@@ -21,12 +21,12 @@ var _ MappedNullable = &PaginatedAuditLogs{}
 
 // PaginatedAuditLogs struct for PaginatedAuditLogs
 type PaginatedAuditLogs struct {
-	Items      []AuditLog `json:"items"`
-	Total      float32    `json:"total"`
-	Page       float32    `json:"page"`
-	TotalPages float32    `json:"totalPages"`
+	Items []AuditLog `json:"items"`
+	Total float32 `json:"total"`
+	Page float32 `json:"page"`
+	TotalPages float32 `json:"totalPages"`
 	// Token for next page in cursor-based pagination
-	NextToken            *string `json:"nextToken,omitempty"`
+	NextToken *string `json:"nextToken,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -182,7 +182,7 @@ func (o *PaginatedAuditLogs) SetNextToken(v string) {
 }
 
 func (o PaginatedAuditLogs) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -222,10 +222,10 @@ func (o *PaginatedAuditLogs) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -290,3 +290,5 @@ func (v *NullablePaginatedAuditLogs) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

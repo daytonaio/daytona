@@ -19,13 +19,14 @@ import (
 	"net/url"
 )
 
+
 type ConfigAPI interface {
 
 	/*
-		ConfigControllerGetConfig Get config
+	ConfigControllerGetConfig Get config
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ConfigAPIConfigControllerGetConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ConfigAPIConfigControllerGetConfigRequest
 	*/
 	ConfigControllerGetConfig(ctx context.Context) ConfigAPIConfigControllerGetConfigRequest
 
@@ -38,7 +39,7 @@ type ConfigAPI interface {
 type ConfigAPIService service
 
 type ConfigAPIConfigControllerGetConfigRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ConfigAPI
 }
 
@@ -49,25 +50,24 @@ func (r ConfigAPIConfigControllerGetConfigRequest) Execute() (*DaytonaConfigurat
 /*
 ConfigControllerGetConfig Get config
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ConfigAPIConfigControllerGetConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ConfigAPIConfigControllerGetConfigRequest
 */
 func (a *ConfigAPIService) ConfigControllerGetConfig(ctx context.Context) ConfigAPIConfigControllerGetConfigRequest {
 	return ConfigAPIConfigControllerGetConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return DaytonaConfiguration
+//  @return DaytonaConfiguration
 func (a *ConfigAPIService) ConfigControllerGetConfigExecute(r ConfigAPIConfigControllerGetConfigRequest) (*DaytonaConfiguration, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *DaytonaConfiguration
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *DaytonaConfiguration
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ConfigAPIService.ConfigControllerGetConfig")

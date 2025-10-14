@@ -20,7 +20,7 @@ var _ MappedNullable = &UserHomeDirResponse{}
 
 // UserHomeDirResponse struct for UserHomeDirResponse
 type UserHomeDirResponse struct {
-	Dir                  *string `json:"dir,omitempty"`
+	Dir *string `json:"dir,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -76,7 +76,7 @@ func (o *UserHomeDirResponse) SetDir(v string) {
 }
 
 func (o UserHomeDirResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -152,3 +152,5 @@ func (v *NullableUserHomeDirResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

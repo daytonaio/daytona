@@ -20,13 +20,14 @@ import (
 	"strings"
 )
 
+
 type RunnersAPI interface {
 
 	/*
-		CreateRunner Create runner
+	CreateRunner Create runner
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RunnersAPICreateRunnerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RunnersAPICreateRunnerRequest
 	*/
 	CreateRunner(ctx context.Context) RunnersAPICreateRunnerRequest
 
@@ -34,10 +35,10 @@ type RunnersAPI interface {
 	CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*http.Response, error)
 
 	/*
-		GetInfoForAuthenticatedRunner Get info for authenticated runner
+	GetInfoForAuthenticatedRunner Get info for authenticated runner
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RunnersAPIGetInfoForAuthenticatedRunnerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RunnersAPIGetInfoForAuthenticatedRunnerRequest
 	*/
 	GetInfoForAuthenticatedRunner(ctx context.Context) RunnersAPIGetInfoForAuthenticatedRunnerRequest
 
@@ -46,11 +47,11 @@ type RunnersAPI interface {
 	GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGetInfoForAuthenticatedRunnerRequest) (*Runner, *http.Response, error)
 
 	/*
-		GetRunnerBySandboxId Get runner by sandbox ID
+	GetRunnerBySandboxId Get runner by sandbox ID
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId
-		@return RunnersAPIGetRunnerBySandboxIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return RunnersAPIGetRunnerBySandboxIdRequest
 	*/
 	GetRunnerBySandboxId(ctx context.Context, sandboxId string) RunnersAPIGetRunnerBySandboxIdRequest
 
@@ -59,10 +60,10 @@ type RunnersAPI interface {
 	GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerBySandboxIdRequest) (*Runner, *http.Response, error)
 
 	/*
-		GetRunnersBySnapshotRef Get runners by snapshot ref
+	GetRunnersBySnapshotRef Get runners by snapshot ref
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RunnersAPIGetRunnersBySnapshotRefRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RunnersAPIGetRunnersBySnapshotRefRequest
 	*/
 	GetRunnersBySnapshotRef(ctx context.Context) RunnersAPIGetRunnersBySnapshotRefRequest
 
@@ -71,10 +72,10 @@ type RunnersAPI interface {
 	GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunnersBySnapshotRefRequest) ([]RunnerSnapshotDto, *http.Response, error)
 
 	/*
-		ListRunners List all runners
+	ListRunners List all runners
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RunnersAPIListRunnersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RunnersAPIListRunnersRequest
 	*/
 	ListRunners(ctx context.Context) RunnersAPIListRunnersRequest
 
@@ -82,11 +83,11 @@ type RunnersAPI interface {
 	ListRunnersExecute(r RunnersAPIListRunnersRequest) (*http.Response, error)
 
 	/*
-		UpdateRunnerScheduling Update runner scheduling status
+	UpdateRunnerScheduling Update runner scheduling status
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id
-		@return RunnersAPIUpdateRunnerSchedulingRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return RunnersAPIUpdateRunnerSchedulingRequest
 	*/
 	UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest
 
@@ -98,8 +99,8 @@ type RunnersAPI interface {
 type RunnersAPIService service
 
 type RunnersAPICreateRunnerRequest struct {
-	ctx          context.Context
-	ApiService   RunnersAPI
+	ctx context.Context
+	ApiService RunnersAPI
 	createRunner *CreateRunner
 }
 
@@ -115,22 +116,22 @@ func (r RunnersAPICreateRunnerRequest) Execute() (*http.Response, error) {
 /*
 CreateRunner Create runner
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RunnersAPICreateRunnerRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return RunnersAPICreateRunnerRequest
 */
 func (a *RunnersAPIService) CreateRunner(ctx context.Context) RunnersAPICreateRunnerRequest {
 	return RunnersAPICreateRunnerRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.CreateRunner")
@@ -195,7 +196,7 @@ func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest)
 }
 
 type RunnersAPIGetInfoForAuthenticatedRunnerRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService RunnersAPI
 }
 
@@ -206,25 +207,24 @@ func (r RunnersAPIGetInfoForAuthenticatedRunnerRequest) Execute() (*Runner, *htt
 /*
 GetInfoForAuthenticatedRunner Get info for authenticated runner
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RunnersAPIGetInfoForAuthenticatedRunnerRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return RunnersAPIGetInfoForAuthenticatedRunnerRequest
 */
 func (a *RunnersAPIService) GetInfoForAuthenticatedRunner(ctx context.Context) RunnersAPIGetInfoForAuthenticatedRunnerRequest {
 	return RunnersAPIGetInfoForAuthenticatedRunnerRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Runner
+//  @return Runner
 func (a *RunnersAPIService) GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGetInfoForAuthenticatedRunnerRequest) (*Runner, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Runner
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Runner
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetInfoForAuthenticatedRunner")
@@ -293,9 +293,9 @@ func (a *RunnersAPIService) GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGet
 }
 
 type RunnersAPIGetRunnerBySandboxIdRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService RunnersAPI
-	sandboxId  string
+	sandboxId string
 }
 
 func (r RunnersAPIGetRunnerBySandboxIdRequest) Execute() (*Runner, *http.Response, error) {
@@ -305,27 +305,26 @@ func (r RunnersAPIGetRunnerBySandboxIdRequest) Execute() (*Runner, *http.Respons
 /*
 GetRunnerBySandboxId Get runner by sandbox ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return RunnersAPIGetRunnerBySandboxIdRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId
+ @return RunnersAPIGetRunnerBySandboxIdRequest
 */
 func (a *RunnersAPIService) GetRunnerBySandboxId(ctx context.Context, sandboxId string) RunnersAPIGetRunnerBySandboxIdRequest {
 	return RunnersAPIGetRunnerBySandboxIdRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ctx: ctx,
+		sandboxId: sandboxId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Runner
+//  @return Runner
 func (a *RunnersAPIService) GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerBySandboxIdRequest) (*Runner, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Runner
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Runner
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetRunnerBySandboxId")
@@ -395,9 +394,9 @@ func (a *RunnersAPIService) GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerByS
 }
 
 type RunnersAPIGetRunnersBySnapshotRefRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService RunnersAPI
-	ref        *string
+	ref *string
 }
 
 // Snapshot ref
@@ -413,25 +412,24 @@ func (r RunnersAPIGetRunnersBySnapshotRefRequest) Execute() ([]RunnerSnapshotDto
 /*
 GetRunnersBySnapshotRef Get runners by snapshot ref
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RunnersAPIGetRunnersBySnapshotRefRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return RunnersAPIGetRunnersBySnapshotRefRequest
 */
 func (a *RunnersAPIService) GetRunnersBySnapshotRef(ctx context.Context) RunnersAPIGetRunnersBySnapshotRefRequest {
 	return RunnersAPIGetRunnersBySnapshotRefRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []RunnerSnapshotDto
+//  @return []RunnerSnapshotDto
 func (a *RunnersAPIService) GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunnersBySnapshotRefRequest) ([]RunnerSnapshotDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []RunnerSnapshotDto
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []RunnerSnapshotDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetRunnersBySnapshotRef")
@@ -504,7 +502,7 @@ func (a *RunnersAPIService) GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunner
 }
 
 type RunnersAPIListRunnersRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService RunnersAPI
 }
 
@@ -515,22 +513,22 @@ func (r RunnersAPIListRunnersRequest) Execute() (*http.Response, error) {
 /*
 ListRunners List all runners
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RunnersAPIListRunnersRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return RunnersAPIListRunnersRequest
 */
 func (a *RunnersAPIService) ListRunners(ctx context.Context) RunnersAPIListRunnersRequest {
 	return RunnersAPIListRunnersRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.ListRunners")
@@ -590,9 +588,9 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 }
 
 type RunnersAPIUpdateRunnerSchedulingRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService RunnersAPI
-	id         string
+	id string
 }
 
 func (r RunnersAPIUpdateRunnerSchedulingRequest) Execute() (*http.Response, error) {
@@ -602,24 +600,24 @@ func (r RunnersAPIUpdateRunnerSchedulingRequest) Execute() (*http.Response, erro
 /*
 UpdateRunnerScheduling Update runner scheduling status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id
-	@return RunnersAPIUpdateRunnerSchedulingRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return RunnersAPIUpdateRunnerSchedulingRequest
 */
 func (a *RunnersAPIService) UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest {
 	return RunnersAPIUpdateRunnerSchedulingRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPatch
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.UpdateRunnerScheduling")

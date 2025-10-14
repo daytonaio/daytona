@@ -19,8 +19,10 @@ from daytona_api_client_async import (
     SandboxApi,
     SandboxState,
     SnapshotsApi,
+    DisksApi,
+    VolumesApi
 )
-from daytona_api_client_async import VolumesApi as VolumesApi
+
 from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
 from environs import Env
 
@@ -38,6 +40,7 @@ from ..common.daytona import (
     DaytonaConfig,
     Image,
 )
+from .disk import AsyncDiskService
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
@@ -51,6 +54,7 @@ class AsyncDaytona:
 
     Attributes:
         volume (AsyncVolumeService): Service for managing volumes.
+        disk (AsyncDiskService): Service for managing disks.
         snapshot (AsyncSnapshotService): Service for managing snapshots.
 
     Example:
@@ -198,6 +202,7 @@ class AsyncDaytona:
 
         # Initialize services
         self.volume = AsyncVolumeService(VolumesApi(self._api_client))
+        self.disk = AsyncDiskService(DisksApi(self._api_client))
         self.snapshot = AsyncSnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
 
     # unasync: delete start

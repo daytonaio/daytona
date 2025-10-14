@@ -24,7 +24,7 @@ type ProcessRestartResponse struct {
 	// A message indicating the result of restarting the process
 	Message string `json:"message"`
 	// The name of the VNC process that was restarted
-	ProcessName          string `json:"processName"`
+	ProcessName string `json:"processName"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -98,7 +98,7 @@ func (o *ProcessRestartResponse) SetProcessName(v string) {
 }
 
 func (o ProcessRestartResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -131,10 +131,10 @@ func (o *ProcessRestartResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -196,3 +196,5 @@ func (v *NullableProcessRestartResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

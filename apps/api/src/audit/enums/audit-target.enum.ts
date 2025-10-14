@@ -15,4 +15,5 @@ export enum AuditTarget {
   SNAPSHOT = 'snapshot',
   USER = 'user',
   VOLUME = 'volume',
+  DISK = 'disk',
 }

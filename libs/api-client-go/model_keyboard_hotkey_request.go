@@ -22,7 +22,7 @@ var _ MappedNullable = &KeyboardHotkeyRequest{}
 // KeyboardHotkeyRequest struct for KeyboardHotkeyRequest
 type KeyboardHotkeyRequest struct {
 	// The hotkey combination to press (e.g., \"ctrl+c\", \"cmd+v\", \"alt+tab\")
-	Keys                 string `json:"keys"`
+	Keys string `json:"keys"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -71,7 +71,7 @@ func (o *KeyboardHotkeyRequest) SetKeys(v string) {
 }
 
 func (o KeyboardHotkeyRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -102,10 +102,10 @@ func (o *KeyboardHotkeyRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -166,3 +166,5 @@ func (v *NullableKeyboardHotkeyRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

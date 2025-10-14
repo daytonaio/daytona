@@ -15,6 +15,7 @@ import {
   SandboxApi,
   ToolboxApi,
   AuditApi,
+  DisksApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
@@ -32,6 +33,7 @@ export class ApiClient {
   private _volumeApi: VolumesApi
   private _toolboxApi: ToolboxApi
   private _auditApi: AuditApi
+  private _diskApi: DisksApi
 
   constructor(config: DashboardConfig, accessToken: string) {
     this.config = new Configuration({
@@ -68,6 +70,7 @@ export class ApiClient {
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
     this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
     this._auditApi = new AuditApi(this.config, undefined, axiosInstance)
+    this._diskApi = new DisksApi(this.config, undefined, axiosInstance)
   }
 
   public setAccessToken(accessToken: string) {
@@ -112,6 +115,10 @@ export class ApiClient {
 
   public get auditApi() {
     return this._auditApi
+  }
+
+  public get diskApi() {
+    return this._diskApi
   }
 
   public async webhookRequest(method: string, url: string, data?: any) {

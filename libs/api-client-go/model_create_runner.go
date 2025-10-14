@@ -21,18 +21,18 @@ var _ MappedNullable = &CreateRunner{}
 
 // CreateRunner struct for CreateRunner
 type CreateRunner struct {
-	Domain               string  `json:"domain"`
-	ApiUrl               string  `json:"apiUrl"`
-	ProxyUrl             string  `json:"proxyUrl"`
-	ApiKey               string  `json:"apiKey"`
-	Cpu                  float32 `json:"cpu"`
-	MemoryGiB            float32 `json:"memoryGiB"`
-	DiskGiB              float32 `json:"diskGiB"`
-	Gpu                  float32 `json:"gpu"`
-	GpuType              string  `json:"gpuType"`
-	Class                string  `json:"class"`
-	Region               string  `json:"region"`
-	Version              string  `json:"version"`
+	Domain string `json:"domain"`
+	ApiUrl string `json:"apiUrl"`
+	ProxyUrl string `json:"proxyUrl"`
+	ApiKey string `json:"apiKey"`
+	Cpu float32 `json:"cpu"`
+	MemoryGiB float32 `json:"memoryGiB"`
+	DiskGiB float32 `json:"diskGiB"`
+	Gpu float32 `json:"gpu"`
+	GpuType string `json:"gpuType"`
+	Class string `json:"class"`
+	Region string `json:"region"`
+	Version string `json:"version"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -356,7 +356,7 @@ func (o *CreateRunner) SetVersion(v string) {
 }
 
 func (o CreateRunner) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -409,10 +409,10 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -484,3 +484,5 @@ func (v *NullableCreateRunner) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -13,8 +13,8 @@ package apiclient
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
+	"fmt"
 )
 
 // checks if the OrganizationInvitation type satisfies the MappedNullable interface at compile time
@@ -43,7 +43,7 @@ type OrganizationInvitation struct {
 	// Creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 	// Last update timestamp
-	UpdatedAt            time.Time `json:"updatedAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -342,7 +342,7 @@ func (o *OrganizationInvitation) SetUpdatedAt(v time.Time) {
 }
 
 func (o OrganizationInvitation) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -393,10 +393,10 @@ func (o *OrganizationInvitation) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -467,3 +467,5 @@ func (v *NullableOrganizationInvitation) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -23,8 +23,9 @@ from daytona_api_client import (
     SandboxApi,
     SandboxState,
     SnapshotsApi,
+    DisksApi,
+    VolumesApi,
 )
-from daytona_api_client import VolumesApi as VolumesApi
 from daytona_toolbox_api_client import ApiClient as ToolboxApiClient
 from environs import Env
 
@@ -42,6 +43,7 @@ from ..common.daytona import (
     DaytonaConfig,
     Image,
 )
+from .disk import DiskService
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
@@ -55,6 +57,7 @@ class Daytona:
 
     Attributes:
         volume (VolumeService): Service for managing volumes.
+        disk (DiskService): Service for managing disks.
         snapshot (SnapshotService): Service for managing snapshots.
 
     Example:
@@ -199,6 +202,7 @@ class Daytona:
 
         # Initialize services
         self.volume = VolumeService(VolumesApi(self._api_client))
+        self.disk = DiskService(DisksApi(self._api_client))
         self.snapshot = SnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
 
     @overload

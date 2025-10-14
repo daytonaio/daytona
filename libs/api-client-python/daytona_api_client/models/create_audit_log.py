@@ -49,8 +49,8 @@ class CreateAuditLog(BaseModel):
         if value is None:
             return value
 
-        if value not in set(['api_key', 'organization', 'organization_invitation', 'organization_role', 'organization_user', 'docker_registry', 'runner', 'sandbox', 'snapshot', 'user', 'volume']):
-            raise ValueError("must be one of enum values ('api_key', 'organization', 'organization_invitation', 'organization_role', 'organization_user', 'docker_registry', 'runner', 'sandbox', 'snapshot', 'user', 'volume')")
+        if value not in set(['api_key', 'organization', 'organization_invitation', 'organization_role', 'organization_user', 'docker_registry', 'runner', 'sandbox', 'snapshot', 'user', 'volume', 'disk']):
+            raise ValueError("must be one of enum values ('api_key', 'organization', 'organization_invitation', 'organization_role', 'organization_user', 'docker_registry', 'runner', 'sandbox', 'snapshot', 'user', 'volume', 'disk')")
         return value
 
     model_config = ConfigDict(

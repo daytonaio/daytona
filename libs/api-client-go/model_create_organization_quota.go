@@ -20,15 +20,15 @@ var _ MappedNullable = &CreateOrganizationQuota{}
 
 // CreateOrganizationQuota struct for CreateOrganizationQuota
 type CreateOrganizationQuota struct {
-	TotalCpuQuota        *float32 `json:"totalCpuQuota,omitempty"`
-	TotalMemoryQuota     *float32 `json:"totalMemoryQuota,omitempty"`
-	TotalDiskQuota       *float32 `json:"totalDiskQuota,omitempty"`
-	MaxCpuPerSandbox     *float32 `json:"maxCpuPerSandbox,omitempty"`
-	MaxMemoryPerSandbox  *float32 `json:"maxMemoryPerSandbox,omitempty"`
-	MaxDiskPerSandbox    *float32 `json:"maxDiskPerSandbox,omitempty"`
-	SnapshotQuota        *float32 `json:"snapshotQuota,omitempty"`
-	MaxSnapshotSize      *float32 `json:"maxSnapshotSize,omitempty"`
-	VolumeQuota          *float32 `json:"volumeQuota,omitempty"`
+	TotalCpuQuota *float32 `json:"totalCpuQuota,omitempty"`
+	TotalMemoryQuota *float32 `json:"totalMemoryQuota,omitempty"`
+	TotalDiskQuota *float32 `json:"totalDiskQuota,omitempty"`
+	MaxCpuPerSandbox *float32 `json:"maxCpuPerSandbox,omitempty"`
+	MaxMemoryPerSandbox *float32 `json:"maxMemoryPerSandbox,omitempty"`
+	MaxDiskPerSandbox *float32 `json:"maxDiskPerSandbox,omitempty"`
+	SnapshotQuota *float32 `json:"snapshotQuota,omitempty"`
+	MaxSnapshotSize *float32 `json:"maxSnapshotSize,omitempty"`
+	VolumeQuota *float32 `json:"volumeQuota,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -340,7 +340,7 @@ func (o *CreateOrganizationQuota) SetVolumeQuota(v float32) {
 }
 
 func (o CreateOrganizationQuota) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -448,3 +448,5 @@ func (v *NullableCreateOrganizationQuota) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

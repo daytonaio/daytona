@@ -19,6 +19,7 @@ from daytona_api_client_async.models.account_provider import AccountProvider
 from daytona_api_client_async.models.announcement import Announcement
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
+from daytona_api_client_async.models.attach_disk_dto import AttachDiskDto
 from daytona_api_client_async.models.audit_log import AuditLog
 from daytona_api_client_async.models.build_info import BuildInfo
 from daytona_api_client_async.models.command import Command
@@ -31,6 +32,7 @@ from daytona_api_client_async.models.computer_use_status_response import Compute
 from daytona_api_client_async.models.computer_use_stop_response import ComputerUseStopResponse
 from daytona_api_client_async.models.create_api_key import CreateApiKey
 from daytona_api_client_async.models.create_build_info import CreateBuildInfo
+from daytona_api_client_async.models.create_disk_dto import CreateDiskDto
 from daytona_api_client_async.models.create_docker_registry import CreateDockerRegistry
 from daytona_api_client_async.models.create_linked_account import CreateLinkedAccount
 from daytona_api_client_async.models.create_organization import CreateOrganization
@@ -45,6 +47,8 @@ from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume
 from daytona_api_client_async.models.create_workspace import CreateWorkspace
 from daytona_api_client_async.models.daytona_configuration import DaytonaConfiguration
+from daytona_api_client_async.models.disk_dto import DiskDto
+from daytona_api_client_async.models.disk_state import DiskState
 from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
 from daytona_api_client_async.models.docker_registry import DockerRegistry
 from daytona_api_client_async.models.download_files import DownloadFiles

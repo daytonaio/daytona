@@ -26,7 +26,7 @@ type UpdateOrganizationRole struct {
 	// The description of the role
 	Description string `json:"description"`
 	// The list of permissions assigned to the role
-	Permissions          []string `json:"permissions"`
+	Permissions []string `json:"permissions"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -125,7 +125,7 @@ func (o *UpdateOrganizationRole) SetPermissions(v []string) {
 }
 
 func (o UpdateOrganizationRole) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -160,10 +160,10 @@ func (o *UpdateOrganizationRole) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -226,3 +226,5 @@ func (v *NullableUpdateOrganizationRole) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

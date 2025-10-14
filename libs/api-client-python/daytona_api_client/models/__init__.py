@@ -19,6 +19,7 @@ from daytona_api_client.models.account_provider import AccountProvider
 from daytona_api_client.models.announcement import Announcement
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
+from daytona_api_client.models.attach_disk_dto import AttachDiskDto
 from daytona_api_client.models.audit_log import AuditLog
 from daytona_api_client.models.build_info import BuildInfo
 from daytona_api_client.models.command import Command
@@ -31,6 +32,7 @@ from daytona_api_client.models.computer_use_status_response import ComputerUseSt
 from daytona_api_client.models.computer_use_stop_response import ComputerUseStopResponse
 from daytona_api_client.models.create_api_key import CreateApiKey
 from daytona_api_client.models.create_build_info import CreateBuildInfo
+from daytona_api_client.models.create_disk_dto import CreateDiskDto
 from daytona_api_client.models.create_docker_registry import CreateDockerRegistry
 from daytona_api_client.models.create_linked_account import CreateLinkedAccount
 from daytona_api_client.models.create_organization import CreateOrganization
@@ -45,6 +47,8 @@ from daytona_api_client.models.create_user import CreateUser
 from daytona_api_client.models.create_volume import CreateVolume
 from daytona_api_client.models.create_workspace import CreateWorkspace
 from daytona_api_client.models.daytona_configuration import DaytonaConfiguration
+from daytona_api_client.models.disk_dto import DiskDto
+from daytona_api_client.models.disk_state import DiskState
 from daytona_api_client.models.display_info_response import DisplayInfoResponse
 from daytona_api_client.models.docker_registry import DockerRegistry
 from daytona_api_client.models.download_files import DownloadFiles

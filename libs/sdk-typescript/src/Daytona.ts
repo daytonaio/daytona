@@ -10,6 +10,7 @@ import {
   SandboxApi,
   SandboxState,
   VolumesApi,
+  DisksApi,
   SandboxVolume,
   ConfigApi,
 } from '@daytonaio/api-client'
@@ -22,6 +23,7 @@ import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
+import { DiskService } from './Disk'
 import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
 import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
@@ -189,6 +191,7 @@ export type SandboxFilter = {
  * Can be initialized either with explicit configuration or using environment variables.
  *
  * @property {VolumeService} volume - Service for managing Daytona Volumes
+ * @property {DiskService} disk - Service for managing Daytona Disks
  * @property {SnapshotService} snapshot - Service for managing Daytona Snapshots
  *
  * @example
@@ -220,6 +223,7 @@ export class Daytona {
   private readonly apiUrl: string
   private proxyToolboxUrl?: string
   public readonly volume: VolumeService
+  public readonly disk: DiskService
   public readonly snapshot: SnapshotService
 
   /**
@@ -290,6 +294,7 @@ export class Daytona {
     this.objectStorageApi = new ObjectStorageApi(configuration, '', axiosInstance)
     this.configApi = new ConfigApi(configuration, '', axiosInstance)
     this.volume = new VolumeService(new VolumesApi(configuration, '', axiosInstance))
+    this.disk = new DiskService(new DisksApi(configuration, '', axiosInstance))
     this.snapshot = new SnapshotService(
       configuration,
       new SnapshotsApi(configuration, '', axiosInstance),

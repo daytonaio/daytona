@@ -22,7 +22,7 @@ var _ MappedNullable = &PtyCreateResponse{}
 // PtyCreateResponse struct for PtyCreateResponse
 type PtyCreateResponse struct {
 	// The unique identifier for the created PTY session
-	SessionId            string `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -71,7 +71,7 @@ func (o *PtyCreateResponse) SetSessionId(v string) {
 }
 
 func (o PtyCreateResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -102,10 +102,10 @@ func (o *PtyCreateResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -166,3 +166,5 @@ func (v *NullablePtyCreateResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

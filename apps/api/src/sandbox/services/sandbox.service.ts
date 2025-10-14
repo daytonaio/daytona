@@ -48,6 +48,7 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
+import { DiskService } from './disk.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import {
   SandboxSortField,
@@ -89,6 +90,7 @@ export class SandboxService {
     private readonly sshAccessRepository: Repository<SshAccess>,
     private readonly runnerService: RunnerService,
     private readonly volumeService: VolumeService,
+    private readonly diskService: DiskService,
     private readonly configService: TypedConfigService,
     private readonly warmPoolService: SandboxWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
@@ -952,6 +954,9 @@ export class SandboxService {
     sandbox.backupState = BackupState.NONE
     sandbox.name = 'DESTROYED_' + sandbox.name + '_' + Date.now()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+    // Automatically detach any disks attached to this sandbox
+    await this.diskService.detachAllFromSandbox(sandbox.id)
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     return sandbox

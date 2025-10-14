@@ -87,7 +87,7 @@ type Workspace struct {
 	// The creation timestamp of the last snapshot
 	SnapshotCreatedAt *string `json:"snapshotCreatedAt,omitempty"`
 	// Additional information about the sandbox
-	Info                 *SandboxInfo `json:"info,omitempty"`
+	Info *SandboxInfo `json:"info,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -1079,7 +1079,7 @@ func (o *Workspace) SetInfo(v SandboxInfo) {
 }
 
 func (o Workspace) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1194,10 +1194,10 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -1290,3 +1290,5 @@ func (v *NullableWorkspace) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -20,7 +20,7 @@ var _ MappedNullable = &WebhookControllerGetStatus200Response{}
 
 // WebhookControllerGetStatus200Response struct for WebhookControllerGetStatus200Response
 type WebhookControllerGetStatus200Response struct {
-	Enabled              *bool `json:"enabled,omitempty"`
+	Enabled *bool `json:"enabled,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -76,7 +76,7 @@ func (o *WebhookControllerGetStatus200Response) SetEnabled(v bool) {
 }
 
 func (o WebhookControllerGetStatus200Response) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -152,3 +152,5 @@ func (v *NullableWebhookControllerGetStatus200Response) UnmarshalJSON(src []byte
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

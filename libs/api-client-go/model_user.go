@@ -13,8 +13,8 @@ package apiclient
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
+	"fmt"
 )
 
 // checks if the User type satisfies the MappedNullable interface at compile time
@@ -31,7 +31,7 @@ type User struct {
 	// User public keys
 	PublicKeys []UserPublicKey `json:"publicKeys"`
 	// Creation timestamp
-	CreatedAt            time.Time `json:"createdAt"`
+	CreatedAt time.Time `json:"createdAt"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -180,7 +180,7 @@ func (o *User) SetCreatedAt(v time.Time) {
 }
 
 func (o User) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -219,10 +219,10 @@ func (o *User) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -287,3 +287,5 @@ func (v *NullableUser) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

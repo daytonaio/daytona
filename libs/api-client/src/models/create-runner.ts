@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+ 
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,90 +12,94 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface CreateRunner
  */
 export interface CreateRunner {
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  domain: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  apiUrl: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  proxyUrl: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  apiKey: string
-  /**
-   *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  cpu: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  memoryGiB: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  diskGiB: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  gpu: number
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  gpuType: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  class: CreateRunnerClassEnum
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  region: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  version: string
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'domain': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'apiUrl': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'proxyUrl': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'apiKey': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateRunner
+     */
+    'cpu': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateRunner
+     */
+    'memoryGiB': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateRunner
+     */
+    'diskGiB': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateRunner
+     */
+    'gpu': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'gpuType': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'class': CreateRunnerClassEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'region': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateRunner
+     */
+    'version': string;
 }
 
 export const CreateRunnerClassEnum = {
-  SMALL: 'small',
-  MEDIUM: 'medium',
-  LARGE: 'large',
-} as const
+    SMALL: 'small',
+    MEDIUM: 'medium',
+    LARGE: 'large'
+} as const;
 
-export type CreateRunnerClassEnum = (typeof CreateRunnerClassEnum)[keyof typeof CreateRunnerClassEnum]
+export type CreateRunnerClassEnum = typeof CreateRunnerClassEnum[keyof typeof CreateRunnerClassEnum];
+
+

@@ -17,19 +17,20 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
 	"time"
+	"reflect"
 )
+
 
 type SandboxAPI interface {
 
 	/*
-		ArchiveSandbox Archive sandbox
+	ArchiveSandbox Archive sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName
-		@return SandboxAPIArchiveSandboxRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName
+	@return SandboxAPIArchiveSandboxRequest
 	*/
 	ArchiveSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIArchiveSandboxRequest
 
@@ -38,11 +39,11 @@ type SandboxAPI interface {
 	ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		CreateBackup Create sandbox backup
+	CreateBackup Create sandbox backup
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPICreateBackupRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPICreateBackupRequest
 	*/
 	CreateBackup(ctx context.Context, sandboxIdOrName string) SandboxAPICreateBackupRequest
 
@@ -51,10 +52,10 @@ type SandboxAPI interface {
 	CreateBackupExecute(r SandboxAPICreateBackupRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		CreateSandbox Create a new sandbox
+	CreateSandbox Create a new sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SandboxAPICreateSandboxRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPICreateSandboxRequest
 	*/
 	CreateSandbox(ctx context.Context) SandboxAPICreateSandboxRequest
 
@@ -63,11 +64,11 @@ type SandboxAPI interface {
 	CreateSandboxExecute(r SandboxAPICreateSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		CreateSshAccess Create SSH access for sandbox
+	CreateSshAccess Create SSH access for sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPICreateSshAccessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPICreateSshAccessRequest
 	*/
 	CreateSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPICreateSshAccessRequest
 
@@ -76,11 +77,11 @@ type SandboxAPI interface {
 	CreateSshAccessExecute(r SandboxAPICreateSshAccessRequest) (*SshAccessDto, *http.Response, error)
 
 	/*
-		DeleteSandbox Delete sandbox
+	DeleteSandbox Delete sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPIDeleteSandboxRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIDeleteSandboxRequest
 	*/
 	DeleteSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIDeleteSandboxRequest
 
@@ -89,11 +90,11 @@ type SandboxAPI interface {
 	DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		GetBuildLogs Get build logs
+	GetBuildLogs Get build logs
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPIGetBuildLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIGetBuildLogsRequest
 	*/
 	GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest
 
@@ -101,12 +102,12 @@ type SandboxAPI interface {
 	GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest) (*http.Response, error)
 
 	/*
-		GetPortPreviewUrl Get preview URL for a sandbox port
+	GetPortPreviewUrl Get preview URL for a sandbox port
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@param port Port number to get preview URL for
-		@return SandboxAPIGetPortPreviewUrlRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param port Port number to get preview URL for
+	@return SandboxAPIGetPortPreviewUrlRequest
 	*/
 	GetPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetPortPreviewUrlRequest
 
@@ -115,11 +116,11 @@ type SandboxAPI interface {
 	GetPortPreviewUrlExecute(r SandboxAPIGetPortPreviewUrlRequest) (*PortPreviewUrl, *http.Response, error)
 
 	/*
-		GetSandbox Get sandbox details
+	GetSandbox Get sandbox details
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPIGetSandboxRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIGetSandboxRequest
 	*/
 	GetSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxRequest
 
@@ -128,10 +129,10 @@ type SandboxAPI interface {
 	GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		GetSandboxRegions List all regions where sandboxes have been created
+	GetSandboxRegions List all regions where sandboxes have been created
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SandboxAPIGetSandboxRegionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIGetSandboxRegionsRequest
 	*/
 	GetSandboxRegions(ctx context.Context) SandboxAPIGetSandboxRegionsRequest
 
@@ -140,10 +141,10 @@ type SandboxAPI interface {
 	GetSandboxRegionsExecute(r SandboxAPIGetSandboxRegionsRequest) ([]Region, *http.Response, error)
 
 	/*
-		GetSandboxesForRunner Get sandboxes for the authenticated runner
+	GetSandboxesForRunner Get sandboxes for the authenticated runner
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SandboxAPIGetSandboxesForRunnerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIGetSandboxesForRunnerRequest
 	*/
 	GetSandboxesForRunner(ctx context.Context) SandboxAPIGetSandboxesForRunnerRequest
 
@@ -152,10 +153,10 @@ type SandboxAPI interface {
 	GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxesForRunnerRequest) ([]Sandbox, *http.Response, error)
 
 	/*
-		ListSandboxes List all sandboxes
+	ListSandboxes List all sandboxes
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SandboxAPIListSandboxesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIListSandboxesRequest
 	*/
 	ListSandboxes(ctx context.Context) SandboxAPIListSandboxesRequest
 
@@ -164,10 +165,10 @@ type SandboxAPI interface {
 	ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error)
 
 	/*
-		ListSandboxesPaginated List all sandboxes paginated
+	ListSandboxesPaginated List all sandboxes paginated
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SandboxAPIListSandboxesPaginatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIListSandboxesPaginatedRequest
 	*/
 	ListSandboxesPaginated(ctx context.Context) SandboxAPIListSandboxesPaginatedRequest
 
@@ -176,11 +177,11 @@ type SandboxAPI interface {
 	ListSandboxesPaginatedExecute(r SandboxAPIListSandboxesPaginatedRequest) (*PaginatedSandboxes, *http.Response, error)
 
 	/*
-		ReplaceLabels Replace sandbox labels
+	ReplaceLabels Replace sandbox labels
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPIReplaceLabelsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIReplaceLabelsRequest
 	*/
 	ReplaceLabels(ctx context.Context, sandboxIdOrName string) SandboxAPIReplaceLabelsRequest
 
@@ -189,11 +190,11 @@ type SandboxAPI interface {
 	ReplaceLabelsExecute(r SandboxAPIReplaceLabelsRequest) (*SandboxLabels, *http.Response, error)
 
 	/*
-		RevokeSshAccess Revoke SSH access for sandbox
+	RevokeSshAccess Revoke SSH access for sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPIRevokeSshAccessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIRevokeSshAccessRequest
 	*/
 	RevokeSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPIRevokeSshAccessRequest
 
@@ -202,12 +203,12 @@ type SandboxAPI interface {
 	RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		SetAutoArchiveInterval Set sandbox auto-archive interval
+	SetAutoArchiveInterval Set sandbox auto-archive interval
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
-		@return SandboxAPISetAutoArchiveIntervalRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+	@return SandboxAPISetAutoArchiveIntervalRequest
 	*/
 	SetAutoArchiveInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoArchiveIntervalRequest
 
@@ -216,12 +217,12 @@ type SandboxAPI interface {
 	SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArchiveIntervalRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		SetAutoDeleteInterval Set sandbox auto-delete interval
+	SetAutoDeleteInterval Set sandbox auto-delete interval
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
-		@return SandboxAPISetAutoDeleteIntervalRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
+	@return SandboxAPISetAutoDeleteIntervalRequest
 	*/
 	SetAutoDeleteInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoDeleteIntervalRequest
 
@@ -230,12 +231,12 @@ type SandboxAPI interface {
 	SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		SetAutostopInterval Set sandbox auto-stop interval
+	SetAutostopInterval Set sandbox auto-stop interval
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@param interval Auto-stop interval in minutes (0 to disable)
-		@return SandboxAPISetAutostopIntervalRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param interval Auto-stop interval in minutes (0 to disable)
+	@return SandboxAPISetAutostopIntervalRequest
 	*/
 	SetAutostopInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutostopIntervalRequest
 
@@ -244,11 +245,11 @@ type SandboxAPI interface {
 	SetAutostopIntervalExecute(r SandboxAPISetAutostopIntervalRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		StartSandbox Start sandbox
+	StartSandbox Start sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPIStartSandboxRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIStartSandboxRequest
 	*/
 	StartSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStartSandboxRequest
 
@@ -257,11 +258,11 @@ type SandboxAPI interface {
 	StartSandboxExecute(r SandboxAPIStartSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		StopSandbox Stop sandbox
+	StopSandbox Stop sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@return SandboxAPIStopSandboxRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIStopSandboxRequest
 	*/
 	StopSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStopSandboxRequest
 
@@ -270,11 +271,11 @@ type SandboxAPI interface {
 	StopSandboxExecute(r SandboxAPIStopSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		UpdateLastActivity Update sandbox last activity
+	UpdateLastActivity Update sandbox last activity
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
-		@return SandboxAPIUpdateLastActivityRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIUpdateLastActivityRequest
 	*/
 	UpdateLastActivity(ctx context.Context, sandboxId string) SandboxAPIUpdateLastActivityRequest
 
@@ -282,12 +283,12 @@ type SandboxAPI interface {
 	UpdateLastActivityExecute(r SandboxAPIUpdateLastActivityRequest) (*http.Response, error)
 
 	/*
-		UpdatePublicStatus Update public status
+	UpdatePublicStatus Update public status
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
-		@param isPublic Public status to set
-		@return SandboxAPIUpdatePublicStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param isPublic Public status to set
+	@return SandboxAPIUpdatePublicStatusRequest
 	*/
 	UpdatePublicStatus(ctx context.Context, sandboxIdOrName string, isPublic bool) SandboxAPIUpdatePublicStatusRequest
 
@@ -296,11 +297,11 @@ type SandboxAPI interface {
 	UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		UpdateSandboxState Update sandbox state
+	UpdateSandboxState Update sandbox state
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
-		@return SandboxAPIUpdateSandboxStateRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIUpdateSandboxStateRequest
 	*/
 	UpdateSandboxState(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxStateRequest
 
@@ -308,10 +309,10 @@ type SandboxAPI interface {
 	UpdateSandboxStateExecute(r SandboxAPIUpdateSandboxStateRequest) (*http.Response, error)
 
 	/*
-		ValidateSshAccess Validate SSH access for sandbox
+	ValidateSshAccess Validate SSH access for sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SandboxAPIValidateSshAccessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIValidateSshAccessRequest
 	*/
 	ValidateSshAccess(ctx context.Context) SandboxAPIValidateSshAccessRequest
 
@@ -324,9 +325,9 @@ type SandboxAPI interface {
 type SandboxAPIService service
 
 type SandboxAPIArchiveSandboxRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
 }
 
@@ -343,27 +344,26 @@ func (r SandboxAPIArchiveSandboxRequest) Execute() (*Sandbox, *http.Response, er
 /*
 ArchiveSandbox Archive sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName
-	@return SandboxAPIArchiveSandboxRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName
+ @return SandboxAPIArchiveSandboxRequest
 */
 func (a *SandboxAPIService) ArchiveSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIArchiveSandboxRequest {
 	return SandboxAPIArchiveSandboxRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ArchiveSandbox")
@@ -436,9 +436,9 @@ func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequ
 }
 
 type SandboxAPICreateBackupRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
 }
 
@@ -455,27 +455,26 @@ func (r SandboxAPICreateBackupRequest) Execute() (*Sandbox, *http.Response, erro
 /*
 CreateBackup Create sandbox backup
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPICreateBackupRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPICreateBackupRequest
 */
 func (a *SandboxAPIService) CreateBackup(ctx context.Context, sandboxIdOrName string) SandboxAPICreateBackupRequest {
 	return SandboxAPICreateBackupRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) CreateBackupExecute(r SandboxAPICreateBackupRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.CreateBackup")
@@ -548,9 +547,9 @@ func (a *SandboxAPIService) CreateBackupExecute(r SandboxAPICreateBackupRequest)
 }
 
 type SandboxAPICreateSandboxRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	createSandbox          *CreateSandbox
+	ctx context.Context
+	ApiService SandboxAPI
+	createSandbox *CreateSandbox
 	xDaytonaOrganizationID *string
 }
 
@@ -572,25 +571,24 @@ func (r SandboxAPICreateSandboxRequest) Execute() (*Sandbox, *http.Response, err
 /*
 CreateSandbox Create a new sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SandboxAPICreateSandboxRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SandboxAPICreateSandboxRequest
 */
 func (a *SandboxAPIService) CreateSandbox(ctx context.Context) SandboxAPICreateSandboxRequest {
 	return SandboxAPICreateSandboxRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) CreateSandboxExecute(r SandboxAPICreateSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.CreateSandbox")
@@ -667,11 +665,11 @@ func (a *SandboxAPIService) CreateSandboxExecute(r SandboxAPICreateSandboxReques
 }
 
 type SandboxAPICreateSshAccessRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
-	expiresInMinutes       *float32
+	expiresInMinutes *float32
 }
 
 // Use with JWT to specify the organization ID
@@ -693,27 +691,26 @@ func (r SandboxAPICreateSshAccessRequest) Execute() (*SshAccessDto, *http.Respon
 /*
 CreateSshAccess Create SSH access for sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPICreateSshAccessRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPICreateSshAccessRequest
 */
 func (a *SandboxAPIService) CreateSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPICreateSshAccessRequest {
 	return SandboxAPICreateSshAccessRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SshAccessDto
+//  @return SshAccessDto
 func (a *SandboxAPIService) CreateSshAccessExecute(r SandboxAPICreateSshAccessRequest) (*SshAccessDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SshAccessDto
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SshAccessDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.CreateSshAccess")
@@ -789,9 +786,9 @@ func (a *SandboxAPIService) CreateSshAccessExecute(r SandboxAPICreateSshAccessRe
 }
 
 type SandboxAPIDeleteSandboxRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
 }
 
@@ -808,27 +805,26 @@ func (r SandboxAPIDeleteSandboxRequest) Execute() (*Sandbox, *http.Response, err
 /*
 DeleteSandbox Delete sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPIDeleteSandboxRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIDeleteSandboxRequest
 */
 func (a *SandboxAPIService) DeleteSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIDeleteSandboxRequest {
 	return SandboxAPIDeleteSandboxRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.DeleteSandbox")
@@ -901,11 +897,11 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 }
 
 type SandboxAPIGetBuildLogsRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
-	follow                 *bool
+	follow *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -927,14 +923,14 @@ func (r SandboxAPIGetBuildLogsRequest) Execute() (*http.Response, error) {
 /*
 GetBuildLogs Get build logs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPIGetBuildLogsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIGetBuildLogsRequest
 */
 func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest {
 	return SandboxAPIGetBuildLogsRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
@@ -942,9 +938,9 @@ func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxIdOrName st
 // Execute executes the request
 func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetBuildLogs")
@@ -1011,10 +1007,10 @@ func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest)
 }
 
 type SandboxAPIGetPortPreviewUrlRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
-	port                   float32
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	port float32
 	xDaytonaOrganizationID *string
 }
 
@@ -1031,29 +1027,28 @@ func (r SandboxAPIGetPortPreviewUrlRequest) Execute() (*PortPreviewUrl, *http.Re
 /*
 GetPortPreviewUrl Get preview URL for a sandbox port
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@param port Port number to get preview URL for
-	@return SandboxAPIGetPortPreviewUrlRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @param port Port number to get preview URL for
+ @return SandboxAPIGetPortPreviewUrlRequest
 */
 func (a *SandboxAPIService) GetPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetPortPreviewUrlRequest {
 	return SandboxAPIGetPortPreviewUrlRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
-		port:            port,
+		port: port,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PortPreviewUrl
+//  @return PortPreviewUrl
 func (a *SandboxAPIService) GetPortPreviewUrlExecute(r SandboxAPIGetPortPreviewUrlRequest) (*PortPreviewUrl, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PortPreviewUrl
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PortPreviewUrl
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetPortPreviewUrl")
@@ -1127,11 +1122,11 @@ func (a *SandboxAPIService) GetPortPreviewUrlExecute(r SandboxAPIGetPortPreviewU
 }
 
 type SandboxAPIGetSandboxRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
-	verbose                *bool
+	verbose *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -1153,27 +1148,26 @@ func (r SandboxAPIGetSandboxRequest) Execute() (*Sandbox, *http.Response, error)
 /*
 GetSandbox Get sandbox details
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPIGetSandboxRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIGetSandboxRequest
 */
 func (a *SandboxAPIService) GetSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxRequest {
 	return SandboxAPIGetSandboxRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandbox")
@@ -1249,8 +1243,8 @@ func (a *SandboxAPIService) GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*S
 }
 
 type SandboxAPIGetSandboxRegionsRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
+	ctx context.Context
+	ApiService SandboxAPI
 	xDaytonaOrganizationID *string
 }
 
@@ -1267,25 +1261,24 @@ func (r SandboxAPIGetSandboxRegionsRequest) Execute() ([]Region, *http.Response,
 /*
 GetSandboxRegions List all regions where sandboxes have been created
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SandboxAPIGetSandboxRegionsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SandboxAPIGetSandboxRegionsRequest
 */
 func (a *SandboxAPIService) GetSandboxRegions(ctx context.Context) SandboxAPIGetSandboxRegionsRequest {
 	return SandboxAPIGetSandboxRegionsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []Region
+//  @return []Region
 func (a *SandboxAPIService) GetSandboxRegionsExecute(r SandboxAPIGetSandboxRegionsRequest) ([]Region, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []Region
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []Region
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxRegions")
@@ -1357,10 +1350,10 @@ func (a *SandboxAPIService) GetSandboxRegionsExecute(r SandboxAPIGetSandboxRegio
 }
 
 type SandboxAPIGetSandboxesForRunnerRequest struct {
-	ctx                      context.Context
-	ApiService               SandboxAPI
-	xDaytonaOrganizationID   *string
-	states                   *string
+	ctx context.Context
+	ApiService SandboxAPI
+	xDaytonaOrganizationID *string
+	states *string
 	skipReconcilingSandboxes *bool
 }
 
@@ -1389,25 +1382,24 @@ func (r SandboxAPIGetSandboxesForRunnerRequest) Execute() ([]Sandbox, *http.Resp
 /*
 GetSandboxesForRunner Get sandboxes for the authenticated runner
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SandboxAPIGetSandboxesForRunnerRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SandboxAPIGetSandboxesForRunnerRequest
 */
 func (a *SandboxAPIService) GetSandboxesForRunner(ctx context.Context) SandboxAPIGetSandboxesForRunnerRequest {
 	return SandboxAPIGetSandboxesForRunnerRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []Sandbox
+//  @return []Sandbox
 func (a *SandboxAPIService) GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxesForRunnerRequest) ([]Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []Sandbox
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxesForRunner")
@@ -1485,12 +1477,12 @@ func (a *SandboxAPIService) GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxe
 }
 
 type SandboxAPIListSandboxesRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
+	ctx context.Context
+	ApiService SandboxAPI
 	xDaytonaOrganizationID *string
-	verbose                *bool
-	labels                 *string
-	includeErroredDeleted  *bool
+	verbose *bool
+	labels *string
+	includeErroredDeleted *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -1524,25 +1516,24 @@ func (r SandboxAPIListSandboxesRequest) Execute() ([]Sandbox, *http.Response, er
 /*
 ListSandboxes List all sandboxes
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SandboxAPIListSandboxesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SandboxAPIListSandboxesRequest
 */
 func (a *SandboxAPIService) ListSandboxes(ctx context.Context) SandboxAPIListSandboxesRequest {
 	return SandboxAPIListSandboxesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []Sandbox
+//  @return []Sandbox
 func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []Sandbox
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ListSandboxes")
@@ -1623,28 +1614,28 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 }
 
 type SandboxAPIListSandboxesPaginatedRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
+	ctx context.Context
+	ApiService SandboxAPI
 	xDaytonaOrganizationID *string
-	page                   *float32
-	limit                  *float32
-	id                     *string
-	name                   *string
-	labels                 *string
-	includeErroredDeleted  *bool
-	states                 *[]string
-	snapshots              *[]string
-	regions                *[]string
-	minCpu                 *float32
-	maxCpu                 *float32
-	minMemoryGiB           *float32
-	maxMemoryGiB           *float32
-	minDiskGiB             *float32
-	maxDiskGiB             *float32
-	lastEventAfter         *time.Time
-	lastEventBefore        *time.Time
-	sort                   *string
-	order                  *string
+	page *float32
+	limit *float32
+	id *string
+	name *string
+	labels *string
+	includeErroredDeleted *bool
+	states *[]string
+	snapshots *[]string
+	regions *[]string
+	minCpu *float32
+	maxCpu *float32
+	minMemoryGiB *float32
+	maxMemoryGiB *float32
+	minDiskGiB *float32
+	maxDiskGiB *float32
+	lastEventAfter *time.Time
+	lastEventBefore *time.Time
+	sort *string
+	order *string
 }
 
 // Use with JWT to specify the organization ID
@@ -1774,25 +1765,24 @@ func (r SandboxAPIListSandboxesPaginatedRequest) Execute() (*PaginatedSandboxes,
 /*
 ListSandboxesPaginated List all sandboxes paginated
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SandboxAPIListSandboxesPaginatedRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SandboxAPIListSandboxesPaginatedRequest
 */
 func (a *SandboxAPIService) ListSandboxesPaginated(ctx context.Context) SandboxAPIListSandboxesPaginatedRequest {
 	return SandboxAPIListSandboxesPaginatedRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PaginatedSandboxes
+//  @return PaginatedSandboxes
 func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandboxesPaginatedRequest) (*PaginatedSandboxes, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PaginatedSandboxes
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PaginatedSandboxes
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ListSandboxesPaginated")
@@ -1960,10 +1950,10 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 }
 
 type SandboxAPIReplaceLabelsRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
-	sandboxLabels          *SandboxLabels
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	sandboxLabels *SandboxLabels
 	xDaytonaOrganizationID *string
 }
 
@@ -1985,27 +1975,26 @@ func (r SandboxAPIReplaceLabelsRequest) Execute() (*SandboxLabels, *http.Respons
 /*
 ReplaceLabels Replace sandbox labels
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPIReplaceLabelsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIReplaceLabelsRequest
 */
 func (a *SandboxAPIService) ReplaceLabels(ctx context.Context, sandboxIdOrName string) SandboxAPIReplaceLabelsRequest {
 	return SandboxAPIReplaceLabelsRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SandboxLabels
+//  @return SandboxLabels
 func (a *SandboxAPIService) ReplaceLabelsExecute(r SandboxAPIReplaceLabelsRequest) (*SandboxLabels, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SandboxLabels
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SandboxLabels
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ReplaceLabels")
@@ -2083,11 +2072,11 @@ func (a *SandboxAPIService) ReplaceLabelsExecute(r SandboxAPIReplaceLabelsReques
 }
 
 type SandboxAPIRevokeSshAccessRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
-	token                  *string
+	token *string
 }
 
 // Use with JWT to specify the organization ID
@@ -2109,27 +2098,26 @@ func (r SandboxAPIRevokeSshAccessRequest) Execute() (*Sandbox, *http.Response, e
 /*
 RevokeSshAccess Revoke SSH access for sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPIRevokeSshAccessRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIRevokeSshAccessRequest
 */
 func (a *SandboxAPIService) RevokeSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPIRevokeSshAccessRequest {
 	return SandboxAPIRevokeSshAccessRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.RevokeSshAccess")
@@ -2205,10 +2193,10 @@ func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRe
 }
 
 type SandboxAPISetAutoArchiveIntervalRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
-	interval               float32
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	interval float32
 	xDaytonaOrganizationID *string
 }
 
@@ -2225,29 +2213,28 @@ func (r SandboxAPISetAutoArchiveIntervalRequest) Execute() (*Sandbox, *http.Resp
 /*
 SetAutoArchiveInterval Set sandbox auto-archive interval
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
-	@return SandboxAPISetAutoArchiveIntervalRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+ @return SandboxAPISetAutoArchiveIntervalRequest
 */
 func (a *SandboxAPIService) SetAutoArchiveInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoArchiveIntervalRequest {
 	return SandboxAPISetAutoArchiveIntervalRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
-		interval:        interval,
+		interval: interval,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArchiveIntervalRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SetAutoArchiveInterval")
@@ -2321,10 +2308,10 @@ func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArc
 }
 
 type SandboxAPISetAutoDeleteIntervalRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
-	interval               float32
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	interval float32
 	xDaytonaOrganizationID *string
 }
 
@@ -2341,29 +2328,28 @@ func (r SandboxAPISetAutoDeleteIntervalRequest) Execute() (*Sandbox, *http.Respo
 /*
 SetAutoDeleteInterval Set sandbox auto-delete interval
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
-	@return SandboxAPISetAutoDeleteIntervalRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
+ @return SandboxAPISetAutoDeleteIntervalRequest
 */
 func (a *SandboxAPIService) SetAutoDeleteInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoDeleteIntervalRequest {
 	return SandboxAPISetAutoDeleteIntervalRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
-		interval:        interval,
+		interval: interval,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SetAutoDeleteInterval")
@@ -2437,10 +2423,10 @@ func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDele
 }
 
 type SandboxAPISetAutostopIntervalRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
-	interval               float32
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	interval float32
 	xDaytonaOrganizationID *string
 }
 
@@ -2457,29 +2443,28 @@ func (r SandboxAPISetAutostopIntervalRequest) Execute() (*Sandbox, *http.Respons
 /*
 SetAutostopInterval Set sandbox auto-stop interval
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@param interval Auto-stop interval in minutes (0 to disable)
-	@return SandboxAPISetAutostopIntervalRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @param interval Auto-stop interval in minutes (0 to disable)
+ @return SandboxAPISetAutostopIntervalRequest
 */
 func (a *SandboxAPIService) SetAutostopInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutostopIntervalRequest {
 	return SandboxAPISetAutostopIntervalRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
-		interval:        interval,
+		interval: interval,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) SetAutostopIntervalExecute(r SandboxAPISetAutostopIntervalRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SetAutostopInterval")
@@ -2553,9 +2538,9 @@ func (a *SandboxAPIService) SetAutostopIntervalExecute(r SandboxAPISetAutostopIn
 }
 
 type SandboxAPIStartSandboxRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
 }
 
@@ -2572,27 +2557,26 @@ func (r SandboxAPIStartSandboxRequest) Execute() (*Sandbox, *http.Response, erro
 /*
 StartSandbox Start sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPIStartSandboxRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIStartSandboxRequest
 */
 func (a *SandboxAPIService) StartSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStartSandboxRequest {
 	return SandboxAPIStartSandboxRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) StartSandboxExecute(r SandboxAPIStartSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.StartSandbox")
@@ -2665,9 +2649,9 @@ func (a *SandboxAPIService) StartSandboxExecute(r SandboxAPIStartSandboxRequest)
 }
 
 type SandboxAPIStopSandboxRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
 	xDaytonaOrganizationID *string
 }
 
@@ -2684,27 +2668,26 @@ func (r SandboxAPIStopSandboxRequest) Execute() (*Sandbox, *http.Response, error
 /*
 StopSandbox Stop sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@return SandboxAPIStopSandboxRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @return SandboxAPIStopSandboxRequest
 */
 func (a *SandboxAPIService) StopSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStopSandboxRequest {
 	return SandboxAPIStopSandboxRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.StopSandbox")
@@ -2777,9 +2760,9 @@ func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (
 }
 
 type SandboxAPIUpdateLastActivityRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxId              string
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxId string
 	xDaytonaOrganizationID *string
 }
 
@@ -2796,24 +2779,24 @@ func (r SandboxAPIUpdateLastActivityRequest) Execute() (*http.Response, error) {
 /*
 UpdateLastActivity Update sandbox last activity
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
-	@return SandboxAPIUpdateLastActivityRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return SandboxAPIUpdateLastActivityRequest
 */
 func (a *SandboxAPIService) UpdateLastActivity(ctx context.Context, sandboxId string) SandboxAPIUpdateLastActivityRequest {
 	return SandboxAPIUpdateLastActivityRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ctx: ctx,
+		sandboxId: sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *SandboxAPIService) UpdateLastActivityExecute(r SandboxAPIUpdateLastActivityRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.UpdateLastActivity")
@@ -2877,10 +2860,10 @@ func (a *SandboxAPIService) UpdateLastActivityExecute(r SandboxAPIUpdateLastActi
 }
 
 type SandboxAPIUpdatePublicStatusRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxIdOrName        string
-	isPublic               bool
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxIdOrName string
+	isPublic bool
 	xDaytonaOrganizationID *string
 }
 
@@ -2897,29 +2880,28 @@ func (r SandboxAPIUpdatePublicStatusRequest) Execute() (*Sandbox, *http.Response
 /*
 UpdatePublicStatus Update public status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
-	@param isPublic Public status to set
-	@return SandboxAPIUpdatePublicStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxIdOrName ID or name of the sandbox
+ @param isPublic Public status to set
+ @return SandboxAPIUpdatePublicStatusRequest
 */
 func (a *SandboxAPIService) UpdatePublicStatus(ctx context.Context, sandboxIdOrName string, isPublic bool) SandboxAPIUpdatePublicStatusRequest {
 	return SandboxAPIUpdatePublicStatusRequest{
-		ApiService:      a,
-		ctx:             ctx,
+		ApiService: a,
+		ctx: ctx,
 		sandboxIdOrName: sandboxIdOrName,
-		isPublic:        isPublic,
+		isPublic: isPublic,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.UpdatePublicStatus")
@@ -2993,10 +2975,10 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 }
 
 type SandboxAPIUpdateSandboxStateRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	sandboxId              string
-	updateSandboxStateDto  *UpdateSandboxStateDto
+	ctx context.Context
+	ApiService SandboxAPI
+	sandboxId string
+	updateSandboxStateDto *UpdateSandboxStateDto
 	xDaytonaOrganizationID *string
 }
 
@@ -3018,24 +3000,24 @@ func (r SandboxAPIUpdateSandboxStateRequest) Execute() (*http.Response, error) {
 /*
 UpdateSandboxState Update sandbox state
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
-	@return SandboxAPIUpdateSandboxStateRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return SandboxAPIUpdateSandboxStateRequest
 */
 func (a *SandboxAPIService) UpdateSandboxState(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxStateRequest {
 	return SandboxAPIUpdateSandboxStateRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ctx: ctx,
+		sandboxId: sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *SandboxAPIService) UpdateSandboxStateExecute(r SandboxAPIUpdateSandboxStateRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.UpdateSandboxState")
@@ -3104,9 +3086,9 @@ func (a *SandboxAPIService) UpdateSandboxStateExecute(r SandboxAPIUpdateSandboxS
 }
 
 type SandboxAPIValidateSshAccessRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	token                  *string
+	ctx context.Context
+	ApiService SandboxAPI
+	token *string
 	xDaytonaOrganizationID *string
 }
 
@@ -3129,25 +3111,24 @@ func (r SandboxAPIValidateSshAccessRequest) Execute() (*SshAccessValidationDto, 
 /*
 ValidateSshAccess Validate SSH access for sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SandboxAPIValidateSshAccessRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SandboxAPIValidateSshAccessRequest
 */
 func (a *SandboxAPIService) ValidateSshAccess(ctx context.Context) SandboxAPIValidateSshAccessRequest {
 	return SandboxAPIValidateSshAccessRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SshAccessValidationDto
+//  @return SshAccessValidationDto
 func (a *SandboxAPIService) ValidateSshAccessExecute(r SandboxAPIValidateSshAccessRequest) (*SshAccessValidationDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SshAccessValidationDto
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SshAccessValidationDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ValidateSshAccess")

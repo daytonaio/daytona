@@ -34,6 +34,7 @@ from .common.daytona import (
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
 )
+from .common.disk import Disk
 from .common.errors import DaytonaError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
@@ -68,6 +69,7 @@ __all__ = [
     "FileDownloadResponse",
     "FileUpload",
     "VolumeMount",
+    "Disk",
     "AsyncDaytona",
     "AsyncSandbox",
     "AsyncPaginatedSandboxes",

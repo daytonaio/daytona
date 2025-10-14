@@ -41,6 +41,7 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import Onboarding from '@/pages/Onboarding'
 import { Button } from './components/ui/button'
 import Volumes from './pages/Volumes'
+import Disks from './pages/Disks'
 import NotFound from './pages/NotFound'
 import AuditLogs from './pages/AuditLogs'
 import Spending from './pages/Spending'
@@ -167,6 +168,7 @@ function App() {
               </RequiredPermissionsOrganizationPageWrapper>
             }
           />
+          <Route path={getRouteSubPath(RoutePath.DISKS)} element={<Disks />} />
           <Route
             path={getRouteSubPath(RoutePath.LIMITS)}
             element={

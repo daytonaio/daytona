@@ -3,6 +3,7 @@ api/openapi.yaml
 api_api_keys.go
 api_audit.go
 api_config.go
+api_disks.go
 api_docker_registry.go
 api_health.go
 api_object_storage.go
@@ -24,6 +25,7 @@ model_account_provider.go
 model_announcement.go
 model_api_key_list.go
 model_api_key_response.go
+model_attach_disk_dto.go
 model_audit_log.go
 model_build_info.go
 model_command.go
@@ -36,6 +38,7 @@ model_computer_use_status_response.go
 model_computer_use_stop_response.go
 model_create_api_key.go
 model_create_build_info.go
+model_create_disk_dto.go
 model_create_docker_registry.go
 model_create_linked_account.go
 model_create_organization.go
@@ -50,6 +53,8 @@ model_create_user.go
 model_create_volume.go
 model_create_workspace.go
 model_daytona_configuration.go
+model_disk_dto.go
+model_disk_state.go
 model_display_info_response.go
 model_docker_registry.go
 model_download_files.go

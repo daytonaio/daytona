@@ -20,14 +20,15 @@ import (
 	"strings"
 )
 
+
 type PreviewAPI interface {
 
 	/*
-		HasSandboxAccess Check if user has access to the sandbox
+	HasSandboxAccess Check if user has access to the sandbox
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId
-		@return PreviewAPIHasSandboxAccessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return PreviewAPIHasSandboxAccessRequest
 	*/
 	HasSandboxAccess(ctx context.Context, sandboxId string) PreviewAPIHasSandboxAccessRequest
 
@@ -36,11 +37,11 @@ type PreviewAPI interface {
 	HasSandboxAccessExecute(r PreviewAPIHasSandboxAccessRequest) (bool, *http.Response, error)
 
 	/*
-		IsSandboxPublic Check if sandbox is public
+	IsSandboxPublic Check if sandbox is public
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
-		@return PreviewAPIIsSandboxPublicRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return PreviewAPIIsSandboxPublicRequest
 	*/
 	IsSandboxPublic(ctx context.Context, sandboxId string) PreviewAPIIsSandboxPublicRequest
 
@@ -49,12 +50,12 @@ type PreviewAPI interface {
 	IsSandboxPublicExecute(r PreviewAPIIsSandboxPublicRequest) (bool, *http.Response, error)
 
 	/*
-		IsValidAuthToken Check if sandbox auth token is valid
+	IsValidAuthToken Check if sandbox auth token is valid
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
-		@param authToken Auth token of the sandbox
-		@return PreviewAPIIsValidAuthTokenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@param authToken Auth token of the sandbox
+	@return PreviewAPIIsValidAuthTokenRequest
 	*/
 	IsValidAuthToken(ctx context.Context, sandboxId string, authToken string) PreviewAPIIsValidAuthTokenRequest
 
@@ -67,9 +68,9 @@ type PreviewAPI interface {
 type PreviewAPIService service
 
 type PreviewAPIHasSandboxAccessRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService PreviewAPI
-	sandboxId  string
+	sandboxId string
 }
 
 func (r PreviewAPIHasSandboxAccessRequest) Execute() (bool, *http.Response, error) {
@@ -79,27 +80,26 @@ func (r PreviewAPIHasSandboxAccessRequest) Execute() (bool, *http.Response, erro
 /*
 HasSandboxAccess Check if user has access to the sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return PreviewAPIHasSandboxAccessRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId
+ @return PreviewAPIHasSandboxAccessRequest
 */
 func (a *PreviewAPIService) HasSandboxAccess(ctx context.Context, sandboxId string) PreviewAPIHasSandboxAccessRequest {
 	return PreviewAPIHasSandboxAccessRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ctx: ctx,
+		sandboxId: sandboxId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return bool
+//  @return bool
 func (a *PreviewAPIService) HasSandboxAccessExecute(r PreviewAPIHasSandboxAccessRequest) (bool, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue bool
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  bool
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.HasSandboxAccess")
@@ -169,9 +169,9 @@ func (a *PreviewAPIService) HasSandboxAccessExecute(r PreviewAPIHasSandboxAccess
 }
 
 type PreviewAPIIsSandboxPublicRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService PreviewAPI
-	sandboxId  string
+	sandboxId string
 }
 
 func (r PreviewAPIIsSandboxPublicRequest) Execute() (bool, *http.Response, error) {
@@ -181,27 +181,26 @@ func (r PreviewAPIIsSandboxPublicRequest) Execute() (bool, *http.Response, error
 /*
 IsSandboxPublic Check if sandbox is public
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
-	@return PreviewAPIIsSandboxPublicRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return PreviewAPIIsSandboxPublicRequest
 */
 func (a *PreviewAPIService) IsSandboxPublic(ctx context.Context, sandboxId string) PreviewAPIIsSandboxPublicRequest {
 	return PreviewAPIIsSandboxPublicRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ctx: ctx,
+		sandboxId: sandboxId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return bool
+//  @return bool
 func (a *PreviewAPIService) IsSandboxPublicExecute(r PreviewAPIIsSandboxPublicRequest) (bool, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue bool
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  bool
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsSandboxPublic")
@@ -271,10 +270,10 @@ func (a *PreviewAPIService) IsSandboxPublicExecute(r PreviewAPIIsSandboxPublicRe
 }
 
 type PreviewAPIIsValidAuthTokenRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService PreviewAPI
-	sandboxId  string
-	authToken  string
+	sandboxId string
+	authToken string
 }
 
 func (r PreviewAPIIsValidAuthTokenRequest) Execute() (bool, *http.Response, error) {
@@ -284,29 +283,28 @@ func (r PreviewAPIIsValidAuthTokenRequest) Execute() (bool, *http.Response, erro
 /*
 IsValidAuthToken Check if sandbox auth token is valid
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
-	@param authToken Auth token of the sandbox
-	@return PreviewAPIIsValidAuthTokenRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @param authToken Auth token of the sandbox
+ @return PreviewAPIIsValidAuthTokenRequest
 */
 func (a *PreviewAPIService) IsValidAuthToken(ctx context.Context, sandboxId string, authToken string) PreviewAPIIsValidAuthTokenRequest {
 	return PreviewAPIIsValidAuthTokenRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
-		authToken:  authToken,
+		ctx: ctx,
+		sandboxId: sandboxId,
+		authToken: authToken,
 	}
 }
 
 // Execute executes the request
-//
-//	@return bool
+//  @return bool
 func (a *PreviewAPIService) IsValidAuthTokenExecute(r PreviewAPIIsValidAuthTokenRequest) (bool, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue bool
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  bool
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsValidAuthToken")
