@@ -1193,25 +1193,36 @@ export class SandboxService extends LockableEntity {
   }
 
   async updateStateAndDesiredState(sandboxId: string, newState: SandboxState): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
-
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
-
-    if (sandbox.state === newState) {
-      this.logger.debug(`Sandbox ${sandboxId} is already in state ${newState}`)
+    const lockKey = await this.tryLock(sandboxId, 60)
+    if (!lockKey) {
+      // Skip update if sandbox is locked (user operation in progress)
+      this.logger.debug(`Skipped state update for ${sandboxId} - sandbox is locked`)
       return
     }
 
-    sandbox.state = newState
-    const desiredState = this.getDesiredStateForState(newState)
-    if (desiredState) {
-      sandbox.desiredState = desiredState
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: { id: sandboxId },
+      })
+
+      if (!sandbox) {
+        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      }
+
+      if (sandbox.state === newState) {
+        this.logger.debug(`Sandbox ${sandboxId} is already in state ${newState}`)
+        return
+      }
+
+      sandbox.state = newState
+      const desiredState = this.getDesiredStateForState(newState)
+      if (desiredState) {
+        sandbox.desiredState = desiredState
+      }
+      await this.sandboxRepository.save(sandbox)
+    } finally {
+      await this.unlock(lockKey)
     }
-    await this.sandboxRepository.save(sandbox)
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
