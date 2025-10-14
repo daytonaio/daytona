@@ -160,6 +160,9 @@ export class AuditService implements OnApplicationBootstrap {
       // set status code to unknown
       log.statusCode = 0
       await this.auditLogRepository.save(log)
+      if (this.configService.get('audit.consoleLogEnabled')) {
+        this.logger.log(`AUDIT_ENTRY: ${JSON.stringify(log)}`)
+      }
     }
     this.logger.debug(`Resolved ${danglingLogs.length} dangling audit logs`)
   }
