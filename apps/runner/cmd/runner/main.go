@@ -111,7 +111,7 @@ func main() {
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
 
 	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
-		Docker:   dockerClient,
+		Docker:     dockerClient,
 		WindowSize: 60,
 	})
 	metricsService.Start(ctx)
