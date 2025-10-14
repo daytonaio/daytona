@@ -46,7 +46,6 @@ import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
-import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -60,6 +59,7 @@ import {
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { LockableEntity } from '../../common/services/lockable-entity.service'
+import { customAlphabet as customNanoid, urlAlphabet } from 'nanoid'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -1321,11 +1321,8 @@ export class SandboxService extends LockableEntity {
 
     const sshAccess = new SshAccess()
     sshAccess.sandboxId = sandbox.id
-    let token: string
-    do {
-      token = nanoid(32)
-    } while (token[0] === '-' || token[0] === '_')
-    sshAccess.token = token
+    // Generate a safe token that can't doesn't have _ or - to avoid CLI issues
+    sshAccess.token = customNanoid(urlAlphabet.replace('_', '').replace('-', ''))(32)
     sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
 
     return await this.sshAccessRepository.save(sshAccess)
