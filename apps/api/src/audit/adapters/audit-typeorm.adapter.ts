@@ -7,9 +7,10 @@ import { Logger } from '@nestjs/common'
 import { AuditLogStorageAdapter } from '../interfaces/audit-storage.interface'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AuditLog } from '../entities/audit-log.entity'
-import { Between, FindManyOptions, Repository } from 'typeorm'
+import { FindManyOptions, Repository } from 'typeorm'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { AuditLogFilter } from '../interfaces/audit-filter.interface'
+import { createRangeFilter } from '../../common/utils/range-filter'
 
 export class AuditTypeormStorageAdapter implements AuditLogStorageAdapter {
   private readonly logger = new Logger(AuditTypeormStorageAdapter.name)
@@ -30,12 +31,9 @@ export class AuditTypeormStorageAdapter implements AuditLogStorageAdapter {
       },
       skip: (page - 1) * limit,
       take: limit,
-      where:
-        filters?.from && filters?.to
-          ? {
-              createdAt: Between(filters.from, filters.to),
-            }
-          : undefined,
+      where: {
+        createdAt: createRangeFilter(filters?.from, filters?.to),
+      },
     }
 
     const [items, total] = await this.auditLogRepository.findAndCount(options)
@@ -63,7 +61,7 @@ export class AuditTypeormStorageAdapter implements AuditLogStorageAdapter {
       where: [
         {
           organizationId,
-          ...(filters?.from && filters?.to ? { createdAt: Between(filters.from, filters.to) } : {}),
+          createdAt: createRangeFilter(filters?.from, filters?.to),
         },
       ],
     }
