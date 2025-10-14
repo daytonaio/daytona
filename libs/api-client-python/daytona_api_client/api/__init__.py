@@ -5,6 +5,7 @@ from daytona_api_client.api.health_api import HealthApi
 from daytona_api_client.api.api_keys_api import ApiKeysApi
 from daytona_api_client.api.audit_api import AuditApi
 from daytona_api_client.api.config_api import ConfigApi
+from daytona_api_client.api.disks_api import DisksApi
 from daytona_api_client.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client.api.object_storage_api import ObjectStorageApi
 from daytona_api_client.api.organizations_api import OrganizationsApi

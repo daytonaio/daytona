@@ -6541,6 +6541,136 @@ paths:
       summary: Get volume details by name
       tags:
         - volumes
+  /disks:
+    get:
+      operationId: listDisks
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/DiskDto'
+                type: array
+          description: List of all disks
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all disks
+      tags:
+        - disks
+    post:
+      operationId: createDisk
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDiskDto'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiskDto'
+          description: The disk has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new disk
+      tags:
+        - disks
+  /disks/{diskId}:
+    delete:
+      operationId: deleteDisk
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the disk
+          explode: false
+          in: path
+          name: diskId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Disk has been marked for deletion
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete disk
+      tags:
+        - disks
+    get:
+      operationId: getDisk
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the disk
+          explode: false
+          in: path
+          name: diskId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiskDto'
+          description: Disk details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get disk details
+      tags:
+        - disks
   /docker-registry:
     get:
       operationId: listRegistries
@@ -7297,6 +7427,7 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
+              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7347,6 +7478,7 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
+              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7402,6 +7534,7 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
+              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7464,6 +7597,7 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
+              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7843,6 +7977,7 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
+              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7880,6 +8015,7 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
+              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -11213,6 +11349,93 @@ components:
       required:
         - name
       type: object
+    DiskState:
+      description: Disk state
+      enum:
+        - fresh
+        - pulling
+        - ready
+        - attached
+        - uploading
+        - stored
+      type: string
+    DiskDto:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        size: 100
+        errorReason: Error processing disk
+        name: my-disk
+        runnerId: 123e4567-e89b-12d3-a456-426614174000
+        id: disk-12345678
+        state: ready
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        id:
+          description: Disk ID
+          example: disk-12345678
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        name:
+          description: Disk name
+          example: my-disk
+          type: string
+        size:
+          description: Disk size in GB
+          example: 100
+          type: number
+        state:
+          allOf:
+            - $ref: '#/components/schemas/DiskState'
+          description: Disk state
+          example: ready
+        runnerId:
+          description: Runner ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
+        errorReason:
+          description: Error reason
+          example: Error processing disk
+          nullable: true
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - name
+        - organizationId
+        - size
+        - state
+        - updatedAt
+      type: object
+    CreateDiskDto:
+      example:
+        size: 100
+        name: my-disk
+      properties:
+        name:
+          description: Disk name
+          example: my-disk
+          type: string
+        size:
+          description: Disk size in GB
+          example: 100
+          type: number
+      required:
+        - name
+        - size
+      type: object
     CreateDockerRegistry:
       example:
         registryType: organization
@@ -11704,6 +11927,7 @@ components:
             - snapshot
             - user
             - volume
+            - disk
           type: string
         targetId:
           type: string

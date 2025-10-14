@@ -8,16 +8,9 @@ import warnings
 from importlib.metadata import version
 from typing import Callable, Dict, Optional, Union, overload
 
-from daytona_api_client_async import (
-    ApiClient,
-    Configuration,
-    CreateBuildInfo,
-    CreateSandbox,
-    ObjectStorageApi,
-    SandboxApi,
-    SandboxState,
-    SnapshotsApi,
-)
+from daytona_api_client_async import ApiClient, Configuration, CreateBuildInfo, CreateSandbox
+from daytona_api_client_async import DisksApi as DisksApi
+from daytona_api_client_async import ObjectStorageApi, SandboxApi, SandboxState, SnapshotsApi
 from daytona_api_client_async import ToolboxApi as ToolboxApi
 from daytona_api_client_async import VolumesApi as VolumesApi
 from environs import Env
@@ -36,6 +29,7 @@ from ..common.daytona import (
     DaytonaConfig,
     Image,
 )
+from .disk import AsyncDiskService
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
@@ -49,6 +43,7 @@ class AsyncDaytona:
 
     Attributes:
         volume (AsyncVolumeService): Service for managing volumes.
+        disk (AsyncDiskService): Service for managing disks.
         snapshot (AsyncSnapshotService): Service for managing snapshots.
 
     Example:
@@ -193,6 +188,7 @@ class AsyncDaytona:
 
         # Initialize services
         self.volume = AsyncVolumeService(VolumesApi(self._api_client))
+        self.disk = AsyncDiskService(DisksApi(self._api_client))
         self.snapshot = AsyncSnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
 
     # unasync: delete start

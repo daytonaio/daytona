@@ -12,16 +12,9 @@ import warnings
 from importlib.metadata import version
 from typing import Callable, Dict, Optional, Union, overload
 
-from daytona_api_client import (
-    ApiClient,
-    Configuration,
-    CreateBuildInfo,
-    CreateSandbox,
-    ObjectStorageApi,
-    SandboxApi,
-    SandboxState,
-    SnapshotsApi,
-)
+from daytona_api_client import ApiClient, Configuration, CreateBuildInfo, CreateSandbox
+from daytona_api_client import DisksApi as DisksApi
+from daytona_api_client import ObjectStorageApi, SandboxApi, SandboxState, SnapshotsApi
 from daytona_api_client import ToolboxApi as ToolboxApi
 from daytona_api_client import VolumesApi as VolumesApi
 from environs import Env
@@ -40,6 +33,7 @@ from ..common.daytona import (
     DaytonaConfig,
     Image,
 )
+from .disk import DiskService
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
@@ -53,6 +47,7 @@ class Daytona:
 
     Attributes:
         volume (VolumeService): Service for managing volumes.
+        disk (DiskService): Service for managing disks.
         snapshot (SnapshotService): Service for managing snapshots.
 
     Example:
@@ -194,6 +189,7 @@ class Daytona:
 
         # Initialize services
         self.volume = VolumeService(VolumesApi(self._api_client))
+        self.disk = DiskService(DisksApi(self._api_client))
         self.snapshot = SnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
 
     @overload

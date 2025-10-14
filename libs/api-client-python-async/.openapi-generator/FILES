@@ -4,6 +4,7 @@ daytona_api_client_async/api/__init__.py
 daytona_api_client_async/api/api_keys_api.py
 daytona_api_client_async/api/audit_api.py
 daytona_api_client_async/api/config_api.py
+daytona_api_client_async/api/disks_api.py
 daytona_api_client_async/api/docker_registry_api.py
 daytona_api_client_async/api/health_api.py
 daytona_api_client_async/api/object_storage_api.py
@@ -39,6 +40,7 @@ daytona_api_client_async/models/computer_use_stop_response.py
 daytona_api_client_async/models/create_api_key.py
 daytona_api_client_async/models/create_audit_log.py
 daytona_api_client_async/models/create_build_info.py
+daytona_api_client_async/models/create_disk_dto.py
 daytona_api_client_async/models/create_docker_registry.py
 daytona_api_client_async/models/create_linked_account.py
 daytona_api_client_async/models/create_organization.py
@@ -53,6 +55,8 @@ daytona_api_client_async/models/create_user.py
 daytona_api_client_async/models/create_volume.py
 daytona_api_client_async/models/create_workspace.py
 daytona_api_client_async/models/daytona_configuration.py
+daytona_api_client_async/models/disk_dto.py
+daytona_api_client_async/models/disk_state.py
 daytona_api_client_async/models/display_info_response.py
 daytona_api_client_async/models/docker_registry.py
 daytona_api_client_async/models/download_files.py

@@ -35,6 +35,9 @@ import { VolumeController } from './controllers/volume.controller'
 import { VolumeService } from './services/volume.service'
 import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
+import { DiskController } from './controllers/disk.controller'
+import { DiskService } from './services/disk.service'
+import { Disk } from './entities/disk.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
@@ -60,6 +63,7 @@ import { SshAccess } from './entities/ssh-access.entity'
       DockerRegistry,
       WarmPool,
       Volume,
+      Disk,
       SshAccess,
     ]),
   ],
@@ -71,6 +75,7 @@ import { SshAccess } from './entities/ssh-access.entity'
     WorkspaceController,
     PreviewController,
     VolumeController,
+    DiskController,
   ],
   providers: [
     SandboxService,
@@ -88,13 +93,22 @@ import { SshAccess } from './entities/ssh-access.entity'
     VolumeService,
     VolumeManager,
     VolumeSubscriber,
+    DiskService,
     RunnerAdapterFactory,
     SandboxStartAction,
     SandboxStopAction,
     SandboxDestroyAction,
     SandboxArchiveAction,
   ],
-  exports: [SandboxService, RunnerService, RedisLockProvider, SnapshotService, VolumeService, VolumeManager],
+  exports: [
+    SandboxService,
+    RunnerService,
+    RedisLockProvider,
+    SnapshotService,
+    VolumeService,
+    VolumeManager,
+    DiskService,
+  ],
 })
 export class SandboxModule {
   configure(consumer: MiddlewareConsumer) {

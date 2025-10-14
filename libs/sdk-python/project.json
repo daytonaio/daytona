@@ -15,7 +15,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "python scripts/sync_generator.py"
+        "command": "python3 scripts/sync_generator.py"
       }
     },
     "add-api-clients": {

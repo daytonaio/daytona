@@ -1033,6 +1033,91 @@ export class OrganizationUsageService {
   }
 
   /**
+   * Increments the pending usage for disk-related organization quotas.
+   *
+   * Pending usage is used to protect against race conditions to prevent quota abuse.
+   *
+   * If a user action will result in increased quota usage, we will first increment the pending usage.
+   *
+   * When the user action is complete, this pending usage will be transfered to the actual usage.
+   *
+   * As a safeguard, an expiration time is set on the pending usage cache to prevent lockout for new operations.
+   *
+   * @param organizationId
+   * @param diskCount - The count of disks to increment.
+   */
+  async incrementPendingDiskUsage(organizationId: string, diskCount: number): Promise<void> {
+    const script = `
+      local diskCountKey = KEYS[1]
+
+      local diskCountIncrement = tonumber(ARGV[1])
+      local ttl = tonumber(ARGV[2])
+    
+      redis.call("INCRBY", diskCountKey, diskCountIncrement)
+      redis.call("EXPIRE", diskCountKey, ttl)
+    `
+
+    await this.redis.eval(
+      script,
+      1,
+      this.getPendingQuotaUsageCacheKey(organizationId, 'disk'),
+      diskCount.toString(),
+      this.CACHE_TTL_SECONDS.toString(),
+    )
+  }
+
+  /**
+   * Decrements the pending usage for disk-related organization quotas.
+   *
+   * Use this method to roll back pending usage after incrementing it for an action that was subsequently rejected.
+   *
+   * Pending usage is used to protect against race conditions to prevent quota abuse.
+   *
+   * If a user action will result in increased quota usage, we will first increment the pending usage.
+   *
+   * When the user action is complete, this pending usage will be transfered to the actual usage.
+   *
+   * @param organizationId
+   * @param diskCount - If provided, the count of disks to decrement.
+   */
+  async decrementPendingDiskUsage(organizationId: string, diskCount?: number): Promise<void> {
+    // decrement the pending usage for necessary quota types
+    const script = `
+      local diskCountKey = KEYS[1]
+
+      local diskCountDecrement = tonumber(ARGV[1])
+      
+      if diskCountDecrement then
+        redis.call("DECRBY", diskCountKey, diskCountDecrement)
+      end
+    `
+
+    await this.redis.eval(
+      script,
+      1,
+      this.getPendingQuotaUsageCacheKey(organizationId, 'disk'),
+      diskCount?.toString() ?? '0',
+    )
+  }
+
+  /**
+   * Get the current and pending usage overview for disk-related organization quotas.
+   *
+   * @param organizationId
+   */
+  async getDiskUsageOverview(organizationId: string): Promise<{
+    currentDiskUsage: number
+    pendingDiskUsage: number | null
+  }> {
+    const sandboxUsageOverview = await this.getSandboxUsageOverview(organizationId)
+
+    return {
+      currentDiskUsage: sandboxUsageOverview.currentDiskUsage,
+      pendingDiskUsage: sandboxUsageOverview.pendingDiskUsage,
+    }
+  }
+
+  /**
    * Get the cache key for the timestamp of the last time the cached usage of organization quotas for a given resource type was populated from the database.
    *
    * @param organizationId

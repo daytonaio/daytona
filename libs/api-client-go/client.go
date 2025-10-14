@@ -55,6 +55,8 @@ type APIClient struct {
 
 	ConfigAPI ConfigAPI
 
+	DisksAPI DisksAPI
+
 	DockerRegistryAPI DockerRegistryAPI
 
 	HealthAPI HealthAPI
@@ -101,6 +103,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ApiKeysAPI = (*ApiKeysAPIService)(&c.common)
 	c.AuditAPI = (*AuditAPIService)(&c.common)
 	c.ConfigAPI = (*ConfigAPIService)(&c.common)
+	c.DisksAPI = (*DisksAPIService)(&c.common)
 	c.DockerRegistryAPI = (*DockerRegistryAPIService)(&c.common)
 	c.HealthAPI = (*HealthAPIService)(&c.common)
 	c.ObjectStorageAPI = (*ObjectStorageAPIService)(&c.common)

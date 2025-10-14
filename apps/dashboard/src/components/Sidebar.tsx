@@ -10,6 +10,7 @@ import {
   ChevronsUpDown,
   Container,
   CreditCard,
+  Disc,
   HardDrive,
   KeyRound,
   ListChecks,
@@ -102,6 +103,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         path: RoutePath.VOLUMES,
       })
     }
+    arr.push({
+      icon: <Disc size={16} strokeWidth={1.5} />,
+      label: 'Disks',
+      path: RoutePath.DISKS,
+    })
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({
         icon: <LockKeyhole size={16} strokeWidth={1.5} />,

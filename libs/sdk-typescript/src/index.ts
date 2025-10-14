@@ -23,6 +23,8 @@ export { Image } from './Image'
 export { Sandbox } from './Sandbox'
 export type { SandboxCodeToolbox } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
+export { DiskService } from './Disk'
+export type { Disk } from './Disk'
 export { ComputerUse, Mouse, Keyboard, Screenshot, Display } from './ComputerUse'
 
 // Chart and artifact types
@@ -37,7 +39,7 @@ export type {
   ScatterChart,
 } from './types/Charts'
 
-export { SandboxState } from '@daytonaio/api-client'
+export { SandboxState, DiskState } from '@daytonaio/api-client'
 export type {
   FileInfo,
   GitStatus,
