@@ -576,9 +576,9 @@ class AsyncDaytona:
         if sandbox_id_or_name:
             return await self.get(sandbox_id_or_name)
         sandboxes = await self.list(labels, page=1, limit=1)
-        if len(sandboxes) == 0:
+        if len(sandboxes.items) == 0:
             raise DaytonaError(f"No sandbox found with labels {labels}")
-        return sandboxes[0]
+        return sandboxes.items[0]
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     async def list(
