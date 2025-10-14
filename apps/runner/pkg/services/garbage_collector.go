@@ -21,8 +21,6 @@ import (
 )
 
 type GarbageCollectorServiceConfig struct {
-	ApiBaseUrl         string
-	ApiToken           string
 	Domain             string
 	DryRun             bool
 	ExcludeSandboxes   string
@@ -35,8 +33,6 @@ type GarbageCollectorServiceConfig struct {
 }
 
 type GarbageCollectorService struct {
-	apiBaseUrl         string
-	apiToken           string
 	domain             string
 	dryRun             bool
 	excludeSandboxes   []string
@@ -46,7 +42,6 @@ type GarbageCollectorService struct {
 	excludeAge         string
 	interval           string
 	dockerClient       *docker.DockerClient
-	httpClient         *http.Client
 	client             *apiclient.APIClient
 }
 
@@ -76,8 +71,6 @@ func NewGarbageCollectorService(config GarbageCollectorServiceConfig) *GarbageCo
 	}
 
 	return &GarbageCollectorService{
-		apiBaseUrl:         config.ApiBaseUrl,
-		apiToken:           config.ApiToken,
 		domain:             config.Domain,
 		dryRun:             config.DryRun,
 		excludeSandboxes:   excludeSandboxes,
@@ -87,7 +80,6 @@ func NewGarbageCollectorService(config GarbageCollectorServiceConfig) *GarbageCo
 		excludeAge:         config.ExcludeAge,
 		interval:           config.Interval,
 		dockerClient:       config.DockerClient,
-		httpClient:         &http.Client{},
 		client:             client,
 	}
 }
@@ -95,7 +87,10 @@ func NewGarbageCollectorService(config GarbageCollectorServiceConfig) *GarbageCo
 func (s *GarbageCollectorService) Run(ctx context.Context) {
 	go func() {
 		// Run cleanup immediately on startup
-		_ = s.cleanup(ctx)
+		err := s.cleanup(ctx)
+		if err != nil {
+			log.Errorf("Error cleaning up: %v", err)
+		}
 
 		// Parse interval, default to 12 hours if not available or invalid format
 		tickerInterval, err := time.ParseDuration(s.interval)
@@ -111,7 +106,10 @@ func (s *GarbageCollectorService) Run(ctx context.Context) {
 		for {
 			select {
 			case <-ticker.C:
-				_ = s.cleanup(ctx)
+				err := s.cleanup(ctx)
+				if err != nil {
+					log.Errorf("Error cleaning up: %v", err)
+				}
 			case <-ctx.Done():
 				return
 			}
@@ -120,12 +118,8 @@ func (s *GarbageCollectorService) Run(ctx context.Context) {
 }
 
 func (s *GarbageCollectorService) cleanup(ctx context.Context) error {
-	log.Printf("Starting sandbox and snapshot cleanup process")
-	log.Printf("Dry run mode: %t", s.dryRun)
-	log.Printf("Exclude pattern: %s", s.excludeSandboxes)
-	log.Printf("Exclude snapshots pattern: %s", s.excludeSnapshots)
-	log.Printf("Sandbox removal threshold: %d", s.thresholdSandboxes)
-	log.Printf("Snapshot removal threshold: %d", s.thresholdSnapshots)
+	log.Infof("Starting sandbox and snapshot cleanup process")
+	log.Infof("Dry run mode: %t", s.dryRun)
 
 	if s.client == nil {
 		client, err := runnerapiclient.GetApiClient()
@@ -135,23 +129,43 @@ func (s *GarbageCollectorService) cleanup(ctx context.Context) error {
 		s.client = client
 	}
 
+	// Cleanup sandboxes
+	err := s.sandboxCleanup(ctx)
+	if err != nil {
+		log.Errorf("Error cleaning up sandboxes: %v", err)
+	}
+
+	// Cleanup snapshots
+	err = s.snapshotCleanup(ctx)
+	if err != nil {
+		log.Errorf("Error cleaning up snapshots: %v", err)
+	}
+
+	return nil
+}
+
+// Sandbox cleanup helpers
+func (s *GarbageCollectorService) sandboxCleanup(ctx context.Context) error {
+	log.Infof("Exclude sandboxes pattern: %s", s.excludeSandboxes)
+	log.Infof("Sandbox removal threshold: %d", s.thresholdSandboxes)
+
 	// Get all sandboxes
 	sandboxes, err := s.getSandboxes(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get sandboxes: %w", err)
 	}
-	log.Printf("Found %d sandboxes", len(sandboxes))
+	log.Infof("Found %d sandboxes", len(sandboxes))
 
 	// Filter out excluded sandboxes
 	filteredSandboxes := s.filterSandboxes(sandboxes)
-	log.Printf("After filtering exclusions: %d sandboxes", len(filteredSandboxes))
+	log.Infof("After filtering exclusions: %d sandboxes", len(filteredSandboxes))
 
 	// Check each sandbox against API
 	invalidSandboxes := []models.SandboxCleanupInfo{}
 	for _, sandbox := range filteredSandboxes {
 		exists, err := s.checkSandboxInAPI(ctx, sandbox.Name)
 		if err != nil {
-			log.Printf("Error checking sandbox %s: %v", sandbox.Name, err)
+			log.Errorf("Error checking sandbox %s: %v", sandbox.Name, err)
 			continue
 		}
 		if !exists {
@@ -159,51 +173,17 @@ func (s *GarbageCollectorService) cleanup(ctx context.Context) error {
 		}
 	}
 
-	log.Printf("Found %d invalid sandboxes", len(invalidSandboxes))
+	log.Infof("Found %d invalid sandboxes", len(invalidSandboxes))
 
-	// Get all snapshots
-	snapshots, err := s.getSnapshots(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to get snapshots: %w", err)
-	}
-	log.Printf("Found %d snapshots", len(snapshots))
-
-	// Filter out excluded snapshots
-	filteredSnapshots := s.filterSnapshots(snapshots)
-	log.Printf("After filtering snapshot exclusions: %d snapshots", len(filteredSnapshots))
-
-	// Check each snapshot against API
-	invalidSnapshots := []models.SnapshotCleanupInfo{}
-	for _, snapshot := range filteredSnapshots {
-		exists, err := s.checkSnapshotInAPI(ctx, snapshot.Name)
-		if err != nil {
-			log.Printf("Error checking snapshot %s: %v", snapshot.Name, err)
-			continue
-		}
-		if !exists {
-			invalidSnapshots = append(invalidSnapshots, snapshot)
-		}
-	}
-
-	log.Printf("Found %d invalid snapshots", len(invalidSnapshots))
-
-	// Display results
-	if len(invalidSandboxes) == 0 && len(invalidSnapshots) == 0 {
-		log.Printf("No invalid sandboxes or snapshots found")
+	if len(invalidSandboxes) == 0 {
+		log.Infof("No invalid sandboxes found")
 		return nil
 	}
 
 	if len(invalidSandboxes) > 0 {
-		log.Printf("Invalid sandboxes:")
+		log.Infof("Invalid sandboxes:")
 		for _, sandbox := range invalidSandboxes {
-			log.Printf("  - %s (%s)", sandbox.Name, sandbox.ID)
-		}
-	}
-
-	if len(invalidSnapshots) > 0 {
-		log.Printf("Invalid snapshots:")
-		for _, snapshot := range invalidSnapshots {
-			log.Printf("  - %s (%s)", snapshot.Name, snapshot.ID)
+			log.Infof("  - %s (%s)", sandbox.Name, sandbox.ID)
 		}
 	}
 
@@ -213,19 +193,14 @@ func (s *GarbageCollectorService) cleanup(ctx context.Context) error {
 			len(invalidSandboxes), s.thresholdSandboxes)
 	}
 
-	if s.thresholdSnapshots > 0 && len(invalidSnapshots) > s.thresholdSnapshots {
-		return fmt.Errorf("aborting: found %d snapshots to remove, which exceeds the snapshot threshold of %d",
-			len(invalidSnapshots), s.thresholdSnapshots)
-	}
-
 	if s.dryRun {
-		log.Printf("Dry run mode - no sandboxes or snapshots will be removed")
+		log.Infof("Dry run mode - no sandboxes or snapshots will be removed")
 		return nil
 	}
 
 	// Remove invalid sandboxes
 	if len(invalidSandboxes) > 0 {
-		log.Printf("Removing %d invalid sandboxes", len(invalidSandboxes))
+		log.Infof("Removing %d invalid sandboxes", len(invalidSandboxes))
 		removedCount := 0
 		for _, sandbox := range invalidSandboxes {
 			// Remove the sandbox (this will stop it first if needed)
@@ -234,59 +209,16 @@ func (s *GarbageCollectorService) cleanup(ctx context.Context) error {
 				Force:         true,
 			})
 			if err != nil {
-				log.Printf("Error removing sandbox %s: %v", sandbox.Name, err)
+				log.Errorf("Error removing sandbox %s: %v", sandbox.Name, err)
 			} else {
-				log.Printf("Removed sandbox %s (%s)", sandbox.Name, sandbox.ID)
+				log.Infof("Removed sandbox %s (%s)", sandbox.Name, sandbox.ID)
 				removedCount++
 			}
 		}
-		log.Printf("Successfully removed %d out of %d invalid sandboxes", removedCount, len(invalidSandboxes))
-	}
-
-	// Remove invalid snapshots
-	if len(invalidSnapshots) > 0 {
-		log.Printf("Removing %d invalid snapshots", len(invalidSnapshots))
-		removedCount := 0
-		for _, snapshot := range invalidSnapshots {
-			if err := s.dockerClient.RemoveImage(context.Background(), snapshot.Name, true); err != nil {
-				log.Printf("Error removing snapshot %s: %v", snapshot.Name, err)
-			} else {
-				log.Printf("Removed snapshot %s (%s)", snapshot.Name, snapshot.ID)
-				removedCount++
-			}
-		}
-		log.Printf("Successfully removed %d out of %d invalid snapshots", removedCount, len(invalidSnapshots))
+		log.Infof("Successfully removed %d out of %d invalid sandboxes", removedCount, len(invalidSandboxes))
 	}
 
 	return nil
-}
-
-func (s *GarbageCollectorService) checkSandboxInAPI(ctx context.Context, sandboxName string) (bool, error) {
-	runnerBySandboxResponse, resp, err := s.client.RunnersAPI.GetRunnerBySandboxId(ctx, sandboxName).Execute()
-	if err != nil {
-		return false, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		// If 404, sandbox doesn't exist in API
-		if resp.StatusCode == http.StatusNotFound {
-			return false, nil
-		}
-
-		// For other status codes, log the error and assume sandbox exist
-		log.Printf("Unexpected status code %d for sandbox %s", resp.StatusCode, sandboxName)
-		return false, fmt.Errorf("unexpected status code %d for sandbox %s", resp.StatusCode, sandboxName)
-	}
-
-	// Check if runner exists and domain matches
-	if runnerBySandboxResponse.Id != "" && runnerBySandboxResponse.Domain == s.domain {
-		return true, nil
-	}
-
-	// Runner exists but domain doesn't match
-	log.Printf("Sandbox %s belongs to runner domain %s, expected %s", sandboxName, runnerBySandboxResponse.Domain, s.domain)
-
-	return true, nil
 }
 
 func (s *GarbageCollectorService) getSandboxes(ctx context.Context) ([]models.SandboxCleanupInfo, error) {
@@ -320,6 +252,106 @@ func (s *GarbageCollectorService) filterSandboxes(sandboxes []models.SandboxClea
 	}
 
 	return filtered
+}
+
+func (s *GarbageCollectorService) checkSandboxInAPI(ctx context.Context, sandboxName string) (bool, error) {
+	runnerBySandboxResponse, resp, err := s.client.RunnersAPI.GetRunnerBySandboxId(ctx, sandboxName).Execute()
+	if err != nil {
+		return false, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		// If 404, sandbox doesn't exist in API
+		if resp.StatusCode == http.StatusNotFound {
+			return false, nil
+		}
+
+		// For other status codes return error and assume sandbox exist
+		return true, fmt.Errorf("unexpected status code %d for sandbox %s", resp.StatusCode, sandboxName)
+	}
+
+	// Check if runner exists and domain matches
+	if runnerBySandboxResponse.Id != "" && runnerBySandboxResponse.Domain == s.domain {
+		return true, nil
+	}
+
+	// Runner exists but domain doesn't match
+	log.Infof("Sandbox %s belongs to runner domain %s, expected %s", sandboxName, runnerBySandboxResponse.Domain, s.domain)
+
+	return false, nil
+}
+
+// Snapshot cleanup helpers
+
+func (s *GarbageCollectorService) snapshotCleanup(ctx context.Context) error {
+	log.Infof("Exclude snapshots pattern: %s", s.excludeSnapshots)
+	log.Infof("Snapshot removal threshold: %d", s.thresholdSnapshots)
+
+	// Get all snapshots
+	snapshots, err := s.getSnapshots(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get snapshots: %w", err)
+	}
+	log.Infof("Found %d snapshots", len(snapshots))
+
+	// Filter out excluded snapshots
+	filteredSnapshots := s.filterSnapshots(snapshots)
+	log.Infof("After filtering snapshot exclusions: %d snapshots", len(filteredSnapshots))
+
+	// Check each snapshot against API
+	invalidSnapshots := []models.SnapshotCleanupInfo{}
+	for _, snapshot := range filteredSnapshots {
+		exists, err := s.checkSnapshotInAPI(ctx, snapshot.Name)
+		if err != nil {
+			log.Errorf("Error checking snapshot %s: %v", snapshot.Name, err)
+			continue
+		}
+		if !exists {
+			invalidSnapshots = append(invalidSnapshots, snapshot)
+		}
+	}
+
+	log.Infof("Found %d invalid snapshots", len(invalidSnapshots))
+
+	if len(invalidSnapshots) == 0 {
+		log.Infof("No invalid snapshots found")
+		return nil
+	}
+
+	if len(invalidSnapshots) > 0 {
+		log.Infof("Invalid snapshots:")
+		for _, snapshot := range invalidSnapshots {
+			log.Infof("  - %s (%s)", snapshot.Name, snapshot.ID)
+		}
+	}
+
+	if s.thresholdSnapshots > 0 && len(invalidSnapshots) > s.thresholdSnapshots {
+		return fmt.Errorf("aborting: found %d snapshots to remove, which exceeds the snapshot threshold of %d",
+			len(invalidSnapshots), s.thresholdSnapshots)
+	}
+
+	if s.dryRun {
+		log.Infof("Dry run mode - no sandboxes or snapshots will be removed")
+		return nil
+	}
+
+	// Remove invalid snapshots
+	if len(invalidSnapshots) > 0 {
+		log.Infof("Removing %d invalid snapshots", len(invalidSnapshots))
+		removedCount := 0
+		for _, snapshot := range invalidSnapshots {
+			err := s.dockerClient.RemoveImage(context.Background(), snapshot.Name, true)
+			if err != nil {
+				log.Errorf("Error removing snapshot %s: %v", snapshot.Name, err)
+			} else {
+				log.Infof("Removed snapshot %s (%s)", snapshot.Name, snapshot.ID)
+				removedCount++
+			}
+		}
+		log.Infof("Successfully removed %d out of %d invalid snapshots", removedCount, len(invalidSnapshots))
+	}
+
+	return nil
 }
 
 func (s *GarbageCollectorService) getSnapshots(ctx context.Context) ([]models.SnapshotCleanupInfo, error) {
@@ -371,7 +403,7 @@ func (s *GarbageCollectorService) filterSnapshots(snapshotCleanupInfos []models.
 		}
 
 		if !snapshotCleanupInfo.CreatedAt.Before(cutoffTime) {
-			log.Printf("Excluding snapshot %s created at %s (within %v)", snapshotCleanupInfo.Name, snapshotCleanupInfo.CreatedAt.Format(time.RFC3339), maxAge)
+			log.Infof("Excluding snapshot %s created at %s (within %v)", snapshotCleanupInfo.Name, snapshotCleanupInfo.CreatedAt.Format(time.RFC3339), maxAge)
 			continue
 		}
 
@@ -393,8 +425,6 @@ func (s *GarbageCollectorService) checkSnapshotInAPI(ctx context.Context, snapsh
 			return false, nil
 		}
 
-		log.Printf("Unexpected status code %d for snapshot %s", resp.StatusCode, snapshotName)
-
 		return false, fmt.Errorf("unexpected status code %d for snapshot %s", resp.StatusCode, snapshotName)
 	}
 
@@ -407,7 +437,7 @@ func (s *GarbageCollectorService) checkSnapshotInAPI(ctx context.Context, snapsh
 
 	// Snapshot exists but doesn't belong to expected domain
 	if len(runnersBySnapshotRefResponse) > 0 {
-		log.Printf("Snapshot %s exists but doesn't belong to expected runner domain %s", snapshotName, s.domain)
+		log.Infof("Snapshot %s exists but doesn't belong to expected runner domain %s", snapshotName, s.domain)
 	}
 
 	return false, nil

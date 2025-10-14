@@ -148,8 +148,6 @@ func main() {
 	})
 
 	garbageCleanerService := services.NewGarbageCollectorService(services.GarbageCollectorServiceConfig{
-		ApiBaseUrl:         cfg.ServerUrl,
-		ApiToken:           cfg.ApiToken,
 		Domain:             cfg.RunnerDomain,
 		DryRun:             cfg.GarbageCollectorDryRun,
 		ExcludeSandboxes:   cfg.GarbageCollectorExcludeSandboxes,
