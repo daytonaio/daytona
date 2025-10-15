@@ -309,7 +309,7 @@ export class SandboxStartAction extends SandboxAction {
       entrypoint = snapshot.entrypoint
     } else {
       sandbox.snapshot = sandbox.buildInfo.snapshotRef
-      entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
+      entrypoint = this.snapshotService.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
     let metadata: { [key: string]: string } | undefined = undefined
@@ -670,40 +670,5 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     return SYNC_AGAIN
-  }
-
-  // TODO: revise/cleanup
-  private getEntrypointFromDockerfile(dockerfileContent: string): string[] {
-    // Match ENTRYPOINT with either a string or JSON array
-    const entrypointMatch = dockerfileContent.match(/ENTRYPOINT\s+(.*)/)
-    if (entrypointMatch) {
-      const rawEntrypoint = entrypointMatch[1].trim()
-      try {
-        // Try parsing as JSON array
-        const parsed = JSON.parse(rawEntrypoint)
-        if (Array.isArray(parsed)) {
-          return parsed
-        }
-      } catch {
-        // Fallback: it's probably a plain string
-        return [rawEntrypoint.replace(/["']/g, '')]
-      }
-    }
-
-    // Match CMD with either a string or JSON array
-    const cmdMatch = dockerfileContent.match(/CMD\s+(.*)/)
-    if (cmdMatch) {
-      const rawCmd = cmdMatch[1].trim()
-      try {
-        const parsed = JSON.parse(rawCmd)
-        if (Array.isArray(parsed)) {
-          return parsed
-        }
-      } catch {
-        return [rawCmd.replace(/["']/g, '')]
-      }
-    }
-
-    return ['sleep', 'infinity']
   }
 }

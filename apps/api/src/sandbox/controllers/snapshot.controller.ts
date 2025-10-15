@@ -130,7 +130,9 @@ export class SnapshotController {
     }
 
     // TODO: consider - if using transient registry, prepend the snapshot name with the username
-    const snapshot = await this.snapshotService.createSnapshot(authContext.organization, createSnapshotDto)
+    const snapshot = createSnapshotDto.buildInfo
+      ? await this.snapshotService.createFromBuildInfo(authContext.organization, createSnapshotDto)
+      : await this.snapshotService.createFromPull(authContext.organization, createSnapshotDto)
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
@@ -182,7 +184,7 @@ export class SnapshotController {
     try {
       // Try to get by ID
       snapshot = await this.snapshotService.getSnapshot(snapshotIdOrName)
-    } catch (error) {
+    } catch {
       // If not found by ID, try by name
       snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
     }

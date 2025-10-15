@@ -170,15 +170,19 @@ Admin user created with API key: ${value}
 
     this.logger.log('Initializing default backup registry...')
 
-    await this.dockerRegistryService.create({
-      name: 'Backup Registry',
-      url: registryUrl,
-      username: registryAdmin,
-      password: registryPassword,
-      project: registryProjectId,
-      registryType: RegistryType.BACKUP,
-      isDefault: true,
-    })
+    await this.dockerRegistryService.create(
+      {
+        name: 'Backup Registry',
+        url: registryUrl,
+        username: registryAdmin,
+        password: registryPassword,
+        project: registryProjectId,
+        registryType: RegistryType.BACKUP,
+        isDefault: true,
+      },
+      undefined,
+      true,
+    )
 
     this.logger.log('Default backup registry initialized successfully')
   }
@@ -200,7 +204,7 @@ Admin user created with API key: ${value}
 
     const defaultSnapshot = this.configService.getOrThrow('defaultSnapshot')
 
-    await this.snapshotService.createSnapshot(
+    await this.snapshotService.createFromPull(
       adminPersonalOrg,
       {
         name: defaultSnapshot,

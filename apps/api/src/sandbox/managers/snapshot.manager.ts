@@ -974,7 +974,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     // If entrypoint is not explicitly set, set it from snapshotInfoResponse
     if (!snapshot.entrypoint) {
-      if (snapshotInfoResponse.entrypoint) {
+      if (snapshotInfoResponse.entrypoint && snapshotInfoResponse.entrypoint.length > 0) {
         if (Array.isArray(snapshotInfoResponse.entrypoint)) {
           snapshot.entrypoint = snapshotInfoResponse.entrypoint
         } else {
@@ -984,6 +984,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         snapshot.entrypoint = ['sleep', 'infinity']
       }
     }
+
+    // todo: save here?
   }
 
   private getInitialRunnerSnapshotTag(snapshot: Snapshot) {
