@@ -275,14 +275,14 @@ await daytona.delete(sandbox)  # Clean up when done
 
 ```python
 @intercept_errors(message_prefix="Failed to get sandbox: ")
-async def get(sandbox_id: str) -> AsyncSandbox
+async def get(sandbox_id_or_name: str) -> AsyncSandbox
 ```
 
-Gets a Sandbox by its ID.
+Gets a Sandbox by its ID or name.
 
 **Arguments**:
 
-- `sandbox_id` _str_ - The ID of the Sandbox to retrieve.
+- `sandbox_id_or_name` _str_ - The ID or name of the Sandbox to retrieve.
   
 
 **Returns**:
@@ -292,13 +292,13 @@ Gets a Sandbox by its ID.
 
 **Raises**:
 
-- `DaytonaError` - If sandbox_id is not provided.
+- `DaytonaError` - If sandbox_id_or_name is not provided.
   
 
 **Example**:
 
 ```python
-sandbox = await daytona.get("my-sandbox-id")
+sandbox = await daytona.get("my-sandbox-id-or-name")
 print(sandbox.state)
 ```
 
@@ -306,21 +306,21 @@ print(sandbox.state)
 
 ```python
 @intercept_errors(message_prefix="Failed to find sandbox: ")
-async def find_one(sandbox_id: Optional[str] = None,
+async def find_one(sandbox_id_or_name: Optional[str] = None,
                    labels: Optional[Dict[str, str]] = None) -> AsyncSandbox
 ```
 
-Finds a Sandbox by its ID or labels.
+Finds a Sandbox by its ID or name or labels.
 
 **Arguments**:
 
-- `sandbox_id` _Optional[str]_ - The ID of the Sandbox to retrieve.
+- `sandbox_id_or_name` _Optional[str]_ - The ID or name of the Sandbox to retrieve.
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
   
 
 **Returns**:
 
-- `Sandbox` - First Sandbox that matches the ID or labels.
+- `Sandbox` - First Sandbox that matches the ID or name or labels.
   
 
 **Raises**:
@@ -341,7 +341,8 @@ print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 @intercept_errors(message_prefix="Failed to list sandboxes: ")
 async def list(labels: Optional[Dict[str, str]] = None,
                page: Optional[int] = None,
-               limit: Optional[int] = None) -> AsyncPaginatedSandboxes
+               limit: Optional[int] = None,
+               name: Optional[str] = None) -> AsyncPaginatedSandboxes
 ```
 
 Returns paginated list of Sandboxes filtered by labels.
@@ -351,6 +352,7 @@ Returns paginated list of Sandboxes filtered by labels.
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
 - `page` _Optional[int]_ - Page number for pagination (starting from 1).
 - `limit` _Optional[int]_ - Maximum number of items per page.
+- `name` _Optional[str]_ - Filter by partial name match.
   
 
 **Returns**:
@@ -361,7 +363,7 @@ Returns paginated list of Sandboxes filtered by labels.
 **Example**:
 
 ```python
-result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
+result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10, name="my-value")
 for sandbox in result.items:
     print(f"{sandbox.id}: {sandbox.state}")
 ```

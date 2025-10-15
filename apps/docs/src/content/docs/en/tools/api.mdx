@@ -508,43 +508,12 @@ import Label from '@components/Label.astro'
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
 | **`verbose`** | query | false | undefined | Include verbose output |
 | **`labels`** | query | false | undefined | JSON encoded labels to filter by |
+| **`includeErroredDeleted`** | query | false | undefined | Include errored and deleted sandboxes |
 
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | List of all sandboxes |
-
-
-## GET /sandbox/paginated
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`page`** | query | false | undefined | Page number of the results |
-| **`limit`** | query | false | undefined | Number of results per page |
-| **`id`** | query | false | undefined | Filter by partial ID match |
-| **`labels`** | query | false | undefined | JSON encoded labels to filter by |
-| **`includeErroredDeleted`** | query | false | undefined | Include results with errored state and deleted desired state |
-| **`states`** | query | false | undefined | List of states to filter by |
-| **`snapshots`** | query | false | undefined | List of snapshot names to filter by |
-| **`regions`** | query | false | undefined | List of regions to filter by |
-| **`minCpu`** | query | false | undefined | Minimum CPU |
-| **`maxCpu`** | query | false | undefined | Maximum CPU |
-| **`minMemoryGiB`** | query | false | undefined | Minimum memory in GiB |
-| **`maxMemoryGiB`** | query | false | undefined | Maximum memory in GiB |
-| **`minDiskGiB`** | query | false | undefined | Minimum disk space in GiB |
-| **`maxDiskGiB`** | query | false | undefined | Maximum disk space in GiB |
-| **`lastEventAfter`** | query | false | undefined | Include items with last event after this timestamp |
-| **`lastEventBefore`** | query | false | undefined | Include items with last event before this timestamp |
-| **`sort`** | query | false | undefined | Field to sort by |
-| **`order`** | query | false | undefined | Direction to sort by |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Paginated list of all sandboxes |
-
 
 ## POST /sandbox
 
@@ -557,6 +526,50 @@ import Label from '@components/Label.astro'
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | The sandbox has been successfully created. |
+
+
+## GET /sandbox/paginated
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`page`** | query | false | undefined | Page number of the results |
+| **`limit`** | query | false | undefined | Number of results per page |
+| **`name`** | query | false | undefined | Filter by partial name match |
+| **`includeErroredDeleted`** | query | false | undefined | Include results with errored state and deleted desired state |
+| **`states`** | query | false | undefined | List of states to filter by |
+| **`sort`** | query | false | undefined | Field to sort by |
+| **`order`** | query | false | undefined | Direction to sort by |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Paginated list of all sandboxes |
+
+
+## GET /sandbox/search
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`page`** | query | false | undefined | Page number of the results |
+| **`limit`** | query | false | undefined | Number of results per page |
+| **`id`** | query | false | undefined | Filter by exact ID match |
+| **`name`** | query | false | undefined | Filter by partial name match |
+| **`labels`** | query | false | undefined | JSON encoded labels to filter by |
+| **`includeErroredDeleted`** | query | false | undefined | Include results with errored state and deleted desired state |
+| **`states`** | query | false | undefined | List of states to filter by |
+| **`snapshots`** | query | false | undefined | List of snapshot names to filter by |
+| **`regions`** | query | false | undefined | List of regions to filter by |
+| **`sort`** | query | false | undefined | Field to sort by |
+| **`order`** | query | false | undefined | Direction to sort by |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Paginated list of sandboxes matching the search criteria |
 
 
 ## GET /sandbox/regions
@@ -657,13 +670,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Labels have been successfully replaced |
 
 
-## PUT /sandbox/\{sandboxIdOrName\}/state
+## PUT /sandbox/\{sandboxId\}/state
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
+| **`sandboxId`** | path | true | undefined | ID of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -677,7 +690,7 @@ import Label from '@components/Label.astro'
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -697,7 +710,7 @@ import Label from '@components/Label.astro'
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
-| **`201`** |  |
+| **`200`** | Public status has been successfully updated |
 
 
 ## POST /sandbox/\{sandboxIdOrName\}/autostop/\{interval\}
@@ -751,7 +764,7 @@ import Label from '@components/Label.astro'
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | undefined |
 
 ### Responses
 | Status Code | Description |
@@ -1432,6 +1445,82 @@ Get logs for a specific command in a session
 | **`200`** | Command log stream marked with stdout and stderr prefixes |
 
 
+## GET /toolbox/\{sandboxId\}/toolbox/process/pty
+List all active PTY sessions in the sandbox
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | PTY sessions retrieved successfully |
+
+## POST /toolbox/\{sandboxId\}/toolbox/process/pty
+Create a new PTY session in the sandbox
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`201`** | PTY session created successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/process/pty/\{sessionId\}
+Get PTY session information by ID
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`sessionId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | PTY session retrieved successfully |
+
+## DELETE /toolbox/\{sandboxId\}/toolbox/process/pty/\{sessionId\}
+Delete a PTY session and terminate the associated process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`sessionId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | PTY session deleted successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/process/pty/\{sessionId\}/resize
+Resize a PTY session
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`sessionId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | PTY session resized successfully |
+
+
 ## POST /toolbox/\{sandboxId\}/toolbox/lsp/completions
 The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
@@ -2060,7 +2149,7 @@ Get list of open windows
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
 | **`workspaceId`** | path | true | undefined | ID of the workspace |
-| **`force`** | query | false  | undefined | undefined |
+| **`force`** | query | true | undefined | undefined |
 
 ### Responses
 | Status Code | Description |
