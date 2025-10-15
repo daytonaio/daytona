@@ -19,7 +19,6 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
-	"time"
 )
 
 type SandboxAPI interface {
@@ -200,6 +199,18 @@ type SandboxAPI interface {
 	// RevokeSshAccessExecute executes the request
 	//  @return Sandbox
 	RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*Sandbox, *http.Response, error)
+
+	/*
+		SearchSandboxes Search sandboxes
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return SandboxAPISearchSandboxesRequest
+	*/
+	SearchSandboxes(ctx context.Context) SandboxAPISearchSandboxesRequest
+
+	// SearchSandboxesExecute executes the request
+	//  @return PaginatedSandboxes
+	SearchSandboxesExecute(r SandboxAPISearchSandboxesRequest) (*PaginatedSandboxes, *http.Response, error)
 
 	/*
 		SetAutoArchiveInterval Set sandbox auto-archive interval
@@ -1616,21 +1627,9 @@ type SandboxAPIListSandboxesPaginatedRequest struct {
 	xDaytonaOrganizationID *string
 	page                   *float32
 	limit                  *float32
-	id                     *string
 	name                   *string
-	labels                 *string
 	includeErroredDeleted  *bool
 	states                 *[]string
-	snapshots              *[]string
-	regions                *[]string
-	minCpu                 *float32
-	maxCpu                 *float32
-	minMemoryGiB           *float32
-	maxMemoryGiB           *float32
-	minDiskGiB             *float32
-	maxDiskGiB             *float32
-	lastEventAfter         *time.Time
-	lastEventBefore        *time.Time
 	sort                   *string
 	order                  *string
 }
@@ -1653,21 +1652,9 @@ func (r SandboxAPIListSandboxesPaginatedRequest) Limit(limit float32) SandboxAPI
 	return r
 }
 
-// Filter by partial ID match
-func (r SandboxAPIListSandboxesPaginatedRequest) Id(id string) SandboxAPIListSandboxesPaginatedRequest {
-	r.id = &id
-	return r
-}
-
 // Filter by partial name match
 func (r SandboxAPIListSandboxesPaginatedRequest) Name(name string) SandboxAPIListSandboxesPaginatedRequest {
 	r.name = &name
-	return r
-}
-
-// JSON encoded labels to filter by
-func (r SandboxAPIListSandboxesPaginatedRequest) Labels(labels string) SandboxAPIListSandboxesPaginatedRequest {
-	r.labels = &labels
 	return r
 }
 
@@ -1680,66 +1667,6 @@ func (r SandboxAPIListSandboxesPaginatedRequest) IncludeErroredDeleted(includeEr
 // List of states to filter by
 func (r SandboxAPIListSandboxesPaginatedRequest) States(states []string) SandboxAPIListSandboxesPaginatedRequest {
 	r.states = &states
-	return r
-}
-
-// List of snapshot names to filter by
-func (r SandboxAPIListSandboxesPaginatedRequest) Snapshots(snapshots []string) SandboxAPIListSandboxesPaginatedRequest {
-	r.snapshots = &snapshots
-	return r
-}
-
-// List of regions to filter by
-func (r SandboxAPIListSandboxesPaginatedRequest) Regions(regions []string) SandboxAPIListSandboxesPaginatedRequest {
-	r.regions = &regions
-	return r
-}
-
-// Minimum CPU
-func (r SandboxAPIListSandboxesPaginatedRequest) MinCpu(minCpu float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.minCpu = &minCpu
-	return r
-}
-
-// Maximum CPU
-func (r SandboxAPIListSandboxesPaginatedRequest) MaxCpu(maxCpu float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.maxCpu = &maxCpu
-	return r
-}
-
-// Minimum memory in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MinMemoryGiB(minMemoryGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.minMemoryGiB = &minMemoryGiB
-	return r
-}
-
-// Maximum memory in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MaxMemoryGiB(maxMemoryGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.maxMemoryGiB = &maxMemoryGiB
-	return r
-}
-
-// Minimum disk space in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MinDiskGiB(minDiskGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.minDiskGiB = &minDiskGiB
-	return r
-}
-
-// Maximum disk space in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MaxDiskGiB(maxDiskGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.maxDiskGiB = &maxDiskGiB
-	return r
-}
-
-// Include items with last event after this timestamp
-func (r SandboxAPIListSandboxesPaginatedRequest) LastEventAfter(lastEventAfter time.Time) SandboxAPIListSandboxesPaginatedRequest {
-	r.lastEventAfter = &lastEventAfter
-	return r
-}
-
-// Include items with last event before this timestamp
-func (r SandboxAPIListSandboxesPaginatedRequest) LastEventBefore(lastEventBefore time.Time) SandboxAPIListSandboxesPaginatedRequest {
-	r.lastEventBefore = &lastEventBefore
 	return r
 }
 
@@ -1806,14 +1733,8 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 		var defaultValue float32 = 100
 		r.limit = &defaultValue
 	}
-	if r.id != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "form", "")
-	}
 	if r.name != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "name", r.name, "form", "")
-	}
-	if r.labels != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
 	}
 	if r.includeErroredDeleted != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
@@ -1831,52 +1752,6 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "states", t, "form", "multi")
 		}
-	}
-	if r.snapshots != nil {
-		t := *r.snapshots
-		if reflect.TypeOf(t).Kind() == reflect.Slice {
-			s := reflect.ValueOf(t)
-			for i := 0; i < s.Len(); i++ {
-				parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", s.Index(i).Interface(), "form", "multi")
-			}
-		} else {
-			parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", t, "form", "multi")
-		}
-	}
-	if r.regions != nil {
-		t := *r.regions
-		if reflect.TypeOf(t).Kind() == reflect.Slice {
-			s := reflect.ValueOf(t)
-			for i := 0; i < s.Len(); i++ {
-				parameterAddToHeaderOrQuery(localVarQueryParams, "regions", s.Index(i).Interface(), "form", "multi")
-			}
-		} else {
-			parameterAddToHeaderOrQuery(localVarQueryParams, "regions", t, "form", "multi")
-		}
-	}
-	if r.minCpu != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minCpu", r.minCpu, "form", "")
-	}
-	if r.maxCpu != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxCpu", r.maxCpu, "form", "")
-	}
-	if r.minMemoryGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGiB", r.minMemoryGiB, "form", "")
-	}
-	if r.maxMemoryGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGiB", r.maxMemoryGiB, "form", "")
-	}
-	if r.minDiskGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGiB", r.minDiskGiB, "form", "")
-	}
-	if r.maxDiskGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGiB", r.maxDiskGiB, "form", "")
-	}
-	if r.lastEventAfter != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventAfter", r.lastEventAfter, "form", "")
-	}
-	if r.lastEventBefore != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
 	}
 	if r.sort != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
@@ -2134,6 +2009,264 @@ func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRe
 
 	if r.token != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPISearchSandboxesRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	xDaytonaOrganizationID *string
+	page                   *float32
+	limit                  *float32
+	id                     *string
+	name                   *string
+	labels                 *string
+	includeErroredDeleted  *bool
+	states                 *[]string
+	snapshots              *[]string
+	regions                *[]string
+	sort                   *string
+	order                  *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPISearchSandboxesRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPISearchSandboxesRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Page number of the results
+func (r SandboxAPISearchSandboxesRequest) Page(page float32) SandboxAPISearchSandboxesRequest {
+	r.page = &page
+	return r
+}
+
+// Number of results per page
+func (r SandboxAPISearchSandboxesRequest) Limit(limit float32) SandboxAPISearchSandboxesRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter by exact ID match
+func (r SandboxAPISearchSandboxesRequest) Id(id string) SandboxAPISearchSandboxesRequest {
+	r.id = &id
+	return r
+}
+
+// Filter by partial name match
+func (r SandboxAPISearchSandboxesRequest) Name(name string) SandboxAPISearchSandboxesRequest {
+	r.name = &name
+	return r
+}
+
+// JSON encoded labels to filter by
+// Deprecated
+func (r SandboxAPISearchSandboxesRequest) Labels(labels string) SandboxAPISearchSandboxesRequest {
+	r.labels = &labels
+	return r
+}
+
+// Include results with errored state and deleted desired state
+func (r SandboxAPISearchSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPISearchSandboxesRequest {
+	r.includeErroredDeleted = &includeErroredDeleted
+	return r
+}
+
+// List of states to filter by
+func (r SandboxAPISearchSandboxesRequest) States(states []string) SandboxAPISearchSandboxesRequest {
+	r.states = &states
+	return r
+}
+
+// List of snapshot names to filter by
+func (r SandboxAPISearchSandboxesRequest) Snapshots(snapshots []string) SandboxAPISearchSandboxesRequest {
+	r.snapshots = &snapshots
+	return r
+}
+
+// List of regions to filter by
+func (r SandboxAPISearchSandboxesRequest) Regions(regions []string) SandboxAPISearchSandboxesRequest {
+	r.regions = &regions
+	return r
+}
+
+// Field to sort by
+func (r SandboxAPISearchSandboxesRequest) Sort(sort string) SandboxAPISearchSandboxesRequest {
+	r.sort = &sort
+	return r
+}
+
+// Direction to sort by
+func (r SandboxAPISearchSandboxesRequest) Order(order string) SandboxAPISearchSandboxesRequest {
+	r.order = &order
+	return r
+}
+
+func (r SandboxAPISearchSandboxesRequest) Execute() (*PaginatedSandboxes, *http.Response, error) {
+	return r.ApiService.SearchSandboxesExecute(r)
+}
+
+/*
+SearchSandboxes Search sandboxes
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPISearchSandboxesRequest
+*/
+func (a *SandboxAPIService) SearchSandboxes(ctx context.Context) SandboxAPISearchSandboxesRequest {
+	return SandboxAPISearchSandboxesRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PaginatedSandboxes
+func (a *SandboxAPIService) SearchSandboxesExecute(r SandboxAPISearchSandboxesRequest) (*PaginatedSandboxes, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PaginatedSandboxes
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SearchSandboxes")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/search"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 100
+		r.limit = &defaultValue
+	}
+	if r.id != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "form", "")
+	}
+	if r.name != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "name", r.name, "form", "")
+	}
+	if r.labels != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
+	}
+	if r.includeErroredDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	} else {
+		var defaultValue bool = false
+		r.includeErroredDeleted = &defaultValue
+	}
+	if r.states != nil {
+		t := *r.states
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "states", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "states", t, "form", "multi")
+		}
+	}
+	if r.snapshots != nil {
+		t := *r.snapshots
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", t, "form", "multi")
+		}
+	}
+	if r.regions != nil {
+		t := *r.regions
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "regions", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "regions", t, "form", "multi")
+		}
+	}
+	if r.sort != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
+	} else {
+		var defaultValue string = "createdAt"
+		r.sort = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "desc"
+		r.order = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

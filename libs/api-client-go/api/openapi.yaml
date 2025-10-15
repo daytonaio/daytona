@@ -1305,13 +1305,130 @@ paths:
             minimum: 1
             type: number
           style: form
-        - description: Filter by partial ID match
+        - description: Filter by partial name match
+          explode: true
+          in: query
+          name: name
+          required: false
+          schema:
+            example: abc123
+            type: string
+          style: form
+        - description: Include results with errored state and deleted desired state
+          explode: true
+          in: query
+          name: includeErroredDeleted
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
+        - description: List of states to filter by
+          explode: true
+          in: query
+          name: states
+          required: false
+          schema:
+            items:
+              enum:
+                - creating
+                - restoring
+                - destroying
+                - started
+                - stopped
+                - starting
+                - stopping
+                - error
+                - build_failed
+                - pending_build
+                - building_snapshot
+                - unknown
+                - pulling_snapshot
+                - archived
+                - archiving
+              type: string
+            type: array
+          style: form
+        - description: Field to sort by
+          explode: true
+          in: query
+          name: sort
+          required: false
+          schema:
+            default: createdAt
+            enum:
+              - lastActivityAt
+              - createdAt
+            type: string
+          style: form
+        - description: Direction to sort by
+          explode: true
+          in: query
+          name: order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSandboxes'
+          description: Paginated list of all sandboxes
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all sandboxes paginated
+      tags:
+        - sandbox
+  /sandbox/search:
+    get:
+      operationId: searchSandboxes
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Page number of the results
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+          style: form
+        - description: Number of results per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            maximum: 200
+            minimum: 1
+            type: number
+          style: form
+        - description: Filter by exact ID match
           explode: true
           in: query
           name: id
           required: false
           schema:
-            example: abc123
+            example: 00000000-0000-0000-0000-000000000000
             type: string
           style: form
         - description: Filter by partial name match
@@ -1323,7 +1440,8 @@ paths:
             example: abc123
             type: string
           style: form
-        - description: JSON encoded labels to filter by
+        - deprecated: true
+          description: JSON encoded labels to filter by
           explode: true
           in: query
           name: labels
@@ -1387,80 +1505,6 @@ paths:
               type: string
             type: array
           style: form
-        - description: Minimum CPU
-          explode: true
-          in: query
-          name: minCpu
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Maximum CPU
-          explode: true
-          in: query
-          name: maxCpu
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Minimum memory in GiB
-          explode: true
-          in: query
-          name: minMemoryGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Maximum memory in GiB
-          explode: true
-          in: query
-          name: maxMemoryGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Minimum disk space in GiB
-          explode: true
-          in: query
-          name: minDiskGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Maximum disk space in GiB
-          explode: true
-          in: query
-          name: maxDiskGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Include items with last event after this timestamp
-          explode: true
-          in: query
-          name: lastEventAfter
-          required: false
-          schema:
-            example: 2024-01-01T00:00:00Z
-            format: date-time
-            type: string
-          style: form
-        - description: Include items with last event before this timestamp
-          explode: true
-          in: query
-          name: lastEventBefore
-          required: false
-          schema:
-            example: 2024-12-31T23:59:59Z
-            format: date-time
-            type: string
-          style: form
         - description: Field to sort by
           explode: true
           in: query
@@ -1469,12 +1513,7 @@ paths:
           schema:
             default: createdAt
             enum:
-              - id
-              - name
-              - state
-              - snapshot
-              - region
-              - updatedAt
+              - lastActivityAt
               - createdAt
             type: string
           style: form
@@ -1496,14 +1535,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedSandboxes'
-          description: Paginated list of all sandboxes
+          description: Paginated list of sandboxes matching the search criteria
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: List all sandboxes paginated
+      summary: Search sandboxes
       tags:
         - sandbox
   /sandbox/regions:
@@ -8282,6 +8321,7 @@ components:
       example:
         memory: 4
         buildInfo: ''
+        lastActivityAt: 2024-10-01T12:00:00Z
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -8446,6 +8486,10 @@ components:
           description: The last update timestamp of the sandbox
           example: 2024-10-01T12:00:00Z
           type: string
+        lastActivityAt:
+          description: The last activity timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
         class:
           deprecated: true
           description: The class of the sandbox
@@ -8482,6 +8526,7 @@ components:
         items:
           - memory: 4
             buildInfo: ''
+            lastActivityAt: 2024-10-01T12:00:00Z
             autoStopInterval: 30
             organizationId: organization123
             createdAt: 2024-10-01T12:00:00Z
@@ -8518,6 +8563,7 @@ components:
             snapshot: daytonaio/sandbox:latest
           - memory: 4
             buildInfo: ''
+            lastActivityAt: 2024-10-01T12:00:00Z
             autoStopInterval: 30
             organizationId: organization123
             createdAt: 2024-10-01T12:00:00Z
@@ -10797,6 +10843,7 @@ components:
       example:
         memory: 4
         buildInfo: ''
+        lastActivityAt: 2024-10-01T12:00:00Z
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -10963,6 +11010,10 @@ components:
           type: string
         updatedAt:
           description: The last update timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
+        lastActivityAt:
+          description: The last activity timestamp of the sandbox
           example: 2024-10-01T12:00:00Z
           type: string
         class:

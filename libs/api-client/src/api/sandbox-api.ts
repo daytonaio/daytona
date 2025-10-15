@@ -619,21 +619,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
      * @param {string} [name] Filter by partial name match
-     * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
-     * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
      * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
@@ -643,21 +631,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
-      id?: string,
       name?: string,
-      labels?: string,
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
-      snapshots?: Array<string>,
-      regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
       sort?: ListSandboxesPaginatedSortEnum,
       order?: ListSandboxesPaginatedOrderEnum,
       options: RawAxiosRequestConfig = {},
@@ -688,16 +664,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
         localVarQueryParameter['limit'] = limit
       }
 
-      if (id !== undefined) {
-        localVarQueryParameter['id'] = id
-      }
-
       if (name !== undefined) {
         localVarQueryParameter['name'] = name
-      }
-
-      if (labels !== undefined) {
-        localVarQueryParameter['labels'] = labels
       }
 
       if (includeErroredDeleted !== undefined) {
@@ -706,48 +674,6 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (states) {
         localVarQueryParameter['states'] = states
-      }
-
-      if (snapshots) {
-        localVarQueryParameter['snapshots'] = snapshots
-      }
-
-      if (regions) {
-        localVarQueryParameter['regions'] = regions
-      }
-
-      if (minCpu !== undefined) {
-        localVarQueryParameter['minCpu'] = minCpu
-      }
-
-      if (maxCpu !== undefined) {
-        localVarQueryParameter['maxCpu'] = maxCpu
-      }
-
-      if (minMemoryGiB !== undefined) {
-        localVarQueryParameter['minMemoryGiB'] = minMemoryGiB
-      }
-
-      if (maxMemoryGiB !== undefined) {
-        localVarQueryParameter['maxMemoryGiB'] = maxMemoryGiB
-      }
-
-      if (minDiskGiB !== undefined) {
-        localVarQueryParameter['minDiskGiB'] = minDiskGiB
-      }
-
-      if (maxDiskGiB !== undefined) {
-        localVarQueryParameter['maxDiskGiB'] = maxDiskGiB
-      }
-
-      if (lastEventAfter !== undefined) {
-        localVarQueryParameter['lastEventAfter'] =
-          (lastEventAfter as any) instanceof Date ? (lastEventAfter as any).toISOString() : lastEventAfter
-      }
-
-      if (lastEventBefore !== undefined) {
-        localVarQueryParameter['lastEventBefore'] =
-          (lastEventBefore as any) instanceof Date ? (lastEventBefore as any).toISOString() : lastEventBefore
       }
 
       if (sort !== undefined) {
@@ -865,6 +791,113 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (token !== undefined) {
         localVarQueryParameter['token'] = token
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Search sandboxes
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
+     * @param {string} [id] Filter by exact ID match
+     * @param {string} [name] Filter by partial name match
+     * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+     * @param {Array<SearchSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<string>} [snapshots] List of snapshot names to filter by
+     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {SearchSandboxesSortEnum} [sort] Field to sort by
+     * @param {SearchSandboxesOrderEnum} [order] Direction to sort by
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    searchSandboxes: async (
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      id?: string,
+      name?: string,
+      labels?: string,
+      includeErroredDeleted?: boolean,
+      states?: Array<SearchSandboxesStatesEnum>,
+      snapshots?: Array<string>,
+      regions?: Array<string>,
+      sort?: SearchSandboxesSortEnum,
+      order?: SearchSandboxesOrderEnum,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/sandbox/search`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (page !== undefined) {
+        localVarQueryParameter['page'] = page
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
+      }
+
+      if (id !== undefined) {
+        localVarQueryParameter['id'] = id
+      }
+
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      if (labels !== undefined) {
+        localVarQueryParameter['labels'] = labels
+      }
+
+      if (includeErroredDeleted !== undefined) {
+        localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted
+      }
+
+      if (states) {
+        localVarQueryParameter['states'] = states
+      }
+
+      if (snapshots) {
+        localVarQueryParameter['snapshots'] = snapshots
+      }
+
+      if (regions) {
+        localVarQueryParameter['regions'] = regions
+      }
+
+      if (sort !== undefined) {
+        localVarQueryParameter['sort'] = sort
+      }
+
+      if (order !== undefined) {
+        localVarQueryParameter['order'] = order
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1633,21 +1666,9 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
      * @param {string} [name] Filter by partial name match
-     * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
-     * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
      * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
@@ -1657,21 +1678,9 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
-      id?: string,
       name?: string,
-      labels?: string,
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
-      snapshots?: Array<string>,
-      regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
       sort?: ListSandboxesPaginatedSortEnum,
       order?: ListSandboxesPaginatedOrderEnum,
       options?: RawAxiosRequestConfig,
@@ -1680,21 +1689,9 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         xDaytonaOrganizationID,
         page,
         limit,
-        id,
         name,
-        labels,
         includeErroredDeleted,
         states,
-        snapshots,
-        regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
         sort,
         order,
         options,
@@ -1766,6 +1763,65 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.revokeSshAccess']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Search sandboxes
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
+     * @param {string} [id] Filter by exact ID match
+     * @param {string} [name] Filter by partial name match
+     * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+     * @param {Array<SearchSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<string>} [snapshots] List of snapshot names to filter by
+     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {SearchSandboxesSortEnum} [sort] Field to sort by
+     * @param {SearchSandboxesOrderEnum} [order] Direction to sort by
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async searchSandboxes(
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      id?: string,
+      name?: string,
+      labels?: string,
+      includeErroredDeleted?: boolean,
+      states?: Array<SearchSandboxesStatesEnum>,
+      snapshots?: Array<string>,
+      regions?: Array<string>,
+      sort?: SearchSandboxesSortEnum,
+      order?: SearchSandboxesOrderEnum,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSandboxes>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.searchSandboxes(
+        xDaytonaOrganizationID,
+        page,
+        limit,
+        id,
+        name,
+        labels,
+        includeErroredDeleted,
+        states,
+        snapshots,
+        regions,
+        sort,
+        order,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.searchSandboxes']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2231,21 +2287,9 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
      * @param {string} [name] Filter by partial name match
-     * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
-     * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
      * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
@@ -2255,21 +2299,9 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
-      id?: string,
       name?: string,
-      labels?: string,
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
-      snapshots?: Array<string>,
-      regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
       sort?: ListSandboxesPaginatedSortEnum,
       order?: ListSandboxesPaginatedOrderEnum,
       options?: RawAxiosRequestConfig,
@@ -2279,21 +2311,9 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
           xDaytonaOrganizationID,
           page,
           limit,
-          id,
           name,
-          labels,
           includeErroredDeleted,
           states,
-          snapshots,
-          regions,
-          minCpu,
-          maxCpu,
-          minMemoryGiB,
-          maxMemoryGiB,
-          minDiskGiB,
-          maxDiskGiB,
-          lastEventAfter,
-          lastEventBefore,
           sort,
           order,
           options,
@@ -2336,6 +2356,57 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<Sandbox> {
       return localVarFp
         .revokeSshAccess(sandboxIdOrName, xDaytonaOrganizationID, token, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Search sandboxes
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
+     * @param {string} [id] Filter by exact ID match
+     * @param {string} [name] Filter by partial name match
+     * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+     * @param {Array<SearchSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<string>} [snapshots] List of snapshot names to filter by
+     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {SearchSandboxesSortEnum} [sort] Field to sort by
+     * @param {SearchSandboxesOrderEnum} [order] Direction to sort by
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    searchSandboxes(
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      id?: string,
+      name?: string,
+      labels?: string,
+      includeErroredDeleted?: boolean,
+      states?: Array<SearchSandboxesStatesEnum>,
+      snapshots?: Array<string>,
+      regions?: Array<string>,
+      sort?: SearchSandboxesSortEnum,
+      order?: SearchSandboxesOrderEnum,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedSandboxes> {
+      return localVarFp
+        .searchSandboxes(
+          xDaytonaOrganizationID,
+          page,
+          limit,
+          id,
+          name,
+          labels,
+          includeErroredDeleted,
+          states,
+          snapshots,
+          regions,
+          sort,
+          order,
+          options,
+        )
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2702,21 +2773,9 @@ export class SandboxApi extends BaseAPI {
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {number} [page] Page number of the results
    * @param {number} [limit] Number of results per page
-   * @param {string} [id] Filter by partial ID match
    * @param {string} [name] Filter by partial name match
-   * @param {string} [labels] JSON encoded labels to filter by
    * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
    * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
-   * @param {Array<string>} [snapshots] List of snapshot names to filter by
-   * @param {Array<string>} [regions] List of regions to filter by
-   * @param {number} [minCpu] Minimum CPU
-   * @param {number} [maxCpu] Maximum CPU
-   * @param {number} [minMemoryGiB] Minimum memory in GiB
-   * @param {number} [maxMemoryGiB] Maximum memory in GiB
-   * @param {number} [minDiskGiB] Minimum disk space in GiB
-   * @param {number} [maxDiskGiB] Maximum disk space in GiB
-   * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-   * @param {Date} [lastEventBefore] Include items with last event before this timestamp
    * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
    * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
    * @param {*} [options] Override http request option.
@@ -2727,21 +2786,9 @@ export class SandboxApi extends BaseAPI {
     xDaytonaOrganizationID?: string,
     page?: number,
     limit?: number,
-    id?: string,
     name?: string,
-    labels?: string,
     includeErroredDeleted?: boolean,
     states?: Array<ListSandboxesPaginatedStatesEnum>,
-    snapshots?: Array<string>,
-    regions?: Array<string>,
-    minCpu?: number,
-    maxCpu?: number,
-    minMemoryGiB?: number,
-    maxMemoryGiB?: number,
-    minDiskGiB?: number,
-    maxDiskGiB?: number,
-    lastEventAfter?: Date,
-    lastEventBefore?: Date,
     sort?: ListSandboxesPaginatedSortEnum,
     order?: ListSandboxesPaginatedOrderEnum,
     options?: RawAxiosRequestConfig,
@@ -2751,21 +2798,9 @@ export class SandboxApi extends BaseAPI {
         xDaytonaOrganizationID,
         page,
         limit,
-        id,
         name,
-        labels,
         includeErroredDeleted,
         states,
-        snapshots,
-        regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
         sort,
         order,
         options,
@@ -2812,6 +2847,59 @@ export class SandboxApi extends BaseAPI {
   ) {
     return SandboxApiFp(this.configuration)
       .revokeSshAccess(sandboxIdOrName, xDaytonaOrganizationID, token, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Search sandboxes
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {number} [page] Page number of the results
+   * @param {number} [limit] Number of results per page
+   * @param {string} [id] Filter by exact ID match
+   * @param {string} [name] Filter by partial name match
+   * @param {string} [labels] JSON encoded labels to filter by
+   * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+   * @param {Array<SearchSandboxesStatesEnum>} [states] List of states to filter by
+   * @param {Array<string>} [snapshots] List of snapshot names to filter by
+   * @param {Array<string>} [regions] List of regions to filter by
+   * @param {SearchSandboxesSortEnum} [sort] Field to sort by
+   * @param {SearchSandboxesOrderEnum} [order] Direction to sort by
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public searchSandboxes(
+    xDaytonaOrganizationID?: string,
+    page?: number,
+    limit?: number,
+    id?: string,
+    name?: string,
+    labels?: string,
+    includeErroredDeleted?: boolean,
+    states?: Array<SearchSandboxesStatesEnum>,
+    snapshots?: Array<string>,
+    regions?: Array<string>,
+    sort?: SearchSandboxesSortEnum,
+    order?: SearchSandboxesOrderEnum,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .searchSandboxes(
+        xDaytonaOrganizationID,
+        page,
+        limit,
+        id,
+        name,
+        labels,
+        includeErroredDeleted,
+        states,
+        snapshots,
+        regions,
+        sort,
+        order,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2992,12 +3080,7 @@ export type ListSandboxesPaginatedStatesEnum =
  * @export
  */
 export const ListSandboxesPaginatedSortEnum = {
-  ID: 'id',
-  NAME: 'name',
-  STATE: 'state',
-  SNAPSHOT: 'snapshot',
-  REGION: 'region',
-  UPDATED_AT: 'updatedAt',
+  LAST_ACTIVITY_AT: 'lastActivityAt',
   CREATED_AT: 'createdAt',
 } as const
 export type ListSandboxesPaginatedSortEnum =
@@ -3011,3 +3094,40 @@ export const ListSandboxesPaginatedOrderEnum = {
 } as const
 export type ListSandboxesPaginatedOrderEnum =
   (typeof ListSandboxesPaginatedOrderEnum)[keyof typeof ListSandboxesPaginatedOrderEnum]
+/**
+ * @export
+ */
+export const SearchSandboxesStatesEnum = {
+  CREATING: 'creating',
+  RESTORING: 'restoring',
+  DESTROYING: 'destroying',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STARTING: 'starting',
+  STOPPING: 'stopping',
+  ERROR: 'error',
+  BUILD_FAILED: 'build_failed',
+  PENDING_BUILD: 'pending_build',
+  BUILDING_SNAPSHOT: 'building_snapshot',
+  UNKNOWN: 'unknown',
+  PULLING_SNAPSHOT: 'pulling_snapshot',
+  ARCHIVED: 'archived',
+  ARCHIVING: 'archiving',
+} as const
+export type SearchSandboxesStatesEnum = (typeof SearchSandboxesStatesEnum)[keyof typeof SearchSandboxesStatesEnum]
+/**
+ * @export
+ */
+export const SearchSandboxesSortEnum = {
+  LAST_ACTIVITY_AT: 'lastActivityAt',
+  CREATED_AT: 'createdAt',
+} as const
+export type SearchSandboxesSortEnum = (typeof SearchSandboxesSortEnum)[keyof typeof SearchSandboxesSortEnum]
+/**
+ * @export
+ */
+export const SearchSandboxesOrderEnum = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const
+export type SearchSandboxesOrderEnum = (typeof SearchSandboxesOrderEnum)[keyof typeof SearchSandboxesOrderEnum]
