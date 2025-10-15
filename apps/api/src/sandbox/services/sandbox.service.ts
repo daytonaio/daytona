@@ -59,6 +59,11 @@ import {
 } from '../dto/list-sandboxes-query.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import {
+  UPGRADE_TIER_MESSAGE,
+  ARCHIVE_SANDBOXES_MESSAGE,
+  PER_SANDBOX_LIMIT_MESSAGE,
+} from '../../common/constants/error-messages'
 import { LockableEntity } from '../../common/services/lockable-entity.service'
 
 const DEFAULT_CPU = 1
@@ -112,17 +117,17 @@ export class SandboxService extends LockableEntity {
     // validate per-sandbox quotas
     if (cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
-        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
+        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (memory > organization.maxMemoryPerSandbox) {
       throw new ForbiddenException(
-        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB)`,
+        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (disk > organization.maxDiskPerSandbox) {
       throw new ForbiddenException(
-        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB)`,
+        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
 
@@ -143,17 +148,21 @@ export class SandboxService extends LockableEntity {
 
     try {
       if (usageOverview.currentCpuUsage + usageOverview.pendingCpuUsage > organization.totalCpuQuota) {
-        throw new ForbiddenException(`Total CPU quota exceeded. Maximum allowed: ${organization.totalCpuQuota}`)
+        throw new ForbiddenException(
+          `Total CPU limit exceeded. Maximum allowed: ${organization.totalCpuQuota}.\n${UPGRADE_TIER_MESSAGE}`,
+        )
       }
 
       if (usageOverview.currentMemoryUsage + usageOverview.pendingMemoryUsage > organization.totalMemoryQuota) {
         throw new ForbiddenException(
-          `Total memory quota exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB`,
+          `Total memory limit exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB.\n${UPGRADE_TIER_MESSAGE}`,
         )
       }
 
       if (usageOverview.currentDiskUsage + usageOverview.pendingDiskUsage > organization.totalDiskQuota) {
-        throw new ForbiddenException(`Total disk quota exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB`)
+        throw new ForbiddenException(
+          `Total disk limit exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB.\n${ARCHIVE_SANDBOXES_MESSAGE}\n${UPGRADE_TIER_MESSAGE}`,
+        )
       }
     } catch (error) {
       await this.rollbackPendingUsage(
