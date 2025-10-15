@@ -191,6 +191,14 @@ const configuration = {
       ttl: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_TTL || '30', 10),
       limit: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_LIMIT || '20000', 10),
     },
+    sandboxCreate: {
+      ttl: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || '60', 10),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || '20', 10),
+    },
+    sandboxLifecycle: {
+      ttl: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
+    },
   },
   log: {
     console: {

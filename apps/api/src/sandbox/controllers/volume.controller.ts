@@ -46,7 +46,7 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 @ApiTags('volumes')
 @Controller('volumes')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class VolumeController {

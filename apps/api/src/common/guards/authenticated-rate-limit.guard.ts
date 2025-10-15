@@ -25,14 +25,19 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
   }
 
   protected async getTracker(req: Request): Promise<string> {
-    const hasAuthHeader = req.headers.authorization?.startsWith('Bearer ')
+    const user = req.user as any
 
-    if (hasAuthHeader) {
-      const token = req.headers.authorization
-      return `auth:${this.hashToken(token)}`
+    // Track by organization ID when available (shared quota per org)
+    if (user?.organizationId) {
+      return `auth:org:${user.organizationId}`
     }
 
-    // Fallback (shouldn't happen in normal flow)
+    // Fallback to user ID for non-org routes (e.g., /users/me)
+    if (user?.userId) {
+      return `auth:user:${user.userId}`
+    }
+
+    // Ultimate fallback (shouldn't happen in normal flow)
     const ip = req.ips.length ? req.ips[0] : req.ip
     return `fallback:${ip}`
   }
@@ -42,6 +47,12 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     const request = context.switchToHttp().getRequest<Request>()
     const isAuthenticated = request.user && this.isValidAuthContext(request.user)
 
+    // Skip rate limiting for system roles
+    if (this.isSystemRole(request.user)) {
+      return true
+    }
+
+    // Check 'authenticated' throttler - applies to all authenticated routes
     if (throttler.name === 'authenticated') {
       if (isAuthenticated) {
         // Clear anonymous rate limit on successful authentication
@@ -51,6 +62,11 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
       return true
     }
 
+    // For any other throttlers (except anonymous), defer to base ThrottlerGuard
+    // It will check if route has @Throttle() decorator for this throttler
+    if (isAuthenticated && throttler.name !== 'anonymous') {
+      return super.handleRequest(requestProps)
+    }
     return true
   }
 
@@ -85,11 +101,12 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     }
   }
 
-  private hashToken(token: string): string {
-    return Buffer.from(token).toString('base64').substring(0, 16)
-  }
-
   private isValidAuthContext(user: any): boolean {
     return user && (user.userId || user.role)
+  }
+
+  private isSystemRole(user: any): boolean {
+    // Skip rate limiting for system roles (ssh-gateway, proxy)
+    return user?.role === 'ssh-gateway' || user?.role === 'proxy'
   }
 }

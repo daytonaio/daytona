@@ -72,11 +72,12 @@ import { RegionDto } from '../dto/region.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { Throttle, seconds } from '@nestjs/throttler'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
@@ -227,6 +228,7 @@ export class SandboxController {
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
+  @Throttle({ 'sandbox-create': { limit: 20, ttl: seconds(60) } })
   @ApiOperation({
     summary: 'Create a new sandbox',
     operationId: 'createSandbox',
@@ -403,6 +405,7 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/start')
   @HttpCode(200)
+  @Throttle({ 'sandbox-lifecycle': { limit: 100, ttl: seconds(60) } })
   @ApiOperation({
     summary: 'Start sandbox',
     operationId: 'startSandbox',
@@ -441,6 +444,7 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/stop')
   @HttpCode(200) //  for Daytona Api compatibility
+  @Throttle({ 'sandbox-lifecycle': { limit: 100, ttl: seconds(60) } })
   @ApiOperation({
     summary: 'Stop sandbox',
     operationId: 'stopSandbox',

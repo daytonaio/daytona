@@ -130,7 +130,7 @@ const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 @ApiTags('toolbox')
 @Controller('toolbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrganizationResourceActionGuard, SandboxAccessGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, SandboxAccessGuard, AuthenticatedRateLimitGuard)
 @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
