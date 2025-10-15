@@ -20,7 +20,7 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 
 @ApiTags('audit')
 @Controller('audit')
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class AuditController {

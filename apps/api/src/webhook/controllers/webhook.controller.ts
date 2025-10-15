@@ -24,7 +24,7 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 @ApiTags('webhooks')
 @Controller('webhooks')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard, OrganizationAccessGuard)
+@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationAccessGuard, AuthenticatedRateLimitGuard)
 @ApiBearerAuth()
 export class WebhookController {
   constructor(
