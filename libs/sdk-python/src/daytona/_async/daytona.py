@@ -582,7 +582,11 @@ class AsyncDaytona:
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     async def list(
-        self, labels: Optional[Dict[str, str]] = None, page: Optional[int] = None, limit: Optional[int] = None
+        self,
+        labels: Optional[Dict[str, str]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        name: Optional[str] = None,
     ) -> AsyncPaginatedSandboxes:
         """Returns paginated list of Sandboxes filtered by labels.
 
@@ -590,13 +594,14 @@ class AsyncDaytona:
             labels (Optional[Dict[str, str]]): Labels to filter Sandboxes.
             page (Optional[int]): Page number for pagination (starting from 1).
             limit (Optional[int]): Maximum number of items per page.
+            name (Optional[str]): Filter by partial name match.
 
         Returns:
             AsyncPaginatedSandboxes: Paginated list of Sandbox instances that match the labels.
 
         Example:
             ```python
-            result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
+            result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10, name="my-value")
             for sandbox in result.items:
                 print(f"{sandbox.id}: {sandbox.state}")
             ```
@@ -607,7 +612,9 @@ class AsyncDaytona:
         if limit is not None and limit < 1:
             raise DaytonaError("limit must be a positive integer")
 
-        response = await self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
+        response = await self._sandbox_api.search_sandboxes(
+            labels=json.dumps(labels), page=page, limit=limit, name=name
+        )
 
         return AsyncPaginatedSandboxes(
             items=[

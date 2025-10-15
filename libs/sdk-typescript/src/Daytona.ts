@@ -589,21 +589,27 @@ export class Daytona {
    * @param {Record<string, string>} [labels] - Labels to filter Sandboxes
    * @param {number} [page] - Page number for pagination (starting from 1)
    * @param {number} [limit] - Maximum number of items per page
+   * @param {string} [name] - Filter by partial name match
    * @returns {Promise<PaginatedSandboxes>} Paginated list of Sandboxes that match the labels.
    *
    * @example
-   * const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
+   * const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10, 'sandbox-name');
    * for (const sandbox of result.items) {
    *     console.log(`${sandbox.id}: ${sandbox.state}`);
    * }
    */
-  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes> {
-    const response = await this.sandboxApi.listSandboxesPaginated(
+  public async list(
+    labels?: Record<string, string>,
+    page?: number,
+    limit?: number,
+    name?: string,
+  ): Promise<PaginatedSandboxes> {
+    const response = await this.sandboxApi.searchSandboxes(
       undefined,
       page,
       limit,
       undefined,
-      undefined,
+      name,
       labels ? JSON.stringify(labels) : undefined,
     )
 
