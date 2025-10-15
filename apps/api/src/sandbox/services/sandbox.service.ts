@@ -15,7 +15,6 @@ import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -57,7 +56,6 @@ import {
   DEFAULT_SANDBOX_SORT_FIELD,
   DEFAULT_SANDBOX_SORT_DIRECTION,
 } from '../dto/list-sandboxes-query.dto'
-import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 const DEFAULT_CPU = 1
@@ -671,7 +669,87 @@ export class SandboxService {
     return this.sandboxRepository.find({ where })
   }
 
-  async findAll(
+  // TODO: do we support sorting?
+  // TODO: indexes
+  async list(
+    organizationId: string,
+    page = 1,
+    limit = 10,
+    filters?: {
+      name?: string
+      includeErroredDestroyed?: boolean
+      states?: SandboxState[]
+    },
+    sort?: {
+      field?: SandboxSortField
+      direction?: SandboxSortDirection
+    },
+  ): Promise<PaginatedList<Sandbox>> {
+    const pageNum = Number(page)
+    const limitNum = Number(limit)
+
+    const { name, includeErroredDestroyed, states } = filters || {}
+
+    const { field: sortField = DEFAULT_SANDBOX_SORT_FIELD, direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION } =
+      sort || {}
+
+    const baseFindOptions: FindOptionsWhere<Sandbox> = {
+      organizationId,
+      ...(name ? { name: ILike(`${name}%`) } : {}),
+    }
+
+    const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
+    const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
+
+    const nonErrorStatesToInclude = statesToInclude.filter((state) => !errorStates.includes(state))
+    const errorStatesToInclude = statesToInclude.filter((state) => errorStates.includes(state))
+
+    const where: FindOptionsWhere<Sandbox>[] = []
+
+    if (nonErrorStatesToInclude.length > 0) {
+      where.push({
+        ...baseFindOptions,
+        state: In(nonErrorStatesToInclude),
+      })
+    }
+
+    if (errorStatesToInclude.length > 0) {
+      where.push({
+        ...baseFindOptions,
+        state: In(errorStatesToInclude),
+        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+      })
+    }
+
+    const [items, total] = await this.sandboxRepository.findAndCount({
+      where,
+      order: {
+        [sortField]: {
+          direction: sortDirection,
+          ...(sortField === SandboxSortField.LAST_ACTIVITY_AT && { nulls: 'LAST' }),
+        },
+        // use as tiebreaker
+        ...(sortField === SandboxSortField.LAST_ACTIVITY_AT && {
+          createdAt: {
+            direction: 'DESC',
+          },
+        }),
+      },
+      skip: (pageNum - 1) * limitNum,
+      take: limitNum,
+      loadEagerRelations: false,
+    })
+
+    return {
+      items,
+      total,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+    }
+  }
+
+  // TODO: Implement search
+  async search(
     organizationId: string,
     page = 1,
     limit = 10,
@@ -683,14 +761,6 @@ export class SandboxService {
       states?: SandboxState[]
       snapshots?: string[]
       regions?: string[]
-      minCpu?: number
-      maxCpu?: number
-      minMemoryGiB?: number
-      maxMemoryGiB?: number
-      minDiskGiB?: number
-      maxDiskGiB?: number
-      lastEventAfter?: Date
-      lastEventBefore?: Date
     },
     sort?: {
       field?: SandboxSortField
@@ -700,68 +770,60 @@ export class SandboxService {
     const pageNum = Number(page)
     const limitNum = Number(limit)
 
-    const {
-      id,
-      name,
-      labels,
-      includeErroredDestroyed,
-      states,
-      snapshots,
-      regions,
-      minCpu,
-      maxCpu,
-      minMemoryGiB,
-      maxMemoryGiB,
-      minDiskGiB,
-      maxDiskGiB,
-      lastEventAfter,
-      lastEventBefore,
-    } = filters || {}
+    const { id, name, labels, includeErroredDestroyed, states, snapshots, regions } = filters || {}
 
     const { field: sortField = DEFAULT_SANDBOX_SORT_FIELD, direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION } =
       sort || {}
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
-      ...(id ? { id: ILike(`${id}%`) } : {}),
+      ...(id ? { id } : {}),
       ...(name ? { name: ILike(`${name}%`) } : {}),
       ...(labels ? { labels: JsonContains(labels) } : {}),
       ...(snapshots ? { snapshot: In(snapshots) } : {}),
       ...(regions ? { region: In(regions) } : {}),
     }
 
-    baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
-    baseFindOptions.mem = createRangeFilter(minMemoryGiB, maxMemoryGiB)
-    baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
-    baseFindOptions.lastActivityAt = createRangeFilter(lastEventAfter, lastEventBefore)
-
-    const filteredStates = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
+    const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
     const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
-    const filteredWithoutErrorStates = filteredStates.filter((state) => !errorStates.includes(state))
 
-    const where: FindOptionsWhere<Sandbox>[] = [
-      {
+    const nonErrorStatesToInclude = statesToInclude.filter((state) => !errorStates.includes(state))
+    const errorStatesToInclude = statesToInclude.filter((state) => errorStates.includes(state))
+
+    const where: FindOptionsWhere<Sandbox>[] = []
+
+    if (nonErrorStatesToInclude.length > 0) {
+      where.push({
         ...baseFindOptions,
-        state: In(filteredWithoutErrorStates),
-      },
-      {
+        state: In(nonErrorStatesToInclude),
+      })
+    }
+
+    if (errorStatesToInclude.length > 0) {
+      where.push({
         ...baseFindOptions,
-        state: In(errorStates),
+        state: In(errorStatesToInclude),
         ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
-      },
-    ]
+      })
+    }
 
     const [items, total] = await this.sandboxRepository.findAndCount({
       where,
       order: {
         [sortField]: {
           direction: sortDirection,
-          nulls: 'LAST',
+          ...(sortField === SandboxSortField.LAST_ACTIVITY_AT && { nulls: 'LAST' }),
         },
-        ...(sortField !== SandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
+        // use as tiebreaker
+        ...(sortField === SandboxSortField.LAST_ACTIVITY_AT && {
+          createdAt: {
+            direction: 'DESC',
+          },
+        }),
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
+      loadEagerRelations: false,
     })
 
     return {
@@ -1345,11 +1407,13 @@ export class SandboxService {
     return { valid: true, sandboxId: sshAccess.sandbox.id }
   }
 
+  // TODO: Implement search
   async getDistinctRegions(organizationId: string): Promise<string[]> {
     const result = await this.sandboxRepository
       .createQueryBuilder('sandbox')
-      .select('DISTINCT sandbox.region', 'region')
+      .select('sandbox.region', 'region')
       .where('sandbox.organizationId = :organizationId', { organizationId })
+      .groupBy('sandbox.region')
       .orderBy('sandbox.region', 'ASC')
       .getRawMany()
 

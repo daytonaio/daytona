@@ -69,6 +69,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
+import { SearchSandboxesQueryDto } from '../dto/search-sandboxes-query.dto'
 import { RegionDto } from '../dto/region.dto'
 
 @ApiTags('sandbox')
@@ -156,6 +157,60 @@ export class SandboxController {
     const {
       page,
       limit,
+      name,
+      includeErroredDeleted: includeErroredDestroyed,
+      states,
+      sort: sortField,
+      order: sortDirection,
+    } = queryParams
+
+    const result = await this.sandboxService.list(
+      authContext.organizationId,
+      page,
+      limit,
+      {
+        name,
+        includeErroredDestroyed,
+        states,
+      },
+      {
+        field: sortField,
+        direction: sortDirection,
+      },
+    )
+
+    const runnerIds = new Set(result.items.map((s) => s.runnerId))
+    const runners = await this.runnerService.findByIds(Array.from(runnerIds))
+    const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
+
+    return {
+      items: result.items.map((sandbox) => {
+        const runner = runnerMap.get(sandbox.runnerId)
+        return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      }),
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    }
+  }
+
+  @Get('search')
+  @ApiOperation({
+    summary: 'Search sandboxes',
+    operationId: 'searchSandboxes',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of sandboxes matching the search criteria',
+    type: PaginatedSandboxesDto,
+  })
+  async searchSandboxes(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Query() queryParams: SearchSandboxesQueryDto,
+  ): Promise<PaginatedSandboxesDto> {
+    const {
+      page,
+      limit,
       id,
       name,
       labels,
@@ -163,38 +218,22 @@ export class SandboxController {
       states,
       snapshots,
       regions,
-      minCpu,
-      maxCpu,
-      minMemoryGiB,
-      maxMemoryGiB,
-      minDiskGiB,
-      maxDiskGiB,
-      lastEventAfter,
-      lastEventBefore,
       sort: sortField,
       order: sortDirection,
     } = queryParams
 
-    const result = await this.sandboxService.findAll(
+    const result = await this.sandboxService.search(
       authContext.organizationId,
       page,
       limit,
       {
         id,
         name,
-        labels: labels ? JSON.parse(labels) : {},
+        labels: labels ? JSON.parse(labels) : undefined,
         includeErroredDestroyed,
         states,
         snapshots,
         regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
       },
       {
         field: sortField,

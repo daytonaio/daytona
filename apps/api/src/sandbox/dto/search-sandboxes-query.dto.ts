@@ -4,35 +4,39 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsBoolean, IsOptional, IsString, IsArray, IsEnum } from 'class-validator'
+import { IsBoolean, IsOptional, IsString, IsArray, IsEnum, IsUUID } from 'class-validator'
 import { Type } from 'class-transformer'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { ToArray } from '../../common/decorators/to-array.decorator'
 import { PageNumber } from '../../common/decorators/page-number.decorator'
 import { PageLimit } from '../../common/decorators/page-limit.decorator'
+import {
+  DEFAULT_SANDBOX_SORT_DIRECTION,
+  DEFAULT_SANDBOX_SORT_FIELD,
+  SandboxSortDirection,
+  SandboxSortField,
+  VALID_QUERY_STATES,
+} from './list-sandboxes-query.dto'
 
-export enum SandboxSortField {
-  LAST_ACTIVITY_AT = 'lastActivityAt',
-  CREATED_AT = 'createdAt',
-}
-
-export enum SandboxSortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
-export const DEFAULT_SANDBOX_SORT_FIELD = SandboxSortField.CREATED_AT
-export const DEFAULT_SANDBOX_SORT_DIRECTION = SandboxSortDirection.DESC
-
-export const VALID_QUERY_STATES = Object.values(SandboxState).filter((state) => state !== SandboxState.DESTROYED)
-
-@ApiSchema({ name: 'ListSandboxesQuery' })
-export class ListSandboxesQueryDto {
+@ApiSchema({ name: 'SearchSandboxesQuery' })
+export class SearchSandboxesQueryDto {
   @PageNumber(1)
   page = 1
 
   @PageLimit(100)
   limit = 100
+
+  @ApiProperty({
+    name: 'id',
+    description: 'Filter by exact ID match',
+    required: false,
+    type: String,
+    example: '00000000-0000-0000-0000-000000000000',
+  })
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  id?: string
 
   @ApiProperty({
     name: 'name',
@@ -44,6 +48,18 @@ export class ListSandboxesQueryDto {
   @IsOptional()
   @IsString()
   name?: string
+
+  @ApiProperty({
+    name: 'labels',
+    description: 'JSON encoded labels to filter by',
+    required: false,
+    type: String,
+    example: '{"label1": "value1", "label2": "value2"}',
+    deprecated: true,
+  })
+  @IsOptional()
+  @IsString()
+  labels?: string
 
   @ApiProperty({
     name: 'includeErroredDeleted',
@@ -72,6 +88,30 @@ export class ListSandboxesQueryDto {
     message: `each value must be one of the following values: ${VALID_QUERY_STATES.join(', ')}`,
   })
   states?: SandboxState[]
+
+  @ApiProperty({
+    name: 'snapshots',
+    description: 'List of snapshot names to filter by',
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @ToArray()
+  @IsArray()
+  @IsString({ each: true })
+  snapshots?: string[]
+
+  @ApiProperty({
+    name: 'regions',
+    description: 'List of regions to filter by',
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @ToArray()
+  @IsArray()
+  @IsString({ each: true })
+  regions?: string[]
 
   @ApiProperty({
     name: 'sort',
