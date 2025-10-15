@@ -7,6 +7,7 @@ type PullSnapshotRequestDTO struct {
 	Snapshot            string       `json:"snapshot" validate:"required"`
 	Registry            *RegistryDTO `json:"registry,omitempty"`
 	DestinationRegistry *RegistryDTO `json:"destinationRegistry,omitempty"`
+	DestinationRef      *string      `json:"destinationRef,omitempty"`
 } //	@name	PullSnapshotRequestDTO
 
 type BuildSnapshotRequestDTO struct {

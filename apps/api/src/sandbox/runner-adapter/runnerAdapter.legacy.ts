@@ -259,6 +259,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     snapshotName: string,
     registry?: DockerRegistry,
     destinationRegistry?: DockerRegistry,
+    destinationRef?: string,
   ): Promise<void> {
     const request: PullSnapshotRequestDTO = {
       snapshot: snapshotName,
@@ -280,6 +281,10 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
         username: destinationRegistry.username,
         password: destinationRegistry.password,
       }
+    }
+
+    if (destinationRef) {
+      request.destinationRef = destinationRef
     }
 
     await this.snapshotApiClient.pullSnapshot(request)

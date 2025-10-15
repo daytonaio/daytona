@@ -113,6 +113,8 @@ definitions:
     type: object
   PullSnapshotRequestDTO:
     properties:
+      destinationRef:
+        type: string
       destinationRegistry:
         $ref: '#/definitions/RegistryDTO'
       registry:

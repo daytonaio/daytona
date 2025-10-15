@@ -104,35 +104,41 @@ func PullSnapshot(ctx *gin.Context) {
 		return
 	}
 
-	// If push registry is provided, push the image
 	if request.DestinationRegistry != nil {
 		if request.DestinationRegistry.Project == nil {
 			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to registry")))
 			return
 		}
 
-		// Get image info to retrieve the hash
-		imageInfo, err := runner.Docker.GetImageInfo(ctx.Request.Context(), request.Snapshot)
-		if err != nil {
-			ctx.Error(err)
-			return
+		var targetRef string
+
+		// If destination ref is provided, use it directly; otherwise build it from the image info
+		if request.DestinationRef != nil {
+			targetRef = *request.DestinationRef
+		} else {
+			// Get image info to retrieve the hash
+			imageInfo, err := runner.Docker.GetImageInfo(ctx.Request.Context(), request.Snapshot)
+			if err != nil {
+				ctx.Error(err)
+				return
+			}
+
+			ref := "daytona-" + getHashWithoutPrefix(imageInfo.Hash) + ":daytona"
+
+			sanitizedURL := strings.TrimPrefix(request.DestinationRegistry.Url, "http://")
+			sanitizedURL = strings.TrimPrefix(sanitizedURL, "https://")
+			targetRef = fmt.Sprintf("%s/%s/%s", sanitizedURL, *request.DestinationRegistry.Project, ref)
 		}
 
-		ref := "daytona-" + getHashWithoutPrefix(imageInfo.Hash) + ":daytona"
-
-		sanitizedURL := strings.TrimPrefix(request.DestinationRegistry.Url, "http://")
-		sanitizedURL = strings.TrimPrefix(sanitizedURL, "https://")
-		targetTag := fmt.Sprintf("%s/%s/%s", sanitizedURL, *request.DestinationRegistry.Project, ref)
-
 		// Tag the image for the target registry
-		err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, targetTag)
+		err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, targetRef)
 		if err != nil {
 			ctx.Error(err)
 			return
 		}
 
 		// Push the tagged image
-		err = runner.Docker.PushImage(ctx.Request.Context(), targetTag, request.DestinationRegistry)
+		err = runner.Docker.PushImage(ctx.Request.Context(), targetRef, request.DestinationRegistry)
 		if err != nil {
 			ctx.Error(err)
 			return

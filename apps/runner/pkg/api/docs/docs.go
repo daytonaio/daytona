@@ -1441,6 +1441,9 @@ const docTemplate = `{
                 "snapshot"
             ],
             "properties": {
+                "destinationRef": {
+                    "type": "string"
+                },
                 "destinationRegistry": {
                     "$ref": "#/definitions/RegistryDTO"
                 },

@@ -283,13 +283,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     snapshotRef: string,
     registry?: DockerRegistry,
     destinationRegistry?: DockerRegistry,
+    destinationRef?: string,
   ) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     let retries = 0
     while (retries < 10) {
       try {
-        await runnerAdapter.pullSnapshot(snapshotRef, registry, destinationRegistry)
+        await runnerAdapter.pullSnapshot(snapshotRef, registry, destinationRegistry, destinationRef)
         return
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
@@ -683,7 +684,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     // Using image name for pull instead of the ref
     try {
-      await this.pullSnapshotRunnerWithRetries(runner, snapshot.imageName, sourceRegistry, destinationRegistry)
+      // If snapshot already has the designated ref from the manifest, pass it, otherwise let the runner build it
+      await this.pullSnapshotRunnerWithRetries(
+        runner,
+        snapshot.imageName,
+        sourceRegistry,
+        destinationRegistry,
+        snapshot.ref ? snapshot.ref : undefined,
+      )
 
       // Tag image to org and creation timestamp for future use
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)

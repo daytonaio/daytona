@@ -24,6 +24,12 @@ import type { RegistryDTO } from './registry-dto'
 export interface PullSnapshotRequestDTO {
   /**
    *
+   * @type {string}
+   * @memberof PullSnapshotRequestDTO
+   */
+  destinationRef?: string
+  /**
+   *
    * @type {RegistryDTO}
    * @memberof PullSnapshotRequestDTO
    */
