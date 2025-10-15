@@ -173,18 +173,19 @@ func (s *GarbageCollectorService) sandboxCleanup(ctx context.Context) error {
 		}
 	}
 
-	log.Infof("Found %d invalid sandboxes", len(invalidSandboxes))
-
 	if len(invalidSandboxes) == 0 {
 		log.Infof("No invalid sandboxes found")
 		return nil
 	}
 
-	if len(invalidSandboxes) > 0 {
-		log.Infof("Invalid sandboxes:")
-		for _, sandbox := range invalidSandboxes {
-			log.Infof("  - %s (%s)", sandbox.Name, sandbox.ID)
-		}
+	log.Infof("Found %d invalid sandboxes:", len(invalidSandboxes))
+	for _, sandbox := range invalidSandboxes {
+		log.Infof("  - %s (%s)", sandbox.Name, sandbox.ID)
+	}
+
+	if s.dryRun {
+		log.Infof("Dry run mode - no sandboxes or snapshots will be removed")
+		return nil
 	}
 
 	// Check thresholds before proceeding with deletion
@@ -193,30 +194,24 @@ func (s *GarbageCollectorService) sandboxCleanup(ctx context.Context) error {
 			len(invalidSandboxes), s.thresholdSandboxes)
 	}
 
-	if s.dryRun {
-		log.Infof("Dry run mode - no sandboxes or snapshots will be removed")
-		return nil
+	// Remove invalid sandboxes
+	log.Infof("Removing %d invalid sandboxes", len(invalidSandboxes))
+	removedCount := 0
+	for _, sandbox := range invalidSandboxes {
+		// Remove the sandbox (this will stop it first if needed)
+		err := s.dockerClient.ApiClient().ContainerRemove(context.Background(), sandbox.ID, container.RemoveOptions{
+			RemoveVolumes: true,
+			Force:         true,
+		})
+		if err != nil {
+			log.Errorf("Error removing sandbox %s: %v", sandbox.Name, err)
+		} else {
+			log.Infof("Removed sandbox %s (%s)", sandbox.Name, sandbox.ID)
+			removedCount++
+		}
 	}
 
-	// Remove invalid sandboxes
-	if len(invalidSandboxes) > 0 {
-		log.Infof("Removing %d invalid sandboxes", len(invalidSandboxes))
-		removedCount := 0
-		for _, sandbox := range invalidSandboxes {
-			// Remove the sandbox (this will stop it first if needed)
-			err := s.dockerClient.ApiClient().ContainerRemove(context.Background(), sandbox.ID, container.RemoveOptions{
-				RemoveVolumes: true,
-				Force:         true,
-			})
-			if err != nil {
-				log.Errorf("Error removing sandbox %s: %v", sandbox.Name, err)
-			} else {
-				log.Infof("Removed sandbox %s (%s)", sandbox.Name, sandbox.ID)
-				removedCount++
-			}
-		}
-		log.Infof("Successfully removed %d out of %d invalid sandboxes", removedCount, len(invalidSandboxes))
-	}
+	log.Infof("Successfully removed %d out of %d invalid sandboxes", removedCount, len(invalidSandboxes))
 
 	return nil
 }
@@ -311,23 +306,14 @@ func (s *GarbageCollectorService) snapshotCleanup(ctx context.Context) error {
 		}
 	}
 
-	log.Infof("Found %d invalid snapshots", len(invalidSnapshots))
-
 	if len(invalidSnapshots) == 0 {
 		log.Infof("No invalid snapshots found")
 		return nil
 	}
 
-	if len(invalidSnapshots) > 0 {
-		log.Infof("Invalid snapshots:")
-		for _, snapshot := range invalidSnapshots {
-			log.Infof("  - %s (%s)", snapshot.Name, snapshot.ID)
-		}
-	}
-
-	if s.thresholdSnapshots > 0 && len(invalidSnapshots) > s.thresholdSnapshots {
-		return fmt.Errorf("aborting: found %d snapshots to remove, which exceeds the snapshot threshold of %d",
-			len(invalidSnapshots), s.thresholdSnapshots)
+	log.Infof("Found %d invalid snapshots:", len(invalidSnapshots))
+	for _, snapshot := range invalidSnapshots {
+		log.Infof("  - %s (%s)", snapshot.Name, snapshot.ID)
 	}
 
 	if s.dryRun {
@@ -335,21 +321,25 @@ func (s *GarbageCollectorService) snapshotCleanup(ctx context.Context) error {
 		return nil
 	}
 
-	// Remove invalid snapshots
-	if len(invalidSnapshots) > 0 {
-		log.Infof("Removing %d invalid snapshots", len(invalidSnapshots))
-		removedCount := 0
-		for _, snapshot := range invalidSnapshots {
-			err := s.dockerClient.RemoveImage(context.Background(), snapshot.Name, true)
-			if err != nil {
-				log.Errorf("Error removing snapshot %s: %v", snapshot.Name, err)
-			} else {
-				log.Infof("Removed snapshot %s (%s)", snapshot.Name, snapshot.ID)
-				removedCount++
-			}
-		}
-		log.Infof("Successfully removed %d out of %d invalid snapshots", removedCount, len(invalidSnapshots))
+	if s.thresholdSnapshots > 0 && len(invalidSnapshots) > s.thresholdSnapshots {
+		return fmt.Errorf("aborting: found %d snapshots to remove, which exceeds the snapshot threshold of %d",
+			len(invalidSnapshots), s.thresholdSnapshots)
 	}
+
+	// Remove invalid snapshots
+	log.Infof("Removing %d invalid snapshots", len(invalidSnapshots))
+	removedCount := 0
+	for _, snapshot := range invalidSnapshots {
+		err := s.dockerClient.RemoveImage(context.Background(), snapshot.Name, true)
+		if err != nil {
+			log.Errorf("Error removing snapshot %s: %v", snapshot.Name, err)
+		} else {
+			log.Infof("Removed snapshot %s (%s)", snapshot.Name, snapshot.ID)
+			removedCount++
+		}
+	}
+
+	log.Infof("Successfully removed %d out of %d invalid snapshots", removedCount, len(invalidSnapshots))
 
 	return nil
 }
