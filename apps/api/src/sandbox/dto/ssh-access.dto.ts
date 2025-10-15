@@ -68,31 +68,10 @@ export class SshAccessValidationDto {
   })
   sandboxId: string
 
-  @ApiProperty({
-    description: 'ID of the runner hosting the sandbox',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    required: false,
-  })
-  runnerId?: string
-
-  @ApiProperty({
-    description: 'Domain of the runner hosting the sandbox',
-    example: 'runner-1.example.com',
-    required: false,
-  })
-  runnerDomain?: string
-
-  static fromValidationResult(
-    valid: boolean,
-    sandboxId: string,
-    runnerId?: string,
-    runnerDomain?: string,
-  ): SshAccessValidationDto {
+  static fromValidationResult(valid: boolean, sandboxId: string): SshAccessValidationDto {
     const dto = new SshAccessValidationDto()
     dto.valid = valid
     dto.sandboxId = sandboxId
-    dto.runnerId = runnerId
-    dto.runnerDomain = runnerDomain
     return dto
   }
 }

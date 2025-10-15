@@ -59,7 +59,6 @@ export interface SandboxCodeToolbox {
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes
  * @property {number} [autoDeleteInterval] - Auto-delete interval in minutes
- * @property {string} [runnerDomain] - Domain name of the Sandbox runner
  * @property {Array<SandboxVolume>} [volumes] - Volumes attached to the Sandbox
  * @property {BuildInfo} [buildInfo] - Build information for the Sandbox if it was created from dynamic build
  * @property {string} [createdAt] - When the Sandbox was created
@@ -95,7 +94,6 @@ export class Sandbox implements SandboxDto {
   public autoStopInterval?: number
   public autoArchiveInterval?: number
   public autoDeleteInterval?: number
-  public runnerDomain?: string
   public volumes?: Array<SandboxVolume>
   public buildInfo?: BuildInfo
   public createdAt?: string
@@ -523,7 +521,6 @@ export class Sandbox implements SandboxDto {
     this.autoStopInterval = sandboxDto.autoStopInterval
     this.autoArchiveInterval = sandboxDto.autoArchiveInterval
     this.autoDeleteInterval = sandboxDto.autoDeleteInterval
-    this.runnerDomain = sandboxDto.runnerDomain
     this.volumes = sandboxDto.volumes
     this.buildInfo = sandboxDto.buildInfo
     this.createdAt = sandboxDto.createdAt

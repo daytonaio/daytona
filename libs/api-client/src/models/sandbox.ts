@@ -170,12 +170,6 @@ export interface Sandbox {
    */
   autoDeleteInterval?: number
   /**
-   * The domain name of the runner
-   * @type {string}
-   * @memberof Sandbox
-   */
-  runnerDomain?: string
-  /**
    * Array of volumes attached to the sandbox
    * @type {Array<SandboxVolume>}
    * @memberof Sandbox

@@ -196,7 +196,7 @@ await daytona.delete(sandbox);
 findOne(filter: SandboxFilter): Promise<Sandbox>
 ```
 
-Finds a Sandbox by its ID or labels.
+Finds a Sandbox by its ID or name or labels.
 
 **Parameters**:
 
@@ -205,7 +205,7 @@ Finds a Sandbox by its ID or labels.
 
 **Returns**:
 
-- `Promise<Sandbox>` - First Sandbox that matches the ID or labels.
+- `Promise<Sandbox>` - First Sandbox that matches the ID or name or labels.
 
 **Example:**
 
@@ -219,14 +219,14 @@ console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
 #### get()
 
 ```ts
-get(sandboxId: string): Promise<Sandbox>
+get(sandboxIdOrName: string): Promise<Sandbox>
 ```
 
-Gets a Sandbox by its ID.
+Gets a Sandbox by its ID or name.
 
 **Parameters**:
 
-- `sandboxId` _string_ - The ID of the Sandbox to retrieve
+- `sandboxIdOrName` _string_ - The ID or name of the Sandbox to retrieve
 
 
 **Returns**:
@@ -236,7 +236,7 @@ Gets a Sandbox by its ID.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
+const sandbox = await daytona.get('my-sandbox-id-or-name');
 console.log(`Sandbox state: ${sandbox.state}`);
 ```
 
@@ -458,7 +458,7 @@ Filter for Sandboxes.
 
 **Properties**:
 
-- `id?` _string_ - The ID of the Sandbox to retrieve
+- `idOrName?` _string_ - The ID or name of the Sandbox to retrieve
 - `labels?` _Record\<string, string\>_ - Labels to filter Sandboxes
 ## VolumeMount
 

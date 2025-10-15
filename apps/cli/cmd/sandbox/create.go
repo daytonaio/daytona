@@ -171,21 +171,6 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 		}
 
-		runnerDomain := sandbox.RunnerDomain
-		if runnerDomain == nil {
-			// Reload the sandbox info if the runner hadn't been assigned yet
-			var getSandboxErr error
-			sandbox, res, getSandboxErr = apiClient.SandboxAPI.GetSandbox(ctx, sandbox.Id).Execute()
-			if getSandboxErr != nil {
-				return apiclient_cli.HandleErrorResponse(res, getSandboxErr)
-			}
-			runnerDomain = sandbox.RunnerDomain
-		}
-
-		if runnerDomain == nil {
-			return fmt.Errorf("failed to get runner domain")
-		}
-
 		previewUrl, res, err := apiClient.SandboxAPI.GetPortPreviewUrl(ctx, sandbox.Id, SANDBOX_TERMINAL_PORT).Execute()
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
