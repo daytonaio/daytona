@@ -17,14 +17,14 @@ services:
     network_mode: service:app
 
   db:
-    image: postgres:18
+    image: postgres:17.6
     environment:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_USER=user
       - POSTGRES_DB=application_ctx
 
   pgadmin:
-    image: dpage/pgadmin4:9.2.0
+    image: dpage/pgadmin4:9.8.0
     entrypoint: ['sh', '-c', 'chmod 600 /pgpass && exec /entrypoint.sh']
     environment:
       PGADMIN_DEFAULT_EMAIL: dev@daytona.io
