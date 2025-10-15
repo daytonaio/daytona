@@ -150,6 +150,14 @@ jobs:
           retention-days: 1
           overwrite: true
 
+      - name: Upload runner artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-amd64
+          path: dist/apps/runner-amd64
+          retention-days: 1
+          overwrite: true
+
       # Don't publish projects with nx for now
       # TODO: Add back ASAP
       # - name: Publish projects
@@ -194,9 +202,17 @@ jobs:
           name: computer-use-amd64
           path: dist/libs/
 
-      - name: Check computer-use artifact
+      - name: Download runner artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: runner-amd64
+          path: dist/apps/
+
+      - name: Check artifacts
         run: |
           ls -la dist/libs/
+          ls -la dist/apps/
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
