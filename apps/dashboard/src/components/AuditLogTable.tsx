@@ -5,14 +5,12 @@
 
 import { AuditLog } from '@daytonaio/api-client'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { TextSearch, ChevronLeft, ChevronRight, ChevronsLeft } from 'lucide-react'
+import { TextSearch } from 'lucide-react'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { TableEmptyState } from '@/components/TableEmptyState'
+import { Pagination } from './Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Button } from './ui/button'
-import { PAGE_SIZE_OPTIONS } from '../constants/Pagination'
 
 interface Props {
   data: AuditLog[]
@@ -24,18 +22,9 @@ interface Props {
   pageCount: number
   totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
-  nextToken?: string
 }
 
-export function AuditLogTable({
-  data,
-  loading,
-  pagination,
-  pageCount,
-  onPaginationChange,
-  totalItems,
-  nextToken,
-}: Props) {
+export function AuditLogTable({ data, loading, pagination, pageCount, onPaginationChange, totalItems }: Props) {
   const columns = getColumns()
 
   const table = useReactTable({
@@ -121,67 +110,7 @@ export function AuditLogTable({
         </Table>
       </div>
 
-      {/* Simple pagination - same component for both offset and cursor pagination */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between w-full mt-4">
-        <div className="flex items-center gap-4">
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value))
-            }}
-          >
-            <SelectTrigger className="h-8 w-[164px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize + ' per page'} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {PAGE_SIZE_OPTIONS.map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize} per page
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="flex-1 text-sm text-muted-foreground">
-            {`${(totalItems || 0).toLocaleString()} total item(s)`}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex items-center justify-end text-sm font-medium text-muted-foreground">
-            Page {table.getState().pagination.pageIndex + 1} of {pageCount}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => onPaginationChange({ pageIndex: 0, pageSize: pagination.pageSize })}
-              disabled={pagination.pageIndex <= 0}
-            >
-              <span className="sr-only">Go to first page</span>
-              <ChevronsLeft />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => onPaginationChange({ pageIndex: pagination.pageIndex - 1, pageSize: pagination.pageSize })}
-              disabled={pagination.pageIndex <= 0}
-            >
-              <span className="sr-only">Go to previous page</span>
-              <ChevronLeft />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => onPaginationChange({ pageIndex: pagination.pageIndex + 1, pageSize: pagination.pageSize })}
-              disabled={!nextToken && pagination.pageIndex >= pageCount - 1}
-            >
-              <span className="sr-only">Go to next page</span>
-              <ChevronRight />
-            </Button>
-          </div>
-        </div>
-      </div>
+      <Pagination table={table} className="mt-4" entityName="Logs" totalItems={totalItems} />
     </div>
   )
 }

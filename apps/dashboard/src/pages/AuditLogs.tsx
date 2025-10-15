@@ -213,8 +213,6 @@ const AuditLogs: React.FC = () => {
           pageIndex: paginationParams.pageIndex,
           pageSize: paginationParams.pageSize,
         }}
-        // Pass cursor pagination info to the table
-        nextToken={data.nextToken}
       />
     </div>
   )
