@@ -20,97 +20,91 @@ import (
 	"strings"
 )
 
-type RunnersAPI interface {
+type RegionsAPI interface {
 
 	/*
-		CreateRunner Create runner
+		CreateRegion Create a new region
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RunnersAPICreateRunnerRequest
+		@return RegionsAPICreateRegionRequest
 	*/
-	CreateRunner(ctx context.Context) RunnersAPICreateRunnerRequest
+	CreateRegion(ctx context.Context) RegionsAPICreateRegionRequest
 
-	// CreateRunnerExecute executes the request
-	//  @return Runner
-	CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*Runner, *http.Response, error)
+	// CreateRegionExecute executes the request
+	//  @return Region
+	CreateRegionExecute(r RegionsAPICreateRegionRequest) (*Region, *http.Response, error)
 
 	/*
-		DeleteRunner Delete runner
+		DeleteRegion Delete a region
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Runner ID
-		@return RunnersAPIDeleteRunnerRequest
+		@param id Region ID
+		@return RegionsAPIDeleteRegionRequest
 	*/
-	DeleteRunner(ctx context.Context, id string) RunnersAPIDeleteRunnerRequest
+	DeleteRegion(ctx context.Context, id string) RegionsAPIDeleteRegionRequest
 
-	// DeleteRunnerExecute executes the request
-	DeleteRunnerExecute(r RunnersAPIDeleteRunnerRequest) (*http.Response, error)
+	// DeleteRegionExecute executes the request
+	DeleteRegionExecute(r RegionsAPIDeleteRegionRequest) (*http.Response, error)
 
 	/*
-		GetRunnerById Get runner by ID
+		GetRegionById Get region by ID
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Runner ID
-		@return RunnersAPIGetRunnerByIdRequest
+		@param id Region ID
+		@return RegionsAPIGetRegionByIdRequest
 	*/
-	GetRunnerById(ctx context.Context, id string) RunnersAPIGetRunnerByIdRequest
+	GetRegionById(ctx context.Context, id string) RegionsAPIGetRegionByIdRequest
 
-	// GetRunnerByIdExecute executes the request
-	//  @return Runner
-	GetRunnerByIdExecute(r RunnersAPIGetRunnerByIdRequest) (*Runner, *http.Response, error)
+	// GetRegionByIdExecute executes the request
+	//  @return Region
+	GetRegionByIdExecute(r RegionsAPIGetRegionByIdRequest) (*Region, *http.Response, error)
 
 	/*
-		ListRunners List all runners
+		ListRegions List all regions
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RunnersAPIListRunnersRequest
+		@return RegionsAPIListRegionsRequest
 	*/
-	ListRunners(ctx context.Context) RunnersAPIListRunnersRequest
+	ListRegions(ctx context.Context) RegionsAPIListRegionsRequest
 
-	// ListRunnersExecute executes the request
-	//  @return []Runner
-	ListRunnersExecute(r RunnersAPIListRunnersRequest) ([]Runner, *http.Response, error)
-
-	/*
-		UpdateRunnerScheduling Update runner scheduling status
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Runner ID
-		@return RunnersAPIUpdateRunnerSchedulingRequest
-	*/
-	UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest
-
-	// UpdateRunnerSchedulingExecute executes the request
-	//  @return Runner
-	UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*Runner, *http.Response, error)
+	// ListRegionsExecute executes the request
+	//  @return []Region
+	ListRegionsExecute(r RegionsAPIListRegionsRequest) ([]Region, *http.Response, error)
 }
 
-// RunnersAPIService RunnersAPI service
-type RunnersAPIService service
+// RegionsAPIService RegionsAPI service
+type RegionsAPIService service
 
-type RunnersAPICreateRunnerRequest struct {
-	ctx          context.Context
-	ApiService   RunnersAPI
-	createRunner *CreateRunner
+type RegionsAPICreateRegionRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	createRegion           *CreateRegion
+	xDaytonaOrganizationID *string
 }
 
-func (r RunnersAPICreateRunnerRequest) CreateRunner(createRunner CreateRunner) RunnersAPICreateRunnerRequest {
-	r.createRunner = &createRunner
+func (r RegionsAPICreateRegionRequest) CreateRegion(createRegion CreateRegion) RegionsAPICreateRegionRequest {
+	r.createRegion = &createRegion
 	return r
 }
 
-func (r RunnersAPICreateRunnerRequest) Execute() (*Runner, *http.Response, error) {
-	return r.ApiService.CreateRunnerExecute(r)
+// Use with JWT to specify the organization ID
+func (r RegionsAPICreateRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPICreateRegionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPICreateRegionRequest) Execute() (*Region, *http.Response, error) {
+	return r.ApiService.CreateRegionExecute(r)
 }
 
 /*
-CreateRunner Create runner
+CreateRegion Create a new region
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RunnersAPICreateRunnerRequest
+	@return RegionsAPICreateRegionRequest
 */
-func (a *RunnersAPIService) CreateRunner(ctx context.Context) RunnersAPICreateRunnerRequest {
-	return RunnersAPICreateRunnerRequest{
+func (a *RegionsAPIService) CreateRegion(ctx context.Context) RegionsAPICreateRegionRequest {
+	return RegionsAPICreateRegionRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
@@ -118,27 +112,27 @@ func (a *RunnersAPIService) CreateRunner(ctx context.Context) RunnersAPICreateRu
 
 // Execute executes the request
 //
-//	@return Runner
-func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*Runner, *http.Response, error) {
+//	@return Region
+func (a *RegionsAPIService) CreateRegionExecute(r RegionsAPICreateRegionRequest) (*Region, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Runner
+		localVarReturnValue *Region
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.CreateRunner")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.CreateRegion")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/runners"
+	localVarPath := localBasePath + "/regions"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.createRunner == nil {
-		return localVarReturnValue, nil, reportError("createRunner is required and must be specified")
+	if r.createRegion == nil {
+		return localVarReturnValue, nil, reportError("createRegion is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -158,8 +152,11 @@ func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
 	// body params
-	localVarPostBody = r.createRunner
+	localVarPostBody = r.createRegion
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -197,25 +194,32 @@ func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest)
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type RunnersAPIDeleteRunnerRequest struct {
-	ctx        context.Context
-	ApiService RunnersAPI
-	id         string
+type RegionsAPIDeleteRegionRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	id                     string
+	xDaytonaOrganizationID *string
 }
 
-func (r RunnersAPIDeleteRunnerRequest) Execute() (*http.Response, error) {
-	return r.ApiService.DeleteRunnerExecute(r)
+// Use with JWT to specify the organization ID
+func (r RegionsAPIDeleteRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIDeleteRegionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPIDeleteRegionRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteRegionExecute(r)
 }
 
 /*
-DeleteRunner Delete runner
+DeleteRegion Delete a region
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Runner ID
-	@return RunnersAPIDeleteRunnerRequest
+	@param id Region ID
+	@return RegionsAPIDeleteRegionRequest
 */
-func (a *RunnersAPIService) DeleteRunner(ctx context.Context, id string) RunnersAPIDeleteRunnerRequest {
-	return RunnersAPIDeleteRunnerRequest{
+func (a *RegionsAPIService) DeleteRegion(ctx context.Context, id string) RegionsAPIDeleteRegionRequest {
+	return RegionsAPIDeleteRegionRequest{
 		ApiService: a,
 		ctx:        ctx,
 		id:         id,
@@ -223,19 +227,19 @@ func (a *RunnersAPIService) DeleteRunner(ctx context.Context, id string) Runners
 }
 
 // Execute executes the request
-func (a *RunnersAPIService) DeleteRunnerExecute(r RunnersAPIDeleteRunnerRequest) (*http.Response, error) {
+func (a *RegionsAPIService) DeleteRegionExecute(r RegionsAPIDeleteRegionRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodDelete
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.DeleteRunner")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.DeleteRegion")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/runners/{id}"
+	localVarPath := localBasePath + "/regions/{id}"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -258,6 +262,9 @@ func (a *RunnersAPIService) DeleteRunnerExecute(r RunnersAPIDeleteRunnerRequest)
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -287,162 +294,61 @@ func (a *RunnersAPIService) DeleteRunnerExecute(r RunnersAPIDeleteRunnerRequest)
 	return localVarHTTPResponse, nil
 }
 
-type RunnersAPIGetRunnerByIdRequest struct {
-	ctx        context.Context
-	ApiService RunnersAPI
-	id         string
+type RegionsAPIGetRegionByIdRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	id                     string
+	xDaytonaOrganizationID *string
 }
 
-func (r RunnersAPIGetRunnerByIdRequest) Execute() (*Runner, *http.Response, error) {
-	return r.ApiService.GetRunnerByIdExecute(r)
-}
-
-/*
-GetRunnerById Get runner by ID
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Runner ID
-	@return RunnersAPIGetRunnerByIdRequest
-*/
-func (a *RunnersAPIService) GetRunnerById(ctx context.Context, id string) RunnersAPIGetRunnerByIdRequest {
-	return RunnersAPIGetRunnerByIdRequest{
-		ApiService: a,
-		ctx:        ctx,
-		id:         id,
-	}
-}
-
-// Execute executes the request
-//
-//	@return Runner
-func (a *RunnersAPIService) GetRunnerByIdExecute(r RunnersAPIGetRunnerByIdRequest) (*Runner, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Runner
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetRunnerById")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/runners/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type RunnersAPIListRunnersRequest struct {
-	ctx        context.Context
-	ApiService RunnersAPI
-	region     *string
-}
-
-// Filter runners by region name
-func (r RunnersAPIListRunnersRequest) Region(region string) RunnersAPIListRunnersRequest {
-	r.region = &region
+// Use with JWT to specify the organization ID
+func (r RegionsAPIGetRegionByIdRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIGetRegionByIdRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
 	return r
 }
 
-func (r RunnersAPIListRunnersRequest) Execute() ([]Runner, *http.Response, error) {
-	return r.ApiService.ListRunnersExecute(r)
+func (r RegionsAPIGetRegionByIdRequest) Execute() (*Region, *http.Response, error) {
+	return r.ApiService.GetRegionByIdExecute(r)
 }
 
 /*
-ListRunners List all runners
+GetRegionById Get region by ID
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RunnersAPIListRunnersRequest
+	@param id Region ID
+	@return RegionsAPIGetRegionByIdRequest
 */
-func (a *RunnersAPIService) ListRunners(ctx context.Context) RunnersAPIListRunnersRequest {
-	return RunnersAPIListRunnersRequest{
+func (a *RegionsAPIService) GetRegionById(ctx context.Context, id string) RegionsAPIGetRegionByIdRequest {
+	return RegionsAPIGetRegionByIdRequest{
 		ApiService: a,
 		ctx:        ctx,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 //
-//	@return []Runner
-func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) ([]Runner, *http.Response, error) {
+//	@return Region
+func (a *RegionsAPIService) GetRegionByIdExecute(r RegionsAPIGetRegionByIdRequest) (*Region, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []Runner
+		localVarReturnValue *Region
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.ListRunners")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.GetRegionById")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/runners"
+	localVarPath := localBasePath + "/regions/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.region != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "region", r.region, "form", "")
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -459,6 +365,9 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -497,49 +406,52 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type RunnersAPIUpdateRunnerSchedulingRequest struct {
-	ctx        context.Context
-	ApiService RunnersAPI
-	id         string
+type RegionsAPIListRegionsRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	xDaytonaOrganizationID *string
 }
 
-func (r RunnersAPIUpdateRunnerSchedulingRequest) Execute() (*Runner, *http.Response, error) {
-	return r.ApiService.UpdateRunnerSchedulingExecute(r)
+// Use with JWT to specify the organization ID
+func (r RegionsAPIListRegionsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIListRegionsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPIListRegionsRequest) Execute() ([]Region, *http.Response, error) {
+	return r.ApiService.ListRegionsExecute(r)
 }
 
 /*
-UpdateRunnerScheduling Update runner scheduling status
+ListRegions List all regions
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Runner ID
-	@return RunnersAPIUpdateRunnerSchedulingRequest
+	@return RegionsAPIListRegionsRequest
 */
-func (a *RunnersAPIService) UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest {
-	return RunnersAPIUpdateRunnerSchedulingRequest{
+func (a *RegionsAPIService) ListRegions(ctx context.Context) RegionsAPIListRegionsRequest {
+	return RegionsAPIListRegionsRequest{
 		ApiService: a,
 		ctx:        ctx,
-		id:         id,
 	}
 }
 
 // Execute executes the request
 //
-//	@return Runner
-func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*Runner, *http.Response, error) {
+//	@return []Region
+func (a *RegionsAPIService) ListRegionsExecute(r RegionsAPIListRegionsRequest) ([]Region, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
+		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Runner
+		localVarReturnValue []Region
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.UpdateRunnerScheduling")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.ListRegions")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/runners/{id}/scheduling"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath := localBasePath + "/regions"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -561,6 +473,9 @@ func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunn
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {

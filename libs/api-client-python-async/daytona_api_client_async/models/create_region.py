@@ -18,33 +18,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class OrganizationRole(BaseModel):
+class CreateRegion(BaseModel):
     """
-    OrganizationRole
+    CreateRegion
     """ # noqa: E501
-    id: StrictStr = Field(description="Role ID")
-    name: StrictStr = Field(description="Role name")
-    description: StrictStr = Field(description="Role description")
-    permissions: List[StrictStr] = Field(description="Roles assigned to the user")
-    is_global: StrictBool = Field(description="Global role flag", alias="isGlobal")
-    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
-    updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
+    name: StrictStr = Field(description="Region name")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "description", "permissions", "isGlobal", "createdAt", "updatedAt"]
-
-    @field_validator('permissions')
-    def permissions_validate_enum(cls, value):
-        """Validates the enum"""
-        for i in value:
-            if i not in set(['write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes', 'read:regions', 'write:regions', 'delete:regions', 'read:runners', 'write:runners', 'delete:runners', 'read:audit_logs']):
-                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes', 'read:regions', 'write:regions', 'delete:regions', 'read:runners', 'write:runners', 'delete:runners', 'read:audit_logs')")
-        return value
+    __properties: ClassVar[List[str]] = ["name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -64,7 +49,7 @@ class OrganizationRole(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of OrganizationRole from a JSON string"""
+        """Create an instance of CreateRegion from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -96,7 +81,7 @@ class OrganizationRole(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of OrganizationRole from a dict"""
+        """Create an instance of CreateRegion from a dict"""
         if obj is None:
             return None
 
@@ -104,13 +89,7 @@ class OrganizationRole(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "description": obj.get("description"),
-            "permissions": obj.get("permissions"),
-            "isGlobal": obj.get("isGlobal"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "name": obj.get("name")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
