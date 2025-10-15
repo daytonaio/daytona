@@ -12,23 +12,15 @@ import {
   ListSandboxesPaginatedStatesEnum,
   PaginatedSandboxes,
 } from '@daytonaio/api-client'
+import { isValidUUID } from '@/lib/utils'
 
 export interface SandboxFilters {
-  id?: string
-  name?: string
+  idOrName?: string
   labels?: Record<string, string>
   includeErroredDeleted?: boolean
   states?: ListSandboxesPaginatedStatesEnum[]
   snapshots?: string[]
   regions?: string[]
-  minCpu?: number
-  maxCpu?: number
-  minMemoryGiB?: number
-  maxMemoryGiB?: number
-  minDiskGiB?: number
-  maxDiskGiB?: number
-  lastEventAfter?: Date
-  lastEventBefore?: Date
 }
 
 export interface SandboxSorting {
@@ -37,7 +29,7 @@ export interface SandboxSorting {
 }
 
 export const DEFAULT_SANDBOX_SORTING: SandboxSorting = {
-  field: ListSandboxesPaginatedSortEnum.UPDATED_AT,
+  field: ListSandboxesPaginatedSortEnum.CREATED_AT,
   direction: ListSandboxesPaginatedOrderEnum.DESC,
 }
 
@@ -78,25 +70,17 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
 
       const { page, pageSize, filters = {}, sorting = {} } = params
 
-      const response = await sandboxApi.listSandboxesPaginated(
+      const response = await sandboxApi.searchSandboxes(
         selectedOrganization.id,
         page,
         pageSize,
-        filters.id,
-        filters.name,
+        filters.idOrName && isValidUUID(filters.idOrName) ? filters.idOrName : undefined,
+        filters.idOrName,
         filters.labels ? JSON.stringify(filters.labels) : undefined,
         filters.includeErroredDeleted,
         filters.states,
         filters.snapshots,
         filters.regions,
-        filters.minCpu,
-        filters.maxCpu,
-        filters.minMemoryGiB,
-        filters.maxMemoryGiB,
-        filters.minDiskGiB,
-        filters.maxDiskGiB,
-        filters.lastEventAfter,
-        filters.lastEventBefore,
         sorting.field,
         sorting.direction,
       )

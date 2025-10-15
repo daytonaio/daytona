@@ -6,12 +6,12 @@
 import React from 'react'
 import { Sandbox, SandboxDesiredState } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import { Checkbox } from '../ui/checkbox'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 
 interface SortableHeaderProps {
   column: any
@@ -33,7 +33,7 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label, dataStat
       ) : column.getIsSorted() === 'desc' ? (
         <ArrowDown className="ml-2 h-4 w-4" />
       ) : (
-        <div className="ml-2 w-4 h-4" />
+        <ArrowUpDown className="ml-2 h-4 w-4" />
       )}
     </div>
   )
@@ -76,6 +76,7 @@ export function getColumns({
   const columns: ColumnDef<Sandbox>[] = [
     {
       id: 'select',
+      size: 30,
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
@@ -105,21 +106,40 @@ export function getColumns({
           </div>
         )
       },
-
       enableSorting: false,
       enableHiding: false,
     },
     {
+      id: 'id',
+      size: 320,
+      enableSorting: false,
+      enableHiding: true,
+      header: () => {
+        return <span>UUID</span>
+      },
+      accessorKey: 'id',
+      cell: ({ row }) => {
+        return (
+          <div className="w-full truncate">
+            <span className="truncate block">{row.original.id}</span>
+          </div>
+        )
+      },
+    },
+    {
       id: 'name',
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Name" />
+      size: 320,
+      enableSorting: false,
+      enableHiding: true,
+      header: () => {
+        return <span>Name</span>
       },
       accessorKey: 'name',
       cell: ({ row }) => {
         const displayName = getDisplayName(row.original)
         return (
-          <div className=" w-full truncate">
-            <span>{displayName}</span>
+          <div className="w-full truncate">
+            <span className="truncate block">{displayName}</span>
           </div>
         )
       },
@@ -127,11 +147,13 @@ export function getColumns({
     {
       id: 'state',
       size: 140,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="State" />
+      enableSorting: false,
+      enableHiding: false,
+      header: () => {
+        return <span>State</span>
       },
       cell: ({ row }) => (
-        <div className=" w-full truncate">
+        <div className="w-full truncate">
           <SandboxStateComponent state={row.original.state} errorReason={row.original.errorReason} />
         </div>
       ),
@@ -139,16 +161,19 @@ export function getColumns({
     },
     {
       id: 'snapshot',
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Snapshot" />
+      size: 150,
+      enableSorting: false,
+      enableHiding: false,
+      header: () => {
+        return <span>Snapshot</span>
       },
       cell: ({ row }) => {
         return (
-          <div className=" w-full truncate">
+          <div className="w-full truncate">
             {row.original.snapshot ? (
-              <div className="truncate max-w-md">{row.original.snapshot}</div>
+              <div className="truncate">{row.original.snapshot}</div>
             ) : (
-              <div className="truncate max-w-md text-muted-foreground/50">-</div>
+              <div className="truncate text-muted-foreground/50">-</div>
             )}
           </div>
         )
@@ -157,35 +182,42 @@ export function getColumns({
     },
     {
       id: 'region',
-      size: 80,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Region" dataState="sortable" />
+      size: 100,
+      enableSorting: false,
+      enableHiding: false,
+      header: () => {
+        return <span>Region</span>
       },
       cell: ({ row }) => {
-        return <span>{row.original.target}</span>
+        return (
+          <div className="w-full truncate">
+            <span className="truncate block">{row.original.target}</span>
+          </div>
+        )
       },
       accessorKey: 'target',
     },
     {
       id: 'resources',
-      size: 10,
-      minSize: 200,
+      size: 190,
+      enableSorting: false,
+      enableHiding: false,
       header: () => {
         return <span>Resources</span>
       },
       cell: ({ row }) => {
         return (
-          <div className="flex items-center gap-2">
-            <div>
+          <div className="flex items-center gap-2 w-full truncate">
+            <div className="whitespace-nowrap">
               {row.original.cpu} <span className="text-muted-foreground">vCPU</span>
             </div>
             <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
-            <div>
-              {row.original.memory} <span className=" text-muted-foreground">GiB</span>
+            <div className="whitespace-nowrap">
+              {row.original.memory} <span className="text-muted-foreground">GiB</span>
             </div>
             <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
-            <div>
-              {row.original.disk} <span className=" text-muted-foreground">GiB</span>
+            <div className="whitespace-nowrap">
+              {row.original.disk} <span className="text-muted-foreground">GiB</span>
             </div>
           </div>
         )
@@ -195,6 +227,7 @@ export function getColumns({
       id: 'labels',
       size: 110,
       enableSorting: false,
+      enableHiding: true,
       header: () => {
         return <span>Labels</span>
       },
@@ -229,13 +262,20 @@ export function getColumns({
     },
     {
       id: 'lastEvent',
-      size: 140,
+      size: 120,
+      enableSorting: true,
+      enableHiding: false,
       header: ({ column }) => {
         return <SortableHeader column={column} label="Last Event" />
       },
       accessorFn: (row) => getLastEvent(row).date,
       cell: ({ row }) => {
-        return <span>{getLastEvent(row.original).relativeTimeString}</span>
+        const lastEvent = getLastEvent(row.original)
+        return (
+          <div className="w-full truncate">
+            <span className="truncate block">{lastEvent.relativeTimeString}</span>
+          </div>
+        )
       },
     },
     {
@@ -243,7 +283,7 @@ export function getColumns({
       size: 100,
       enableHiding: false,
       cell: ({ row }) => (
-        <div>
+        <div className="w-full flex justify-end">
           <SandboxTableActions
             sandbox={row.original}
             writePermitted={writePermitted}
@@ -281,5 +321,5 @@ function getDisplayName(sandbox: Sandbox): string {
 }
 
 function getLastEvent(sandbox: Sandbox): { date: Date; relativeTimeString: string } {
-  return getRelativeTimeString(sandbox.updatedAt)
+  return getRelativeTimeString(sandbox.lastActivityAt)
 }
