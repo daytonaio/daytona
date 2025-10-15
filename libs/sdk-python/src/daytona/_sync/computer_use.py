@@ -7,8 +7,8 @@
 
 from typing import List, Optional
 
-from daytona_api_client import (
-    CompressedScreenshotResponse,
+from daytona_toolbox_api_client import (
+    ComputerUseApi,
     ComputerUseStartResponse,
     ComputerUseStatusResponse,
     ComputerUseStopResponse,
@@ -21,16 +21,13 @@ from daytona_api_client import (
     MouseDragRequest,
     MouseDragResponse,
     MouseMoveRequest,
-    MouseMoveResponse,
-    MousePosition,
+    MousePositionResponse,
     MouseScrollRequest,
     ProcessErrorsResponse,
     ProcessLogsResponse,
     ProcessRestartResponse,
     ProcessStatusResponse,
-    RegionScreenshotResponse,
     ScreenshotResponse,
-    ToolboxApi,
     WindowsResponse,
 )
 
@@ -41,16 +38,15 @@ from ..common.computer_use import ScreenshotOptions, ScreenshotRegion
 class Mouse:
     """Mouse operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to get mouse position: ")
-    def get_position(self) -> MousePosition:
+    def get_position(self) -> MousePositionResponse:
         """Gets the current mouse cursor position.
 
         Returns:
-            MousePosition: Current mouse position with x and y coordinates.
+            MousePositionResponse: Current mouse position with x and y coordinates.
 
         Example:
             ```python
@@ -58,11 +54,11 @@ class Mouse:
             print(f"Mouse is at: {position.x}, {position.y}")
             ```
         """
-        response = self._toolbox_api.get_mouse_position(self._sandbox_id)
+        response = self._api_client.get_mouse_position()
         return response
 
     @intercept_errors(message_prefix="Failed to move mouse: ")
-    def move(self, x: int, y: int) -> MouseMoveResponse:
+    def move(self, x: int, y: int) -> MousePositionResponse:
         """Moves the mouse cursor to the specified coordinates.
 
         Args:
@@ -70,7 +66,7 @@ class Mouse:
             y (int): The y coordinate to move to.
 
         Returns:
-            MouseMoveResponse: Move operation result.
+            MousePositionResponse: Position after move.
 
         Example:
             ```python
@@ -79,7 +75,7 @@ class Mouse:
             ```
         """
         request = MouseMoveRequest(x=x, y=y)
-        response = self._toolbox_api.move_mouse(self._sandbox_id, request)
+        response = self._api_client.move_mouse(request)
         return response
 
     @intercept_errors(message_prefix="Failed to click mouse: ")
@@ -108,7 +104,7 @@ class Mouse:
             ```
         """
         request = MouseClickRequest(x=x, y=y, button=button, double=double)
-        response = self._toolbox_api.click_mouse(self._sandbox_id, request)
+        response = self._api_client.click(request)
         return response
 
     @intercept_errors(message_prefix="Failed to drag mouse: ")
@@ -132,7 +128,7 @@ class Mouse:
             ```
         """
         request = MouseDragRequest(start_x=start_x, start_y=start_y, end_x=end_x, end_y=end_y, button=button)
-        response = self._toolbox_api.drag_mouse(self._sandbox_id, request)
+        response = self._api_client.drag(request=request)
         return response
 
     @intercept_errors(message_prefix="Failed to scroll mouse: ")
@@ -158,16 +154,15 @@ class Mouse:
             ```
         """
         request = MouseScrollRequest(x=x, y=y, direction=direction, amount=amount)
-        response = self._toolbox_api.scroll_mouse(self._sandbox_id, request)
+        response = self._api_client.scroll(request=request)
         return response
 
 
 class Keyboard:
     """Keyboard operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to type text: ")
     def type(self, text: str, delay: Optional[int] = None) -> None:
@@ -197,7 +192,7 @@ class Keyboard:
             ```
         """
         request = KeyboardTypeRequest(text=text, delay=delay)
-        self._toolbox_api.type_text(self._sandbox_id, request)
+        self._api_client.type_text(request=request)
 
     @intercept_errors(message_prefix="Failed to press key: ")
     def press(self, key: str, modifiers: Optional[List[str]] = None) -> None:
@@ -233,7 +228,7 @@ class Keyboard:
             ```
         """
         request = KeyboardPressRequest(key=key, modifiers=modifiers or [])
-        self._toolbox_api.press_key(self._sandbox_id, request)
+        self._api_client.press_key(request=request)
 
     @intercept_errors(message_prefix="Failed to press hotkey: ")
     def hotkey(self, keys: str) -> None:
@@ -270,15 +265,14 @@ class Keyboard:
             ```
         """
         request = KeyboardHotkeyRequest(keys=keys)
-        self._toolbox_api.press_hotkey(self._sandbox_id, request)
+        self._api_client.press_hotkey(request=request)
 
 
 class Screenshot:
     """Screenshot operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to take screenshot: ")
     def take_full_screen(self, show_cursor: bool = False) -> ScreenshotResponse:
@@ -299,11 +293,11 @@ class Screenshot:
             with_cursor = sandbox.computer_use.screenshot.take_full_screen(True)
             ```
         """
-        response = self._toolbox_api.take_screenshot(self._sandbox_id, show_cursor=show_cursor)
+        response = self._api_client.take_screenshot(show_cursor=show_cursor)
         return response
 
     @intercept_errors(message_prefix="Failed to take region screenshot: ")
-    def take_region(self, region: ScreenshotRegion, show_cursor: bool = False) -> RegionScreenshotResponse:
+    def take_region(self, region: ScreenshotRegion, show_cursor: bool = False) -> ScreenshotResponse:
         """Takes a screenshot of a specific region.
 
         Args:
@@ -311,7 +305,7 @@ class Screenshot:
             show_cursor (bool): Whether to show the cursor in the screenshot.
 
         Returns:
-            RegionScreenshotResponse: Screenshot data with base64 encoded image.
+            ScreenshotResponse: Screenshot data with base64 encoded image.
 
         Example:
             ```python
@@ -320,20 +314,20 @@ class Screenshot:
             print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
             ```
         """
-        response = self._toolbox_api.take_region_screenshot(
-            self._sandbox_id, region.height, region.width, region.y, region.x, show_cursor=show_cursor
+        response = self._api_client.take_region_screenshot(
+            height=region.height, width=region.width, y=region.y, x=region.x, show_cursor=show_cursor
         )
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
-    def take_compressed(self, options: Optional[ScreenshotOptions] = None) -> CompressedScreenshotResponse:
+    def take_compressed(self, options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse:
         """Takes a compressed screenshot of the entire screen.
 
         Args:
             options (ScreenshotOptions): Compression and display options.
 
         Returns:
-            CompressedScreenshotResponse: Compressed screenshot data.
+            ScreenshotResponse: Compressed screenshot data.
 
         Example:
             ```python
@@ -354,8 +348,7 @@ class Screenshot:
         if options is None:
             options = ScreenshotOptions()
 
-        response = self._toolbox_api.take_compressed_screenshot(
-            self._sandbox_id,
+        response = self._api_client.take_compressed_screenshot(
             scale=options.scale,
             quality=options.quality,
             format=options.fmt,
@@ -366,7 +359,7 @@ class Screenshot:
     @intercept_errors(message_prefix="Failed to take compressed region screenshot: ")
     def take_compressed_region(
         self, region: ScreenshotRegion, options: Optional[ScreenshotOptions] = None
-    ) -> CompressedScreenshotResponse:
+    ) -> ScreenshotResponse:
         """Takes a compressed screenshot of a specific region.
 
         Args:
@@ -374,7 +367,7 @@ class Screenshot:
             options (ScreenshotOptions): Compression and display options.
 
         Returns:
-            CompressedScreenshotResponse: Compressed screenshot data.
+            ScreenshotResponse: Compressed screenshot data.
 
         Example:
             ```python
@@ -389,12 +382,11 @@ class Screenshot:
         if options is None:
             options = ScreenshotOptions()
 
-        response = self._toolbox_api.take_compressed_region_screenshot(
-            self._sandbox_id,
-            region.height,
-            region.width,
-            region.y,
-            region.x,
+        response = self._api_client.take_compressed_region_screenshot(
+            height=region.height,
+            width=region.width,
+            y=region.y,
+            x=region.x,
             scale=options.scale,
             quality=options.quality,
             format=options.fmt,
@@ -406,9 +398,8 @@ class Screenshot:
 class Display:
     """Display operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to get display info: ")
     def get_info(self) -> DisplayInfoResponse:
@@ -426,7 +417,7 @@ class Display:
                 print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
             ```
         """
-        response = self._toolbox_api.get_display_info(self._sandbox_id)
+        response = self._api_client.get_display_info()
         return response
 
     @intercept_errors(message_prefix="Failed to get windows: ")
@@ -444,7 +435,7 @@ class Display:
                 print(f"- {window.title} (ID: {window.id})")
             ```
         """
-        response = self._toolbox_api.get_windows(self._sandbox_id)
+        response = self._api_client.get_windows()
         return response
 
 
@@ -461,14 +452,13 @@ class ComputerUse:
         display (Display): Display operations interface.
     """
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
-        self.mouse = Mouse(sandbox_id, toolbox_api)
-        self.keyboard = Keyboard(sandbox_id, toolbox_api)
-        self.screenshot = Screenshot(sandbox_id, toolbox_api)
-        self.display = Display(sandbox_id, toolbox_api)
+        self.mouse = Mouse(api_client)
+        self.keyboard = Keyboard(api_client)
+        self.screenshot = Screenshot(api_client)
+        self.display = Display(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     def start(self) -> ComputerUseStartResponse:
@@ -483,7 +473,7 @@ class ComputerUse:
             print("Computer use processes started:", result.message)
             ```
         """
-        response = self._toolbox_api.start_computer_use(self._sandbox_id)
+        response = self._api_client.start_computer_use()
         return response
 
     @intercept_errors(message_prefix="Failed to stop computer use: ")
@@ -499,7 +489,7 @@ class ComputerUse:
             print("Computer use processes stopped:", result.message)
             ```
         """
-        response = self._toolbox_api.stop_computer_use(self._sandbox_id)
+        response = self._api_client.stop_computer_use()
         return response
 
     @intercept_errors(message_prefix="Failed to get computer use status: ")
@@ -515,7 +505,7 @@ class ComputerUse:
             print("Computer use status:", response.status)
             ```
         """
-        return self._toolbox_api.get_computer_use_status(self._sandbox_id)
+        return self._api_client.get_computer_use_status()
 
     @intercept_errors(message_prefix="Failed to get process status: ")
     def get_process_status(self, process_name: str) -> ProcessStatusResponse:
@@ -533,7 +523,7 @@ class ComputerUse:
             no_vnc_status = sandbox.computer_use.get_process_status("novnc")
             ```
         """
-        response = self._toolbox_api.get_process_status(process_name, self._sandbox_id)
+        response = self._api_client.get_process_status(process_name=process_name)
         return response
 
     @intercept_errors(message_prefix="Failed to restart process: ")
@@ -552,7 +542,7 @@ class ComputerUse:
             print("XFCE4 process restarted:", result.message)
             ```
         """
-        response = self._toolbox_api.restart_process(process_name, self._sandbox_id)
+        response = self._api_client.restart_process(process_name=process_name)
         return response
 
     @intercept_errors(message_prefix="Failed to get process logs: ")
@@ -571,7 +561,7 @@ class ComputerUse:
             print("NoVNC logs:", logs)
             ```
         """
-        response = self._toolbox_api.get_process_logs(process_name, self._sandbox_id)
+        response = self._api_client.get_process_logs(process_name=process_name)
         return response
 
     @intercept_errors(message_prefix="Failed to get process errors: ")
@@ -590,5 +580,5 @@ class ComputerUse:
             print("X11VNC errors:", errors)
             ```
         """
-        response = self._toolbox_api.get_process_errors(process_name, self._sandbox_id)
+        response = self._api_client.get_process_errors(process_name=process_name)
         return response

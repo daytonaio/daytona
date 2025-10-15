@@ -9,11 +9,11 @@ import {
   ObjectStorageApi,
   SandboxApi,
   SandboxState,
-  ToolboxApi,
   VolumesApi,
   SandboxVolume,
+  ConfigApi,
 } from '@daytonaio/api-client'
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosInstance } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
@@ -211,13 +211,14 @@ export type SandboxFilter = {
 export class Daytona {
   private readonly clientConfig: Configuration
   private readonly sandboxApi: SandboxApi
-  private readonly toolboxApi: ToolboxApi
   private readonly objectStorageApi: ObjectStorageApi
+  private readonly configApi: ConfigApi
   private readonly target?: string
   private readonly apiKey?: string
   private readonly jwtToken?: string
   private readonly organizationId?: string
   private readonly apiUrl: string
+  private proxyToolboxUrl?: string
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -283,40 +284,11 @@ export class Daytona {
       },
     })
 
-    const axiosInstance = axios.create({
-      timeout: 24 * 60 * 60 * 1000, // 24 hours
-    })
-    axiosInstance.interceptors.response.use(
-      (response) => {
-        return response
-      },
-      (error) => {
-        let errorMessage: string
-
-        if (error instanceof AxiosError && error.message.includes('timeout of')) {
-          errorMessage = 'Operation timed out'
-        } else {
-          errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
-        }
-
-        try {
-          errorMessage = JSON.stringify(errorMessage)
-        } catch {
-          errorMessage = String(errorMessage)
-        }
-
-        switch (error.response?.data?.statusCode) {
-          case 404:
-            throw new DaytonaNotFoundError(errorMessage)
-          default:
-            throw new DaytonaError(errorMessage)
-        }
-      },
-    )
+    const axiosInstance = this.createAxiosInstance()
 
     this.sandboxApi = new SandboxApi(configuration, '', axiosInstance)
-    this.toolboxApi = new ToolboxApi(configuration, '', axiosInstance)
     this.objectStorageApi = new ObjectStorageApi(configuration, '', axiosInstance)
+    this.configApi = new ConfigApi(configuration, '', axiosInstance)
     this.volume = new VolumeService(new VolumesApi(configuration, '', axiosInstance))
     this.snapshot = new SnapshotService(
       configuration,
@@ -522,7 +494,14 @@ export class Daytona {
         )
       }
 
-      const sandbox = new Sandbox(sandboxInstance, this.clientConfig, this.sandboxApi, this.toolboxApi, codeToolbox)
+      const sandbox = new Sandbox(
+        sandboxInstance,
+        new Configuration(structuredClone(this.clientConfig)),
+        this.createAxiosInstance(),
+        this.sandboxApi,
+        codeToolbox,
+        this.getProxyToolboxUrl.bind(this),
+      )
 
       if (sandbox.state !== 'started') {
         const timeElapsed = Date.now() - startTime
@@ -557,7 +536,14 @@ export class Daytona {
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
     const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
 
-    return new Sandbox(sandboxInstance, this.clientConfig, this.sandboxApi, this.toolboxApi, codeToolbox)
+    return new Sandbox(
+      sandboxInstance,
+      structuredClone(this.clientConfig),
+      this.createAxiosInstance(),
+      this.sandboxApi,
+      codeToolbox,
+      this.getProxyToolboxUrl.bind(this),
+    )
   }
 
   /**
@@ -610,7 +596,7 @@ export class Daytona {
     return {
       items: response.data.items.map((sandbox) => {
         const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-        return new Sandbox(sandbox, this.clientConfig, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
+        return new Sandbox(sandbox, structuredClone(this.clientConfig), this.createAxiosInstance(), this.sandboxApi, this.getCodeToolbox(language), this.getProxyToolboxUrl.bind(this))
       }),
       total: response.data.total,
       page: response.data.page,
@@ -685,5 +671,51 @@ export class Daytona {
         throw new DaytonaError(errMsg)
       }
     }
+  }
+
+  private createAxiosInstance(): AxiosInstance {
+    const axiosInstance = axios.create({
+      timeout: 24 * 60 * 60 * 1000, // 24 hours
+    })
+
+    axiosInstance.interceptors.response.use(
+      (response) => {
+        return response
+      },
+      (error) => {
+        console.log('error', error)
+        let errorMessage: string
+
+        if (error instanceof AxiosError && error.message.includes('timeout of')) {
+          errorMessage = 'Operation timed out'
+        } else {
+          errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
+        }
+
+        try {
+          errorMessage = JSON.stringify(errorMessage)
+        } catch {
+          errorMessage = String(errorMessage)
+        }
+
+        switch (error.response?.data?.statusCode) {
+          case 404:
+            throw new DaytonaNotFoundError(errorMessage)
+          default:
+            throw new DaytonaError(errorMessage)
+        }
+      },
+    )
+
+    return axiosInstance
+  }
+
+  public async getProxyToolboxUrl(): Promise<string> {
+    if (this.proxyToolboxUrl) {
+      return this.proxyToolboxUrl
+    }
+
+    this.proxyToolboxUrl = (await this.configApi.configControllerGetConfig()).data.proxyToolboxUrl
+    return this.proxyToolboxUrl
   }
 }

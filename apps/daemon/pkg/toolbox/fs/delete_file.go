@@ -11,6 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// DeleteFile godoc
+//
+//	@Summary		Delete a file or directory
+//	@Description	Delete a file or directory at the specified path
+//	@Tags			file-system
+//	@Param			path		query	string	true	"File or directory path to delete"
+//	@Param			recursive	query	boolean	false	"Enable recursive deletion for directories"
+//	@Success		204
+//	@Router			/files [delete]
+//
+//	@id				DeleteFile
 func DeleteFile(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {

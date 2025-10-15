@@ -21,7 +21,18 @@ func NewPTYController(workDir string) *PTYController {
 	return &PTYController{workDir: workDir}
 }
 
-// CreatePTYSession creates a new PTY session
+// CreatePTYSession godoc
+//
+//	@Summary		Create a new PTY session
+//	@Description	Create a new pseudo-terminal session with specified configuration
+//	@Tags			process
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		PTYCreateRequest	true	"PTY session creation request"
+//	@Success		201		{object}	PTYCreateResponse
+//	@Router			/process/pty [post]
+//
+//	@id				CreatePtySession
 func (p *PTYController) CreatePTYSession(c *gin.Context) {
 	var req PTYCreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -98,12 +109,31 @@ func (p *PTYController) CreatePTYSession(c *gin.Context) {
 	c.JSON(http.StatusCreated, PTYCreateResponse{SessionID: req.ID})
 }
 
-// ListPTYSessions lists all PTY sessions
+// ListPTYSessions godoc
+//
+//	@Summary		List all PTY sessions
+//	@Description	Get a list of all active pseudo-terminal sessions
+//	@Tags			process
+//	@Produce		json
+//	@Success		200	{object}	PTYListResponse
+//	@Router			/process/pty [get]
+//
+//	@id				ListPtySessions
 func (p *PTYController) ListPTYSessions(c *gin.Context) {
 	c.JSON(http.StatusOK, PTYListResponse{Sessions: ptyManager.List()})
 }
 
-// GetPTYSession gets information about a specific PTY session
+// GetPTYSession godoc
+//
+//	@Summary		Get PTY session information
+//	@Description	Get detailed information about a specific pseudo-terminal session
+//	@Tags			process
+//	@Produce		json
+//	@Param			sessionId	path		string	true	"PTY session ID"
+//	@Success		200			{object}	PTYSessionInfo
+//	@Router			/process/pty/{sessionId} [get]
+//
+//	@id				GetPtySession
 func (p *PTYController) GetPTYSession(c *gin.Context) {
 	id := c.Param("sessionId")
 	if id == "" {
@@ -118,7 +148,17 @@ func (p *PTYController) GetPTYSession(c *gin.Context) {
 	c.JSON(http.StatusNotFound, gin.H{"error": "PTY session not found"})
 }
 
-// DeletePTYSession deletes a PTY session
+// DeletePTYSession godoc
+//
+//	@Summary		Delete a PTY session
+//	@Description	Delete a pseudo-terminal session and terminate its process
+//	@Tags			process
+//	@Produce		json
+//	@Param			sessionId	path		string	true	"PTY session ID"
+//	@Success		200			{object}	gin.H
+//	@Router			/process/pty/{sessionId} [delete]
+//
+//	@id				DeletePtySession
 func (p *PTYController) DeletePTYSession(c *gin.Context) {
 	id := c.Param("sessionId")
 	if id == "" {
@@ -135,7 +175,16 @@ func (p *PTYController) DeletePTYSession(c *gin.Context) {
 	c.JSON(http.StatusNotFound, gin.H{"error": "PTY session not found"})
 }
 
-// ConnectPTYSession handles WebSocket connections to PTY sessions
+// ConnectPTYSession godoc
+//
+//	@Summary		Connect to PTY session via WebSocket
+//	@Description	Establish a WebSocket connection to interact with a pseudo-terminal session
+//	@Tags			process
+//	@Param			sessionId	path	string	true	"PTY session ID"
+//	@Success		101			"Switching Protocols - WebSocket connection established"
+//	@Router			/process/pty/{sessionId}/connect [get]
+//
+//	@id				ConnectPtySession
 func (p *PTYController) ConnectPTYSession(c *gin.Context) {
 	id := c.Param("sessionId")
 	if id == "" {
@@ -170,7 +219,19 @@ func (p *PTYController) ConnectPTYSession(c *gin.Context) {
 	session.attachWebSocket(ws)
 }
 
-// ResizePTYSession resizes a PTY session
+// ResizePTYSession godoc
+//
+//	@Summary		Resize a PTY session
+//	@Description	Resize the terminal dimensions of a pseudo-terminal session
+//	@Tags			process
+//	@Accept			json
+//	@Produce		json
+//	@Param			sessionId	path		string				true	"PTY session ID"
+//	@Param			request		body		PTYResizeRequest	true	"Resize request with new dimensions"
+//	@Success		200			{object}	PTYSessionInfo
+//	@Router			/process/pty/{sessionId}/resize [post]
+//
+//	@id				ResizePtySession
 func (p *PTYController) ResizePTYSession(c *gin.Context) {
 	id := c.Param("sessionId")
 	if id == "" {

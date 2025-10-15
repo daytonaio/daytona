@@ -19,6 +19,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// GetSessionCommandLogs godoc
+//
+//	@Summary		Get session command logs
+//	@Description	Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+//	@Tags			process
+//	@Produce		text/plain
+//	@Param			sessionId	path		string	true	"Session ID"
+//	@Param			commandId	path		string	true	"Command ID"
+//	@Param			follow		query		boolean	false	"Follow logs in real-time (WebSocket only)"
+//	@Success		200			{string}	string	"Log content"
+//	@Router			/process/session/{sessionId}/command/{commandId}/logs [get]
+//
+//	@id				GetSessionCommandLogs
 func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 	cmdId := c.Param("commandId")
