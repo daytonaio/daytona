@@ -58,6 +58,14 @@ import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posth
       },
     }),
     ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..'),
+      exclude: ['/api/*'],
+      renderPath: '/runner-amd64',
+      serveStaticOptions: {
+        cacheControl: false,
+      },
+    }),
+    ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'dashboard'),
       exclude: ['/api/*'],
       renderPath: '/',
