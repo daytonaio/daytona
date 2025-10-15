@@ -53,7 +53,7 @@ const AuditLogs: React.FC = () => {
   )
 
   const fetchData = useCallback(
-    async (showTableLoadingState = true, customDateRange?: DateRange, cursor?: string) => {
+    async (showTableLoadingState = true) => {
       if (!selectedOrganization) {
         return
       }
@@ -62,20 +62,15 @@ const AuditLogs: React.FC = () => {
         setLoadingData(true)
       }
 
-      let currentRange = dateRange
-      if (customDateRange) {
-        currentRange = customDateRange
-      }
-
       try {
         const response = (
           await auditApi.getOrganizationAuditLogs(
             selectedOrganization.id,
             paginationParams.pageIndex + 1,
             paginationParams.pageSize,
-            currentRange.from,
-            currentRange.to,
-            cursor, // Use passed cursor parameter
+            dateRange.from,
+            dateRange.to,
+            currentCursor,
           )
         ).data
 
@@ -86,7 +81,7 @@ const AuditLogs: React.FC = () => {
         setLoadingData(false)
       }
     },
-    [auditApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize, dateRange],
+    [auditApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize, dateRange, currentCursor],
   )
 
   const handlePaginationChange = useCallback(
@@ -135,18 +130,13 @@ const AuditLogs: React.FC = () => {
   )
 
   useEffect(() => {
-    fetchData(true, undefined, currentCursor)
-  }, [fetchData, currentCursor, paginationParams.pageIndex, paginationParams.pageSize])
+    fetchData()
+  }, [fetchData])
 
   // Auto-refresh
   useInterval(
     () => {
-      if (!dateRangePickerRef.current || !selectedOrganization || loadingData) {
-        return
-      }
-
-      const currentRange = dateRangePickerRef.current.getCurrentRange()
-      fetchData(false, currentRange, currentCursor)
+      fetchData(false)
     },
     autoRefresh ? 5000 : null,
   )
