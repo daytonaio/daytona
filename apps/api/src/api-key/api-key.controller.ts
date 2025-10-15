@@ -27,7 +27,7 @@ import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate
 @ApiTags('api-keys')
 @Controller('api-keys')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ApiKeyController {
