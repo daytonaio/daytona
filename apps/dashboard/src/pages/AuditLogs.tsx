@@ -6,6 +6,7 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { PaginatedAuditLogs } from '@daytonaio/api-client'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { AuditLogTable } from '@/components/AuditLogTable'
 import { Switch } from '@/components/ui/switch'
@@ -34,7 +35,7 @@ const AuditLogs: React.FC = () => {
 
   const [paginationParams, setPaginationParams] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: DEFAULT_PAGE_SIZE,
   })
   const [currentCursor, setCurrentCursor] = useState<string | undefined>(undefined)
   const [cursorHistory, setCursorHistory] = useState<string[]>([])
@@ -173,7 +174,7 @@ const AuditLogs: React.FC = () => {
 
   const handleDateRangeChange = useCallback((range: DateRange) => {
     setDateRange(range)
-    setPaginationParams({ pageIndex: 0, pageSize: 10 })
+    setPaginationParams({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE })
     setCurrentCursor(undefined)
     setCursorHistory([])
     setData((prev) => ({ ...prev, page: 1, nextToken: undefined }))
