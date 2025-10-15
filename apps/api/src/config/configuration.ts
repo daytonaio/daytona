@@ -18,6 +18,46 @@ const configuration = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
+    readReplicas: ((): {
+      host: string
+      port: number
+      username: string
+      password: string
+      database: string
+    }[] => {
+      const replicas: {
+        host: string
+        port: number
+        username: string
+        password: string
+        database: string
+      }[] = []
+      let index = 1
+
+      while (process.env[`DB_READ_REPLICA_${index}_HOST`]) {
+        const host = process.env[`DB_READ_REPLICA_${index}_HOST`]
+        const port = process.env[`DB_READ_REPLICA_${index}_PORT`]
+          ? parseInt(process.env[`DB_READ_REPLICA_${index}_PORT`], 10)
+          : 5432
+        const username = process.env[`DB_READ_REPLICA_${index}_USERNAME`]
+        const password = process.env[`DB_READ_REPLICA_${index}_PASSWORD`]
+        const database = process.env[`DB_READ_REPLICA_${index}_DATABASE`]
+
+        if (host && port && username && password && database) {
+          replicas.push({
+            host,
+            port,
+            username,
+            password,
+            database,
+          })
+        }
+
+        index++
+      }
+
+      return replicas
+    })(),
   },
   redis: {
     host: process.env.REDIS_HOST,

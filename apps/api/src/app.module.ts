@@ -42,8 +42,10 @@ import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posth
     TypeOrmModule.forRootAsync({
       inject: [TypedConfigService],
       useFactory: (configService: TypedConfigService) => {
-        return {
-          type: 'postgres',
+        const readReplicas = configService.get('database.readReplicas') || []
+
+        const baseConfig = {
+          type: 'postgres' as const,
           host: configService.getOrThrow('database.host'),
           port: configService.getOrThrow('database.port'),
           username: configService.getOrThrow('database.username'),
@@ -54,7 +56,29 @@ import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posth
           migrationsRun: configService.get('runMigrations') || !configService.getOrThrow('production'),
           namingStrategy: new CustomNamingStrategy(),
           manualInitialization: configService.get('skipConnections'),
+          ...(readReplicas.length > 0 && {
+            replication: {
+              // do not change default mode, read replicas must be opt-in
+              defaultMode: 'master' as const,
+              master: {
+                host: configService.getOrThrow('database.host'),
+                port: configService.getOrThrow('database.port'),
+                username: configService.getOrThrow('database.username'),
+                password: configService.getOrThrow('database.password'),
+                database: configService.getOrThrow('database.database'),
+              },
+              slaves: readReplicas.map((replica) => ({
+                host: replica.host,
+                port: replica.port,
+                username: replica.username,
+                password: replica.password,
+                database: replica.database,
+              })),
+            },
+          }),
         }
+
+        return baseConfig
       },
     }),
     ServeStaticModule.forRoot({
