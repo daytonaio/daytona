@@ -4,13 +4,6 @@
   "version": "1.0.0",
   "description": "Installs development tools.",
   "options": {
-    "pipPackages": {
-      "type": "array",
-      "description": "List of pip packages to install",
-      "items": {
-        "type": "string"
-      }
-    },
     "goTools": {
       "type": "array",
       "description": "List of Go tools to install",
@@ -21,7 +14,6 @@
   },
   "installsAfter": [
     "ghcr.io/devcontainers/features/go",
-    "ghcr.io/devcontainers/features/python",
     "ghcr.io/devcontainers/features/docker-in-docker"
   ]
 }
