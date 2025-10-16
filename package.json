@@ -126,7 +126,7 @@
     "jwks-rsa": "^3.1.0",
     "lucide-react": "^0.487.0",
     "motion": "^12.23.0",
-    "nodemailer": "^6.9.1",
+    "nodemailer": "^7.0.7",
     "oidc-client-ts": "^3.2.0",
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",
