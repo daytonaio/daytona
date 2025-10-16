@@ -54,7 +54,13 @@
           "NODE_OPTIONS": "--require tsconfig-paths/register",
           "SKIP_CONNECTIONS": "true"
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "projects": ["runner-grpc-client"],
+          "target": "build"
+        }
+      ]
     },
     "serve": {
       "executor": "@nx/js:node",

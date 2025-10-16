@@ -35,7 +35,7 @@ func (s *SandboxService) UpdateNetworkSettings(ctx context.Context, req *pb.Upda
 			return nil, status.Errorf(codes.Internal, "failed to update network settings: %v", err)
 		}
 	}
-	
+
 	return &pb.UpdateNetworkSettingsResponse{
 		Message: "Network settings updated",
 	}, nil
