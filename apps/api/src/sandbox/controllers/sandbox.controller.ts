@@ -73,6 +73,12 @@ import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { Throttle, seconds } from '@nestjs/throttler'
+import {
+  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT,
+  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL,
+  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT,
+  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL,
+} from '../../config/defaults'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -230,8 +236,8 @@ export class SandboxController {
   @UseInterceptors(ContentTypeInterceptor)
   @Throttle({
     authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || '200', 10),
-      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || '60', 10)),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT, 10),
+      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL, 10)),
     },
   })
   @ApiOperation({
@@ -380,8 +386,10 @@ export class SandboxController {
   @Delete(':sandboxIdOrName')
   @Throttle({
     authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
-      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
     },
   })
   @ApiOperation({
@@ -418,8 +426,10 @@ export class SandboxController {
   @HttpCode(200)
   @Throttle({
     authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
-      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
     },
   })
   @ApiOperation({
@@ -462,8 +472,10 @@ export class SandboxController {
   @HttpCode(200) //  for Daytona Api compatibility
   @Throttle({
     authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
-      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
     },
   })
   @ApiOperation({
@@ -837,8 +849,10 @@ export class SandboxController {
   @HttpCode(200)
   @Throttle({
     authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
-      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
     },
   })
   @ApiOperation({
