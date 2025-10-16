@@ -14,6 +14,7 @@ import { SnapshotService } from './sandbox/services/snapshot.service'
 import { SystemRole } from './user/enums/system-role.enum'
 import { TypedConfigService } from './config/typed-config.service'
 import { SchedulerRegistry } from '@nestjs/schedule'
+import { CronJob } from 'cron'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -34,13 +35,11 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
   async onApplicationShutdown(signal?: string) {
     this.logger.log(`Received shutdown signal: ${signal}. Shutting down gracefully...`)
-    await this.stopAllCronJobs()
+    this.stopAllCronJobs()
   }
 
   async onApplicationBootstrap() {
-    if (this.configService.get('disableCronJobs') || this.configService.get('maintananceMode')) {
-      await this.stopAllCronJobs()
-    }
+    this.stopUnusedCronJobs()
 
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
@@ -49,7 +48,52 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.initializeDefaultSnapshot()
   }
 
-  private async stopAllCronJobs(): Promise<void> {
+  private stopUnusedCronJobs(): void {
+    if (this.configService.get('cron.disableAll') || this.configService.get('maintananceMode')) {
+      this.stopAllCronJobs()
+      return
+    }
+
+    const disabledScopes = this.configService.get('cron.disabledCronScopes') || []
+    const onlyEnabledScopes = this.configService.get('cron.onlyEnabledCronScopes') || []
+
+    if (disabledScopes.length > 0 && onlyEnabledScopes.length > 0) {
+      throw new Error('Cannot have both disabled and enabled cron scopes set')
+    }
+
+    if (disabledScopes.length === 0 && onlyEnabledScopes.length === 0) {
+      return
+    }
+
+    const cronJobs = this.schedulerRegistry.getCronJobs()
+
+    const scopedJobs = new Map<string, Map<string, CronJob>>()
+
+    cronJobs.forEach((job, name) => {
+      const scope = name.split(':')[0]
+      if (!scopedJobs.has(scope)) {
+        scopedJobs.set(scope, new Map<string, CronJob>())
+      }
+      scopedJobs.get(scope)?.set(name, job)
+    })
+
+    let scopesToDisable = disabledScopes
+    if (onlyEnabledScopes.length > 0) {
+      scopesToDisable = Array.from(scopedJobs.keys()).filter((scope) => !onlyEnabledScopes.includes(scope))
+    }
+
+    scopesToDisable.forEach((scope) => {
+      const jobs = scopedJobs.get(scope)
+      if (jobs) {
+        Array.from(jobs.keys()).forEach((job) => {
+          this.logger.error(`Stopping cron job: ${job} due to not being in enabled scopes`)
+          this.schedulerRegistry.deleteCronJob(job)
+        })
+      }
+    })
+  }
+
+  private stopAllCronJobs() {
     for (const cronName of this.schedulerRegistry.getCronJobs().keys()) {
       this.logger.debug(`Stopping cron job: ${cronName}`)
       this.schedulerRegistry.deleteCronJob(cronName)
