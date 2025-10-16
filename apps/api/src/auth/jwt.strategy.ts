@@ -71,6 +71,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         email: payload.email || '',
       })
       this.logger.debug(`Updated name and email address for existing user with ID: ${userId}`)
+    } else if (user.email !== payload.email) {
+      await this.userService.update(user.id, {
+        email: payload.email || '',
+      })
+      this.logger.debug(`Updated email address for existing user with ID: ${userId}`)
     }
 
     const organizationId = request.get(CustomHeaders.ORGANIZATION_ID.name)
