@@ -153,6 +153,10 @@ const configuration = {
       limit: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_LIMIT || DEFAULT_RATE_LIMIT_AUTHENTICATED_LIMIT, 10),
     },
   },
+  apiKey: {
+    validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),
+    userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
+  },
 }
 
 export { configuration }
