@@ -530,16 +530,6 @@ export class SandboxController {
   })
   @UseGuards(RunnerAuthGuard)
   @UseGuards(SandboxAccessGuard)
-  @Audit({
-    action: AuditAction.UPDATE,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-    requestMetadata: {
-      body: (req: TypedRequest<UpdateSandboxStateDto>) => ({
-        state: req.body?.state,
-      }),
-    },
-  })
   async updateSandboxState(
     @Param('sandboxId') sandboxId: string,
     @Body() updateStateDto: UpdateSandboxStateDto,
