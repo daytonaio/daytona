@@ -11667,6 +11667,8 @@ components:
             - send_webhook_message
             - initialize_webhooks
             - update_sandbox_default_limited_network_egress
+            - create_ssh_access
+            - revoke_ssh_access
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder
