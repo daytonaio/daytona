@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
+	"github.com/daytonaio/runner/pkg/sdisk"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 )
@@ -29,6 +30,7 @@ type DockerClientConfig struct {
 	ComputerUsePluginPath  string
 	NetRulesManager        *netrules.NetRulesManager
 	ResourceLimitsDisabled bool
+	SDisk                  sdisk.DiskManager
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
@@ -45,6 +47,7 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		computerUsePluginPath:  config.ComputerUsePluginPath,
 		netRulesManager:        config.NetRulesManager,
 		resourceLimitsDisabled: config.ResourceLimitsDisabled,
+		sdisk:                  config.SDisk,
 	}
 }
 
@@ -66,6 +69,7 @@ type DockerClient struct {
 	computerUsePluginPath  string
 	netRulesManager        *netrules.NetRulesManager
 	resourceLimitsDisabled bool
+	sdisk                  sdisk.DiskManager
 }
 
 // retryWithExponentialBackoff executes a function with exponential backoff retry logic

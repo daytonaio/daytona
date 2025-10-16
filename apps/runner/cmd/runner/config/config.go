@@ -31,6 +31,13 @@ type Config struct {
 	AWSSecretAccessKey     string `envconfig:"AWS_SECRET_ACCESS_KEY"`
 	AWSDefaultBucket       string `envconfig:"AWS_DEFAULT_BUCKET"`
 	ResourceLimitsDisabled bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
+	DataDir                string `envconfig:"DISK_DATA_DIR"`
+	LayerSizeThresholdMB   int64  `envconfig:"DISK_LAYER_SIZE_THRESHOLD_MB"`
+	Compression            string `envconfig:"DISK_COMPRESSION"`
+	ClusterSize            int    `envconfig:"DISK_CLUSTER_SIZE"`
+	LazyRefcounts          bool   `envconfig:"DISK_LAZY_REFCOUNTS"`
+	Preallocation          string `envconfig:"DISK_PREALLOCATION"`
+	MaxMounted             int    `envconfig:"DISK_MAX_MOUNTED"`
 }
 
 var DEFAULT_API_PORT int = 8080
@@ -57,6 +64,34 @@ func GetConfig() (*Config, error) {
 
 	if config.ApiPort == 0 {
 		config.ApiPort = DEFAULT_API_PORT
+	}
+
+	if config.DataDir == "" {
+		config.DataDir = filepath.Join(os.TempDir(), "daytona", "sdisk")
+	}
+
+	if config.LayerSizeThresholdMB == 0 {
+		config.LayerSizeThresholdMB = 100
+	}
+
+	if config.Compression == "" {
+		config.Compression = "zlib"
+	}
+
+	if config.ClusterSize == 0 {
+		config.ClusterSize = 65536
+	}
+
+	if config.LazyRefcounts == false {
+		config.LazyRefcounts = true
+	}
+
+	if config.Preallocation == "" {
+		config.Preallocation = "off"
+	}
+
+	if config.MaxMounted == 0 {
+		config.MaxMounted = 100
 	}
 
 	return config, nil

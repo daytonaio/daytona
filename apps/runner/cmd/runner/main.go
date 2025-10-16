@@ -21,6 +21,7 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/daytonaio/runner/pkg/runner"
+	"github.com/daytonaio/runner/pkg/sdisk"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/daytonaio/runner/pkg/sshgateway"
 	"github.com/docker/docker/client"
@@ -94,6 +95,30 @@ func main() {
 
 	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
 
+	sdisk, err := sdisk.New(sdisk.Config{
+		DataDir: cfg.DataDir,
+		S3: sdisk.S3Config{
+			Bucket:          cfg.AWSDefaultBucket,
+			Region:          cfg.AWSRegion,
+			AccessKeyID:     cfg.AWSAccessKeyId,
+			SecretAccessKey: cfg.AWSSecretAccessKey,
+			Endpoint:        cfg.AWSEndpointUrl,
+		},
+		QCOW2: sdisk.QCOW2Config{
+			Compression:   cfg.Compression,
+			ClusterSize:   cfg.ClusterSize,
+			LazyRefcounts: cfg.LazyRefcounts,
+			Preallocation: cfg.Preallocation,
+		},
+		Pool: sdisk.PoolConfig{
+			Enabled:    true,
+			MaxMounted: cfg.MaxMounted,
+		},
+	})
+	if err != nil {
+		log.Fatalf("Failed to create sdisk: %v", err)
+	}
+
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:              cli,
 		StatesCache:            statesCache,
@@ -106,6 +131,7 @@ func main() {
 		ComputerUsePluginPath:  pluginPath,
 		NetRulesManager:        netRulesManager,
 		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
+		SDisk:                  sdisk,
 	})
 
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
@@ -145,6 +171,7 @@ func main() {
 		MetricsService:    metricsService,
 		NetRulesManager:   netRulesManager,
 		SSHGatewayService: sshGatewayService,
+		SDisk:             &sdisk,
 	})
 
 	apiServerErrChan := make(chan error)

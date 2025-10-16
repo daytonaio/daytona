@@ -70,19 +70,23 @@ const Disks: React.FC = () => {
 
   useEffect(() => {
     const handleDiskCreatedEvent = (disk: DiskDto) => {
-      if (!disks.some((d) => d.id === disk.id)) {
-        setDisks((prev) => [disk, ...prev])
-      }
+      // Refresh the disks list to get the latest data from the server
+      fetchDisks(false) // false = don't show loading state
     }
 
     const handleDiskStateUpdatedEvent = (data: { disk: DiskDto; oldState: DiskState; newState: DiskState }) => {
       if (data.newState === DiskState.STORED) {
         // Disk is being deleted
         setDisks((prev) => prev.filter((d) => d.id !== data.disk.id))
-      } else if (!disks.some((d) => d.id === data.disk.id)) {
-        setDisks((prev) => [data.disk, ...prev])
       } else {
-        setDisks((prev) => prev.map((d) => (d.id === data.disk.id ? data.disk : d)))
+        setDisks((prev) => {
+          const existingDisk = prev.find((d) => d.id === data.disk.id)
+          if (existingDisk) {
+            return prev.map((d) => (d.id === data.disk.id ? data.disk : d))
+          } else {
+            return [data.disk, ...prev]
+          }
+        })
       }
     }
 
@@ -97,7 +101,7 @@ const Disks: React.FC = () => {
       notificationSocket.off('disk.created', handleDiskCreatedEvent)
       notificationSocket.off('disk.state.updated', handleDiskStateUpdatedEvent)
     }
-  }, [notificationSocket, disks])
+  }, [notificationSocket, fetchDisks])
 
   const handleCreate = async () => {
     if (!newDiskName.trim()) {
@@ -128,6 +132,8 @@ const Disks: React.FC = () => {
       setNewDiskName('')
       setNewDiskSize(10)
       toast.success(`Creating disk ${newDiskName}`)
+      // Refresh the disks list to show the new disk
+      await fetchDisks(false)
     } catch (error) {
       handleApiError(error, 'Failed to create disk')
     } finally {

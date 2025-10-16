@@ -7665,7 +7665,6 @@ components:
             - delete:registries
             - write:snapshots
             - delete:snapshots
-            - read:sandboxes
             - write:sandboxes
             - delete:sandboxes
             - read:volumes
@@ -7716,7 +7715,6 @@ components:
             - delete:registries
             - write:snapshots
             - delete:snapshots
-            - read:sandboxes
             - write:sandboxes
             - delete:sandboxes
             - read:volumes
@@ -7772,7 +7770,6 @@ components:
             - delete:registries
             - write:snapshots
             - delete:snapshots
-            - read:sandboxes
             - write:sandboxes
             - delete:sandboxes
             - read:volumes
@@ -7835,7 +7832,6 @@ components:
             - delete:registries
             - write:snapshots
             - delete:snapshots
-            - read:sandboxes
             - write:sandboxes
             - delete:sandboxes
             - read:volumes
@@ -8220,7 +8216,6 @@ components:
             - delete:registries
             - write:snapshots
             - delete:snapshots
-            - read:sandboxes
             - write:sandboxes
             - delete:sandboxes
             - read:volumes
@@ -8258,7 +8253,6 @@ components:
             - delete:registries
             - write:snapshots
             - delete:snapshots
-            - read:sandboxes
             - write:sandboxes
             - delete:sandboxes
             - read:volumes
@@ -8997,6 +8991,7 @@ components:
         autoDeleteInterval: 30
         public: false
         name: MySandbox
+        diskId: 550e8400-e29b-41d4-a716-446655440000
         user: daytona
         class: small
         autoArchiveInterval: 10080
@@ -9070,6 +9065,10 @@ components:
           description: Disk space allocated to the sandbox in GB
           example: 3
           type: integer
+        diskId:
+          description: Existing disk ID to attach to the sandbox
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)
           example: 30

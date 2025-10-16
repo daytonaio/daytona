@@ -13,6 +13,8 @@ import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { DiskService } from '../../services/disk.service'
+import { ToolboxService } from '../../services/toolbox.deprecated.service'
 
 @Injectable()
 export class SandboxDestroyAction extends SandboxAction {
@@ -22,6 +24,8 @@ export class SandboxDestroyAction extends SandboxAction {
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
     protected redisLockProvider: RedisLockProvider,
+    protected toolboxService: ToolboxService,
+    protected diskService: DiskService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray } from 'class-validator'
+import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray, IsUUID } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
@@ -131,6 +131,14 @@ export class CreateSandboxDto {
   @IsOptional()
   @IsNumber()
   disk?: number
+
+  @ApiPropertyOptional({
+    description: 'Existing disk ID to attach to the sandbox',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsOptional()
+  @IsUUID()
+  diskId?: string
 
   @ApiPropertyOptional({
     description: 'Auto-stop interval in minutes (0 means disabled)',

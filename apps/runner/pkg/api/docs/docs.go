@@ -36,6 +36,86 @@ const docTemplate = `{
                 }
             }
         },
+        "/disk/{diskId}/archive": {
+            "post": {
+                "description": "Archive disk to object storage",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disk"
+                ],
+                "summary": "Archive disk",
+                "operationId": "ArchiveDisk",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Disk ID",
+                        "name": "diskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Archive disk request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ArchiveDiskDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/disk/{diskId}/restore": {
+            "post": {
+                "description": "Restore disk from object storage",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disk"
+                ],
+                "summary": "Restore disk",
+                "operationId": "RestoreDisk",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Disk ID",
+                        "name": "diskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Restore disk request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RestoreDiskDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/info": {
             "get": {
                 "description": "Runner info with system metrics",
@@ -1163,6 +1243,20 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "ArchiveDiskDTO": {
+            "type": "object",
+            "required": [
+                "diskId"
+            ],
+            "properties": {
+                "diskId": {
+                    "type": "string"
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                }
+            }
+        },
         "BuildSnapshotRequestDTO": {
             "type": "object",
             "required": [
@@ -1221,6 +1315,9 @@ const docTemplate = `{
                 "cpuQuota": {
                     "type": "integer",
                     "minimum": 1
+                },
+                "diskId": {
+                    "type": "string"
                 },
                 "entrypoint": {
                     "type": "array",
@@ -1372,6 +1469,20 @@ const docTemplate = `{
                 "memory": {
                     "type": "integer",
                     "minimum": 1
+                }
+            }
+        },
+        "RestoreDiskDTO": {
+            "type": "object",
+            "required": [
+                "diskId"
+            ],
+            "properties": {
+                "diskId": {
+                    "type": "string"
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },

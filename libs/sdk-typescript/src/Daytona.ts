@@ -147,6 +147,8 @@ export type CreateSandboxBaseParams = {
   networkBlockAll?: boolean
   networkAllowList?: string
   ephemeral?: boolean
+  /** Existing disk ID to attach to the Sandbox instead of size */
+  diskId?: string
 }
 
 /**
@@ -459,6 +461,7 @@ export class Daytona {
           gpu: resources?.gpu,
           memory: resources?.memory,
           disk: resources?.disk,
+          diskId: params.diskId,
           autoStopInterval: params.autoStopInterval,
           autoArchiveInterval: params.autoArchiveInterval,
           autoDeleteInterval: params.autoDeleteInterval,

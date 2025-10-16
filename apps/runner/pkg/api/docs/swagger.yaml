@@ -1,4 +1,13 @@
 definitions:
+  ArchiveDiskDTO:
+    properties:
+      diskId:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+    - diskId
+    type: object
   BuildSnapshotRequestDTO:
     properties:
       context:
@@ -35,6 +44,8 @@ definitions:
       cpuQuota:
         minimum: 1
         type: integer
+      diskId:
+        type: string
       entrypoint:
         items:
           type: string
@@ -146,6 +157,15 @@ definitions:
       memory:
         minimum: 1
         type: integer
+    type: object
+  RestoreDiskDTO:
+    properties:
+      diskId:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+    - diskId
     type: object
   RunnerInfoResponseDTO:
     properties:
@@ -264,6 +284,60 @@ paths:
               type: string
             type: object
       summary: Health check
+  /disk/{diskId}/archive:
+    post:
+      description: Archive disk to object storage
+      operationId: ArchiveDisk
+      parameters:
+      - description: Disk ID
+        in: path
+        name: diskId
+        required: true
+        type: string
+      - description: Archive disk request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ArchiveDiskDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Archive disk
+      tags:
+      - disk
+  /disk/{diskId}/restore:
+    post:
+      description: Restore disk from object storage
+      operationId: RestoreDisk
+      parameters:
+      - description: Disk ID
+        in: path
+        name: diskId
+        required: true
+        type: string
+      - description: Restore disk request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/RestoreDiskDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Restore disk
+      tags:
+      - disk
   /info:
     get:
       description: Runner info with system metrics

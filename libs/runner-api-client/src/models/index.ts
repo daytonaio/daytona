@@ -1,3 +1,4 @@
+export * from './archive-disk-dto';
 export * from './build-snapshot-request-dto';
 export * from './create-backup-dto';
 export * from './create-sandbox-dto';
@@ -8,6 +9,7 @@ export * from './error-response';
 export * from './pull-snapshot-request-dto';
 export * from './registry-dto';
 export * from './resize-sandbox-dto';
+export * from './restore-disk-dto';
 export * from './runner-info-response-dto';
 export * from './runner-metrics';
 export * from './sandbox-info-response';

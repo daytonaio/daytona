@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
+	"github.com/daytonaio/runner/pkg/sdisk"
 	"github.com/docker/docker/errdefs"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
@@ -68,11 +69,47 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	volumeMountPathBinds := make([]string, 0)
+
+	// Shared volumes
 	if sandboxDto.Volumes != nil {
 		volumeMountPathBinds, err = d.getVolumesMountPathBinds(ctx, sandboxDto.Volumes)
 		if err != nil {
 			return "", err
 		}
+	}
+
+	// Sandbox Disk
+	if sandboxDto.DiskId != "" {
+		disks, err := d.sdisk.List(ctx)
+		if err != nil {
+			return "", err
+		}
+		diskExists := false
+		for _, disk := range disks {
+			if disk.Name == sandboxDto.DiskId {
+				diskExists = true
+				break
+			}
+		}
+		var disk sdisk.Disk
+		if !diskExists {
+			disk, err = d.sdisk.Create(ctx, sandboxDto.DiskId, 10)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			disk, err = d.sdisk.Open(ctx, sandboxDto.DiskId)
+			if err != nil {
+				return "", err
+			}
+		}
+		if !disk.IsMounted() {
+			_, err := disk.Mount(ctx)
+			if err != nil {
+				return "", err
+			}
+		}
+		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/disk/:%s/", disk.MountPath(), "/workspace"))
 	}
 
 	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(ctx, sandboxDto, volumeMountPathBinds)

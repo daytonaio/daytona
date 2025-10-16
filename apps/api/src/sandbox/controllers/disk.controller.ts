@@ -54,7 +54,6 @@ export class DiskController {
     description: 'List of all disks',
     type: [DiskDto],
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_SANDBOXES])
   async listDisks(@AuthContext() authContext: OrganizationAuthContext): Promise<DiskDto[]> {
     const disks = await this.diskService.findAll(authContext.organizationId)
     return disks.map(DiskDto.fromDisk)
@@ -107,7 +106,6 @@ export class DiskController {
     description: 'Disk details',
     type: DiskDto,
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_SANDBOXES])
   async getDisk(@Param('diskId') diskId: string): Promise<DiskDto> {
     const disk = await this.diskService.findOne(diskId)
     return DiskDto.fromDisk(disk)

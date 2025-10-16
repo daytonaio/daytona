@@ -12,6 +12,7 @@ import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import {
   Configuration,
+  DiskApi,
   SandboxApi,
   EnumsSandboxState,
   SnapshotsApi,
@@ -38,6 +39,7 @@ const RETRYABLE_NETWORK_ERROR_CODES = ['ECONNRESET', 'ETIMEDOUT']
 @Injectable()
 export class RunnerAdapterLegacy implements RunnerAdapter {
   private readonly logger = new Logger(RunnerAdapterLegacy.name)
+  private diskApiClient: DiskApi
   private sandboxApiClient: SandboxApi
   private snapshotApiClient: SnapshotsApi
   private runnerApiClient: DefaultApi
@@ -136,6 +138,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       axiosDebug.addLogger(axiosInstance)
     }
 
+    this.diskApiClient = new DiskApi(new Configuration(), '', axiosInstance)
     this.sandboxApiClient = new SandboxApi(new Configuration(), '', axiosInstance)
     this.snapshotApiClient = new SnapshotsApi(new Configuration(), '', axiosInstance)
     this.runnerApiClient = new DefaultApi(new Configuration(), '', axiosInstance)
@@ -197,6 +200,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
       metadata: metadata,
+      diskId: sandbox.disks?.[0], // Pass the first disk ID if available
     }
 
     await this.sandboxApiClient.create(createSandboxDto)
@@ -315,5 +319,37 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     }
 
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
+  }
+
+  async archiveDisk(diskId: string, registry?: DockerRegistry): Promise<void> {
+    const request = {
+      diskId: diskId,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url,
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    }
+
+    await this.diskApiClient.archiveDisk(diskId, request)
+  }
+
+  async restoreDisk(diskId: string, registry?: DockerRegistry): Promise<void> {
+    const request = {
+      diskId: diskId,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url,
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    }
+
+    await this.diskApiClient.restoreDisk(diskId, request)
   }
 }

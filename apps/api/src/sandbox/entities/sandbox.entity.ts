@@ -150,6 +150,13 @@ export class Sandbox {
   })
   volumes: SandboxVolume[]
 
+  @Column({
+    type: 'uuid',
+    array: true,
+    default: [],
+  })
+  disks: string[]
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

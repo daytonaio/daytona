@@ -72,6 +72,9 @@ export interface RunnerAdapter {
     networkAllowList?: string,
     networkLimitEgress?: boolean,
   ): Promise<void>
+
+  archiveDisk(diskId: string, registry?: DockerRegistry): Promise<void>
+  restoreDisk(diskId: string, registry?: DockerRegistry): Promise<void>
 }
 
 @Injectable()

@@ -360,6 +360,7 @@ class Daytona:
             volumes=params.volumes,
             network_block_all=params.network_block_all,
             network_allow_list=params.network_allow_list,
+            disk_id=params.disk_id,
         )
 
         if getattr(params, "snapshot", None):

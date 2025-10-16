@@ -15,6 +15,7 @@
 
 
 export * from './api/default-api';
+export * from './api/disk-api';
 export * from './api/sandbox-api';
 export * from './api/snapshots-api';
 export * from './api/toolbox-api';

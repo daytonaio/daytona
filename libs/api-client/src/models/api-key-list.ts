@@ -69,7 +69,6 @@ export const ApiKeyListPermissionsEnum = {
     DELETE_REGISTRIES: 'delete:registries',
     WRITE_SNAPSHOTS: 'write:snapshots',
     DELETE_SNAPSHOTS: 'delete:snapshots',
-    READ_SANDBOXES: 'read:sandboxes',
     WRITE_SANDBOXES: 'write:sandboxes',
     DELETE_SANDBOXES: 'delete:sandboxes',
     READ_VOLUMES: 'read:volumes',

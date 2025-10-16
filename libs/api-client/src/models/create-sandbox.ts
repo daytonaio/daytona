@@ -111,6 +111,12 @@ export interface CreateSandbox {
      */
     'disk'?: number;
     /**
+     * Existing disk ID to attach to the sandbox
+     * @type {string}
+     * @memberof CreateSandbox
+     */
+    'diskId'?: string;
+    /**
      * Auto-stop interval in minutes (0 means disabled)
      * @type {number}
      * @memberof CreateSandbox
