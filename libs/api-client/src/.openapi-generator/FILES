@@ -27,6 +27,7 @@ models/account-provider.ts
 models/announcement.ts
 models/api-key-list.ts
 models/api-key-response.ts
+models/attach-disk-dto.ts
 models/audit-log.ts
 models/build-info.ts
 models/command.ts

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
@@ -17,9 +17,11 @@ import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { ToolboxService } from '../../services/toolbox.service'
 import { TypedConfigService } from '../../../config/typed-config.service'
+import { SandboxStartAction } from './sandbox-start.action'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
+  protected readonly logger = new Logger(SandboxStartAction.name)
   constructor(
     protected runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
@@ -74,12 +76,24 @@ export class SandboxArchiveAction extends SandboxAction {
           return DONT_SYNC_AGAIN
         }
 
-        //  when the backup is completed, destroy the sandbox on the runner
+        //  when the backup is completed, archive disks and destroy the sandbox on the runner
         //  and deassociate the sandbox from the runner
         const runner = await this.runnerService.findOne(sandbox.runnerId)
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
         try {
+          // Archive disks if any are attached
+          if (sandbox.disks && sandbox.disks.length > 0) {
+            for (const diskId of sandbox.disks) {
+              try {
+                await runnerAdapter.archiveDisk(diskId)
+              } catch (error) {
+                this.logger.error(`Failed to archive disk ${diskId}: ${error}`)
+                // Continue with other disks even if one fails
+              }
+            }
+          }
+
           const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
           switch (sandboxInfo.state) {
             case SandboxState.DESTROYING:

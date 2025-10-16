@@ -25,6 +25,7 @@ const (
 	DISKSTATE_PULLING   DiskState = "pulling"
 	DISKSTATE_READY     DiskState = "ready"
 	DISKSTATE_ATTACHED  DiskState = "attached"
+	DISKSTATE_DETACHED  DiskState = "detached"
 	DISKSTATE_UPLOADING DiskState = "uploading"
 	DISKSTATE_STORED    DiskState = "stored"
 )
@@ -35,6 +36,7 @@ var AllowedDiskStateEnumValues = []DiskState{
 	"pulling",
 	"ready",
 	"attached",
+	"detached",
 	"uploading",
 	"stored",
 }

@@ -129,6 +129,8 @@ class CreateSandboxBaseParams(BaseModel):
     network_block_all: Optional[bool] = None
     network_allow_list: Optional[str] = None
     ephemeral: Optional[bool] = None
+    # Existing disk ID to attach to the Sandbox instead of requesting size
+    disk_id: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod

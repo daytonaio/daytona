@@ -33,6 +33,8 @@ type DiskDto struct {
 	State DiskState `json:"state"`
 	// Runner ID
 	RunnerId NullableString `json:"runnerId,omitempty"`
+	// Sandbox ID
+	SandboxId NullableString `json:"sandboxId,omitempty"`
 	// Error reason
 	ErrorReason NullableString `json:"errorReason,omitempty"`
 	// Creation timestamp
@@ -231,6 +233,49 @@ func (o *DiskDto) UnsetRunnerId() {
 	o.RunnerId.Unset()
 }
 
+// GetSandboxId returns the SandboxId field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DiskDto) GetSandboxId() string {
+	if o == nil || IsNil(o.SandboxId.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.SandboxId.Get()
+}
+
+// GetSandboxIdOk returns a tuple with the SandboxId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DiskDto) GetSandboxIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SandboxId.Get(), o.SandboxId.IsSet()
+}
+
+// HasSandboxId returns a boolean if a field has been set.
+func (o *DiskDto) HasSandboxId() bool {
+	if o != nil && o.SandboxId.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetSandboxId gets a reference to the given NullableString and assigns it to the SandboxId field.
+func (o *DiskDto) SetSandboxId(v string) {
+	o.SandboxId.Set(&v)
+}
+
+// SetSandboxIdNil sets the value for SandboxId to be an explicit nil
+func (o *DiskDto) SetSandboxIdNil() {
+	o.SandboxId.Set(nil)
+}
+
+// UnsetSandboxId ensures that no value is present for SandboxId, not even an explicit nil
+func (o *DiskDto) UnsetSandboxId() {
+	o.SandboxId.Unset()
+}
+
 // GetErrorReason returns the ErrorReason field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *DiskDto) GetErrorReason() string {
 	if o == nil || IsNil(o.ErrorReason.Get()) {
@@ -340,6 +385,9 @@ func (o DiskDto) ToMap() (map[string]interface{}, error) {
 	if o.RunnerId.IsSet() {
 		toSerialize["runnerId"] = o.RunnerId.Get()
 	}
+	if o.SandboxId.IsSet() {
+		toSerialize["sandboxId"] = o.SandboxId.Get()
+	}
 	if o.ErrorReason.IsSet() {
 		toSerialize["errorReason"] = o.ErrorReason.Get()
 	}
@@ -400,6 +448,7 @@ func (o *DiskDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "size")
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "runnerId")
+		delete(additionalProperties, "sandboxId")
 		delete(additionalProperties, "errorReason")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")

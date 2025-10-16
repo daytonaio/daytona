@@ -23,6 +23,7 @@ export const DiskState = {
   PULLING: 'pulling',
   READY: 'ready',
   ATTACHED: 'attached',
+  DETACHED: 'detached',
   UPLOADING: 'uploading',
   STORED: 'stored',
 } as const

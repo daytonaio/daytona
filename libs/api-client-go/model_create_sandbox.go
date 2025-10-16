@@ -48,6 +48,8 @@ type CreateSandbox struct {
 	Memory *int32 `json:"memory,omitempty"`
 	// Disk space allocated to the sandbox in GB
 	Disk *int32 `json:"disk,omitempty"`
+	// Existing disk ID to attach to the sandbox
+	DiskId *string `json:"diskId,omitempty"`
 	// Auto-stop interval in minutes (0 means disabled)
 	AutoStopInterval *int32 `json:"autoStopInterval,omitempty"`
 	// Auto-archive interval in minutes (0 means the maximum interval will be used)
@@ -528,6 +530,38 @@ func (o *CreateSandbox) SetDisk(v int32) {
 	o.Disk = &v
 }
 
+// GetDiskId returns the DiskId field value if set, zero value otherwise.
+func (o *CreateSandbox) GetDiskId() string {
+	if o == nil || IsNil(o.DiskId) {
+		var ret string
+		return ret
+	}
+	return *o.DiskId
+}
+
+// GetDiskIdOk returns a tuple with the DiskId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSandbox) GetDiskIdOk() (*string, bool) {
+	if o == nil || IsNil(o.DiskId) {
+		return nil, false
+	}
+	return o.DiskId, true
+}
+
+// HasDiskId returns a boolean if a field has been set.
+func (o *CreateSandbox) HasDiskId() bool {
+	if o != nil && !IsNil(o.DiskId) {
+		return true
+	}
+
+	return false
+}
+
+// SetDiskId gets a reference to the given string and assigns it to the DiskId field.
+func (o *CreateSandbox) SetDiskId(v string) {
+	o.DiskId = &v
+}
+
 // GetAutoStopInterval returns the AutoStopInterval field value if set, zero value otherwise.
 func (o *CreateSandbox) GetAutoStopInterval() int32 {
 	if o == nil || IsNil(o.AutoStopInterval) {
@@ -740,6 +774,9 @@ func (o CreateSandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Disk) {
 		toSerialize["disk"] = o.Disk
 	}
+	if !IsNil(o.DiskId) {
+		toSerialize["diskId"] = o.DiskId
+	}
 	if !IsNil(o.AutoStopInterval) {
 		toSerialize["autoStopInterval"] = o.AutoStopInterval
 	}
@@ -791,6 +828,7 @@ func (o *CreateSandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "gpu")
 		delete(additionalProperties, "memory")
 		delete(additionalProperties, "disk")
+		delete(additionalProperties, "diskId")
 		delete(additionalProperties, "autoStopInterval")
 		delete(additionalProperties, "autoArchiveInterval")
 		delete(additionalProperties, "autoDeleteInterval")

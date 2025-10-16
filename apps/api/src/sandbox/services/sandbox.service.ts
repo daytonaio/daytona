@@ -15,7 +15,6 @@ import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -60,6 +59,7 @@ import {
 } from '../dto/list-sandboxes-query.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { DiskState } from '../enums/disk-state.enum'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -414,7 +414,29 @@ export class SandboxService {
 
       sandbox.runnerId = runner.id
 
+      if (createSandboxDto.diskId) {
+        const disk = await this.diskService.findOne(createSandboxDto.diskId)
+        if (!disk) {
+          throw new NotFoundException(`Disk with ID ${createSandboxDto.diskId} not found`)
+        }
+        if (![DiskState.FRESH, DiskState.STORED, DiskState.DETACHED].includes(disk.state)) {
+          throw new BadRequestError(`Disk not ready to be attached`)
+        }
+        if (disk.sandboxId) {
+          // this should never happen, but just in case
+          throw new BadRequestError(`Disk is already attached to sandbox ${disk.sandboxId}`)
+        }
+        sandbox.disks = [disk.id]
+      }
+
       await this.sandboxRepository.insert(sandbox)
+
+      // TODO: This should be done in a transaction
+      if (createSandboxDto.diskId) {
+        sandbox.disks = [createSandboxDto.diskId]
+        await this.diskService.attachToSandbox(createSandboxDto.diskId, sandbox.id)
+      }
+
       return SandboxDto.fromSandbox(sandbox, runner.domain)
     } catch (error) {
       if (error.code === '23505') {
@@ -610,7 +632,29 @@ export class SandboxService {
         sandbox.state = SandboxState.PENDING_BUILD
       }
 
+      if (createSandboxDto.diskId) {
+        const disk = await this.diskService.findOne(createSandboxDto.diskId)
+        if (!disk) {
+          throw new NotFoundException(`Disk with ID ${createSandboxDto.diskId} not found`)
+        }
+        if (![DiskState.FRESH, DiskState.STORED, DiskState.DETACHED].includes(disk.state)) {
+          throw new BadRequestError(`Disk not ready to be attached`)
+        }
+        if (disk.sandboxId) {
+          // this should never happen, but just in case
+          throw new BadRequestError(`Disk is already attached to sandbox ${disk.sandboxId}`)
+        }
+        sandbox.disks = [disk.id]
+      }
+
       await this.sandboxRepository.insert(sandbox)
+
+      // TODO: This should be done in a transaction
+      if (createSandboxDto.diskId) {
+        sandbox.disks = [createSandboxDto.diskId]
+        await this.diskService.attachToSandbox(createSandboxDto.diskId, sandbox.id)
+      }
+
       return SandboxDto.fromSandbox(sandbox, runner?.domain)
     } catch (error) {
       if (error.code === '23505') {
@@ -931,9 +975,6 @@ export class SandboxService {
     sandbox.backupState = BackupState.NONE
     sandbox.name = 'DESTROYED_' + sandbox.name + '_' + Date.now()
     await this.sandboxRepository.save(sandbox)
-
-    // Automatically detach any disks attached to this sandbox
-    await this.diskService.detachAllFromSandbox(sandbox.id)
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
 

@@ -33,6 +33,12 @@ export interface CreateSandboxDTO {
   cpuQuota?: number
   /**
    *
+   * @type {string}
+   * @memberof CreateSandboxDTO
+   */
+  diskId?: string
+  /**
+   *
    * @type {Array<string>}
    * @memberof CreateSandboxDTO
    */

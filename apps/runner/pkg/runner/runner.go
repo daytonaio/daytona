@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/netrules"
+	"github.com/daytonaio/runner/pkg/sdisk"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/daytonaio/runner/pkg/sshgateway"
 )
@@ -20,6 +21,7 @@ type RunnerInstanceConfig struct {
 	MetricsService    *services.MetricsService
 	NetRulesManager   *netrules.NetRulesManager
 	SSHGatewayService *sshgateway.Service
+	SDisk             *sdisk.DiskManager
 }
 
 type Runner struct {
@@ -29,6 +31,7 @@ type Runner struct {
 	MetricsService    *services.MetricsService
 	NetRulesManager   *netrules.NetRulesManager
 	SSHGatewayService *sshgateway.Service
+	SDisk             *sdisk.DiskManager
 }
 
 var runner *Runner
@@ -50,6 +53,7 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 			MetricsService:    config.MetricsService,
 			NetRulesManager:   config.NetRulesManager,
 			SSHGatewayService: config.SSHGatewayService,
+			SDisk:             config.SDisk,
 		}
 	}
 

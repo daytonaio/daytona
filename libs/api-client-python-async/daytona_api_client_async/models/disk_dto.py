@@ -34,11 +34,12 @@ class DiskDto(BaseModel):
     size: Union[StrictFloat, StrictInt] = Field(description="Disk size in GB")
     state: DiskState = Field(description="Disk state")
     runner_id: Optional[StrictStr] = Field(default=None, description="Runner ID", alias="runnerId")
+    sandbox_id: Optional[StrictStr] = Field(default=None, description="Sandbox ID", alias="sandboxId")
     error_reason: Optional[StrictStr] = Field(default=None, description="Error reason", alias="errorReason")
     created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
     updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "size", "state", "runnerId", "errorReason", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "size", "state", "runnerId", "sandboxId", "errorReason", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,6 +92,11 @@ class DiskDto(BaseModel):
         if self.runner_id is None and "runner_id" in self.model_fields_set:
             _dict['runnerId'] = None
 
+        # set to None if sandbox_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.sandbox_id is None and "sandbox_id" in self.model_fields_set:
+            _dict['sandboxId'] = None
+
         # set to None if error_reason (nullable) is None
         # and model_fields_set contains the field
         if self.error_reason is None and "error_reason" in self.model_fields_set:
@@ -114,6 +120,7 @@ class DiskDto(BaseModel):
             "size": obj.get("size"),
             "state": obj.get("state"),
             "runnerId": obj.get("runnerId"),
+            "sandboxId": obj.get("sandboxId"),
             "errorReason": obj.get("errorReason"),
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt")

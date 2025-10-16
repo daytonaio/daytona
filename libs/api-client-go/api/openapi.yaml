@@ -6671,6 +6671,84 @@ paths:
       summary: Get disk details
       tags:
         - disks
+  /disks/{diskId}/attach:
+    post:
+      operationId: attachDisk
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the disk
+          explode: false
+          in: path
+          name: diskId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachDiskDto'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiskDto'
+          description: Disk has been successfully attached to sandbox
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Attach disk to sandbox
+      tags:
+        - disks
+  /disks/{diskId}/detach:
+    post:
+      operationId: detachDisk
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the disk
+          explode: false
+          in: path
+          name: diskId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiskDto'
+          description: Disk has been successfully detached from sandbox
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Detach disk from sandbox
+      tags:
+        - disks
   /docker-registry:
     get:
       operationId: listRegistries
@@ -7427,7 +7505,6 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
-              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7478,7 +7555,6 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
-              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7534,7 +7610,6 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
-              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7597,7 +7672,6 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
-              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -7977,7 +8051,6 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
-              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -8015,7 +8088,6 @@ components:
               - delete:registries
               - write:snapshots
               - delete:snapshots
-              - read:sandboxes
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -8761,6 +8833,7 @@ components:
         autoDeleteInterval: 30
         public: false
         name: MySandbox
+        diskId: 550e8400-e29b-41d4-a716-446655440000
         user: daytona
         class: small
         autoArchiveInterval: 10080
@@ -8834,6 +8907,10 @@ components:
           description: Disk space allocated to the sandbox in GB
           example: 3
           type: integer
+        diskId:
+          description: Existing disk ID to attach to the sandbox
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)
           example: 30
@@ -11356,6 +11433,7 @@ components:
         - pulling
         - ready
         - attached
+        - detached
         - uploading
         - stored
       type: string
@@ -11366,6 +11444,7 @@ components:
         size: 100
         errorReason: Error processing disk
         name: my-disk
+        sandboxId: 123e4567-e89b-12d3-a456-426614174000
         runnerId: 123e4567-e89b-12d3-a456-426614174000
         id: disk-12345678
         state: ready
@@ -11394,6 +11473,11 @@ components:
           example: ready
         runnerId:
           description: Runner ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
+        sandboxId:
+          description: Sandbox ID
           example: 123e4567-e89b-12d3-a456-426614174000
           nullable: true
           type: string
@@ -11435,6 +11519,17 @@ components:
       required:
         - name
         - size
+      type: object
+    AttachDiskDto:
+      example:
+        sandboxId: 123e4567-e89b-12d3-a456-426614174000
+      properties:
+        sandboxId:
+          description: Sandbox ID to attach the disk to
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+      required:
+        - sandboxId
       type: object
     CreateDockerRegistry:
       example:

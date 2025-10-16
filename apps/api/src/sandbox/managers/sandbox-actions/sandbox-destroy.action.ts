@@ -13,6 +13,7 @@ import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
+import { DiskService } from '../../services/disk.service'
 
 @Injectable()
 export class SandboxDestroyAction extends SandboxAction {
@@ -22,6 +23,7 @@ export class SandboxDestroyAction extends SandboxAction {
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
     protected toolboxService: ToolboxService,
+    protected diskService: DiskService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }

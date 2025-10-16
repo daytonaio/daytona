@@ -18,6 +18,15 @@ import (
 func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
 	containerConfig := d.getContainerCreateConfig(sandboxDto)
 
+	// Add disk mount path binds if diskId is provided
+	if sandboxDto.DiskId != "" {
+		diskMountPathBinds, err := d.getDiskMountPathBinds(ctx, sandboxDto.DiskId)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		volumeMountPathBinds = append(volumeMountPathBinds, diskMountPathBinds...)
+	}
+
 	hostConfig, err := d.getContainerHostConfig(ctx, sandboxDto, volumeMountPathBinds)
 	if err != nil {
 		return nil, nil, nil, err
@@ -129,4 +138,16 @@ func (d *DockerClient) getFilesystem(info system.Info) string {
 	}
 
 	return ""
+}
+
+func (d *DockerClient) getDiskMountPathBinds(ctx context.Context, diskId string) ([]string, error) {
+	// TODO: Implement disk mounting logic
+	// This would involve:
+	// 1. Check if disk is already mounted
+	// 2. If not, mount the disk from object storage (S3) to a local path
+	// 3. Return the bind mount path for the container
+
+	// For now, return a placeholder implementation
+	diskMountPath := fmt.Sprintf("/tmp/daytona-disks/%s", diskId)
+	return []string{fmt.Sprintf("%s:/workspace/disk:rw", diskMountPath)}, nil
 }

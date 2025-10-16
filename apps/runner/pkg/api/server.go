@@ -132,6 +132,12 @@ func (a *ApiServer) Start() error {
 		snapshotController.GET("/logs", controllers.GetBuildLogs)
 	}
 
+	diskController := protected.Group("/disk")
+	{
+		diskController.POST("/:diskId/archive", controllers.ArchiveDisk)
+		diskController.POST("/:diskId/restore", controllers.RestoreDisk)
+	}
+
 	a.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", a.apiPort),
 		Handler: a.router,

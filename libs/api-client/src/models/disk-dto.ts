@@ -59,6 +59,12 @@ export interface DiskDto {
    */
   runnerId?: string | null
   /**
+   * Sandbox ID
+   * @type {string}
+   * @memberof DiskDto
+   */
+  sandboxId?: string | null
+  /**
    * Error reason
    * @type {string}
    * @memberof DiskDto
