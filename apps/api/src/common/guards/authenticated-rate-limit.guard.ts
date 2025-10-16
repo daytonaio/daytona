@@ -47,12 +47,13 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     const request = context.switchToHttp().getRequest<Request>()
     const isAuthenticated = request.user && this.isValidAuthContext(request.user)
 
-    // Skip rate limiting for system roles
+    // Skip rate limiting for M2M system roles (checked AFTER auth runs)
     if (this.isSystemRole(request.user)) {
       return true
     }
 
     // Check 'authenticated' throttler - applies to all authenticated routes
+    // Routes can override with @Throttle({ authenticated: { limit, ttl } })
     if (throttler.name === 'authenticated') {
       if (isAuthenticated) {
         // Clear anonymous rate limit on successful authentication
@@ -62,9 +63,13 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
       return true
     }
 
-    // For any other throttlers (except anonymous), defer to base ThrottlerGuard
-    // It will check if route has @Throttle() decorator for this throttler
-    if (isAuthenticated && throttler.name !== 'anonymous') {
+    // Skip anonymous throttler (handled by AnonymousRateLimitGuard)
+    if (throttler.name === 'anonymous') {
+      return true
+    }
+
+    // For any other throttlers, defer to base ThrottlerGuard
+    if (isAuthenticated) {
       return super.handleRequest(requestProps)
     }
     return true
@@ -106,7 +111,7 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
   }
 
   private isSystemRole(user: any): boolean {
-    // Skip rate limiting for system roles (ssh-gateway, proxy)
-    return user?.role === 'ssh-gateway' || user?.role === 'proxy'
+    // Skip rate limiting for M2M system roles (proxy, runner, ssh-gateway)
+    return user?.role === 'ssh-gateway' || user?.role === 'proxy' || user?.role === 'runner'
   }
 }
