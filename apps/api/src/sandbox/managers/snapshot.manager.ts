@@ -997,7 +997,17 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   private getInitialRunnerSnapshotTag(snapshot: Snapshot) {
-    return `${snapshot.imageName}-${snapshot.organizationId}-${snapshot.createdAt.getTime()}`
+    // Extract the base image name without any tag or digest
+    let baseImageName = snapshot.imageName
+    const colonIndex = baseImageName.indexOf(':')
+    if (colonIndex !== -1) {
+      baseImageName = baseImageName.substring(0, colonIndex)
+    }
+    const atIndex = baseImageName.indexOf('@')
+    if (atIndex !== -1) {
+      baseImageName = baseImageName.substring(0, atIndex)
+    }
+    return `${baseImageName}-${snapshot.id}-${snapshot.createdAt.getTime()}:daytona`
   }
 
   @OnEvent(SnapshotEvents.CREATED)
