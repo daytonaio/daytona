@@ -253,7 +253,7 @@ export class RunnerService {
                   timeoutId = setTimeout(() => {
                     abortController.abort()
                     reject(new Error('Health check timeout'))
-                  }, 3000)
+                  }, 5000)
                 }),
               ])
 

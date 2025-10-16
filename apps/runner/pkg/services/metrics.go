@@ -32,13 +32,15 @@ type CPUSnapshot struct {
 
 // MetricsServiceConfig holds configuration for the metrics service
 type MetricsServiceConfig struct {
-	Docker     *docker.DockerClient
-	WindowSize int // CPU metrics window size in seconds
+	Docker          *docker.DockerClient
+	TimeoutInterval string
+	WindowSize      int // CPU metrics window size in seconds
 }
 
 // MetricsService provides system metrics with proper encapsulation
 type MetricsService struct {
-	docker *docker.DockerClient
+	docker          *docker.DockerClient
+	timeoutInterval time.Duration
 
 	// CPU usage metrics - ring buffer for sliding window
 	cpuRing  *ring.Ring
@@ -65,9 +67,16 @@ func NewMetricsService(config MetricsServiceConfig) *MetricsService {
 		windowSize = 60 // Default to 60 seconds
 	}
 
+	timeoutInterval, err := time.ParseDuration(config.TimeoutInterval)
+	if err != nil {
+		log.Errorf("Error parsing timeout interval: %v - using default of 10s", err)
+		timeoutInterval = 5 * time.Second
+	}
+
 	return &MetricsService{
-		docker:  config.Docker,
-		cpuRing: ring.New(windowSize),
+		docker:          config.Docker,
+		timeoutInterval: timeoutInterval,
+		cpuRing:         ring.New(windowSize),
 	}
 }
 
@@ -79,11 +88,36 @@ func (s *MetricsService) Start(ctx context.Context) {
 
 // GetMetrics returns all current system metrics
 func (s *MetricsService) GetMetrics() (*models.SystemMetrics, error) {
+	for {
+		select {
+		case <-time.After(s.timeoutInterval):
+			s.otherMutex.RLock()
+			defer s.otherMutex.RUnlock()
+			if s.lastError != nil && time.Since(s.lastErrorTime) < time.Minute {
+				return nil, fmt.Errorf("error getting metrics: %w", s.lastError)
+			}
+			return nil, fmt.Errorf("timeout waiting for metrics")
+		default:
+			metrics := s.getMetrics()
+			if metrics != nil {
+				return metrics, nil
+			}
+		}
+	}
+}
+
+// getMetrics returns all current system metrics
+func (s *MetricsService) getMetrics() *models.SystemMetrics {
 	// Get CPU metrics (requires read lock)
 	s.cpuMutex.RLock()
 	cpuUsage, err := s.calculateCPUUsageAverage()
 	if err != nil {
-		return nil, err
+		s.otherMutex.Lock()
+		s.lastError = err
+		s.lastErrorTime = time.Now()
+		s.otherMutex.Unlock()
+
+		return nil
 	}
 	s.cpuMutex.RUnlock()
 
@@ -93,10 +127,10 @@ func (s *MetricsService) GetMetrics() (*models.SystemMetrics, error) {
 
 	// Return error if it's within the last minute
 	if s.lastError != nil && time.Since(s.lastErrorTime) < time.Minute {
-		return nil, fmt.Errorf("metrics collection error: %w", s.lastError)
+		return nil
 	}
 
-	metrics := &models.SystemMetrics{
+	return &models.SystemMetrics{
 		CPUUsage:        cpuUsage,
 		CPULoadAvg:      s.cpuLoadAvg,
 		RAMUsage:        s.ramUsage,
@@ -107,8 +141,6 @@ func (s *MetricsService) GetMetrics() (*models.SystemMetrics, error) {
 		SnapshotCount:   s.snapshotCount,
 		LastUpdated:     s.lastUpdated,
 	}
-
-	return metrics, nil
 }
 
 // collectCPUUsageMetrics runs in a background goroutine, continuously monitoring CPU
