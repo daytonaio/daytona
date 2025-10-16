@@ -42,6 +42,7 @@ import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-ex
 import { setTimeout } from 'timers/promises'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -302,7 +303,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return organization
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'stop-suspended-organization-sandboxes' })
+  @Cron(CronExpression.EVERY_MINUTE, { name: `${CRON_SCOPES.ORGANIZATIONS}:stop-suspended-organization-sandboxes` })
   @TrackJobExecution()
   @LogExecution('stop-suspended-organization-sandboxes')
   async stopSuspendedOrganizationSandboxes(): Promise<void> {
@@ -355,7 +356,9 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'deactivate-suspended-organization-snapshots' })
+  @Cron(CronExpression.EVERY_MINUTE, {
+    name: `${CRON_SCOPES.ORGANIZATIONS}:deactivate-suspended-organization-snapshots`,
+  })
   @TrackJobExecution()
   @LogExecution('deactivate-suspended-organization-snapshots')
   async deactivateSuspendedOrganizationSnapshots(): Promise<void> {

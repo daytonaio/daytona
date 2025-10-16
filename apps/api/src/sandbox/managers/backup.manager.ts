@@ -32,6 +32,7 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -65,7 +66,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   //  todo: make frequency configurable or more efficient
-  @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
+  @Cron(CronExpression.EVERY_5_MINUTES, { name: `${CRON_SCOPES.BACKUPS}:ad-hoc-backup-check` })
   @TrackJobExecution()
   @LogExecution('ad-hoc-backup-check')
   async adHocBackupCheck(): Promise<void> {
@@ -130,7 +131,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: `${CRON_SCOPES.BACKUPS}:check-backup-states` })
   @TrackJobExecution()
   @LogExecution('check-backup-states')
   async checkBackupStates(): Promise<void> {
@@ -227,7 +228,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: `${CRON_SCOPES.BACKUPS}:sync-stop-state-create-backups` })
   @TrackJobExecution()
   @LogExecution('sync-stop-state-create-backups')
   async syncStopStateCreateBackups(): Promise<void> {
