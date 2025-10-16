@@ -230,7 +230,7 @@ export class SandboxController {
   @UseInterceptors(ContentTypeInterceptor)
   @Throttle({
     authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || '20', 10),
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || '200', 10),
       ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || '60', 10)),
     },
   })
