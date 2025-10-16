@@ -22,7 +22,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const TERMINATION_GRACE_PERIOD = 10 * time.Second
+const TERMINATION_GRACE_PERIOD = 5 * time.Second
 const TERMINATION_CHECK_INTERVAL = 100 * time.Millisecond
 
 var sessions = map[string]*session{}
@@ -111,14 +111,14 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 		return
 	}
 
-	// Terminate process if running
+	// Cancel context first - this signals CommandContext to stop
+	session.cancel()
+
+	// Terminate process group if still running
 	if err := s.terminateSession(c.Request.Context(), session); err != nil {
 		log.Errorf("Failed to terminate session %s: %v", session.id, err)
 		// Continue with cleanup even if termination fails
 	}
-
-	// Cancel context
-	session.cancel()
 
 	// Clean up session directory
 	err := os.RemoveAll(session.Dir(s.configDir))
@@ -243,7 +243,7 @@ func (s *SessionController) terminateSession(ctx context.Context, session *sessi
 
 	pid := session.cmd.Process.Pid
 
-	// Send SIGTERM first
+	// Send SIGTERM to entire process group (negative PID)
 	err := syscall.Kill(-pid, syscall.SIGTERM)
 	if err != nil {
 		// If SIGTERM fails, try SIGKILL immediately
@@ -257,8 +257,8 @@ func (s *SessionController) terminateSession(ctx context.Context, session *sessi
 		return nil
 	}
 
-	// Force kill if still alive
-	log.Debugf("Session %s timeout, sending SIGKILL", session.id)
+	// Force kill entire process group if still alive
+	log.Debugf("Session %s timeout, sending SIGKILL to process group", session.id)
 	return syscall.Kill(-pid, syscall.SIGKILL)
 }
 
