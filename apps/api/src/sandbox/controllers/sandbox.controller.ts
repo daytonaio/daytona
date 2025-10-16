@@ -228,7 +228,12 @@ export class SandboxController {
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
-  @Throttle({ 'sandbox-create': { limit: 20, ttl: seconds(60) } })
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || '20', 10),
+      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || '60', 10)),
+    },
+  })
   @ApiOperation({
     summary: 'Create a new sandbox',
     operationId: 'createSandbox',
@@ -373,6 +378,12 @@ export class SandboxController {
   }
 
   @Delete(':sandboxIdOrName')
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
+      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+    },
+  })
   @ApiOperation({
     summary: 'Delete sandbox',
     operationId: 'deleteSandbox',
@@ -405,7 +416,12 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/start')
   @HttpCode(200)
-  @Throttle({ 'sandbox-lifecycle': { limit: 100, ttl: seconds(60) } })
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
+      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+    },
+  })
   @ApiOperation({
     summary: 'Start sandbox',
     operationId: 'startSandbox',
@@ -444,7 +460,12 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/stop')
   @HttpCode(200) //  for Daytona Api compatibility
-  @Throttle({ 'sandbox-lifecycle': { limit: 100, ttl: seconds(60) } })
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
+      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+    },
+  })
   @ApiOperation({
     summary: 'Stop sandbox',
     operationId: 'stopSandbox',
@@ -814,6 +835,12 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/archive')
   @HttpCode(200)
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || '100', 10),
+      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || '60', 10)),
+    },
+  })
   @ApiOperation({
     summary: 'Archive sandbox',
     operationId: 'archiveSandbox',
