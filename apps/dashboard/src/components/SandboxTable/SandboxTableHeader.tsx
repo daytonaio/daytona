@@ -17,6 +17,7 @@ import {
   HardDrive,
   MemoryStick,
   RefreshCw,
+  Columns,
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
@@ -39,6 +40,7 @@ import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFi
 import { SnapshotFilter, SnapshotFilterIndicator } from './filters/SnapshotFilter'
 import { ResourceFilter, ResourceFilterIndicator, ResourceFilterValue } from './filters/ResourceFilter'
 import { LabelFilter, LabelFilterIndicator } from './filters/LabelFilter'
+import { TableColumnVisibilityToggle } from '../TableColumnVisibilityToggle'
 
 const RESOURCE_FILTERS = [
   { type: 'cpu' as const, label: 'CPU', icon: Cpu },
@@ -70,24 +72,44 @@ export function SandboxTableHeader({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center mb-4">
-      <div className="flex gap-2 items-center">
+      <div className="flex flex-wrap gap-2 items-center">
         <DebouncedInput
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
-          placeholder="Search by Name"
-          className="max-w-[200px]"
+          placeholder="Search by Name or UUID"
+          className="w-[240px]"
         />
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className="flex items-center gap-2"
-        >
+        <Button variant="outline" onClick={onRefresh} disabled={isRefreshing} className="flex items-center gap-2">
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
+
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              <Columns className="w-4 h-4" />
+              View
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px] p-0">
+            <TableColumnVisibilityToggle
+              columns={table.getAllColumns().filter((column) => ['name', 'id', 'labels'].includes(column.id))}
+              getColumnLabel={(id: string) => {
+                switch (id) {
+                  case 'name':
+                    return 'Name'
+                  case 'id':
+                    return 'UUID'
+                  case 'labels':
+                    return 'Labels'
+                  default:
+                    return id
+                }
+              }}
+            />
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>

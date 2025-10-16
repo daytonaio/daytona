@@ -21,8 +21,8 @@ export function SandboxState({ state, errorReason }: SandboxStateProps) {
   if (state === SandboxStateType.ERROR || state === SandboxStateType.BUILD_FAILED) {
     const errorContent = (
       <div className={`flex items-center gap-1 text-red-600 dark:text-red-400`}>
-        {stateIcon}
-        {label}
+        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">{stateIcon}</div>
+        <span className="truncate">{label}</span>
       </div>
     )
 
@@ -44,8 +44,8 @@ export function SandboxState({ state, errorReason }: SandboxStateProps) {
 
   return (
     <div className={`flex items-center gap-1 ${state === SandboxStateType.ARCHIVED ? 'text-muted-foreground' : ''}`}>
-      <div className="w-4 h-4 flex items-center justify-center">{stateIcon}</div>
-      <span>{label}</span>
+      <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">{stateIcon}</div>
+      <span className="truncate">{label}</span>
     </div>
   )
 }

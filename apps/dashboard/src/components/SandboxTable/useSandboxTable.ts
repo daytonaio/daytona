@@ -10,8 +10,9 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getPaginationRowModel,
+  VisibilityState,
 } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { FacetedFilterOption } from './types'
 import { getColumns } from './columns'
 import {
@@ -21,6 +22,8 @@ import {
   convertTableFiltersToApiFilters,
 } from './types'
 import { SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 
 interface UseSandboxTableProps {
   data: Sandbox[]
@@ -70,6 +73,23 @@ export function useSandboxTable({
   onFiltersChange,
   regionsData,
 }: UseSandboxTableProps) {
+  // Column visibility state management with persistence
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    const saved = getLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility)
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return { id: false, labels: false }
+      }
+    }
+    return { id: false, labels: false }
+  })
+
+  useEffect(() => {
+    setLocalStorageItem(LocalStorageKey.SandboxTableColumnVisibility, JSON.stringify(columnVisibility))
+  }, [columnVisibility])
+
   // Convert API sorting and filters to table format for internal use
   const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
   const tableFilters = useMemo(() => convertApiFiltersToTableFilters(filters), [filters])
@@ -139,11 +159,13 @@ export function useSandboxTable({
     state: {
       sorting: tableSorting,
       columnFilters: tableFilters,
+      columnVisibility,
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,
       },
     },
+    onColumnVisibilityChange: setColumnVisibility,
     defaultColumn: {
       size: 100,
     },
