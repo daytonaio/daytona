@@ -40,7 +40,7 @@
           "GOOS": "linux",
           "CGO_ENABLED": "0"
         },
-        "flags": ["-ldflags \"-s -w -X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""]
+        "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""]
       },
       "dependsOn": ["prepare"]
     },

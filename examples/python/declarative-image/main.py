@@ -31,6 +31,7 @@ def main():
         )
         .workdir("/home/daytona/workspace")
         .env({"MY_ENV_VAR": "My Environment Variable"})
+        .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
     )
 
     # Create the snapshot

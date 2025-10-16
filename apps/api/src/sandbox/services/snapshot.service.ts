@@ -90,7 +90,6 @@ export class SnapshotService {
   }
 
   private processEntrypoint(entrypoint?: string[]): string[] | undefined {
-    // Handle entrypoint properly - convert empty array or empty strings to undefined to avoid PostgreSQL array literal error
     if (!entrypoint || entrypoint.length === 0) {
       return undefined
     }
@@ -649,22 +648,6 @@ export class SnapshotService {
       } catch {
         // Fallback: it's probably a plain string
         return [rawEntrypoint.replace(/["']/g, '')]
-      }
-    }
-
-    // todo: consider ignoring CMD
-
-    // Match CMD with either a string or JSON array
-    const cmdMatch = dockerfileContent.match(/CMD\s+(.*)/)
-    if (cmdMatch) {
-      const rawCmd = cmdMatch[1].trim()
-      try {
-        const parsed = JSON.parse(rawCmd)
-        if (Array.isArray(parsed)) {
-          return parsed
-        }
-      } catch {
-        return [rawCmd.replace(/["']/g, '')]
       }
     }
 

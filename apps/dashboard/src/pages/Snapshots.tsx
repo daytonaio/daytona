@@ -230,13 +230,17 @@ const Snapshots: React.FC = () => {
   }
 
   const handleCreate = async () => {
-    const nameValidationError = validateSnapshotName(newSnapshotName)
+    const trimmedName = newSnapshotName.trim()
+    const trimmedImageName = newImageName.trim()
+    const trimmedEntrypoint = newEntrypoint.trim()
+
+    const nameValidationError = validateSnapshotName(trimmedName)
     if (nameValidationError) {
       toast.warning(nameValidationError)
       return
     }
 
-    const imageValidationError = validateImageName(newImageName)
+    const imageValidationError = validateImageName(trimmedImageName)
     if (imageValidationError) {
       toast.warning(imageValidationError)
       return
@@ -246,9 +250,9 @@ const Snapshots: React.FC = () => {
     try {
       await snapshotApi.createSnapshot(
         {
-          name: newSnapshotName,
-          imageName: newImageName,
-          entrypoint: newEntrypoint.trim() ? newEntrypoint.trim().split(' ') : undefined,
+          name: trimmedName,
+          imageName: trimmedImageName,
+          entrypoint: trimmedEntrypoint ? trimmedEntrypoint.split(' ') : undefined,
           cpu,
           memory,
           disk,
@@ -261,7 +265,7 @@ const Snapshots: React.FC = () => {
       setNewImageName('')
       setNewEntrypoint('')
       setSkipValidation(false)
-      toast.success(`Creating snapshot ${newSnapshotName}`)
+      toast.success(`Creating snapshot ${trimmedName}`)
 
       if (paginationParams.pageIndex !== 0) {
         setPaginationParams((prev) => ({
@@ -523,15 +527,20 @@ const Snapshots: React.FC = () => {
                   If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
                 </p>
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="skip-validation"
-                  checked={skipValidation}
-                  onCheckedChange={(checked) => setSkipValidation(!!checked)}
-                />
-                <Label htmlFor="skip-validation" className="text-sm">
-                  Skip validation
-                </Label>
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="skip-validation"
+                    checked={skipValidation}
+                    onCheckedChange={(checked) => setSkipValidation(!!checked)}
+                  />
+                  <Label htmlFor="skip-validation" className="text-sm">
+                    Skip validation
+                  </Label>
+                </div>
+                <p className="text-sm text-muted-foreground pl-1">
+                  Not recommended - useful for entrypoints that require environment variables
+                </p>
               </div>
             </form>
             <DialogFooter>
@@ -552,8 +561,8 @@ const Snapshots: React.FC = () => {
                   disabled={
                     !newSnapshotName.trim() ||
                     !newImageName.trim() ||
-                    validateSnapshotName(newSnapshotName) !== null ||
-                    validateImageName(newImageName) !== null
+                    validateSnapshotName(newSnapshotName.trim()) !== null ||
+                    validateImageName(newImageName.trim()) !== null
                   }
                 >
                   Create
