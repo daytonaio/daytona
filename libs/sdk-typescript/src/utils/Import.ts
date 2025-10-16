@@ -28,7 +28,12 @@ const requireMap = {
 }
 
 const validateMap: Record<string, (mod: any) => boolean> = {
-  fs: (mod: any) => typeof mod.createReadStream === 'function',
+  'fast-glob': (mod: any) => typeof mod.default === 'function' && typeof mod.default.sync === 'function',
+  '@iarna/toml': (mod: any) => typeof mod.parse === 'function' && typeof mod.stringify === 'function',
+  stream: (mod: any) => typeof mod.Readable === 'function' && typeof mod.Writable === 'function',
+  tar: (mod: any) => typeof mod.extract === 'function' && typeof mod.create === 'function',
+  'expand-tilde': (mod: any) => typeof mod.default === 'function',
+  fs: (mod: any) => typeof mod.createReadStream === 'function' && typeof mod.readFile === 'function',
   'form-data': (mod: any) => typeof mod.default === 'function',
 }
 
