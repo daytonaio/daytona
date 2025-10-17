@@ -4,8 +4,7 @@
  */
 
 import { Injectable, Logger, Inject, ExecutionContext } from '@nestjs/common'
-import { ThrottlerGuard, ThrottlerRequest, ThrottlerModuleOptions } from '@nestjs/throttler'
-import { ThrottlerStorage } from '@nestjs/throttler/dist/throttler-storage.interface'
+import { ThrottlerGuard, ThrottlerRequest, ThrottlerModuleOptions, ThrottlerStorage } from '@nestjs/throttler'
 import { Reflector } from '@nestjs/core'
 import { Request } from 'express'
 import { getRedisConnectionToken } from '@nestjs-modules/ioredis'
