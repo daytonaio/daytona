@@ -33,6 +33,7 @@ import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
+import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
@@ -280,17 +281,17 @@ export class SnapshotService {
     // validate per-sandbox quotas
     if (cpu && cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
-        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
+        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (memory && memory > organization.maxMemoryPerSandbox) {
       throw new ForbiddenException(
-        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB)`,
+        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
     if (disk && disk > organization.maxDiskPerSandbox) {
       throw new ForbiddenException(
-        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB)`,
+        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
       )
     }
 
