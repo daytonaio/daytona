@@ -40,6 +40,7 @@ import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-ex
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { LockableEntity } from '../../common/services/lockable-entity.service'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 @Injectable()
 export class SandboxManager extends LockableEntity implements TrackableJobExecutions, OnApplicationShutdown {
@@ -74,7 +75,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
+  @Cron(CronExpression.EVERY_MINUTE, { name: `${CRON_SCOPES.SANDBOXES}:auto-stop-check` })
   @TrackJobExecution()
   @OtelSpan()
   @LogExecution('auto-stop-check')
@@ -141,7 +142,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
+  @Cron(CronExpression.EVERY_MINUTE, { name: `${CRON_SCOPES.SANDBOXES}:auto-archive-check` })
   @TrackJobExecution()
   @LogExecution('auto-archive-check')
   async autoArchiveCheck(): Promise<void> {
@@ -189,7 +190,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-delete-check' })
+  @Cron(CronExpression.EVERY_MINUTE, { name: `${CRON_SCOPES.SANDBOXES}:auto-delete-check` })
   @TrackJobExecution()
   @LogExecution('auto-delete-check')
   async autoDeleteCheck(): Promise<void> {
@@ -249,7 +250,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: `${CRON_SCOPES.SANDBOXES}:sync-states` })
   @TrackJobExecution()
   @OtelSpan()
   @LogExecution('sync-states')
@@ -317,7 +318,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: `${CRON_SCOPES.SANDBOXES}:sync-archived-desired-states` })
   @TrackJobExecution()
   @LogExecution('sync-archived-desired-states')
   async syncArchivedDesiredStates(): Promise<void> {

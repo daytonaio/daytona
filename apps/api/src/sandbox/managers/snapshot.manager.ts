@@ -33,6 +33,7 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { setTimeout as sleep } from 'timers/promises'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 @Injectable()
 export class SnapshotManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -70,7 +71,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'sync-runner-snapshots', waitForCompletion: true })
+  @Cron(CronExpression.EVERY_5_SECONDS, {
+    name: `${CRON_SCOPES.SNAPSHOTS}:sync-runner-snapshots`,
+    waitForCompletion: true,
+  })
   @TrackJobExecution()
   @LogExecution('sync-runner-snapshots')
   async syncRunnerSnapshots() {
@@ -109,7 +113,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-runner-snapshot-states', waitForCompletion: true })
+  @Cron(CronExpression.EVERY_10_SECONDS, {
+    name: `${CRON_SCOPES.SNAPSHOTS}:sync-runner-snapshot-states`,
+    waitForCompletion: true,
+  })
   @TrackJobExecution()
   @LogExecution('sync-runner-snapshot-states')
   async syncRunnerSnapshotStates() {
@@ -350,7 +357,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-cleanup' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: `${CRON_SCOPES.SNAPSHOTS}:check-snapshot-cleanup` })
   @TrackJobExecution()
   @LogExecution('check-snapshot-cleanup')
   async checkSnapshotCleanup() {
@@ -394,7 +401,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-state', waitForCompletion: true })
+  @Cron(CronExpression.EVERY_10_SECONDS, {
+    name: `${CRON_SCOPES.SNAPSHOTS}:check-snapshot-state`,
+    waitForCompletion: true,
+  })
   @TrackJobExecution()
   @LogExecution('check-snapshot-state')
   async checkSnapshotState() {
@@ -469,7 +479,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   @Cron(CronExpression.EVERY_30_MINUTES, {
-    name: 'cleanup-local-snapshots',
+    name: `${CRON_SCOPES.SNAPSHOTS}:cleanup-local-snapshots`,
   })
   @TrackJobExecution()
   @LogExecution('cleanup-local-snapshots')
@@ -860,7 +870,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.snapshotRepository.save(snapshot)
   }
 
-  @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup-old-buildinfo-snapshot-runners' })
+  @Cron(CronExpression.EVERY_HOUR, { name: `${CRON_SCOPES.SNAPSHOTS}:cleanup-old-buildinfo-snapshot-runners` })
   @TrackJobExecution()
   @LogExecution('cleanup-old-buildinfo-snapshot-runners')
   async cleanupOldBuildInfoSnapshotRunners() {
@@ -901,7 +911,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'deactivate-old-snapshots' })
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: `${CRON_SCOPES.SNAPSHOTS}:deactivate-old-snapshots` })
   @TrackJobExecution()
   @LogExecution('deactivate-old-snapshots')
   async deactivateOldSnapshots() {
@@ -967,7 +977,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-inactive-snapshots-from-runners' })
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: `${CRON_SCOPES.SNAPSHOTS}:cleanup-inactive-snapshots-from-runners` })
   @TrackJobExecution()
   @LogExecution('cleanup-inactive-snapshots-from-runners')
   async cleanupInactiveSnapshotsFromRunners() {

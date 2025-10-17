@@ -60,6 +60,7 @@ import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { LockableEntity } from '../../common/services/lockable-entity.service'
 import { customAlphabet as customNanoid, urlAlphabet } from 'nanoid'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -1102,7 +1103,7 @@ export class SandboxService extends LockableEntity {
     return sandbox
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-destroyed-sandboxes' })
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: `${CRON_SCOPES.SANDBOXES}:cleanup-destroyed-sandboxes` })
   @LogExecution('cleanup-destroyed-sandboxes')
   async cleanupDestroyedSandboxes() {
     const twentyFourHoursAgo = new Date()
@@ -1118,7 +1119,7 @@ export class SandboxService extends LockableEntity {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-build-failed-sandboxes' })
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: `${CRON_SCOPES.SANDBOXES}:cleanup-build-failed-sandboxes` })
   @LogExecution('cleanup-build-failed-sandboxes')
   async cleanupBuildFailedSandboxes() {
     const twentyFourHoursAgo = new Date()
@@ -1230,7 +1231,7 @@ export class SandboxService extends LockableEntity {
     await this.createForWarmPool(event.warmPool)
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'handle-unschedulable-runners' })
+  @Cron(CronExpression.EVERY_MINUTE, { name: `${CRON_SCOPES.SANDBOXES}:handle-unschedulable-runners` })
   @LogExecution('handle-unschedulable-runners')
   private async handleUnschedulableRunners() {
     const runners = await this.runnerRepository.find({ where: { unschedulable: true } })
