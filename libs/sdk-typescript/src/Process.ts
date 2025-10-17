@@ -747,7 +747,7 @@ function findSubarray(haystack: Uint8Array, needle: Uint8Array): number {
 }
 
 function createWebSocket(url: string, token: string, headers: Record<string, string>): WebSocket {
-  if (RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS) {
+  if (RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.DENO || RUNTIME === Runtime.SERVERLESS) {
     return new WebSocket(
       url + '&DAYTONA_SANDBOX_AUTH_KEY=' + token,
       `X-Daytona-SDK-Version~${headers['X-Daytona-SDK-Version']}`,

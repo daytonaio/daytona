@@ -505,6 +505,36 @@ await fs.uploadFiles(files);
 ***
 
 
+## DownloadMetadata
+
+Represents metadata for a file download operation.
+
+**Properties**:
+
+- `destination?` _string_ - Destination path in the local filesystem where the file content will be streamed to.
+- `error?` _string_ - Error message if the download failed, undefined if successful.
+- `result?` _string \| Uint8Array\<ArrayBufferLike\> \| Buffer\<ArrayBufferLike\>_ - The download result - file path (if destination provided in the request)
+    or bytes content (if no destination in the request), undefined if failed or no data received.
+## FileDownloadRequest
+
+Represents a request to download a single file from the Sandbox.
+
+**Properties**:
+
+- `destination?` _string_ - Destination path in the local filesystem where the file content will be
+    streamed to. If not provided, the file will be downloaded in the bytes buffer (might cause memory issues if the file is large).
+- `source` _string_ - Source path in the Sandbox. Relative paths are resolved based on the user's
+    root directory.
+## FileDownloadResponse
+
+Represents the response to a single file download request.
+
+**Properties**:
+
+- `error?` _string_ - Error message if the download failed, undefined if successful.
+- `result?` _string \| Buffer\<ArrayBufferLike\>_ - The download result - file path (if destination provided in the request)
+    or bytes content (if no destination in the request), undefined if failed or no data received.
+- `source` _string_ - The original source path requested for download.
 ## FilePermissionsParams
 
 Parameters for setting file permissions in the Sandbox.
