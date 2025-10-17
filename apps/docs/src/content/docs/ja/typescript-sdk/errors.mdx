@@ -3,24 +3,23 @@ title: "エラー"
 hideTitleOnPage: true
 ---
 
-
-## DaytonaError
+## DaytonaError \{#daytonaerror\}
 
 Daytona SDKの基底エラー。
 
 **継承:**
 
-- `Error`
+* `Error`
 
-### 派生クラス
+### 派生クラス \{#extended-by\}
 
-- `DaytonaNotFoundError`
+* `DaytonaNotFoundError`
 
-### コンストラクタ
+### コンストラクタ \{#constructors\}
 
-#### new DaytonaError()
+#### new DaytonaError() \{#new-daytonaerror\}
 
-_継承元_: `Error.constructor`
+*継承元*: `Error.constructor`
 
 ```ts
 new DaytonaError(message?: string): DaytonaError
@@ -28,16 +27,15 @@ new DaytonaError(message?: string): DaytonaError
 
 **パラメータ**:
 
-- `message?` _string_
-
+* `message?` *string*
 
 **戻り値**:
 
-- `DaytonaError`
+* `DaytonaError`
 
-#### new DaytonaError()
+#### new DaytonaError() \{#new-daytonaerror\}
 
-_継承元_: `Error.constructor`
+*継承元*: `Error.constructor`
 
 ```ts
 new DaytonaError(message?: string, options?: ErrorOptions): DaytonaError
@@ -45,30 +43,28 @@ new DaytonaError(message?: string, options?: ErrorOptions): DaytonaError
 
 **パラメータ**:
 
-- `message?` _string_
-- `options?` _ErrorOptions_
-
+* `message?` *string*
+* `options?` *ErrorOptions*
 
 **戻り値**:
 
-- `DaytonaError`
+* `DaytonaError`
 
 ***
 
-
-## DaytonaNotFoundError
+## DaytonaNotFoundError \{#daytonanotfounderror\}
 
 Daytona SDK の基本となるエラー。
 
 **継承:**
 
-- `DaytonaError`
+* `DaytonaError`
 
-### コンストラクタ
+### コンストラクタ \{#constructors\}
 
-#### new DaytonaNotFoundError()
+#### new DaytonaNotFoundError() \{#new-daytonanotfounderror\}
 
-_継承元_: `DaytonaError.constructor`
+*継承元*: `DaytonaError.constructor`
 
 ```ts
 new DaytonaNotFoundError(message?: string): DaytonaNotFoundError
@@ -76,16 +72,15 @@ new DaytonaNotFoundError(message?: string): DaytonaNotFoundError
 
 **パラメータ**:
 
-- `message?` _string_
-
+* `message?` *string*
 
 **戻り値**:
 
-- `DaytonaNotFoundError`
+* `DaytonaNotFoundError`
 
-#### new DaytonaNotFoundError()
+#### new DaytonaNotFoundError() \{#new-daytonanotfounderror\}
 
-_継承元_: `DaytonaError.constructor`
+*継承元*: `DaytonaError.constructor`
 
 ```ts
 new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFoundError
@@ -93,11 +88,9 @@ new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFo
 
 **パラメータ**:
 
-- `message?` _string_
-- `options?` _ErrorOptions_
-
+* `message?` *string*
+* `options?` *ErrorOptions*
 
 **戻り値**:
 
-- `DaytonaNotFoundError`
-
+* `DaytonaNotFoundError`
