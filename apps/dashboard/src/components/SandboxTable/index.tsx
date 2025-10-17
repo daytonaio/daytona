@@ -124,7 +124,7 @@ export function SandboxTable({
         isRefreshing={isRefreshing}
       />
 
-      <Table className="border-separate border-spacing-0">
+      <Table className="border-separate border-spacing-0" style={{ tableLayout: 'fixed', width: '100%' }}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -140,6 +140,9 @@ export function SandboxTable({
                       'sticky top-0 z-[3] border-b border-border',
                       header.column.getCanSort() ? 'hover:bg-muted cursor-pointer' : '',
                     )}
+                    style={{
+                      width: `${header.column.getSize()}px`,
+                    }}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
@@ -181,9 +184,7 @@ export function SandboxTable({
                     }}
                     className="border-b border-border"
                     style={{
-                      width: cell.column.id === 'name' ? '35%' : cell.column.id === 'select' ? '30px' : 'auto',
-                      maxWidth: cell.column.id === 'select' ? '30px' : cell.column.getSize() + 80,
-                      minWidth: cell.column.id === 'select' ? '30px' : cell.column.getSize(),
+                      width: `${cell.column.getSize()}px`,
                     }}
                     sticky={cell.column.id === 'actions' ? 'right' : undefined}
                   >

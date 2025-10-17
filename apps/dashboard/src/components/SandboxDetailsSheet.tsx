@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Archive, Camera, X, GitFork, Trash, Play, Tag } from 'lucide-react'
+import { Archive, Camera, X, GitFork, Trash, Play, Tag, Copy } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -60,6 +61,16 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
 
   const getLastEvent = (sandbox: Sandbox): { date: Date; relativeTimeString: string } => {
     return getRelativeTimeString(sandbox.updatedAt)
+  }
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Copied to clipboard')
+    } catch (err) {
+      console.error('Failed to copy text:', err)
+      toast.error('Failed to copy to clipboard')
+    }
   }
 
   return (
@@ -149,11 +160,36 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
             <TabsTrigger value="terminal">Terminal</TabsTrigger>
           </TabsList> */}
           <TabsContent value="overview" className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
-            <div className="grid grid-cols-1 md:grid-cols-[320px_1fr_1fr_1fr] gap-6">
+            <div className="grid grid-cols-2 gap-6">
               <div>
-                <h3 className="text-sm text-muted-foreground">ID</h3>
-                <p className="mt-1 text-sm font-medium">{sandbox.id}</p>
+                <h3 className="text-sm text-muted-foreground">Name</h3>
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">{sandbox.name}</p>
+                  <button
+                    onClick={() => copyToClipboard(sandbox.name)}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Copy name"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
+              <div>
+                <h3 className="text-sm text-muted-foreground">UUID</h3>
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">{sandbox.id}</p>
+                  <button
+                    onClick={() => copyToClipboard(sandbox.id)}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Copy UUID"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <h3 className="text-sm text-muted-foreground">State</h3>
                 <div className="mt-1 text-sm">
@@ -162,12 +198,39 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               </div>
               <div>
                 <h3 className="text-sm text-muted-foreground">Snapshot</h3>
-                <p className="mt-1 text-sm font-medium">{sandbox.snapshot}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">{sandbox.snapshot || '-'}</p>
+                  {sandbox.snapshot && (
+                    <button
+                      onClick={() => copyToClipboard(sandbox.snapshot || '')}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Copy snapshot"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
               </div>
               <div>
                 <h3 className="text-sm text-muted-foreground">Region</h3>
-                <p className="mt-1 text-sm font-medium">{sandbox.target}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="text-sm font-medium truncate">{sandbox.target}</p>
+                  <button
+                    onClick={() => copyToClipboard(sandbox.target)}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Copy region"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
+                </div>
               </div>
+              <div>
+                <h3 className="text-sm text-muted-foreground">Last used</h3>
+                <p className="mt-1 text-sm font-medium">{getLastEvent(sandbox).relativeTimeString}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <h3 className="text-sm text-muted-foreground">Resources</h3>
                 <div className="mt-1 text-sm font-medium flex items-center gap-1">
@@ -181,10 +244,6 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                     {sandbox.disk} GiB
                   </div>
                 </div>
-              </div>
-              <div>
-                <h3 className="text-sm text-muted-foreground">Last used</h3>
-                <p className="mt-1 text-sm font-medium">{getLastEvent(sandbox).relativeTimeString}</p>
               </div>
             </div>
             <div>
