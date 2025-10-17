@@ -10,7 +10,7 @@ from daytona_api_client.exceptions import NotFoundException, OpenApiException
 from daytona_api_client_async.exceptions import NotFoundException as NotFoundExceptionAsync
 from daytona_api_client_async.exceptions import OpenApiException as OpenApiExceptionAsync
 
-from ..common.errors import DaytonaError, DaytonaNotFoundError
+from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -36,6 +36,9 @@ def intercept_errors(
                 msg = _get_open_api_exception_message(e)
                 if isinstance(e, (NotFoundException, NotFoundExceptionAsync)):
                     raise DaytonaNotFoundError(f"{message_prefix}{msg}") from None
+                # Check for rate limit (429) errors
+                if hasattr(e, "status") and e.status == 429:
+                    raise DaytonaRateLimitError(f"{message_prefix}{msg}") from None
                 raise DaytonaError(f"{message_prefix}{msg}") from None
 
             msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)

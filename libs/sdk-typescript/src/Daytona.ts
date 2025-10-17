@@ -17,7 +17,7 @@ import axios, { AxiosError } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
-import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
+import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
 import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
@@ -299,15 +299,19 @@ export class Daytona {
           errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
         }
 
-        try {
-          errorMessage = JSON.stringify(errorMessage)
-        } catch {
-          errorMessage = String(errorMessage)
+        if (typeof errorMessage === 'object') {
+          try {
+            errorMessage = JSON.stringify(errorMessage)
+          } catch {
+            errorMessage = String(errorMessage)
+          }
         }
 
-        switch (error.response?.data?.statusCode) {
+        switch (error.response?.status) {
           case 404:
             throw new DaytonaNotFoundError(errorMessage)
+          case 429:
+            throw new DaytonaRateLimitError(errorMessage)
           default:
             throw new DaytonaError(errorMessage)
         }
