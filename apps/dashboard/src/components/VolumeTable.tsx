@@ -45,7 +45,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   const deletePermitted = useMemo(
-    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES),
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_VOLUMES),
     [authenticatedUserHasPermission],
   )
 
