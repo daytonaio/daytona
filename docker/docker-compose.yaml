@@ -2,7 +2,6 @@ name: daytona
 services:
   api:
     image: daytonaio/daytona-api
-    privileged: true
     ports:
       - 3000:3000
     networks:
