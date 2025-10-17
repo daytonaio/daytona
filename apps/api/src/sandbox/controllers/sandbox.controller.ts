@@ -122,7 +122,7 @@ export class SandboxController {
     @Query('labels') labelsQuery?: string,
     @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
   ): Promise<SandboxDto[]> {
-    const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
+    const labels = labelsQuery ? JSON.parse(labelsQuery) : undefined
     const sandboxes = await this.sandboxService.findAllDeprecated(
       authContext.organizationId,
       labels,
@@ -182,7 +182,7 @@ export class SandboxController {
       {
         id,
         name,
-        labels: labels ? JSON.parse(labels) : {},
+        labels: labels ? JSON.parse(labels) : undefined,
         includeErroredDestroyed,
         states,
         snapshots,
