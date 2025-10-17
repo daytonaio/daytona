@@ -32,8 +32,13 @@ class DiskState(str, Enum):
     READY = 'ready'
     ATTACHED = 'attached'
     DETACHED = 'detached'
-    UPLOADING = 'uploading'
+    PENDING_PUSH = 'pending_push'
+    PUSHING = 'pushing'
     STORED = 'stored'
+    PENDING_DELETE = 'pending_delete'
+    DELETING = 'deleting'
+    DELETED = 'deleted'
+    ERROR = 'error'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

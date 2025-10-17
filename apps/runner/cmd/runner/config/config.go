@@ -14,22 +14,24 @@ import (
 )
 
 type Config struct {
-	ServerUrl              string `envconfig:"SERVER_URL" validate:"required"`
-	ApiToken               string `envconfig:"API_TOKEN" validate:"required"`
-	ApiPort                int    `envconfig:"API_PORT"`
-	TLSCertFile            string `envconfig:"TLS_CERT_FILE"`
-	TLSKeyFile             string `envconfig:"TLS_KEY_FILE"`
-	EnableTLS              bool   `envconfig:"ENABLE_TLS"`
-	CacheRetentionDays     int    `envconfig:"CACHE_RETENTION_DAYS"`
-	Environment            string `envconfig:"ENVIRONMENT"`
-	ContainerRuntime       string `envconfig:"CONTAINER_RUNTIME"`
-	ContainerNetwork       string `envconfig:"CONTAINER_NETWORK"`
-	LogFilePath            string `envconfig:"LOG_FILE_PATH"`
-	AWSRegion              string `envconfig:"AWS_REGION"`
-	AWSEndpointUrl         string `envconfig:"AWS_ENDPOINT_URL"`
-	AWSAccessKeyId         string `envconfig:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey     string `envconfig:"AWS_SECRET_ACCESS_KEY"`
-	AWSDefaultBucket       string `envconfig:"AWS_DEFAULT_BUCKET"`
+	ServerUrl          string `envconfig:"SERVER_URL" validate:"required"`
+	ApiToken           string `envconfig:"API_TOKEN" validate:"required"`
+	ApiPort            int    `envconfig:"API_PORT"`
+	TLSCertFile        string `envconfig:"TLS_CERT_FILE"`
+	TLSKeyFile         string `envconfig:"TLS_KEY_FILE"`
+	EnableTLS          bool   `envconfig:"ENABLE_TLS"`
+	CacheRetentionDays int    `envconfig:"CACHE_RETENTION_DAYS"`
+	Environment        string `envconfig:"ENVIRONMENT"`
+	ContainerRuntime   string `envconfig:"CONTAINER_RUNTIME"`
+	ContainerNetwork   string `envconfig:"CONTAINER_NETWORK"`
+	LogFilePath        string `envconfig:"LOG_FILE_PATH"`
+	// S3 Configuration
+	AWSRegion          string `envconfig:"S3_REGION"`
+	AWSEndpointUrl     string `envconfig:"S3_ENDPOINT"`
+	AWSAccessKeyId     string `envconfig:"S3_ACCESS_KEY"`
+	AWSSecretAccessKey string `envconfig:"S3_SECRET_KEY"`
+	AWSDefaultBucket   string `envconfig:"S3_DEFAULT_BUCKET"`
+	// Sandbox Disk Configuration
 	ResourceLimitsDisabled bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
 	DataDir                string `envconfig:"DISK_DATA_DIR"`
 	LayerSizeThresholdMB   int64  `envconfig:"DISK_LAYER_SIZE_THRESHOLD_MB"`

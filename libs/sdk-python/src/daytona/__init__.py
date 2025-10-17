@@ -1,7 +1,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from daytona_api_client import SandboxState, SessionExecuteResponse
+from daytona_api_client import DiskState, SandboxState, SessionExecuteResponse
 
 from ._async.computer_use import (
     AsyncComputerUse,
@@ -56,6 +56,7 @@ __all__ = [
     "Sandbox",
     "Resources",
     "SandboxState",
+    "DiskState",
     "ChartType",
     "Chart",
     "LineChart",

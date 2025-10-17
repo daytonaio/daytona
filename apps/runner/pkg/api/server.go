@@ -134,8 +134,9 @@ func (a *ApiServer) Start() error {
 
 	diskController := protected.Group("/disk")
 	{
-		diskController.POST("/:diskId/archive", controllers.ArchiveDisk)
-		diskController.POST("/:diskId/restore", controllers.RestoreDisk)
+		diskController.POST("/:diskId/push", controllers.PushDisk)
+		diskController.POST("/:diskId/pull", controllers.PullDisk)
+		diskController.GET("/:diskId/info", controllers.DiskInfo)
 	}
 
 	a.httpServer = &http.Server{

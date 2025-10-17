@@ -401,18 +401,6 @@ export class SandboxStartAction extends SandboxAction {
         }
       }
 
-      // Restore disks if any are attached
-      if (sandbox.disks && sandbox.disks.length > 0) {
-        for (const diskId of sandbox.disks) {
-          try {
-            await runnerAdapter.restoreDisk(diskId, registry)
-          } catch (error) {
-            this.logger.error(`Failed to restore disk ${diskId}: ${error}`)
-            // Continue with sandbox creation even if disk restore fails
-          }
-        }
-      }
-
       await runnerAdapter.createSandbox(sandbox, registry, undefined, metadata)
     } else {
       // if sandbox has runner, start sandbox

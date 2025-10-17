@@ -506,12 +506,12 @@ func (c *QCowClient) Checksum(ctx context.Context, imagePath string) (string, er
 
 // GetActualSize returns the actual disk usage of a QCOW2 image
 func (c *QCowClient) GetActualSize(ctx context.Context, imagePath string) (int64, error) {
-	fileInfo, err := os.Stat(imagePath)
+	info, err := c.Info(ctx, imagePath)
 	if err != nil {
-		return 0, fmt.Errorf("failed to stat image: %w", err)
+		return 0, err
 	}
 
-	return fileInfo.Size(), nil
+	return info.ActualSize, nil
 }
 
 // GetVirtualSize returns the virtual size of a QCOW2 image

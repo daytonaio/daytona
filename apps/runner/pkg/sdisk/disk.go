@@ -220,14 +220,15 @@ func (v *disk) pushBaseLayer(ctx context.Context, state *DiskState) error {
 		return fmt.Errorf("failed to calculate checksum: %w", err)
 	}
 
-	// Get actual size
-	actualSize, err := v.qcow2Client.GetActualSize(ctx, baseImagePath)
+	// Get file size of the base layer
+	fileInfo, err := os.Stat(baseImagePath)
 	if err != nil {
-		return fmt.Errorf("failed to get actual size: %w", err)
+		return fmt.Errorf("failed to get file size: %w", err)
 	}
+	actualSize := fileInfo.Size()
 
 	// Generate base layer ID
-	layerID := fmt.Sprintf("base-%d", time.Now().Unix())
+	layerID := fmt.Sprintf("base-%s", state.Name)
 
 	// Upload as a layer (using flattened version if it had backing)
 	if err := v.s3Client.UploadLayer(ctx, v.name, layerID, baseImagePath); err != nil {
@@ -284,11 +285,12 @@ func (v *disk) pushBaseLayer(ctx context.Context, state *DiskState) error {
 // 2. Create a new empty working layer with the just-uploaded layer as backing
 // This ensures true delta layers - each layer only contains what changed during that session.
 func (v *disk) pushIncrementalLayer(ctx context.Context, state *DiskState, existingMetadata *S3Metadata) error {
-	// Get actual size of the current working layer
-	actualSize, err := v.qcow2Client.GetActualSize(ctx, v.imagePath)
+	// Get file size of the current working layer
+	fileInfo, err := os.Stat(v.imagePath)
 	if err != nil {
-		return fmt.Errorf("failed to get actual size: %w", err)
+		return fmt.Errorf("failed to get file size: %w", err)
 	}
+	actualSize := fileInfo.Size()
 
 	// Check if working layer has meaningful changes
 	// Empty working layers (just created by createNewWorkingLayer) are typically 200-500KB
@@ -323,9 +325,13 @@ func (v *disk) pushIncrementalLayer(ctx context.Context, state *DiskState, exist
 			layerID = lastLayer.ID
 			parentID = lastLayer.ParentID
 			reusingLayer = true
+			fmt.Fprintf(os.Stderr, "info: reusing layer %s (size: %d bytes < threshold: %d bytes)\n",
+				layerID, lastLayer.Size, thresholdBytes)
 		} else {
 			// Create a new layer
 			parentID = existingMetadata.TopLayerID
+			fmt.Fprintf(os.Stderr, "info: creating new layer (last layer size: %d bytes >= threshold: %d bytes)\n",
+				lastLayer.Size, thresholdBytes)
 		}
 	} else {
 		parentID = ""
@@ -398,6 +404,8 @@ func (v *disk) pushIncrementalLayer(ctx context.Context, state *DiskState, exist
 	// If the layer has grown to/above the threshold, create a new layer for next push
 	if reusingLayer && actualSize < thresholdBytes {
 		// Keep the current working layer for continued reuse
+		fmt.Fprintf(os.Stderr, "info: keeping current working layer for reuse (size: %d bytes < threshold: %d bytes)\n",
+			actualSize, thresholdBytes)
 	} else {
 		// Create a new empty working layer with the just-uploaded layer as backing
 		// This is critical for the stacked approach - future writes go to the new layer

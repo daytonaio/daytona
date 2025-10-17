@@ -11,6 +11,8 @@ import { Repository } from 'typeorm'
 import { UserService } from '../../user/user.service'
 import { User } from '../../user/user.entity'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { RunnerState } from '../enums/runner-state.enum'
+import { BadRequestError } from '../../exceptions/bad-request.exception'
 
 const runnerArray: Runner[] = [
   {
@@ -22,9 +24,24 @@ const runnerArray: Runner[] = [
     memoryGiB: 1,
     gpu: 1,
     gpuType: 'test',
-    key: 'test',
-    domain: 'test',
-    limit: 1,
+    domain: 'test1.example.com',
+    apiUrl: 'https://test1.example.com/api',
+    proxyUrl: 'https://test1.example.com/proxy',
+    apiKey: 'test-key-1',
+    state: RunnerState.READY,
+    availabilityScore: 80,
+    currentCpuUsagePercentage: 0,
+    currentMemoryUsagePercentage: 0,
+    currentDiskUsagePercentage: 0,
+    currentAllocatedCpu: 0,
+    currentAllocatedMemoryGiB: 0,
+    currentAllocatedDiskGiB: 0,
+    currentSnapshotCount: 0,
+    version: '1.0.0',
+    unschedulable: false,
+    lastChecked: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: '2',
@@ -35,9 +52,52 @@ const runnerArray: Runner[] = [
     memoryGiB: 1,
     gpu: 1,
     gpuType: 'test',
-    key: 'test',
-    domain: 'test',
-    limit: 1,
+    domain: 'test2.example.com',
+    apiUrl: 'https://test2.example.com/api',
+    proxyUrl: 'https://test2.example.com/proxy',
+    apiKey: 'test-key-2',
+    state: RunnerState.READY,
+    availabilityScore: 90,
+    currentCpuUsagePercentage: 0,
+    currentMemoryUsagePercentage: 0,
+    currentDiskUsagePercentage: 0,
+    currentAllocatedCpu: 0,
+    currentAllocatedMemoryGiB: 0,
+    currentAllocatedDiskGiB: 0,
+    currentSnapshotCount: 0,
+    version: '1.0.0',
+    unschedulable: false,
+    lastChecked: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: '3',
+    class: SandboxClass.SMALL,
+    region: 'us',
+    cpu: 1,
+    diskGiB: 1,
+    memoryGiB: 1,
+    gpu: 1,
+    gpuType: 'test',
+    domain: 'test3.example.com',
+    apiUrl: 'https://test3.example.com/api',
+    proxyUrl: 'https://test3.example.com/proxy',
+    apiKey: 'test-key-3',
+    state: RunnerState.READY,
+    availabilityScore: 85,
+    currentCpuUsagePercentage: 0,
+    currentMemoryUsagePercentage: 0,
+    currentDiskUsagePercentage: 0,
+    currentAllocatedCpu: 0,
+    currentAllocatedMemoryGiB: 0,
+    currentAllocatedDiskGiB: 0,
+    currentSnapshotCount: 0,
+    version: '1.0.0',
+    unschedulable: false,
+    lastChecked: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ]
 
@@ -50,9 +110,24 @@ const oneRunner: Runner = {
   memoryGiB: 1,
   gpu: 1,
   gpuType: 'test',
-  key: 'test',
-  domain: 'test',
-  limit: 1,
+  domain: 'test1.example.com',
+  apiUrl: 'https://test1.example.com/api',
+  proxyUrl: 'https://test1.example.com/proxy',
+  apiKey: 'test-key-1',
+  state: RunnerState.READY,
+  availabilityScore: 80,
+  currentCpuUsagePercentage: 0,
+  currentMemoryUsagePercentage: 0,
+  currentDiskUsagePercentage: 0,
+  currentAllocatedCpu: 0,
+  currentAllocatedMemoryGiB: 0,
+  currentAllocatedDiskGiB: 0,
+  currentSnapshotCount: 0,
+  version: '1.0.0',
+  unschedulable: false,
+  lastChecked: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 }
 
 describe('RunnerService', () => {
@@ -101,9 +176,24 @@ describe('RunnerService', () => {
         memoryGiB: 1,
         gpu: 1,
         gpuType: 'test',
-        key: 'test',
-        domain: 'test',
-        limit: 1,
+        domain: 'test1.example.com',
+        apiUrl: 'https://test1.example.com/api',
+        proxyUrl: 'https://test1.example.com/proxy',
+        apiKey: 'test-key-1',
+        state: RunnerState.INITIALIZING,
+        availabilityScore: 0,
+        currentCpuUsagePercentage: 0,
+        currentMemoryUsagePercentage: 0,
+        currentDiskUsagePercentage: 0,
+        currentAllocatedCpu: 0,
+        currentAllocatedMemoryGiB: 0,
+        currentAllocatedDiskGiB: 0,
+        currentSnapshotCount: 0,
+        version: '1.0.0',
+        unschedulable: false,
+        lastChecked: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       expect(
@@ -115,9 +205,11 @@ describe('RunnerService', () => {
           memoryGiB: 1,
           gpu: 1,
           gpuType: 'test',
-          key: 'test',
-          domain: 'test',
-          limit: 1,
+          domain: 'test1.example.com',
+          apiUrl: 'https://test1.example.com/api',
+          proxyUrl: 'https://test1.example.com/proxy',
+          apiKey: 'test-key-1',
+          version: '1.0.0',
         }),
       ).resolves.toEqual(oneRunner)
     })
@@ -144,6 +236,66 @@ describe('RunnerService', () => {
       const retVal = await service.remove('2')
       expect(removeSpy).toHaveBeenCalledWith('2')
       expect(retVal).toBeUndefined()
+    })
+  })
+
+  describe('getRandomAvailableRunner()', () => {
+    beforeEach(() => {
+      // Mock the findAvailableRunners method to return our test data
+      jest.spyOn(service, 'findAvailableRunners').mockResolvedValue(runnerArray)
+    })
+
+    it('should return a random runner from available runners when no preferred runners specified', async () => {
+      const params = {
+        region: 'us',
+        sandboxClass: SandboxClass.SMALL,
+      }
+
+      const result = await service.getRandomAvailableRunner(params)
+
+      expect(result).toBeDefined()
+      expect(runnerArray).toContain(result)
+      expect(service.findAvailableRunners).toHaveBeenCalledWith(params)
+    })
+
+    it('should prioritize preferred runners when they are available', async () => {
+      const params = {
+        region: 'us',
+        sandboxClass: SandboxClass.SMALL,
+        preferredRunnerIds: ['2', '3'], // Prefer runners 2 and 3
+      }
+
+      const result = await service.getRandomAvailableRunner(params)
+
+      expect(result).toBeDefined()
+      expect(['2', '3']).toContain(result.id)
+      expect(service.findAvailableRunners).toHaveBeenCalledWith(params)
+    })
+
+    it('should fallback to all available runners when preferred runners are not available', async () => {
+      const params = {
+        region: 'us',
+        sandboxClass: SandboxClass.SMALL,
+        preferredRunnerIds: ['999', '888'], // Non-existent runner IDs
+      }
+
+      const result = await service.getRandomAvailableRunner(params)
+
+      expect(result).toBeDefined()
+      expect(runnerArray).toContain(result)
+      expect(service.findAvailableRunners).toHaveBeenCalledWith(params)
+    })
+
+    it('should throw error when no available runners', async () => {
+      jest.spyOn(service, 'findAvailableRunners').mockResolvedValue([])
+
+      const params = {
+        region: 'us',
+        sandboxClass: SandboxClass.SMALL,
+      }
+
+      await expect(service.getRandomAvailableRunner(params)).rejects.toThrow(BadRequestError)
+      await expect(service.getRandomAvailableRunner(params)).rejects.toThrow('No available runners')
     })
   })
 })

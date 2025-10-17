@@ -9,6 +9,11 @@ export enum DiskState {
   READY = 'ready',
   ATTACHED = 'attached',
   DETACHED = 'detached',
-  UPLOADING = 'uploading',
+  PENDING_PUSH = 'pending_push',
+  PUSHING = 'pushing',
   STORED = 'stored',
+  PENDING_DELETE = 'pending_delete',
+  DELETING = 'deleting',
+  DELETED = 'deleted',
+  ERROR = 'error',
 }
