@@ -8289,7 +8289,6 @@ components:
         autoDeleteInterval: 30
         public: false
         errorReason: The sandbox is not running
-        runnerDomain: runner.example.com
         id: sandbox123
         state: creating
         class: small
@@ -8425,10 +8424,6 @@ components:
             \ 0 means delete immediately upon stopping)"
           example: 30
           type: number
-        runnerDomain:
-          description: The domain name of the runner
-          example: runner.example.com
-          type: string
         volumes:
           description: Array of volumes attached to the sandbox
           items:
@@ -8489,7 +8484,6 @@ components:
             autoDeleteInterval: 30
             public: false
             errorReason: The sandbox is not running
-            runnerDomain: runner.example.com
             id: sandbox123
             state: creating
             class: small
@@ -8525,7 +8519,6 @@ components:
             autoDeleteInterval: 30
             public: false
             errorReason: The sandbox is not running
-            runnerDomain: runner.example.com
             id: sandbox123
             state: creating
             class: small
@@ -8771,7 +8764,6 @@ components:
       example:
         sandboxId: '123456'
         url: https://123456-mysandbox.runner.com
-        legacyProxyUrl: https://3000-mysandbox.runner.com
         token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
       properties:
         sandboxId:
@@ -8785,10 +8777,6 @@ components:
         token:
           description: Access token
           example: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
-          type: string
-        legacyProxyUrl:
-          description: Legacy preview url using runner domain
-          example: https://3000-mysandbox.runner.com
           type: string
       required:
         - sandboxId
@@ -8843,8 +8831,6 @@ components:
       example:
         valid: true
         sandboxId: 123e4567-e89b-12d3-a456-426614174000
-        runnerDomain: runner-1.example.com
-        runnerId: 123e4567-e89b-12d3-a456-426614174000
       properties:
         valid:
           description: Whether the SSH access token is valid
@@ -8853,14 +8839,6 @@ components:
         sandboxId:
           description: ID of the sandbox this SSH access is for
           example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerId:
-          description: ID of the runner hosting the sandbox
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerDomain:
-          description: Domain of the runner hosting the sandbox
-          example: runner-1.example.com
           type: string
       required:
         - sandboxId
@@ -10805,7 +10783,6 @@ components:
         snapshotState: None
         public: false
         errorReason: The sandbox is not running
-        runnerDomain: runner.example.com
         id: sandbox123
         state: creating
         class: small
@@ -10944,10 +10921,6 @@ components:
             \ 0 means delete immediately upon stopping)"
           example: 30
           type: number
-        runnerDomain:
-          description: The domain name of the runner
-          example: runner.example.com
-          type: string
         volumes:
           description: Array of volumes attached to the sandbox
           items:
@@ -11119,7 +11092,6 @@ components:
     WorkspacePortPreviewUrl:
       example:
         url: https://123456-mysandbox.runner.com
-        legacyProxyUrl: https://3000-mysandbox.runner.com
         token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
       properties:
         url:
@@ -11129,10 +11101,6 @@ components:
         token:
           description: Access token
           example: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
-          type: string
-        legacyProxyUrl:
-          description: Legacy preview url using runner domain
-          example: https://3000-mysandbox.runner.com
           type: string
       required:
         - token

@@ -30,10 +30,4 @@ export interface WorkspacePortPreviewUrl {
    * @memberof WorkspacePortPreviewUrl
    */
   token: string
-  /**
-   * Legacy preview url using runner domain
-   * @type {string}
-   * @memberof WorkspacePortPreviewUrl
-   */
-  legacyProxyUrl?: string
 }

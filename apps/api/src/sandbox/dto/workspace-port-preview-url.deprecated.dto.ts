@@ -21,12 +21,4 @@ export class WorkspacePortPreviewUrlDto {
   })
   @IsString()
   token: string
-
-  @ApiProperty({
-    description: 'Legacy preview url using runner domain',
-    example: 'https://3000-mysandbox.runner.com',
-    required: false,
-  })
-  @IsString()
-  legacyProxyUrl?: string
 }

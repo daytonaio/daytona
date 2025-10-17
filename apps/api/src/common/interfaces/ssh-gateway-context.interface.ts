@@ -10,5 +10,5 @@ export interface SshGatewayContext extends BaseAuthContext {
 }
 
 export function isSshGatewayContext(user: BaseAuthContext): user is SshGatewayContext {
-  return 'role' in user && (user.role === 'ssh-gateway' || user.role === 'admin')
+  return 'role' in user && user.role === 'ssh-gateway'
 }

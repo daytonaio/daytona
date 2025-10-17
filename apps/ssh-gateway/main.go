@@ -189,17 +189,15 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 		return
 	}
 
-	if validation.RunnerId == nil {
-		log.Printf("No runner ID returned for token: %s", token)
+	runner, _, err := g.apiClient.RunnersAPI.GetRunnerBySandboxId(context.Background(), validation.SandboxId).Execute()
+	if err != nil {
+		log.Printf("Failed to get runner by sandbox ID: %v", err)
 		conn.Close()
 		return
 	}
 
-	runnerID := *validation.RunnerId
-	runnerDomain := ""
-	if validation.RunnerDomain != nil {
-		runnerDomain = *validation.RunnerDomain
-	}
+	runnerID := runner.Id
+	runnerDomain := runner.Domain
 	sandboxId := validation.SandboxId
 
 	log.Printf("Token validated, SSH connection established for runner: %s", runnerID)
