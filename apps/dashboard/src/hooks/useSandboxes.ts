@@ -12,10 +12,10 @@ import {
   ListSandboxesPaginatedStatesEnum,
   PaginatedSandboxes,
 } from '@daytonaio/api-client'
+import { isValidUUID } from '@/lib/utils'
 
 export interface SandboxFilters {
-  id?: string
-  name?: string
+  idOrName?: string
   labels?: Record<string, string>
   includeErroredDeleted?: boolean
   states?: ListSandboxesPaginatedStatesEnum[]
@@ -78,12 +78,12 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
 
       const { page, pageSize, filters = {}, sorting = {} } = params
 
-      const response = await sandboxApi.listSandboxesPaginated(
+      const listResponse = await sandboxApi.listSandboxesPaginated(
         selectedOrganization.id,
         page,
         pageSize,
-        filters.id,
-        filters.name,
+        undefined,
+        filters.idOrName,
         filters.labels ? JSON.stringify(filters.labels) : undefined,
         filters.includeErroredDeleted,
         filters.states,
@@ -101,10 +101,32 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         sorting.direction,
       )
 
-      return response.data
+      let paginatedData = listResponse.data
+
+      // TODO: this will be obsolete once we introduce the search API
+      if (filters.idOrName && isValidUUID(filters.idOrName) && page === 1) {
+        // Attempt to fetch sandbox by ID if the search value is a valid UUID
+        try {
+          const sandbox = (await sandboxApi.getSandbox(filters.idOrName, selectedOrganization.id)).data
+          const existsInPaginatedData = paginatedData.items.some((item) => item.id === sandbox.id)
+
+          if (!existsInPaginatedData) {
+            paginatedData = {
+              ...paginatedData,
+              // This is an exact UUID match, ignore sorting
+              items: [sandbox, ...paginatedData.items],
+              total: paginatedData.total + 1,
+            }
+          }
+        } catch (error) {
+          // TODO: rethrow if not 4xx
+        }
+      }
+
+      return paginatedData
     },
     enabled: !!selectedOrganization,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 10, // 10 seconds
     gcTime: 1000 * 60 * 5, // 5 minutes,
   })
 }

@@ -9,9 +9,9 @@ import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Checkbox } from '../ui/checkbox'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 
 interface SortableHeaderProps {
   column: any
@@ -76,6 +76,7 @@ export function getColumns({
   const columns: ColumnDef<Sandbox>[] = [
     {
       id: 'select',
+      size: 30,
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
@@ -111,6 +112,9 @@ export function getColumns({
     },
     {
       id: 'name',
+      size: 320,
+      enableSorting: true,
+      enableHiding: true,
       header: ({ column }) => {
         return <SortableHeader column={column} label="Name" />
       },
@@ -118,8 +122,25 @@ export function getColumns({
       cell: ({ row }) => {
         const displayName = getDisplayName(row.original)
         return (
-          <div className=" w-full truncate">
-            <span>{displayName}</span>
+          <div className="w-full truncate">
+            <span className="truncate block">{displayName}</span>
+          </div>
+        )
+      },
+    },
+    {
+      id: 'id',
+      size: 320,
+      enableSorting: false,
+      enableHiding: true,
+      header: () => {
+        return <span>UUID</span>
+      },
+      accessorKey: 'id',
+      cell: ({ row }) => {
+        return (
+          <div className="w-full truncate">
+            <span className="truncate block">{row.original.id}</span>
           </div>
         )
       },
@@ -127,11 +148,13 @@ export function getColumns({
     {
       id: 'state',
       size: 140,
+      enableSorting: true,
+      enableHiding: false,
       header: ({ column }) => {
         return <SortableHeader column={column} label="State" />
       },
       cell: ({ row }) => (
-        <div className=" w-full truncate">
+        <div className="w-full truncate">
           <SandboxStateComponent state={row.original.state} errorReason={row.original.errorReason} />
         </div>
       ),
@@ -139,16 +162,19 @@ export function getColumns({
     },
     {
       id: 'snapshot',
+      size: 150,
+      enableSorting: true,
+      enableHiding: false,
       header: ({ column }) => {
         return <SortableHeader column={column} label="Snapshot" />
       },
       cell: ({ row }) => {
         return (
-          <div className=" w-full truncate">
+          <div className="w-full truncate">
             {row.original.snapshot ? (
-              <div className="truncate max-w-md">{row.original.snapshot}</div>
+              <div className="truncate">{row.original.snapshot}</div>
             ) : (
-              <div className="truncate max-w-md text-muted-foreground/50">-</div>
+              <div className="truncate text-muted-foreground/50">-</div>
             )}
           </div>
         )
@@ -157,35 +183,42 @@ export function getColumns({
     },
     {
       id: 'region',
-      size: 80,
+      size: 100,
+      enableSorting: true,
+      enableHiding: false,
       header: ({ column }) => {
         return <SortableHeader column={column} label="Region" dataState="sortable" />
       },
       cell: ({ row }) => {
-        return <span>{row.original.target}</span>
+        return (
+          <div className="w-full truncate">
+            <span className="truncate block">{row.original.target}</span>
+          </div>
+        )
       },
       accessorKey: 'target',
     },
     {
       id: 'resources',
-      size: 10,
-      minSize: 200,
+      size: 190,
+      enableSorting: false,
+      enableHiding: false,
       header: () => {
         return <span>Resources</span>
       },
       cell: ({ row }) => {
         return (
-          <div className="flex items-center gap-2">
-            <div>
+          <div className="flex items-center gap-2 w-full truncate">
+            <div className="whitespace-nowrap">
               {row.original.cpu} <span className="text-muted-foreground">vCPU</span>
             </div>
             <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
-            <div>
-              {row.original.memory} <span className=" text-muted-foreground">GiB</span>
+            <div className="whitespace-nowrap">
+              {row.original.memory} <span className="text-muted-foreground">GiB</span>
             </div>
             <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
-            <div>
-              {row.original.disk} <span className=" text-muted-foreground">GiB</span>
+            <div className="whitespace-nowrap">
+              {row.original.disk} <span className="text-muted-foreground">GiB</span>
             </div>
           </div>
         )
@@ -195,6 +228,7 @@ export function getColumns({
       id: 'labels',
       size: 110,
       enableSorting: false,
+      enableHiding: true,
       header: () => {
         return <span>Labels</span>
       },
@@ -229,13 +263,20 @@ export function getColumns({
     },
     {
       id: 'lastEvent',
-      size: 140,
+      size: 120,
+      enableSorting: true,
+      enableHiding: false,
       header: ({ column }) => {
         return <SortableHeader column={column} label="Last Event" />
       },
       accessorFn: (row) => getLastEvent(row).date,
       cell: ({ row }) => {
-        return <span>{getLastEvent(row.original).relativeTimeString}</span>
+        const lastEvent = getLastEvent(row.original)
+        return (
+          <div className="w-full truncate">
+            <span className="truncate block">{lastEvent.relativeTimeString}</span>
+          </div>
+        )
       },
     },
     {
@@ -243,7 +284,7 @@ export function getColumns({
       size: 100,
       enableHiding: false,
       cell: ({ row }) => (
-        <div>
+        <div className="w-full flex justify-end">
           <SandboxTableActions
             sandbox={row.original}
             writePermitted={writePermitted}

@@ -129,7 +129,7 @@ export const convertTableFiltersToApiFilters = (columnFilters: ColumnFiltersStat
     switch (filter.id) {
       case 'name':
         if (filter.value && typeof filter.value === 'string') {
-          filters.name = filter.value
+          filters.idOrName = filter.value
         }
         break
       case 'state':
@@ -241,8 +241,8 @@ export const convertApiSortingToTableSorting = (sorting: SandboxSorting): Sortin
 export const convertApiFiltersToTableFilters = (filters: SandboxFilters): ColumnFiltersState => {
   const columnFilters: ColumnFiltersState = []
 
-  if (filters.name) {
-    columnFilters.push({ id: 'name', value: filters.name })
+  if (filters.idOrName) {
+    columnFilters.push({ id: 'name', value: filters.idOrName })
   }
 
   if (filters.states && filters.states.length > 0) {
