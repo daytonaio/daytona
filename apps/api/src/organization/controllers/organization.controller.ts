@@ -97,6 +97,7 @@ export class OrganizationController {
   @ApiResponse({
     status: 200,
     description: 'Organization invitation accepted successfully',
+    type: OrganizationInvitationDto,
   })
   @ApiParam({
     name: 'invitationId',
@@ -112,7 +113,7 @@ export class OrganizationController {
   async acceptInvitation(
     @AuthContext() authContext: IAuthContext,
     @Param('invitationId') invitationId: string,
-  ): Promise<void> {
+  ): Promise<OrganizationInvitationDto> {
     try {
       const invitation = await this.organizationInvitationService.findOneOrFail(invitationId)
       if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
@@ -122,7 +123,8 @@ export class OrganizationController {
       throw new NotFoundException(`Organization invitation with ID ${invitationId} not found`)
     }
 
-    return this.organizationInvitationService.accept(invitationId, authContext.userId)
+    const acceptedInvitation = await this.organizationInvitationService.accept(invitationId, authContext.userId)
+    return OrganizationInvitationDto.fromOrganizationInvitation(acceptedInvitation)
   }
 
   @Post('/invitations/:invitationId/decline')

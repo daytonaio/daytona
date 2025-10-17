@@ -5,18 +5,62 @@
 
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { AuditController } from './controllers/audit.controller'
-import { AuditLog } from './entities/audit-log.entity'
-import { AuditInterceptor } from './interceptors/audit.interceptor'
-import { AuditService } from './services/audit.service'
-import { AuditLogSubscriber } from './subscribers/audit-log.subscriber'
 import { OrganizationModule } from '../organization/organization.module'
+import { AuditLog } from './entities/audit-log.entity'
+import { AuditService } from './services/audit.service'
+import { AuditInterceptor } from './interceptors/audit.interceptor'
+import { AuditLogSubscriber } from './subscribers/audit-log.subscriber'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
+import { AuditController } from './controllers/audit.controller'
+import { AuditKafkaConsumerController } from './publishers/kafka/audit-kafka-consumer.controller'
+import { ClientsModule, Transport } from '@nestjs/microservices'
+import { TypedConfigService } from '../config/typed-config.service'
+import { Partitioners } from 'kafkajs'
+import { OpensearchModule } from 'nestjs-opensearch'
+import { AuditStorageAdapterProvider } from './providers/audit-storage.provider'
+import { AuditPublisherProvider } from './providers/audit-publisher.provider'
+import { AUDIT_KAFKA_SERVICE } from './constants/audit-tokens'
 
 @Module({
-  imports: [OrganizationModule, TypeOrmModule.forFeature([AuditLog])],
-  controllers: [AuditController],
-  providers: [AuditService, AuditInterceptor, AuditLogSubscriber, RedisLockProvider],
+  imports: [
+    OrganizationModule,
+    TypeOrmModule.forFeature([AuditLog]),
+    ClientsModule.registerAsync([
+      {
+        name: AUDIT_KAFKA_SERVICE,
+        inject: [TypedConfigService],
+        useFactory: (configService: TypedConfigService) => {
+          return {
+            transport: Transport.KAFKA,
+            options: {
+              producerOnlyMode: true,
+              client: configService.getKafkaClientConfig(),
+              producer: {
+                allowAutoTopicCreation: true,
+                createPartitioner: Partitioners.DefaultPartitioner,
+                idempotent: true,
+              },
+            },
+          }
+        },
+      },
+    ]),
+    OpensearchModule.forRootAsync({
+      inject: [TypedConfigService],
+      useFactory: (configService: TypedConfigService) => {
+        return configService.getOpenSearchConfig()
+      },
+    }),
+  ],
+  controllers: [AuditController, AuditKafkaConsumerController],
+  providers: [
+    AuditService,
+    AuditInterceptor,
+    AuditLogSubscriber,
+    RedisLockProvider,
+    AuditStorageAdapterProvider,
+    AuditPublisherProvider,
+  ],
   exports: [AuditService, AuditInterceptor],
 })
 export class AuditModule {}

@@ -276,6 +276,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInvitation'
           description: Organization invitation accepted successfully
       security:
         - bearer: []
@@ -7021,6 +7025,33 @@ paths:
             minimum: 1
             type: number
           style: form
+        - description: From date (ISO 8601 format)
+          explode: true
+          in: query
+          name: from
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: To date (ISO 8601 format)
+          explode: true
+          in: query
+          name: to
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: "Token for cursor-based pagination. When provided, takes precedence\
+            \ over page parameter."
+          explode: true
+          in: query
+          name: nextToken
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         '200':
           content:
@@ -7035,31 +7066,6 @@ paths:
             - profile
             - email
       summary: Get all audit logs
-      tags:
-        - audit
-    post:
-      operationId: createAuditLog
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateAuditLog'
-        required: true
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuditLog'
-          description: Audit log entry created successfully
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Create audit log entry
       tags:
         - audit
   /audit/organizations/{organizationId}:
@@ -7094,6 +7100,33 @@ paths:
             maximum: 200
             minimum: 1
             type: number
+          style: form
+        - description: From date (ISO 8601 format)
+          explode: true
+          in: query
+          name: from
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: To date (ISO 8601 format)
+          explode: true
+          in: query
+          name: to
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: "Token for cursor-based pagination. When provided, takes precedence\
+            \ over page parameter."
+          explode: true
+          in: query
+          name: nextToken
+          required: false
+          schema:
+            type: string
           style: form
       responses:
         '200':
@@ -11533,6 +11566,7 @@ components:
     PaginatedAuditLogs:
       example:
         total: 6.027456183070403
+        nextToken: nextToken
         totalPages: 5.962133916683182
         page: 1.4658129805029452
         items:
@@ -11577,110 +11611,14 @@ components:
           type: number
         totalPages:
           type: number
+        nextToken:
+          description: Token for next page in cursor-based pagination
+          type: string
       required:
         - items
         - page
         - total
         - totalPages
-      type: object
-    CreateAuditLog:
-      example:
-        organizationId: organizationId
-        actorId: actorId
-        targetId: targetId
-        actorEmail: actorEmail
-        action: create
-        targetType: api_key
-      properties:
-        actorId:
-          type: string
-        actorEmail:
-          type: string
-        organizationId:
-          type: string
-        action:
-          enum:
-            - create
-            - read
-            - update
-            - delete
-            - login
-            - set_default
-            - update_access
-            - update_quota
-            - suspend
-            - unsuspend
-            - accept
-            - decline
-            - link_account
-            - unlink_account
-            - leave_organization
-            - regenerate_key_pair
-            - update_scheduling
-            - start
-            - stop
-            - replace_labels
-            - create_backup
-            - update_public_status
-            - set_auto_stop_interval
-            - set_auto_archive_interval
-            - set_auto_delete_interval
-            - archive
-            - get_port_preview_url
-            - set_general_status
-            - activate
-            - deactivate
-            - update_network_settings
-            - get_webhook_app_portal_access
-            - send_webhook_message
-            - initialize_webhooks
-            - update_sandbox_default_limited_network_egress
-            - create_ssh_access
-            - revoke_ssh_access
-            - toolbox_delete_file
-            - toolbox_download_file
-            - toolbox_create_folder
-            - toolbox_move_file
-            - toolbox_set_file_permissions
-            - toolbox_replace_in_files
-            - toolbox_upload_file
-            - toolbox_bulk_upload_files
-            - toolbox_git_add_files
-            - toolbox_git_create_branch
-            - toolbox_git_delete_branch
-            - toolbox_git_clone_repository
-            - toolbox_git_commit_changes
-            - toolbox_git_pull_changes
-            - toolbox_git_push_changes
-            - toolbox_git_checkout_branch
-            - toolbox_execute_command
-            - toolbox_create_session
-            - toolbox_session_execute_command
-            - toolbox_delete_session
-            - toolbox_computer_use_start
-            - toolbox_computer_use_stop
-            - toolbox_computer_use_restart_process
-          type: string
-        targetType:
-          enum:
-            - api_key
-            - organization
-            - organization_invitation
-            - organization_role
-            - organization_user
-            - docker_registry
-            - runner
-            - sandbox
-            - snapshot
-            - user
-            - volume
-          type: string
-        targetId:
-          type: string
-      required:
-        - action
-        - actorEmail
-        - actorId
       type: object
     uploadFile_request:
       properties:
