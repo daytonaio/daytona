@@ -9,7 +9,7 @@ import { TextSearch } from 'lucide-react'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { TableEmptyState } from '@/components/TableEmptyState'
-import { Pagination } from './Pagination'
+import { Pagination } from '@/components/Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
 
 interface Props {
@@ -109,7 +109,6 @@ export function AuditLogTable({ data, loading, pagination, pageCount, onPaginati
           </TableBody>
         </Table>
       </div>
-
       <Pagination table={table} className="mt-4" entityName="Logs" totalItems={totalItems} />
     </div>
   )
