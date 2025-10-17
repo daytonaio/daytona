@@ -24,7 +24,7 @@ export class AuditTypeormStorageAdapter implements AuditLogStorageAdapter {
     throw new Error('Typeorm adapter does not support writing audit logs.')
   }
 
-  async getAllLogs(page?: number, limit?: number, filters?: AuditLogFilter): Promise<PaginatedList<AuditLog>> {
+  async getAllLogs(page?: number, limit = 1000, filters?: AuditLogFilter): Promise<PaginatedList<AuditLog>> {
     const options: FindManyOptions<AuditLog> = {
       order: {
         createdAt: 'DESC',
@@ -49,7 +49,7 @@ export class AuditTypeormStorageAdapter implements AuditLogStorageAdapter {
   async getOrganizationLogs(
     organizationId: string,
     page?: number,
-    limit?: number,
+    limit = 1000,
     filters?: AuditLogFilter,
   ): Promise<PaginatedList<AuditLog>> {
     const options: FindManyOptions<AuditLog> = {

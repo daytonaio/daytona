@@ -97,6 +97,7 @@ export class OrganizationController {
   @ApiResponse({
     status: 200,
     description: 'Organization invitation accepted successfully',
+    type: OrganizationInvitationDto,
   })
   @ApiParam({
     name: 'invitationId',

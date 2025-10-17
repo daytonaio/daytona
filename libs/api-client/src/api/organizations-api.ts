@@ -1271,7 +1271,7 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     async acceptOrganizationInvitation(
       invitationId: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationInvitation>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.acceptOrganizationInvitation(invitationId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -1951,7 +1951,10 @@ export const OrganizationsApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    acceptOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+    acceptOrganizationInvitation(
+      invitationId: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<OrganizationInvitation> {
       return localVarFp.acceptOrganizationInvitation(invitationId, options).then((request) => request(axios, basePath))
     },
     /**

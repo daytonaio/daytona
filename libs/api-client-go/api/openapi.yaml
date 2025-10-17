@@ -276,6 +276,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInvitation'
           description: Organization invitation accepted successfully
       security:
         - bearer: []

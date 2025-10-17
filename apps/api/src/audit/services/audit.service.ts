@@ -49,6 +49,12 @@ export class AuditService implements OnApplicationBootstrap {
     if (auditConfig.retentionDays && auditConfig.retentionDays > 0) {
       this.schedulerRegistry.getCronJob('cleanup-old-audit-logs').start()
     }
+
+    const batchSize = this.configService.getOrThrow('audit.publish.batchSize')
+
+    if (batchSize > 50000) {
+      throw new Error('Audit publish batch size cannot be greater than 50000')
+    }
   }
 
   async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
@@ -126,6 +132,9 @@ export class AuditService implements OnApplicationBootstrap {
   async cleanupOldAuditLogs(): Promise<void> {
     try {
       const retentionDays = this.configService.get('audit.retentionDays')
+      if (!retentionDays) {
+        return
+      }
 
       const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000)
       this.logger.log(`Starting cleanup of audit logs older than ${retentionDays} days`)
@@ -184,7 +193,7 @@ export class AuditService implements OnApplicationBootstrap {
       where: {
         statusCode: Not(IsNull()),
       },
-      take: this.configService.get('audit.publish.batchSize'),
+      take: this.configService.getOrThrow('audit.publish.batchSize'),
       order: {
         createdAt: 'ASC',
       },

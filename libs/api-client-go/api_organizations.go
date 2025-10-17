@@ -32,7 +32,8 @@ type OrganizationsAPI interface {
 	AcceptOrganizationInvitation(ctx context.Context, invitationId string) OrganizationsAPIAcceptOrganizationInvitationRequest
 
 	// AcceptOrganizationInvitationExecute executes the request
-	AcceptOrganizationInvitationExecute(r OrganizationsAPIAcceptOrganizationInvitationRequest) (*http.Response, error)
+	//  @return OrganizationInvitation
+	AcceptOrganizationInvitationExecute(r OrganizationsAPIAcceptOrganizationInvitationRequest) (*OrganizationInvitation, *http.Response, error)
 
 	/*
 		CancelOrganizationInvitation Cancel organization invitation
@@ -362,7 +363,7 @@ type OrganizationsAPIAcceptOrganizationInvitationRequest struct {
 	invitationId string
 }
 
-func (r OrganizationsAPIAcceptOrganizationInvitationRequest) Execute() (*http.Response, error) {
+func (r OrganizationsAPIAcceptOrganizationInvitationRequest) Execute() (*OrganizationInvitation, *http.Response, error) {
 	return r.ApiService.AcceptOrganizationInvitationExecute(r)
 }
 
@@ -382,16 +383,19 @@ func (a *OrganizationsAPIService) AcceptOrganizationInvitation(ctx context.Conte
 }
 
 // Execute executes the request
-func (a *OrganizationsAPIService) AcceptOrganizationInvitationExecute(r OrganizationsAPIAcceptOrganizationInvitationRequest) (*http.Response, error) {
+//
+//	@return OrganizationInvitation
+func (a *OrganizationsAPIService) AcceptOrganizationInvitationExecute(r OrganizationsAPIAcceptOrganizationInvitationRequest) (*OrganizationInvitation, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *OrganizationInvitation
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.AcceptOrganizationInvitation")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/organizations/invitations/{invitationId}/accept"
@@ -411,7 +415,7 @@ func (a *OrganizationsAPIService) AcceptOrganizationInvitationExecute(r Organiza
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -420,19 +424,19 @@ func (a *OrganizationsAPIService) AcceptOrganizationInvitationExecute(r Organiza
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -440,10 +444,19 @@ func (a *OrganizationsAPIService) AcceptOrganizationInvitationExecute(r Organiza
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type OrganizationsAPICancelOrganizationInvitationRequest struct {
