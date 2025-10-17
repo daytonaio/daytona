@@ -12,11 +12,12 @@ import { StorageAccessDto } from '../../sandbox/dto/storage-access-dto'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('object-storage')
 @Controller('object-storage')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ObjectStorageController {

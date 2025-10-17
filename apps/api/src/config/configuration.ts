@@ -4,6 +4,12 @@
  */
 
 import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
+import {
+  DEFAULT_RATE_LIMIT_ANONYMOUS_TTL,
+  DEFAULT_RATE_LIMIT_ANONYMOUS_LIMIT,
+  DEFAULT_RATE_LIMIT_AUTHENTICATED_TTL,
+  DEFAULT_RATE_LIMIT_AUTHENTICATED_LIMIT,
+} from './defaults'
 
 const configuration = {
   production: process.env.NODE_ENV === 'production',
@@ -136,6 +142,16 @@ const configuration = {
     cpuPenaltyThreshold: parseInt(process.env.RUNNER_CPU_PENALTY_THRESHOLD || '90', 10),
     memoryPenaltyThreshold: parseInt(process.env.RUNNER_MEMORY_PENALTY_THRESHOLD || '75', 10),
     diskPenaltyThreshold: parseInt(process.env.RUNNER_DISK_PENALTY_THRESHOLD || '75', 10),
+  },
+  rateLimit: {
+    anonymous: {
+      ttl: parseInt(process.env.RATE_LIMIT_ANONYMOUS_TTL || DEFAULT_RATE_LIMIT_ANONYMOUS_TTL, 10),
+      limit: parseInt(process.env.RATE_LIMIT_ANONYMOUS_LIMIT || DEFAULT_RATE_LIMIT_ANONYMOUS_LIMIT, 10),
+    },
+    authenticated: {
+      ttl: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_TTL || DEFAULT_RATE_LIMIT_AUTHENTICATED_TTL, 10),
+      limit: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_LIMIT || DEFAULT_RATE_LIMIT_AUTHENTICATED_LIMIT, 10),
+    },
   },
   apiKey: {
     validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),

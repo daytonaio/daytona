@@ -69,11 +69,19 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { RegionDto } from '../dto/region.dto'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { Throttle, seconds } from '@nestjs/throttler'
+import {
+  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT,
+  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL,
+  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT,
+  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL,
+} from '../../config/defaults'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
@@ -224,6 +232,12 @@ export class SandboxController {
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT, 10),
+      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL, 10)),
+    },
+  })
   @ApiOperation({
     summary: 'Create a new sandbox',
     operationId: 'createSandbox',
@@ -368,6 +382,14 @@ export class SandboxController {
   }
 
   @Delete(':sandboxIdOrName')
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
+    },
+  })
   @ApiOperation({
     summary: 'Delete sandbox',
     operationId: 'deleteSandbox',
@@ -400,6 +422,14 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/start')
   @HttpCode(200)
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
+    },
+  })
   @ApiOperation({
     summary: 'Start sandbox',
     operationId: 'startSandbox',
@@ -438,6 +468,14 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/stop')
   @HttpCode(200) //  for Daytona Api compatibility
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
+    },
+  })
   @ApiOperation({
     summary: 'Stop sandbox',
     operationId: 'stopSandbox',
@@ -788,6 +826,14 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/archive')
   @HttpCode(200)
+  @Throttle({
+    authenticated: {
+      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: seconds(
+        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
+      ),
+    },
+  })
   @ApiOperation({
     summary: 'Archive sandbox',
     operationId: 'archiveSandbox',
