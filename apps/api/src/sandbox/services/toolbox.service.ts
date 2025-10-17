@@ -11,6 +11,8 @@ import { Runner } from '../entities/runner.entity'
 import axios from 'axios'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { RunnerService } from './runner.service'
 
 @Injectable()
 export class ToolboxService {
@@ -22,6 +24,8 @@ export class ToolboxService {
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly runnerService: RunnerService,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
   ) {}
 
   async forwardRequestToRunner(sandboxId: string, method: string, path: string, data?: any): Promise<any> {
@@ -98,6 +102,39 @@ export class ToolboxService {
 
       if (sandbox.state !== SandboxState.STARTED) {
         throw new BadRequestException('Sandbox is not running')
+      }
+
+      try {
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        const sandboxInfo = await runnerAdapter.sandboxInfo(sandboxId)
+
+        if (sandboxInfo.state === SandboxState.STARTED) {
+          return runner
+        }
+
+        this.logger.warn(
+          `Sandbox ${sandboxId} is marked as STARTED in DB but actual state is ${sandboxInfo.state}. Updating to ERROR.`,
+        )
+        await this.sandboxRepository.update(sandboxId, {
+          state: SandboxState.ERROR,
+          errorReason: `Container state mismatch: expected STARTED, actual ${sandboxInfo.state}`,
+        })
+        throw new BadRequestException(
+          `Sandbox is not running (actual state: ${sandboxInfo.state}). Please restart the sandbox.`,
+        )
+      } catch (error) {
+        if (error instanceof BadRequestException) throw error
+
+        if (error.response?.status === 404 || error.message?.includes('not found')) {
+          this.logger.warn(`Sandbox ${sandboxId} is marked as STARTED but container not found on runner. Updating to ERROR.`)
+          await this.sandboxRepository.update(sandboxId, {
+            state: SandboxState.ERROR,
+            errorReason: 'Container not found on runner',
+          })
+          throw new BadRequestException('Sandbox container not found. Please restart the sandbox.')
+        }
+
+        this.logger.error(`Failed to verify sandbox ${sandboxId} state on runner:`, error)
       }
 
       return runner
