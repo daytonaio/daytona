@@ -11,13 +11,13 @@ from typing import Dict, List, Optional
 from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
-from daytona_api_client import SandboxApi, SshAccessDto, SshAccessValidationDto, ToolboxApi
+from daytona_api_client import SandboxApi, SandboxState, SshAccessDto, SshAccessValidationDto, ToolboxApi
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
 from .._utils.timeout import with_timeout
-from ..common.errors import DaytonaError
+from ..common.errors import DaytonaError, DaytonaNotFoundError
 from ..common.protocols import SandboxCodeToolbox
 from .computer_use import ComputerUse
 from .filesystem import FileSystem
@@ -113,6 +113,7 @@ class Sandbox(SandboxDto):
     def computer_use(self) -> ComputerUse:
         return self._computer_use
 
+    @intercept_errors(message_prefix="Failed to refresh sandbox data: ")
     def refresh_data(self) -> None:
         """Refreshes the Sandbox data from the API.
 
@@ -274,7 +275,7 @@ class Sandbox(SandboxDto):
         """
         start_time = time.time()
         self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
-        self.refresh_data()
+        self.__refresh_data_safe()
         time_elapsed = time.time() - start_time
         self.wait_for_sandbox_stop(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
@@ -287,7 +288,7 @@ class Sandbox(SandboxDto):
                 Default is 60 seconds.
         """
         self._sandbox_api.delete_sandbox(self.id, _request_timeout=timeout or None)
-        self.refresh_data()
+        self.__refresh_data_safe()
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
     @with_timeout(
@@ -345,7 +346,7 @@ class Sandbox(SandboxDto):
         """
         while self.state not in ["stopped", "destroyed"]:
             try:
-                self.refresh_data()
+                self.__refresh_data_safe()
 
                 if self.state in ["error", "build_failed"]:
                     err_msg = (
@@ -525,6 +526,15 @@ class Sandbox(SandboxDto):
         self.updated_at = sandbox_dto.updated_at
         self.network_block_all = sandbox_dto.network_block_all
         self.network_allow_list = sandbox_dto.network_allow_list
+
+    def __refresh_data_safe(self) -> None:
+        """Refreshes the Sandbox data from the API, but does not throw an error if the sandbox has been deleted.
+        Instead, it sets the state to destroyed.
+        """
+        try:
+            self.refresh_data()
+        except DaytonaNotFoundError:
+            self.state = SandboxState.DESTROYED
 
 
 class PaginatedSandboxes(PaginatedSandboxesDto):
