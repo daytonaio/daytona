@@ -15,7 +15,7 @@ from daytona_toolbox_api_client.exceptions import OpenApiException as OpenApiExc
 from daytona_toolbox_api_client_async.exceptions import NotFoundException as NotFoundExceptionToolboxAsync
 from daytona_toolbox_api_client_async.exceptions import OpenApiException as OpenApiExceptionToolboxAsync
 
-from ..common.errors import DaytonaError, DaytonaNotFoundError
+from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -58,6 +58,9 @@ def intercept_errors(
                     ),
                 ):
                     raise DaytonaNotFoundError(f"{message_prefix}{msg}") from None
+                # Check for rate limit (429) errors
+                if hasattr(e, "status") and e.status == 429:
+                    raise DaytonaRateLimitError(f"{message_prefix}{msg}") from None
                 raise DaytonaError(f"{message_prefix}{msg}") from None
 
             if isinstance(e, RuntimeError) and SESSION_IS_CLOSED_ERROR_MESSAGE in str(e):

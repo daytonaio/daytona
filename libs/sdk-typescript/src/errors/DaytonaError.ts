@@ -13,3 +13,8 @@
 export class DaytonaError extends Error {}
 
 export class DaytonaNotFoundError extends DaytonaError {}
+
+/**
+ * Error thrown when rate limit is exceeded.
+ */
+export class DaytonaRateLimitError extends DaytonaError {}

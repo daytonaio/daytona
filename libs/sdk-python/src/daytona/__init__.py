@@ -34,7 +34,7 @@ from .common.daytona import (
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
 )
-from .common.errors import DaytonaError
+from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
 from .common.lsp_server import LspCompletionPosition, LspLanguageId
@@ -51,6 +51,8 @@ __all__ = [
     "SessionExecuteRequest",
     "SessionExecuteResponse",
     "DaytonaError",
+    "DaytonaNotFoundError",
+    "DaytonaRateLimitError",
     "LspLanguageId",
     "CodeRunParams",
     "Sandbox",
