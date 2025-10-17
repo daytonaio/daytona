@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
+	"github.com/shirou/gopsutil/v4/process"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -111,17 +112,18 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 		return
 	}
 
-	// Cancel context first - this signals CommandContext to stop
-	session.cancel()
-
-	// Terminate process group if still running
-	if err := s.terminateSession(c.Request.Context(), session); err != nil {
+	// Terminate process group first with signals (SIGTERM -> SIGKILL)
+	err := s.terminateSession(c.Request.Context(), session)
+	if err != nil {
 		log.Errorf("Failed to terminate session %s: %v", session.id, err)
 		// Continue with cleanup even if termination fails
 	}
 
+	// Cancel context after termination
+	session.cancel()
+
 	// Clean up session directory
-	err := os.RemoveAll(session.Dir(s.configDir))
+	err = os.RemoveAll(session.Dir(s.configDir))
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -274,8 +276,16 @@ func (s *SessionController) waitForTermination(ctx context.Context, pid int, tim
 		case <-timeoutCtx.Done():
 			return false
 		case <-ticker.C:
-			err := syscall.Kill(-pid, 0)
+			parent, err := process.NewProcess(int32(pid))
 			if err != nil {
+				return true
+			}
+			children, err := parent.Children()
+			if err != nil {
+				// Unable to enumerate children; handle as needed (e.g., treat conservatively)
+				return false
+			}
+			if len(children) == 0 {
 				return true
 			}
 		}
