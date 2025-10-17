@@ -21,7 +21,7 @@ import { FileSystem } from './FileSystem'
 import { Git } from './Git'
 import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
-import { DaytonaError } from './errors/DaytonaError'
+import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { ComputerUse } from './ComputerUse'
 
 /**
@@ -250,7 +250,7 @@ export class Sandbox implements SandboxDto {
     }
     const startTime = Date.now()
     await this.sandboxApi.stopSandbox(this.id, undefined, { timeout: timeout * 1000 })
-    await this.refreshData()
+    await this.refreshDataSafe()
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStopped(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
   }
@@ -261,7 +261,7 @@ export class Sandbox implements SandboxDto {
    */
   public async delete(timeout = 60): Promise<void> {
     await this.sandboxApi.deleteSandbox(this.id, undefined, { timeout: timeout * 1000 })
-    await this.refreshData()
+    this.refreshDataSafe()
   }
 
   /**
@@ -325,7 +325,7 @@ export class Sandbox implements SandboxDto {
 
     // Treat destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping
     while (this.state !== 'stopped' && this.state !== 'destroyed') {
-      await this.refreshData()
+      this.refreshDataSafe()
 
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
       if (this.state === 'stopped' || this.state === 'destroyed') {
@@ -527,6 +527,22 @@ export class Sandbox implements SandboxDto {
     this.updatedAt = sandboxDto.updatedAt
     this.networkBlockAll = sandboxDto.networkBlockAll
     this.networkAllowList = sandboxDto.networkAllowList
+  }
+
+  /**
+   * Refreshes the Sandbox data from the API, but does not throw an error if the sandbox has been deleted.
+   * Instead, it sets the state to destroyed.
+   *
+   * @returns {Promise<void>}
+   */
+  private async refreshDataSafe(): Promise<void> {
+    try {
+      await this.refreshData()
+    } catch (error) {
+      if (error instanceof DaytonaNotFoundError) {
+        this.state = SandboxState.DESTROYED
+      }
+    }
   }
 }
 

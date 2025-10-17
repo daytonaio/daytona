@@ -64,6 +64,7 @@ Initialize a new Sandbox instance.
 #### Sandbox.refresh\_data
 
 ```python
+@intercept_errors(message_prefix="Failed to refresh sandbox data: ")
 def refresh_data() -> None
 ```
 

@@ -64,6 +64,7 @@ Initialize a new Sandbox instance.
 #### AsyncSandbox.refresh\_data
 
 ```python
+@intercept_errors(message_prefix="Failed to refresh sandbox data: ")
 async def refresh_data() -> None
 ```
 
