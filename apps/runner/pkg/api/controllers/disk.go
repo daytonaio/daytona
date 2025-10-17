@@ -146,3 +146,54 @@ func DiskInfo(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, response)
 }
+
+// DeleteDisk 			godoc
+//
+//	@Summary		Delete disk
+//	@Description	Delete a disk from the runner
+//	@Produce		json
+//	@Tags			disk
+//	@Param			diskId	path		string	true	"Disk ID"
+//	@Success		200		{object}	map[string]interface{}
+//	@Failure		400		{object}	map[string]interface{}
+//	@Failure		404		{object}	map[string]interface{}
+//	@Failure		409		{object}	map[string]interface{}
+//	@Failure		500		{object}	map[string]interface{}
+//	@Router			/disk/{diskId}/delete [delete]
+//
+//	@id				DeleteDisk
+func DeleteDisk(ctx *gin.Context) {
+	diskId := ctx.Param("diskId")
+	if diskId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "diskId is required"})
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	// Check if disk exists and is not mounted
+	disk, err := (*runner.SDisk).Open(ctx.Request.Context(), diskId)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Disk not found"})
+		return
+	}
+	defer disk.Close()
+
+	// Check if disk is mounted
+	if disk.IsMounted() {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "Cannot delete mounted disk. Please unmount first."})
+		return
+	}
+
+	// Delete the disk
+	err = (*runner.SDisk).Delete(ctx.Request.Context(), diskId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Disk deleted",
+		"diskId":  diskId,
+	})
+}

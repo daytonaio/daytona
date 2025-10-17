@@ -181,7 +181,7 @@ export class DiskService {
     return disk
   }
 
-  async attachToSandbox(diskId: string, sandboxId: string): Promise<Disk> {
+  async attachToSandbox(diskId: string, sandboxId: string, skipStateCheck = false): Promise<Disk> {
     // Find the disk
     const disk = await this.diskRepository.findOne({
       where: { id: diskId },
@@ -213,7 +213,7 @@ export class DiskService {
     }
 
     // Validate sandbox state
-    if (![SandboxState.UNKNOWN, SandboxState.CREATING].includes(sandbox.state)) {
+    if (!skipStateCheck && ![SandboxState.UNKNOWN, SandboxState.CREATING].includes(sandbox.state)) {
       console.error(
         `Sandbox must be in '${SandboxState.UNKNOWN}' or '${SandboxState.CREATING}' instead of '${sandbox.state}' state to attach a disk`,
       )

@@ -453,7 +453,8 @@ export class SandboxService {
       // TODO: This should be done in a transaction
       if (createSandboxDto.diskId) {
         sandbox.disks = [createSandboxDto.diskId]
-        await this.diskService.attachToSandbox(createSandboxDto.diskId, sandbox.id)
+        // Temporary workaround is to skip state check for new sandboxes with disks
+        await this.diskService.attachToSandbox(createSandboxDto.diskId, sandbox.id, true)
       }
 
       return SandboxDto.fromSandbox(sandbox)
