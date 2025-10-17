@@ -1,6 +1,52 @@
 import time
 
-from daytona import CreateSandboxFromImageParams, Daytona
+from daytona import CreateSandboxFromImageParams, Daytona, SandboxState
+
+
+def wait_for_sandbox_state(sandbox, target_state, timeout_seconds=60, poll_interval=1, verbose=True):
+    """
+    Wait for a sandbox to reach a specific state.
+
+    Args:
+        sandbox: The sandbox object to monitor
+        target_state: The target state to wait for (e.g., SandboxState.DESTROYED)
+        timeout_seconds: Maximum time to wait in seconds (default: 60)
+        poll_interval: Time between state checks in seconds (default: 1)
+        verbose: Whether to print status messages (default: True)
+
+    Returns:
+        bool: True if sandbox reached target state, False if timeout or error occurred
+    """
+    if verbose:
+        print(f"⏳ Waiting for sandbox {sandbox.name} to reach state: {target_state}")
+
+    start_time = time.time()
+
+    try:
+        while sandbox.state != target_state:
+            if time.time() - start_time > timeout_seconds:
+                if verbose:
+                    print(f"⏰ Timeout waiting for sandbox to reach {target_state}")
+                return False
+
+            sandbox.refresh_data()
+            time.sleep(poll_interval)
+
+    except Exception as e:
+        # Check if it's a 404 error (sandbox not found, which means it's deleted)
+        error_str = str(e)
+        if "404" in error_str or "Not Found" in error_str:
+            if verbose:
+                print(f"✅ Sandbox not found (404) - assuming {target_state}")
+            return True
+        if verbose:
+            print(f"❌ Error refreshing sandbox data: {e}")
+        return False
+
+    if verbose:
+        print(f"✅ Sandbox {sandbox.name} reached state: {sandbox.state}")
+
+    return sandbox.state == target_state
 
 
 def main():
@@ -63,7 +109,9 @@ def main():
     # Wait sandbox to be deleted
     print("\n⏳ Waiting for sandbox to be deleted...")
 
-    time.sleep(10)
+    if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
+        print("❌ Failed to wait for sandbox deletion")
+        return
 
     # Create a new sandbox with the same disk
     print("\n🏗️ Creating a new sandbox with the same disk...")
@@ -85,22 +133,32 @@ def main():
 
     sandbox.delete()
 
-    # Wait sandbox to be deleted
+    # Wait for sandbox to be deleted
+    if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
+        print("❌ Failed to wait for sandbox deletion")
+        return
+
+    # Wait for the second sandbox to be deleted
     print("\n⏳ Waiting for the second sandbox to be deleted...")
 
-    time.sleep(10)
+    if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
+        print("❌ Failed to wait for second sandbox deletion")
+        return
 
-    # # Delete the disk
-    # print("\n🗑️  Deleting the disk...")
-    # daytona.disk.delete(disk)
-    # print(f"✅ Deleted disk: {disk.name}")
+    # Wait for the disk to be detached after the second sandbox is deleted
+    time.sleep(2)
 
-    # # Final list to confirm deletion
-    # print("\n📋 Final disk list...")
-    # final_disks = daytona.disk.list()
-    # print(f"Found {len(final_disks)} disks after cleanup")
+    # Delete the disk
+    print("\n🗑️  Deleting the disk...")
+    daytona.disk.delete(disk)
+    print(f"✅ Deleted disk: {disk.name}")
 
-    # print("\n🎉 Disk management example completed successfully!")
+    # Final list to confirm deletion
+    print("\n📋 Final disk list...")
+    final_disks = daytona.disk.list()
+    print(f"Found {len(final_disks)} disks after cleanup")
+
+    print("\n🎉 Disk management example completed successfully!")
 
 
 if __name__ == "__main__":

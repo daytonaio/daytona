@@ -334,4 +334,8 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   async pullDisk(diskId: string): Promise<void> {
     await this.diskApiClient.pullDisk(diskId)
   }
+
+  async deleteDisk(diskId: string): Promise<void> {
+    await this.diskApiClient.deleteDisk(diskId)
+  }
 }

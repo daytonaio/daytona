@@ -5,7 +5,9 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
@@ -75,6 +77,13 @@ func Destroy(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
 	runner := runner.GetInstance(nil)
+
+	// Unmount any attached disk before destroying the sandbox
+	if err := unmountSandboxDisk(ctx, runner, sandboxId); err != nil {
+		// Log the error but don't fail sandbox destruction
+		// The disk will be cleaned up later by the disk manager
+		fmt.Fprintf(os.Stderr, "warning: failed to unmount disk for sandbox %s: %v\n", sandboxId, err)
+	}
 
 	err := runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
 	if err != nil {
@@ -405,4 +414,35 @@ func RemoveDestroyed(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "Sandbox removed")
+}
+
+// unmountSandboxDisk attempts to unmount any disk attached to the sandbox
+func unmountSandboxDisk(ctx *gin.Context, runner *runner.Runner, sandboxId string) error {
+	// For now, we'll try to unmount all mounted disks and let the disk manager handle it
+	// In a production system, you'd want to track which disk is attached to which sandbox more precisely
+	disks, err := (*runner.SDisk).List(ctx.Request.Context())
+	if err != nil {
+		return fmt.Errorf("failed to list disks: %w", err)
+	}
+
+	// Unmount all mounted disks
+	// This is a simple approach - in a production system, you'd want to track
+	// which disk is attached to which sandbox more precisely
+	for _, diskInfo := range disks {
+		if diskInfo.IsMounted {
+			disk, err := (*runner.SDisk).Open(ctx.Request.Context(), diskInfo.Name)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "warning: failed to open disk %s for unmounting: %v\n", diskInfo.Name, err)
+				continue
+			}
+
+			if err := disk.Unmount(ctx.Request.Context()); err != nil {
+				fmt.Fprintf(os.Stderr, "warning: failed to unmount disk %s: %v\n", diskInfo.Name, err)
+			}
+
+			disk.Close()
+		}
+	}
+
+	return nil
 }

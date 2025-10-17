@@ -85,9 +85,12 @@ export interface RunnerAdapter {
     networkLimitEgress?: boolean,
   ): Promise<void>
 
-  pushDisk(diskId: string, registry?: DockerRegistry): Promise<void>
-  pullDisk(diskId: string, registry?: DockerRegistry): Promise<void>
+  // TODO: add disk layer store credentials
+  pushDisk(diskId: string): Promise<void>
+  // TODO: add disk layer store credentials
+  pullDisk(diskId: string): Promise<void>
   getDiskInfo(diskId: string): Promise<RunnerDiskInfo>
+  deleteDisk(diskId: string): Promise<void>
 }
 
 @Injectable()

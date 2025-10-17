@@ -287,6 +287,47 @@ paths:
               type: string
             type: object
       summary: Health check
+  /disk/{diskId}/delete:
+    delete:
+      description: Delete a disk from the runner
+      operationId: DeleteDisk
+      parameters:
+        - description: Disk ID
+          in: path
+          name: diskId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        '409':
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete disk
+      tags:
+        - disk
   /disk/{diskId}/info:
     get:
       description: Get detailed information about a specific disk
