@@ -22,9 +22,7 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
-import type { ArchiveDiskDTO } from '../models';
-// @ts-ignore
-import type { RestoreDiskDTO } from '../models';
+import type { DiskInfoDTO } from '../models';
 /**
  * DiskApi - axios parameter creator
  * @export
@@ -32,19 +30,16 @@ import type { RestoreDiskDTO } from '../models';
 export const DiskApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Archive disk to object storage
-         * @summary Archive disk
+         * Get detailed information about a specific disk
+         * @summary Get disk info
          * @param {string} diskId Disk ID
-         * @param {ArchiveDiskDTO} request Archive disk request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        archiveDisk: async (diskId: string, request: ArchiveDiskDTO, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        diskInfo: async (diskId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'diskId' is not null or undefined
-            assertParamExists('archiveDisk', 'diskId', diskId)
-            // verify required parameter 'request' is not null or undefined
-            assertParamExists('archiveDisk', 'request', request)
-            const localVarPath = `/disk/{diskId}/archive`
+            assertParamExists('diskInfo', 'diskId', diskId)
+            const localVarPath = `/disk/{diskId}/info`
                 .replace(`{${"diskId"}}`, encodeURIComponent(String(diskId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -53,7 +48,7 @@ export const DiskApiAxiosParamCreator = function (configuration?: Configuration)
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -62,12 +57,9 @@ export const DiskApiAxiosParamCreator = function (configuration?: Configuration)
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -75,19 +67,16 @@ export const DiskApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Restore disk from object storage
-         * @summary Restore disk
+         * Pull disk from object storage
+         * @summary Pull disk
          * @param {string} diskId Disk ID
-         * @param {RestoreDiskDTO} request Restore disk request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        restoreDisk: async (diskId: string, request: RestoreDiskDTO, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        pullDisk: async (diskId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'diskId' is not null or undefined
-            assertParamExists('restoreDisk', 'diskId', diskId)
-            // verify required parameter 'request' is not null or undefined
-            assertParamExists('restoreDisk', 'request', request)
-            const localVarPath = `/disk/{diskId}/restore`
+            assertParamExists('pullDisk', 'diskId', diskId)
+            const localVarPath = `/disk/{diskId}/pull`
                 .replace(`{${"diskId"}}`, encodeURIComponent(String(diskId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -105,12 +94,46 @@ export const DiskApiAxiosParamCreator = function (configuration?: Configuration)
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Push disk to object storage
+         * @summary Push disk
+         * @param {string} diskId Disk ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pushDisk: async (diskId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'diskId' is not null or undefined
+            assertParamExists('pushDisk', 'diskId', diskId)
+            const localVarPath = `/disk/{diskId}/push`
+                .replace(`{${"diskId"}}`, encodeURIComponent(String(diskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -128,31 +151,42 @@ export const DiskApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DiskApiAxiosParamCreator(configuration)
     return {
         /**
-         * Archive disk to object storage
-         * @summary Archive disk
+         * Get detailed information about a specific disk
+         * @summary Get disk info
          * @param {string} diskId Disk ID
-         * @param {ArchiveDiskDTO} request Archive disk request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async archiveDisk(diskId: string, request: ArchiveDiskDTO, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.archiveDisk(diskId, request, options);
+        async diskInfo(diskId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskInfoDTO>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.diskInfo(diskId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DiskApi.archiveDisk']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['DiskApi.diskInfo']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Restore disk from object storage
-         * @summary Restore disk
+         * Pull disk from object storage
+         * @summary Pull disk
          * @param {string} diskId Disk ID
-         * @param {RestoreDiskDTO} request Restore disk request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async restoreDisk(diskId: string, request: RestoreDiskDTO, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.restoreDisk(diskId, request, options);
+        async pullDisk(diskId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.pullDisk(diskId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DiskApi.restoreDisk']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['DiskApi.pullDisk']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Push disk to object storage
+         * @summary Push disk
+         * @param {string} diskId Disk ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async pushDisk(diskId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.pushDisk(diskId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DiskApi.pushDisk']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -166,26 +200,34 @@ export const DiskApiFactory = function (configuration?: Configuration, basePath?
     const localVarFp = DiskApiFp(configuration)
     return {
         /**
-         * Archive disk to object storage
-         * @summary Archive disk
+         * Get detailed information about a specific disk
+         * @summary Get disk info
          * @param {string} diskId Disk ID
-         * @param {ArchiveDiskDTO} request Archive disk request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        archiveDisk(diskId: string, request: ArchiveDiskDTO, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
-            return localVarFp.archiveDisk(diskId, request, options).then((request) => request(axios, basePath));
+        diskInfo(diskId: string, options?: RawAxiosRequestConfig): AxiosPromise<DiskInfoDTO> {
+            return localVarFp.diskInfo(diskId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Restore disk from object storage
-         * @summary Restore disk
+         * Pull disk from object storage
+         * @summary Pull disk
          * @param {string} diskId Disk ID
-         * @param {RestoreDiskDTO} request Restore disk request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        restoreDisk(diskId: string, request: RestoreDiskDTO, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
-            return localVarFp.restoreDisk(diskId, request, options).then((request) => request(axios, basePath));
+        pullDisk(diskId: string, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.pullDisk(diskId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Push disk to object storage
+         * @summary Push disk
+         * @param {string} diskId Disk ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        pushDisk(diskId: string, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.pushDisk(diskId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -198,29 +240,39 @@ export const DiskApiFactory = function (configuration?: Configuration, basePath?
  */
 export class DiskApi extends BaseAPI {
     /**
-     * Archive disk to object storage
-     * @summary Archive disk
+     * Get detailed information about a specific disk
+     * @summary Get disk info
      * @param {string} diskId Disk ID
-     * @param {ArchiveDiskDTO} request Archive disk request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DiskApi
      */
-    public archiveDisk(diskId: string, request: ArchiveDiskDTO, options?: RawAxiosRequestConfig) {
-        return DiskApiFp(this.configuration).archiveDisk(diskId, request, options).then((request) => request(this.axios, this.basePath));
+    public diskInfo(diskId: string, options?: RawAxiosRequestConfig) {
+        return DiskApiFp(this.configuration).diskInfo(diskId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Restore disk from object storage
-     * @summary Restore disk
+     * Pull disk from object storage
+     * @summary Pull disk
      * @param {string} diskId Disk ID
-     * @param {RestoreDiskDTO} request Restore disk request
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DiskApi
      */
-    public restoreDisk(diskId: string, request: RestoreDiskDTO, options?: RawAxiosRequestConfig) {
-        return DiskApiFp(this.configuration).restoreDisk(diskId, request, options).then((request) => request(this.axios, this.basePath));
+    public pullDisk(diskId: string, options?: RawAxiosRequestConfig) {
+        return DiskApiFp(this.configuration).pullDisk(diskId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Push disk to object storage
+     * @summary Push disk
+     * @param {string} diskId Disk ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DiskApi
+     */
+    public pushDisk(diskId: string, options?: RawAxiosRequestConfig) {
+        return DiskApiFp(this.configuration).pushDisk(diskId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

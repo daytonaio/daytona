@@ -355,7 +355,18 @@ export class RunnerService {
       throw new BadRequestError('No available runners')
     }
 
-    // Get random runner from the best available runners
+    // If preferredRunnerIds are specified, prioritize them
+    if (params.preferredRunnerIds && params.preferredRunnerIds.length > 0) {
+      const preferredRunners = availableRunners.filter((runner) => params.preferredRunnerIds.includes(runner.id))
+
+      if (preferredRunners.length > 0) {
+        // Get random runner from preferred runners
+        const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
+        return preferredRunners[randomIntFromInterval(0, preferredRunners.length - 1)]
+      }
+    }
+
+    // Get random runner from all available runners (fallback)
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
     return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
@@ -568,6 +579,7 @@ export class GetRunnerParams {
   snapshotRef?: string
   excludedRunnerIds?: string[]
   availabilityScoreThreshold?: number
+  preferredRunnerIds?: string[]
 }
 
 interface AvailabilityScoreParams {

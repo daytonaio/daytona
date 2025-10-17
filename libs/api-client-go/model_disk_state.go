@@ -26,8 +26,13 @@ const (
 	DISKSTATE_READY DiskState = "ready"
 	DISKSTATE_ATTACHED DiskState = "attached"
 	DISKSTATE_DETACHED DiskState = "detached"
-	DISKSTATE_UPLOADING DiskState = "uploading"
+	DISKSTATE_PENDING_PUSH DiskState = "pending_push"
+	DISKSTATE_PUSHING DiskState = "pushing"
 	DISKSTATE_STORED DiskState = "stored"
+	DISKSTATE_PENDING_DELETE DiskState = "pending_delete"
+	DISKSTATE_DELETING DiskState = "deleting"
+	DISKSTATE_DELETED DiskState = "deleted"
+	DISKSTATE_ERROR DiskState = "error"
 )
 
 // All allowed values of DiskState enum
@@ -37,8 +42,13 @@ var AllowedDiskStateEnumValues = []DiskState{
 	"ready",
 	"attached",
 	"detached",
-	"uploading",
+	"pending_push",
+	"pushing",
 	"stored",
+	"pending_delete",
+	"deleting",
+	"deleted",
+	"error",
 }
 
 func (v *DiskState) UnmarshalJSON(src []byte) error {

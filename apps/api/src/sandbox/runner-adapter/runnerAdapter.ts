@@ -33,6 +33,18 @@ export interface RunnerInfo {
   metrics?: RunnerMetrics
 }
 
+export interface RunnerDiskInfo {
+  name: string
+  sizeGB: number
+  actualSizeGB: number
+  created: string
+  modified: string
+  isMounted: boolean
+  mountPath: string
+  inS3: boolean
+  checksum: string
+}
+
 export interface RunnerAdapter {
   init(runner: Runner): Promise<void>
 
@@ -73,8 +85,9 @@ export interface RunnerAdapter {
     networkLimitEgress?: boolean,
   ): Promise<void>
 
-  archiveDisk(diskId: string, registry?: DockerRegistry): Promise<void>
-  restoreDisk(diskId: string, registry?: DockerRegistry): Promise<void>
+  pushDisk(diskId: string, registry?: DockerRegistry): Promise<void>
+  pullDisk(diskId: string, registry?: DockerRegistry): Promise<void>
+  getDiskInfo(diskId: string): Promise<RunnerDiskInfo>
 }
 
 @Injectable()

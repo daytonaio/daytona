@@ -8,7 +8,7 @@ import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
 import { Injectable, Logger } from '@nestjs/common'
-import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo } from './runnerAdapter'
+import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerDiskInfo } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import {
   Configuration,
@@ -128,9 +128,21 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
         return response
       },
       (error) => {
-        const errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
+        let errorMessage = error.message || 'Unknown error'
 
-        throw new Error(String(errorMessage))
+        if (error.response?.data) {
+          if (typeof error.response.data === 'string') {
+            errorMessage = error.response.data
+          } else if (error.response.data.message) {
+            errorMessage = error.response.data.message
+          } else if (error.response.data.error) {
+            errorMessage = error.response.data.error
+          } else {
+            errorMessage = JSON.stringify(error.response.data)
+          }
+        }
+
+        throw new Error(errorMessage)
       },
     )
 
@@ -321,35 +333,16 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
   }
 
-  async archiveDisk(diskId: string, registry?: DockerRegistry): Promise<void> {
-    const request = {
-      diskId: diskId,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url,
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
-    }
-
-    await this.diskApiClient.archiveDisk(diskId, request)
+  async getDiskInfo(diskId: string): Promise<RunnerDiskInfo> {
+    const response = await this.diskApiClient.diskInfo(diskId)
+    return response.data as unknown as RunnerDiskInfo
   }
 
-  async restoreDisk(diskId: string, registry?: DockerRegistry): Promise<void> {
-    const request = {
-      diskId: diskId,
-      registry: registry
-        ? {
-            project: registry.project,
-            url: registry.url,
-            username: registry.username,
-            password: registry.password,
-          }
-        : undefined,
-    }
+  async pushDisk(diskId: string): Promise<void> {
+    await this.diskApiClient.pushDisk(diskId)
+  }
 
-    await this.diskApiClient.restoreDisk(diskId, request)
+  async pullDisk(diskId: string): Promise<void> {
+    await this.diskApiClient.pullDisk(diskId)
   }
 }

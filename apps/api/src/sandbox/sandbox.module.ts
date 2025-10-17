@@ -38,6 +38,7 @@ import { Volume } from './entities/volume.entity'
 import { DiskController } from './controllers/disk.controller'
 import { DiskService } from './services/disk.service'
 import { Disk } from './entities/disk.entity'
+import { DiskManager } from './managers/disk.manager'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
@@ -95,6 +96,7 @@ import { SandboxRepository } from './repositories/sandbox.repository'
     VolumeManager,
     VolumeSubscriber,
     DiskService,
+    DiskManager,
     RunnerAdapterFactory,
     SandboxStartAction,
     SandboxStopAction,
@@ -115,6 +117,7 @@ import { SandboxRepository } from './repositories/sandbox.repository'
     VolumeManager,
     SandboxRepository,
     DiskService,
+    DiskManager,
   ],
 })
 export class SandboxModule {}

@@ -5,7 +5,7 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not } from 'typeorm'
+import { Repository, Not, In } from 'typeorm'
 import { Disk } from '../entities/disk.entity'
 import { Sandbox } from '../entities/sandbox.entity'
 import { DiskState } from '../enums/disk-state.enum'
@@ -98,7 +98,7 @@ export class DiskService {
         where: {
           organizationId: organization.id,
           name: disk.name,
-          state: Not(DiskState.STORED), // Consider STORED as deleted state
+          state: Not(In([DiskState.STORED])), // Consider STORED as deleted state and exclude archived
         },
       })
 
@@ -136,7 +136,7 @@ export class DiskService {
     }
 
     // Update state to mark as stored (deleted)
-    disk.state = DiskState.STORED
+    disk.state = DiskState.PENDING_DELETE
     await this.diskRepository.save(disk)
     this.logger.debug(`Marked disk ${diskId} for deletion`)
   }
@@ -157,7 +157,7 @@ export class DiskService {
     return this.diskRepository.find({
       where: {
         organizationId,
-        state: Not(DiskState.STORED), // Exclude stored (deleted) disks
+        state: Not(In([DiskState.DELETED])),
       },
       order: {
         createdAt: 'DESC',
@@ -170,7 +170,7 @@ export class DiskService {
       where: {
         organizationId,
         name,
-        state: Not(DiskState.STORED),
+        state: Not(In([DiskState.DELETED])),
       },
     })
 
@@ -192,8 +192,10 @@ export class DiskService {
     }
 
     // Validate disk state
-    if (disk.state !== DiskState.STORED && disk.state !== DiskState.FRESH) {
-      throw new BadRequestError(`Disk must be in '${DiskState.STORED}' or '${DiskState.FRESH}' state to be attached`)
+    if (![DiskState.FRESH, DiskState.DETACHED, DiskState.STORED].includes(disk.state)) {
+      throw new BadRequestError(
+        `Disk must be in '${DiskState.DETACHED}', '${DiskState.STORED}' or '${DiskState.FRESH}' state to be attached`,
+      )
     }
 
     // Check if disk is already attached to another sandbox
@@ -211,9 +213,13 @@ export class DiskService {
     }
 
     // Validate sandbox state
-    if (sandbox.state !== SandboxState.UNKNOWN) {
-      console.error(`Sandbox must be in '${SandboxState.UNKNOWN}' instead of '${sandbox.state}' state to attach a disk`)
-      throw new BadRequestError(`Sandbox must be in '${SandboxState.UNKNOWN}' state to attach a disk`)
+    if (![SandboxState.UNKNOWN, SandboxState.CREATING].includes(sandbox.state)) {
+      console.error(
+        `Sandbox must be in '${SandboxState.UNKNOWN}' or '${SandboxState.CREATING}' instead of '${sandbox.state}' state to attach a disk`,
+      )
+      throw new BadRequestError(
+        `Sandbox must be in '${SandboxState.UNKNOWN}' or '${SandboxState.CREATING}' state to attach a disk`,
+      )
     }
 
     // Check if sandbox already has a disk attached
@@ -231,6 +237,7 @@ export class DiskService {
     // Attach the disk
     disk.sandboxId = sandboxId
     disk.state = DiskState.ATTACHED
+    disk.runnerId = sandbox.runnerId
 
     const savedDisk = await this.diskRepository.save(disk)
     this.logger.debug(`Attached disk ${diskId} to sandbox ${sandboxId}`)
@@ -272,6 +279,29 @@ export class DiskService {
 
     const savedDisk = await this.diskRepository.save(disk)
     this.logger.debug(`Detached disk ${diskId} from sandbox ${disk.sandboxId}`)
+    return savedDisk
+  }
+
+  async push(diskId: string): Promise<Disk> {
+    // Find the disk
+    const disk = await this.diskRepository.findOne({
+      where: { id: diskId },
+    })
+
+    if (!disk) {
+      throw new NotFoundException(`Disk with ID ${diskId} not found`)
+    }
+
+    // Validate disk state - can only archive detached or stored disks
+    if (![DiskState.DETACHED].includes(disk.state)) {
+      throw new BadRequestError(`Disk must be in '${DiskState.DETACHED}' state to be uploaded`)
+    }
+
+    // Archive the disk
+    disk.state = DiskState.PENDING_PUSH
+
+    const savedDisk = await this.diskRepository.save(disk)
+    this.logger.debug(`Archived disk ${diskId}`)
     return savedDisk
   }
 

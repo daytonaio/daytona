@@ -11567,8 +11567,13 @@ components:
       - ready
       - attached
       - detached
-      - uploading
+      - pending_push
+      - pushing
       - stored
+      - pending_delete
+      - deleting
+      - deleted
+      - error
       type: string
     DiskDto:
       example:

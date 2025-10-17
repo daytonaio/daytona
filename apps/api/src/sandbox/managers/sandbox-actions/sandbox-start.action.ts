@@ -411,7 +411,7 @@ export class SandboxStartAction extends SandboxAction {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runner.id)
+      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, lockCode, runner.id)
 
       sandbox.snapshot = validBackup
 
@@ -422,18 +422,6 @@ export class SandboxStartAction extends SandboxAction {
           organizationId: organization.id,
           organizationName: organization.name,
           sandboxName: sandbox.name,
-        }
-      }
-
-      // Restore disks if any are attached
-      if (sandbox.disks && sandbox.disks.length > 0) {
-        for (const diskId of sandbox.disks) {
-          try {
-            await runnerAdapter.restoreDisk(diskId, registry)
-          } catch (error) {
-            this.logger.error(`Failed to restore disk ${diskId}: ${error}`)
-            // Continue with sandbox creation even if disk restore fails
-          }
         }
       }
 

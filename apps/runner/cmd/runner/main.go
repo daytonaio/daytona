@@ -103,6 +103,7 @@ func main() {
 			AccessKeyID:     cfg.AWSAccessKeyId,
 			SecretAccessKey: cfg.AWSSecretAccessKey,
 			Endpoint:        cfg.AWSEndpointUrl,
+			UsePathStyle:    true,
 		},
 		QCOW2: sdisk.QCOW2Config{
 			Compression:   cfg.Compression,

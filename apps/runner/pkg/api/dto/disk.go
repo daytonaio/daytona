@@ -8,12 +8,14 @@ type DiskDTO struct {
 	MountPath string `json:"mountPath"`
 } //	@name	DiskDTO
 
-type ArchiveDiskDTO struct {
-	DiskId   string       `json:"diskId" validate:"required"`
-	Registry *RegistryDTO `json:"registry,omitempty"`
-} //	@name	ArchiveDiskDTO
-
-type RestoreDiskDTO struct {
-	DiskId   string       `json:"diskId" validate:"required"`
-	Registry *RegistryDTO `json:"registry,omitempty"`
-} //	@name	RestoreDiskDTO
+type DiskInfoDTO struct {
+	Name         string `json:"name"`
+	SizeGB       int64  `json:"sizeGB"`
+	ActualSizeGB int64  `json:"actualSizeGB"`
+	Created      string `json:"created"`
+	Modified     string `json:"modified"`
+	IsMounted    bool   `json:"isMounted"`
+	MountPath    string `json:"mountPath"`
+	InS3         bool   `json:"inS3"`
+	Checksum     string `json:"checksum"`
+} //	@name	DiskInfoDTO

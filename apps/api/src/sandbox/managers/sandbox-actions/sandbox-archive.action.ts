@@ -83,9 +83,9 @@ export class SandboxArchiveAction extends SandboxAction {
           if (sandbox.disks && sandbox.disks.length > 0) {
             for (const diskId of sandbox.disks) {
               try {
-                await runnerAdapter.archiveDisk(diskId)
+                await runnerAdapter.pushDisk(diskId)
               } catch (error) {
-                this.logger.error(`Failed to archive disk ${diskId}: ${error}`)
+                this.logger.error(`Failed to push disk ${diskId}: ${error}`)
                 // Continue with other disks even if one fails
               }
             }

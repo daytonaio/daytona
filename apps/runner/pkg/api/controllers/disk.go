@@ -5,34 +5,28 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
 )
 
-// ArchiveDisk 			godoc
+// PushDisk 			godoc
 //
-//	@Summary		Archive disk
-//	@Description	Archive disk to object storage
+//	@Summary		Push disk
+//	@Description	Push disk to object storage
 //	@Produce		json
 //	@Tags			disk
-//	@Param			diskId	path		string				true	"Disk ID"
-//	@Param			request	body		dto.ArchiveDiskDTO	true	"Archive disk request"
+//	@Param			diskId	path		string	true	"Disk ID"
 //	@Success		200		{object}	map[string]interface{}
-//	@Router			/disk/{diskId}/archive [post]
+//	@Router			/disk/{diskId}/push [post]
 //
-//	@id				ArchiveDisk
-func ArchiveDisk(ctx *gin.Context) {
+//	@id				PushDisk
+func PushDisk(ctx *gin.Context) {
 	diskId := ctx.Param("diskId")
 	if diskId == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "diskId is required"})
-		return
-	}
-
-	var request dto.ArchiveDiskDTO
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -57,33 +51,26 @@ func ArchiveDisk(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Disk archived",
+		"message": "Disk pushed",
 		"diskId":  diskId,
 	})
 }
 
-// RestoreDisk 			godoc
+// PullDisk 			godoc
 //
-//	@Summary		Restore disk
-//	@Description	Restore disk from object storage
+//	@Summary		Pull disk
+//	@Description	Pull disk from object storage
 //	@Produce		json
 //	@Tags			disk
-//	@Param			diskId	path		string				true	"Disk ID"
-//	@Param			request	body		dto.RestoreDiskDTO	true	"Restore disk request"
+//	@Param			diskId	path		string	true	"Disk ID"
 //	@Success		200		{object}	map[string]interface{}
-//	@Router			/disk/{diskId}/restore [post]
+//	@Router			/disk/{diskId}/pull [post]
 //
-//	@id				RestoreDisk
-func RestoreDisk(ctx *gin.Context) {
+//	@id				PullDisk
+func PullDisk(ctx *gin.Context) {
 	diskId := ctx.Param("diskId")
 	if diskId == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "diskId is required"})
-		return
-	}
-
-	var request dto.RestoreDiskDTO
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -108,7 +95,54 @@ func RestoreDisk(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Disk restored",
+		"message": "Disk pulled",
 		"diskId":  diskId,
 	})
+}
+
+// DiskInfo 			godoc
+//
+//	@Summary		Get disk info
+//	@Description	Get detailed information about a specific disk
+//	@Produce		json
+//	@Tags			disk
+//	@Param			diskId	path		string	true	"Disk ID"
+//	@Success		200		{object}	dto.DiskInfoDTO
+//	@Failure		400		{object}	map[string]interface{}
+//	@Failure		404		{object}	map[string]interface{}
+//	@Failure		500		{object}	map[string]interface{}
+//	@Router			/disk/{diskId}/info [get]
+//
+//	@id				DiskInfo
+func DiskInfo(ctx *gin.Context) {
+	diskId := ctx.Param("diskId")
+	if diskId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "diskId is required"})
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	disk, err := (*runner.SDisk).Open(ctx.Request.Context(), diskId)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Disk not found"})
+		return
+	}
+	defer disk.Close()
+
+	info := disk.Info()
+
+	response := dto.DiskInfoDTO{
+		Name:         info.Name,
+		SizeGB:       info.SizeGB,
+		ActualSizeGB: info.ActualSizeGB,
+		Created:      info.Created.Format(time.RFC3339),
+		Modified:     info.Modified.Format(time.RFC3339),
+		IsMounted:    info.IsMounted,
+		MountPath:    disk.MountPath(),
+		InS3:         info.InS3,
+		Checksum:     info.Checksum,
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }

@@ -214,8 +214,8 @@ const statuses: FacetedFilterOption[] = [
     icon: ({ className }: { className?: string }) => <HardDrive className={className} />,
   },
   {
-    value: DiskState.UPLOADING,
-    label: 'Uploading',
+    value: DiskState.PUSHING,
+    label: 'Pushing',
     icon: ({ className }: { className?: string }) => <Timer className={className} />,
   },
   {
@@ -378,10 +378,10 @@ function StateBadge({ state }: { state: DiskState }) {
           label: 'Attached',
           className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
         }
-      case DiskState.UPLOADING:
+      case DiskState.PUSHING:
         return {
           icon: <Timer className="mr-1 h-3 w-3" />,
-          label: 'Uploading',
+          label: 'Pushing',
           className: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
         }
       case DiskState.STORED:

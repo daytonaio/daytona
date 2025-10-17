@@ -634,24 +634,7 @@ export class SandboxService {
       }
 
       let runner: Runner
-
-      try {
-        runner = await this.runnerService.getRandomAvailableRunner({
-          region: sandbox.region,
-          sandboxClass: sandbox.class,
-          snapshotRef: sandbox.buildInfo.snapshotRef,
-        })
-        sandbox.runnerId = runner.id
-      } catch (error) {
-        if (
-          error instanceof BadRequestError == false ||
-          error.message !== 'No available runners' ||
-          !sandbox.buildInfo
-        ) {
-          throw error
-        }
-        sandbox.state = SandboxState.PENDING_BUILD
-      }
+      let preferredRunnerIds: string[] = []
 
       sandbox.pending = true
 
@@ -668,6 +651,35 @@ export class SandboxService {
           throw new BadRequestError(`Disk is already attached to sandbox ${disk.sandboxId}`)
         }
         sandbox.disks = [disk.id]
+
+        // If the disk is detached, try to assign the same runner to the sandbox
+        if (disk.state === DiskState.DETACHED) {
+          // This should never happen, but for sanity reasons
+          if (!disk.runnerId) {
+            throw new BadRequestError(`Disk is detached but no runner ID found`)
+          }
+          preferredRunnerIds = [disk.runnerId]
+        }
+      }
+
+      try {
+        runner = await this.runnerService.getRandomAvailableRunner({
+          region: sandbox.region,
+          sandboxClass: sandbox.class,
+          snapshotRef: sandbox.buildInfo.snapshotRef,
+          preferredRunnerIds: preferredRunnerIds,
+        })
+
+        sandbox.runnerId = runner.id
+      } catch (error) {
+        if (
+          error instanceof BadRequestError == false ||
+          error.message !== 'No available runners' ||
+          !sandbox.buildInfo
+        ) {
+          throw error
+        }
+        sandbox.state = SandboxState.PENDING_BUILD
       }
 
       await this.sandboxRepository.insert(sandbox)

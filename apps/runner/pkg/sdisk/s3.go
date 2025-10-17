@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -105,7 +106,7 @@ func (c *S3Client) diskKey(diskName string) string {
 
 // layerKey returns the S3 key for a specific layer
 func (c *S3Client) layerKey(diskName, layerID string) string {
-	return fmt.Sprintf("disks/%s/layers/%s.qcow2", diskName, layerID)
+	return fmt.Sprintf("disks/%s/layers/%s", diskName, layerID)
 }
 
 // metadataKey returns the S3 key for a disk's metadata
@@ -304,29 +305,66 @@ func (c *S3Client) ListDisks(ctx context.Context) ([]string, error) {
 	return disks, nil
 }
 
-// UploadLayer uploads a single QCOW2 layer to S3
+// UploadLayer uploads a single QCOW2 layer to S3 using sparse-aware compression
 func (c *S3Client) UploadLayer(ctx context.Context, diskName, layerID, localPath string) error {
-	// Open the local file
-	file, err := os.Open(localPath)
-	if err != nil {
-		return fmt.Errorf("failed to open layer file: %w", err)
-	}
-	defer file.Close()
-
-	// Get file size
-	fileInfo, err := file.Stat()
-	if err != nil {
-		return fmt.Errorf("failed to stat layer file: %w", err)
+	// Verify the source file exists
+	if _, err := os.Stat(localPath); err != nil {
+		return fmt.Errorf("source file does not exist: %w", err)
 	}
 
-	// Upload the layer file
-	key := c.layerKey(diskName, layerID)
+	// Create a temporary file for the tar output
+	tmpFile, err := os.CreateTemp("", "layer-*.tar.gz")
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	defer os.Remove(tmpFile.Name())
+	defer tmpFile.Close()
+
+	// Create tar.gz with sparse support
+	dir := filepath.Dir(localPath)
+	base := filepath.Base(localPath)
+
+	// Check if tar is available
+	if _, err := exec.LookPath("tar"); err != nil {
+		return fmt.Errorf("tar command not found: %w", err)
+	}
+
+	// Add a timeout to prevent hanging
+	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	defer cancel()
+	cmd := exec.CommandContext(timeoutCtx, "tar", "-czS", "-f", tmpFile.Name(), "-C", dir, base)
+
+	// Capture stderr for debugging
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to create tar archive: %w, stderr: %s", err, stderr.String())
+	}
+
+	// Verify the tar file was created and has content
+	fileInfo, err := tmpFile.Stat()
+	if err != nil {
+		return fmt.Errorf("failed to stat tar file: %w", err)
+	}
+	if fileInfo.Size() == 0 {
+		return fmt.Errorf("tar file is empty")
+	}
+
+	// Read the tar file into memory for S3 upload
+	tarData, err := os.ReadFile(tmpFile.Name())
+	if err != nil {
+		return fmt.Errorf("failed to read tar file: %w", err)
+	}
+
+	// Upload the tar file to S3
+	key := c.layerKey(diskName, layerID) + ".tar.gz"
 	_, err = c.s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:        aws.String(c.bucket),
 		Key:           aws.String(key),
-		Body:          file,
-		ContentLength: aws.Int64(fileInfo.Size()),
-		ContentType:   aws.String("application/octet-stream"),
+		Body:          bytes.NewReader(tarData),
+		ContentLength: aws.Int64(int64(len(tarData))),
+		ContentType:   aws.String("application/x-tar+gzip"),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to upload layer: %w", err)
@@ -335,7 +373,7 @@ func (c *S3Client) UploadLayer(ctx context.Context, diskName, layerID, localPath
 	return nil
 }
 
-// DownloadLayer downloads a single QCOW2 layer from S3
+// DownloadLayer downloads a single QCOW2 layer from S3 using sparse-aware extraction
 func (c *S3Client) DownloadLayer(ctx context.Context, diskName, layerID, localPath string) error {
 	// Create directory for the layer if it doesn't exist
 	dir := filepath.Dir(localPath)
@@ -344,7 +382,7 @@ func (c *S3Client) DownloadLayer(ctx context.Context, diskName, layerID, localPa
 	}
 
 	// Download the layer file
-	key := c.layerKey(diskName, layerID)
+	key := c.layerKey(diskName, layerID) + ".tar.gz"
 	result, err := c.s3Client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(c.bucket),
 		Key:    aws.String(key),
@@ -354,16 +392,26 @@ func (c *S3Client) DownloadLayer(ctx context.Context, diskName, layerID, localPa
 	}
 	defer result.Body.Close()
 
-	// Create local file
-	file, err := os.Create(localPath)
+	// Extract with sparse support
+	cmd := exec.CommandContext(ctx, "tar", "-xzS", "-f", "-", "-C", dir)
+	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return fmt.Errorf("failed to create local layer file: %w", err)
+		return fmt.Errorf("failed to create tar pipe: %w", err)
 	}
-	defer file.Close()
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("failed to start tar: %w", err)
+	}
 
-	// Copy data
-	if _, err := io.Copy(file, result.Body); err != nil {
-		return fmt.Errorf("failed to write layer data: %w", err)
+	// Stream S3 data to tar
+	if _, err := io.Copy(stdin, result.Body); err != nil {
+		stdin.Close()
+		cmd.Process.Kill()
+		return fmt.Errorf("failed to extract layer: %w", err)
+	}
+	stdin.Close()
+
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("failed to complete extraction: %w", err)
 	}
 
 	return nil
@@ -371,7 +419,7 @@ func (c *S3Client) DownloadLayer(ctx context.Context, diskName, layerID, localPa
 
 // LayerExists checks if a specific layer exists in S3
 func (c *S3Client) LayerExists(ctx context.Context, diskName, layerID string) (bool, error) {
-	key := c.layerKey(diskName, layerID)
+	key := c.layerKey(diskName, layerID) + ".tar.gz"
 	_, err := c.s3Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(c.bucket),
 		Key:    aws.String(key),
@@ -391,7 +439,7 @@ func (c *S3Client) LayerExists(ctx context.Context, diskName, layerID string) (b
 
 // DeleteLayer deletes a specific layer from S3
 func (c *S3Client) DeleteLayer(ctx context.Context, diskName, layerID string) error {
-	key := c.layerKey(diskName, layerID)
+	key := c.layerKey(diskName, layerID) + ".tar.gz"
 	_, err := c.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: aws.String(c.bucket),
 		Key:    aws.String(key),
