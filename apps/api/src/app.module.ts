@@ -93,7 +93,9 @@ import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posth
         }
       },
     }),
-    EventEmitterModule.forRoot(),
+    EventEmitterModule.forRoot({
+      maxListeners: 100,
+    }),
     ApiKeyModule,
     AuthModule,
     UserModule,

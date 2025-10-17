@@ -30,7 +30,6 @@ from daytona_api_client.models.computer_use_start_response import ComputerUseSta
 from daytona_api_client.models.computer_use_status_response import ComputerUseStatusResponse
 from daytona_api_client.models.computer_use_stop_response import ComputerUseStopResponse
 from daytona_api_client.models.create_api_key import CreateApiKey
-from daytona_api_client.models.create_audit_log import CreateAuditLog
 from daytona_api_client.models.create_build_info import CreateBuildInfo
 from daytona_api_client.models.create_docker_registry import CreateDockerRegistry
 from daytona_api_client.models.create_linked_account import CreateLinkedAccount

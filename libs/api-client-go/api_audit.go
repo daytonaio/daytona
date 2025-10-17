@@ -18,21 +18,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type AuditAPI interface {
-
-	/*
-		CreateAuditLog Create audit log entry
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return AuditAPICreateAuditLogRequest
-	*/
-	CreateAuditLog(ctx context.Context) AuditAPICreateAuditLogRequest
-
-	// CreateAuditLogExecute executes the request
-	//  @return AuditLog
-	CreateAuditLogExecute(r AuditAPICreateAuditLogRequest) (*AuditLog, *http.Response, error)
 
 	/*
 		GetAllAuditLogs Get all audit logs
@@ -63,120 +52,14 @@ type AuditAPI interface {
 // AuditAPIService AuditAPI service
 type AuditAPIService service
 
-type AuditAPICreateAuditLogRequest struct {
-	ctx            context.Context
-	ApiService     AuditAPI
-	createAuditLog *CreateAuditLog
-}
-
-func (r AuditAPICreateAuditLogRequest) CreateAuditLog(createAuditLog CreateAuditLog) AuditAPICreateAuditLogRequest {
-	r.createAuditLog = &createAuditLog
-	return r
-}
-
-func (r AuditAPICreateAuditLogRequest) Execute() (*AuditLog, *http.Response, error) {
-	return r.ApiService.CreateAuditLogExecute(r)
-}
-
-/*
-CreateAuditLog Create audit log entry
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return AuditAPICreateAuditLogRequest
-*/
-func (a *AuditAPIService) CreateAuditLog(ctx context.Context) AuditAPICreateAuditLogRequest {
-	return AuditAPICreateAuditLogRequest{
-		ApiService: a,
-		ctx:        ctx,
-	}
-}
-
-// Execute executes the request
-//
-//	@return AuditLog
-func (a *AuditAPIService) CreateAuditLogExecute(r AuditAPICreateAuditLogRequest) (*AuditLog, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *AuditLog
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuditAPIService.CreateAuditLog")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/audit"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.createAuditLog == nil {
-		return localVarReturnValue, nil, reportError("createAuditLog is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	// body params
-	localVarPostBody = r.createAuditLog
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
 type AuditAPIGetAllAuditLogsRequest struct {
 	ctx        context.Context
 	ApiService AuditAPI
 	page       *float32
 	limit      *float32
+	from       *time.Time
+	to         *time.Time
+	nextToken  *string
 }
 
 // Page number of the results
@@ -188,6 +71,24 @@ func (r AuditAPIGetAllAuditLogsRequest) Page(page float32) AuditAPIGetAllAuditLo
 // Number of results per page
 func (r AuditAPIGetAllAuditLogsRequest) Limit(limit float32) AuditAPIGetAllAuditLogsRequest {
 	r.limit = &limit
+	return r
+}
+
+// From date (ISO 8601 format)
+func (r AuditAPIGetAllAuditLogsRequest) From(from time.Time) AuditAPIGetAllAuditLogsRequest {
+	r.from = &from
+	return r
+}
+
+// To date (ISO 8601 format)
+func (r AuditAPIGetAllAuditLogsRequest) To(to time.Time) AuditAPIGetAllAuditLogsRequest {
+	r.to = &to
+	return r
+}
+
+// Token for cursor-based pagination. When provided, takes precedence over page parameter.
+func (r AuditAPIGetAllAuditLogsRequest) NextToken(nextToken string) AuditAPIGetAllAuditLogsRequest {
+	r.nextToken = &nextToken
 	return r
 }
 
@@ -241,6 +142,15 @@ func (a *AuditAPIService) GetAllAuditLogsExecute(r AuditAPIGetAllAuditLogsReques
 	} else {
 		var defaultValue float32 = 100
 		r.limit = &defaultValue
+	}
+	if r.from != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "from", r.from, "form", "")
+	}
+	if r.to != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "form", "")
+	}
+	if r.nextToken != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "nextToken", r.nextToken, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -302,6 +212,9 @@ type AuditAPIGetOrganizationAuditLogsRequest struct {
 	organizationId string
 	page           *float32
 	limit          *float32
+	from           *time.Time
+	to             *time.Time
+	nextToken      *string
 }
 
 // Page number of the results
@@ -313,6 +226,24 @@ func (r AuditAPIGetOrganizationAuditLogsRequest) Page(page float32) AuditAPIGetO
 // Number of results per page
 func (r AuditAPIGetOrganizationAuditLogsRequest) Limit(limit float32) AuditAPIGetOrganizationAuditLogsRequest {
 	r.limit = &limit
+	return r
+}
+
+// From date (ISO 8601 format)
+func (r AuditAPIGetOrganizationAuditLogsRequest) From(from time.Time) AuditAPIGetOrganizationAuditLogsRequest {
+	r.from = &from
+	return r
+}
+
+// To date (ISO 8601 format)
+func (r AuditAPIGetOrganizationAuditLogsRequest) To(to time.Time) AuditAPIGetOrganizationAuditLogsRequest {
+	r.to = &to
+	return r
+}
+
+// Token for cursor-based pagination. When provided, takes precedence over page parameter.
+func (r AuditAPIGetOrganizationAuditLogsRequest) NextToken(nextToken string) AuditAPIGetOrganizationAuditLogsRequest {
+	r.nextToken = &nextToken
 	return r
 }
 
@@ -369,6 +300,15 @@ func (a *AuditAPIService) GetOrganizationAuditLogsExecute(r AuditAPIGetOrganizat
 	} else {
 		var defaultValue float32 = 100
 		r.limit = &defaultValue
+	}
+	if r.from != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "from", r.from, "form", "")
+	}
+	if r.to != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "form", "")
+	}
+	if r.nextToken != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "nextToken", r.nextToken, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

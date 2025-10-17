@@ -46,4 +46,10 @@ export interface PaginatedAuditLogs {
    * @memberof PaginatedAuditLogs
    */
   totalPages: number
+  /**
+   * Token for next page in cursor-based pagination
+   * @type {string}
+   * @memberof PaginatedAuditLogs
+   */
+  nextToken?: string
 }

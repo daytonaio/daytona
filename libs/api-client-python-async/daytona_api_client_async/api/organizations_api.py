@@ -69,7 +69,7 @@ class OrganizationsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> OrganizationInvitation:
         """Accept organization invitation
 
 
@@ -106,7 +106,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "OrganizationInvitation",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -135,7 +135,7 @@ class OrganizationsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[OrganizationInvitation]:
         """Accept organization invitation
 
 
@@ -172,7 +172,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "OrganizationInvitation",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -238,7 +238,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "OrganizationInvitation",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -279,6 +279,13 @@ class OrganizationsApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
