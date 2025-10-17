@@ -67,8 +67,6 @@ type Sandbox struct {
 	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
 	// Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 	AutoDeleteInterval *float32 `json:"autoDeleteInterval,omitempty"`
-	// The domain name of the runner
-	RunnerDomain *string `json:"runnerDomain,omitempty"`
 	// Array of volumes attached to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the sandbox
@@ -749,38 +747,6 @@ func (o *Sandbox) SetAutoDeleteInterval(v float32) {
 	o.AutoDeleteInterval = &v
 }
 
-// GetRunnerDomain returns the RunnerDomain field value if set, zero value otherwise.
-func (o *Sandbox) GetRunnerDomain() string {
-	if o == nil || IsNil(o.RunnerDomain) {
-		var ret string
-		return ret
-	}
-	return *o.RunnerDomain
-}
-
-// GetRunnerDomainOk returns a tuple with the RunnerDomain field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Sandbox) GetRunnerDomainOk() (*string, bool) {
-	if o == nil || IsNil(o.RunnerDomain) {
-		return nil, false
-	}
-	return o.RunnerDomain, true
-}
-
-// HasRunnerDomain returns a boolean if a field has been set.
-func (o *Sandbox) HasRunnerDomain() bool {
-	if o != nil && !IsNil(o.RunnerDomain) {
-		return true
-	}
-
-	return false
-}
-
-// SetRunnerDomain gets a reference to the given string and assigns it to the RunnerDomain field.
-func (o *Sandbox) SetRunnerDomain(v string) {
-	o.RunnerDomain = &v
-}
-
 // GetVolumes returns the Volumes field value if set, zero value otherwise.
 func (o *Sandbox) GetVolumes() []SandboxVolume {
 	if o == nil || IsNil(o.Volumes) {
@@ -1029,9 +995,6 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.AutoDeleteInterval) {
 		toSerialize["autoDeleteInterval"] = o.AutoDeleteInterval
 	}
-	if !IsNil(o.RunnerDomain) {
-		toSerialize["runnerDomain"] = o.RunnerDomain
-	}
 	if !IsNil(o.Volumes) {
 		toSerialize["volumes"] = o.Volumes
 	}
@@ -1128,7 +1091,6 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "autoStopInterval")
 		delete(additionalProperties, "autoArchiveInterval")
 		delete(additionalProperties, "autoDeleteInterval")
-		delete(additionalProperties, "runnerDomain")
 		delete(additionalProperties, "volumes")
 		delete(additionalProperties, "buildInfo")
 		delete(additionalProperties, "createdAt")

@@ -17,12 +17,13 @@ import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-
+import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
+import { OrGuard } from '../../auth/or.guard'
 @ApiTags('runners')
 @Controller('runners')
-@UseGuards(CombinedAuthGuard, SystemActionGuard, ProxyGuard)
-@RequiredApiRole([SystemRole.ADMIN, 'proxy'])
+@UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
+@RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class RunnerController {

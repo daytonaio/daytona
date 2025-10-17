@@ -70,8 +70,8 @@ export class WorkspaceDto extends SandboxDto {
     super()
   }
 
-  static fromSandbox(sandbox: Sandbox, runnerDomain: string): WorkspaceDto {
-    const dto = super.fromSandbox(sandbox, runnerDomain)
+  static fromSandbox(sandbox: Sandbox): WorkspaceDto {
+    const dto = super.fromSandbox(sandbox)
     return this.fromSandboxDto(dto)
   }
 
@@ -86,7 +86,6 @@ export class WorkspaceDto extends SandboxDto {
         created: sandboxDto.createdAt,
         providerMetadata: JSON.stringify({
           state: sandboxDto.state,
-          nodeDomain: sandboxDto.runnerDomain,
           region: sandboxDto.target,
           class: sandboxDto.class,
           updatedAt: sandboxDto.updatedAt,

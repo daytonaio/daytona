@@ -24,9 +24,7 @@ type WorkspacePortPreviewUrl struct {
 	// Preview url
 	Url string `json:"url"`
 	// Access token
-	Token string `json:"token"`
-	// Legacy preview url using runner domain
-	LegacyProxyUrl       *string `json:"legacyProxyUrl,omitempty"`
+	Token                string `json:"token"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -99,38 +97,6 @@ func (o *WorkspacePortPreviewUrl) SetToken(v string) {
 	o.Token = v
 }
 
-// GetLegacyProxyUrl returns the LegacyProxyUrl field value if set, zero value otherwise.
-func (o *WorkspacePortPreviewUrl) GetLegacyProxyUrl() string {
-	if o == nil || IsNil(o.LegacyProxyUrl) {
-		var ret string
-		return ret
-	}
-	return *o.LegacyProxyUrl
-}
-
-// GetLegacyProxyUrlOk returns a tuple with the LegacyProxyUrl field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *WorkspacePortPreviewUrl) GetLegacyProxyUrlOk() (*string, bool) {
-	if o == nil || IsNil(o.LegacyProxyUrl) {
-		return nil, false
-	}
-	return o.LegacyProxyUrl, true
-}
-
-// HasLegacyProxyUrl returns a boolean if a field has been set.
-func (o *WorkspacePortPreviewUrl) HasLegacyProxyUrl() bool {
-	if o != nil && !IsNil(o.LegacyProxyUrl) {
-		return true
-	}
-
-	return false
-}
-
-// SetLegacyProxyUrl gets a reference to the given string and assigns it to the LegacyProxyUrl field.
-func (o *WorkspacePortPreviewUrl) SetLegacyProxyUrl(v string) {
-	o.LegacyProxyUrl = &v
-}
-
 func (o WorkspacePortPreviewUrl) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -143,9 +109,6 @@ func (o WorkspacePortPreviewUrl) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["url"] = o.Url
 	toSerialize["token"] = o.Token
-	if !IsNil(o.LegacyProxyUrl) {
-		toSerialize["legacyProxyUrl"] = o.LegacyProxyUrl
-	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -192,7 +155,6 @@ func (o *WorkspacePortPreviewUrl) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "url")
 		delete(additionalProperties, "token")
-		delete(additionalProperties, "legacyProxyUrl")
 		o.AdditionalProperties = additionalProperties
 	}
 

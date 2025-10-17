@@ -24,11 +24,7 @@ type SshAccessValidationDto struct {
 	// Whether the SSH access token is valid
 	Valid bool `json:"valid"`
 	// ID of the sandbox this SSH access is for
-	SandboxId string `json:"sandboxId"`
-	// ID of the runner hosting the sandbox
-	RunnerId *string `json:"runnerId,omitempty"`
-	// Domain of the runner hosting the sandbox
-	RunnerDomain         *string `json:"runnerDomain,omitempty"`
+	SandboxId            string `json:"sandboxId"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -101,70 +97,6 @@ func (o *SshAccessValidationDto) SetSandboxId(v string) {
 	o.SandboxId = v
 }
 
-// GetRunnerId returns the RunnerId field value if set, zero value otherwise.
-func (o *SshAccessValidationDto) GetRunnerId() string {
-	if o == nil || IsNil(o.RunnerId) {
-		var ret string
-		return ret
-	}
-	return *o.RunnerId
-}
-
-// GetRunnerIdOk returns a tuple with the RunnerId field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *SshAccessValidationDto) GetRunnerIdOk() (*string, bool) {
-	if o == nil || IsNil(o.RunnerId) {
-		return nil, false
-	}
-	return o.RunnerId, true
-}
-
-// HasRunnerId returns a boolean if a field has been set.
-func (o *SshAccessValidationDto) HasRunnerId() bool {
-	if o != nil && !IsNil(o.RunnerId) {
-		return true
-	}
-
-	return false
-}
-
-// SetRunnerId gets a reference to the given string and assigns it to the RunnerId field.
-func (o *SshAccessValidationDto) SetRunnerId(v string) {
-	o.RunnerId = &v
-}
-
-// GetRunnerDomain returns the RunnerDomain field value if set, zero value otherwise.
-func (o *SshAccessValidationDto) GetRunnerDomain() string {
-	if o == nil || IsNil(o.RunnerDomain) {
-		var ret string
-		return ret
-	}
-	return *o.RunnerDomain
-}
-
-// GetRunnerDomainOk returns a tuple with the RunnerDomain field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *SshAccessValidationDto) GetRunnerDomainOk() (*string, bool) {
-	if o == nil || IsNil(o.RunnerDomain) {
-		return nil, false
-	}
-	return o.RunnerDomain, true
-}
-
-// HasRunnerDomain returns a boolean if a field has been set.
-func (o *SshAccessValidationDto) HasRunnerDomain() bool {
-	if o != nil && !IsNil(o.RunnerDomain) {
-		return true
-	}
-
-	return false
-}
-
-// SetRunnerDomain gets a reference to the given string and assigns it to the RunnerDomain field.
-func (o *SshAccessValidationDto) SetRunnerDomain(v string) {
-	o.RunnerDomain = &v
-}
-
 func (o SshAccessValidationDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -177,12 +109,6 @@ func (o SshAccessValidationDto) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["valid"] = o.Valid
 	toSerialize["sandboxId"] = o.SandboxId
-	if !IsNil(o.RunnerId) {
-		toSerialize["runnerId"] = o.RunnerId
-	}
-	if !IsNil(o.RunnerDomain) {
-		toSerialize["runnerDomain"] = o.RunnerDomain
-	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -229,8 +155,6 @@ func (o *SshAccessValidationDto) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "valid")
 		delete(additionalProperties, "sandboxId")
-		delete(additionalProperties, "runnerId")
-		delete(additionalProperties, "runnerDomain")
 		o.AdditionalProperties = additionalProperties
 	}
 

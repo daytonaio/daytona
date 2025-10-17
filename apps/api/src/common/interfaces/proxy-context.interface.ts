@@ -10,5 +10,5 @@ export interface ProxyContext extends BaseAuthContext {
 }
 
 export function isProxyContext(user: BaseAuthContext): user is ProxyContext {
-  return 'role' in user && (user.role === 'proxy' || user.role === 'admin')
+  return 'role' in user && user.role === 'proxy'
 }

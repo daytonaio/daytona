@@ -51,7 +51,6 @@ class AsyncSandbox(SandboxDto):
         auto_stop_interval (int): Auto-stop interval in minutes.
         auto_archive_interval (int): Auto-archive interval in minutes.
         auto_delete_interval (int): Auto-delete interval in minutes.
-        runner_domain (str): Domain name of the Sandbox runner.
         volumes (List[str]): Volumes attached to the Sandbox.
         build_info (str): Build information for the Sandbox if it was created from dynamic build.
         created_at (str): When the Sandbox was created.
@@ -517,7 +516,6 @@ class AsyncSandbox(SandboxDto):
         self.auto_stop_interval = sandbox_dto.auto_stop_interval
         self.auto_archive_interval = sandbox_dto.auto_archive_interval
         self.auto_delete_interval = sandbox_dto.auto_delete_interval
-        self.runner_domain = sandbox_dto.runner_domain
         self.volumes = sandbox_dto.volumes
         self.build_info = sandbox_dto.build_info
         self.created_at = sandbox_dto.created_at

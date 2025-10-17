@@ -42,7 +42,6 @@ import { WorkspaceDto } from '../dto/workspace.deprecated.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState as WorkspaceState } from '../enums/sandbox-state.enum'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
-import { Runner } from '../entities/runner.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { SandboxAccessGuard as WorkspaceAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -110,8 +109,7 @@ export class WorkspaceController {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
     const workspacees = await this.workspaceService.findAllDeprecated(authContext.organizationId, labels)
     const dtos = workspacees.map(async (workspace) => {
-      const runner = await this.runnerService.findOne(workspace.runnerId)
-      const dto = WorkspaceDto.fromSandbox(workspace, runner.domain)
+      const dto = WorkspaceDto.fromSandbox(workspace)
       return dto
     })
     return await Promise.all(dtos)
@@ -219,12 +217,7 @@ export class WorkspaceController {
   ): Promise<WorkspaceDto> {
     const workspace = await this.workspaceService.findOne(workspaceId, true)
 
-    let runner: Runner
-    if (workspace.runnerId) {
-      runner = await this.runnerService.findOne(workspace.runnerId)
-    }
-
-    return WorkspaceDto.fromSandbox(workspace, runner?.domain)
+    return WorkspaceDto.fromSandbox(workspace)
   }
 
   @Delete(':workspaceId')

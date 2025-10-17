@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,10 +29,8 @@ class SshAccessValidationDto(BaseModel):
     """ # noqa: E501
     valid: StrictBool = Field(description="Whether the SSH access token is valid")
     sandbox_id: StrictStr = Field(description="ID of the sandbox this SSH access is for", alias="sandboxId")
-    runner_id: Optional[StrictStr] = Field(default=None, description="ID of the runner hosting the sandbox", alias="runnerId")
-    runner_domain: Optional[StrictStr] = Field(default=None, description="Domain of the runner hosting the sandbox", alias="runnerDomain")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["valid", "sandboxId", "runnerId", "runnerDomain"]
+    __properties: ClassVar[List[str]] = ["valid", "sandboxId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,9 +91,7 @@ class SshAccessValidationDto(BaseModel):
 
         _obj = cls.model_validate({
             "valid": obj.get("valid"),
-            "sandboxId": obj.get("sandboxId"),
-            "runnerId": obj.get("runnerId"),
-            "runnerDomain": obj.get("runnerDomain")
+            "sandboxId": obj.get("sandboxId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

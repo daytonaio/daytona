@@ -424,7 +424,7 @@ export class SandboxService extends LockableEntity {
       sandbox.runnerId = runner.id
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox, runner.domain)
+      return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
@@ -504,7 +504,7 @@ export class SandboxService extends LockableEntity {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result, runner.domain)
+    return SandboxDto.fromSandbox(result)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -620,7 +620,7 @@ export class SandboxService extends LockableEntity {
       }
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
@@ -1370,8 +1370,6 @@ export class SandboxService extends LockableEntity {
         return {
           valid: true,
           sandboxId: sshAccess.sandbox.id,
-          runnerId: runner.id,
-          runnerDomain: runner.domain,
         }
       }
     }

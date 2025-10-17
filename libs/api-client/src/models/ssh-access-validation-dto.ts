@@ -30,16 +30,4 @@ export interface SshAccessValidationDto {
    * @memberof SshAccessValidationDto
    */
   sandboxId: string
-  /**
-   * ID of the runner hosting the sandbox
-   * @type {string}
-   * @memberof SshAccessValidationDto
-   */
-  runnerId?: string
-  /**
-   * Domain of the runner hosting the sandbox
-   * @type {string}
-   * @memberof SshAccessValidationDto
-   */
-  runnerDomain?: string
 }
