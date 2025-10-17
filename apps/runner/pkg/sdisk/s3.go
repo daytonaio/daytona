@@ -104,9 +104,9 @@ func (c *S3Client) diskKey(diskName string) string {
 	return fmt.Sprintf("disks/%s/disk.qcow2", diskName)
 }
 
-// layerKey returns the S3 key for a specific layer
+// layerKey returns the S3 key for a specific layer in the shared layers folder
 func (c *S3Client) layerKey(diskName, layerID string) string {
-	return fmt.Sprintf("disks/%s/layers/%s", diskName, layerID)
+	return fmt.Sprintf("layers/%s", layerID)
 }
 
 // metadataKey returns the S3 key for a disk's metadata
@@ -255,7 +255,29 @@ func (c *S3Client) DiskExists(ctx context.Context, diskName string) (bool, error
 
 // DeleteDisk deletes a disk and all its layers from S3
 func (c *S3Client) DeleteDisk(ctx context.Context, diskName string) error {
-	// List all objects under this disk's prefix
+	//	TODO: implement external layer manager to delete layers from S3
+	// metadata, err := c.DownloadMetadata(ctx, diskName)
+
+	// if err != nil {
+	// 	return fmt.Errorf("failed to download metadata: %w", err)
+	// }
+
+	// Delete all layers that belong to this disk
+	// Not used - keeping for reference
+	//
+	// for _, layer := range metadata.Layers {
+	// 	layerKey := c.layerKey(diskName, layer.ID) + ".tar.gz"
+	// 	_, err := c.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
+	// 		Bucket: aws.String(c.bucket),
+	// 		Key:    aws.String(layerKey),
+	// 	})
+	// 	if err != nil {
+	// 		// Log error but continue with other deletions
+	// 		fmt.Fprintf(os.Stderr, "warning: failed to delete layer %s: %v\n", layer.ID, err)
+	// 	}
+	// }
+
+	// Delete the disk metadata folder
 	prefix := fmt.Sprintf("disks/%s/", diskName)
 	result, err := c.s3Client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
 		Bucket: aws.String(c.bucket),
@@ -265,7 +287,7 @@ func (c *S3Client) DeleteDisk(ctx context.Context, diskName string) error {
 		return fmt.Errorf("failed to list disk objects: %w", err)
 	}
 
-	// Delete all objects (layers, metadata, etc.)
+	// Delete all objects in the disk folder (metadata, etc.)
 	for _, obj := range result.Contents {
 		_, err := c.s3Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 			Bucket: aws.String(c.bucket),
