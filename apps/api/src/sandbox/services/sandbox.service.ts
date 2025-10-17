@@ -147,21 +147,23 @@ export class SandboxService extends LockableEntity {
     const usageOverview = await this.organizationUsageService.getSandboxUsageOverview(organization.id, excludeSandboxId)
 
     try {
+      const upgradeTierMessage = UPGRADE_TIER_MESSAGE(this.configService.getOrThrow('dashboardUrl'))
+
       if (usageOverview.currentCpuUsage + usageOverview.pendingCpuUsage > organization.totalCpuQuota) {
         throw new ForbiddenException(
-          `Total CPU limit exceeded. Maximum allowed: ${organization.totalCpuQuota}.\n${UPGRADE_TIER_MESSAGE}`,
+          `Total CPU limit exceeded. Maximum allowed: ${organization.totalCpuQuota}.\n${upgradeTierMessage}`,
         )
       }
 
       if (usageOverview.currentMemoryUsage + usageOverview.pendingMemoryUsage > organization.totalMemoryQuota) {
         throw new ForbiddenException(
-          `Total memory limit exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB.\n${UPGRADE_TIER_MESSAGE}`,
+          `Total memory limit exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB.\n${upgradeTierMessage}`,
         )
       }
 
       if (usageOverview.currentDiskUsage + usageOverview.pendingDiskUsage > organization.totalDiskQuota) {
         throw new ForbiddenException(
-          `Total disk limit exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB.\n${ARCHIVE_SANDBOXES_MESSAGE}\n${UPGRADE_TIER_MESSAGE}`,
+          `Total disk limit exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB.\n${ARCHIVE_SANDBOXES_MESSAGE}\n${upgradeTierMessage}`,
         )
       }
     } catch (error) {
