@@ -12,13 +12,19 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
+	"github.com/shirou/gopsutil/v4/process"
 
 	log "github.com/sirupsen/logrus"
 )
+
+const TERMINATION_GRACE_PERIOD = 5 * time.Second
+const TERMINATION_CHECK_INTERVAL = 100 * time.Millisecond
 
 var sessions = map[string]*session{}
 
@@ -27,6 +33,11 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
+
+	// Set up a new process group so we can kill all child processes when the session is deleted
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
 
 	// for backward compatibility (only sdk clients before 0.103.X), we use the home directory as the default directory
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
@@ -97,19 +108,28 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 
 	session, ok := sessions[sessionId]
 	if !ok {
-		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
+		_ = c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
 	}
 
+	// Terminate process group first with signals (SIGTERM -> SIGKILL)
+	err := s.terminateSession(c.Request.Context(), session)
+	if err != nil {
+		log.Errorf("Failed to terminate session %s: %v", session.id, err)
+		// Continue with cleanup even if termination fails
+	}
+
+	// Cancel context after termination
 	session.cancel()
 
-	err := os.RemoveAll(session.Dir(s.configDir))
+	// Clean up session directory
+	err = os.RemoveAll(session.Dir(s.configDir))
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	delete(sessions, sessionId)
+	delete(sessions, session.id)
 	c.Status(http.StatusNoContent)
 }
 
@@ -216,4 +236,58 @@ func (s *SessionController) getSessionCommand(sessionId, cmdId string) (*Command
 	command.ExitCode = &exitCodeInt
 
 	return command, nil
+}
+
+func (s *SessionController) terminateSession(ctx context.Context, session *session) error {
+	if session.cmd == nil || session.cmd.Process == nil {
+		return nil
+	}
+
+	pid := session.cmd.Process.Pid
+
+	// Send SIGTERM to entire process group (negative PID)
+	err := syscall.Kill(-pid, syscall.SIGTERM)
+	if err != nil {
+		// If SIGTERM fails, try SIGKILL immediately
+		log.Warnf("SIGTERM failed for session %s, trying SIGKILL: %v", session.id, err)
+		return syscall.Kill(-pid, syscall.SIGKILL)
+	}
+
+	// Wait for graceful termination
+	if s.waitForTermination(ctx, pid, TERMINATION_GRACE_PERIOD, TERMINATION_CHECK_INTERVAL) {
+		log.Debugf("Session %s terminated gracefully", session.id)
+		return nil
+	}
+
+	// Force kill entire process group if still alive
+	log.Debugf("Session %s timeout, sending SIGKILL to process group", session.id)
+	return syscall.Kill(-pid, syscall.SIGKILL)
+}
+
+func (s *SessionController) waitForTermination(ctx context.Context, pid int, timeout, interval time.Duration) bool {
+	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeoutCtx.Done():
+			return false
+		case <-ticker.C:
+			parent, err := process.NewProcess(int32(pid))
+			if err != nil {
+				return true
+			}
+			children, err := parent.Children()
+			if err != nil {
+				// Unable to enumerate children; handle as needed (e.g., treat conservatively)
+				return false
+			}
+			if len(children) == 0 {
+				return true
+			}
+		}
+	}
 }
