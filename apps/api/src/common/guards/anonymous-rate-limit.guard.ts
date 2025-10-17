@@ -5,8 +5,7 @@
 
 import { Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { ThrottlerGuard, ThrottlerModuleOptions, ThrottlerRequest } from '@nestjs/throttler'
-import { ThrottlerStorage } from '@nestjs/throttler/dist/throttler-storage.interface'
+import { ThrottlerGuard, ThrottlerModuleOptions, ThrottlerRequest, ThrottlerStorage } from '@nestjs/throttler'
 import { Request } from 'express'
 
 @Injectable()
