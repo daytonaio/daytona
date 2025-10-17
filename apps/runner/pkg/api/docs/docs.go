@@ -36,6 +36,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/disk/{diskId}/delete": {
+            "delete": {
+                "description": "Delete a disk from the runner",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disk"
+                ],
+                "summary": "Delete disk",
+                "operationId": "DeleteDisk",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Disk ID",
+                        "name": "diskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force delete mounted disk (unmounts first)",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/disk/{diskId}/info": {
             "get": {
                 "description": "Get detailed information about a specific disk",

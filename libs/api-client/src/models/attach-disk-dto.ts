@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,19 +12,16 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface AttachDiskDto
  */
 export interface AttachDiskDto {
-    /**
-     * Sandbox ID to attach the disk to
-     * @type {string}
-     * @memberof AttachDiskDto
-     */
-    'sandboxId': string;
+  /**
+   * Sandbox ID to attach the disk to
+   * @type {string}
+   * @memberof AttachDiskDto
+   */
+  sandboxId: string
 }
-

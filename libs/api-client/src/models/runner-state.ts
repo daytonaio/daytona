@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,8 +12,6 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
  * The state of the runner
  * @export
@@ -21,14 +19,11 @@
  */
 
 export const RunnerState = {
-    INITIALIZING: 'initializing',
-    READY: 'ready',
-    DISABLED: 'disabled',
-    DECOMMISSIONED: 'decommissioned',
-    UNRESPONSIVE: 'unresponsive'
-} as const;
+  INITIALIZING: 'initializing',
+  READY: 'ready',
+  DISABLED: 'disabled',
+  DECOMMISSIONED: 'decommissioned',
+  UNRESPONSIVE: 'unresponsive',
+} as const
 
-export type RunnerState = typeof RunnerState[keyof typeof RunnerState];
-
-
-
+export type RunnerState = (typeof RunnerState)[keyof typeof RunnerState]

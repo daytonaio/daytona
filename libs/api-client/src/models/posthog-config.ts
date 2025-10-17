@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,25 +12,22 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface PosthogConfig
  */
 export interface PosthogConfig {
-    /**
-     * PostHog API key
-     * @type {string}
-     * @memberof PosthogConfig
-     */
-    'apiKey': string;
-    /**
-     * PostHog host URL
-     * @type {string}
-     * @memberof PosthogConfig
-     */
-    'host': string;
+  /**
+   * PostHog API key
+   * @type {string}
+   * @memberof PosthogConfig
+   */
+  apiKey: string
+  /**
+   * PostHog host URL
+   * @type {string}
+   * @memberof PosthogConfig
+   */
+  host: string
 }
-

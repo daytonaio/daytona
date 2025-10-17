@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,73 +12,70 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface OrganizationUsageOverview
  */
 export interface OrganizationUsageOverview {
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'totalCpuQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'totalMemoryQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'totalDiskQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'currentCpuUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'currentMemoryUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'currentDiskUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'totalSnapshotQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'currentSnapshotUsage': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'totalVolumeQuota': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof OrganizationUsageOverview
-     */
-    'currentVolumeUsage': number;
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  totalCpuQuota: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  totalMemoryQuota: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  totalDiskQuota: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  currentCpuUsage: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  currentMemoryUsage: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  currentDiskUsage: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  totalSnapshotQuota: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  currentSnapshotUsage: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  totalVolumeQuota: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  currentVolumeUsage: number
 }
-

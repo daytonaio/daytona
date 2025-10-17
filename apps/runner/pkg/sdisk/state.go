@@ -25,6 +25,22 @@ type DiskState struct {
 	Checksum   string
 }
 
+// LayerState represents a cached layer
+type LayerState struct {
+	ID       string    // Layer ID from S3
+	Checksum string    // SHA256 checksum
+	Size     int64     // File size in bytes
+	CachedAt time.Time // When layer was downloaded
+	RefCount int       // Number of disks using this layer
+}
+
+// DiskLayerMapping tracks which layers a disk uses
+type DiskLayerMapping struct {
+	DiskName string
+	LayerID  string
+	Position int // Layer position in chain (0=base, 1=first delta, etc)
+}
+
 // NewDB creates a new state database
 func NewDB(dbPath string) (*DB, error) {
 	db, err := sql.Open("sqlite3", dbPath)
@@ -55,8 +71,26 @@ func createTables(db *sql.DB) error {
 		checksum TEXT
 	);
 
+	CREATE TABLE IF NOT EXISTS layers (
+		id TEXT PRIMARY KEY,
+		checksum TEXT NOT NULL,
+		size INTEGER NOT NULL,
+		cached_at TIMESTAMP NOT NULL,
+		ref_count INTEGER NOT NULL DEFAULT 0
+	);
+
+	CREATE TABLE IF NOT EXISTS disk_layers (
+		disk_name TEXT NOT NULL,
+		layer_id TEXT NOT NULL,
+		position INTEGER NOT NULL,
+		PRIMARY KEY (disk_name, layer_id)
+	);
+
 	CREATE INDEX IF NOT EXISTS idx_disks_in_s3 ON disks(in_s3);
 	CREATE INDEX IF NOT EXISTS idx_disks_is_mounted ON disks(is_mounted);
+	CREATE INDEX IF NOT EXISTS idx_disk_layers_disk ON disk_layers(disk_name);
+	CREATE INDEX IF NOT EXISTS idx_disk_layers_layer ON disk_layers(layer_id);
+	CREATE INDEX IF NOT EXISTS idx_layers_ref_count ON layers(ref_count);
 	`
 
 	if _, err := db.Exec(schema); err != nil {
@@ -257,6 +291,211 @@ func (db *DB) UpdateS3State(name string, inS3 bool, checksum string) error {
 	}
 
 	return nil
+}
+
+// SaveLayer saves or updates a layer's state
+func (db *DB) SaveLayer(layer *LayerState) error {
+	query := `
+	INSERT INTO layers (id, checksum, size, cached_at, ref_count)
+	VALUES (?, ?, ?, ?, ?)
+	ON CONFLICT(id) DO UPDATE SET
+		checksum = excluded.checksum,
+		size = excluded.size,
+		cached_at = excluded.cached_at,
+		ref_count = excluded.ref_count
+	`
+
+	_, err := db.db.Exec(query,
+		layer.ID,
+		layer.Checksum,
+		layer.Size,
+		layer.CachedAt,
+		layer.RefCount,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to save layer: %w", err)
+	}
+
+	return nil
+}
+
+// GetLayer retrieves a layer's state
+func (db *DB) GetLayer(layerID string) (*LayerState, error) {
+	query := `
+	SELECT id, checksum, size, cached_at, ref_count
+	FROM layers
+	WHERE id = ?
+	`
+
+	var layer LayerState
+	err := db.db.QueryRow(query, layerID).Scan(
+		&layer.ID,
+		&layer.Checksum,
+		&layer.Size,
+		&layer.CachedAt,
+		&layer.RefCount,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil // Not found
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get layer: %w", err)
+	}
+
+	return &layer, nil
+}
+
+// IncrementLayerRefCount increments the reference count for a layer
+func (db *DB) IncrementLayerRefCount(layerID string) error {
+	query := `
+	UPDATE layers 
+	SET ref_count = ref_count + 1
+	WHERE id = ?
+	`
+
+	result, err := db.db.Exec(query, layerID)
+	if err != nil {
+		return fmt.Errorf("failed to increment layer ref count: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("layer not found")
+	}
+
+	return nil
+}
+
+// DecrementLayerRefCount decrements the reference count for a layer
+func (db *DB) DecrementLayerRefCount(layerID string) error {
+	query := `
+	UPDATE layers 
+	SET ref_count = ref_count - 1
+	WHERE id = ? AND ref_count > 0
+	`
+
+	result, err := db.db.Exec(query, layerID)
+	if err != nil {
+		return fmt.Errorf("failed to decrement layer ref count: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("layer not found or ref count already zero")
+	}
+
+	return nil
+}
+
+// AddDiskLayerMapping adds a mapping between a disk and a layer
+func (db *DB) AddDiskLayerMapping(diskName, layerID string, position int) error {
+	query := `
+	INSERT INTO disk_layers (disk_name, layer_id, position)
+	VALUES (?, ?, ?)
+	ON CONFLICT(disk_name, layer_id) DO UPDATE SET
+		position = excluded.position
+	`
+
+	_, err := db.db.Exec(query, diskName, layerID, position)
+	if err != nil {
+		return fmt.Errorf("failed to add disk-layer mapping: %w", err)
+	}
+
+	return nil
+}
+
+// GetDiskLayers retrieves all layer mappings for a disk
+func (db *DB) GetDiskLayers(diskName string) ([]*DiskLayerMapping, error) {
+	query := `
+	SELECT disk_name, layer_id, position
+	FROM disk_layers
+	WHERE disk_name = ?
+	ORDER BY position
+	`
+
+	rows, err := db.db.Query(query, diskName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get disk layers: %w", err)
+	}
+	defer rows.Close()
+
+	var mappings []*DiskLayerMapping
+	for rows.Next() {
+		var mapping DiskLayerMapping
+		if err := rows.Scan(
+			&mapping.DiskName,
+			&mapping.LayerID,
+			&mapping.Position,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		mappings = append(mappings, &mapping)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return mappings, nil
+}
+
+// DeleteDiskLayers removes all layer mappings for a disk
+func (db *DB) DeleteDiskLayers(diskName string) error {
+	query := `DELETE FROM disk_layers WHERE disk_name = ?`
+
+	_, err := db.db.Exec(query, diskName)
+	if err != nil {
+		return fmt.Errorf("failed to delete disk layers: %w", err)
+	}
+
+	return nil
+}
+
+// ListUnusedLayers returns layers with zero reference count
+func (db *DB) ListUnusedLayers() ([]*LayerState, error) {
+	query := `
+	SELECT id, checksum, size, cached_at, ref_count
+	FROM layers
+	WHERE ref_count = 0
+	ORDER BY cached_at ASC
+	`
+
+	rows, err := db.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list unused layers: %w", err)
+	}
+	defer rows.Close()
+
+	var layers []*LayerState
+	for rows.Next() {
+		var layer LayerState
+		if err := rows.Scan(
+			&layer.ID,
+			&layer.Checksum,
+			&layer.Size,
+			&layer.CachedAt,
+			&layer.RefCount,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		layers = append(layers, &layer)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return layers, nil
 }
 
 // Close closes the database connection

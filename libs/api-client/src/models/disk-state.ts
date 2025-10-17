@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,8 +12,6 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
  * Disk state
  * @export
@@ -21,21 +19,18 @@
  */
 
 export const DiskState = {
-    FRESH: 'fresh',
-    PULLING: 'pulling',
-    READY: 'ready',
-    ATTACHED: 'attached',
-    DETACHED: 'detached',
-    PENDING_PUSH: 'pending_push',
-    PUSHING: 'pushing',
-    STORED: 'stored',
-    PENDING_DELETE: 'pending_delete',
-    DELETING: 'deleting',
-    DELETED: 'deleted',
-    ERROR: 'error'
-} as const;
+  FRESH: 'fresh',
+  PULLING: 'pulling',
+  READY: 'ready',
+  ATTACHED: 'attached',
+  DETACHED: 'detached',
+  PENDING_PUSH: 'pending_push',
+  PUSHING: 'pushing',
+  STORED: 'stored',
+  PENDING_DELETE: 'pending_delete',
+  DELETING: 'deleting',
+  DELETED: 'deleted',
+  ERROR: 'error',
+} as const
 
-export type DiskState = typeof DiskState[keyof typeof DiskState];
-
-
-
+export type DiskState = (typeof DiskState)[keyof typeof DiskState]

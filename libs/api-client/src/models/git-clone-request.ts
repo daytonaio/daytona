@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,49 +12,46 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface GitCloneRequest
  */
 export interface GitCloneRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCloneRequest
-     */
-    'url': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCloneRequest
-     */
-    'path': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCloneRequest
-     */
-    'username'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCloneRequest
-     */
-    'password'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCloneRequest
-     */
-    'branch'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GitCloneRequest
-     */
-    'commit_id'?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof GitCloneRequest
+   */
+  url: string
+  /**
+   *
+   * @type {string}
+   * @memberof GitCloneRequest
+   */
+  path: string
+  /**
+   *
+   * @type {string}
+   * @memberof GitCloneRequest
+   */
+  username?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GitCloneRequest
+   */
+  password?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GitCloneRequest
+   */
+  branch?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GitCloneRequest
+   */
+  commit_id?: string
 }
-

@@ -20,15 +20,14 @@ import (
 	"strings"
 )
 
-
 type WebhooksAPI interface {
 
 	/*
-	WebhookControllerGetAppPortalAccess Get Svix Consumer App Portal access URL for an organization
+		WebhookControllerGetAppPortalAccess Get Svix Consumer App Portal access URL for an organization
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId
-	@return WebhooksAPIWebhookControllerGetAppPortalAccessRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId
+		@return WebhooksAPIWebhookControllerGetAppPortalAccessRequest
 	*/
 	WebhookControllerGetAppPortalAccess(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerGetAppPortalAccessRequest
 
@@ -37,11 +36,11 @@ type WebhooksAPI interface {
 	WebhookControllerGetAppPortalAccessExecute(r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) (*WebhookAppPortalAccess, *http.Response, error)
 
 	/*
-	WebhookControllerGetInitializationStatus Get webhook initialization status for an organization
+		WebhookControllerGetInitializationStatus Get webhook initialization status for an organization
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId
-	@return WebhooksAPIWebhookControllerGetInitializationStatusRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId
+		@return WebhooksAPIWebhookControllerGetInitializationStatusRequest
 	*/
 	WebhookControllerGetInitializationStatus(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerGetInitializationStatusRequest
 
@@ -50,12 +49,12 @@ type WebhooksAPI interface {
 	WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookInitializationStatus, *http.Response, error)
 
 	/*
-	WebhookControllerGetMessageAttempts Get delivery attempts for a webhook message
+		WebhookControllerGetMessageAttempts Get delivery attempts for a webhook message
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId
-	@param messageId
-	@return WebhooksAPIWebhookControllerGetMessageAttemptsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId
+		@param messageId
+		@return WebhooksAPIWebhookControllerGetMessageAttemptsRequest
 	*/
 	WebhookControllerGetMessageAttempts(ctx context.Context, organizationId string, messageId string) WebhooksAPIWebhookControllerGetMessageAttemptsRequest
 
@@ -64,10 +63,10 @@ type WebhooksAPI interface {
 	WebhookControllerGetMessageAttemptsExecute(r WebhooksAPIWebhookControllerGetMessageAttemptsRequest) ([]map[string]interface{}, *http.Response, error)
 
 	/*
-	WebhookControllerGetStatus Get webhook service status
+		WebhookControllerGetStatus Get webhook service status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WebhooksAPIWebhookControllerGetStatusRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WebhooksAPIWebhookControllerGetStatusRequest
 	*/
 	WebhookControllerGetStatus(ctx context.Context) WebhooksAPIWebhookControllerGetStatusRequest
 
@@ -76,11 +75,11 @@ type WebhooksAPI interface {
 	WebhookControllerGetStatusExecute(r WebhooksAPIWebhookControllerGetStatusRequest) (*WebhookControllerGetStatus200Response, *http.Response, error)
 
 	/*
-	WebhookControllerInitializeWebhooks Initialize webhooks for an organization
+		WebhookControllerInitializeWebhooks Initialize webhooks for an organization
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId
-	@return WebhooksAPIWebhookControllerInitializeWebhooksRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId
+		@return WebhooksAPIWebhookControllerInitializeWebhooksRequest
 	*/
 	WebhookControllerInitializeWebhooks(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerInitializeWebhooksRequest
 
@@ -88,11 +87,11 @@ type WebhooksAPI interface {
 	WebhookControllerInitializeWebhooksExecute(r WebhooksAPIWebhookControllerInitializeWebhooksRequest) (*http.Response, error)
 
 	/*
-	WebhookControllerSendWebhook Send a webhook message to an organization
+		WebhookControllerSendWebhook Send a webhook message to an organization
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId
-	@return WebhooksAPIWebhookControllerSendWebhookRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId
+		@return WebhooksAPIWebhookControllerSendWebhookRequest
 	*/
 	WebhookControllerSendWebhook(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerSendWebhookRequest
 
@@ -104,9 +103,9 @@ type WebhooksAPI interface {
 type WebhooksAPIService service
 
 type WebhooksAPIWebhookControllerGetAppPortalAccessRequest struct {
-	ctx context.Context
-	ApiService WebhooksAPI
-	organizationId string
+	ctx                    context.Context
+	ApiService             WebhooksAPI
+	organizationId         string
 	xDaytonaOrganizationID *string
 }
 
@@ -123,26 +122,27 @@ func (r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) Execute() (*Webho
 /*
 WebhookControllerGetAppPortalAccess Get Svix Consumer App Portal access URL for an organization
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param organizationId
- @return WebhooksAPIWebhookControllerGetAppPortalAccessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId
+	@return WebhooksAPIWebhookControllerGetAppPortalAccessRequest
 */
 func (a *WebhooksAPIService) WebhookControllerGetAppPortalAccess(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerGetAppPortalAccessRequest {
 	return WebhooksAPIWebhookControllerGetAppPortalAccessRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:     a,
+		ctx:            ctx,
 		organizationId: organizationId,
 	}
 }
 
 // Execute executes the request
-//  @return WebhookAppPortalAccess
+//
+//	@return WebhookAppPortalAccess
 func (a *WebhooksAPIService) WebhookControllerGetAppPortalAccessExecute(r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) (*WebhookAppPortalAccess, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WebhookAppPortalAccess
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WebhookAppPortalAccess
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerGetAppPortalAccess")
@@ -215,9 +215,9 @@ func (a *WebhooksAPIService) WebhookControllerGetAppPortalAccessExecute(r Webhoo
 }
 
 type WebhooksAPIWebhookControllerGetInitializationStatusRequest struct {
-	ctx context.Context
-	ApiService WebhooksAPI
-	organizationId string
+	ctx                    context.Context
+	ApiService             WebhooksAPI
+	organizationId         string
 	xDaytonaOrganizationID *string
 }
 
@@ -234,26 +234,27 @@ func (r WebhooksAPIWebhookControllerGetInitializationStatusRequest) Execute() (*
 /*
 WebhookControllerGetInitializationStatus Get webhook initialization status for an organization
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param organizationId
- @return WebhooksAPIWebhookControllerGetInitializationStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId
+	@return WebhooksAPIWebhookControllerGetInitializationStatusRequest
 */
 func (a *WebhooksAPIService) WebhookControllerGetInitializationStatus(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerGetInitializationStatusRequest {
 	return WebhooksAPIWebhookControllerGetInitializationStatusRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:     a,
+		ctx:            ctx,
 		organizationId: organizationId,
 	}
 }
 
 // Execute executes the request
-//  @return WebhookInitializationStatus
+//
+//	@return WebhookInitializationStatus
 func (a *WebhooksAPIService) WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookInitializationStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WebhookInitializationStatus
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WebhookInitializationStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerGetInitializationStatus")
@@ -326,10 +327,10 @@ func (a *WebhooksAPIService) WebhookControllerGetInitializationStatusExecute(r W
 }
 
 type WebhooksAPIWebhookControllerGetMessageAttemptsRequest struct {
-	ctx context.Context
-	ApiService WebhooksAPI
-	organizationId string
-	messageId string
+	ctx                    context.Context
+	ApiService             WebhooksAPI
+	organizationId         string
+	messageId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -346,28 +347,29 @@ func (r WebhooksAPIWebhookControllerGetMessageAttemptsRequest) Execute() ([]map[
 /*
 WebhookControllerGetMessageAttempts Get delivery attempts for a webhook message
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param organizationId
- @param messageId
- @return WebhooksAPIWebhookControllerGetMessageAttemptsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId
+	@param messageId
+	@return WebhooksAPIWebhookControllerGetMessageAttemptsRequest
 */
 func (a *WebhooksAPIService) WebhookControllerGetMessageAttempts(ctx context.Context, organizationId string, messageId string) WebhooksAPIWebhookControllerGetMessageAttemptsRequest {
 	return WebhooksAPIWebhookControllerGetMessageAttemptsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:     a,
+		ctx:            ctx,
 		organizationId: organizationId,
-		messageId: messageId,
+		messageId:      messageId,
 	}
 }
 
 // Execute executes the request
-//  @return []map[string]interface{}
+//
+//	@return []map[string]interface{}
 func (a *WebhooksAPIService) WebhookControllerGetMessageAttemptsExecute(r WebhooksAPIWebhookControllerGetMessageAttemptsRequest) ([]map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerGetMessageAttempts")
@@ -441,8 +443,8 @@ func (a *WebhooksAPIService) WebhookControllerGetMessageAttemptsExecute(r Webhoo
 }
 
 type WebhooksAPIWebhookControllerGetStatusRequest struct {
-	ctx context.Context
-	ApiService WebhooksAPI
+	ctx                    context.Context
+	ApiService             WebhooksAPI
 	xDaytonaOrganizationID *string
 }
 
@@ -459,24 +461,25 @@ func (r WebhooksAPIWebhookControllerGetStatusRequest) Execute() (*WebhookControl
 /*
 WebhookControllerGetStatus Get webhook service status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WebhooksAPIWebhookControllerGetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WebhooksAPIWebhookControllerGetStatusRequest
 */
 func (a *WebhooksAPIService) WebhookControllerGetStatus(ctx context.Context) WebhooksAPIWebhookControllerGetStatusRequest {
 	return WebhooksAPIWebhookControllerGetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return WebhookControllerGetStatus200Response
+//
+//	@return WebhookControllerGetStatus200Response
 func (a *WebhooksAPIService) WebhookControllerGetStatusExecute(r WebhooksAPIWebhookControllerGetStatusRequest) (*WebhookControllerGetStatus200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WebhookControllerGetStatus200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WebhookControllerGetStatus200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerGetStatus")
@@ -548,9 +551,9 @@ func (a *WebhooksAPIService) WebhookControllerGetStatusExecute(r WebhooksAPIWebh
 }
 
 type WebhooksAPIWebhookControllerInitializeWebhooksRequest struct {
-	ctx context.Context
-	ApiService WebhooksAPI
-	organizationId string
+	ctx                    context.Context
+	ApiService             WebhooksAPI
+	organizationId         string
 	xDaytonaOrganizationID *string
 }
 
@@ -567,14 +570,14 @@ func (r WebhooksAPIWebhookControllerInitializeWebhooksRequest) Execute() (*http.
 /*
 WebhookControllerInitializeWebhooks Initialize webhooks for an organization
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param organizationId
- @return WebhooksAPIWebhookControllerInitializeWebhooksRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId
+	@return WebhooksAPIWebhookControllerInitializeWebhooksRequest
 */
 func (a *WebhooksAPIService) WebhookControllerInitializeWebhooks(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerInitializeWebhooksRequest {
 	return WebhooksAPIWebhookControllerInitializeWebhooksRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:     a,
+		ctx:            ctx,
 		organizationId: organizationId,
 	}
 }
@@ -582,9 +585,9 @@ func (a *WebhooksAPIService) WebhookControllerInitializeWebhooks(ctx context.Con
 // Execute executes the request
 func (a *WebhooksAPIService) WebhookControllerInitializeWebhooksExecute(r WebhooksAPIWebhookControllerInitializeWebhooksRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerInitializeWebhooks")
@@ -648,10 +651,10 @@ func (a *WebhooksAPIService) WebhookControllerInitializeWebhooksExecute(r Webhoo
 }
 
 type WebhooksAPIWebhookControllerSendWebhookRequest struct {
-	ctx context.Context
-	ApiService WebhooksAPI
-	organizationId string
-	sendWebhookDto *SendWebhookDto
+	ctx                    context.Context
+	ApiService             WebhooksAPI
+	organizationId         string
+	sendWebhookDto         *SendWebhookDto
 	xDaytonaOrganizationID *string
 }
 
@@ -673,14 +676,14 @@ func (r WebhooksAPIWebhookControllerSendWebhookRequest) Execute() (*http.Respons
 /*
 WebhookControllerSendWebhook Send a webhook message to an organization
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param organizationId
- @return WebhooksAPIWebhookControllerSendWebhookRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId
+	@return WebhooksAPIWebhookControllerSendWebhookRequest
 */
 func (a *WebhooksAPIService) WebhookControllerSendWebhook(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerSendWebhookRequest {
 	return WebhooksAPIWebhookControllerSendWebhookRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:     a,
+		ctx:            ctx,
 		organizationId: organizationId,
 	}
 }
@@ -688,9 +691,9 @@ func (a *WebhooksAPIService) WebhookControllerSendWebhook(ctx context.Context, o
 // Execute executes the request
 func (a *WebhooksAPIService) WebhookControllerSendWebhookExecute(r WebhooksAPIWebhookControllerSendWebhookRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerSendWebhook")

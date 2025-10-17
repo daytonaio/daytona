@@ -20,15 +20,14 @@ import (
 	"strings"
 )
 
-
 type DisksAPI interface {
 
 	/*
-	AttachDisk Attach disk to sandbox
+		AttachDisk Attach disk to sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param diskId ID of the disk
-	@return DisksAPIAttachDiskRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param diskId ID of the disk
+		@return DisksAPIAttachDiskRequest
 	*/
 	AttachDisk(ctx context.Context, diskId string) DisksAPIAttachDiskRequest
 
@@ -37,10 +36,10 @@ type DisksAPI interface {
 	AttachDiskExecute(r DisksAPIAttachDiskRequest) (*DiskDto, *http.Response, error)
 
 	/*
-	CreateDisk Create a new disk
+		CreateDisk Create a new disk
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DisksAPICreateDiskRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return DisksAPICreateDiskRequest
 	*/
 	CreateDisk(ctx context.Context) DisksAPICreateDiskRequest
 
@@ -49,11 +48,11 @@ type DisksAPI interface {
 	CreateDiskExecute(r DisksAPICreateDiskRequest) (*DiskDto, *http.Response, error)
 
 	/*
-	DeleteDisk Delete disk
+		DeleteDisk Delete disk
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param diskId ID of the disk
-	@return DisksAPIDeleteDiskRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param diskId ID of the disk
+		@return DisksAPIDeleteDiskRequest
 	*/
 	DeleteDisk(ctx context.Context, diskId string) DisksAPIDeleteDiskRequest
 
@@ -61,11 +60,11 @@ type DisksAPI interface {
 	DeleteDiskExecute(r DisksAPIDeleteDiskRequest) (*http.Response, error)
 
 	/*
-	DetachDisk Detach disk from sandbox
+		DetachDisk Detach disk from sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param diskId ID of the disk
-	@return DisksAPIDetachDiskRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param diskId ID of the disk
+		@return DisksAPIDetachDiskRequest
 	*/
 	DetachDisk(ctx context.Context, diskId string) DisksAPIDetachDiskRequest
 
@@ -74,11 +73,11 @@ type DisksAPI interface {
 	DetachDiskExecute(r DisksAPIDetachDiskRequest) (*DiskDto, *http.Response, error)
 
 	/*
-	GetDisk Get disk details
+		GetDisk Get disk details
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param diskId ID of the disk
-	@return DisksAPIGetDiskRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param diskId ID of the disk
+		@return DisksAPIGetDiskRequest
 	*/
 	GetDisk(ctx context.Context, diskId string) DisksAPIGetDiskRequest
 
@@ -87,10 +86,10 @@ type DisksAPI interface {
 	GetDiskExecute(r DisksAPIGetDiskRequest) (*DiskDto, *http.Response, error)
 
 	/*
-	ListDisks List all disks
+		ListDisks List all disks
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DisksAPIListDisksRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return DisksAPIListDisksRequest
 	*/
 	ListDisks(ctx context.Context) DisksAPIListDisksRequest
 
@@ -103,10 +102,10 @@ type DisksAPI interface {
 type DisksAPIService service
 
 type DisksAPIAttachDiskRequest struct {
-	ctx context.Context
-	ApiService DisksAPI
-	diskId string
-	attachDiskDto *AttachDiskDto
+	ctx                    context.Context
+	ApiService             DisksAPI
+	diskId                 string
+	attachDiskDto          *AttachDiskDto
 	xDaytonaOrganizationID *string
 }
 
@@ -128,26 +127,27 @@ func (r DisksAPIAttachDiskRequest) Execute() (*DiskDto, *http.Response, error) {
 /*
 AttachDisk Attach disk to sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param diskId ID of the disk
- @return DisksAPIAttachDiskRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param diskId ID of the disk
+	@return DisksAPIAttachDiskRequest
 */
 func (a *DisksAPIService) AttachDisk(ctx context.Context, diskId string) DisksAPIAttachDiskRequest {
 	return DisksAPIAttachDiskRequest{
 		ApiService: a,
-		ctx: ctx,
-		diskId: diskId,
+		ctx:        ctx,
+		diskId:     diskId,
 	}
 }
 
 // Execute executes the request
-//  @return DiskDto
+//
+//	@return DiskDto
 func (a *DisksAPIService) AttachDiskExecute(r DisksAPIAttachDiskRequest) (*DiskDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DiskDto
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DiskDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DisksAPIService.AttachDisk")
@@ -225,9 +225,9 @@ func (a *DisksAPIService) AttachDiskExecute(r DisksAPIAttachDiskRequest) (*DiskD
 }
 
 type DisksAPICreateDiskRequest struct {
-	ctx context.Context
-	ApiService DisksAPI
-	createDiskDto *CreateDiskDto
+	ctx                    context.Context
+	ApiService             DisksAPI
+	createDiskDto          *CreateDiskDto
 	xDaytonaOrganizationID *string
 }
 
@@ -249,24 +249,25 @@ func (r DisksAPICreateDiskRequest) Execute() (*DiskDto, *http.Response, error) {
 /*
 CreateDisk Create a new disk
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return DisksAPICreateDiskRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DisksAPICreateDiskRequest
 */
 func (a *DisksAPIService) CreateDisk(ctx context.Context) DisksAPICreateDiskRequest {
 	return DisksAPICreateDiskRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return DiskDto
+//
+//	@return DiskDto
 func (a *DisksAPIService) CreateDiskExecute(r DisksAPICreateDiskRequest) (*DiskDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DiskDto
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DiskDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DisksAPIService.CreateDisk")
@@ -343,9 +344,9 @@ func (a *DisksAPIService) CreateDiskExecute(r DisksAPICreateDiskRequest) (*DiskD
 }
 
 type DisksAPIDeleteDiskRequest struct {
-	ctx context.Context
-	ApiService DisksAPI
-	diskId string
+	ctx                    context.Context
+	ApiService             DisksAPI
+	diskId                 string
 	xDaytonaOrganizationID *string
 }
 
@@ -362,24 +363,24 @@ func (r DisksAPIDeleteDiskRequest) Execute() (*http.Response, error) {
 /*
 DeleteDisk Delete disk
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param diskId ID of the disk
- @return DisksAPIDeleteDiskRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param diskId ID of the disk
+	@return DisksAPIDeleteDiskRequest
 */
 func (a *DisksAPIService) DeleteDisk(ctx context.Context, diskId string) DisksAPIDeleteDiskRequest {
 	return DisksAPIDeleteDiskRequest{
 		ApiService: a,
-		ctx: ctx,
-		diskId: diskId,
+		ctx:        ctx,
+		diskId:     diskId,
 	}
 }
 
 // Execute executes the request
 func (a *DisksAPIService) DeleteDiskExecute(r DisksAPIDeleteDiskRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DisksAPIService.DeleteDisk")
@@ -443,9 +444,9 @@ func (a *DisksAPIService) DeleteDiskExecute(r DisksAPIDeleteDiskRequest) (*http.
 }
 
 type DisksAPIDetachDiskRequest struct {
-	ctx context.Context
-	ApiService DisksAPI
-	diskId string
+	ctx                    context.Context
+	ApiService             DisksAPI
+	diskId                 string
 	xDaytonaOrganizationID *string
 }
 
@@ -462,26 +463,27 @@ func (r DisksAPIDetachDiskRequest) Execute() (*DiskDto, *http.Response, error) {
 /*
 DetachDisk Detach disk from sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param diskId ID of the disk
- @return DisksAPIDetachDiskRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param diskId ID of the disk
+	@return DisksAPIDetachDiskRequest
 */
 func (a *DisksAPIService) DetachDisk(ctx context.Context, diskId string) DisksAPIDetachDiskRequest {
 	return DisksAPIDetachDiskRequest{
 		ApiService: a,
-		ctx: ctx,
-		diskId: diskId,
+		ctx:        ctx,
+		diskId:     diskId,
 	}
 }
 
 // Execute executes the request
-//  @return DiskDto
+//
+//	@return DiskDto
 func (a *DisksAPIService) DetachDiskExecute(r DisksAPIDetachDiskRequest) (*DiskDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DiskDto
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DiskDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DisksAPIService.DetachDisk")
@@ -554,9 +556,9 @@ func (a *DisksAPIService) DetachDiskExecute(r DisksAPIDetachDiskRequest) (*DiskD
 }
 
 type DisksAPIGetDiskRequest struct {
-	ctx context.Context
-	ApiService DisksAPI
-	diskId string
+	ctx                    context.Context
+	ApiService             DisksAPI
+	diskId                 string
 	xDaytonaOrganizationID *string
 }
 
@@ -573,26 +575,27 @@ func (r DisksAPIGetDiskRequest) Execute() (*DiskDto, *http.Response, error) {
 /*
 GetDisk Get disk details
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param diskId ID of the disk
- @return DisksAPIGetDiskRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param diskId ID of the disk
+	@return DisksAPIGetDiskRequest
 */
 func (a *DisksAPIService) GetDisk(ctx context.Context, diskId string) DisksAPIGetDiskRequest {
 	return DisksAPIGetDiskRequest{
 		ApiService: a,
-		ctx: ctx,
-		diskId: diskId,
+		ctx:        ctx,
+		diskId:     diskId,
 	}
 }
 
 // Execute executes the request
-//  @return DiskDto
+//
+//	@return DiskDto
 func (a *DisksAPIService) GetDiskExecute(r DisksAPIGetDiskRequest) (*DiskDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DiskDto
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DiskDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DisksAPIService.GetDisk")
@@ -665,8 +668,8 @@ func (a *DisksAPIService) GetDiskExecute(r DisksAPIGetDiskRequest) (*DiskDto, *h
 }
 
 type DisksAPIListDisksRequest struct {
-	ctx context.Context
-	ApiService DisksAPI
+	ctx                    context.Context
+	ApiService             DisksAPI
 	xDaytonaOrganizationID *string
 }
 
@@ -683,24 +686,25 @@ func (r DisksAPIListDisksRequest) Execute() ([]DiskDto, *http.Response, error) {
 /*
 ListDisks List all disks
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return DisksAPIListDisksRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DisksAPIListDisksRequest
 */
 func (a *DisksAPIService) ListDisks(ctx context.Context) DisksAPIListDisksRequest {
 	return DisksAPIListDisksRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []DiskDto
+//
+//	@return []DiskDto
 func (a *DisksAPIService) ListDisksExecute(r DisksAPIListDisksRequest) ([]DiskDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []DiskDto
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []DiskDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DisksAPIService.ListDisks")

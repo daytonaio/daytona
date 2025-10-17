@@ -17,23 +17,22 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"os"
+	"strings"
 )
-
 
 type ToolboxAPI interface {
 
 	/*
-	ClickMouseDeprecated [DEPRECATED] Click mouse
+		ClickMouseDeprecated [DEPRECATED] Click mouse
 
-	Click mouse at specified coordinates
+		Click mouse at specified coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIClickMouseDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIClickMouseDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ClickMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIClickMouseDeprecatedRequest
 
@@ -43,15 +42,15 @@ type ToolboxAPI interface {
 	ClickMouseDeprecatedExecute(r ToolboxAPIClickMouseDeprecatedRequest) (*MouseClickResponse, *http.Response, error)
 
 	/*
-	CreateFolderDeprecated [DEPRECATED] Create folder
+		CreateFolderDeprecated [DEPRECATED] Create folder
 
-	Create folder inside sandbox
+		Create folder inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPICreateFolderDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPICreateFolderDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreateFolderDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreateFolderDeprecatedRequest
 
@@ -60,15 +59,15 @@ type ToolboxAPI interface {
 	CreateFolderDeprecatedExecute(r ToolboxAPICreateFolderDeprecatedRequest) (*http.Response, error)
 
 	/*
-	CreatePTYSessionDeprecated [DEPRECATED] Create PTY session
+		CreatePTYSessionDeprecated [DEPRECATED] Create PTY session
 
-	Create a new PTY session in the sandbox
+		Create a new PTY session in the sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPICreatePTYSessionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPICreatePTYSessionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreatePTYSessionDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreatePTYSessionDeprecatedRequest
 
@@ -78,15 +77,15 @@ type ToolboxAPI interface {
 	CreatePTYSessionDeprecatedExecute(r ToolboxAPICreatePTYSessionDeprecatedRequest) (*PtyCreateResponse, *http.Response, error)
 
 	/*
-	CreateSessionDeprecated [DEPRECATED] Create session
+		CreateSessionDeprecated [DEPRECATED] Create session
 
-	Create a new session in the sandbox
+		Create a new session in the sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPICreateSessionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPICreateSessionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreateSessionDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreateSessionDeprecatedRequest
 
@@ -95,15 +94,15 @@ type ToolboxAPI interface {
 	CreateSessionDeprecatedExecute(r ToolboxAPICreateSessionDeprecatedRequest) (*http.Response, error)
 
 	/*
-	DeleteFileDeprecated [DEPRECATED] Delete file
+		DeleteFileDeprecated [DEPRECATED] Delete file
 
-	Delete file inside sandbox
+		Delete file inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIDeleteFileDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDeleteFileDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDeleteFileDeprecatedRequest
 
@@ -112,16 +111,16 @@ type ToolboxAPI interface {
 	DeleteFileDeprecatedExecute(r ToolboxAPIDeleteFileDeprecatedRequest) (*http.Response, error)
 
 	/*
-	DeletePTYSessionDeprecated [DEPRECATED] Delete PTY session
+		DeletePTYSessionDeprecated [DEPRECATED] Delete PTY session
 
-	Delete a PTY session and terminate the associated process
+		Delete a PTY session and terminate the associated process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIDeletePTYSessionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIDeletePTYSessionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DeletePTYSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeletePTYSessionDeprecatedRequest
 
@@ -130,16 +129,16 @@ type ToolboxAPI interface {
 	DeletePTYSessionDeprecatedExecute(r ToolboxAPIDeletePTYSessionDeprecatedRequest) (*http.Response, error)
 
 	/*
-	DeleteSessionDeprecated [DEPRECATED] Delete session
+		DeleteSessionDeprecated [DEPRECATED] Delete session
 
-	Delete a specific session
+		Delete a specific session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIDeleteSessionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIDeleteSessionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeleteSessionDeprecatedRequest
 
@@ -148,15 +147,15 @@ type ToolboxAPI interface {
 	DeleteSessionDeprecatedExecute(r ToolboxAPIDeleteSessionDeprecatedRequest) (*http.Response, error)
 
 	/*
-	DownloadFileDeprecated [DEPRECATED] Download file
+		DownloadFileDeprecated [DEPRECATED] Download file
 
-	Download file from sandbox
+		Download file from sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIDownloadFileDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDownloadFileDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DownloadFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDownloadFileDeprecatedRequest
 
@@ -166,15 +165,15 @@ type ToolboxAPI interface {
 	DownloadFileDeprecatedExecute(r ToolboxAPIDownloadFileDeprecatedRequest) (*os.File, *http.Response, error)
 
 	/*
-	DownloadFilesDeprecated [DEPRECATED] Download multiple files
+		DownloadFilesDeprecated [DEPRECATED] Download multiple files
 
-	Streams back a multipart/form-data bundle of the requested paths
+		Streams back a multipart/form-data bundle of the requested paths
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIDownloadFilesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDownloadFilesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DownloadFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDownloadFilesDeprecatedRequest
 
@@ -184,15 +183,15 @@ type ToolboxAPI interface {
 	DownloadFilesDeprecatedExecute(r ToolboxAPIDownloadFilesDeprecatedRequest) (*os.File, *http.Response, error)
 
 	/*
-	DragMouseDeprecated [DEPRECATED] Drag mouse
+		DragMouseDeprecated [DEPRECATED] Drag mouse
 
-	Drag mouse from start to end coordinates
+		Drag mouse from start to end coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIDragMouseDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDragMouseDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DragMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDragMouseDeprecatedRequest
 
@@ -202,15 +201,15 @@ type ToolboxAPI interface {
 	DragMouseDeprecatedExecute(r ToolboxAPIDragMouseDeprecatedRequest) (*MouseDragResponse, *http.Response, error)
 
 	/*
-	ExecuteCommandDeprecated [DEPRECATED] Execute command
+		ExecuteCommandDeprecated [DEPRECATED] Execute command
 
-	Execute command synchronously inside sandbox
+		Execute command synchronously inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIExecuteCommandDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIExecuteCommandDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ExecuteCommandDeprecated(ctx context.Context, sandboxId string) ToolboxAPIExecuteCommandDeprecatedRequest
 
@@ -220,16 +219,16 @@ type ToolboxAPI interface {
 	ExecuteCommandDeprecatedExecute(r ToolboxAPIExecuteCommandDeprecatedRequest) (*ExecuteResponse, *http.Response, error)
 
 	/*
-	ExecuteSessionCommandDeprecated [DEPRECATED] Execute command in session
+		ExecuteSessionCommandDeprecated [DEPRECATED] Execute command in session
 
-	Execute a command in a specific session
+		Execute a command in a specific session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIExecuteSessionCommandDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIExecuteSessionCommandDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ExecuteSessionCommandDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIExecuteSessionCommandDeprecatedRequest
 
@@ -239,15 +238,15 @@ type ToolboxAPI interface {
 	ExecuteSessionCommandDeprecatedExecute(r ToolboxAPIExecuteSessionCommandDeprecatedRequest) (*SessionExecuteResponse, *http.Response, error)
 
 	/*
-	FindInFilesDeprecated [DEPRECATED] Search for text/pattern in files
+		FindInFilesDeprecated [DEPRECATED] Search for text/pattern in files
 
-	Search for text/pattern inside sandbox files
+		Search for text/pattern inside sandbox files
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIFindInFilesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIFindInFilesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	FindInFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIFindInFilesDeprecatedRequest
 
@@ -257,15 +256,15 @@ type ToolboxAPI interface {
 	FindInFilesDeprecatedExecute(r ToolboxAPIFindInFilesDeprecatedRequest) ([]Match, *http.Response, error)
 
 	/*
-	GetComputerUseStatusDeprecated [DEPRECATED] Get computer use status
+		GetComputerUseStatusDeprecated [DEPRECATED] Get computer use status
 
-	Get status of all VNC desktop processes
+		Get status of all VNC desktop processes
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetComputerUseStatusDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetComputerUseStatusDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetComputerUseStatusDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetComputerUseStatusDeprecatedRequest
 
@@ -275,15 +274,15 @@ type ToolboxAPI interface {
 	GetComputerUseStatusDeprecatedExecute(r ToolboxAPIGetComputerUseStatusDeprecatedRequest) (*ComputerUseStatusResponse, *http.Response, error)
 
 	/*
-	GetDisplayInfoDeprecated [DEPRECATED] Get display info
+		GetDisplayInfoDeprecated [DEPRECATED] Get display info
 
-	Get information about displays
+		Get information about displays
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetDisplayInfoDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetDisplayInfoDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetDisplayInfoDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetDisplayInfoDeprecatedRequest
 
@@ -293,15 +292,15 @@ type ToolboxAPI interface {
 	GetDisplayInfoDeprecatedExecute(r ToolboxAPIGetDisplayInfoDeprecatedRequest) (*DisplayInfoResponse, *http.Response, error)
 
 	/*
-	GetFileInfoDeprecated [DEPRECATED] Get file info
+		GetFileInfoDeprecated [DEPRECATED] Get file info
 
-	Get file info inside sandbox
+		Get file info inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetFileInfoDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetFileInfoDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetFileInfoDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetFileInfoDeprecatedRequest
 
@@ -311,15 +310,15 @@ type ToolboxAPI interface {
 	GetFileInfoDeprecatedExecute(r ToolboxAPIGetFileInfoDeprecatedRequest) (*FileInfo, *http.Response, error)
 
 	/*
-	GetMousePositionDeprecated [DEPRECATED] Get mouse position
+		GetMousePositionDeprecated [DEPRECATED] Get mouse position
 
-	Get current mouse cursor position
+		Get current mouse cursor position
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetMousePositionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetMousePositionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetMousePositionDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetMousePositionDeprecatedRequest
 
@@ -329,16 +328,16 @@ type ToolboxAPI interface {
 	GetMousePositionDeprecatedExecute(r ToolboxAPIGetMousePositionDeprecatedRequest) (*MousePosition, *http.Response, error)
 
 	/*
-	GetPTYSessionDeprecated [DEPRECATED] Get PTY session
+		GetPTYSessionDeprecated [DEPRECATED] Get PTY session
 
-	Get PTY session information by ID
+		Get PTY session information by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIGetPTYSessionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIGetPTYSessionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetPTYSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetPTYSessionDeprecatedRequest
 
@@ -348,16 +347,16 @@ type ToolboxAPI interface {
 	GetPTYSessionDeprecatedExecute(r ToolboxAPIGetPTYSessionDeprecatedRequest) (*PtySessionInfo, *http.Response, error)
 
 	/*
-	GetProcessErrorsDeprecated [DEPRECATED] Get process errors
+		GetProcessErrorsDeprecated [DEPRECATED] Get process errors
 
-	Get error logs for a specific VNC process
+		Get error logs for a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIGetProcessErrorsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIGetProcessErrorsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetProcessErrorsDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessErrorsDeprecatedRequest
 
@@ -367,16 +366,16 @@ type ToolboxAPI interface {
 	GetProcessErrorsDeprecatedExecute(r ToolboxAPIGetProcessErrorsDeprecatedRequest) (*ProcessErrorsResponse, *http.Response, error)
 
 	/*
-	GetProcessLogsDeprecated [DEPRECATED] Get process logs
+		GetProcessLogsDeprecated [DEPRECATED] Get process logs
 
-	Get logs for a specific VNC process
+		Get logs for a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIGetProcessLogsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIGetProcessLogsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetProcessLogsDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessLogsDeprecatedRequest
 
@@ -386,16 +385,16 @@ type ToolboxAPI interface {
 	GetProcessLogsDeprecatedExecute(r ToolboxAPIGetProcessLogsDeprecatedRequest) (*ProcessLogsResponse, *http.Response, error)
 
 	/*
-	GetProcessStatusDeprecated [DEPRECATED] Get process status
+		GetProcessStatusDeprecated [DEPRECATED] Get process status
 
-	Get status of a specific VNC process
+		Get status of a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIGetProcessStatusDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIGetProcessStatusDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetProcessStatusDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessStatusDeprecatedRequest
 
@@ -405,13 +404,13 @@ type ToolboxAPI interface {
 	GetProcessStatusDeprecatedExecute(r ToolboxAPIGetProcessStatusDeprecatedRequest) (*ProcessStatusResponse, *http.Response, error)
 
 	/*
-	GetProjectDirDeprecated [DEPRECATED] Get sandbox project dir
+		GetProjectDirDeprecated [DEPRECATED] Get sandbox project dir
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetProjectDirDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetProjectDirDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetProjectDirDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetProjectDirDeprecatedRequest
 
@@ -421,17 +420,17 @@ type ToolboxAPI interface {
 	GetProjectDirDeprecatedExecute(r ToolboxAPIGetProjectDirDeprecatedRequest) (*ProjectDirResponse, *http.Response, error)
 
 	/*
-	GetSessionCommandDeprecated [DEPRECATED] Get session command
+		GetSessionCommandDeprecated [DEPRECATED] Get session command
 
-	Get session command by ID
+		Get session command by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@param commandId
-	@return ToolboxAPIGetSessionCommandDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@param commandId
+		@return ToolboxAPIGetSessionCommandDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetSessionCommandDeprecated(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandDeprecatedRequest
 
@@ -441,17 +440,17 @@ type ToolboxAPI interface {
 	GetSessionCommandDeprecatedExecute(r ToolboxAPIGetSessionCommandDeprecatedRequest) (*Command, *http.Response, error)
 
 	/*
-	GetSessionCommandLogsDeprecated [DEPRECATED] Get command logs
+		GetSessionCommandLogsDeprecated [DEPRECATED] Get command logs
 
-	Get logs for a specific command in a session
+		Get logs for a specific command in a session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@param commandId
-	@return ToolboxAPIGetSessionCommandLogsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@param commandId
+		@return ToolboxAPIGetSessionCommandLogsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetSessionCommandLogsDeprecated(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandLogsDeprecatedRequest
 
@@ -461,16 +460,16 @@ type ToolboxAPI interface {
 	GetSessionCommandLogsDeprecatedExecute(r ToolboxAPIGetSessionCommandLogsDeprecatedRequest) (string, *http.Response, error)
 
 	/*
-	GetSessionDeprecated [DEPRECATED] Get session
+		GetSessionDeprecated [DEPRECATED] Get session
 
-	Get session by ID
+		Get session by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIGetSessionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIGetSessionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetSessionDeprecatedRequest
 
@@ -480,13 +479,13 @@ type ToolboxAPI interface {
 	GetSessionDeprecatedExecute(r ToolboxAPIGetSessionDeprecatedRequest) (*Session, *http.Response, error)
 
 	/*
-	GetUserHomeDirDeprecated [DEPRECATED] Get sandbox user home dir
+		GetUserHomeDirDeprecated [DEPRECATED] Get sandbox user home dir
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetUserHomeDirDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetUserHomeDirDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetUserHomeDirDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetUserHomeDirDeprecatedRequest
 
@@ -496,15 +495,15 @@ type ToolboxAPI interface {
 	GetUserHomeDirDeprecatedExecute(r ToolboxAPIGetUserHomeDirDeprecatedRequest) (*UserHomeDirResponse, *http.Response, error)
 
 	/*
-	GetWindowsDeprecated [DEPRECATED] Get windows
+		GetWindowsDeprecated [DEPRECATED] Get windows
 
-	Get list of open windows
+		Get list of open windows
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetWindowsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetWindowsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetWindowsDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetWindowsDeprecatedRequest
 
@@ -514,13 +513,13 @@ type ToolboxAPI interface {
 	GetWindowsDeprecatedExecute(r ToolboxAPIGetWindowsDeprecatedRequest) (*WindowsResponse, *http.Response, error)
 
 	/*
-	GetWorkDirDeprecated [DEPRECATED] Get sandbox work-dir
+		GetWorkDirDeprecated [DEPRECATED] Get sandbox work-dir
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetWorkDirDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetWorkDirDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetWorkDirDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetWorkDirDeprecatedRequest
 
@@ -530,15 +529,15 @@ type ToolboxAPI interface {
 	GetWorkDirDeprecatedExecute(r ToolboxAPIGetWorkDirDeprecatedRequest) (*WorkDirResponse, *http.Response, error)
 
 	/*
-	GitAddFilesDeprecated [DEPRECATED] Add files
+		GitAddFilesDeprecated [DEPRECATED] Add files
 
-	Add files to git commit
+		Add files to git commit
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitAddFilesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitAddFilesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitAddFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitAddFilesDeprecatedRequest
 
@@ -547,15 +546,15 @@ type ToolboxAPI interface {
 	GitAddFilesDeprecatedExecute(r ToolboxAPIGitAddFilesDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GitCheckoutBranchDeprecated [DEPRECATED] Checkout branch
+		GitCheckoutBranchDeprecated [DEPRECATED] Checkout branch
 
-	Checkout branch or commit in git repository
+		Checkout branch or commit in git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCheckoutBranchDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCheckoutBranchDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitCheckoutBranchDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCheckoutBranchDeprecatedRequest
 
@@ -564,15 +563,15 @@ type ToolboxAPI interface {
 	GitCheckoutBranchDeprecatedExecute(r ToolboxAPIGitCheckoutBranchDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GitCloneRepositoryDeprecated [DEPRECATED] Clone repository
+		GitCloneRepositoryDeprecated [DEPRECATED] Clone repository
 
-	Clone git repository
+		Clone git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCloneRepositoryDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCloneRepositoryDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitCloneRepositoryDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCloneRepositoryDeprecatedRequest
 
@@ -581,15 +580,15 @@ type ToolboxAPI interface {
 	GitCloneRepositoryDeprecatedExecute(r ToolboxAPIGitCloneRepositoryDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GitCommitChangesDeprecated [DEPRECATED] Commit changes
+		GitCommitChangesDeprecated [DEPRECATED] Commit changes
 
-	Commit changes to git repository
+		Commit changes to git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCommitChangesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCommitChangesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitCommitChangesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCommitChangesDeprecatedRequest
 
@@ -599,15 +598,15 @@ type ToolboxAPI interface {
 	GitCommitChangesDeprecatedExecute(r ToolboxAPIGitCommitChangesDeprecatedRequest) (*GitCommitResponse, *http.Response, error)
 
 	/*
-	GitCreateBranchDeprecated [DEPRECATED] Create branch
+		GitCreateBranchDeprecated [DEPRECATED] Create branch
 
-	Create branch on git repository
+		Create branch on git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCreateBranchDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCreateBranchDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitCreateBranchDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCreateBranchDeprecatedRequest
 
@@ -616,15 +615,15 @@ type ToolboxAPI interface {
 	GitCreateBranchDeprecatedExecute(r ToolboxAPIGitCreateBranchDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GitDeleteBranchDeprecated [DEPRECATED] Delete branch
+		GitDeleteBranchDeprecated [DEPRECATED] Delete branch
 
-	Delete branch on git repository
+		Delete branch on git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitDeleteBranchDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitDeleteBranchDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitDeleteBranchDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitDeleteBranchDeprecatedRequest
 
@@ -633,15 +632,15 @@ type ToolboxAPI interface {
 	GitDeleteBranchDeprecatedExecute(r ToolboxAPIGitDeleteBranchDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GitGetHistoryDeprecated [DEPRECATED] Get commit history
+		GitGetHistoryDeprecated [DEPRECATED] Get commit history
 
-	Get commit history from git repository
+		Get commit history from git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitGetHistoryDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitGetHistoryDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitGetHistoryDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitGetHistoryDeprecatedRequest
 
@@ -651,15 +650,15 @@ type ToolboxAPI interface {
 	GitGetHistoryDeprecatedExecute(r ToolboxAPIGitGetHistoryDeprecatedRequest) ([]GitCommitInfo, *http.Response, error)
 
 	/*
-	GitGetStatusDeprecated [DEPRECATED] Get git status
+		GitGetStatusDeprecated [DEPRECATED] Get git status
 
-	Get status from git repository
+		Get status from git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitGetStatusDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitGetStatusDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitGetStatusDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitGetStatusDeprecatedRequest
 
@@ -669,15 +668,15 @@ type ToolboxAPI interface {
 	GitGetStatusDeprecatedExecute(r ToolboxAPIGitGetStatusDeprecatedRequest) (*GitStatus, *http.Response, error)
 
 	/*
-	GitListBranchesDeprecated [DEPRECATED] Get branch list
+		GitListBranchesDeprecated [DEPRECATED] Get branch list
 
-	Get branch list from git repository
+		Get branch list from git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitListBranchesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitListBranchesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitListBranchesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitListBranchesDeprecatedRequest
 
@@ -687,15 +686,15 @@ type ToolboxAPI interface {
 	GitListBranchesDeprecatedExecute(r ToolboxAPIGitListBranchesDeprecatedRequest) (*ListBranchResponse, *http.Response, error)
 
 	/*
-	GitPullChangesDeprecated [DEPRECATED] Pull changes
+		GitPullChangesDeprecated [DEPRECATED] Pull changes
 
-	Pull changes from remote
+		Pull changes from remote
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitPullChangesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitPullChangesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitPullChangesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitPullChangesDeprecatedRequest
 
@@ -704,15 +703,15 @@ type ToolboxAPI interface {
 	GitPullChangesDeprecatedExecute(r ToolboxAPIGitPullChangesDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GitPushChangesDeprecated [DEPRECATED] Push changes
+		GitPushChangesDeprecated [DEPRECATED] Push changes
 
-	Push changes to remote
+		Push changes to remote
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitPushChangesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitPushChangesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GitPushChangesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitPushChangesDeprecatedRequest
 
@@ -721,13 +720,13 @@ type ToolboxAPI interface {
 	GitPushChangesDeprecatedExecute(r ToolboxAPIGitPushChangesDeprecatedRequest) (*http.Response, error)
 
 	/*
-	ListFilesDeprecated [DEPRECATED] List files
+		ListFilesDeprecated [DEPRECATED] List files
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIListFilesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIListFilesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ListFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIListFilesDeprecatedRequest
 
@@ -737,15 +736,15 @@ type ToolboxAPI interface {
 	ListFilesDeprecatedExecute(r ToolboxAPIListFilesDeprecatedRequest) ([]FileInfo, *http.Response, error)
 
 	/*
-	ListPTYSessionsDeprecated [DEPRECATED] List PTY sessions
+		ListPTYSessionsDeprecated [DEPRECATED] List PTY sessions
 
-	List all active PTY sessions in the sandbox
+		List all active PTY sessions in the sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIListPTYSessionsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIListPTYSessionsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ListPTYSessionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPIListPTYSessionsDeprecatedRequest
 
@@ -755,15 +754,15 @@ type ToolboxAPI interface {
 	ListPTYSessionsDeprecatedExecute(r ToolboxAPIListPTYSessionsDeprecatedRequest) (*PtyListResponse, *http.Response, error)
 
 	/*
-	ListSessionsDeprecated [DEPRECATED] List sessions
+		ListSessionsDeprecated [DEPRECATED] List sessions
 
-	List all active sessions in the sandbox
+		List all active sessions in the sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIListSessionsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIListSessionsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ListSessionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPIListSessionsDeprecatedRequest
 
@@ -773,15 +772,15 @@ type ToolboxAPI interface {
 	ListSessionsDeprecatedExecute(r ToolboxAPIListSessionsDeprecatedRequest) ([]Session, *http.Response, error)
 
 	/*
-	LspCompletionsDeprecated [DEPRECATED] Get Lsp Completions
+		LspCompletionsDeprecated [DEPRECATED] Get Lsp Completions
 
-	The Completion request is sent from the client to the server to compute completion items at a given cursor position.
+		The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspCompletionsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspCompletionsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	LspCompletionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspCompletionsDeprecatedRequest
 
@@ -791,15 +790,15 @@ type ToolboxAPI interface {
 	LspCompletionsDeprecatedExecute(r ToolboxAPILspCompletionsDeprecatedRequest) (*CompletionList, *http.Response, error)
 
 	/*
-	LspDidCloseDeprecated [DEPRECATED] Call Lsp DidClose
+		LspDidCloseDeprecated [DEPRECATED] Call Lsp DidClose
 
-	The document close notification is sent from the client to the server when the document got closed in the client.
+		The document close notification is sent from the client to the server when the document got closed in the client.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspDidCloseDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspDidCloseDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	LspDidCloseDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspDidCloseDeprecatedRequest
 
@@ -808,15 +807,15 @@ type ToolboxAPI interface {
 	LspDidCloseDeprecatedExecute(r ToolboxAPILspDidCloseDeprecatedRequest) (*http.Response, error)
 
 	/*
-	LspDidOpenDeprecated [DEPRECATED] Call Lsp DidOpen
+		LspDidOpenDeprecated [DEPRECATED] Call Lsp DidOpen
 
-	The document open notification is sent from the client to the server to signal newly opened text documents.
+		The document open notification is sent from the client to the server to signal newly opened text documents.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspDidOpenDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspDidOpenDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	LspDidOpenDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspDidOpenDeprecatedRequest
 
@@ -825,15 +824,15 @@ type ToolboxAPI interface {
 	LspDidOpenDeprecatedExecute(r ToolboxAPILspDidOpenDeprecatedRequest) (*http.Response, error)
 
 	/*
-	LspDocumentSymbolsDeprecated [DEPRECATED] Call Lsp DocumentSymbols
+		LspDocumentSymbolsDeprecated [DEPRECATED] Call Lsp DocumentSymbols
 
-	The document symbol request is sent from the client to the server.
+		The document symbol request is sent from the client to the server.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspDocumentSymbolsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspDocumentSymbolsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	LspDocumentSymbolsDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspDocumentSymbolsDeprecatedRequest
 
@@ -843,15 +842,15 @@ type ToolboxAPI interface {
 	LspDocumentSymbolsDeprecatedExecute(r ToolboxAPILspDocumentSymbolsDeprecatedRequest) ([]LspSymbol, *http.Response, error)
 
 	/*
-	LspStartDeprecated [DEPRECATED] Start Lsp server
+		LspStartDeprecated [DEPRECATED] Start Lsp server
 
-	Start Lsp server process inside sandbox project
+		Start Lsp server process inside sandbox project
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspStartDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspStartDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	LspStartDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspStartDeprecatedRequest
 
@@ -860,15 +859,15 @@ type ToolboxAPI interface {
 	LspStartDeprecatedExecute(r ToolboxAPILspStartDeprecatedRequest) (*http.Response, error)
 
 	/*
-	LspStopDeprecated [DEPRECATED] Stop Lsp server
+		LspStopDeprecated [DEPRECATED] Stop Lsp server
 
-	Stop Lsp server process inside sandbox project
+		Stop Lsp server process inside sandbox project
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspStopDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspStopDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	LspStopDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspStopDeprecatedRequest
 
@@ -877,15 +876,15 @@ type ToolboxAPI interface {
 	LspStopDeprecatedExecute(r ToolboxAPILspStopDeprecatedRequest) (*http.Response, error)
 
 	/*
-	LspWorkspaceSymbolsDeprecated [DEPRECATED] Call Lsp WorkspaceSymbols
+		LspWorkspaceSymbolsDeprecated [DEPRECATED] Call Lsp WorkspaceSymbols
 
-	The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+		The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspWorkspaceSymbolsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspWorkspaceSymbolsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	LspWorkspaceSymbolsDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspWorkspaceSymbolsDeprecatedRequest
 
@@ -895,15 +894,15 @@ type ToolboxAPI interface {
 	LspWorkspaceSymbolsDeprecatedExecute(r ToolboxAPILspWorkspaceSymbolsDeprecatedRequest) ([]LspSymbol, *http.Response, error)
 
 	/*
-	MoveFileDeprecated [DEPRECATED] Move file
+		MoveFileDeprecated [DEPRECATED] Move file
 
-	Move file inside sandbox
+		Move file inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIMoveFileDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIMoveFileDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	MoveFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIMoveFileDeprecatedRequest
 
@@ -912,15 +911,15 @@ type ToolboxAPI interface {
 	MoveFileDeprecatedExecute(r ToolboxAPIMoveFileDeprecatedRequest) (*http.Response, error)
 
 	/*
-	MoveMouseDeprecated [DEPRECATED] Move mouse
+		MoveMouseDeprecated [DEPRECATED] Move mouse
 
-	Move mouse cursor to specified coordinates
+		Move mouse cursor to specified coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIMoveMouseDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIMoveMouseDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	MoveMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIMoveMouseDeprecatedRequest
 
@@ -930,15 +929,15 @@ type ToolboxAPI interface {
 	MoveMouseDeprecatedExecute(r ToolboxAPIMoveMouseDeprecatedRequest) (*MouseMoveResponse, *http.Response, error)
 
 	/*
-	PressHotkeyDeprecated [DEPRECATED] Press hotkey
+		PressHotkeyDeprecated [DEPRECATED] Press hotkey
 
-	Press a hotkey combination
+		Press a hotkey combination
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIPressHotkeyDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIPressHotkeyDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	PressHotkeyDeprecated(ctx context.Context, sandboxId string) ToolboxAPIPressHotkeyDeprecatedRequest
 
@@ -947,15 +946,15 @@ type ToolboxAPI interface {
 	PressHotkeyDeprecatedExecute(r ToolboxAPIPressHotkeyDeprecatedRequest) (*http.Response, error)
 
 	/*
-	PressKeyDeprecated [DEPRECATED] Press key
+		PressKeyDeprecated [DEPRECATED] Press key
 
-	Press a key with optional modifiers
+		Press a key with optional modifiers
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIPressKeyDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIPressKeyDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	PressKeyDeprecated(ctx context.Context, sandboxId string) ToolboxAPIPressKeyDeprecatedRequest
 
@@ -964,15 +963,15 @@ type ToolboxAPI interface {
 	PressKeyDeprecatedExecute(r ToolboxAPIPressKeyDeprecatedRequest) (*http.Response, error)
 
 	/*
-	ReplaceInFilesDeprecated [DEPRECATED] Replace in files
+		ReplaceInFilesDeprecated [DEPRECATED] Replace in files
 
-	Replace text/pattern in multiple files inside sandbox
+		Replace text/pattern in multiple files inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIReplaceInFilesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIReplaceInFilesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ReplaceInFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIReplaceInFilesDeprecatedRequest
 
@@ -982,16 +981,16 @@ type ToolboxAPI interface {
 	ReplaceInFilesDeprecatedExecute(r ToolboxAPIReplaceInFilesDeprecatedRequest) ([]ReplaceResult, *http.Response, error)
 
 	/*
-	ResizePTYSessionDeprecated [DEPRECATED] Resize PTY session
+		ResizePTYSessionDeprecated [DEPRECATED] Resize PTY session
 
-	Resize a PTY session
+		Resize a PTY session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIResizePTYSessionDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIResizePTYSessionDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ResizePTYSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIResizePTYSessionDeprecatedRequest
 
@@ -1001,16 +1000,16 @@ type ToolboxAPI interface {
 	ResizePTYSessionDeprecatedExecute(r ToolboxAPIResizePTYSessionDeprecatedRequest) (*PtySessionInfo, *http.Response, error)
 
 	/*
-	RestartProcessDeprecated [DEPRECATED] Restart process
+		RestartProcessDeprecated [DEPRECATED] Restart process
 
-	Restart a specific VNC process
+		Restart a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIRestartProcessDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIRestartProcessDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	RestartProcessDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIRestartProcessDeprecatedRequest
 
@@ -1020,15 +1019,15 @@ type ToolboxAPI interface {
 	RestartProcessDeprecatedExecute(r ToolboxAPIRestartProcessDeprecatedRequest) (*ProcessRestartResponse, *http.Response, error)
 
 	/*
-	ScrollMouseDeprecated [DEPRECATED] Scroll mouse
+		ScrollMouseDeprecated [DEPRECATED] Scroll mouse
 
-	Scroll mouse at specified coordinates
+		Scroll mouse at specified coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIScrollMouseDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIScrollMouseDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ScrollMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIScrollMouseDeprecatedRequest
 
@@ -1038,15 +1037,15 @@ type ToolboxAPI interface {
 	ScrollMouseDeprecatedExecute(r ToolboxAPIScrollMouseDeprecatedRequest) (*MouseScrollResponse, *http.Response, error)
 
 	/*
-	SearchFilesDeprecated [DEPRECATED] Search files
+		SearchFilesDeprecated [DEPRECATED] Search files
 
-	Search for files inside sandbox
+		Search for files inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPISearchFilesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPISearchFilesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	SearchFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPISearchFilesDeprecatedRequest
 
@@ -1056,15 +1055,15 @@ type ToolboxAPI interface {
 	SearchFilesDeprecatedExecute(r ToolboxAPISearchFilesDeprecatedRequest) (*SearchFilesResponse, *http.Response, error)
 
 	/*
-	SetFilePermissionsDeprecated [DEPRECATED] Set file permissions
+		SetFilePermissionsDeprecated [DEPRECATED] Set file permissions
 
-	Set file owner/group/permissions inside sandbox
+		Set file owner/group/permissions inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPISetFilePermissionsDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPISetFilePermissionsDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	SetFilePermissionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPISetFilePermissionsDeprecatedRequest
 
@@ -1073,15 +1072,15 @@ type ToolboxAPI interface {
 	SetFilePermissionsDeprecatedExecute(r ToolboxAPISetFilePermissionsDeprecatedRequest) (*http.Response, error)
 
 	/*
-	StartComputerUseDeprecated [DEPRECATED] Start computer use processes
+		StartComputerUseDeprecated [DEPRECATED] Start computer use processes
 
-	Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+		Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIStartComputerUseDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIStartComputerUseDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	StartComputerUseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIStartComputerUseDeprecatedRequest
 
@@ -1091,15 +1090,15 @@ type ToolboxAPI interface {
 	StartComputerUseDeprecatedExecute(r ToolboxAPIStartComputerUseDeprecatedRequest) (*ComputerUseStartResponse, *http.Response, error)
 
 	/*
-	StopComputerUseDeprecated [DEPRECATED] Stop computer use processes
+		StopComputerUseDeprecated [DEPRECATED] Stop computer use processes
 
-	Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+		Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIStopComputerUseDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIStopComputerUseDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	StopComputerUseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIStopComputerUseDeprecatedRequest
 
@@ -1109,15 +1108,15 @@ type ToolboxAPI interface {
 	StopComputerUseDeprecatedExecute(r ToolboxAPIStopComputerUseDeprecatedRequest) (*ComputerUseStopResponse, *http.Response, error)
 
 	/*
-	TakeCompressedRegionScreenshotDeprecated [DEPRECATED] Take compressed region screenshot
+		TakeCompressedRegionScreenshotDeprecated [DEPRECATED] Take compressed region screenshot
 
-	Take a compressed screenshot of a specific region
+		Take a compressed screenshot of a specific region
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	TakeCompressedRegionScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest
 
@@ -1127,15 +1126,15 @@ type ToolboxAPI interface {
 	TakeCompressedRegionScreenshotDeprecatedExecute(r ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest) (*CompressedScreenshotResponse, *http.Response, error)
 
 	/*
-	TakeCompressedScreenshotDeprecated [DEPRECATED] Take compressed screenshot
+		TakeCompressedScreenshotDeprecated [DEPRECATED] Take compressed screenshot
 
-	Take a compressed screenshot with format, quality, and scale options
+		Take a compressed screenshot with format, quality, and scale options
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeCompressedScreenshotDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeCompressedScreenshotDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	TakeCompressedScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedScreenshotDeprecatedRequest
 
@@ -1145,15 +1144,15 @@ type ToolboxAPI interface {
 	TakeCompressedScreenshotDeprecatedExecute(r ToolboxAPITakeCompressedScreenshotDeprecatedRequest) (*CompressedScreenshotResponse, *http.Response, error)
 
 	/*
-	TakeRegionScreenshotDeprecated [DEPRECATED] Take region screenshot
+		TakeRegionScreenshotDeprecated [DEPRECATED] Take region screenshot
 
-	Take a screenshot of a specific region
+		Take a screenshot of a specific region
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeRegionScreenshotDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeRegionScreenshotDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	TakeRegionScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeRegionScreenshotDeprecatedRequest
 
@@ -1163,15 +1162,15 @@ type ToolboxAPI interface {
 	TakeRegionScreenshotDeprecatedExecute(r ToolboxAPITakeRegionScreenshotDeprecatedRequest) (*RegionScreenshotResponse, *http.Response, error)
 
 	/*
-	TakeScreenshotDeprecated [DEPRECATED] Take screenshot
+		TakeScreenshotDeprecated [DEPRECATED] Take screenshot
 
-	Take a screenshot of the entire screen
+		Take a screenshot of the entire screen
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeScreenshotDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeScreenshotDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	TakeScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeScreenshotDeprecatedRequest
 
@@ -1181,15 +1180,15 @@ type ToolboxAPI interface {
 	TakeScreenshotDeprecatedExecute(r ToolboxAPITakeScreenshotDeprecatedRequest) (*ScreenshotResponse, *http.Response, error)
 
 	/*
-	TypeTextDeprecated [DEPRECATED] Type text
+		TypeTextDeprecated [DEPRECATED] Type text
 
-	Type text using keyboard
+		Type text using keyboard
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITypeTextDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITypeTextDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	TypeTextDeprecated(ctx context.Context, sandboxId string) ToolboxAPITypeTextDeprecatedRequest
 
@@ -1198,15 +1197,15 @@ type ToolboxAPI interface {
 	TypeTextDeprecatedExecute(r ToolboxAPITypeTextDeprecatedRequest) (*http.Response, error)
 
 	/*
-	UploadFileDeprecated [DEPRECATED] Upload file
+		UploadFileDeprecated [DEPRECATED] Upload file
 
-	Upload file inside sandbox
+		Upload file inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIUploadFileDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIUploadFileDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UploadFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIUploadFileDeprecatedRequest
 
@@ -1215,15 +1214,15 @@ type ToolboxAPI interface {
 	UploadFileDeprecatedExecute(r ToolboxAPIUploadFileDeprecatedRequest) (*http.Response, error)
 
 	/*
-	UploadFilesDeprecated [DEPRECATED] Upload multiple files
+		UploadFilesDeprecated [DEPRECATED] Upload multiple files
 
-	Upload multiple files inside sandbox
+		Upload multiple files inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIUploadFilesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIUploadFilesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UploadFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIUploadFilesDeprecatedRequest
 
@@ -1236,10 +1235,10 @@ type ToolboxAPI interface {
 type ToolboxAPIService service
 
 type ToolboxAPIClickMouseDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseClickRequest *MouseClickRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseClickRequest      *MouseClickRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -1263,29 +1262,31 @@ ClickMouseDeprecated [DEPRECATED] Click mouse
 
 Click mouse at specified coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIClickMouseDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIClickMouseDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ClickMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIClickMouseDeprecatedRequest {
 	return ToolboxAPIClickMouseDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MouseClickResponse
+//
+//	@return MouseClickResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) ClickMouseDeprecatedExecute(r ToolboxAPIClickMouseDeprecatedRequest) (*MouseClickResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MouseClickResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MouseClickResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ClickMouseDeprecated")
@@ -1363,11 +1364,11 @@ func (a *ToolboxAPIService) ClickMouseDeprecatedExecute(r ToolboxAPIClickMouseDe
 }
 
 type ToolboxAPICreateFolderDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
-	mode *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
+	mode                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -1396,17 +1397,17 @@ CreateFolderDeprecated [DEPRECATED] Create folder
 
 Create folder inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPICreateFolderDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPICreateFolderDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) CreateFolderDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreateFolderDeprecatedRequest {
 	return ToolboxAPICreateFolderDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -1414,9 +1415,9 @@ func (a *ToolboxAPIService) CreateFolderDeprecated(ctx context.Context, sandboxI
 // Deprecated
 func (a *ToolboxAPIService) CreateFolderDeprecatedExecute(r ToolboxAPICreateFolderDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreateFolderDeprecated")
@@ -1488,10 +1489,10 @@ func (a *ToolboxAPIService) CreateFolderDeprecatedExecute(r ToolboxAPICreateFold
 }
 
 type ToolboxAPICreatePTYSessionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	ptyCreateRequest *PtyCreateRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	ptyCreateRequest       *PtyCreateRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -1515,29 +1516,31 @@ CreatePTYSessionDeprecated [DEPRECATED] Create PTY session
 
 Create a new PTY session in the sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPICreatePTYSessionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPICreatePTYSessionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) CreatePTYSessionDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreatePTYSessionDeprecatedRequest {
 	return ToolboxAPICreatePTYSessionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return PtyCreateResponse
+//
+//	@return PtyCreateResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) CreatePTYSessionDeprecatedExecute(r ToolboxAPICreatePTYSessionDeprecatedRequest) (*PtyCreateResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PtyCreateResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtyCreateResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreatePTYSessionDeprecated")
@@ -1615,10 +1618,10 @@ func (a *ToolboxAPIService) CreatePTYSessionDeprecatedExecute(r ToolboxAPICreate
 }
 
 type ToolboxAPICreateSessionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	createSessionRequest *CreateSessionRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	createSessionRequest   *CreateSessionRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -1642,17 +1645,17 @@ CreateSessionDeprecated [DEPRECATED] Create session
 
 Create a new session in the sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPICreateSessionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPICreateSessionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) CreateSessionDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreateSessionDeprecatedRequest {
 	return ToolboxAPICreateSessionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -1660,9 +1663,9 @@ func (a *ToolboxAPIService) CreateSessionDeprecated(ctx context.Context, sandbox
 // Deprecated
 func (a *ToolboxAPIService) CreateSessionDeprecatedExecute(r ToolboxAPICreateSessionDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreateSessionDeprecated")
@@ -1731,12 +1734,12 @@ func (a *ToolboxAPIService) CreateSessionDeprecatedExecute(r ToolboxAPICreateSes
 }
 
 type ToolboxAPIDeleteFileDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
-	recursive *bool
+	recursive              *bool
 }
 
 func (r ToolboxAPIDeleteFileDeprecatedRequest) Path(path string) ToolboxAPIDeleteFileDeprecatedRequest {
@@ -1764,17 +1767,17 @@ DeleteFileDeprecated [DEPRECATED] Delete file
 
 Delete file inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIDeleteFileDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDeleteFileDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) DeleteFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDeleteFileDeprecatedRequest {
 	return ToolboxAPIDeleteFileDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -1782,9 +1785,9 @@ func (a *ToolboxAPIService) DeleteFileDeprecated(ctx context.Context, sandboxId 
 // Deprecated
 func (a *ToolboxAPIService) DeleteFileDeprecatedExecute(r ToolboxAPIDeleteFileDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DeleteFileDeprecated")
@@ -1855,10 +1858,10 @@ func (a *ToolboxAPIService) DeleteFileDeprecatedExecute(r ToolboxAPIDeleteFileDe
 }
 
 type ToolboxAPIDeletePTYSessionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -1877,19 +1880,19 @@ DeletePTYSessionDeprecated [DEPRECATED] Delete PTY session
 
 Delete a PTY session and terminate the associated process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIDeletePTYSessionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIDeletePTYSessionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) DeletePTYSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeletePTYSessionDeprecatedRequest {
 	return ToolboxAPIDeletePTYSessionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
@@ -1897,9 +1900,9 @@ func (a *ToolboxAPIService) DeletePTYSessionDeprecated(ctx context.Context, sand
 // Deprecated
 func (a *ToolboxAPIService) DeletePTYSessionDeprecatedExecute(r ToolboxAPIDeletePTYSessionDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DeletePTYSessionDeprecated")
@@ -1964,10 +1967,10 @@ func (a *ToolboxAPIService) DeletePTYSessionDeprecatedExecute(r ToolboxAPIDelete
 }
 
 type ToolboxAPIDeleteSessionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -1986,19 +1989,19 @@ DeleteSessionDeprecated [DEPRECATED] Delete session
 
 Delete a specific session
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIDeleteSessionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIDeleteSessionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) DeleteSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeleteSessionDeprecatedRequest {
 	return ToolboxAPIDeleteSessionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
@@ -2006,9 +2009,9 @@ func (a *ToolboxAPIService) DeleteSessionDeprecated(ctx context.Context, sandbox
 // Deprecated
 func (a *ToolboxAPIService) DeleteSessionDeprecatedExecute(r ToolboxAPIDeleteSessionDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DeleteSessionDeprecated")
@@ -2073,10 +2076,10 @@ func (a *ToolboxAPIService) DeleteSessionDeprecatedExecute(r ToolboxAPIDeleteSes
 }
 
 type ToolboxAPIDownloadFileDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -2100,29 +2103,31 @@ DownloadFileDeprecated [DEPRECATED] Download file
 
 Download file from sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIDownloadFileDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDownloadFileDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) DownloadFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDownloadFileDeprecatedRequest {
 	return ToolboxAPIDownloadFileDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return *os.File
+//
+//	@return *os.File
+//
 // Deprecated
 func (a *ToolboxAPIService) DownloadFileDeprecatedExecute(r ToolboxAPIDownloadFileDeprecatedRequest) (*os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *os.File
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DownloadFileDeprecated")
@@ -2199,10 +2204,10 @@ func (a *ToolboxAPIService) DownloadFileDeprecatedExecute(r ToolboxAPIDownloadFi
 }
 
 type ToolboxAPIDownloadFilesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	downloadFiles *DownloadFiles
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	downloadFiles          *DownloadFiles
 	xDaytonaOrganizationID *string
 }
 
@@ -2226,29 +2231,31 @@ DownloadFilesDeprecated [DEPRECATED] Download multiple files
 
 Streams back a multipart/form-data bundle of the requested paths
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIDownloadFilesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDownloadFilesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) DownloadFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDownloadFilesDeprecatedRequest {
 	return ToolboxAPIDownloadFilesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return *os.File
+//
+//	@return *os.File
+//
 // Deprecated
 func (a *ToolboxAPIService) DownloadFilesDeprecatedExecute(r ToolboxAPIDownloadFilesDeprecatedRequest) (*os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *os.File
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DownloadFilesDeprecated")
@@ -2326,10 +2333,10 @@ func (a *ToolboxAPIService) DownloadFilesDeprecatedExecute(r ToolboxAPIDownloadF
 }
 
 type ToolboxAPIDragMouseDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseDragRequest *MouseDragRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseDragRequest       *MouseDragRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -2353,29 +2360,31 @@ DragMouseDeprecated [DEPRECATED] Drag mouse
 
 Drag mouse from start to end coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIDragMouseDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDragMouseDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) DragMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIDragMouseDeprecatedRequest {
 	return ToolboxAPIDragMouseDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MouseDragResponse
+//
+//	@return MouseDragResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) DragMouseDeprecatedExecute(r ToolboxAPIDragMouseDeprecatedRequest) (*MouseDragResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MouseDragResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MouseDragResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DragMouseDeprecated")
@@ -2453,10 +2462,10 @@ func (a *ToolboxAPIService) DragMouseDeprecatedExecute(r ToolboxAPIDragMouseDepr
 }
 
 type ToolboxAPIExecuteCommandDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	executeRequest *ExecuteRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	executeRequest         *ExecuteRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -2480,29 +2489,31 @@ ExecuteCommandDeprecated [DEPRECATED] Execute command
 
 Execute command synchronously inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIExecuteCommandDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIExecuteCommandDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ExecuteCommandDeprecated(ctx context.Context, sandboxId string) ToolboxAPIExecuteCommandDeprecatedRequest {
 	return ToolboxAPIExecuteCommandDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ExecuteResponse
+//
+//	@return ExecuteResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) ExecuteCommandDeprecatedExecute(r ToolboxAPIExecuteCommandDeprecatedRequest) (*ExecuteResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ExecuteResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ExecuteResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ExecuteCommandDeprecated")
@@ -2580,11 +2591,11 @@ func (a *ToolboxAPIService) ExecuteCommandDeprecatedExecute(r ToolboxAPIExecuteC
 }
 
 type ToolboxAPIExecuteSessionCommandDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
-	sessionExecuteRequest *SessionExecuteRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	sessionExecuteRequest  *SessionExecuteRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -2608,31 +2619,33 @@ ExecuteSessionCommandDeprecated [DEPRECATED] Execute command in session
 
 Execute a command in a specific session
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIExecuteSessionCommandDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIExecuteSessionCommandDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ExecuteSessionCommandDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIExecuteSessionCommandDeprecatedRequest {
 	return ToolboxAPIExecuteSessionCommandDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
 // Execute executes the request
-//  @return SessionExecuteResponse
+//
+//	@return SessionExecuteResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) ExecuteSessionCommandDeprecatedExecute(r ToolboxAPIExecuteSessionCommandDeprecatedRequest) (*SessionExecuteResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SessionExecuteResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SessionExecuteResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ExecuteSessionCommandDeprecated")
@@ -2711,11 +2724,11 @@ func (a *ToolboxAPIService) ExecuteSessionCommandDeprecatedExecute(r ToolboxAPIE
 }
 
 type ToolboxAPIFindInFilesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
-	pattern *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
+	pattern                *string
 	xDaytonaOrganizationID *string
 }
 
@@ -2744,29 +2757,31 @@ FindInFilesDeprecated [DEPRECATED] Search for text/pattern in files
 
 Search for text/pattern inside sandbox files
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIFindInFilesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIFindInFilesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) FindInFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIFindInFilesDeprecatedRequest {
 	return ToolboxAPIFindInFilesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []Match
+//
+//	@return []Match
+//
 // Deprecated
 func (a *ToolboxAPIService) FindInFilesDeprecatedExecute(r ToolboxAPIFindInFilesDeprecatedRequest) ([]Match, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Match
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Match
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.FindInFilesDeprecated")
@@ -2847,9 +2862,9 @@ func (a *ToolboxAPIService) FindInFilesDeprecatedExecute(r ToolboxAPIFindInFiles
 }
 
 type ToolboxAPIGetComputerUseStatusDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2868,29 +2883,31 @@ GetComputerUseStatusDeprecated [DEPRECATED] Get computer use status
 
 Get status of all VNC desktop processes
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetComputerUseStatusDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetComputerUseStatusDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetComputerUseStatusDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetComputerUseStatusDeprecatedRequest {
 	return ToolboxAPIGetComputerUseStatusDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ComputerUseStatusResponse
+//
+//	@return ComputerUseStatusResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetComputerUseStatusDeprecatedExecute(r ToolboxAPIGetComputerUseStatusDeprecatedRequest) (*ComputerUseStatusResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComputerUseStatusResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComputerUseStatusResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetComputerUseStatusDeprecated")
@@ -2963,9 +2980,9 @@ func (a *ToolboxAPIService) GetComputerUseStatusDeprecatedExecute(r ToolboxAPIGe
 }
 
 type ToolboxAPIGetDisplayInfoDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2984,29 +3001,31 @@ GetDisplayInfoDeprecated [DEPRECATED] Get display info
 
 Get information about displays
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetDisplayInfoDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetDisplayInfoDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetDisplayInfoDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetDisplayInfoDeprecatedRequest {
 	return ToolboxAPIGetDisplayInfoDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return DisplayInfoResponse
+//
+//	@return DisplayInfoResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetDisplayInfoDeprecatedExecute(r ToolboxAPIGetDisplayInfoDeprecatedRequest) (*DisplayInfoResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DisplayInfoResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DisplayInfoResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetDisplayInfoDeprecated")
@@ -3079,10 +3098,10 @@ func (a *ToolboxAPIService) GetDisplayInfoDeprecatedExecute(r ToolboxAPIGetDispl
 }
 
 type ToolboxAPIGetFileInfoDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -3106,29 +3125,31 @@ GetFileInfoDeprecated [DEPRECATED] Get file info
 
 Get file info inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetFileInfoDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetFileInfoDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetFileInfoDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetFileInfoDeprecatedRequest {
 	return ToolboxAPIGetFileInfoDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return FileInfo
+//
+//	@return FileInfo
+//
 // Deprecated
 func (a *ToolboxAPIService) GetFileInfoDeprecatedExecute(r ToolboxAPIGetFileInfoDeprecatedRequest) (*FileInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *FileInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *FileInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetFileInfoDeprecated")
@@ -3205,9 +3226,9 @@ func (a *ToolboxAPIService) GetFileInfoDeprecatedExecute(r ToolboxAPIGetFileInfo
 }
 
 type ToolboxAPIGetMousePositionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3226,29 +3247,31 @@ GetMousePositionDeprecated [DEPRECATED] Get mouse position
 
 Get current mouse cursor position
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetMousePositionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetMousePositionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetMousePositionDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetMousePositionDeprecatedRequest {
 	return ToolboxAPIGetMousePositionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MousePosition
+//
+//	@return MousePosition
+//
 // Deprecated
 func (a *ToolboxAPIService) GetMousePositionDeprecatedExecute(r ToolboxAPIGetMousePositionDeprecatedRequest) (*MousePosition, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MousePosition
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MousePosition
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetMousePositionDeprecated")
@@ -3321,10 +3344,10 @@ func (a *ToolboxAPIService) GetMousePositionDeprecatedExecute(r ToolboxAPIGetMou
 }
 
 type ToolboxAPIGetPTYSessionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3343,31 +3366,33 @@ GetPTYSessionDeprecated [DEPRECATED] Get PTY session
 
 Get PTY session information by ID
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIGetPTYSessionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIGetPTYSessionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetPTYSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetPTYSessionDeprecatedRequest {
 	return ToolboxAPIGetPTYSessionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
 // Execute executes the request
-//  @return PtySessionInfo
+//
+//	@return PtySessionInfo
+//
 // Deprecated
 func (a *ToolboxAPIService) GetPTYSessionDeprecatedExecute(r ToolboxAPIGetPTYSessionDeprecatedRequest) (*PtySessionInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PtySessionInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtySessionInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetPTYSessionDeprecated")
@@ -3441,10 +3466,10 @@ func (a *ToolboxAPIService) GetPTYSessionDeprecatedExecute(r ToolboxAPIGetPTYSes
 }
 
 type ToolboxAPIGetProcessErrorsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3463,31 +3488,33 @@ GetProcessErrorsDeprecated [DEPRECATED] Get process errors
 
 Get error logs for a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIGetProcessErrorsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIGetProcessErrorsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetProcessErrorsDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessErrorsDeprecatedRequest {
 	return ToolboxAPIGetProcessErrorsDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessErrorsResponse
+//
+//	@return ProcessErrorsResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetProcessErrorsDeprecatedExecute(r ToolboxAPIGetProcessErrorsDeprecatedRequest) (*ProcessErrorsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessErrorsResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessErrorsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProcessErrorsDeprecated")
@@ -3561,10 +3588,10 @@ func (a *ToolboxAPIService) GetProcessErrorsDeprecatedExecute(r ToolboxAPIGetPro
 }
 
 type ToolboxAPIGetProcessLogsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3583,31 +3610,33 @@ GetProcessLogsDeprecated [DEPRECATED] Get process logs
 
 Get logs for a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIGetProcessLogsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIGetProcessLogsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetProcessLogsDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessLogsDeprecatedRequest {
 	return ToolboxAPIGetProcessLogsDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessLogsResponse
+//
+//	@return ProcessLogsResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetProcessLogsDeprecatedExecute(r ToolboxAPIGetProcessLogsDeprecatedRequest) (*ProcessLogsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessLogsResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessLogsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProcessLogsDeprecated")
@@ -3681,10 +3710,10 @@ func (a *ToolboxAPIService) GetProcessLogsDeprecatedExecute(r ToolboxAPIGetProce
 }
 
 type ToolboxAPIGetProcessStatusDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3703,31 +3732,33 @@ GetProcessStatusDeprecated [DEPRECATED] Get process status
 
 Get status of a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIGetProcessStatusDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIGetProcessStatusDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetProcessStatusDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessStatusDeprecatedRequest {
 	return ToolboxAPIGetProcessStatusDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessStatusResponse
+//
+//	@return ProcessStatusResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetProcessStatusDeprecatedExecute(r ToolboxAPIGetProcessStatusDeprecatedRequest) (*ProcessStatusResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessStatusResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessStatusResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProcessStatusDeprecated")
@@ -3801,9 +3832,9 @@ func (a *ToolboxAPIService) GetProcessStatusDeprecatedExecute(r ToolboxAPIGetPro
 }
 
 type ToolboxAPIGetProjectDirDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3820,29 +3851,31 @@ func (r ToolboxAPIGetProjectDirDeprecatedRequest) Execute() (*ProjectDirResponse
 /*
 GetProjectDirDeprecated [DEPRECATED] Get sandbox project dir
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetProjectDirDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetProjectDirDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetProjectDirDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetProjectDirDeprecatedRequest {
 	return ToolboxAPIGetProjectDirDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProjectDirResponse
+//
+//	@return ProjectDirResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetProjectDirDeprecatedExecute(r ToolboxAPIGetProjectDirDeprecatedRequest) (*ProjectDirResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProjectDirResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProjectDirResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProjectDirDeprecated")
@@ -3915,11 +3948,11 @@ func (a *ToolboxAPIService) GetProjectDirDeprecatedExecute(r ToolboxAPIGetProjec
 }
 
 type ToolboxAPIGetSessionCommandDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
-	commandId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	commandId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3938,33 +3971,35 @@ GetSessionCommandDeprecated [DEPRECATED] Get session command
 
 Get session command by ID
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @param commandId
- @return ToolboxAPIGetSessionCommandDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@param commandId
+	@return ToolboxAPIGetSessionCommandDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetSessionCommandDeprecated(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandDeprecatedRequest {
 	return ToolboxAPIGetSessionCommandDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
-		commandId: commandId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+		commandId:  commandId,
 	}
 }
 
 // Execute executes the request
-//  @return Command
+//
+//	@return Command
+//
 // Deprecated
 func (a *ToolboxAPIService) GetSessionCommandDeprecatedExecute(r ToolboxAPIGetSessionCommandDeprecatedRequest) (*Command, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Command
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Command
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSessionCommandDeprecated")
@@ -4039,13 +4074,13 @@ func (a *ToolboxAPIService) GetSessionCommandDeprecatedExecute(r ToolboxAPIGetSe
 }
 
 type ToolboxAPIGetSessionCommandLogsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
-	commandId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	commandId              string
 	xDaytonaOrganizationID *string
-	follow *bool
+	follow                 *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -4069,33 +4104,35 @@ GetSessionCommandLogsDeprecated [DEPRECATED] Get command logs
 
 Get logs for a specific command in a session
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @param commandId
- @return ToolboxAPIGetSessionCommandLogsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@param commandId
+	@return ToolboxAPIGetSessionCommandLogsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetSessionCommandLogsDeprecated(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandLogsDeprecatedRequest {
 	return ToolboxAPIGetSessionCommandLogsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
-		commandId: commandId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+		commandId:  commandId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
+//
 // Deprecated
 func (a *ToolboxAPIService) GetSessionCommandLogsDeprecatedExecute(r ToolboxAPIGetSessionCommandLogsDeprecatedRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSessionCommandLogsDeprecated")
@@ -4173,10 +4210,10 @@ func (a *ToolboxAPIService) GetSessionCommandLogsDeprecatedExecute(r ToolboxAPIG
 }
 
 type ToolboxAPIGetSessionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -4195,31 +4232,33 @@ GetSessionDeprecated [DEPRECATED] Get session
 
 Get session by ID
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIGetSessionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIGetSessionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetSessionDeprecatedRequest {
 	return ToolboxAPIGetSessionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
 // Execute executes the request
-//  @return Session
+//
+//	@return Session
+//
 // Deprecated
 func (a *ToolboxAPIService) GetSessionDeprecatedExecute(r ToolboxAPIGetSessionDeprecatedRequest) (*Session, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Session
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Session
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSessionDeprecated")
@@ -4293,9 +4332,9 @@ func (a *ToolboxAPIService) GetSessionDeprecatedExecute(r ToolboxAPIGetSessionDe
 }
 
 type ToolboxAPIGetUserHomeDirDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -4312,29 +4351,31 @@ func (r ToolboxAPIGetUserHomeDirDeprecatedRequest) Execute() (*UserHomeDirRespon
 /*
 GetUserHomeDirDeprecated [DEPRECATED] Get sandbox user home dir
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetUserHomeDirDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetUserHomeDirDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetUserHomeDirDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetUserHomeDirDeprecatedRequest {
 	return ToolboxAPIGetUserHomeDirDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return UserHomeDirResponse
+//
+//	@return UserHomeDirResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetUserHomeDirDeprecatedExecute(r ToolboxAPIGetUserHomeDirDeprecatedRequest) (*UserHomeDirResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *UserHomeDirResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *UserHomeDirResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetUserHomeDirDeprecated")
@@ -4407,9 +4448,9 @@ func (a *ToolboxAPIService) GetUserHomeDirDeprecatedExecute(r ToolboxAPIGetUserH
 }
 
 type ToolboxAPIGetWindowsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -4428,29 +4469,31 @@ GetWindowsDeprecated [DEPRECATED] Get windows
 
 Get list of open windows
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetWindowsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetWindowsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetWindowsDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetWindowsDeprecatedRequest {
 	return ToolboxAPIGetWindowsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return WindowsResponse
+//
+//	@return WindowsResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetWindowsDeprecatedExecute(r ToolboxAPIGetWindowsDeprecatedRequest) (*WindowsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WindowsResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WindowsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetWindowsDeprecated")
@@ -4523,9 +4566,9 @@ func (a *ToolboxAPIService) GetWindowsDeprecatedExecute(r ToolboxAPIGetWindowsDe
 }
 
 type ToolboxAPIGetWorkDirDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -4542,29 +4585,31 @@ func (r ToolboxAPIGetWorkDirDeprecatedRequest) Execute() (*WorkDirResponse, *htt
 /*
 GetWorkDirDeprecated [DEPRECATED] Get sandbox work-dir
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetWorkDirDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetWorkDirDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GetWorkDirDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGetWorkDirDeprecatedRequest {
 	return ToolboxAPIGetWorkDirDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return WorkDirResponse
+//
+//	@return WorkDirResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GetWorkDirDeprecatedExecute(r ToolboxAPIGetWorkDirDeprecatedRequest) (*WorkDirResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkDirResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkDirResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetWorkDirDeprecated")
@@ -4637,10 +4682,10 @@ func (a *ToolboxAPIService) GetWorkDirDeprecatedExecute(r ToolboxAPIGetWorkDirDe
 }
 
 type ToolboxAPIGitAddFilesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitAddRequest *GitAddRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitAddRequest          *GitAddRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -4664,17 +4709,17 @@ GitAddFilesDeprecated [DEPRECATED] Add files
 
 Add files to git commit
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitAddFilesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitAddFilesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitAddFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitAddFilesDeprecatedRequest {
 	return ToolboxAPIGitAddFilesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -4682,9 +4727,9 @@ func (a *ToolboxAPIService) GitAddFilesDeprecated(ctx context.Context, sandboxId
 // Deprecated
 func (a *ToolboxAPIService) GitAddFilesDeprecatedExecute(r ToolboxAPIGitAddFilesDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitAddFilesDeprecated")
@@ -4753,10 +4798,10 @@ func (a *ToolboxAPIService) GitAddFilesDeprecatedExecute(r ToolboxAPIGitAddFiles
 }
 
 type ToolboxAPIGitCheckoutBranchDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitCheckoutRequest *GitCheckoutRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitCheckoutRequest     *GitCheckoutRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -4780,17 +4825,17 @@ GitCheckoutBranchDeprecated [DEPRECATED] Checkout branch
 
 Checkout branch or commit in git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCheckoutBranchDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCheckoutBranchDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitCheckoutBranchDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCheckoutBranchDeprecatedRequest {
 	return ToolboxAPIGitCheckoutBranchDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -4798,9 +4843,9 @@ func (a *ToolboxAPIService) GitCheckoutBranchDeprecated(ctx context.Context, san
 // Deprecated
 func (a *ToolboxAPIService) GitCheckoutBranchDeprecatedExecute(r ToolboxAPIGitCheckoutBranchDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCheckoutBranchDeprecated")
@@ -4869,10 +4914,10 @@ func (a *ToolboxAPIService) GitCheckoutBranchDeprecatedExecute(r ToolboxAPIGitCh
 }
 
 type ToolboxAPIGitCloneRepositoryDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitCloneRequest *GitCloneRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitCloneRequest        *GitCloneRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -4896,17 +4941,17 @@ GitCloneRepositoryDeprecated [DEPRECATED] Clone repository
 
 Clone git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCloneRepositoryDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCloneRepositoryDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitCloneRepositoryDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCloneRepositoryDeprecatedRequest {
 	return ToolboxAPIGitCloneRepositoryDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -4914,9 +4959,9 @@ func (a *ToolboxAPIService) GitCloneRepositoryDeprecated(ctx context.Context, sa
 // Deprecated
 func (a *ToolboxAPIService) GitCloneRepositoryDeprecatedExecute(r ToolboxAPIGitCloneRepositoryDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCloneRepositoryDeprecated")
@@ -4985,10 +5030,10 @@ func (a *ToolboxAPIService) GitCloneRepositoryDeprecatedExecute(r ToolboxAPIGitC
 }
 
 type ToolboxAPIGitCommitChangesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitCommitRequest *GitCommitRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitCommitRequest       *GitCommitRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5012,29 +5057,31 @@ GitCommitChangesDeprecated [DEPRECATED] Commit changes
 
 Commit changes to git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCommitChangesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCommitChangesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitCommitChangesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCommitChangesDeprecatedRequest {
 	return ToolboxAPIGitCommitChangesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return GitCommitResponse
+//
+//	@return GitCommitResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GitCommitChangesDeprecatedExecute(r ToolboxAPIGitCommitChangesDeprecatedRequest) (*GitCommitResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GitCommitResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GitCommitResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCommitChangesDeprecated")
@@ -5112,10 +5159,10 @@ func (a *ToolboxAPIService) GitCommitChangesDeprecatedExecute(r ToolboxAPIGitCom
 }
 
 type ToolboxAPIGitCreateBranchDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitBranchRequest *GitBranchRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitBranchRequest       *GitBranchRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5139,17 +5186,17 @@ GitCreateBranchDeprecated [DEPRECATED] Create branch
 
 Create branch on git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCreateBranchDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCreateBranchDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitCreateBranchDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitCreateBranchDeprecatedRequest {
 	return ToolboxAPIGitCreateBranchDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -5157,9 +5204,9 @@ func (a *ToolboxAPIService) GitCreateBranchDeprecated(ctx context.Context, sandb
 // Deprecated
 func (a *ToolboxAPIService) GitCreateBranchDeprecatedExecute(r ToolboxAPIGitCreateBranchDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCreateBranchDeprecated")
@@ -5228,9 +5275,9 @@ func (a *ToolboxAPIService) GitCreateBranchDeprecatedExecute(r ToolboxAPIGitCrea
 }
 
 type ToolboxAPIGitDeleteBranchDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	gitDeleteBranchRequest *GitDeleteBranchRequest
 	xDaytonaOrganizationID *string
 }
@@ -5255,17 +5302,17 @@ GitDeleteBranchDeprecated [DEPRECATED] Delete branch
 
 Delete branch on git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitDeleteBranchDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitDeleteBranchDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitDeleteBranchDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitDeleteBranchDeprecatedRequest {
 	return ToolboxAPIGitDeleteBranchDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -5273,9 +5320,9 @@ func (a *ToolboxAPIService) GitDeleteBranchDeprecated(ctx context.Context, sandb
 // Deprecated
 func (a *ToolboxAPIService) GitDeleteBranchDeprecatedExecute(r ToolboxAPIGitDeleteBranchDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitDeleteBranchDeprecated")
@@ -5344,10 +5391,10 @@ func (a *ToolboxAPIService) GitDeleteBranchDeprecatedExecute(r ToolboxAPIGitDele
 }
 
 type ToolboxAPIGitGetHistoryDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -5371,29 +5418,31 @@ GitGetHistoryDeprecated [DEPRECATED] Get commit history
 
 Get commit history from git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitGetHistoryDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitGetHistoryDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitGetHistoryDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitGetHistoryDeprecatedRequest {
 	return ToolboxAPIGitGetHistoryDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []GitCommitInfo
+//
+//	@return []GitCommitInfo
+//
 // Deprecated
 func (a *ToolboxAPIService) GitGetHistoryDeprecatedExecute(r ToolboxAPIGitGetHistoryDeprecatedRequest) ([]GitCommitInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []GitCommitInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitCommitInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitGetHistoryDeprecated")
@@ -5470,10 +5519,10 @@ func (a *ToolboxAPIService) GitGetHistoryDeprecatedExecute(r ToolboxAPIGitGetHis
 }
 
 type ToolboxAPIGitGetStatusDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -5497,29 +5546,31 @@ GitGetStatusDeprecated [DEPRECATED] Get git status
 
 Get status from git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitGetStatusDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitGetStatusDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitGetStatusDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitGetStatusDeprecatedRequest {
 	return ToolboxAPIGitGetStatusDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return GitStatus
+//
+//	@return GitStatus
+//
 // Deprecated
 func (a *ToolboxAPIService) GitGetStatusDeprecatedExecute(r ToolboxAPIGitGetStatusDeprecatedRequest) (*GitStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GitStatus
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GitStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitGetStatusDeprecated")
@@ -5596,10 +5647,10 @@ func (a *ToolboxAPIService) GitGetStatusDeprecatedExecute(r ToolboxAPIGitGetStat
 }
 
 type ToolboxAPIGitListBranchesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -5623,29 +5674,31 @@ GitListBranchesDeprecated [DEPRECATED] Get branch list
 
 Get branch list from git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitListBranchesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitListBranchesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitListBranchesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitListBranchesDeprecatedRequest {
 	return ToolboxAPIGitListBranchesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ListBranchResponse
+//
+//	@return ListBranchResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) GitListBranchesDeprecatedExecute(r ToolboxAPIGitListBranchesDeprecatedRequest) (*ListBranchResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ListBranchResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListBranchResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitListBranchesDeprecated")
@@ -5722,10 +5775,10 @@ func (a *ToolboxAPIService) GitListBranchesDeprecatedExecute(r ToolboxAPIGitList
 }
 
 type ToolboxAPIGitPullChangesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitRepoRequest *GitRepoRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitRepoRequest         *GitRepoRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5749,17 +5802,17 @@ GitPullChangesDeprecated [DEPRECATED] Pull changes
 
 Pull changes from remote
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitPullChangesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitPullChangesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitPullChangesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitPullChangesDeprecatedRequest {
 	return ToolboxAPIGitPullChangesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -5767,9 +5820,9 @@ func (a *ToolboxAPIService) GitPullChangesDeprecated(ctx context.Context, sandbo
 // Deprecated
 func (a *ToolboxAPIService) GitPullChangesDeprecatedExecute(r ToolboxAPIGitPullChangesDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitPullChangesDeprecated")
@@ -5838,10 +5891,10 @@ func (a *ToolboxAPIService) GitPullChangesDeprecatedExecute(r ToolboxAPIGitPullC
 }
 
 type ToolboxAPIGitPushChangesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitRepoRequest *GitRepoRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitRepoRequest         *GitRepoRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5865,17 +5918,17 @@ GitPushChangesDeprecated [DEPRECATED] Push changes
 
 Push changes to remote
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitPushChangesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitPushChangesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) GitPushChangesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIGitPushChangesDeprecatedRequest {
 	return ToolboxAPIGitPushChangesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -5883,9 +5936,9 @@ func (a *ToolboxAPIService) GitPushChangesDeprecated(ctx context.Context, sandbo
 // Deprecated
 func (a *ToolboxAPIService) GitPushChangesDeprecatedExecute(r ToolboxAPIGitPushChangesDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitPushChangesDeprecated")
@@ -5954,11 +6007,11 @@ func (a *ToolboxAPIService) GitPushChangesDeprecatedExecute(r ToolboxAPIGitPushC
 }
 
 type ToolboxAPIListFilesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
-	path *string
+	path                   *string
 }
 
 // Use with JWT to specify the organization ID
@@ -5979,29 +6032,31 @@ func (r ToolboxAPIListFilesDeprecatedRequest) Execute() ([]FileInfo, *http.Respo
 /*
 ListFilesDeprecated [DEPRECATED] List files
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIListFilesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIListFilesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ListFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIListFilesDeprecatedRequest {
 	return ToolboxAPIListFilesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []FileInfo
+//
+//	@return []FileInfo
+//
 // Deprecated
 func (a *ToolboxAPIService) ListFilesDeprecatedExecute(r ToolboxAPIListFilesDeprecatedRequest) ([]FileInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []FileInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []FileInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ListFilesDeprecated")
@@ -6077,9 +6132,9 @@ func (a *ToolboxAPIService) ListFilesDeprecatedExecute(r ToolboxAPIListFilesDepr
 }
 
 type ToolboxAPIListPTYSessionsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -6098,29 +6153,31 @@ ListPTYSessionsDeprecated [DEPRECATED] List PTY sessions
 
 List all active PTY sessions in the sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIListPTYSessionsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIListPTYSessionsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ListPTYSessionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPIListPTYSessionsDeprecatedRequest {
 	return ToolboxAPIListPTYSessionsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return PtyListResponse
+//
+//	@return PtyListResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) ListPTYSessionsDeprecatedExecute(r ToolboxAPIListPTYSessionsDeprecatedRequest) (*PtyListResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PtyListResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtyListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ListPTYSessionsDeprecated")
@@ -6193,9 +6250,9 @@ func (a *ToolboxAPIService) ListPTYSessionsDeprecatedExecute(r ToolboxAPIListPTY
 }
 
 type ToolboxAPIListSessionsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -6214,29 +6271,31 @@ ListSessionsDeprecated [DEPRECATED] List sessions
 
 List all active sessions in the sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIListSessionsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIListSessionsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ListSessionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPIListSessionsDeprecatedRequest {
 	return ToolboxAPIListSessionsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []Session
+//
+//	@return []Session
+//
 // Deprecated
 func (a *ToolboxAPIService) ListSessionsDeprecatedExecute(r ToolboxAPIListSessionsDeprecatedRequest) ([]Session, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Session
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Session
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ListSessionsDeprecated")
@@ -6309,10 +6368,10 @@ func (a *ToolboxAPIService) ListSessionsDeprecatedExecute(r ToolboxAPIListSessio
 }
 
 type ToolboxAPILspCompletionsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspCompletionParams *LspCompletionParams
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspCompletionParams    *LspCompletionParams
 	xDaytonaOrganizationID *string
 }
 
@@ -6336,29 +6395,31 @@ LspCompletionsDeprecated [DEPRECATED] Get Lsp Completions
 
 The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspCompletionsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspCompletionsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) LspCompletionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspCompletionsDeprecatedRequest {
 	return ToolboxAPILspCompletionsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return CompletionList
+//
+//	@return CompletionList
+//
 // Deprecated
 func (a *ToolboxAPIService) LspCompletionsDeprecatedExecute(r ToolboxAPILspCompletionsDeprecatedRequest) (*CompletionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CompletionList
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CompletionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspCompletionsDeprecated")
@@ -6436,10 +6497,10 @@ func (a *ToolboxAPIService) LspCompletionsDeprecatedExecute(r ToolboxAPILspCompl
 }
 
 type ToolboxAPILspDidCloseDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspDocumentRequest *LspDocumentRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspDocumentRequest     *LspDocumentRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6463,17 +6524,17 @@ LspDidCloseDeprecated [DEPRECATED] Call Lsp DidClose
 
 The document close notification is sent from the client to the server when the document got closed in the client.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspDidCloseDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspDidCloseDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) LspDidCloseDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspDidCloseDeprecatedRequest {
 	return ToolboxAPILspDidCloseDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -6481,9 +6542,9 @@ func (a *ToolboxAPIService) LspDidCloseDeprecated(ctx context.Context, sandboxId
 // Deprecated
 func (a *ToolboxAPIService) LspDidCloseDeprecatedExecute(r ToolboxAPILspDidCloseDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspDidCloseDeprecated")
@@ -6552,10 +6613,10 @@ func (a *ToolboxAPIService) LspDidCloseDeprecatedExecute(r ToolboxAPILspDidClose
 }
 
 type ToolboxAPILspDidOpenDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspDocumentRequest *LspDocumentRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspDocumentRequest     *LspDocumentRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6579,17 +6640,17 @@ LspDidOpenDeprecated [DEPRECATED] Call Lsp DidOpen
 
 The document open notification is sent from the client to the server to signal newly opened text documents.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspDidOpenDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspDidOpenDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) LspDidOpenDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspDidOpenDeprecatedRequest {
 	return ToolboxAPILspDidOpenDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -6597,9 +6658,9 @@ func (a *ToolboxAPIService) LspDidOpenDeprecated(ctx context.Context, sandboxId 
 // Deprecated
 func (a *ToolboxAPIService) LspDidOpenDeprecatedExecute(r ToolboxAPILspDidOpenDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspDidOpenDeprecated")
@@ -6668,12 +6729,12 @@ func (a *ToolboxAPIService) LspDidOpenDeprecatedExecute(r ToolboxAPILspDidOpenDe
 }
 
 type ToolboxAPILspDocumentSymbolsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	languageId *string
-	pathToProject *string
-	uri *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	languageId             *string
+	pathToProject          *string
+	uri                    *string
 	xDaytonaOrganizationID *string
 }
 
@@ -6707,29 +6768,31 @@ LspDocumentSymbolsDeprecated [DEPRECATED] Call Lsp DocumentSymbols
 
 The document symbol request is sent from the client to the server.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspDocumentSymbolsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspDocumentSymbolsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) LspDocumentSymbolsDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspDocumentSymbolsDeprecatedRequest {
 	return ToolboxAPILspDocumentSymbolsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []LspSymbol
+//
+//	@return []LspSymbol
+//
 // Deprecated
 func (a *ToolboxAPIService) LspDocumentSymbolsDeprecatedExecute(r ToolboxAPILspDocumentSymbolsDeprecatedRequest) ([]LspSymbol, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []LspSymbol
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []LspSymbol
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspDocumentSymbolsDeprecated")
@@ -6814,10 +6877,10 @@ func (a *ToolboxAPIService) LspDocumentSymbolsDeprecatedExecute(r ToolboxAPILspD
 }
 
 type ToolboxAPILspStartDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspServerRequest *LspServerRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspServerRequest       *LspServerRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6841,17 +6904,17 @@ LspStartDeprecated [DEPRECATED] Start Lsp server
 
 Start Lsp server process inside sandbox project
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspStartDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspStartDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) LspStartDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspStartDeprecatedRequest {
 	return ToolboxAPILspStartDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -6859,9 +6922,9 @@ func (a *ToolboxAPIService) LspStartDeprecated(ctx context.Context, sandboxId st
 // Deprecated
 func (a *ToolboxAPIService) LspStartDeprecatedExecute(r ToolboxAPILspStartDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspStartDeprecated")
@@ -6930,10 +6993,10 @@ func (a *ToolboxAPIService) LspStartDeprecatedExecute(r ToolboxAPILspStartDeprec
 }
 
 type ToolboxAPILspStopDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspServerRequest *LspServerRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspServerRequest       *LspServerRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6957,17 +7020,17 @@ LspStopDeprecated [DEPRECATED] Stop Lsp server
 
 Stop Lsp server process inside sandbox project
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspStopDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspStopDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) LspStopDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspStopDeprecatedRequest {
 	return ToolboxAPILspStopDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -6975,9 +7038,9 @@ func (a *ToolboxAPIService) LspStopDeprecated(ctx context.Context, sandboxId str
 // Deprecated
 func (a *ToolboxAPIService) LspStopDeprecatedExecute(r ToolboxAPILspStopDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspStopDeprecated")
@@ -7046,12 +7109,12 @@ func (a *ToolboxAPIService) LspStopDeprecatedExecute(r ToolboxAPILspStopDeprecat
 }
 
 type ToolboxAPILspWorkspaceSymbolsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	languageId *string
-	pathToProject *string
-	query *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	languageId             *string
+	pathToProject          *string
+	query                  *string
 	xDaytonaOrganizationID *string
 }
 
@@ -7085,29 +7148,31 @@ LspWorkspaceSymbolsDeprecated [DEPRECATED] Call Lsp WorkspaceSymbols
 
 The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspWorkspaceSymbolsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspWorkspaceSymbolsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) LspWorkspaceSymbolsDeprecated(ctx context.Context, sandboxId string) ToolboxAPILspWorkspaceSymbolsDeprecatedRequest {
 	return ToolboxAPILspWorkspaceSymbolsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []LspSymbol
+//
+//	@return []LspSymbol
+//
 // Deprecated
 func (a *ToolboxAPIService) LspWorkspaceSymbolsDeprecatedExecute(r ToolboxAPILspWorkspaceSymbolsDeprecatedRequest) ([]LspSymbol, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []LspSymbol
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []LspSymbol
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspWorkspaceSymbolsDeprecated")
@@ -7192,11 +7257,11 @@ func (a *ToolboxAPIService) LspWorkspaceSymbolsDeprecatedExecute(r ToolboxAPILsp
 }
 
 type ToolboxAPIMoveFileDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	source *string
-	destination *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	source                 *string
+	destination            *string
 	xDaytonaOrganizationID *string
 }
 
@@ -7225,17 +7290,17 @@ MoveFileDeprecated [DEPRECATED] Move file
 
 Move file inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIMoveFileDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIMoveFileDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) MoveFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIMoveFileDeprecatedRequest {
 	return ToolboxAPIMoveFileDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -7243,9 +7308,9 @@ func (a *ToolboxAPIService) MoveFileDeprecated(ctx context.Context, sandboxId st
 // Deprecated
 func (a *ToolboxAPIService) MoveFileDeprecatedExecute(r ToolboxAPIMoveFileDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.MoveFileDeprecated")
@@ -7317,10 +7382,10 @@ func (a *ToolboxAPIService) MoveFileDeprecatedExecute(r ToolboxAPIMoveFileDeprec
 }
 
 type ToolboxAPIMoveMouseDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseMoveRequest *MouseMoveRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseMoveRequest       *MouseMoveRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -7344,29 +7409,31 @@ MoveMouseDeprecated [DEPRECATED] Move mouse
 
 Move mouse cursor to specified coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIMoveMouseDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIMoveMouseDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) MoveMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIMoveMouseDeprecatedRequest {
 	return ToolboxAPIMoveMouseDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MouseMoveResponse
+//
+//	@return MouseMoveResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) MoveMouseDeprecatedExecute(r ToolboxAPIMoveMouseDeprecatedRequest) (*MouseMoveResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MouseMoveResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MouseMoveResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.MoveMouseDeprecated")
@@ -7444,10 +7511,10 @@ func (a *ToolboxAPIService) MoveMouseDeprecatedExecute(r ToolboxAPIMoveMouseDepr
 }
 
 type ToolboxAPIPressHotkeyDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	keyboardHotkeyRequest *KeyboardHotkeyRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	keyboardHotkeyRequest  *KeyboardHotkeyRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -7471,17 +7538,17 @@ PressHotkeyDeprecated [DEPRECATED] Press hotkey
 
 Press a hotkey combination
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIPressHotkeyDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIPressHotkeyDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) PressHotkeyDeprecated(ctx context.Context, sandboxId string) ToolboxAPIPressHotkeyDeprecatedRequest {
 	return ToolboxAPIPressHotkeyDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -7489,9 +7556,9 @@ func (a *ToolboxAPIService) PressHotkeyDeprecated(ctx context.Context, sandboxId
 // Deprecated
 func (a *ToolboxAPIService) PressHotkeyDeprecatedExecute(r ToolboxAPIPressHotkeyDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.PressHotkeyDeprecated")
@@ -7560,10 +7627,10 @@ func (a *ToolboxAPIService) PressHotkeyDeprecatedExecute(r ToolboxAPIPressHotkey
 }
 
 type ToolboxAPIPressKeyDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	keyboardPressRequest *KeyboardPressRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	keyboardPressRequest   *KeyboardPressRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -7587,17 +7654,17 @@ PressKeyDeprecated [DEPRECATED] Press key
 
 Press a key with optional modifiers
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIPressKeyDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIPressKeyDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) PressKeyDeprecated(ctx context.Context, sandboxId string) ToolboxAPIPressKeyDeprecatedRequest {
 	return ToolboxAPIPressKeyDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -7605,9 +7672,9 @@ func (a *ToolboxAPIService) PressKeyDeprecated(ctx context.Context, sandboxId st
 // Deprecated
 func (a *ToolboxAPIService) PressKeyDeprecatedExecute(r ToolboxAPIPressKeyDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.PressKeyDeprecated")
@@ -7676,10 +7743,10 @@ func (a *ToolboxAPIService) PressKeyDeprecatedExecute(r ToolboxAPIPressKeyDeprec
 }
 
 type ToolboxAPIReplaceInFilesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	replaceRequest *ReplaceRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	replaceRequest         *ReplaceRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -7703,29 +7770,31 @@ ReplaceInFilesDeprecated [DEPRECATED] Replace in files
 
 Replace text/pattern in multiple files inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIReplaceInFilesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIReplaceInFilesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ReplaceInFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIReplaceInFilesDeprecatedRequest {
 	return ToolboxAPIReplaceInFilesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []ReplaceResult
+//
+//	@return []ReplaceResult
+//
 // Deprecated
 func (a *ToolboxAPIService) ReplaceInFilesDeprecatedExecute(r ToolboxAPIReplaceInFilesDeprecatedRequest) ([]ReplaceResult, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ReplaceResult
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ReplaceResult
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ReplaceInFilesDeprecated")
@@ -7803,11 +7872,11 @@ func (a *ToolboxAPIService) ReplaceInFilesDeprecatedExecute(r ToolboxAPIReplaceI
 }
 
 type ToolboxAPIResizePTYSessionDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
-	ptyResizeRequest *PtyResizeRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	ptyResizeRequest       *PtyResizeRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -7831,31 +7900,33 @@ ResizePTYSessionDeprecated [DEPRECATED] Resize PTY session
 
 Resize a PTY session
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIResizePTYSessionDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIResizePTYSessionDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ResizePTYSessionDeprecated(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIResizePTYSessionDeprecatedRequest {
 	return ToolboxAPIResizePTYSessionDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
 // Execute executes the request
-//  @return PtySessionInfo
+//
+//	@return PtySessionInfo
+//
 // Deprecated
 func (a *ToolboxAPIService) ResizePTYSessionDeprecatedExecute(r ToolboxAPIResizePTYSessionDeprecatedRequest) (*PtySessionInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *PtySessionInfo
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtySessionInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ResizePTYSessionDeprecated")
@@ -7934,10 +8005,10 @@ func (a *ToolboxAPIService) ResizePTYSessionDeprecatedExecute(r ToolboxAPIResize
 }
 
 type ToolboxAPIRestartProcessDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -7956,31 +8027,33 @@ RestartProcessDeprecated [DEPRECATED] Restart process
 
 Restart a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIRestartProcessDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIRestartProcessDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) RestartProcessDeprecated(ctx context.Context, processName string, sandboxId string) ToolboxAPIRestartProcessDeprecatedRequest {
 	return ToolboxAPIRestartProcessDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessRestartResponse
+//
+//	@return ProcessRestartResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) RestartProcessDeprecatedExecute(r ToolboxAPIRestartProcessDeprecatedRequest) (*ProcessRestartResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessRestartResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessRestartResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.RestartProcessDeprecated")
@@ -8054,10 +8127,10 @@ func (a *ToolboxAPIService) RestartProcessDeprecatedExecute(r ToolboxAPIRestartP
 }
 
 type ToolboxAPIScrollMouseDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseScrollRequest *MouseScrollRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseScrollRequest     *MouseScrollRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -8081,29 +8154,31 @@ ScrollMouseDeprecated [DEPRECATED] Scroll mouse
 
 Scroll mouse at specified coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIScrollMouseDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIScrollMouseDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) ScrollMouseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIScrollMouseDeprecatedRequest {
 	return ToolboxAPIScrollMouseDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MouseScrollResponse
+//
+//	@return MouseScrollResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) ScrollMouseDeprecatedExecute(r ToolboxAPIScrollMouseDeprecatedRequest) (*MouseScrollResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MouseScrollResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MouseScrollResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ScrollMouseDeprecated")
@@ -8181,11 +8256,11 @@ func (a *ToolboxAPIService) ScrollMouseDeprecatedExecute(r ToolboxAPIScrollMouse
 }
 
 type ToolboxAPISearchFilesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
-	pattern *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
+	pattern                *string
 	xDaytonaOrganizationID *string
 }
 
@@ -8214,29 +8289,31 @@ SearchFilesDeprecated [DEPRECATED] Search files
 
 Search for files inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPISearchFilesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPISearchFilesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) SearchFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPISearchFilesDeprecatedRequest {
 	return ToolboxAPISearchFilesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return SearchFilesResponse
+//
+//	@return SearchFilesResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) SearchFilesDeprecatedExecute(r ToolboxAPISearchFilesDeprecatedRequest) (*SearchFilesResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SearchFilesResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SearchFilesResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.SearchFilesDeprecated")
@@ -8317,14 +8394,14 @@ func (a *ToolboxAPIService) SearchFilesDeprecatedExecute(r ToolboxAPISearchFiles
 }
 
 type ToolboxAPISetFilePermissionsDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
-	owner *string
-	group *string
-	mode *string
+	owner                  *string
+	group                  *string
+	mode                   *string
 }
 
 func (r ToolboxAPISetFilePermissionsDeprecatedRequest) Path(path string) ToolboxAPISetFilePermissionsDeprecatedRequest {
@@ -8362,17 +8439,17 @@ SetFilePermissionsDeprecated [DEPRECATED] Set file permissions
 
 Set file owner/group/permissions inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPISetFilePermissionsDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPISetFilePermissionsDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) SetFilePermissionsDeprecated(ctx context.Context, sandboxId string) ToolboxAPISetFilePermissionsDeprecatedRequest {
 	return ToolboxAPISetFilePermissionsDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -8380,9 +8457,9 @@ func (a *ToolboxAPIService) SetFilePermissionsDeprecated(ctx context.Context, sa
 // Deprecated
 func (a *ToolboxAPIService) SetFilePermissionsDeprecatedExecute(r ToolboxAPISetFilePermissionsDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.SetFilePermissionsDeprecated")
@@ -8459,9 +8536,9 @@ func (a *ToolboxAPIService) SetFilePermissionsDeprecatedExecute(r ToolboxAPISetF
 }
 
 type ToolboxAPIStartComputerUseDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -8480,29 +8557,31 @@ StartComputerUseDeprecated [DEPRECATED] Start computer use processes
 
 Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIStartComputerUseDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIStartComputerUseDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) StartComputerUseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIStartComputerUseDeprecatedRequest {
 	return ToolboxAPIStartComputerUseDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ComputerUseStartResponse
+//
+//	@return ComputerUseStartResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) StartComputerUseDeprecatedExecute(r ToolboxAPIStartComputerUseDeprecatedRequest) (*ComputerUseStartResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComputerUseStartResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComputerUseStartResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.StartComputerUseDeprecated")
@@ -8575,9 +8654,9 @@ func (a *ToolboxAPIService) StartComputerUseDeprecatedExecute(r ToolboxAPIStartC
 }
 
 type ToolboxAPIStopComputerUseDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -8596,29 +8675,31 @@ StopComputerUseDeprecated [DEPRECATED] Stop computer use processes
 
 Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIStopComputerUseDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIStopComputerUseDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) StopComputerUseDeprecated(ctx context.Context, sandboxId string) ToolboxAPIStopComputerUseDeprecatedRequest {
 	return ToolboxAPIStopComputerUseDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ComputerUseStopResponse
+//
+//	@return ComputerUseStopResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) StopComputerUseDeprecatedExecute(r ToolboxAPIStopComputerUseDeprecatedRequest) (*ComputerUseStopResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComputerUseStopResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComputerUseStopResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.StopComputerUseDeprecated")
@@ -8691,18 +8772,18 @@ func (a *ToolboxAPIService) StopComputerUseDeprecatedExecute(r ToolboxAPIStopCom
 }
 
 type ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	height *float32
-	width *float32
-	y *float32
-	x *float32
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	height                 *float32
+	width                  *float32
+	y                      *float32
+	x                      *float32
 	xDaytonaOrganizationID *string
-	scale *float32
-	quality *float32
-	format *string
-	showCursor *bool
+	scale                  *float32
+	quality                *float32
+	format                 *string
+	showCursor             *bool
 }
 
 func (r ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest) Height(height float32) ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest {
@@ -8760,29 +8841,31 @@ TakeCompressedRegionScreenshotDeprecated [DEPRECATED] Take compressed region scr
 
 Take a compressed screenshot of a specific region
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) TakeCompressedRegionScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest {
 	return ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return CompressedScreenshotResponse
+//
+//	@return CompressedScreenshotResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) TakeCompressedRegionScreenshotDeprecatedExecute(r ToolboxAPITakeCompressedRegionScreenshotDeprecatedRequest) (*CompressedScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CompressedScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CompressedScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeCompressedRegionScreenshotDeprecated")
@@ -8883,14 +8966,14 @@ func (a *ToolboxAPIService) TakeCompressedRegionScreenshotDeprecatedExecute(r To
 }
 
 type ToolboxAPITakeCompressedScreenshotDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
-	scale *float32
-	quality *float32
-	format *string
-	showCursor *bool
+	scale                  *float32
+	quality                *float32
+	format                 *string
+	showCursor             *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -8928,29 +9011,31 @@ TakeCompressedScreenshotDeprecated [DEPRECATED] Take compressed screenshot
 
 Take a compressed screenshot with format, quality, and scale options
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeCompressedScreenshotDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeCompressedScreenshotDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) TakeCompressedScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedScreenshotDeprecatedRequest {
 	return ToolboxAPITakeCompressedScreenshotDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return CompressedScreenshotResponse
+//
+//	@return CompressedScreenshotResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) TakeCompressedScreenshotDeprecatedExecute(r ToolboxAPITakeCompressedScreenshotDeprecatedRequest) (*CompressedScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CompressedScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CompressedScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeCompressedScreenshotDeprecated")
@@ -9035,15 +9120,15 @@ func (a *ToolboxAPIService) TakeCompressedScreenshotDeprecatedExecute(r ToolboxA
 }
 
 type ToolboxAPITakeRegionScreenshotDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	height *float32
-	width *float32
-	y *float32
-	x *float32
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	height                 *float32
+	width                  *float32
+	y                      *float32
+	x                      *float32
 	xDaytonaOrganizationID *string
-	showCursor *bool
+	showCursor             *bool
 }
 
 func (r ToolboxAPITakeRegionScreenshotDeprecatedRequest) Height(height float32) ToolboxAPITakeRegionScreenshotDeprecatedRequest {
@@ -9086,29 +9171,31 @@ TakeRegionScreenshotDeprecated [DEPRECATED] Take region screenshot
 
 Take a screenshot of a specific region
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeRegionScreenshotDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeRegionScreenshotDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) TakeRegionScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeRegionScreenshotDeprecatedRequest {
 	return ToolboxAPITakeRegionScreenshotDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return RegionScreenshotResponse
+//
+//	@return RegionScreenshotResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) TakeRegionScreenshotDeprecatedExecute(r ToolboxAPITakeRegionScreenshotDeprecatedRequest) (*RegionScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *RegionScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RegionScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeRegionScreenshotDeprecated")
@@ -9200,11 +9287,11 @@ func (a *ToolboxAPIService) TakeRegionScreenshotDeprecatedExecute(r ToolboxAPITa
 }
 
 type ToolboxAPITakeScreenshotDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
-	showCursor *bool
+	showCursor             *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -9227,29 +9314,31 @@ TakeScreenshotDeprecated [DEPRECATED] Take screenshot
 
 Take a screenshot of the entire screen
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeScreenshotDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeScreenshotDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) TakeScreenshotDeprecated(ctx context.Context, sandboxId string) ToolboxAPITakeScreenshotDeprecatedRequest {
 	return ToolboxAPITakeScreenshotDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ScreenshotResponse
+//
+//	@return ScreenshotResponse
+//
 // Deprecated
 func (a *ToolboxAPIService) TakeScreenshotDeprecatedExecute(r ToolboxAPITakeScreenshotDeprecatedRequest) (*ScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeScreenshotDeprecated")
@@ -9325,10 +9414,10 @@ func (a *ToolboxAPIService) TakeScreenshotDeprecatedExecute(r ToolboxAPITakeScre
 }
 
 type ToolboxAPITypeTextDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	keyboardTypeRequest *KeyboardTypeRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	keyboardTypeRequest    *KeyboardTypeRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -9352,17 +9441,17 @@ TypeTextDeprecated [DEPRECATED] Type text
 
 Type text using keyboard
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITypeTextDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITypeTextDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) TypeTextDeprecated(ctx context.Context, sandboxId string) ToolboxAPITypeTextDeprecatedRequest {
 	return ToolboxAPITypeTextDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -9370,9 +9459,9 @@ func (a *ToolboxAPIService) TypeTextDeprecated(ctx context.Context, sandboxId st
 // Deprecated
 func (a *ToolboxAPIService) TypeTextDeprecatedExecute(r ToolboxAPITypeTextDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TypeTextDeprecated")
@@ -9441,12 +9530,12 @@ func (a *ToolboxAPIService) TypeTextDeprecatedExecute(r ToolboxAPITypeTextDeprec
 }
 
 type ToolboxAPIUploadFileDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
-	file *os.File
+	file                   *os.File
 }
 
 func (r ToolboxAPIUploadFileDeprecatedRequest) Path(path string) ToolboxAPIUploadFileDeprecatedRequest {
@@ -9474,17 +9563,17 @@ UploadFileDeprecated [DEPRECATED] Upload file
 
 Upload file inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIUploadFileDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIUploadFileDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) UploadFileDeprecated(ctx context.Context, sandboxId string) ToolboxAPIUploadFileDeprecatedRequest {
 	return ToolboxAPIUploadFileDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -9492,9 +9581,9 @@ func (a *ToolboxAPIService) UploadFileDeprecated(ctx context.Context, sandboxId 
 // Deprecated
 func (a *ToolboxAPIService) UploadFileDeprecatedExecute(r ToolboxAPIUploadFileDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.UploadFileDeprecated")
@@ -9534,8 +9623,8 @@ func (a *ToolboxAPIService) UploadFileDeprecatedExecute(r ToolboxAPIUploadFileDe
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	var fileLocalVarFormFileName string
-	var fileLocalVarFileName     string
-	var fileLocalVarFileBytes    []byte
+	var fileLocalVarFileName string
+	var fileLocalVarFileBytes []byte
 
 	fileLocalVarFormFileName = "file"
 	fileLocalVarFile := r.file
@@ -9577,9 +9666,9 @@ func (a *ToolboxAPIService) UploadFileDeprecatedExecute(r ToolboxAPIUploadFileDe
 }
 
 type ToolboxAPIUploadFilesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -9598,17 +9687,17 @@ UploadFilesDeprecated [DEPRECATED] Upload multiple files
 
 Upload multiple files inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIUploadFilesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIUploadFilesDeprecatedRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) UploadFilesDeprecated(ctx context.Context, sandboxId string) ToolboxAPIUploadFilesDeprecatedRequest {
 	return ToolboxAPIUploadFilesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -9616,9 +9705,9 @@ func (a *ToolboxAPIService) UploadFilesDeprecated(ctx context.Context, sandboxId
 // Deprecated
 func (a *ToolboxAPIService) UploadFilesDeprecatedExecute(r ToolboxAPIUploadFilesDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.UploadFilesDeprecated")

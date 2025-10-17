@@ -21,18 +21,18 @@ type DiskState string
 
 // List of DiskState
 const (
-	DISKSTATE_FRESH DiskState = "fresh"
-	DISKSTATE_PULLING DiskState = "pulling"
-	DISKSTATE_READY DiskState = "ready"
-	DISKSTATE_ATTACHED DiskState = "attached"
-	DISKSTATE_DETACHED DiskState = "detached"
-	DISKSTATE_PENDING_PUSH DiskState = "pending_push"
-	DISKSTATE_PUSHING DiskState = "pushing"
-	DISKSTATE_STORED DiskState = "stored"
+	DISKSTATE_FRESH          DiskState = "fresh"
+	DISKSTATE_PULLING        DiskState = "pulling"
+	DISKSTATE_READY          DiskState = "ready"
+	DISKSTATE_ATTACHED       DiskState = "attached"
+	DISKSTATE_DETACHED       DiskState = "detached"
+	DISKSTATE_PENDING_PUSH   DiskState = "pending_push"
+	DISKSTATE_PUSHING        DiskState = "pushing"
+	DISKSTATE_STORED         DiskState = "stored"
 	DISKSTATE_PENDING_DELETE DiskState = "pending_delete"
-	DISKSTATE_DELETING DiskState = "deleting"
-	DISKSTATE_DELETED DiskState = "deleted"
-	DISKSTATE_ERROR DiskState = "error"
+	DISKSTATE_DELETING       DiskState = "deleting"
+	DISKSTATE_DELETED        DiskState = "deleted"
+	DISKSTATE_ERROR          DiskState = "error"
 )
 
 // All allowed values of DiskState enum
@@ -129,4 +129,3 @@ func (v *NullableDiskState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

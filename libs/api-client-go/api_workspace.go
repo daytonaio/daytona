@@ -20,17 +20,16 @@ import (
 	"strings"
 )
 
-
 type WorkspaceAPI interface {
 
 	/*
-	ArchiveWorkspaceDeprecated [DEPRECATED] Archive workspace
+		ArchiveWorkspaceDeprecated [DEPRECATED] Archive workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId
-	@return WorkspaceAPIArchiveWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId
+		@return WorkspaceAPIArchiveWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ArchiveWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIArchiveWorkspaceDeprecatedRequest
 
@@ -39,13 +38,13 @@ type WorkspaceAPI interface {
 	ArchiveWorkspaceDeprecatedExecute(r WorkspaceAPIArchiveWorkspaceDeprecatedRequest) (*http.Response, error)
 
 	/*
-	CreateBackupWorkspaceDeprecated [DEPRECATED] Create workspace backup
+		CreateBackupWorkspaceDeprecated [DEPRECATED] Create workspace backup
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPICreateBackupWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPICreateBackupWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreateBackupWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPICreateBackupWorkspaceDeprecatedRequest
 
@@ -55,12 +54,12 @@ type WorkspaceAPI interface {
 	CreateBackupWorkspaceDeprecatedExecute(r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error)
 
 	/*
-	CreateWorkspaceDeprecated [DEPRECATED] Create a new workspace
+		CreateWorkspaceDeprecated [DEPRECATED] Create a new workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkspaceAPICreateWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkspaceAPICreateWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	CreateWorkspaceDeprecated(ctx context.Context) WorkspaceAPICreateWorkspaceDeprecatedRequest
 
@@ -70,13 +69,13 @@ type WorkspaceAPI interface {
 	CreateWorkspaceDeprecatedExecute(r WorkspaceAPICreateWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error)
 
 	/*
-	DeleteWorkspaceDeprecated [DEPRECATED] Delete workspace
+		DeleteWorkspaceDeprecated [DEPRECATED] Delete workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPIDeleteWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPIDeleteWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	DeleteWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIDeleteWorkspaceDeprecatedRequest
 
@@ -85,13 +84,13 @@ type WorkspaceAPI interface {
 	DeleteWorkspaceDeprecatedExecute(r WorkspaceAPIDeleteWorkspaceDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GetBuildLogsWorkspaceDeprecated [DEPRECATED] Get build logs
+		GetBuildLogsWorkspaceDeprecated [DEPRECATED] Get build logs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetBuildLogsWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest
 
@@ -100,14 +99,14 @@ type WorkspaceAPI interface {
 	GetBuildLogsWorkspaceDeprecatedExecute(r WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest) (*http.Response, error)
 
 	/*
-	GetPortPreviewUrlWorkspaceDeprecated [DEPRECATED] Get preview URL for a workspace port
+		GetPortPreviewUrlWorkspaceDeprecated [DEPRECATED] Get preview URL for a workspace port
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@param port Port number to get preview URL for
-	@return WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@param port Port number to get preview URL for
+		@return WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetPortPreviewUrlWorkspaceDeprecated(ctx context.Context, workspaceId string, port float32) WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest
 
@@ -117,13 +116,13 @@ type WorkspaceAPI interface {
 	GetPortPreviewUrlWorkspaceDeprecatedExecute(r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) (*WorkspacePortPreviewUrl, *http.Response, error)
 
 	/*
-	GetWorkspaceDeprecated [DEPRECATED] Get workspace details
+		GetWorkspaceDeprecated [DEPRECATED] Get workspace details
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPIGetWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPIGetWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	GetWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIGetWorkspaceDeprecatedRequest
 
@@ -133,12 +132,12 @@ type WorkspaceAPI interface {
 	GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error)
 
 	/*
-	ListWorkspacesDeprecated [DEPRECATED] List all workspaces
+		ListWorkspacesDeprecated [DEPRECATED] List all workspaces
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return WorkspaceAPIListWorkspacesDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return WorkspaceAPIListWorkspacesDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ListWorkspacesDeprecated(ctx context.Context) WorkspaceAPIListWorkspacesDeprecatedRequest
 
@@ -148,13 +147,13 @@ type WorkspaceAPI interface {
 	ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error)
 
 	/*
-	ReplaceLabelsWorkspaceDeprecated [DEPRECATED] Replace workspace labels
+		ReplaceLabelsWorkspaceDeprecated [DEPRECATED] Replace workspace labels
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	ReplaceLabelsWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest
 
@@ -164,14 +163,14 @@ type WorkspaceAPI interface {
 	ReplaceLabelsWorkspaceDeprecatedExecute(r WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest) (*SandboxLabels, *http.Response, error)
 
 	/*
-	SetAutoArchiveIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-archive interval
+		SetAutoArchiveIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-archive interval
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
-	@return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+		@return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	SetAutoArchiveIntervalWorkspaceDeprecated(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
 
@@ -180,14 +179,14 @@ type WorkspaceAPI interface {
 	SetAutoArchiveIntervalWorkspaceDeprecatedExecute(r WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest) (*http.Response, error)
 
 	/*
-	SetAutostopIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-stop interval
+		SetAutostopIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-stop interval
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@param interval Auto-stop interval in minutes (0 to disable)
-	@return WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@param interval Auto-stop interval in minutes (0 to disable)
+		@return WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	SetAutostopIntervalWorkspaceDeprecated(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest
 
@@ -196,13 +195,13 @@ type WorkspaceAPI interface {
 	SetAutostopIntervalWorkspaceDeprecatedExecute(r WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest) (*http.Response, error)
 
 	/*
-	StartWorkspaceDeprecated [DEPRECATED] Start workspace
+		StartWorkspaceDeprecated [DEPRECATED] Start workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPIStartWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPIStartWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	StartWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIStartWorkspaceDeprecatedRequest
 
@@ -211,13 +210,13 @@ type WorkspaceAPI interface {
 	StartWorkspaceDeprecatedExecute(r WorkspaceAPIStartWorkspaceDeprecatedRequest) (*http.Response, error)
 
 	/*
-	StopWorkspaceDeprecated [DEPRECATED] Stop workspace
+		StopWorkspaceDeprecated [DEPRECATED] Stop workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPIStopWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPIStopWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	StopWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIStopWorkspaceDeprecatedRequest
 
@@ -226,14 +225,14 @@ type WorkspaceAPI interface {
 	StopWorkspaceDeprecatedExecute(r WorkspaceAPIStopWorkspaceDeprecatedRequest) (*http.Response, error)
 
 	/*
-	UpdatePublicStatusWorkspaceDeprecated [DEPRECATED] Update public status
+		UpdatePublicStatusWorkspaceDeprecated [DEPRECATED] Update public status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@param isPublic Public status to set
-	@return WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@param isPublic Public status to set
+		@return WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UpdatePublicStatusWorkspaceDeprecated(ctx context.Context, workspaceId string, isPublic bool) WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest
 
@@ -246,9 +245,9 @@ type WorkspaceAPI interface {
 type WorkspaceAPIService service
 
 type WorkspaceAPIArchiveWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
 	xDaytonaOrganizationID *string
 }
 
@@ -265,16 +264,16 @@ func (r WorkspaceAPIArchiveWorkspaceDeprecatedRequest) Execute() (*http.Response
 /*
 ArchiveWorkspaceDeprecated [DEPRECATED] Archive workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId
- @return WorkspaceAPIArchiveWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId
+	@return WorkspaceAPIArchiveWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) ArchiveWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIArchiveWorkspaceDeprecatedRequest {
 	return WorkspaceAPIArchiveWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
@@ -283,9 +282,9 @@ func (a *WorkspaceAPIService) ArchiveWorkspaceDeprecated(ctx context.Context, wo
 // Deprecated
 func (a *WorkspaceAPIService) ArchiveWorkspaceDeprecatedExecute(r WorkspaceAPIArchiveWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ArchiveWorkspaceDeprecated")
@@ -349,9 +348,9 @@ func (a *WorkspaceAPIService) ArchiveWorkspaceDeprecatedExecute(r WorkspaceAPIAr
 }
 
 type WorkspaceAPICreateBackupWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
 	xDaytonaOrganizationID *string
 }
 
@@ -368,29 +367,31 @@ func (r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) Execute() (*Workspac
 /*
 CreateBackupWorkspaceDeprecated [DEPRECATED] Create workspace backup
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return WorkspaceAPICreateBackupWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPICreateBackupWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPICreateBackupWorkspaceDeprecatedRequest {
 	return WorkspaceAPICreateBackupWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
 
 // Execute executes the request
-//  @return Workspace
+//
+//	@return Workspace
+//
 // Deprecated
 func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecatedExecute(r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Workspace
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateBackupWorkspaceDeprecated")
@@ -463,9 +464,9 @@ func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecatedExecute(r Workspace
 }
 
 type WorkspaceAPICreateWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	createWorkspace *CreateWorkspace
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	createWorkspace        *CreateWorkspace
 	xDaytonaOrganizationID *string
 }
 
@@ -487,27 +488,29 @@ func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) Execute() (*Workspace, *ht
 /*
 CreateWorkspaceDeprecated [DEPRECATED] Create a new workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkspaceAPICreateWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkspaceAPICreateWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) CreateWorkspaceDeprecated(ctx context.Context) WorkspaceAPICreateWorkspaceDeprecatedRequest {
 	return WorkspaceAPICreateWorkspaceDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Workspace
+//
+//	@return Workspace
+//
 // Deprecated
 func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICreateWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Workspace
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateWorkspaceDeprecated")
@@ -584,10 +587,10 @@ func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICre
 }
 
 type WorkspaceAPIDeleteWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
-	force *bool
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	force                  *bool
 	xDaytonaOrganizationID *string
 }
 
@@ -609,16 +612,16 @@ func (r WorkspaceAPIDeleteWorkspaceDeprecatedRequest) Execute() (*http.Response,
 /*
 DeleteWorkspaceDeprecated [DEPRECATED] Delete workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return WorkspaceAPIDeleteWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPIDeleteWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) DeleteWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIDeleteWorkspaceDeprecatedRequest {
 	return WorkspaceAPIDeleteWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
@@ -627,9 +630,9 @@ func (a *WorkspaceAPIService) DeleteWorkspaceDeprecated(ctx context.Context, wor
 // Deprecated
 func (a *WorkspaceAPIService) DeleteWorkspaceDeprecatedExecute(r WorkspaceAPIDeleteWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.DeleteWorkspaceDeprecated")
@@ -697,11 +700,11 @@ func (a *WorkspaceAPIService) DeleteWorkspaceDeprecatedExecute(r WorkspaceAPIDel
 }
 
 type WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
 	xDaytonaOrganizationID *string
-	follow *bool
+	follow                 *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -723,16 +726,16 @@ func (r WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest) Execute() (*http.Res
 /*
 GetBuildLogsWorkspaceDeprecated [DEPRECATED] Get build logs
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) GetBuildLogsWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest {
 	return WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
@@ -741,9 +744,9 @@ func (a *WorkspaceAPIService) GetBuildLogsWorkspaceDeprecated(ctx context.Contex
 // Deprecated
 func (a *WorkspaceAPIService) GetBuildLogsWorkspaceDeprecatedExecute(r WorkspaceAPIGetBuildLogsWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetBuildLogsWorkspaceDeprecated")
@@ -810,10 +813,10 @@ func (a *WorkspaceAPIService) GetBuildLogsWorkspaceDeprecatedExecute(r Workspace
 }
 
 type WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
-	port float32
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	port                   float32
 	xDaytonaOrganizationID *string
 }
 
@@ -830,31 +833,33 @@ func (r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) Execute() (*Wor
 /*
 GetPortPreviewUrlWorkspaceDeprecated [DEPRECATED] Get preview URL for a workspace port
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @param port Port number to get preview URL for
- @return WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@param port Port number to get preview URL for
+	@return WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) GetPortPreviewUrlWorkspaceDeprecated(ctx context.Context, workspaceId string, port float32) WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest {
 	return WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
-		port: port,
+		port:        port,
 	}
 }
 
 // Execute executes the request
-//  @return WorkspacePortPreviewUrl
+//
+//	@return WorkspacePortPreviewUrl
+//
 // Deprecated
 func (a *WorkspaceAPIService) GetPortPreviewUrlWorkspaceDeprecatedExecute(r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) (*WorkspacePortPreviewUrl, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WorkspacePortPreviewUrl
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkspacePortPreviewUrl
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetPortPreviewUrlWorkspaceDeprecated")
@@ -928,11 +933,11 @@ func (a *WorkspaceAPIService) GetPortPreviewUrlWorkspaceDeprecatedExecute(r Work
 }
 
 type WorkspaceAPIGetWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
 	xDaytonaOrganizationID *string
-	verbose *bool
+	verbose                *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -954,29 +959,31 @@ func (r WorkspaceAPIGetWorkspaceDeprecatedRequest) Execute() (*Workspace, *http.
 /*
 GetWorkspaceDeprecated [DEPRECATED] Get workspace details
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return WorkspaceAPIGetWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPIGetWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) GetWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIGetWorkspaceDeprecatedRequest {
 	return WorkspaceAPIGetWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
 
 // Execute executes the request
-//  @return Workspace
+//
+//	@return Workspace
+//
 // Deprecated
 func (a *WorkspaceAPIService) GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Workspace
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspaceDeprecated")
@@ -1052,11 +1059,11 @@ func (a *WorkspaceAPIService) GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWor
 }
 
 type WorkspaceAPIListWorkspacesDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
 	xDaytonaOrganizationID *string
-	verbose *bool
-	labels *string
+	verbose                *bool
+	labels                 *string
 }
 
 // Use with JWT to specify the organization ID
@@ -1084,27 +1091,29 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() ([]Workspace, *ht
 /*
 ListWorkspacesDeprecated [DEPRECATED] List all workspaces
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return WorkspaceAPIListWorkspacesDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return WorkspaceAPIListWorkspacesDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) ListWorkspacesDeprecated(ctx context.Context) WorkspaceAPIListWorkspacesDeprecatedRequest {
 	return WorkspaceAPIListWorkspacesDeprecatedRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Workspace
+//
+//	@return []Workspace
+//
 // Deprecated
 func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Workspace
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspacesDeprecated")
@@ -1182,10 +1191,10 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIList
 }
 
 type WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
-	sandboxLabels *SandboxLabels
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	sandboxLabels          *SandboxLabels
 	xDaytonaOrganizationID *string
 }
 
@@ -1207,29 +1216,31 @@ func (r WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest) Execute() (*Sandbox
 /*
 ReplaceLabelsWorkspaceDeprecated [DEPRECATED] Replace workspace labels
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) ReplaceLabelsWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest {
 	return WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
 
 // Execute executes the request
-//  @return SandboxLabels
+//
+//	@return SandboxLabels
+//
 // Deprecated
 func (a *WorkspaceAPIService) ReplaceLabelsWorkspaceDeprecatedExecute(r WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest) (*SandboxLabels, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SandboxLabels
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SandboxLabels
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ReplaceLabelsWorkspaceDeprecated")
@@ -1307,10 +1318,10 @@ func (a *WorkspaceAPIService) ReplaceLabelsWorkspaceDeprecatedExecute(r Workspac
 }
 
 type WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
-	interval float32
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	interval               float32
 	xDaytonaOrganizationID *string
 }
 
@@ -1327,19 +1338,19 @@ func (r WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest) Execute() 
 /*
 SetAutoArchiveIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-archive interval
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
- @return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+	@return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) SetAutoArchiveIntervalWorkspaceDeprecated(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest {
 	return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
-		interval: interval,
+		interval:    interval,
 	}
 }
 
@@ -1347,9 +1358,9 @@ func (a *WorkspaceAPIService) SetAutoArchiveIntervalWorkspaceDeprecated(ctx cont
 // Deprecated
 func (a *WorkspaceAPIService) SetAutoArchiveIntervalWorkspaceDeprecatedExecute(r WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.SetAutoArchiveIntervalWorkspaceDeprecated")
@@ -1414,10 +1425,10 @@ func (a *WorkspaceAPIService) SetAutoArchiveIntervalWorkspaceDeprecatedExecute(r
 }
 
 type WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
-	interval float32
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	interval               float32
 	xDaytonaOrganizationID *string
 }
 
@@ -1434,19 +1445,19 @@ func (r WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest) Execute() (*h
 /*
 SetAutostopIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-stop interval
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @param interval Auto-stop interval in minutes (0 to disable)
- @return WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@param interval Auto-stop interval in minutes (0 to disable)
+	@return WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) SetAutostopIntervalWorkspaceDeprecated(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest {
 	return WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
-		interval: interval,
+		interval:    interval,
 	}
 }
 
@@ -1454,9 +1465,9 @@ func (a *WorkspaceAPIService) SetAutostopIntervalWorkspaceDeprecated(ctx context
 // Deprecated
 func (a *WorkspaceAPIService) SetAutostopIntervalWorkspaceDeprecatedExecute(r WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.SetAutostopIntervalWorkspaceDeprecated")
@@ -1521,9 +1532,9 @@ func (a *WorkspaceAPIService) SetAutostopIntervalWorkspaceDeprecatedExecute(r Wo
 }
 
 type WorkspaceAPIStartWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
 	xDaytonaOrganizationID *string
 }
 
@@ -1540,16 +1551,16 @@ func (r WorkspaceAPIStartWorkspaceDeprecatedRequest) Execute() (*http.Response, 
 /*
 StartWorkspaceDeprecated [DEPRECATED] Start workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return WorkspaceAPIStartWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPIStartWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) StartWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIStartWorkspaceDeprecatedRequest {
 	return WorkspaceAPIStartWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
@@ -1558,9 +1569,9 @@ func (a *WorkspaceAPIService) StartWorkspaceDeprecated(ctx context.Context, work
 // Deprecated
 func (a *WorkspaceAPIService) StartWorkspaceDeprecatedExecute(r WorkspaceAPIStartWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.StartWorkspaceDeprecated")
@@ -1624,9 +1635,9 @@ func (a *WorkspaceAPIService) StartWorkspaceDeprecatedExecute(r WorkspaceAPIStar
 }
 
 type WorkspaceAPIStopWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
 	xDaytonaOrganizationID *string
 }
 
@@ -1643,16 +1654,16 @@ func (r WorkspaceAPIStopWorkspaceDeprecatedRequest) Execute() (*http.Response, e
 /*
 StopWorkspaceDeprecated [DEPRECATED] Stop workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return WorkspaceAPIStopWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPIStopWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) StopWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIStopWorkspaceDeprecatedRequest {
 	return WorkspaceAPIStopWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
@@ -1661,9 +1672,9 @@ func (a *WorkspaceAPIService) StopWorkspaceDeprecated(ctx context.Context, works
 // Deprecated
 func (a *WorkspaceAPIService) StopWorkspaceDeprecatedExecute(r WorkspaceAPIStopWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.StopWorkspaceDeprecated")
@@ -1727,10 +1738,10 @@ func (a *WorkspaceAPIService) StopWorkspaceDeprecatedExecute(r WorkspaceAPIStopW
 }
 
 type WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest struct {
-	ctx context.Context
-	ApiService WorkspaceAPI
-	workspaceId string
-	isPublic bool
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	isPublic               bool
 	xDaytonaOrganizationID *string
 }
 
@@ -1747,19 +1758,19 @@ func (r WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest) Execute() (*ht
 /*
 UpdatePublicStatusWorkspaceDeprecated [DEPRECATED] Update public status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @param isPublic Public status to set
- @return WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@param isPublic Public status to set
+	@return WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest
 
 Deprecated
 */
 func (a *WorkspaceAPIService) UpdatePublicStatusWorkspaceDeprecated(ctx context.Context, workspaceId string, isPublic bool) WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest {
 	return WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
-		isPublic: isPublic,
+		isPublic:    isPublic,
 	}
 }
 
@@ -1767,9 +1778,9 @@ func (a *WorkspaceAPIService) UpdatePublicStatusWorkspaceDeprecated(ctx context.
 // Deprecated
 func (a *WorkspaceAPIService) UpdatePublicStatusWorkspaceDeprecatedExecute(r WorkspaceAPIUpdatePublicStatusWorkspaceDeprecatedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.UpdatePublicStatusWorkspaceDeprecated")

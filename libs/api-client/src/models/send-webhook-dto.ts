@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,31 +12,28 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface SendWebhookDto
  */
 export interface SendWebhookDto {
-    /**
-     * The type of event being sent
-     * @type {string}
-     * @memberof SendWebhookDto
-     */
-    'eventType': string;
-    /**
-     * The payload data to send
-     * @type {object}
-     * @memberof SendWebhookDto
-     */
-    'payload': object;
-    /**
-     * Optional event ID for idempotency
-     * @type {string}
-     * @memberof SendWebhookDto
-     */
-    'eventId'?: string;
+  /**
+   * The type of event being sent
+   * @type {string}
+   * @memberof SendWebhookDto
+   */
+  eventType: string
+  /**
+   * The payload data to send
+   * @type {object}
+   * @memberof SendWebhookDto
+   */
+  payload: object
+  /**
+   * Optional event ID for idempotency
+   * @type {string}
+   * @memberof SendWebhookDto
+   */
+  eventId?: string
 }
-

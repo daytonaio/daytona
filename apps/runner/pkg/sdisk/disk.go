@@ -417,39 +417,32 @@ func (v *disk) pushIncrementalLayer(ctx context.Context, state *DiskState, exist
 	return nil
 }
 
-// createNewWorkingLayer creates a new empty QCOW2 with a flattened backing
+// createNewWorkingLayer creates a new empty QCOW2 with the original backing chain preserved
 // Strategy:
-// 1. Flatten the current working image (which may have backing files)
-// 2. Save the flattened version as the backing layer
-// 3. Create a new empty layer with the flattened backing
-// This keeps S3 layers thin (with backing refs) but local backing always flattened (no chains)
+// 1. Get the backing file of the current working image (preserves the layer chain)
+// 2. Create a new empty layer with that backing file
+// This preserves the original layer structure instead of flattening
 func (v *disk) createNewWorkingLayer(ctx context.Context, backingLayerID string) error {
 	layersDir := filepath.Join(v.config.DataDir, "layers", v.name)
 	if err := os.MkdirAll(layersDir, 0755); err != nil {
 		return fmt.Errorf("failed to create layers directory: %w", err)
 	}
 
-	// Use a single consolidated backing file that gets replaced each push
-	// This avoids locking issues and keeps the local backing chain depth at 1
-	consolidatedPath := filepath.Join(layersDir, "consolidated.qcow2")
-	tempConsolidatedPath := filepath.Join(layersDir, "consolidated.tmp.qcow2")
-
-	// Flatten the current working image to a temp consolidated backing
-	// This removes all backing file references and creates a standalone image
-	if err := v.qcow2Client.Convert(ctx, v.imagePath, tempConsolidatedPath); err != nil {
-		return fmt.Errorf("failed to flatten backing layer: %w", err)
+	// Get the current backing file of the working image
+	// This preserves the entire layer chain (base -> delta-1 -> delta-2 -> ... -> top)
+	backingFile, err := v.qcow2Client.GetBackingFile(ctx, v.imagePath)
+	if err != nil {
+		return fmt.Errorf("failed to get backing file: %w", err)
 	}
 
-	// Replace the old consolidated with the new one
-	// This must happen BEFORE creating the new working layer
-	os.Remove(consolidatedPath)
-	if err := os.Rename(tempConsolidatedPath, consolidatedPath); err != nil {
-		return fmt.Errorf("failed to update consolidated backing: %w", err)
+	// If there's no backing file, something is wrong (should always have one after pull)
+	if backingFile == "" {
+		return fmt.Errorf("working image has no backing file - cannot create new working layer")
 	}
 
-	// Create a new EMPTY QCOW2 with the consolidated backing
+	// Create a new EMPTY QCOW2 with the preserved backing chain
 	tempNewLayer := v.imagePath + ".new"
-	if err := v.qcow2Client.CreateWithBacking(ctx, consolidatedPath, tempNewLayer, int(v.sizeGB)); err != nil {
+	if err := v.qcow2Client.CreateWithBacking(ctx, backingFile, tempNewLayer, int(v.sizeGB)); err != nil {
 		return fmt.Errorf("failed to create new working layer: %w", err)
 	}
 

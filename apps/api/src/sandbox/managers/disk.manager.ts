@@ -256,8 +256,20 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
       })
 
       // Delete disk folder from S3
+      // Note, this will leave the layers in S3
+      // The layer deletion is handled by the external layer manager service
       const diskFolderPrefix = `disks/${disk.id}`
       await deleteS3Folder(this.s3Client, this.s3Bucket, diskFolderPrefix)
+
+      if (DiskState.DETACHED) {
+        // If the disk is still on the runner, we need to tell the runner to delete the disk
+        const runner = await this.runnerService.findOne(disk.runnerId)
+        if (!runner) {
+          throw new Error(`Runner ${disk.runnerId} not found for disk ${disk.id}`)
+        }
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        await runnerAdapter.deleteDisk(disk.id)
+      }
 
       // Delete any existing disk record with the deleted state and the same name in the same organization
       await this.diskRepository.delete({

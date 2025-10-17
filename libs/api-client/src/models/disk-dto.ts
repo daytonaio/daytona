@@ -12,78 +12,74 @@
  * Do not edit the class manually.
  */
 
-
 // May contain unused imports in some cases
 // @ts-ignore
-import type { DiskState } from './disk-state';
+import type { DiskState } from './disk-state'
 
 /**
- * 
+ *
  * @export
  * @interface DiskDto
  */
 export interface DiskDto {
-    /**
-     * Disk ID
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'id': string;
-    /**
-     * Organization ID
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'organizationId': string;
-    /**
-     * Disk name
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'name': string;
-    /**
-     * Disk size in GB
-     * @type {number}
-     * @memberof DiskDto
-     */
-    'size': number;
-    /**
-     * Disk state
-     * @type {DiskState}
-     * @memberof DiskDto
-     */
-    'state': DiskState;
-    /**
-     * Runner ID
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'runnerId'?: string | null;
-    /**
-     * Sandbox ID
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'sandboxId'?: string | null;
-    /**
-     * Error reason
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'errorReason'?: string | null;
-    /**
-     * Creation timestamp
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'createdAt': string;
-    /**
-     * Last update timestamp
-     * @type {string}
-     * @memberof DiskDto
-     */
-    'updatedAt': string;
+  /**
+   * Disk ID
+   * @type {string}
+   * @memberof DiskDto
+   */
+  id: string
+  /**
+   * Organization ID
+   * @type {string}
+   * @memberof DiskDto
+   */
+  organizationId: string
+  /**
+   * Disk name
+   * @type {string}
+   * @memberof DiskDto
+   */
+  name: string
+  /**
+   * Disk size in GB
+   * @type {number}
+   * @memberof DiskDto
+   */
+  size: number
+  /**
+   * Disk state
+   * @type {DiskState}
+   * @memberof DiskDto
+   */
+  state: DiskState
+  /**
+   * Runner ID
+   * @type {string}
+   * @memberof DiskDto
+   */
+  runnerId?: string | null
+  /**
+   * Sandbox ID
+   * @type {string}
+   * @memberof DiskDto
+   */
+  sandboxId?: string | null
+  /**
+   * Error reason
+   * @type {string}
+   * @memberof DiskDto
+   */
+  errorReason?: string | null
+  /**
+   * Creation timestamp
+   * @type {string}
+   * @memberof DiskDto
+   */
+  createdAt: string
+  /**
+   * Last update timestamp
+   * @type {string}
+   * @memberof DiskDto
+   */
+  updatedAt: string
 }
-
-
-

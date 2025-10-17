@@ -20,14 +20,13 @@ import (
 	"strings"
 )
 
-
 type ApiKeysAPI interface {
 
 	/*
-	CreateApiKey Create API key
+		CreateApiKey Create API key
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiKeysAPICreateApiKeyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiKeysAPICreateApiKeyRequest
 	*/
 	CreateApiKey(ctx context.Context) ApiKeysAPICreateApiKeyRequest
 
@@ -36,11 +35,11 @@ type ApiKeysAPI interface {
 	CreateApiKeyExecute(r ApiKeysAPICreateApiKeyRequest) (*ApiKeyResponse, *http.Response, error)
 
 	/*
-	DeleteApiKey Delete API key
+		DeleteApiKey Delete API key
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name
-	@return ApiKeysAPIDeleteApiKeyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param name
+		@return ApiKeysAPIDeleteApiKeyRequest
 	*/
 	DeleteApiKey(ctx context.Context, name string) ApiKeysAPIDeleteApiKeyRequest
 
@@ -48,12 +47,12 @@ type ApiKeysAPI interface {
 	DeleteApiKeyExecute(r ApiKeysAPIDeleteApiKeyRequest) (*http.Response, error)
 
 	/*
-	DeleteApiKeyForUser Delete API key for user
+		DeleteApiKeyForUser Delete API key for user
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param userId
-	@param name
-	@return ApiKeysAPIDeleteApiKeyForUserRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId
+		@param name
+		@return ApiKeysAPIDeleteApiKeyForUserRequest
 	*/
 	DeleteApiKeyForUser(ctx context.Context, userId string, name string) ApiKeysAPIDeleteApiKeyForUserRequest
 
@@ -61,11 +60,11 @@ type ApiKeysAPI interface {
 	DeleteApiKeyForUserExecute(r ApiKeysAPIDeleteApiKeyForUserRequest) (*http.Response, error)
 
 	/*
-	GetApiKey Get API key
+		GetApiKey Get API key
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name
-	@return ApiKeysAPIGetApiKeyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param name
+		@return ApiKeysAPIGetApiKeyRequest
 	*/
 	GetApiKey(ctx context.Context, name string) ApiKeysAPIGetApiKeyRequest
 
@@ -74,10 +73,10 @@ type ApiKeysAPI interface {
 	GetApiKeyExecute(r ApiKeysAPIGetApiKeyRequest) (*ApiKeyList, *http.Response, error)
 
 	/*
-	GetCurrentApiKey Get current API key's details
+		GetCurrentApiKey Get current API key's details
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiKeysAPIGetCurrentApiKeyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiKeysAPIGetCurrentApiKeyRequest
 	*/
 	GetCurrentApiKey(ctx context.Context) ApiKeysAPIGetCurrentApiKeyRequest
 
@@ -86,10 +85,10 @@ type ApiKeysAPI interface {
 	GetCurrentApiKeyExecute(r ApiKeysAPIGetCurrentApiKeyRequest) (*ApiKeyList, *http.Response, error)
 
 	/*
-	ListApiKeys List API keys
+		ListApiKeys List API keys
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiKeysAPIListApiKeysRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiKeysAPIListApiKeysRequest
 	*/
 	ListApiKeys(ctx context.Context) ApiKeysAPIListApiKeysRequest
 
@@ -102,9 +101,9 @@ type ApiKeysAPI interface {
 type ApiKeysAPIService service
 
 type ApiKeysAPICreateApiKeyRequest struct {
-	ctx context.Context
-	ApiService ApiKeysAPI
-	createApiKey *CreateApiKey
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
+	createApiKey           *CreateApiKey
 	xDaytonaOrganizationID *string
 }
 
@@ -126,24 +125,25 @@ func (r ApiKeysAPICreateApiKeyRequest) Execute() (*ApiKeyResponse, *http.Respons
 /*
 CreateApiKey Create API key
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiKeysAPICreateApiKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiKeysAPICreateApiKeyRequest
 */
 func (a *ApiKeysAPIService) CreateApiKey(ctx context.Context) ApiKeysAPICreateApiKeyRequest {
 	return ApiKeysAPICreateApiKeyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ApiKeyResponse
+//
+//	@return ApiKeyResponse
 func (a *ApiKeysAPIService) CreateApiKeyExecute(r ApiKeysAPICreateApiKeyRequest) (*ApiKeyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ApiKeyResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ApiKeyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.CreateApiKey")
@@ -220,9 +220,9 @@ func (a *ApiKeysAPIService) CreateApiKeyExecute(r ApiKeysAPICreateApiKeyRequest)
 }
 
 type ApiKeysAPIDeleteApiKeyRequest struct {
-	ctx context.Context
-	ApiService ApiKeysAPI
-	name string
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
+	name                   string
 	xDaytonaOrganizationID *string
 }
 
@@ -239,24 +239,24 @@ func (r ApiKeysAPIDeleteApiKeyRequest) Execute() (*http.Response, error) {
 /*
 DeleteApiKey Delete API key
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name
- @return ApiKeysAPIDeleteApiKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name
+	@return ApiKeysAPIDeleteApiKeyRequest
 */
 func (a *ApiKeysAPIService) DeleteApiKey(ctx context.Context, name string) ApiKeysAPIDeleteApiKeyRequest {
 	return ApiKeysAPIDeleteApiKeyRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
 func (a *ApiKeysAPIService) DeleteApiKeyExecute(r ApiKeysAPIDeleteApiKeyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.DeleteApiKey")
@@ -320,10 +320,10 @@ func (a *ApiKeysAPIService) DeleteApiKeyExecute(r ApiKeysAPIDeleteApiKeyRequest)
 }
 
 type ApiKeysAPIDeleteApiKeyForUserRequest struct {
-	ctx context.Context
-	ApiService ApiKeysAPI
-	userId string
-	name string
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
+	userId                 string
+	name                   string
 	xDaytonaOrganizationID *string
 }
 
@@ -340,26 +340,26 @@ func (r ApiKeysAPIDeleteApiKeyForUserRequest) Execute() (*http.Response, error) 
 /*
 DeleteApiKeyForUser Delete API key for user
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param userId
- @param name
- @return ApiKeysAPIDeleteApiKeyForUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId
+	@param name
+	@return ApiKeysAPIDeleteApiKeyForUserRequest
 */
 func (a *ApiKeysAPIService) DeleteApiKeyForUser(ctx context.Context, userId string, name string) ApiKeysAPIDeleteApiKeyForUserRequest {
 	return ApiKeysAPIDeleteApiKeyForUserRequest{
 		ApiService: a,
-		ctx: ctx,
-		userId: userId,
-		name: name,
+		ctx:        ctx,
+		userId:     userId,
+		name:       name,
 	}
 }
 
 // Execute executes the request
 func (a *ApiKeysAPIService) DeleteApiKeyForUserExecute(r ApiKeysAPIDeleteApiKeyForUserRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.DeleteApiKeyForUser")
@@ -424,9 +424,9 @@ func (a *ApiKeysAPIService) DeleteApiKeyForUserExecute(r ApiKeysAPIDeleteApiKeyF
 }
 
 type ApiKeysAPIGetApiKeyRequest struct {
-	ctx context.Context
-	ApiService ApiKeysAPI
-	name string
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
+	name                   string
 	xDaytonaOrganizationID *string
 }
 
@@ -443,26 +443,27 @@ func (r ApiKeysAPIGetApiKeyRequest) Execute() (*ApiKeyList, *http.Response, erro
 /*
 GetApiKey Get API key
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name
- @return ApiKeysAPIGetApiKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name
+	@return ApiKeysAPIGetApiKeyRequest
 */
 func (a *ApiKeysAPIService) GetApiKey(ctx context.Context, name string) ApiKeysAPIGetApiKeyRequest {
 	return ApiKeysAPIGetApiKeyRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ApiKeyList
+//
+//	@return ApiKeyList
 func (a *ApiKeysAPIService) GetApiKeyExecute(r ApiKeysAPIGetApiKeyRequest) (*ApiKeyList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ApiKeyList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ApiKeyList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.GetApiKey")
@@ -535,8 +536,8 @@ func (a *ApiKeysAPIService) GetApiKeyExecute(r ApiKeysAPIGetApiKeyRequest) (*Api
 }
 
 type ApiKeysAPIGetCurrentApiKeyRequest struct {
-	ctx context.Context
-	ApiService ApiKeysAPI
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
 	xDaytonaOrganizationID *string
 }
 
@@ -553,24 +554,25 @@ func (r ApiKeysAPIGetCurrentApiKeyRequest) Execute() (*ApiKeyList, *http.Respons
 /*
 GetCurrentApiKey Get current API key's details
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiKeysAPIGetCurrentApiKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiKeysAPIGetCurrentApiKeyRequest
 */
 func (a *ApiKeysAPIService) GetCurrentApiKey(ctx context.Context) ApiKeysAPIGetCurrentApiKeyRequest {
 	return ApiKeysAPIGetCurrentApiKeyRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ApiKeyList
+//
+//	@return ApiKeyList
 func (a *ApiKeysAPIService) GetCurrentApiKeyExecute(r ApiKeysAPIGetCurrentApiKeyRequest) (*ApiKeyList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ApiKeyList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ApiKeyList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.GetCurrentApiKey")
@@ -642,8 +644,8 @@ func (a *ApiKeysAPIService) GetCurrentApiKeyExecute(r ApiKeysAPIGetCurrentApiKey
 }
 
 type ApiKeysAPIListApiKeysRequest struct {
-	ctx context.Context
-	ApiService ApiKeysAPI
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
 	xDaytonaOrganizationID *string
 }
 
@@ -660,24 +662,25 @@ func (r ApiKeysAPIListApiKeysRequest) Execute() ([]ApiKeyList, *http.Response, e
 /*
 ListApiKeys List API keys
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiKeysAPIListApiKeysRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiKeysAPIListApiKeysRequest
 */
 func (a *ApiKeysAPIService) ListApiKeys(ctx context.Context) ApiKeysAPIListApiKeysRequest {
 	return ApiKeysAPIListApiKeysRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []ApiKeyList
+//
+//	@return []ApiKeyList
 func (a *ApiKeysAPIService) ListApiKeysExecute(r ApiKeysAPIListApiKeysRequest) ([]ApiKeyList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ApiKeyList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ApiKeyList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.ListApiKeys")

@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,31 +12,28 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface LspDocumentRequest
  */
 export interface LspDocumentRequest {
-    /**
-     * Language identifier
-     * @type {string}
-     * @memberof LspDocumentRequest
-     */
-    'languageId': string;
-    /**
-     * Path to the project
-     * @type {string}
-     * @memberof LspDocumentRequest
-     */
-    'pathToProject': string;
-    /**
-     * Document URI
-     * @type {string}
-     * @memberof LspDocumentRequest
-     */
-    'uri': string;
+  /**
+   * Language identifier
+   * @type {string}
+   * @memberof LspDocumentRequest
+   */
+  languageId: string
+  /**
+   * Path to the project
+   * @type {string}
+   * @memberof LspDocumentRequest
+   */
+  pathToProject: string
+  /**
+   * Document URI
+   * @type {string}
+   * @memberof LspDocumentRequest
+   */
+  uri: string
 }
-

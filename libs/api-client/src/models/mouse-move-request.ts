@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,25 +12,22 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface MouseMoveRequest
  */
 export interface MouseMoveRequest {
-    /**
-     * The target X coordinate to move the mouse cursor to
-     * @type {number}
-     * @memberof MouseMoveRequest
-     */
-    'x': number;
-    /**
-     * The target Y coordinate to move the mouse cursor to
-     * @type {number}
-     * @memberof MouseMoveRequest
-     */
-    'y': number;
+  /**
+   * The target X coordinate to move the mouse cursor to
+   * @type {number}
+   * @memberof MouseMoveRequest
+   */
+  x: number
+  /**
+   * The target Y coordinate to move the mouse cursor to
+   * @type {number}
+   * @memberof MouseMoveRequest
+   */
+  y: number
 }
-

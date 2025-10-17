@@ -40,7 +40,7 @@ type DiskDto struct {
 	// Creation timestamp
 	CreatedAt string `json:"createdAt"`
 	// Last update timestamp
-	UpdatedAt string `json:"updatedAt"`
+	UpdatedAt            string `json:"updatedAt"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -222,6 +222,7 @@ func (o *DiskDto) HasRunnerId() bool {
 func (o *DiskDto) SetRunnerId(v string) {
 	o.RunnerId.Set(&v)
 }
+
 // SetRunnerIdNil sets the value for RunnerId to be an explicit nil
 func (o *DiskDto) SetRunnerIdNil() {
 	o.RunnerId.Set(nil)
@@ -264,6 +265,7 @@ func (o *DiskDto) HasSandboxId() bool {
 func (o *DiskDto) SetSandboxId(v string) {
 	o.SandboxId.Set(&v)
 }
+
 // SetSandboxIdNil sets the value for SandboxId to be an explicit nil
 func (o *DiskDto) SetSandboxIdNil() {
 	o.SandboxId.Set(nil)
@@ -306,6 +308,7 @@ func (o *DiskDto) HasErrorReason() bool {
 func (o *DiskDto) SetErrorReason(v string) {
 	o.ErrorReason.Set(&v)
 }
+
 // SetErrorReasonNil sets the value for ErrorReason to be an explicit nil
 func (o *DiskDto) SetErrorReasonNil() {
 	o.ErrorReason.Set(nil)
@@ -365,7 +368,7 @@ func (o *DiskDto) SetUpdatedAt(v string) {
 }
 
 func (o DiskDto) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -417,10 +420,10 @@ func (o *DiskDto) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -490,5 +493,3 @@ func (v *NullableDiskDto) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

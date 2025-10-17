@@ -24,6 +24,9 @@ type DiskManager interface {
 
 	// Close closes the manager and releases resources
 	Close() error
+
+	// CleanupUnusedLayers removes cached layers with zero references
+	CleanupUnusedLayers(ctx context.Context) (int, error)
 }
 
 // Disk represents a managed disk volume

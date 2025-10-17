@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -154,6 +155,7 @@ func DiskInfo(ctx *gin.Context) {
 //	@Produce		json
 //	@Tags			disk
 //	@Param			diskId	path		string	true	"Disk ID"
+//	@Param			force	query		bool	false	"Force delete mounted disk (unmounts first)"
 //	@Success		200		{object}	map[string]interface{}
 //	@Failure		400		{object}	map[string]interface{}
 //	@Failure		404		{object}	map[string]interface{}
@@ -169,9 +171,12 @@ func DeleteDisk(ctx *gin.Context) {
 		return
 	}
 
+	// Check for force parameter
+	force := ctx.Query("force") == "true"
+
 	runner := runner.GetInstance(nil)
 
-	// Check if disk exists and is not mounted
+	// Check if disk exists
 	disk, err := (*runner.SDisk).Open(ctx.Request.Context(), diskId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Disk not found"})
@@ -181,8 +186,16 @@ func DeleteDisk(ctx *gin.Context) {
 
 	// Check if disk is mounted
 	if disk.IsMounted() {
-		ctx.JSON(http.StatusConflict, gin.H{"error": "Cannot delete mounted disk. Please unmount first."})
-		return
+		if !force {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "Cannot delete mounted disk. Please unmount first or use ?force=true"})
+			return
+		}
+
+		// Force unmount the disk
+		if err := disk.Unmount(ctx.Request.Context()); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to unmount disk: %v", err)})
+			return
+		}
 	}
 
 	// Delete the disk

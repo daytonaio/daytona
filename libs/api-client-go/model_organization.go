@@ -13,8 +13,8 @@ package apiclient
 
 import (
 	"encoding/json"
-	"time"
 	"fmt"
+	"time"
 )
 
 // checks if the Organization type satisfies the MappedNullable interface at compile time
@@ -59,7 +59,7 @@ type Organization struct {
 	// Sandbox default network block all
 	SandboxLimitedNetworkEgress bool `json:"sandboxLimitedNetworkEgress"`
 	// Default region
-	DefaultRegion string `json:"defaultRegion"`
+	DefaultRegion        string `json:"defaultRegion"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -558,7 +558,7 @@ func (o *Organization) SetDefaultRegion(v string) {
 }
 
 func (o Organization) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -625,10 +625,10 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -707,5 +707,3 @@ func (v *NullableOrganization) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

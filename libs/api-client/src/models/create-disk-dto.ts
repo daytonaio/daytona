@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,25 +12,22 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface CreateDiskDto
  */
 export interface CreateDiskDto {
-    /**
-     * Disk name
-     * @type {string}
-     * @memberof CreateDiskDto
-     */
-    'name': string;
-    /**
-     * Disk size in GB
-     * @type {number}
-     * @memberof CreateDiskDto
-     */
-    'size': number;
+  /**
+   * Disk name
+   * @type {string}
+   * @memberof CreateDiskDto
+   */
+  name: string
+  /**
+   * Disk size in GB
+   * @type {number}
+   * @memberof CreateDiskDto
+   */
+  size: number
 }
-

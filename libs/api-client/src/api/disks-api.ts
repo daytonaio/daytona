@@ -12,467 +12,574 @@
  * Do not edit the class manually.
  */
 
-
-import type { Configuration } from '../configuration';
-import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
-import globalAxios from 'axios';
+import type { Configuration } from '../configuration'
+import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios'
+import globalAxios from 'axios'
 // Some imports not used depending on template conditions
 // @ts-ignore
-import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
+import {
+  DUMMY_BASE_URL,
+  assertParamExists,
+  setApiKeyToObject,
+  setBasicAuthToObject,
+  setBearerAuthToObject,
+  setOAuthToObject,
+  setSearchParams,
+  serializeDataIfNeeded,
+  toPathString,
+  createRequestFunction,
+} from '../common'
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
+import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
-import type { AttachDiskDto } from '../models';
+import type { AttachDiskDto } from '../models'
 // @ts-ignore
-import type { CreateDiskDto } from '../models';
+import type { CreateDiskDto } from '../models'
 // @ts-ignore
-import type { DiskDto } from '../models';
+import type { DiskDto } from '../models'
 /**
  * DisksApi - axios parameter creator
  * @export
  */
 export const DisksApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * 
-         * @summary Attach disk to sandbox
-         * @param {string} diskId ID of the disk
-         * @param {AttachDiskDto} attachDiskDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        attachDisk: async (diskId: string, attachDiskDto: AttachDiskDto, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'diskId' is not null or undefined
-            assertParamExists('attachDisk', 'diskId', diskId)
-            // verify required parameter 'attachDiskDto' is not null or undefined
-            assertParamExists('attachDisk', 'attachDiskDto', attachDiskDto)
-            const localVarPath = `/disks/{diskId}/attach`
-                .replace(`{${"diskId"}}`, encodeURIComponent(String(diskId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
+  return {
+    /**
+     *
+     * @summary Attach disk to sandbox
+     * @param {string} diskId ID of the disk
+     * @param {AttachDiskDto} attachDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    attachDisk: async (
+      diskId: string,
+      attachDiskDto: AttachDiskDto,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'diskId' is not null or undefined
+      assertParamExists('attachDisk', 'diskId', diskId)
+      // verify required parameter 'attachDiskDto' is not null or undefined
+      assertParamExists('attachDisk', 'attachDiskDto', attachDiskDto)
+      const localVarPath = `/disks/{diskId}/attach`.replace(`{${'diskId'}}`, encodeURIComponent(String(diskId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            // authentication oauth2 required
+      // authentication oauth2 required
 
+      localVarHeaderParameter['Content-Type'] = 'application/json'
 
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(attachDiskDto, localVarRequestOptions, configuration)
 
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(attachDiskDto, localVarRequestOptions, configuration)
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Create a new disk
+     * @param {CreateDiskDto} createDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createDisk: async (
+      createDiskDto: CreateDiskDto,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'createDiskDto' is not null or undefined
+      assertParamExists('createDisk', 'createDiskDto', createDiskDto)
+      const localVarPath = `/disks`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
 
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Create a new disk
-         * @param {CreateDiskDto} createDiskDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createDisk: async (createDiskDto: CreateDiskDto, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'createDiskDto' is not null or undefined
-            assertParamExists('createDisk', 'createDiskDto', createDiskDto)
-            const localVarPath = `/disks`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+      // authentication oauth2 required
 
-            // authentication oauth2 required
+      localVarHeaderParameter['Content-Type'] = 'application/json'
 
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(createDiskDto, localVarRequestOptions, configuration)
 
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Delete disk
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteDisk: async (
+      diskId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'diskId' is not null or undefined
+      assertParamExists('deleteDisk', 'diskId', diskId)
+      const localVarPath = `/disks/{diskId}`.replace(`{${'diskId'}}`, encodeURIComponent(String(diskId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
 
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(createDiskDto, localVarRequestOptions, configuration)
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
 
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Delete disk
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        deleteDisk: async (diskId: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'diskId' is not null or undefined
-            assertParamExists('deleteDisk', 'diskId', diskId)
-            const localVarPath = `/disks/{diskId}`
-                .replace(`{${"diskId"}}`, encodeURIComponent(String(diskId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+      // authentication oauth2 required
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
-            // authentication oauth2 required
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Detach disk from sandbox
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    detachDisk: async (
+      diskId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'diskId' is not null or undefined
+      assertParamExists('detachDisk', 'diskId', diskId)
+      const localVarPath = `/disks/{diskId}/detach`.replace(`{${'diskId'}}`, encodeURIComponent(String(diskId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
 
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
 
-    
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Detach disk from sandbox
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        detachDisk: async (diskId: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'diskId' is not null or undefined
-            assertParamExists('detachDisk', 'diskId', diskId)
-            const localVarPath = `/disks/{diskId}/detach`
-                .replace(`{${"diskId"}}`, encodeURIComponent(String(diskId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
+      // authentication oauth2 required
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Get disk details
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getDisk: async (
+      diskId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'diskId' is not null or undefined
+      assertParamExists('getDisk', 'diskId', diskId)
+      const localVarPath = `/disks/{diskId}`.replace(`{${'diskId'}}`, encodeURIComponent(String(diskId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
 
-            // authentication oauth2 required
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
 
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-    
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+      // authentication oauth2 required
 
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get disk details
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getDisk: async (diskId: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'diskId' is not null or undefined
-            assertParamExists('getDisk', 'diskId', diskId)
-            const localVarPath = `/disks/{diskId}`
-                .replace(`{${"diskId"}}`, encodeURIComponent(String(diskId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary List all disks
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listDisks: async (xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/disks`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
 
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
 
-            // authentication oauth2 required
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+      // authentication oauth2 required
 
-    
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary List all disks
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listDisks: async (xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/disks`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication oauth2 required
-
-
-    
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+  }
+}
 
 /**
  * DisksApi - functional programming interface
  * @export
  */
-export const DisksApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = DisksApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * 
-         * @summary Attach disk to sandbox
-         * @param {string} diskId ID of the disk
-         * @param {AttachDiskDto} attachDiskDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async attachDisk(diskId: string, attachDiskDto: AttachDiskDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.attachDisk(diskId, attachDiskDto, xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DisksApi.attachDisk']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Create a new disk
-         * @param {CreateDiskDto} createDiskDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createDisk(createDiskDto: CreateDiskDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createDisk(createDiskDto, xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DisksApi.createDisk']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Delete disk
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async deleteDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteDisk(diskId, xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DisksApi.deleteDisk']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Detach disk from sandbox
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async detachDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.detachDisk(diskId, xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DisksApi.detachDisk']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get disk details
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getDisk(diskId, xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DisksApi.getDisk']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary List all disks
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listDisks(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<DiskDto>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listDisks(xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DisksApi.listDisks']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
+export const DisksApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = DisksApiAxiosParamCreator(configuration)
+  return {
+    /**
+     *
+     * @summary Attach disk to sandbox
+     * @param {string} diskId ID of the disk
+     * @param {AttachDiskDto} attachDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async attachDisk(
+      diskId: string,
+      attachDiskDto: AttachDiskDto,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.attachDisk(
+        diskId,
+        attachDiskDto,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DisksApi.attachDisk']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Create a new disk
+     * @param {CreateDiskDto} createDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createDisk(
+      createDiskDto: CreateDiskDto,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createDisk(
+        createDiskDto,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DisksApi.createDisk']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Delete disk
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async deleteDisk(
+      diskId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteDisk(diskId, xDaytonaOrganizationID, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DisksApi.deleteDisk']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Detach disk from sandbox
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async detachDisk(
+      diskId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.detachDisk(diskId, xDaytonaOrganizationID, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DisksApi.detachDisk']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Get disk details
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getDisk(
+      diskId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getDisk(diskId, xDaytonaOrganizationID, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DisksApi.getDisk']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary List all disks
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listDisks(
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<DiskDto>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listDisks(xDaytonaOrganizationID, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DisksApi.listDisks']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+  }
+}
 
 /**
  * DisksApi - factory interface
  * @export
  */
 export const DisksApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = DisksApiFp(configuration)
-    return {
-        /**
-         * 
-         * @summary Attach disk to sandbox
-         * @param {string} diskId ID of the disk
-         * @param {AttachDiskDto} attachDiskDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        attachDisk(diskId: string, attachDiskDto: AttachDiskDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<DiskDto> {
-            return localVarFp.attachDisk(diskId, attachDiskDto, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Create a new disk
-         * @param {CreateDiskDto} createDiskDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createDisk(createDiskDto: CreateDiskDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<DiskDto> {
-            return localVarFp.createDisk(createDiskDto, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Delete disk
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        deleteDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.deleteDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Detach disk from sandbox
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        detachDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<DiskDto> {
-            return localVarFp.detachDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get disk details
-         * @param {string} diskId ID of the disk
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<DiskDto> {
-            return localVarFp.getDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary List all disks
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listDisks(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<DiskDto>> {
-            return localVarFp.listDisks(xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-    };
-};
+  const localVarFp = DisksApiFp(configuration)
+  return {
+    /**
+     *
+     * @summary Attach disk to sandbox
+     * @param {string} diskId ID of the disk
+     * @param {AttachDiskDto} attachDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    attachDisk(
+      diskId: string,
+      attachDiskDto: AttachDiskDto,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<DiskDto> {
+      return localVarFp
+        .attachDisk(diskId, attachDiskDto, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Create a new disk
+     * @param {CreateDiskDto} createDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createDisk(
+      createDiskDto: CreateDiskDto,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<DiskDto> {
+      return localVarFp
+        .createDisk(createDiskDto, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Delete disk
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.deleteDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Detach disk from sandbox
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    detachDisk(
+      diskId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<DiskDto> {
+      return localVarFp.detachDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Get disk details
+     * @param {string} diskId ID of the disk
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<DiskDto> {
+      return localVarFp.getDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary List all disks
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listDisks(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<DiskDto>> {
+      return localVarFp.listDisks(xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
+    },
+  }
+}
 
 /**
  * DisksApi - object-oriented interface
@@ -481,82 +588,98 @@ export const DisksApiFactory = function (configuration?: Configuration, basePath
  * @extends {BaseAPI}
  */
 export class DisksApi extends BaseAPI {
-    /**
-     * 
-     * @summary Attach disk to sandbox
-     * @param {string} diskId ID of the disk
-     * @param {AttachDiskDto} attachDiskDto 
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DisksApi
-     */
-    public attachDisk(diskId: string, attachDiskDto: AttachDiskDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return DisksApiFp(this.configuration).attachDisk(diskId, attachDiskDto, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
+  /**
+   *
+   * @summary Attach disk to sandbox
+   * @param {string} diskId ID of the disk
+   * @param {AttachDiskDto} attachDiskDto
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DisksApi
+   */
+  public attachDisk(
+    diskId: string,
+    attachDiskDto: AttachDiskDto,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return DisksApiFp(this.configuration)
+      .attachDisk(diskId, attachDiskDto, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
 
-    /**
-     * 
-     * @summary Create a new disk
-     * @param {CreateDiskDto} createDiskDto 
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DisksApi
-     */
-    public createDisk(createDiskDto: CreateDiskDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return DisksApiFp(this.configuration).createDisk(createDiskDto, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
+  /**
+   *
+   * @summary Create a new disk
+   * @param {CreateDiskDto} createDiskDto
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DisksApi
+   */
+  public createDisk(createDiskDto: CreateDiskDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return DisksApiFp(this.configuration)
+      .createDisk(createDiskDto, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
 
-    /**
-     * 
-     * @summary Delete disk
-     * @param {string} diskId ID of the disk
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DisksApi
-     */
-    public deleteDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return DisksApiFp(this.configuration).deleteDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
+  /**
+   *
+   * @summary Delete disk
+   * @param {string} diskId ID of the disk
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DisksApi
+   */
+  public deleteDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return DisksApiFp(this.configuration)
+      .deleteDisk(diskId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
 
-    /**
-     * 
-     * @summary Detach disk from sandbox
-     * @param {string} diskId ID of the disk
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DisksApi
-     */
-    public detachDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return DisksApiFp(this.configuration).detachDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
+  /**
+   *
+   * @summary Detach disk from sandbox
+   * @param {string} diskId ID of the disk
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DisksApi
+   */
+  public detachDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return DisksApiFp(this.configuration)
+      .detachDisk(diskId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
 
-    /**
-     * 
-     * @summary Get disk details
-     * @param {string} diskId ID of the disk
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DisksApi
-     */
-    public getDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return DisksApiFp(this.configuration).getDisk(diskId, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
+  /**
+   *
+   * @summary Get disk details
+   * @param {string} diskId ID of the disk
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DisksApi
+   */
+  public getDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return DisksApiFp(this.configuration)
+      .getDisk(diskId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
 
-    /**
-     * 
-     * @summary List all disks
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DisksApi
-     */
-    public listDisks(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return DisksApiFp(this.configuration).listDisks(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
+  /**
+   *
+   * @summary List all disks
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DisksApi
+   */
+  public listDisks(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return DisksApiFp(this.configuration)
+      .listDisks(xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
 }
-

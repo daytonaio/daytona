@@ -1,5 +1,5 @@
 /* tslint:disable */
- 
+
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,19 +12,16 @@
  * Do not edit the class manually.
  */
 
-
-
 /**
- * 
+ *
  * @export
  * @interface CreateVolume
  */
 export interface CreateVolume {
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateVolume
-     */
-    'name': string;
+  /**
+   *
+   * @type {string}
+   * @memberof CreateVolume
+   */
+  name: string
 }
-
