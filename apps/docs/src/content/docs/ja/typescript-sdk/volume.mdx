@@ -3,16 +3,15 @@ title: "ボリューム"
 hideTitleOnPage: true
 ---
 
-
-## VolumeService
+## VolumeService \{#volumeservice\}
 
 Daytonaのボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を管理するサービス。
 
 このサービスは、ボリュームの一覧取得、参照、作成、削除の各メソッドを提供します。
 
-### Constructors
+### Constructors \{#constructors\}
 
-#### new VolumeService()
+#### new VolumeService() \{#new-volumeservice\}
 
 ```ts
 new VolumeService(volumesApi: VolumesApi): VolumeService
@@ -20,16 +19,15 @@ new VolumeService(volumesApi: VolumesApi): VolumeService
 
 **Parameters**:
 
-- `volumesApi` _VolumesApi_
-
+* `volumesApi` *VolumesApi*
 
 **Returns**:
 
-- `VolumeService`
+* `VolumeService`
 
-### Methods
+### Methods \{#methods\}
 
-#### create()
+#### create() \{#create\}
 
 ```ts
 create(name: string): Promise<Volume>
@@ -39,12 +37,11 @@ create(name: string): Promise<Volume>
 
 **Parameters**:
 
-- `name` _string_ - 新規ボリュームの名前
-
+* `name` *string* - 新規ボリュームの名前
 
 **Returns**:
 
-- `Promise<Volume>` - 作成されたボリューム
+* `Promise<Volume>` - 作成されたボリューム
 
 **Throws**:
 
@@ -60,7 +57,7 @@ console.log(`Created volume ${volume.name} with ID ${volume.id}`);
 
 ***
 
-#### delete()
+#### delete() \{#delete\}
 
 ```ts
 delete(volume: Volume): Promise<void>
@@ -70,12 +67,11 @@ delete(volume: Volume): Promise<void>
 
 **Parameters**:
 
-- `volume` _Volume_ - 削除するボリューム
-
+* `volume` *Volume* - 削除するボリューム
 
 **Returns**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **Throws**:
 
@@ -92,7 +88,7 @@ console.log("Volume deleted successfully");
 
 ***
 
-#### get()
+#### get() \{#get\}
 
 ```ts
 get(name: string, create: boolean): Promise<Volume>
@@ -102,13 +98,12 @@ get(name: string, create: boolean): Promise<Volume>
 
 **Parameters**:
 
-- `name` _string_ - 取得するボリューム名
-- `create` _boolean = false_ - 存在しない場合に作成するかどうか
-
+* `name` *string* - 取得するボリューム名
+* `create` *boolean = false* - 存在しない場合に作成するかどうか
 
 **Returns**:
 
-- `Promise<Volume>` - 取得されたボリューム
+* `Promise<Volume>` - 取得されたボリューム
 
 **Throws**:
 
@@ -124,7 +119,7 @@ console.log(`Volume ${volume.name} is in state ${volume.state}`);
 
 ***
 
-#### list()
+#### list() \{#list\}
 
 ```ts
 list(): Promise<Volume[]>
@@ -134,7 +129,7 @@ list(): Promise<Volume[]>
 
 **Returns**:
 
-- `Promise<Volume[]>` - ユーザーがアクセス可能なすべてのボリュームの一覧
+* `Promise<Volume[]>` - ユーザーがアクセス可能なすべてのボリュームの一覧
 
 **Example:**
 
@@ -147,8 +142,7 @@ volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
 
 ***
 
-
-## ボリューム（Volume）
+## ボリューム（Volume） \{#volume\}
 
 ```ts
 type Volume = VolumeDto & {
@@ -160,5 +154,4 @@ Daytona（サンドボックスを作成・管理するプラットフォーム�
 
 **型定義**:
 
-- `\_\_brand` _"Volume"_
-
+* `\_\_brand` *&quot;Volume&quot;*

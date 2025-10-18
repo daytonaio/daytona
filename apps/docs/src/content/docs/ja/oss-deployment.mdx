@@ -1,0 +1,171 @@
+---
+title: オープンソースのデプロイ
+---
+
+このガイドでは、Docker Compose を使用してローカル環境で Daytona Open Source を実行する手順を説明します。
+
+Compose ファイルは、Daytona リポジトリの [docker](https://github.com/daytonaio/daytona/tree/main/docker) フォルダにあります。
+
+:::caution
+
+* このセットアップはまだ開発中で、**本番環境での使用は安全ではありません**
+* 本番環境向けのデプロイガイドは別途提供予定です
+  :::
+
+## 概要 \{#overview\}
+
+この Docker Compose 構成には、Daytona を稼働させるために必要なすべてのサービスが含まれています:
+
+* **API**: Daytona のメインアプリケーションサーバー
+* **Proxy**: リクエストのプロキシサービス
+* **Runner**: Daytona のランナーをホストするサービス
+* **SSH Gateway**: サンドボックスへの SSH アクセスを処理するサービス
+* **Database**: データ永続化のための PostgreSQL データベース
+* **Redis**: キャッシュとセッション用のインメモリデータストア
+* **Dex**: OIDC 認証プロバイダー
+* **Registry**: Web UI を備えた Docker イメージレジストリ
+* **MinIO**: S3 互換のオブジェクトストレージ
+* **MailDev**: メールテストサービス
+* **Jaeger**: 分散トレーシング
+* **PgAdmin**: データベース管理インターフェース
+
+## クイックスタート \{#quick-start\}
+
+1. [Daytona リポジトリ](https://github.com/daytonaio/daytona)をクローンする
+
+2. [Docker と Docker Compose をインストールする](https://docs.docker.com/get-docker/)
+
+3. すべてのサービスを起動するために（Daytona リポジトリのルートで）次のコマンドを実行する:
+
+   ```bash
+   docker compose -f docker/docker-compose.yaml up -d
+   ```
+
+4. サービスにアクセスする:
+   * Daytona Dashboard: http://localhost:3000
+     * 認証情報: dev@daytona.io `password`
+     * http://localhost:3000/dashboard/snapshots で既定のスナップショットが有効になっていることを確認する
+   * PgAdmin: http://localhost:5050
+   * Registry UI: http://localhost:5100
+   * MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
+
+## プロキシ URL の DNS 設定 \{#dns-setup-for-proxy-urls\}
+
+ローカル開発では、`*.proxy.localhost` ドメインを `127.0.0.1` に解決する必要があります。
+
+```bash
+./scripts/setup-proxy-dns.sh
+```
+
+これは dnsmasq を `address=/proxy.localhost/127.0.0.1` で設定します。
+
+**この設定を行わない場合**、SDK のサンプルやプロキシへの直接アクセスは動作しません。
+
+## 開発メモ \{#development-notes\}
+
+* サービス間通信を簡素化するため、共有ネットワークを使用しています
+* データベースおよびストレージのデータは Docker ボリュームに永続化されます
+* テスト用に、レジストリはイメージの削除を許可するよう設定されています
+* ソケットがマウントされていない DinD 環境では cgroups を分割できないため、サンドボックスのリソース制限は無効化されています
+
+## Daytona 用 Auth0 設定ガイド \{#auth0-configuration-guide-for-daytona\}
+
+### ステップ 1: Auth0 テナントを作成する \{#step-1-create-your-auth0-tenant\}
+
+まず https://auth0.com/signup にアクセスしてサインアップを開始します。ユースケースに応じてアカウント種別を選択します。ビジネス向けアプリケーションなら `Company`、個人プロジェクトなら `Personal` を選択します。\
+「Let&#39;s get set up」ページでは、`My Daytona` のようなアプリケーション名を入力し、アプリケーションタイプに `Single Page Application (SPA)` を選択します。認証方法は `Email and Password` から始めて問題ありません。Google、GitHub、Facebook などのソーシャルプロバイダーは後から追加できます。設定が完了したら、右下の `Create Application` をクリックします。
+
+### ステップ 2: シングルページアプリケーションを設定する \{#step-2-configure-your-single-page-application\}
+
+左サイドバーの `Applications` &gt; `Applications` に移動し、先ほど作成したアプリケーションを選択します。`Settings` タブをクリックし、下へスクロールして `Application URIs` セクションを見つけ、コールバック URL とオリジン URL を設定します。
+`Allowed Callback URIs` フィールドに、次の URL を追加します：
+
+```
+http://localhost:3000
+http://localhost:3000/api/oauth2-redirect.html
+http://localhost:4000/callback
+http://proxy.localhost:4000/callback
+```
+
+「Allowed Logout URIs」には次を追加します：
+
+```
+http://localhost:3000
+```
+
+次に、`Allowed Web Origins` に以下を追加します：
+
+```
+http://localhost:3000
+```
+
+これらの設定を反映するには、ページ下部の `Save Changes` をクリックするのを忘れずに行ってください。
+
+### ステップ 3: Machine-to-Machine アプリケーションを作成する \{#step-3-create-machine-to-machine-application\}
+
+Auth0 の Management API と連携するには、Machine-to-Machine アプリケーションが必要です。`Applications` &gt; `Applications` に移動し、`Create Application` をクリックします。タイプとして `Machine to Machine Applications` を選択し、`My Management API M2M` のようなわかりやすい名前を付けます。
+アプリケーションを作成したら、新しい M2M アプリケーションの `APIs` タブに移動します。トグルまたは `Authorize` ボタンをクリックして `Auth0 Management API` を見つけて承認します。\
+承認後、権限を設定するために Management API の横にあるドロップダウン矢印をクリックします。M2M アプリケーションに次の権限を付与します。
+
+```
+read:users
+update:users
+read:connections
+create:guardian_enrollment_tickets
+read:connections_options
+```
+
+権限の変更を適用するには、`Save` をクリックします。
+
+### ステップ 4: カスタム API を設定する \{#step-4-set-up-custom-api\}
+
+Daytona アプリケーションでは、認証と認可を処理するためのカスタム API が必要です。左サイドバーの `Applications` &gt; `APIs` に移動し、`Create API` をクリックします。`My Daytona API` のようなわかりやすい名前を入力し、`my-daytona-api` のような識別子を指定します。識別子は、アプリケーション構成で使用される一意の文字列である必要があります。\
+API を作成したら、`Permissions` タブに移動して、アプリケーションで使用するスコープを定義します。以下の各権限を、対応する説明とともに追加してください:
+
+| Permission                  | Description                            |
+| --------------------------- | -------------------------------------- |
+| `read:node`                 | ワークスペースノード情報を取得          |
+| `create:node`               | 新規ワークスペースノードレコードを作成  |
+| `create:user`               | ユーザーアカウントを作成                |
+| `read:users`                | すべてのユーザーアカウントを取得        |
+| `regenerate-key-pair:users` | ユーザーの SSH キーペアを再生成         |
+| `read:workspaces`           | ワークスペースを読み取り（ユーザースコープ） |
+| `create:registry`           | 新規 Docker レジストリアカウントレコードを作成 |
+| `read:registries`           | すべての Docker レジストリレコードを取得 |
+| `read:registry`             | Docker レジストリレコードを取得         |
+| `write:registry`            | Docker レジストリレコードを作成または更新 |
+
+### ステップ 5: 環境変数の設定 \{#step-5-configure-environment-variables\}
+
+Auth0 のセットアップ手順をすべて完了したら、Daytona のデプロイで環境変数を設定する必要があります。これらの変数によって、先ほど構成した Auth0 サービスにアプリケーションが接続されます。
+
+#### 設定値の確認方法 \{#finding-your-configuration-values\}
+
+必要な値は Auth0 ダッシュボードで確認できます。SPA アプリケーションの設定は `Applications` &gt; `Applications` に移動し、該当する SPA アプリを選択して `Settings` タブをクリックします。M2M アプリケーションも同様に、Machine-to-Machine アプリを選択してください。カスタム API の設定は `Applications` &gt; `APIs` から対象のカスタム API を選択し、`Settings` を開きます。
+
+#### API サービスの設定 \{#api-service-configuration\}
+
+API サービスで次の環境変数を設定します:
+
+```bash
+OIDC_CLIENT_ID=your_spa_app_client_id
+OIDC_ISSUER_BASE_URL=your_spa_app_domain
+OIDC_AUDIENCE=your_custom_api_identifier
+OIDC_MANAGEMENT_API_ENABLED=true
+OIDC_MANAGEMENT_API_CLIENT_ID=your_m2m_app_client_id
+OIDC_MANAGEMENT_API_CLIENT_SECRET=your_m2m_app_client_secret
+OIDC_MANAGEMENT_API_AUDIENCE=your_auth0_managment_api_identifier
+```
+
+#### プロキシサービスの設定 \{#proxy-service-configuration\}
+
+プロキシサービスでは、次の環境変数を設定します:
+
+```bash
+OIDC_CLIENT_ID=your_spa_app_client_id
+OIDC_CLIENT_SECRET=
+OIDC_DOMAIN=your_spa_app_domain
+OIDC_AUDIENCE=your_custom_api_identifier（末尾スラッシュ付き）
+```
+
+プロキシ環境では、`OIDC_CLIENT_SECRET` は空のままにしておいてください。
