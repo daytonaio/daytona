@@ -8980,6 +8980,7 @@ components:
         domain: runner1.example.com
         region: us
         lastChecked: 2024-10-01T12:00:00Z
+        currentCpuLoadAverage: 1.2
       properties:
         id:
           description: The ID of the runner
@@ -9028,6 +9029,10 @@ components:
         currentCpuUsagePercentage:
           description: Current CPU usage percentage
           example: 45.6
+          type: number
+        currentCpuLoadAverage:
+          description: Current CPU load average
+          example: 1.2
           type: number
         currentMemoryUsagePercentage:
           description: Current RAM usage percentage

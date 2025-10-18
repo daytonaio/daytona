@@ -98,6 +98,12 @@ export interface Runner {
    */
   currentCpuUsagePercentage?: number
   /**
+   * Current CPU load average
+   * @type {number}
+   * @memberof Runner
+   */
+  currentCpuLoadAverage?: number
+  /**
    * Current RAM usage percentage
    * @type {number}
    * @memberof Runner

@@ -56,6 +56,12 @@ export class Runner {
     type: 'float',
     default: 0,
   })
+  currentCpuLoadAverage: number
+
+  @Column({
+    type: 'float',
+    default: 0,
+  })
   currentMemoryUsagePercentage: number
 
   @Column({
@@ -88,6 +94,11 @@ export class Runner {
     default: 0,
   })
   availabilityScore: number
+
+  @Column({
+    nullable: true,
+  })
+  runnerInfoError: string
 
   @Column()
   region: string
