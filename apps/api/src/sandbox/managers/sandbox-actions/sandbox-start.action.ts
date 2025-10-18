@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { Repository } from 'typeorm'
-import { RECOVERY_ERROR_SUBSTRINGS } from '../../constants/errors-for-recovery.js'
+import { RECOVERY_ERROR_SUBSTRINGS } from '../../constants/errors-for-recovery'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from './sandbox.action'
