@@ -1,0 +1,390 @@
+{
+  "version": 1,
+  "entries": {
+    "apps/docs/src/content/i18n/en.json:ja": {
+      "versionId": "236c9bab9bb1eb621a8027c767c52ee447d9f1f364ff9375cb3b438335f69bd1",
+      "fileName": "apps/docs/src/content/i18n/en.json",
+      "updatedAt": "2025-10-17T16:40:52.372Z"
+    },
+    "apps/docs/src/content/docs/en/api-keys.mdx:ja": {
+      "versionId": "93b8aaa530a59cf3a07c9166539f4ef76e5cfe73ee015edd0f0892bfbb5ea40d",
+      "fileName": "apps/docs/src/content/docs/en/api-keys.mdx",
+      "updatedAt": "2025-10-17T16:40:52.373Z"
+    },
+    "apps/docs/src/content/docs/en/audit-logs.mdx:ja": {
+      "versionId": "5efce78642879dfdc288f3f9ae9c786aa7d2e2fc59c7a882cc60acaad442f7de",
+      "fileName": "apps/docs/src/content/docs/en/audit-logs.mdx",
+      "updatedAt": "2025-10-17T16:40:52.373Z"
+    },
+    "apps/docs/src/content/docs/en/billing.mdx:ja": {
+      "versionId": "6c692289032523c6799367bac2c0c2a0b6e1e8e661d5500fe91bb8453f60a81d",
+      "fileName": "apps/docs/src/content/docs/en/billing.mdx",
+      "updatedAt": "2025-10-17T16:40:52.373Z"
+    },
+    "apps/docs/src/content/docs/en/computer-use-linux.mdx:ja": {
+      "versionId": "d840029b8ab1ea02096238215081a09c97853fb945f5f4c4928d446c5d875c7d",
+      "fileName": "apps/docs/src/content/docs/en/computer-use-linux.mdx",
+      "updatedAt": "2025-10-17T16:40:52.374Z"
+    },
+    "apps/docs/src/content/docs/en/computer-use-macos.mdx:ja": {
+      "versionId": "c50cc98f023c01b6d921ea332e8d8788ae7a1fe82edb14644b613f26165c2736",
+      "fileName": "apps/docs/src/content/docs/en/computer-use-macos.mdx",
+      "updatedAt": "2025-10-17T16:40:52.374Z"
+    },
+    "apps/docs/src/content/docs/en/computer-use-windows.mdx:ja": {
+      "versionId": "706500caa6a039fe898a7093f655a4033df46b7679799709f871c8bc651155a8",
+      "fileName": "apps/docs/src/content/docs/en/computer-use-windows.mdx",
+      "updatedAt": "2025-10-17T16:40:52.374Z"
+    },
+    "apps/docs/src/content/docs/en/configuration.mdx:ja": {
+      "versionId": "1f73f2649aea9bf82df81234a6f16208841c42c124cbb95a1118fef64d93fca6",
+      "fileName": "apps/docs/src/content/docs/en/configuration.mdx",
+      "updatedAt": "2025-10-17T16:40:52.374Z"
+    },
+    "apps/docs/src/content/docs/en/custom-domain-authentication.mdx:ja": {
+      "versionId": "ecae64307daac332a2fd6461509ac70bfd2a9501640ce4bbdcc79c2fa532af43",
+      "fileName": "apps/docs/src/content/docs/en/custom-domain-authentication.mdx",
+      "updatedAt": "2025-10-17T16:40:52.375Z"
+    },
+    "apps/docs/src/content/docs/en/data-analysis-with-ai.mdx:ja": {
+      "versionId": "a2644557d086060638ad3fdb195f73c3c1ccdaf94abe39e02c273a1e338fde37",
+      "fileName": "apps/docs/src/content/docs/en/data-analysis-with-ai.mdx",
+      "updatedAt": "2025-10-17T16:40:52.375Z"
+    },
+    "apps/docs/src/content/docs/en/declarative-builder.mdx:ja": {
+      "versionId": "b796e4f5ecb52efe5e05c501fdfa990f70fb2ccbb45ace73a35c97a5dca9e5c5",
+      "fileName": "apps/docs/src/content/docs/en/declarative-builder.mdx",
+      "updatedAt": "2025-10-17T16:40:52.375Z"
+    },
+    "apps/docs/src/content/docs/en/file-system-operations.mdx:ja": {
+      "versionId": "b07d75293fb4e9801dc5a123d06202e308a3ce294da8ad6608bf6f5e7210e7de",
+      "fileName": "apps/docs/src/content/docs/en/file-system-operations.mdx",
+      "updatedAt": "2025-10-17T16:40:52.376Z"
+    },
+    "apps/docs/src/content/docs/en/getting-started.mdx:ja": {
+      "versionId": "323d42870ad1e7fd2968794aae5a8079349a3dbf23c325d44ca71a6d0ece4b7b",
+      "fileName": "apps/docs/src/content/docs/en/getting-started.mdx",
+      "updatedAt": "2025-10-17T16:40:52.376Z"
+    },
+    "apps/docs/src/content/docs/en/git-operations.mdx:ja": {
+      "versionId": "f59793367ef1bee3ff5f9ddb87fc11672957c77523e6c0a9fc928bd226b0f733",
+      "fileName": "apps/docs/src/content/docs/en/git-operations.mdx",
+      "updatedAt": "2025-10-17T16:40:52.376Z"
+    },
+    "apps/docs/src/content/docs/en/index.mdx:ja": {
+      "versionId": "3f0d3fa930fbd024fb48b28c1226577899e67c58340378348aa8abed65165d62",
+      "fileName": "apps/docs/src/content/docs/en/index.mdx",
+      "updatedAt": "2025-10-17T16:40:52.377Z"
+    },
+    "apps/docs/src/content/docs/en/language-server-protocol.mdx:ja": {
+      "versionId": "b35786af1a9f43b6efcdf0c738b7cfe0eb15d067d5d2e5f7ed796a50e68ac968",
+      "fileName": "apps/docs/src/content/docs/en/language-server-protocol.mdx",
+      "updatedAt": "2025-10-17T16:40:52.377Z"
+    },
+    "apps/docs/src/content/docs/en/limits.mdx:ja": {
+      "versionId": "e108c5f8a30c93ba0a78f72d242c2cec4d4b8bf2867c6578d206884be0cdc72e",
+      "fileName": "apps/docs/src/content/docs/en/limits.mdx",
+      "updatedAt": "2025-10-17T16:40:52.377Z"
+    },
+    "apps/docs/src/content/docs/en/linked-accounts.mdx:ja": {
+      "versionId": "b21a83767a13ffe36fa07258826f5d8adb265a7c3a9e3619bb3dde87e1d8c321",
+      "fileName": "apps/docs/src/content/docs/en/linked-accounts.mdx",
+      "updatedAt": "2025-10-17T16:40:52.377Z"
+    },
+    "apps/docs/src/content/docs/en/log-streaming.mdx:ja": {
+      "versionId": "866f8da18c59b791517498c3b1b9a021d685d5cd67f26dca5f2d5bc604ac70c3",
+      "fileName": "apps/docs/src/content/docs/en/log-streaming.mdx",
+      "updatedAt": "2025-10-17T16:40:52.378Z"
+    },
+    "apps/docs/src/content/docs/en/mcp.mdx:ja": {
+      "versionId": "ef33d6abff8e7988a1629f115364365f3f6dec42aa99910302f92efeefd47eb4",
+      "fileName": "apps/docs/src/content/docs/en/mcp.mdx",
+      "updatedAt": "2025-10-17T16:40:52.378Z"
+    },
+    "apps/docs/src/content/docs/en/network-limits.mdx:ja": {
+      "versionId": "9a087042b521d91b5f078b93262264b4d7a8d025c6387977e7778999f87588e3",
+      "fileName": "apps/docs/src/content/docs/en/network-limits.mdx",
+      "updatedAt": "2025-10-17T16:40:52.378Z"
+    },
+    "apps/docs/src/content/docs/en/organizations.mdx:ja": {
+      "versionId": "7750bc042f08ebd4546e8849052bd7cd65b38b22ea671b3ca935c1d3545b17a2",
+      "fileName": "apps/docs/src/content/docs/en/organizations.mdx",
+      "updatedAt": "2025-10-17T16:40:52.378Z"
+    },
+    "apps/docs/src/content/docs/en/oss-deployment.mdx:ja": {
+      "versionId": "4aeea95dee50703255391450a126c2169d4f909f36e59f797fbb5d62ee7c9ff3",
+      "fileName": "apps/docs/src/content/docs/en/oss-deployment.mdx",
+      "updatedAt": "2025-10-17T16:40:52.379Z"
+    },
+    "apps/docs/src/content/docs/en/preview-and-authentication.mdx:ja": {
+      "versionId": "6d30920614ae6a5146966f6c73c0874b84ea2b2d204d221e086a6e6c98a2ea8e",
+      "fileName": "apps/docs/src/content/docs/en/preview-and-authentication.mdx",
+      "updatedAt": "2025-10-17T16:40:52.379Z"
+    },
+    "apps/docs/src/content/docs/en/process-code-execution.mdx:ja": {
+      "versionId": "bd3d60bfa9b6fd50210180b24e7002c8b4c11058c060e61d057cde6b5507c81e",
+      "fileName": "apps/docs/src/content/docs/en/process-code-execution.mdx",
+      "updatedAt": "2025-10-17T16:40:52.379Z"
+    },
+    "apps/docs/src/content/docs/en/pty.mdx:ja": {
+      "versionId": "04c8598650ac795cc854513102d0d789a4081a6d116f65c23c08db38378c1eab",
+      "fileName": "apps/docs/src/content/docs/en/pty.mdx",
+      "updatedAt": "2025-10-17T16:40:52.380Z"
+    },
+    "apps/docs/src/content/docs/en/regions.mdx:ja": {
+      "versionId": "9d595479e706cc4ec9c181f9985e3671400fbe01d1ecaef65bba237aa06189f9",
+      "fileName": "apps/docs/src/content/docs/en/regions.mdx",
+      "updatedAt": "2025-10-17T16:40:52.380Z"
+    },
+    "apps/docs/src/content/docs/en/sandbox-management.mdx:ja": {
+      "versionId": "8a4d8818a05080dc59fdff3d46a038c6f166e9a8ae0f96ad24221e9fb1ea63d5",
+      "fileName": "apps/docs/src/content/docs/en/sandbox-management.mdx",
+      "updatedAt": "2025-10-17T16:40:52.380Z"
+    },
+    "apps/docs/src/content/docs/en/snapshots.mdx:ja": {
+      "versionId": "a84ed74b1458bbde01d315bb29980e6c94a2ebd11c5cbe84ef17b8d7440b2fd6",
+      "fileName": "apps/docs/src/content/docs/en/snapshots.mdx",
+      "updatedAt": "2025-10-17T16:40:52.380Z"
+    },
+    "apps/docs/src/content/docs/en/ssh-access.mdx:ja": {
+      "versionId": "7ef1f9213753e8cae6cad89556b8d440f407c764a20e70090358c69bf7762036",
+      "fileName": "apps/docs/src/content/docs/en/ssh-access.mdx",
+      "updatedAt": "2025-10-17T16:40:52.381Z"
+    },
+    "apps/docs/src/content/docs/en/volumes.mdx:ja": {
+      "versionId": "0800c757b2fe0de9ca31ca83db21507a2aff21f3402fa0b4e37181dff86fb9a1",
+      "fileName": "apps/docs/src/content/docs/en/volumes.mdx",
+      "updatedAt": "2025-10-17T16:40:52.381Z"
+    },
+    "apps/docs/src/content/docs/en/web-terminal.mdx:ja": {
+      "versionId": "a23cde456ba357b6dc685e18f511087e76af4cd106019470811b254027d92860",
+      "fileName": "apps/docs/src/content/docs/en/web-terminal.mdx",
+      "updatedAt": "2025-10-17T16:40:52.381Z"
+    },
+    "apps/docs/src/content/docs/en/webhooks.mdx:ja": {
+      "versionId": "35a6dddbfa95af41d7a945e5b4469e87607938c3d6ad9909b2b8fdd2f34331fd",
+      "fileName": "apps/docs/src/content/docs/en/webhooks.mdx",
+      "updatedAt": "2025-10-17T16:40:52.381Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/index.mdx:ja": {
+      "versionId": "a08c2c93d8b89d2c6edd635299fc72c0d9a4a2de8e6b8e7e8e95ee9acdbd92cd",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/index.mdx",
+      "updatedAt": "2025-10-17T16:40:52.382Z"
+    },
+    "apps/docs/src/content/docs/en/tools/api.mdx:ja": {
+      "versionId": "997408a6990939dc3119f127864d962726b283e7580b95b88871fc2c59a1a219",
+      "fileName": "apps/docs/src/content/docs/en/tools/api.mdx",
+      "updatedAt": "2025-10-17T16:40:52.382Z"
+    },
+    "apps/docs/src/content/docs/en/tools/cli.mdx:ja": {
+      "versionId": "f61ecf794f94797084ef078046cb4a2fe36bc0d56de606444f6b087c35397481",
+      "fileName": "apps/docs/src/content/docs/en/tools/cli.mdx",
+      "updatedAt": "2025-10-17T16:40:52.382Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/charts.mdx:ja": {
+      "versionId": "ea4fd1e69459f2f91010ccfdbcc02810334785d1d1dcf55ffb9de4d86f43b73c",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/charts.mdx",
+      "updatedAt": "2025-10-17T16:40:52.383Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/computer-use.mdx:ja": {
+      "versionId": "72744948e7a37e192125f2556adc2857abcdaf1c286ed32a20e2f545c37e7463",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/computer-use.mdx",
+      "updatedAt": "2025-10-17T16:40:52.383Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/daytona.mdx:ja": {
+      "versionId": "33006178e3de7ab611bb0ad339b8aac439afeeceeb093c60c5bbcb303bed3529",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/daytona.mdx",
+      "updatedAt": "2025-10-17T16:40:52.383Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/errors.mdx:ja": {
+      "versionId": "507df9b3e1beea824fa5afb114af71d00929663edd7987c831c1ca6899c3f2aa",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/errors.mdx",
+      "updatedAt": "2025-10-17T16:40:52.384Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/execute-response.mdx:ja": {
+      "versionId": "41e918995c59769e944e01e2c7b6ba993f880e245f6c686698d469fa21c14808",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/execute-response.mdx",
+      "updatedAt": "2025-10-17T16:40:52.384Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/file-system.mdx:ja": {
+      "versionId": "81641fcb6a175b4300089d4d0c864af57a4c297bce9af60cdc9364e4e4b9b124",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/file-system.mdx",
+      "updatedAt": "2025-10-17T16:40:52.384Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/git.mdx:ja": {
+      "versionId": "841fbccf2076967b807353d2b0621790aa1ff36219d4b9d50c7041b5e392a3e5",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/git.mdx",
+      "updatedAt": "2025-10-17T16:40:52.384Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/image.mdx:ja": {
+      "versionId": "1e118a4be9aa204553e5fbb86131eb74f940dc7a6109b3c836daa7fe008fa6a4",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/image.mdx",
+      "updatedAt": "2025-10-17T16:40:52.385Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/index.mdx:ja": {
+      "versionId": "ecde0e6f5daf2c11c9887bf53c793c7ae9e1cab63e61fe31a1dec83e7813eebc",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/index.mdx",
+      "updatedAt": "2025-10-17T16:40:52.385Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/lsp-server.mdx:ja": {
+      "versionId": "2f481b735ca94e10ada964c7578f8f35fb5c81dc1b4f52b15483a090b55dd910",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/lsp-server.mdx",
+      "updatedAt": "2025-10-17T16:40:52.385Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/object-storage.mdx:ja": {
+      "versionId": "c9947cbac60ddb753aaa743e73f28d7e71a2866c809f2b1663dbd1da2011ac63",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/object-storage.mdx",
+      "updatedAt": "2025-10-17T16:40:52.385Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/process.mdx:ja": {
+      "versionId": "4a5e18ca5ae17081b23e0f9fdb622f41ae4383846cd85e0dd4bb40bb46d7a206",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/process.mdx",
+      "updatedAt": "2025-10-17T16:40:52.386Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/pty-handle.mdx:ja": {
+      "versionId": "4823d0e624e406103acb96f09d09fa241312f2e27a28a0de48a1c9a70c6dbbc6",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/pty-handle.mdx",
+      "updatedAt": "2025-10-17T16:40:52.386Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/pty.mdx:ja": {
+      "versionId": "9468e50192b904794b7578dfe313e8b53668171a580d30b242f774c43d9bcea1",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/pty.mdx",
+      "updatedAt": "2025-10-17T16:40:52.386Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/sandbox.mdx:ja": {
+      "versionId": "6887b83dcdaca97e118e65af79687402ead74af7855a5913f745336bd77aa718",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/sandbox.mdx",
+      "updatedAt": "2025-10-17T16:40:52.387Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/snapshot.mdx:ja": {
+      "versionId": "c69244b918a7c3d14f2b978ae249bce92f6287598cbc4a373b64528abda9597a",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/snapshot.mdx",
+      "updatedAt": "2025-10-17T16:40:52.387Z"
+    },
+    "apps/docs/src/content/docs/en/typescript-sdk/volume.mdx:ja": {
+      "versionId": "7b667209e6bd682cc4dd3c79837b2435ee21b8576503ac564721fcfeac3edc82",
+      "fileName": "apps/docs/src/content/docs/en/typescript-sdk/volume.mdx",
+      "updatedAt": "2025-10-17T16:40:52.387Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-computer-use.mdx:ja": {
+      "versionId": "545427c7a91055a54238d6d6c08df158ede4ac6f82af28f284b9dbeeb405ca8b",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-computer-use.mdx",
+      "updatedAt": "2025-10-17T16:40:52.387Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-daytona.mdx:ja": {
+      "versionId": "7657f7f266824af32429110aa64c2df5bdee9d04eac0b6fc5a37759dfb81ad6b",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-daytona.mdx",
+      "updatedAt": "2025-10-17T16:40:52.388Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-file-system.mdx:ja": {
+      "versionId": "7f942366327216e7f3d589dcd78a0b4a50419606785e67e44e0e754df3390570",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-file-system.mdx",
+      "updatedAt": "2025-10-17T16:40:52.388Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-git.mdx:ja": {
+      "versionId": "9a1deb29c5de564edf9e9f8044c1b6411f09429b97902cde6cbcb48439ed00c6",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-git.mdx",
+      "updatedAt": "2025-10-17T16:40:52.388Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-lsp-server.mdx:ja": {
+      "versionId": "e6466698531a31187c4e626a0e7b2e0065993f00accccc570618131530fbee2f",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-lsp-server.mdx",
+      "updatedAt": "2025-10-17T16:40:52.388Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-object-storage.mdx:ja": {
+      "versionId": "e4b33867f6a4c3ccf7513789683d41ee20fa2fd49e1184bb7a794cbc2509cc3f",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-object-storage.mdx",
+      "updatedAt": "2025-10-17T16:40:52.389Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-sandbox.mdx:ja": {
+      "versionId": "d264aa27cd1e6e587839b7fcdfedf304a9c4786c9bddc727148256430db61cdc",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-sandbox.mdx",
+      "updatedAt": "2025-10-17T16:40:52.389Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-snapshot.mdx:ja": {
+      "versionId": "4545d0475c8a2ca30110557134f9638d97137523890e5ae5d821220f1b8ad544",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-snapshot.mdx",
+      "updatedAt": "2025-10-17T16:40:52.389Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/async/async-volume.mdx:ja": {
+      "versionId": "44fe6f21c8887cf24c6faf1ba02e6beaf2868a9060818946582a01bf3bc5517a",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/async/async-volume.mdx",
+      "updatedAt": "2025-10-17T16:40:52.390Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/common/charts.mdx:ja": {
+      "versionId": "65dc379b398271c8158207ebc85369f2af07d0688fe63e0d71bf4cde7bc345ed",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/common/charts.mdx",
+      "updatedAt": "2025-10-17T16:40:52.390Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/common/errors.mdx:ja": {
+      "versionId": "28347822abaf5512526bdb13a3e0b1533984c9278438953a4759b6d2ae0d94c9",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/common/errors.mdx",
+      "updatedAt": "2025-10-17T16:40:52.390Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/common/image.mdx:ja": {
+      "versionId": "221f19a12104359b308d411bdd74e0aa4cc8e2b49161d901cf4f543bd7a36a5a",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/common/image.mdx",
+      "updatedAt": "2025-10-17T16:40:52.390Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/computer-use.mdx:ja": {
+      "versionId": "fadad6c7367f7f32e0fe4d47cfe337fb548409e184bb23568c71cda7985fb02f",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/computer-use.mdx",
+      "updatedAt": "2025-10-17T16:40:52.391Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/daytona.mdx:ja": {
+      "versionId": "a08ac39f3e484ec77e48d45a203bbfc32a8304cf36058295fbbebb2b67070456",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/daytona.mdx",
+      "updatedAt": "2025-10-17T16:40:52.391Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/file-system.mdx:ja": {
+      "versionId": "6f74af1778468fc0232425db0967a1ff77b85ad3671364b8c667035200e969ff",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/file-system.mdx",
+      "updatedAt": "2025-10-17T16:40:52.391Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/git.mdx:ja": {
+      "versionId": "f68b3b1996ddef2ea2c3129cf3039ae66ad1027dff54944ba51111e93117e88d",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/git.mdx",
+      "updatedAt": "2025-10-17T16:40:52.392Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/lsp-server.mdx:ja": {
+      "versionId": "041b343810c7680d8140fd752e967071434b60bc9e54b66cb0ff18d41a17ec2f",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/lsp-server.mdx",
+      "updatedAt": "2025-10-17T16:40:52.392Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/object-storage.mdx:ja": {
+      "versionId": "65056cd443786ca6dbc114b782c1820f6ed958ebadf6732b5eba5de80461666f",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/object-storage.mdx",
+      "updatedAt": "2025-10-17T16:40:52.392Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/process.mdx:ja": {
+      "versionId": "f89504bed5f1b92261b208563a443d83b9738ac4905452c5d48432a95b85201a",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/process.mdx",
+      "updatedAt": "2025-10-17T16:40:52.392Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/sandbox.mdx:ja": {
+      "versionId": "312a18734ddc890ff9f8f34b4fef5cafb6916d9c3cd544f0ffa975d05cdcf861",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/sandbox.mdx",
+      "updatedAt": "2025-10-17T16:40:52.393Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/snapshot.mdx:ja": {
+      "versionId": "eb796afdbb01d51f6e0757944b1c152726f102e01a2716e58f48d884c70fd8c0",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/snapshot.mdx",
+      "updatedAt": "2025-10-17T16:40:52.393Z"
+    },
+    "apps/docs/src/content/docs/en/python-sdk/sync/volume.mdx:ja": {
+      "versionId": "e4f8ec716c7230e4caf6523ee1d94c39716dd1f0992ee1e01225dd95571c0caa",
+      "fileName": "apps/docs/src/content/docs/en/python-sdk/sync/volume.mdx",
+      "updatedAt": "2025-10-17T16:40:52.393Z"
+    },
+    "apps/docs/src/content/docs/en/404.md:ja": {
+      "versionId": "5cdb78a1b1861020007275488426745e9660fcb9fda70e56edbfe36926289574",
+      "fileName": "apps/docs/src/content/docs/en/404.md",
+      "updatedAt": "2025-10-17T16:40:52.393Z"
+    },
+    "__INTERNAL_GT_TEMPLATE_NAME__:ja": {
+      "versionId": "a5263ae730d05691a69319b03cdb119d86005df6c88e3b6616e3fa511f9dffb5",
+      "fileName": "__INTERNAL_GT_TEMPLATE_NAME__",
+      "updatedAt": "2025-10-17T16:40:52.394Z"
+    }
+  }
+}
