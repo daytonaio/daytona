@@ -323,8 +323,7 @@ export class SandboxStartAction extends SandboxAction {
           const matchesRecovery = RECOVERY_ERROR_SUBSTRINGS.some((substring) =>
             error.message.toLowerCase().includes(substring.toLowerCase()),
           )
-          // Empty error message also qualifies
-          if (matchesRecovery || error.message == '') {
+          if (matchesRecovery) {
             try {
               await this.restoreSandboxOnNewRunner(sandbox, organization, sandbox.runnerId, true)
               this.logger.warn(`Sandbox ${sandbox.id} transferred to a new runner`)
