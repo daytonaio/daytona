@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { SearchInput } from '@/components/SearchInput'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import {
   DEFAULT_SNAPSHOT_SORTING,
@@ -45,6 +46,7 @@ const Snapshots: React.FC = () => {
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -82,6 +84,49 @@ const Snapshots: React.FC = () => {
       handleApiError(snapshotsDataError, 'Failed to fetch snapshots')
     }
   }, [snapshotsDataError])
+
+  // Filter snapshots based on search query
+  const filteredSnapshots = useMemo(() => {
+    if (!snapshotsData?.items) {
+      return []
+    }
+    if (!searchQuery.trim()) {
+      return snapshotsData.items
+    }
+
+    const query = searchQuery.toLowerCase().trim()
+    const searchTerms = query.split(/\s+/).filter((term) => term.length > 0)
+
+    return snapshotsData.items.filter((snapshot) => {
+      const name = snapshot.name?.toLowerCase() || ''
+      const imageName = snapshot.imageName?.toLowerCase() || ''
+      const tag = snapshot.general ? 'system' : ''
+      const searchableText = `${name} ${imageName} ${tag}`.toLowerCase()
+
+      return searchTerms.every((term) => searchableText.includes(term))
+    })
+  }, [snapshotsData?.items, searchQuery])
+
+  // Apply client-side pagination to filtered results
+  const filteredPaginationData = useMemo(() => {
+    const totalFiltered = filteredSnapshots.length
+    const startIndex = paginationParams.pageIndex * paginationParams.pageSize
+    const endIndex = startIndex + paginationParams.pageSize
+    const paginatedItems = filteredSnapshots.slice(startIndex, endIndex)
+
+    return {
+      items: paginatedItems,
+      total: totalFiltered,
+      totalPages: Math.ceil(totalFiltered / paginationParams.pageSize),
+    }
+  }, [filteredSnapshots, paginationParams.pageIndex, paginationParams.pageSize])
+
+  // Reset to first page when search query changes
+  useEffect(() => {
+    if (searchQuery.trim() && paginationParams.pageIndex > 0) {
+      setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+    }
+  }, [searchQuery, paginationParams.pageIndex])
 
   const updateSnapshotInCache = useCallback(
     (snapshotId: string, updates: Partial<SnapshotDto>) => {
@@ -335,8 +380,17 @@ const Snapshots: React.FC = () => {
       </PageHeader>
 
       <PageContent size="full">
+        <SearchInput
+          placeholder="Search snapshots..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          resultCount={filteredSnapshots.length}
+          entityName="snapshot"
+          data-testid="snapshots-search"
+        />
+
         <SnapshotTable
-          data={snapshotsData?.items ?? []}
+          data={filteredPaginationData.items}
           loading={snapshotsDataIsLoading}
           loadingSnapshots={loadingSnapshots}
           getRegionName={getRegionName}
@@ -350,8 +404,8 @@ const Snapshots: React.FC = () => {
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
           onCreateSnapshot={handleCreateSnapshot}
-          pageCount={snapshotsData?.totalPages ?? 0}
-          totalItems={snapshotsData?.total ?? 0}
+          pageCount={filteredPaginationData.totalPages}
+          totalItems={filteredPaginationData.total}
           onPaginationChange={handlePaginationChange}
           pagination={{
             pageIndex: paginationParams.pageIndex,
