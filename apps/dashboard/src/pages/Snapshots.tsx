@@ -26,6 +26,7 @@ import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { SearchInput } from '@/components/SearchInput'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 
@@ -51,13 +52,52 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
+
+  // Filter snapshots based on search query
+  const filteredSnapshots = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return snapshotsData.items
+    }
+
+    const query = searchQuery.toLowerCase().trim()
+    const searchTerms = query.split(/\s+/).filter((term) => term.length > 0)
+
+    return snapshotsData.items.filter((snapshot) => {
+      const name = snapshot.name?.toLowerCase() || ''
+      const imageName = snapshot.imageName?.toLowerCase() || ''
+      const tag = snapshot.general ? 'system' : ''
+      const searchableText = `${name} ${imageName} ${tag}`.toLowerCase()
+
+      return searchTerms.every((term) => searchableText.includes(term))
+    })
+  }, [snapshotsData.items, searchQuery])
 
   const [paginationParams, setPaginationParams] = useState({
     pageIndex: 0,
     pageSize: DEFAULT_PAGE_SIZE,
   })
+
+  const filteredPaginationData = useMemo(() => {
+    const totalFiltered = filteredSnapshots.length
+    const startIndex = paginationParams.pageIndex * paginationParams.pageSize
+    const endIndex = startIndex + paginationParams.pageSize
+    const paginatedItems = filteredSnapshots.slice(startIndex, endIndex)
+
+    return {
+      items: paginatedItems,
+      total: totalFiltered,
+      totalPages: Math.ceil(totalFiltered / paginationParams.pageSize),
+    }
+  }, [filteredSnapshots, paginationParams.pageIndex, paginationParams.pageSize])
+
+  useEffect(() => {
+    if (searchQuery.trim() && paginationParams.pageIndex > 0) {
+      setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+    }
+  }, [searchQuery, paginationParams.pageIndex])
 
   const fetchSnapshots = useCallback(
     async (showTableLoadingState = true) => {
@@ -521,8 +561,17 @@ const Snapshots: React.FC = () => {
           </DialogContent>
         </div>
 
+        <SearchInput
+          placeholder="Search snapshots..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          resultCount={filteredSnapshots.length}
+          entityName="snapshot"
+          data-testid="snapshots-search"
+        />
+
         <SnapshotTable
-          data={snapshotsData.items}
+          data={filteredPaginationData.items}
           loading={loadingTable}
           loadingSnapshots={loadingSnapshots}
           onDelete={(snapshot) => {
@@ -532,8 +581,8 @@ const Snapshots: React.FC = () => {
           onBulkDelete={handleBulkDelete}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
-          pageCount={snapshotsData.totalPages}
-          totalItems={snapshotsData.total}
+          pageCount={filteredPaginationData.totalPages}
+          totalItems={filteredPaginationData.total}
           onPaginationChange={handlePaginationChange}
           pagination={{
             pageIndex: paginationParams.pageIndex,
