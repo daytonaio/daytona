@@ -641,13 +641,14 @@ export class SandboxStartAction extends SandboxAction {
     const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
 
     let availableRunners: Runner[] = []
+    const excludedRunnerIds: string[] = excludedRunnerId ? [excludedRunnerId] : []
 
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
           region: sandbox.region,
           sandboxClass: sandbox.class,
           snapshotRef,
-          excludedRunnerIds: [excludedRunnerId],
+          excludedRunnerIds,
         })
       : []
     if (runnersWithBaseSnapshot.length > 0) {
@@ -657,7 +658,7 @@ export class SandboxStartAction extends SandboxAction {
       availableRunners = await this.runnerService.findAvailableRunners({
         region: sandbox.region,
         sandboxClass: sandbox.class,
-        excludedRunnerIds: [excludedRunnerId],
+        excludedRunnerIds,
       })
     }
 
