@@ -349,7 +349,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  async syncInstanceState(sandboxId: string, startedAt = new Date()): Promise<void> {
+  async syncInstanceState(sandboxId: string, startedAt = new Date(), providedLockKey?: string): Promise<void> {
     // If syncing for longer than 10 seconds, return
     // The sandbox will be continued in the next cron run
     // This prevents endless loops of syncing the same sandbox
@@ -358,9 +358,20 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     }
 
     //  prevent syncState cron from running multiple instances of the same sandbox
-    const lockKey = await this.tryLock(sandboxId, 360)
-    if (!lockKey) {
-      return
+    let lockKey: string
+
+    if (providedLockKey) {
+      // Lock already acquired by caller (event-driven from service)
+      lockKey = providedLockKey
+      // Renew the lock to ensure it doesn't expire during recursive calls
+      await this.redisLockProvider.renewLock(lockKey, 60)
+    } else {
+      // Cron-driven: Try to acquire lock, skip if busy
+      const key = await this.tryLock(sandboxId, 360)
+      if (!key) {
+        return
+      }
+      lockKey = key
     }
 
     const sandbox = await this.sandboxRepository.findOneByOrFail({
@@ -408,34 +419,35 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
       await this.sandboxRepository.save(sandbox)
     }
 
-    await this.unlock(lockKey)
     if (syncState === SYNC_AGAIN) {
-      this.syncInstanceState(sandboxId, startedAt)
+      this.syncInstanceState(sandboxId, startedAt, lockKey) // Pass the lock
+    } else {
+      await this.unlock(lockKey) // Only unlock if no recursive call
     }
   }
 
   @OnEvent(SandboxEvents.ARCHIVED)
   @TrackJobExecution()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    this.syncInstanceState(event.sandbox.id, new Date(), event.lockKey).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.DESTROYED)
   @TrackJobExecution()
   private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    this.syncInstanceState(event.sandbox.id, new Date(), event.lockKey).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.STARTED)
   @TrackJobExecution()
   private async handleSandboxStartedEvent(event: SandboxStartedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    this.syncInstanceState(event.sandbox.id, new Date(), event.lockKey).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.STOPPED)
   @TrackJobExecution()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    this.syncInstanceState(event.sandbox.id, new Date(), event.lockKey).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.CREATED)

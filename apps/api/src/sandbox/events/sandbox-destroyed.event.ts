@@ -6,5 +6,8 @@
 import { Sandbox } from '../entities/sandbox.entity'
 
 export class SandboxDestroyedEvent {
-  constructor(public readonly sandbox: Sandbox) {}
+  constructor(
+    public readonly sandbox: Sandbox,
+    public readonly lockKey: string,
+  ) {}
 }
