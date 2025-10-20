@@ -28,13 +28,13 @@ const requireMap = {
 }
 
 const validateMap: Record<string, (mod: any) => boolean> = {
-  'fast-glob': (mod: any) => typeof mod.default === 'function' && typeof mod.default.sync === 'function',
+  'fast-glob': (mod: any) => typeof mod === 'function' && typeof mod?.sync === 'function',
   '@iarna/toml': (mod: any) => typeof mod.parse === 'function' && typeof mod.stringify === 'function',
   stream: (mod: any) => typeof mod.Readable === 'function' && typeof mod.Writable === 'function',
   tar: (mod: any) => typeof mod.extract === 'function' && typeof mod.create === 'function',
-  'expand-tilde': (mod: any) => typeof mod.default === 'function',
+  'expand-tilde': (mod: any) => typeof mod === 'function',
   fs: (mod: any) => typeof mod.createReadStream === 'function' && typeof mod.readFile === 'function',
-  'form-data': (mod: any) => typeof mod.default === 'function',
+  'form-data': (mod: any) => typeof mod === 'function',
 }
 
 type ModuleMap = typeof loaderMap
@@ -51,6 +51,7 @@ export async function dynamicImport<K extends keyof ModuleMap>(
   let mod: any
   try {
     mod = (await loader()) as any
+    mod = mod?.default ?? mod
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     throw new DaytonaError(`${errorPrefix || ''} Module "${name}" is not available in the "${RUNTIME}" runtime: ${msg}`)
@@ -62,7 +63,7 @@ export async function dynamicImport<K extends keyof ModuleMap>(
     )
   }
 
-  return mod?.default ?? mod
+  return mod
 }
 
 type RequireMap = typeof requireMap
@@ -76,6 +77,7 @@ export function dynamicRequire<K extends keyof RequireMap>(name: K, errorPrefix?
   let mod: any
   try {
     mod = loader()
+    mod = mod?.default ?? mod
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     throw new DaytonaError(`${errorPrefix || ''} Module "${name}" is not available in the "${RUNTIME}" runtime: ${msg}`)
@@ -87,5 +89,5 @@ export function dynamicRequire<K extends keyof RequireMap>(name: K, errorPrefix?
     )
   }
 
-  return mod?.default ?? mod
+  return mod
 }
