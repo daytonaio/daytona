@@ -25,7 +25,7 @@ NAME = "daytona_api_client"
 VERSION = "0.0.0-dev"
 PYTHON_REQUIRES = ">= 3.8"
 REQUIRES = [
-    "urllib3 >= 1.25.3, < 3.0.0",
+    "urllib3 >= 2.1.0, < 3.0.0",
     "python-dateutil >= 2.8.2",
     "pydantic >= 2",
     "typing-extensions >= 4.7.1",
