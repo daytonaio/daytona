@@ -140,6 +140,7 @@ export class AuditService implements OnApplicationBootstrap {
       this.logger.log(`Starting cleanup of audit logs older than ${retentionDays} days`)
 
       const deletedLogs = await this.auditLogRepository.delete({
+        statusCode: Not(IsNull()),
         createdAt: LessThan(cutoffDate),
       })
 
