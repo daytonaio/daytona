@@ -45,4 +45,4 @@ ENV AWS_DEFAULT_BUCKET=daytona
 
 ENV SERVER_URL=http://api:3000/api
 
-ENTRYPOINT ["sh", "-c", "dockerd & daytona-runner"]
+ENTRYPOINT ["sh", "-c", "/usr/local/bin/dockerd-entrypoint.sh & daytona-runner"]
