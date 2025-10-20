@@ -131,7 +131,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
-                await this.unlock(lockKey)
+                await this.unlock(sandbox.id)
               }
             }),
           )
@@ -182,7 +182,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
           } finally {
-            await this.unlock(lockKey)
+            await this.unlock(sandbox.id)
           }
         }),
       )
@@ -241,7 +241,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
-                await this.unlock(lockKey)
+                await this.unlock(sandbox.id)
               }
             }),
           )
@@ -350,13 +350,13 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   }
 
   async syncInstanceState(sandboxId: string, startedAt = new Date(), providedLockKey?: string): Promise<void> {
-    // If syncing for longer than 10 seconds, return
+    // If syncing for longer than 10 seconds, unlock and return
     // The sandbox will be continued in the next cron run
     // This prevents endless loops of syncing the same sandbox
     if (new Date().getTime() - startedAt.getTime() > 10000) {
+      await this.unlock(sandboxId)
       return
     }
-
     //  prevent syncState cron from running multiple instances of the same sandbox
     let lockKey: string
 
@@ -367,11 +367,10 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
       await this.redisLockProvider.renewLock(lockKey, 60)
     } else {
       // Cron-driven: Try to acquire lock, skip if busy
-      const key = await this.tryLock(sandboxId, 360)
-      if (!key) {
+      lockKey = await this.tryLock(sandboxId, 60)
+      if (!lockKey) {
         return
       }
-      lockKey = key
     }
 
     const sandbox = await this.sandboxRepository.findOneByOrFail({
@@ -379,7 +378,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     })
 
     if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
-      await this.unlock(lockKey)
+      await this.unlock(sandboxId)
       return
     }
 
@@ -412,6 +411,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
       })
       if (!sandbox) {
         //  edge case where sandbox is deleted while desired state is being processed
+        await this.unlock(sandboxId)
         return
       }
       sandbox.state = SandboxState.ERROR
@@ -422,7 +422,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     if (syncState === SYNC_AGAIN) {
       this.syncInstanceState(sandboxId, startedAt, lockKey) // Pass the lock
     } else {
-      await this.unlock(lockKey) // Only unlock if no recursive call
+      await this.unlock(sandboxId) // Only unlock if no recursive call
     }
   }
 

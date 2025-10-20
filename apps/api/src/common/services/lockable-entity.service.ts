@@ -52,7 +52,8 @@ export abstract class LockableEntity {
   }
 
   /** Releases the lock */
-  protected async unlock(lockKey: string): Promise<void> {
+  protected async unlock(entityId: string): Promise<void> {
+    const lockKey = this.getLockKey(entityId)
     await this.redisLockProvider.unlock(lockKey)
   }
 }

@@ -207,18 +207,14 @@ export class SandboxService extends LockableEntity {
   }
 
   async archive(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
-    const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
-    const lockKey = this.getLockKey(sandboxId)
-    const acquired = await this.tryLock(lockKey, 60)
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    const lockKey = await this.tryLock(sandbox.id, 60)
 
-    if (!acquired) {
+    if (!lockKey) {
       throw new SandboxError('State change in progress')
     }
 
     try {
-      // Re-fetch with fresh state after acquiring lock
-      const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
-
       if (String(sandbox.state) !== String(sandbox.desiredState)) {
         throw new SandboxError('State change in progress')
       }
@@ -239,10 +235,10 @@ export class SandboxService extends LockableEntity {
       sandbox.desiredState = SandboxDesiredState.ARCHIVED
       await this.sandboxRepository.save(sandbox)
 
-      this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox, lockKey))
+      this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox, this.getLockKey(sandbox.id)))
       return sandbox
     } catch (error) {
-      await this.unlock(lockKey)
+      await this.unlock(sandbox.id)
       throw error
     }
   }
@@ -953,10 +949,9 @@ export class SandboxService extends LockableEntity {
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     // Fetch to get actual ID for consistent locking
     const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
-    const lockKey = this.getLockKey(sandboxId)
-    const acquired = await this.tryLock(lockKey, 60)
+    const lockKey = await this.tryLock(sandboxId, 60)
 
-    if (!acquired) {
+    if (!lockKey) {
       throw new SandboxError('State change in progress')
     }
 
@@ -973,20 +968,19 @@ export class SandboxService extends LockableEntity {
       sandbox.name = 'DESTROYED_' + sandbox.name + '_' + Date.now()
       await this.sandboxRepository.save(sandbox)
 
-      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox, lockKey))
+      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox, this.getLockKey(sandboxId)))
       return sandbox
     } catch (error) {
-      await this.unlock(lockKey)
+      await this.unlock(sandboxId)
       throw error
     }
   }
 
   async start(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
-    const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
-    const lockKey = this.getLockKey(sandboxId)
-    const acquired = await this.tryLock(sandboxId, 60)
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
+    const lockKey = await this.tryLock(sandbox.id, 60)
 
-    if (!acquired) {
+    if (!lockKey) {
       throw new SandboxError('State change in progress')
     }
 
@@ -995,10 +989,8 @@ export class SandboxService extends LockableEntity {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const sandbox = await this.findOneByIdOrName(sandboxId, organization.id)
-
       if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
-        await this.unlock(lockKey)
+        await this.unlock(sandbox.id)
         return sandbox
       }
 
@@ -1039,11 +1031,11 @@ export class SandboxService extends LockableEntity {
       sandbox.desiredState = SandboxDesiredState.STARTED
       await this.sandboxRepository.save(sandbox)
 
-      this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox, lockKey))
+      this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox, this.getLockKey(sandbox.id)))
 
       return sandbox
     } catch (error) {
-      await this.unlock(lockKey)
+      await this.unlock(sandbox.id)
       await this.rollbackPendingUsage(
         organization.id,
         pendingCpuIncrement,
@@ -1056,15 +1048,12 @@ export class SandboxService extends LockableEntity {
 
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     // Fetch to get actual ID for consistent locking
-    const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
-    const lockKey = this.getLockKey(sandboxId)
-    const acquired = await this.tryLock(lockKey, 60)
-    if (!acquired) {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    const lockKey = await this.tryLock(sandbox.id, 60)
+    if (!lockKey) {
       throw new SandboxError('State change in progress')
     }
     try {
-      const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
-
       if (String(sandbox.state) !== String(sandbox.desiredState)) {
         throw new SandboxError('State change in progress')
       }
@@ -1089,14 +1078,14 @@ export class SandboxService extends LockableEntity {
 
       const event =
         sandbox.autoDeleteInterval === 0
-          ? new SandboxDestroyedEvent(sandbox, lockKey)
-          : new SandboxStoppedEvent(sandbox, lockKey)
+          ? new SandboxDestroyedEvent(sandbox, this.getLockKey(sandbox.id))
+          : new SandboxStoppedEvent(sandbox, this.getLockKey(sandbox.id))
 
       this.eventEmitter.emit(sandbox.autoDeleteInterval === 0 ? SandboxEvents.DESTROYED : SandboxEvents.STOPPED, event)
 
       return sandbox
     } catch (error) {
-      await this.unlock(lockKey)
+      await this.unlock(sandbox.id)
       throw error
     }
   }
@@ -1265,7 +1254,7 @@ export class SandboxService extends LockableEntity {
       }
       await this.sandboxRepository.save(sandbox)
     } finally {
-      await this.unlock(lockKey)
+      await this.unlock(sandboxId)
     }
   }
 
