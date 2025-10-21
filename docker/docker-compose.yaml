@@ -2,7 +2,6 @@ name: daytona
 services:
   api:
     image: daytonaio/daytona-api
-    privileged: true
     ports:
       - 3000:3000
     environment:
@@ -10,6 +9,14 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     networks:
       - daytona-network
+    restart: always
+    privileged: true
+    depends_on:
+      - db
+      - runner
+      - redis
+      - dex
+      - registry
 
   proxy:
     image: daytonaio/daytona-proxy
@@ -17,14 +24,16 @@ services:
       - daytona-network
     ports:
       - 4000:4000
+    restart: always
 
   runner:
     image: daytonaio/daytona-runner
-    privileged: true
     networks:
       - daytona-network
     ports:
       - 3003:3003
+    privileged: true
+    restart: always
 
   ssh-gateway:
     image: daytonaio/daytona-ssh-gateway
@@ -32,16 +41,20 @@ services:
       - daytona-network
     ports:
       - 2222:2222
+    restart: always
 
   dex:
     image: dexidp/dex:v2.42.0
     volumes:
       - ./dex/config.yaml:/etc/dex/config.yaml
-    command: ['dex', 'serve', '/etc/dex/config.yaml']
+      - dex_db:/var/dex
+    entrypoint: ['sh', '-c', 'touch /var/dex/dex.db && exec dex serve /etc/dex/config.yaml']
     networks:
       - daytona-network
     ports:
       - 5556:5556
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5556/dex/.well-known/openid-configuration"]
 
   db:
     image: postgres:18
@@ -51,6 +64,8 @@ services:
       - POSTGRES_DB=daytona
     networks:
       - daytona-network
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4:9.2.0
@@ -118,6 +133,8 @@ services:
     image: maildev/maildev
     networks:
       - daytona-network
+    ports:
+      - 1080:1080
 
   minio:
     image: minio/minio:latest
@@ -130,11 +147,15 @@ services:
     command: server /data --console-address ":9001"
     networks:
       - daytona-network
+    ports:
+      - 9001:9001
 
   jaeger:
     image: jaegertracing/all-in-one:1.67.0
     networks:
       - daytona-network
+    ports:
+      - 16686:16686
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.138.0
@@ -146,6 +167,8 @@ services:
 volumes:
   registry: {}
   minio_data: {}
+  db_data: {}
+  dex_db: {}
 
 networks:
   daytona-network:
