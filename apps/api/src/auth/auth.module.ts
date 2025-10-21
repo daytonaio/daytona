@@ -65,6 +65,7 @@ import { catchError, map } from 'rxjs/operators'
             jwksUri: jwksUri,
           },
           userService,
+          configService,
         )
       },
       inject: [UserService, HttpService, TypedConfigService],

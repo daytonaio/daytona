@@ -28,7 +28,6 @@ import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { OrganizationEvents } from '../constants/organization-events.constant'
 import { CreateOrganizationQuotaDto } from '../dto/create-organization-quota.dto'
-import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/default-organization-quota'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
@@ -48,6 +47,7 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
   activeJobs = new Set<string>()
   private readonly logger = new Logger(OrganizationService.name)
+  private defaultOrganizationQuota: CreateOrganizationQuotaDto
 
   constructor(
     @InjectRepository(Organization)
@@ -59,7 +59,9 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
-  ) {}
+  ) {
+    this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
+  }
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish
@@ -207,7 +209,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     createdBy: string,
     creatorEmailVerified: boolean,
     personal = false,
-    quota: CreateOrganizationQuotaDto = DEFAULT_ORGANIZATION_QUOTA,
+    quota: CreateOrganizationQuotaDto = this.defaultOrganizationQuota,
   ): Promise<Organization> {
     if (personal) {
       const count = await entityManager.count(Organization, {
