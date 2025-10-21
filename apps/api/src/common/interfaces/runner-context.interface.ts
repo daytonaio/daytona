@@ -4,10 +4,12 @@
  */
 
 import { BaseAuthContext } from './auth-context.interface'
+import { Runner } from '../../sandbox/entities/runner.entity'
 
 export interface RunnerContext extends BaseAuthContext {
   role: 'runner'
   runnerId: string
+  runner: Runner
 }
 
 export function isRunnerContext(user: BaseAuthContext): user is RunnerContext {
