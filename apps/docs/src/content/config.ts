@@ -333,6 +333,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/rate-limits', locale),
+          label: labels['sidebarconfig.rateLimits'],
+          description: labels['sidebarconfig.rateLimitsDescription'],
+          attrs: {
+            icon: 'rate.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/network-limits', locale),
           label: labels['sidebarconfig.networkLimits'],
           description: labels['sidebarconfig.networkLimitsDescription'],

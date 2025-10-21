@@ -51,19 +51,20 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
       return true
     }
 
-    // Check 'authenticated' throttler - applies to all authenticated routes
-    // Routes can override with @Throttle({ authenticated: { limit, ttl } })
-    if (throttler.name === 'authenticated') {
+    // Skip anonymous throttler (handled by AnonymousRateLimitGuard)
+    if (throttler.name === 'anonymous') {
+      return true
+    }
+
+    // Check authenticated throttlers - applies to all authenticated routes
+    // Routes can override with @Throttle({ authenticated/sandbox-create/sandbox-lifecycle: { limit, ttl } })
+    const authenticatedThrottlers = ['authenticated', 'sandbox-create', 'sandbox-lifecycle']
+    if (authenticatedThrottlers.includes(throttler.name)) {
       if (isAuthenticated) {
         // Clear anonymous rate limit on successful authentication
         await this.clearAnonymousRateLimit(request, context)
         return super.handleRequest(requestProps)
       }
-      return true
-    }
-
-    // Skip anonymous throttler (handled by AnonymousRateLimitGuard)
-    if (throttler.name === 'anonymous') {
       return true
     }
 
