@@ -27,7 +27,11 @@ export class DockerRegistryService {
     private readonly dockerRegistryProvider: IDockerRegistryProvider,
   ) {}
 
-  async create(createDto: CreateDockerRegistryDto, organizationId?: string): Promise<DockerRegistry> {
+  async create(
+    createDto: CreateDockerRegistryDto,
+    organizationId?: string,
+    isFallback = false,
+  ): Promise<DockerRegistry> {
     //  set some limit to the number of registries
     if (organizationId) {
       const registries = await this.dockerRegistryRepository.find({
@@ -41,6 +45,7 @@ export class DockerRegistryService {
     const registry = this.dockerRegistryRepository.create({
       ...createDto,
       organizationId,
+      isFallback,
     })
     return this.dockerRegistryRepository.save(registry)
   }
