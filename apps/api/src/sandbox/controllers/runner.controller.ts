@@ -20,10 +20,14 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrGuard } from '../../auth/or.guard'
+import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
+import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
+import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+
 @ApiTags('runners')
 @Controller('runners')
 @UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
-@RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
+@RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'runner'])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class RunnerController {
@@ -55,6 +59,21 @@ export class RunnerController {
   })
   async create(@Body() createRunnerDto: CreateRunnerDto): Promise<Runner> {
     return this.runnerService.create(createRunnerDto)
+  }
+
+  @Get('/me')
+  @UseGuards(RunnerAuthGuard)
+  @ApiOperation({
+    summary: 'Get info for authenticated runner',
+    operationId: 'getInfoForAuthenticatedRunner',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Runner info',
+    type: RunnerDto,
+  })
+  async getInfoForAuthenticatedRunner(@RunnerContextDecorator() runnerContext: RunnerContext): Promise<RunnerDto> {
+    return RunnerDto.fromRunner(runnerContext.runner)
   }
 
   @Get()
