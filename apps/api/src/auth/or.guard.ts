@@ -4,6 +4,7 @@
  */
 
 import { Injectable, ExecutionContext, Logger, CanActivate, Type, mixin } from '@nestjs/common'
+import { ModuleRef } from '@nestjs/core'
 
 /**
  * Creates an OrGuard that allows access if at least one of the provided guards allows access.
@@ -20,11 +21,12 @@ export function OrGuard(guards: Type<CanActivate>[]): Type<CanActivate> {
   class OrGuardMixin implements CanActivate {
     protected readonly logger = new Logger(`OrGuard`)
 
+    constructor(private readonly moduleRef: ModuleRef) {}
+
     async canActivate(context: ExecutionContext): Promise<boolean> {
       for (const GuardClass of guards) {
         try {
-          // Instantiate the guard directly
-          const guard = new GuardClass()
+          const guard = this.moduleRef.get(GuardClass, { strict: false })
           const result = await guard.canActivate(context)
 
           if (result) {
