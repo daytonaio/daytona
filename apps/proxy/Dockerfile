@@ -41,4 +41,6 @@ ENV OIDC_AUDIENCE=daytona
 ENV REDIS_HOST=redis
 ENV REDIS_PORT=6379
 
+HEALTHCHECK CMD [ "curl", "-f", "http://localhost:4000/health" ]
+
 ENTRYPOINT ["daytona-proxy"]
