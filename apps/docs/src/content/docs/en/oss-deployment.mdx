@@ -174,21 +174,20 @@ Below is a full list of environment variables with their default values:
 
 ### Runner
 
-| Variable                   | Type    | Default Value                                | Description                           |
-| -------------------------- | ------- | -------------------------------------------- | ------------------------------------- |
-| `VERSION`                  | string  | `0.0.1`                                      | Runner service version                |
-| `ENVIRONMENT`              | string  | `development`                                | Application environment               |
-| `API_PORT`                 | number  | `3003`                                       | Runner API service port               |
-| `API_TOKEN`                | string  | `secret_api_token`                           | Runner API authentication token       |
-| `DAYTONA_BINARY_PATH`      | string  | `/workspaces/daytona/dist/apps/daemon-amd64` | Path to Daytona daemon binary         |
-| `LOG_FILE_PATH`            | string  | `/home/daytona/runner/runner.log`            | Path to runner log file               |
-| `RESOURCE_LIMITS_DISABLED` | boolean | `true`                                       | Disable resource limits for sandboxes |
-| `AWS_ENDPOINT_URL`         | string  | `http://minio:9000`                          | AWS S3-compatible storage endpoint    |
-| `AWS_REGION`               | string  | `us-east-1`                                  | AWS region                            |
-| `AWS_ACCESS_KEY_ID`        | string  | `minioadmin`                                 | AWS access key ID                     |
-| `AWS_SECRET_ACCESS_KEY`    | string  | `minioadmin`                                 | AWS secret access key                 |
-| `AWS_DEFAULT_BUCKET`       | string  | `daytona`                                    | AWS default bucket name               |
-| `SERVER_URL`               | string  | `http://api:3000/api`                        | Daytona API server URL                |
+| Variable                   | Type    | Default Value                     | Description                           |
+| -------------------------- | ------- | --------------------------------- | ------------------------------------- |
+| `VERSION`                  | string  | `0.0.1`                           | Runner service version                |
+| `ENVIRONMENT`              | string  | `development`                     | Application environment               |
+| `API_PORT`                 | number  | `3003`                            | Runner API service port               |
+| `API_TOKEN`                | string  | `secret_api_token`                | Runner API authentication token       |
+| `LOG_FILE_PATH`            | string  | `/home/daytona/runner/runner.log` | Path to runner log file               |
+| `RESOURCE_LIMITS_DISABLED` | boolean | `true`                            | Disable resource limits for sandboxes |
+| `AWS_ENDPOINT_URL`         | string  | `http://minio:9000`               | AWS S3-compatible storage endpoint    |
+| `AWS_REGION`               | string  | `us-east-1`                       | AWS region                            |
+| `AWS_ACCESS_KEY_ID`        | string  | `minioadmin`                      | AWS access key ID                     |
+| `AWS_SECRET_ACCESS_KEY`    | string  | `minioadmin`                      | AWS secret access key                 |
+| `AWS_DEFAULT_BUCKET`       | string  | `daytona`                         | AWS default bucket name               |
+| `SERVER_URL`               | string  | `http://api:3000/api`             | Daytona API server URL                |
 
 ### SSH Gateway
 

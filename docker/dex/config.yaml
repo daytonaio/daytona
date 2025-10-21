@@ -1,7 +1,10 @@
 # config.yaml
 issuer: http://localhost:5556/dex
 storage:
-  type: memory
+  type: sqlite3
+  config:
+    file: /var/dex/dex.db
+
 web:
   http: 0.0.0.0:5556
   allowedOrigins: ['*']

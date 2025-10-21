@@ -343,9 +343,9 @@ func (g *SSHGateway) connectToRunner(sandboxId string, runnerDomain string, sign
 		host = "localhost"
 	}
 
-	// Handle localdev case: if runnerDomain contains a port, remove it
+	// Handle case with port: if runnerDomain contains a port, remove it
 	// For example: "localtest.me:3003" -> "localtest.me"
-	if strings.Contains(host, "localtest.me") && strings.Contains(host, ":") {
+	if strings.Contains(host, ":") {
 		if idx := strings.Index(host, ":"); idx != -1 {
 			host = host[:idx]
 		}
