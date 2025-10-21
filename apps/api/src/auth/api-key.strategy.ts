@@ -123,6 +123,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
         return {
           role: 'runner',
           runnerId: runner.id,
+          runner,
         }
       }
     } catch (error) {

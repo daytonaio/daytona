@@ -2312,6 +2312,26 @@ paths:
       summary: Create runner
       tags:
         - runners
+  /runners/me:
+    get:
+      operationId: getInfoForAuthenticatedRunner
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runner'
+          description: Runner info
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get info for authenticated runner
+      tags:
+        - runners
   /runners/{id}/scheduling:
     patch:
       operationId: updateRunnerScheduling
