@@ -9,7 +9,7 @@
       "options": {
         "commands": [
           "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i dist/apps/api/openapi.json -g python --additional-properties=packageName=daytona_api_client_async,projectName=daytona_api_client_async,packageVersion=$DEFAULT_PACKAGE_VERSION,pythonPackageName=daytona_api_client_async,disallowAdditionalPropertiesIfNotPresent=false,library=asyncio -o {projectRoot}",
-          "sed -i 's/^license = \".*\"/license = \"Apache-2.0\"/' {projectRoot}/pyproject.toml"
+          "bash hack/python-client/postprocess.sh {projectRoot}"
         ],
         "parallel": false
       },
