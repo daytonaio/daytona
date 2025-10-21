@@ -12,7 +12,7 @@ import { UserService } from '../user/user.service'
 import { AuthContext } from '../common/interfaces/auth-context.interface'
 import { Request } from 'express'
 import { CustomHeaders } from '../common/constants/header.constants'
-import { DEFAULT_ORGANIZATION_QUOTA } from '../common/constants/default-organization-quota'
+import { TypedConfigService } from '../config/typed-config.service'
 
 interface JwtStrategyConfig {
   jwksUri: string
@@ -28,6 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly options: JwtStrategyConfig,
     private readonly userService: UserService,
+    private readonly configService: TypedConfigService,
   ) {
     super({
       secretOrKeyProvider: passportJwtSecret({
@@ -62,7 +63,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         name: payload.name || payload.username || 'Unknown',
         email: payload.email || '',
         emailVerified: payload.email_verified || false,
-        personalOrganizationQuota: DEFAULT_ORGANIZATION_QUOTA,
+        personalOrganizationQuota: this.configService.getOrThrow('defaultOrganizationQuota'),
       })
       this.logger.debug(`Created new user with ID: ${userId}`)
     } else if (user.name === 'Unknown' || !user.email) {
