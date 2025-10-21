@@ -72,13 +72,7 @@ import { RegionDto } from '../dto/region.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
-import { Throttle, seconds } from '@nestjs/throttler'
-import {
-  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT,
-  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL,
-  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT,
-  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL,
-} from '../../config/defaults'
+import { SkipThrottle } from '@nestjs/throttler'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -86,6 +80,7 @@ import {
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@SkipThrottle({ 'sandbox-create': true, 'sandbox-lifecycle': true })
 export class SandboxController {
   private readonly logger = new Logger(SandboxController.name)
 
@@ -234,12 +229,7 @@ export class SandboxController {
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
-  @Throttle({
-    authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT, 10),
-      ttl: seconds(parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL, 10)),
-    },
-  })
+  @SkipThrottle({ authenticated: true, 'sandbox-create': false })
   @ApiOperation({
     summary: 'Create a new sandbox',
     operationId: 'createSandbox',
@@ -384,14 +374,7 @@ export class SandboxController {
   }
 
   @Delete(':sandboxIdOrName')
-  @Throttle({
-    authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
-      ttl: seconds(
-        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
-      ),
-    },
-  })
+  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
   @ApiOperation({
     summary: 'Delete sandbox',
     operationId: 'deleteSandbox',
@@ -424,14 +407,7 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/start')
   @HttpCode(200)
-  @Throttle({
-    authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
-      ttl: seconds(
-        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
-      ),
-    },
-  })
+  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
   @ApiOperation({
     summary: 'Start sandbox',
     operationId: 'startSandbox',
@@ -470,14 +446,7 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/stop')
   @HttpCode(200) //  for Daytona Api compatibility
-  @Throttle({
-    authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
-      ttl: seconds(
-        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
-      ),
-    },
-  })
+  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
   @ApiOperation({
     summary: 'Stop sandbox',
     operationId: 'stopSandbox',
@@ -847,14 +816,7 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/archive')
   @HttpCode(200)
-  @Throttle({
-    authenticated: {
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
-      ttl: seconds(
-        parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
-      ),
-    },
-  })
+  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
   @ApiOperation({
     summary: 'Archive sandbox',
     operationId: 'archiveSandbox',

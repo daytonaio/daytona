@@ -159,6 +159,16 @@ import { APP_GUARD } from '@nestjs/core'
               ttl: seconds(configService.get('rateLimit.authenticated.ttl')),
               limit: configService.get('rateLimit.authenticated.limit'),
             },
+            {
+              name: 'sandbox-create',
+              ttl: seconds(configService.get('rateLimit.sandboxCreate.ttl')),
+              limit: configService.get('rateLimit.sandboxCreate.limit'),
+            },
+            {
+              name: 'sandbox-lifecycle',
+              ttl: seconds(configService.get('rateLimit.sandboxLifecycle.ttl')),
+              limit: configService.get('rateLimit.sandboxLifecycle.limit'),
+            },
           ],
           storage: new ThrottlerStorageRedisService(redis),
         }

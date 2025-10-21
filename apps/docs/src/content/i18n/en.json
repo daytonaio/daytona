@@ -51,6 +51,8 @@
   "sidebarconfig.organizationsDescription": "Learn how to create, manage, and remove Organizations using the Daytona SDK.",
   "sidebarconfig.limits": "Limits",
   "sidebarconfig.limitsDescription": "Limits and tiers assigned to Organizations.",
+  "sidebarconfig.rateLimits": "Rate Limits",
+  "sidebarconfig.rateLimitsDescription": "API rate limits for authenticated and anonymous requests.",
   "sidebarconfig.billing": "Billing",
   "sidebarconfig.billingDescription": "Billing management for Organizations.",
   "sidebarconfig.linkedAccounts": "Linked Accounts",
