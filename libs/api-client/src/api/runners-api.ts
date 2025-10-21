@@ -85,6 +85,40 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
+     * @summary Get info for authenticated runner
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getInfoForAuthenticatedRunner: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/runners/me`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Get runner by sandbox ID
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -270,6 +304,27 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get info for authenticated runner
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getInfoForAuthenticatedRunner(
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getInfoForAuthenticatedRunner(options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['RunnersApi.getInfoForAuthenticatedRunner']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Get runner by sandbox ID
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -380,6 +435,15 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
+     * @summary Get info for authenticated runner
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
+      return localVarFp.getInfoForAuthenticatedRunner(options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Get runner by sandbox ID
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -438,6 +502,19 @@ export class RunnersApi extends BaseAPI {
   public createRunner(createRunner: CreateRunner, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
       .createRunner(createRunner, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get info for authenticated runner
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof RunnersApi
+   */
+  public getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig) {
+    return RunnersApiFp(this.configuration)
+      .getInfoForAuthenticatedRunner(options)
       .then((request) => request(this.axios, this.basePath))
   }
 
