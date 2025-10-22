@@ -19,7 +19,6 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
 )
 
 //go:embed repl_worker.py
@@ -234,7 +233,7 @@ func (c *Context) start() error {
 	c.info.Active = true
 	c.done = make(chan struct{})
 
-	log.Debugf("Started interpreter context %s with PID %d", c.info.ID, c.cmd.Process.Pid)
+	c.logger.Debug("Started interpreter context", "contextId", c.info.ID, "pid", c.cmd.Process.Pid)
 
 	// Start reading worker output
 	go c.workerReadLoop()
@@ -291,7 +290,7 @@ func (c *Context) workerReadLoop() {
 		var chunk map[string]any
 		err := json.Unmarshal([]byte(line), &chunk)
 		if err != nil {
-			log.Errorf("Failed to parse worker chunk: %v", err)
+			c.logger.Error("Failed to parse worker chunk", "error", err)
 			continue
 		}
 		c.handleChunk(chunk)
@@ -299,7 +298,7 @@ func (c *Context) workerReadLoop() {
 
 	err := scanner.Err()
 	if err != nil {
-		log.Errorf("Error reading from worker: %v", err)
+		c.logger.Error("Error reading from worker", "error", err)
 	}
 }
 
@@ -393,9 +392,9 @@ func (c *Context) monitorProcess() {
 			}
 		}
 		c.commandMu.Unlock()
-		log.Errorf("Interpreter context %s process exited with error: %v", contextID, err)
+		c.logger.Error("Interpreter context process exited with error", "contextId", contextID, "error", err)
 	} else {
-		log.Debugf("Interpreter context %s process exited normally", contextID)
+		c.logger.Debug("Interpreter context process exited normally", "contextId", contextID)
 	}
 
 	// Close WebSocket client if any
@@ -435,10 +434,10 @@ func (c *Context) shutdown() {
 		select {
 		case <-done:
 			// Process exited gracefully
-			log.Debugf("Interpreter context %s shut down gracefully", contextID)
+			c.logger.Debug("Interpreter context shut down gracefully", "contextId", contextID)
 		case <-time.After(2 * time.Second):
 			// Timeout - force kill
-			log.Debugf("Interpreter context %s shutdown timeout, force killing", contextID)
+			c.logger.Debug("Interpreter context shutdown timeout, force killing", "contextId", contextID)
 			if cancel != nil {
 				cancel()
 			}

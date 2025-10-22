@@ -230,6 +230,10 @@ Below is a full list of environment variables with their default values:
 | `DAYTONA_API_URL`                       | string  | `http://api:3000/api`             | Daytona API URL                                       |
 | `DAYTONA_RUNNER_TOKEN`                  | string  | `secret_api_token`                | Runner API authentication token                       |
 | `VERSION`                               | string  | `0.0.1`                           | Runner service version                                |
+| `OTEL_LOGGING_ENABLED`                  | boolean | `false`                           | Runner OpenTelemetry logging enabled                  |
+| `OTEL_TRACING_ENABLED`                  | boolean | `false`                           | Runner OpenTelemetry tracing enabled                  |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`           | string  | (empty)                           | Runner OpenTelemetry OTLP exporter endpoint           |
+| `OTEL_EXPORTER_OTLP_HEADERS`            | string  | (empty)                           | Runner OpenTelemetry OTLP exporter headers            |
 | `ENVIRONMENT`                           | string  | `development`                     | Application environment                               |
 | `API_PORT`                              | number  | `3003`                            | Runner API service port                               |
 | `LOG_FILE_PATH`                         | string  | `/home/daytona/runner/runner.log` | Path to runner log file                               |

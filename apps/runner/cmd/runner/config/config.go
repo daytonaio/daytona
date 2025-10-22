@@ -20,9 +20,14 @@ type Config struct {
 	DaytonaApiUrl                      string        `envconfig:"DAYTONA_API_URL"`
 	ApiToken                           string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
 	ApiPort                            int           `envconfig:"API_PORT"`
+	ApiLogRequests                     bool          `envconfig:"API_LOG_REQUESTS" default:"false"`
 	TLSCertFile                        string        `envconfig:"TLS_CERT_FILE"`
 	TLSKeyFile                         string        `envconfig:"TLS_KEY_FILE"`
 	EnableTLS                          bool          `envconfig:"ENABLE_TLS"`
+	OtelLoggingEnabled                 bool          `envconfig:"OTEL_LOGGING_ENABLED"`
+	OtelTracingEnabled                 bool          `envconfig:"OTEL_TRACING_ENABLED"`
+	OtelEndpoint                       string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+	OtelHeaders                        string        `envconfig:"OTEL_EXPORTER_OTLP_HEADERS"`
 	CacheRetentionDays                 int           `envconfig:"CACHE_RETENTION_DAYS"`
 	Environment                        string        `envconfig:"ENVIRONMENT"`
 	ContainerRuntime                   string        `envconfig:"CONTAINER_RUNTIME"`
@@ -107,6 +112,25 @@ func GetConfig() (*Config, error) {
 	}
 
 	return config, nil
+}
+
+func (c *Config) GetOtelHeaders() map[string]string {
+	headers := map[string]string{}
+	for _, pair := range strings.Split(c.OtelHeaders, ",") {
+		pair = strings.TrimSpace(pair)
+		if pair == "" {
+			continue
+		}
+
+		k, v, found := strings.Cut(pair, "=")
+		if !found {
+			continue
+		}
+
+		headers[strings.TrimSpace(k)] = strings.TrimSpace(v)
+	}
+
+	return headers
 }
 
 func GetContainerRuntime() string {

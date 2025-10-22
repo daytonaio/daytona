@@ -13,8 +13,6 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 
-	log "github.com/sirupsen/logrus"
-
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/common-go/pkg/utils"
 )
@@ -46,7 +44,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	// Ignore err because we want to destroy the container even if it exited
 	state, _ := d.DeduceSandboxState(ctx, containerId)
 	if state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying {
-		log.Debugf("Sandbox %s is already destroyed or destroying", containerId)
+		d.logger.DebugContext(ctx, "Sandbox is already destroyed or destroying", "containerId", containerId)
 		d.statesCache.SetSandboxState(ctx, containerId, state)
 		return nil
 	}
@@ -63,7 +61,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 				containerShortId := ct.ID[:12]
 				err = d.netRulesManager.DeleteNetworkRules(containerShortId)
 				if err != nil {
-					log.Errorf("Failed to delete sandbox network settings: %v", err)
+					d.logger.ErrorContext(ctx, "Failed to delete sandbox network settings", "error", err)
 				}
 			}()
 
@@ -76,8 +74,8 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 			return nil
 		}
 
-		log.Warnf("Failed to remove stopped sandbox without force: %v", err)
-		log.Warnf("Trying to remove stopped sandbox with force")
+		d.logger.WarnContext(ctx, "Failed to remove stopped sandbox without force", "error", err)
+		d.logger.WarnContext(ctx, "Trying to remove stopped sandbox with force")
 	}
 
 	// Use exponential backoff helper for container removal
@@ -106,7 +104,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		containerShortId := ct.ID[:12]
 		err = d.netRulesManager.DeleteNetworkRules(containerShortId)
 		if err != nil {
-			log.Errorf("Failed to delete sandbox network settings: %v", err)
+			d.logger.ErrorContext(ctx, "Failed to delete sandbox network settings", "error", err)
 		}
 	}()
 
@@ -147,7 +145,7 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		return err
 	}
 
-	log.Debugf("Destroyed sandbox %s removed successfully", containerId)
+	d.logger.DebugContext(ctx, "Destroyed sandbox removed successfully", "containerId", containerId)
 
 	return nil
 }

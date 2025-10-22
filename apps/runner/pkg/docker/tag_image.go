@@ -10,9 +10,7 @@ import (
 )
 
 func (d *DockerClient) TagImage(ctx context.Context, sourceImage string, targetImage string) error {
-	if d.logWriter != nil {
-		fmt.Fprintf(d.logWriter, "Tagging image %s as %s...\n", sourceImage, targetImage)
-	}
+	d.logger.InfoContext(ctx, "Tagging image", "sourceImage", sourceImage, "targetImage", targetImage)
 
 	// Extract repository and tag from targetImage
 	lastColonIndex := strings.LastIndex(targetImage, ":")
@@ -34,9 +32,7 @@ func (d *DockerClient) TagImage(ctx context.Context, sourceImage string, targetI
 		return err
 	}
 
-	if d.logWriter != nil {
-		fmt.Fprintf(d.logWriter, "Image tagged successfully: %s → %s\n", sourceImage, targetImage)
-	}
+	d.logger.InfoContext(ctx, "Image tagged successfully", "sourceImage", sourceImage, "targetImage", targetImage)
 
 	return nil
 }

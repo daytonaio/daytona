@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
-	log "github.com/sirupsen/logrus"
 )
 
 // normalizePath removes all trailing slashes from a path to ensure consistent comparison.
@@ -36,7 +35,7 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 	d.lastVolumeCleanup = time.Now()
 
 	dryRun := d.volumeCleanupDryRun
-	log.Infof("Volume cleanup dry-run: %v", dryRun)
+	d.logger.InfoContext(ctx, "Volume cleanup", "dry-run", dryRun)
 
 	volumeMountBasePath := getVolumeMountBasePath()
 	mountDirs, err := filepath.Glob(filepath.Join(volumeMountBasePath, volumeMountPrefix+"*"))
@@ -46,7 +45,7 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 
 	inUse, err := d.getInUseVolumeMounts(ctx)
 	if err != nil {
-		log.Errorf("Volume cleanup aborted: %v", err)
+		d.logger.ErrorContext(ctx, "Volume cleanup aborted", "error", err)
 		return
 	}
 
@@ -60,11 +59,11 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 			continue
 		}
 		if dryRun {
-			log.Infof("[DRY-RUN] Would clean orphaned volume mount: %s", dir)
+			d.logger.InfoContext(ctx, "[DRY-RUN] Would clean orphaned volume mount", "path", dir)
 			continue
 		}
-		log.Infof("Cleaning orphaned volume mount: %s", dir)
-		d.unmountAndRemoveDir(dir)
+		d.logger.InfoContext(ctx, "Cleaning orphaned volume mount", "path", dir)
+		d.unmountAndRemoveDir(ctx, dir)
 	}
 }
 
@@ -90,7 +89,7 @@ func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) (map[string]boo
 	return inUse, nil
 }
 
-func (d *DockerClient) unmountAndRemoveDir(path string) {
+func (d *DockerClient) unmountAndRemoveDir(ctx context.Context, path string) {
 	mountBasePath := getVolumeMountBasePath()
 	volumeMountPath := filepath.Join(mountBasePath, volumeMountPrefix)
 	cleanPath := filepath.Clean(path)
@@ -100,36 +99,36 @@ func (d *DockerClient) unmountAndRemoveDir(path string) {
 
 	if d.isDirectoryMounted(cleanPath) {
 		if err := exec.Command("umount", cleanPath).Run(); err != nil {
-			log.Errorf("Failed to unmount %s: %v", cleanPath, err)
+			d.logger.ErrorContext(ctx, "Failed to unmount directory", "path", cleanPath, "error", err)
 			return
 		}
 		// Was FUSE mounted, data is on S3 - safe to remove
 		if err := os.RemoveAll(cleanPath); err != nil {
-			log.Errorf("Failed to remove %s: %v", cleanPath, err)
+			d.logger.ErrorContext(ctx, "Failed to remove directory", "path", cleanPath, "error", err)
 		}
 		return
 	}
 
 	// Not mounted - might have unsynced local data
-	if isDirEmpty(cleanPath) {
+	if d.isDirEmpty(ctx, cleanPath) {
 		if err := os.Remove(cleanPath); err != nil {
-			log.Errorf("Failed to remove %s: %v", cleanPath, err)
+			d.logger.ErrorContext(ctx, "Failed to remove directory", "path", cleanPath, "error", err)
 		}
 		return
 	}
 
 	timestamp := time.Now().Unix()
 	garbagePath := filepath.Join(mountBasePath, fmt.Sprintf("garbage-%d-%s", timestamp, strings.TrimPrefix(filepath.Base(cleanPath), volumeMountPrefix)))
-	log.Debugf("Renaming non-empty volume directory: %s", garbagePath)
+	d.logger.DebugContext(ctx, "Renaming non-empty volume directory", "path", garbagePath)
 	if err := os.Rename(cleanPath, garbagePath); err != nil {
-		log.Errorf("Failed to rename %s: %v", cleanPath, err)
+		d.logger.ErrorContext(ctx, "Failed to rename directory", "path", cleanPath, "error", err)
 	}
 }
 
-func isDirEmpty(path string) bool {
+func (d *DockerClient) isDirEmpty(ctx context.Context, path string) bool {
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		log.Errorf("Failed to read directory %s: %v", path, err)
+		d.logger.ErrorContext(ctx, "Failed to read directory", "path", path, "error", err)
 		return false
 	}
 	return len(entries) == 0

@@ -6,6 +6,7 @@ package telemetry
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"runtime"
 	"strconv"
@@ -22,8 +23,6 @@ import (
 	sdk_metric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // InitMetrics initializes OpenTelemetry Metrics with an OTLP HTTP exporter.
@@ -62,43 +61,43 @@ func InitMetrics(ctx context.Context, config Config, meterName string) (*sdk_met
 
 	// Get container limits
 	limits := getContainerLimits()
-	log.Infof("Detected container limits - CPU: %.2f cores, Memory: %d bytes (%.2f GB)",
-		limits.CPULimit,
-		limits.MemoryLimit,
-		float64(limits.MemoryLimit)/1073741824.0)
+	slog.Info("Detected container limits",
+		"cpu_cores", limits.CPULimit,
+		"memory_bytes", limits.MemoryLimit,
+		"memory_gb", float64(limits.MemoryLimit)/1073741824.0)
 
-	// ADDED: Log initial disk stats for verification
+	// Log initial disk stats for verification
 	if diskStats, err := getDiskStats("/"); err == nil {
-		log.Infof("Detected filesystem - Total: %.2f GB, Used: %.2f GB, Available: %.2f GB",
-			float64(diskStats.Total)/1073741824.0,
-			float64(diskStats.Used)/1073741824.0,
-			float64(diskStats.Available)/1073741824.0)
+		slog.Info("Detected filesystem",
+			"total_gb", float64(diskStats.Total)/1073741824.0,
+			"used_gb", float64(diskStats.Used)/1073741824.0,
+			"available_gb", float64(diskStats.Available)/1073741824.0)
 	}
 
 	// Register container limits metrics
 	if err := registerLimitsMetrics(meterName, mp, limits); err != nil {
-		log.Warnf("Failed to register container limits metrics: %v", err)
+		slog.Warn("Failed to register container limits metrics", "error", err)
 	}
 
 	// Register container usage metrics
 	if err := registerUsageMetrics(meterName, mp, limits); err != nil {
-		log.Warnf("Failed to register container usage metrics: %v", err)
+		slog.Warn("Failed to register container usage metrics", "error", err)
 	}
 
 	// Register disk usage metrics
 	if err := registerDiskUsageMetrics(meterName, mp); err != nil {
-		log.Warnf("Failed to register disk usage metrics: %v", err)
+		slog.Warn("Failed to register disk usage metrics", "error", err)
 	}
 
 	// Start runtime metrics collection
 	if err := otel_runtime.Start(otel_runtime.WithMinimumReadMemStatsInterval(time.Second)); err != nil {
-		log.Warnf("Failed to start runtime metrics: %v", err)
+		slog.Warn("Failed to start runtime metrics", "error", err)
 	}
 
 	// Start host metrics collection
-	log.Info("Starting host metrics collection")
+	slog.Info("Starting host metrics collection")
 	if err := host.Start(host.WithMeterProvider(mp)); err != nil {
-		log.Warnf("Failed to start host metrics: %v", err)
+		slog.Warn("Failed to start host metrics", "error", err)
 	}
 
 	return mp, nil
@@ -110,7 +109,7 @@ func ShutdownMeter(mp *sdk_metric.MeterProvider) {
 	defer cancel()
 
 	if err := mp.Shutdown(ctx); err != nil {
-		log.Printf("Error shutting down meter provider: %v", err)
+		fmt.Fprintf(os.Stderr, "Error shutting down meter provider: %v\n", err)
 	}
 }
 
@@ -423,7 +422,7 @@ func registerDiskUsageMetrics(name string, mp *sdk_metric.MeterProvider) error {
 			// Get disk stats for root filesystem
 			diskStats, err := getDiskStats("/")
 			if err != nil {
-				log.Warnf("Failed to get disk stats: %v", err)
+				slog.Warn("Failed to get disk stats", "error", err)
 				return nil // Don't fail the entire callback
 			}
 

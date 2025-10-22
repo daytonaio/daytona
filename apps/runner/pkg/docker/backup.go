@@ -12,8 +12,6 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type backupContext struct {
@@ -30,7 +28,7 @@ func (d *DockerClient) CreateBackup(ctx context.Context, containerId string, bac
 		backup_context.cancel()
 	}
 
-	log.Infof("Creating backup for container %s...", containerId)
+	d.logger.InfoContext(ctx, "Creating backup for container", "containerId", containerId)
 
 	return d.createBackup(containerId, backupDto)
 }
@@ -42,12 +40,12 @@ func (d *DockerClient) CreateBackupAsync(ctx context.Context, containerId string
 		backup_context.cancel()
 	}
 
-	log.Infof("Creating backup for container %s...", containerId)
+	d.logger.InfoContext(ctx, "Creating backup for container", "containerId", containerId)
 
 	go func() {
 		err := d.createBackup(containerId, backupDto)
 		if err != nil {
-			log.Errorf("Error creating backup for container %s: %v", containerId, err)
+			d.logger.ErrorContext(ctx, "Error creating backup for container", "containerId", containerId, "error", err)
 		}
 	}()
 
@@ -73,15 +71,15 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
-			log.Infof("Backup for container %s canceled", containerId)
+			d.logger.InfoContext(ctx, "Backup canceled for container", "containerId", containerId)
 			return err
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
-			log.Errorf("Backup for container %s timed out during commit", containerId)
+			d.logger.ErrorContext(ctx, "Backup timed out during commit", "containerId", containerId)
 			return err
 		}
-		log.Errorf("Error committing container %s: %v", containerId, err)
+		d.logger.ErrorContext(ctx, "Error committing container", "containerId", containerId, "error", err)
 		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 		return err
 	}
@@ -90,26 +88,26 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
-			log.Infof("Backup for container %s canceled", containerId)
+			d.logger.InfoContext(ctx, "Backup canceled for container", "containerId", containerId)
 			return err
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
-			log.Errorf("Backup for container %s timed out during push", containerId)
+			d.logger.ErrorContext(ctx, "Backup timed out during push", "containerId", containerId)
 			return err
 		}
-		log.Errorf("Error pushing image %s: %v", backupDto.Snapshot, err)
+		d.logger.ErrorContext(ctx, "Error pushing image", "image", backupDto.Snapshot, "error", err)
 		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 		return err
 	}
 
 	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
 
-	log.Infof("Backup (%s) for container %s created successfully", backupDto.Snapshot, containerId)
+	d.logger.InfoContext(ctx, "Backup created successfully", "snapshot", backupDto.Snapshot, "containerId", containerId)
 
 	err = d.RemoveImage(ctx, backupDto.Snapshot, true)
 	if err != nil {
-		log.Errorf("Error removing image %s: %v", backupDto.Snapshot, err)
+		d.logger.ErrorContext(ctx, "Error removing image", "image", backupDto.Snapshot, "error", err)
 		// Don't set backup to failed because the image is already pushed
 	}
 

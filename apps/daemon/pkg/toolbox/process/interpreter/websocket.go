@@ -5,20 +5,22 @@ package interpreter
 
 import (
 	"encoding/json"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
 )
 
 // attachWebSocket connects a WebSocket client to the interpreter context
 func (c *Context) attachWebSocket(ws *websocket.Conn) {
+	clientId := uuid.NewString()
 	cl := &wsClient{
-		id:   uuid.NewString(),
-		conn: ws,
-		send: make(chan wsFrame, 1024),
-		done: make(chan struct{}),
+		id:     clientId,
+		conn:   ws,
+		send:   make(chan wsFrame, 1024),
+		done:   make(chan struct{}),
+		logger: c.logger.With(slog.String("clientId", clientId)),
 	}
 
 	c.mu.Lock()
@@ -28,7 +30,7 @@ func (c *Context) attachWebSocket(ws *websocket.Conn) {
 	c.client = cl
 	c.mu.Unlock()
 
-	log.Debugf("Client %s attached to interpreter context %s", cl.id, c.info.ID)
+	c.logger.Debug("Client attached to interpreter context", "clientId", cl.id, "contextId", c.info.ID)
 
 	go c.clientWriter(cl)
 
@@ -42,7 +44,7 @@ func (c *Context) attachWebSocket(ws *websocket.Conn) {
 	c.mu.Unlock()
 
 	cl.close()
-	log.Debugf("Client %s detached from interpreter context %s", cl.id, c.info.ID)
+	c.logger.Debug("Client detached from interpreter context", "clientId", cl.id, "contextId", c.info.ID)
 }
 
 // clientWriter sends output messages to the WebSocket client
@@ -60,7 +62,7 @@ func (c *Context) clientWriter(cl *wsClient) {
 
 			err := cl.writeFrame(frame)
 			if err != nil {
-				log.Debugf("Failed to write frame: %v", err)
+				c.logger.Debug("Failed to write frame", "error", err)
 			}
 			if frame.close != nil {
 				return
@@ -82,7 +84,7 @@ func (c *Context) emitOutput(msg *OutputMessage) {
 	select {
 	case cl.send <- wsFrame{output: msg}:
 	default:
-		log.Debug("Client send channel full - closing slow consumer")
+		c.logger.Debug("Client send channel full - closing slow consumer")
 		cl.requestClose(websocket.ClosePolicyViolation, "slow consumer")
 
 		c.mu.Lock()
@@ -109,7 +111,7 @@ func (cl *wsClient) close() {
 			}
 		case <-timer.C:
 			// Timeout reached, proceed with closing
-			log.Debug("Timeout waiting for client writer to finish")
+			cl.logger.Debug("Timeout waiting for client writer to finish")
 		}
 
 		// Wait for client's close frame response (proper WebSocket handshake)
@@ -163,7 +165,7 @@ func (cl *wsClient) requestClose(code int, message string) {
 	select {
 	case cl.send <- frame:
 	default:
-		log.Debug("Couldn't send close frame to client - closing connection")
+		cl.logger.Debug("Couldn't send close frame to client - closing connection")
 	}
 
 	cl.close()

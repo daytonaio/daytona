@@ -53,30 +53,30 @@ func (s *Service) Start(ctx context.Context) {
 	inProgressJobs, _, err := s.client.JobsAPI.ListJobs(ctx).Status(apiclient.JOBSTATUS_IN_PROGRESS).Execute()
 	if err != nil {
 		// Only log error
-		s.log.Warn("Failed to fetch IN_PROGRESS jobs", slog.Any("error", err))
+		s.log.WarnContext(ctx, "Failed to fetch IN_PROGRESS jobs", "error", err)
 	} else {
 		if inProgressJobs != nil && len(inProgressJobs.Items) > 0 {
-			s.log.Info("Found IN_PROGRESS jobs", slog.Int("count", len(inProgressJobs.Items)))
+			s.log.InfoContext(ctx, "Found IN_PROGRESS jobs", "count", len(inProgressJobs.Items))
 			for _, job := range inProgressJobs.Items {
 				go s.executor.Execute(ctx, &job)
 			}
 		} else {
-			s.log.Info("No IN_PROGRESS jobs found")
+			s.log.InfoContext(ctx, "No IN_PROGRESS jobs found")
 		}
 	}
 
-	s.log.Info("Starting job poller")
+	s.log.InfoContext(ctx, "Starting job poller")
 
 	for {
 		select {
 		case <-ctx.Done():
-			s.log.Info("Job poller stopped")
+			s.log.InfoContext(ctx, "Job poller stopped")
 			return
 		default:
 			// Poll for jobs
 			jobs, err := s.pollJobs(ctx)
 			if err != nil {
-				s.log.Warn("Failed to poll jobs", slog.Any("error", err))
+				s.log.ErrorContext(ctx, "Failed to poll jobs", "error", err)
 				// Wait a bit before retrying on error
 				time.Sleep(5 * time.Second)
 				continue
@@ -84,7 +84,7 @@ func (s *Service) Start(ctx context.Context) {
 
 			// Process jobs
 			if len(jobs) > 0 {
-				s.log.Debug("Received jobs", slog.Int("count", len(jobs)))
+				s.log.DebugContext(ctx, "Received jobs", "count", len(jobs))
 				for _, job := range jobs {
 					// Execute job in goroutine for parallel processing
 					go s.executor.Execute(ctx, &job)

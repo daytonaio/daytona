@@ -14,8 +14,6 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) (string, error) {
@@ -73,7 +71,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 		processesCtx := context.Background()
 		go func() {
 			if err := d.startDaytonaDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
-				log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
+				d.logger.ErrorContext(ctx, "Failed to start Daytona daemon", "error", err)
 			}
 		}()
 	}
@@ -93,7 +91,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 			containerShortId := c.ID[:12]
 			err = d.netRulesManager.SetNetworkLimiter(containerShortId, containerIP)
 			if err != nil {
-				log.Errorf("Failed to set network limiter: %v", err)
+				d.logger.ErrorContext(ctx, "Failed to set network limiter", "error", err)
 			}
 		}()
 	}

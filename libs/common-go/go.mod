@@ -6,8 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/redis/go-redis/v9 v9.10.0
-	github.com/sirupsen/logrus v1.9.3
-	go.opentelemetry.io/contrib/bridges/otellogrus v0.13.0
+	go.opentelemetry.io/contrib/bridges/otelslog v0.13.0
 	go.opentelemetry.io/contrib/instrumentation/host v0.64.0
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.64.0
 	go.opentelemetry.io/otel v1.40.0
