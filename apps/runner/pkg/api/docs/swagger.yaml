@@ -482,6 +482,42 @@ paths:
       summary: Destroy sandbox
       tags:
         - sandbox
+  /sandboxes/{sandboxId}/logs:
+    get:
+      description: Get the entire log output of a sandbox container
+      operationId: Logs
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: Container logs
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get sandbox logs
+      tags:
+        - sandbox
   /sandboxes/{sandboxId}/network-settings:
     get:
       description: Get sandbox network settings

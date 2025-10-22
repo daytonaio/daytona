@@ -5,12 +5,14 @@ package controllers
 
 import (
 	"errors"
+	"io"
 	"net/http"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
+	"github.com/docker/docker/api/types/container"
 	"github.com/gin-gonic/gin"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -405,4 +407,47 @@ func RemoveDestroyed(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "Sandbox removed")
+}
+
+// Logs 			godoc
+//
+//	@Tags			sandbox
+//	@Summary		Get sandbox logs
+//	@Description	Get the entire log output of a sandbox container
+//	@Produce		text/plain
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		200			{string}	string	"Container logs"
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/logs [get]
+//
+//	@id				Logs
+func Logs(ctx *gin.Context) {
+	sandboxId := ctx.Param("sandboxId")
+
+	runner := runner.GetInstance(nil)
+
+	// Get container logs using Docker API
+	logs, err := runner.Docker.ApiClient().ContainerLogs(ctx.Request.Context(), sandboxId, container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Timestamps: false,
+	})
+	if err != nil {
+		ctx.Error(common_errors.NewNotFoundError(errors.New("container not found or logs unavailable")))
+		return
+	}
+	defer logs.Close()
+
+	// Set content type to plain text
+	ctx.Header("Content-Type", "text/plain")
+
+	// Copy logs directly to response
+	_, err = io.Copy(ctx.Writer, logs)
+	if err != nil {
+		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+		return
+	}
 }
