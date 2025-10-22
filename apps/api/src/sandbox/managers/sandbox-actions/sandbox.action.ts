@@ -11,6 +11,7 @@ import { Sandbox } from '../../entities/sandbox.entity'
 import { Repository } from 'typeorm'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { ToolboxService } from '../../services/toolbox.service'
+import { BackupState } from '../../enums/backup-state.enum'
 
 export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -54,6 +55,10 @@ export abstract class SandboxAction {
 
     if (daemonVersion !== undefined) {
       sandbox.daemonVersion = daemonVersion
+    }
+
+    if (sandbox.state == SandboxState.DESTROYED) {
+      sandbox.backupState = BackupState.NONE
     }
 
     await this.sandboxRepository.save(sandbox)
