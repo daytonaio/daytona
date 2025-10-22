@@ -12,12 +12,10 @@ import (
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/pkg/jsonmessage"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) PushImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) error {
-	log.Infof("Pushing image %s...", imageName)
+	d.log.InfoContext(ctx, "Pushing image", "imageName", imageName)
 
 	responseBody, err := d.apiClient.ImagePush(ctx, imageName, image.PushOptions{
 		RegistryAuth: getRegistryAuth(reg),
@@ -32,7 +30,7 @@ func (d *DockerClient) PushImage(ctx context.Context, imageName string, reg *dto
 		return err
 	}
 
-	log.Infof("Image %s pushed successfully", imageName)
+	d.log.InfoContext(ctx, "Image pushed successfully", "imageName", imageName)
 
 	return nil
 }
