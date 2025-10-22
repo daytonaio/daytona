@@ -2183,6 +2183,50 @@ paths:
       summary: Get build logs
       tags:
         - sandbox
+  /sandbox/{sandboxIdOrName}/logs:
+    get:
+      operationId: getSandboxLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Whether to include timestamps in the logs
+          explode: true
+          in: query
+          name: timestamps
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Sandbox logs
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get sandbox logs
+      tags:
+        - sandbox
   /sandbox/{sandboxIdOrName}/ssh-access:
     delete:
       operationId: revokeSshAccess
