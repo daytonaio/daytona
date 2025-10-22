@@ -6,11 +6,10 @@ package process
 import (
 	"bytes"
 	"errors"
+	"log/slog"
 	"net/http"
 	"os/exec"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,78 +26,80 @@ import (
 //	@Router			/process/execute [post]
 //
 //	@id				ExecuteCommand
-func ExecuteCommand(c *gin.Context) {
-	var request ExecuteRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("command is required"))
-		return
-	}
-
-	cmdParts := parseCommand(request.Command)
-	if len(cmdParts) == 0 {
-		c.AbortWithError(http.StatusBadRequest, errors.New("empty command"))
-		return
-	}
-
-	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-	if request.Cwd != nil {
-		cmd.Dir = *request.Cwd
-	}
-
-	// set maximum execution time
-	timeout := 360 * time.Second
-	if request.Timeout != nil && *request.Timeout > 0 {
-		timeout = time.Duration(*request.Timeout) * time.Second
-	}
-
-	timeoutReached := false
-	timer := time.AfterFunc(timeout, func() {
-		timeoutReached = true
-		if cmd.Process != nil {
-			// kill the process group
-			err := cmd.Process.Kill()
-			if err != nil {
-				log.Error(err)
-				return
-			}
-		}
-	})
-	defer timer.Stop()
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		if timeoutReached {
-			c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
+func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request ExecuteRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.AbortWithError(http.StatusBadRequest, errors.New("command is required"))
 			return
 		}
-		if exitError, ok := err.(*exec.ExitError); ok {
-			exitCode := exitError.ExitCode()
+
+		cmdParts := parseCommand(request.Command)
+		if len(cmdParts) == 0 {
+			c.AbortWithError(http.StatusBadRequest, errors.New("empty command"))
+			return
+		}
+
+		cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+		if request.Cwd != nil {
+			cmd.Dir = *request.Cwd
+		}
+
+		// set maximum execution time
+		timeout := 360 * time.Second
+		if request.Timeout != nil && *request.Timeout > 0 {
+			timeout = time.Duration(*request.Timeout) * time.Second
+		}
+
+		timeoutReached := false
+		timer := time.AfterFunc(timeout, func() {
+			timeoutReached = true
+			if cmd.Process != nil {
+				// kill the process group
+				err := cmd.Process.Kill()
+				if err != nil {
+					logger.Error("failed to kill process", "error", err)
+					return
+				}
+			}
+		})
+		defer timer.Stop()
+
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			if timeoutReached {
+				c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
+				return
+			}
+			if exitError, ok := err.(*exec.ExitError); ok {
+				exitCode := exitError.ExitCode()
+				c.JSON(http.StatusOK, ExecuteResponse{
+					ExitCode: exitCode,
+					Result:   string(output),
+				})
+				return
+			}
 			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: exitCode,
+				ExitCode: -1,
 				Result:   string(output),
 			})
 			return
 		}
+
+		if cmd.ProcessState == nil {
+			c.JSON(http.StatusOK, ExecuteResponse{
+				ExitCode: -1,
+				Result:   string(output),
+			})
+			return
+		}
+
+		exitCode := cmd.ProcessState.ExitCode()
 		c.JSON(http.StatusOK, ExecuteResponse{
-			ExitCode: -1,
+			ExitCode: exitCode,
 			Result:   string(output),
 		})
-		return
 	}
-
-	if cmd.ProcessState == nil {
-		c.JSON(http.StatusOK, ExecuteResponse{
-			ExitCode: -1,
-			Result:   string(output),
-		})
-		return
-	}
-
-	exitCode := cmd.ProcessState.ExitCode()
-	c.JSON(http.StatusOK, ExecuteResponse{
-		ExitCode: exitCode,
-		Result:   string(output),
-	})
 }
 
 // parseCommand splits a command string properly handling quotes

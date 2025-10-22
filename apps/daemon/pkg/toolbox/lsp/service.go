@@ -6,10 +6,12 @@ package lsp
 import (
 	"encoding/base64"
 	"fmt"
+	"log/slog"
 	"sync"
 )
 
 type LSPService struct {
+	logger  *slog.Logger
 	servers map[string]LSPServer
 }
 
@@ -18,9 +20,10 @@ var (
 	once     sync.Once
 )
 
-func GetLSPService() *LSPService {
+func GetLSPService(logger *slog.Logger) *LSPService {
 	once.Do(func() {
 		instance = &LSPService{
+			logger:  logger,
 			servers: make(map[string]LSPServer),
 		}
 	})
@@ -36,11 +39,11 @@ func (s *LSPService) Get(languageId string, pathToProject string) (LSPServer, er
 
 	switch languageId {
 	case "typescript":
-		server := NewTypeScriptLSPServer()
+		server := NewTypeScriptLSPServer(s.logger)
 		s.servers[key] = server
 		return server, nil
 	case "python":
-		server := NewPythonLSPServer()
+		server := NewPythonLSPServer(s.logger)
 		s.servers[key] = server
 		return server, nil
 	default:
@@ -57,7 +60,7 @@ func (s *LSPService) Start(languageId string, pathToProject string) error {
 			return nil
 		}
 	} else {
-		newServer := NewTypeScriptLSPServer()
+		newServer := NewTypeScriptLSPServer(s.logger)
 		s.servers[key] = newServer
 		server = newServer
 	}

@@ -16,7 +16,6 @@ import (
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/docker/docker/api/types/container"
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId string, workDir string) error {
@@ -87,7 +86,7 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 			go func() {
 				err := d.initializeDaemon(containerIP, *authToken)
 				if err != nil {
-					log.Errorf("Failed to initialize daemon telemetry: %v", err)
+					d.logger.ErrorContext(ctx, "Failed to initialize daemon telemetry", "error", err)
 				}
 			}()
 

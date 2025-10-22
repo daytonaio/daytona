@@ -4,17 +4,19 @@
 package session
 
 import (
+	"log/slog"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/session"
 )
 
 type SessionController struct {
+	logger         *slog.Logger
 	configDir      string
 	sessionService *session.SessionService
 }
 
-func NewSessionController(configDir, workDir string, terminationGracePeriodSeconds, terminationCheckIntervalMilliseconds int) *SessionController {
+func NewSessionController(logger *slog.Logger, configDir, workDir string, terminationGracePeriodSeconds, terminationCheckIntervalMilliseconds int) *SessionController {
 	if terminationGracePeriodSeconds <= 0 {
 		terminationGracePeriodSeconds = 5 // default to 5 seconds
 	}
@@ -26,9 +28,10 @@ func NewSessionController(configDir, workDir string, terminationGracePeriodSecon
 	terminationGracePeriod := time.Duration(terminationGracePeriodSeconds) * time.Second
 	terminationCheckInterval := time.Duration(terminationCheckIntervalMilliseconds) * time.Millisecond
 
-	service := session.NewSessionService(configDir, terminationGracePeriod, terminationCheckInterval)
+	service := session.NewSessionService(logger, configDir, terminationGracePeriod, terminationCheckInterval)
 
 	return &SessionController{
+		logger:         logger.With(slog.String("component", "session_controller")),
 		configDir:      configDir,
 		sessionService: service,
 	}

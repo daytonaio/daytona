@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -17,6 +18,7 @@ import (
 
 	golog "log"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/recording"
@@ -24,13 +26,30 @@ import (
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
-	log "github.com/sirupsen/logrus"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 )
 
 func main() {
+	logLevel := log.ParseLogLevel(os.Getenv("LOG_LEVEL"))
+
+	// Create the console handler with tint for colored output
+	consoleHandler := tint.NewHandler(os.Stdout, &tint.Options{
+		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
+		TimeFormat: time.RFC3339,
+		Level:      logLevel,
+	})
+
+	logger := slog.New(consoleHandler)
+	slog.SetDefault(logger)
+
+	// Redirect standard library log to slog
+	golog.SetOutput(&log.DebugLogWriter{})
+
 	c, err := config.GetConfig()
 	if err != nil {
-		panic(err)
+		logger.Error("Failed to get config", "error", err)
+		os.Exit(2)
 	}
 
 	// Check if user wants to read entrypoint logs
@@ -44,31 +63,39 @@ func main() {
 	if c.DaemonLogFilePath != "" {
 		logFile, err := os.OpenFile(c.DaemonLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Error("Failed to open log file at ", c.DaemonLogFilePath)
+			logger.Error("Failed to open log file", "path", c.DaemonLogFilePath, "error", err)
 		} else {
 			defer logFile.Close()
 			logWriter = logFile
+
+			fileHandler := slog.NewTextHandler(logWriter, &slog.HandlerOptions{
+				Level: logLevel,
+			})
+			handler := log.NewMultiHandler([]slog.Handler{consoleHandler, fileHandler}...)
+
+			logger = slog.New(handler)
+			slog.SetDefault(logger)
 		}
 	}
 
-	initLogs(logWriter)
-
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		panic(fmt.Errorf("failed to get user home directory: %w", err))
+		logger.Error("Failed to get user home directory", "error", err)
+		return
 	}
 
 	configDir := filepath.Join(homeDir, ".daytona")
 	err = os.MkdirAll(configDir, 0755)
 	if err != nil {
-		panic(fmt.Errorf("failed to create config directory: %w", err))
+		logger.Error("Failed to create config directory", "path", configDir, "error", err)
+		return
 	}
 
 	// If workdir in image is not set, use user home as workdir
 	if c.UserHomeAsWorkDir {
 		err = os.Chdir(homeDir)
 		if err != nil {
-			log.Warnf("failed to change working directory to home directory: %v", err)
+			logger.Warn("Failed to change working directory to home directory", "error", err)
 		}
 	}
 
@@ -83,7 +110,9 @@ func main() {
 		if c.EntrypointLogFilePath != "" {
 			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
-				log.Errorf("Failed to open log file at %s due to %v, fallback to STDOUT and STDERR", c.EntrypointLogFilePath, err)
+				logger.Error("Failed to open log file, fallback to STDOUT and STDERR",
+					"path", c.EntrypointLogFilePath,
+					"error", err)
 			} else {
 				defer entrypointLogFile.Close()
 				entrypointLogWriter = entrypointLogFile
@@ -101,13 +130,13 @@ func main() {
 		// while allowing the daemon to continue initialization without blocking.
 		startErr := entrypointCmd.Start()
 		if startErr != nil {
-			fmt.Fprintf(entrypointErrLogWriter, "failed to start command: %v\n", startErr)
+			fmt.Fprintf(entrypointErrLogWriter, "Failed to start command: %v\n", startErr)
 		} else {
 			entrypointWg.Add(1)
 			go func() {
 				defer entrypointWg.Done()
 				if err := entrypointCmd.Wait(); err != nil {
-					fmt.Fprintf(entrypointErrLogWriter, "command exited with error: %v\n", err)
+					fmt.Fprintf(entrypointErrLogWriter, "Command exited with error: %v\n", err)
 				} else {
 					fmt.Fprint(entrypointLogWriter, "Entrypoint command completed successfully\n")
 				}
@@ -119,16 +148,18 @@ func main() {
 
 	workDir, err := os.Getwd()
 	if err != nil {
-		panic(fmt.Errorf("failed to get current working directory: %w", err))
+		logger.Error("Failed to get current working directory", "error", err)
+		return
 	}
 
 	recordingsDir := c.RecordingsDir
 	if recordingsDir == "" {
 		recordingsDir = filepath.Join(configDir, "recordings")
 	}
-	recordingService := recording.NewRecordingService(recordingsDir)
+	recordingService := recording.NewRecordingService(logger, recordingsDir)
 
 	toolBoxServer := toolbox.NewServer(toolbox.ServerConfig{
+		Logger:                               logger,
 		WorkDir:                              workDir,
 		ConfigDir:                            configDir,
 		OtelEndpoint:                         c.OtelEndpoint,
@@ -155,15 +186,13 @@ func main() {
 
 	// Start recording dashboard server
 	go func() {
-		if err := recordingdashboard.NewDashboardServer(recordingService).Start(); err != nil {
+		if err := recordingdashboard.NewDashboardServer(logger, recordingService).Start(); err != nil {
 			errChan <- err
 		}
 	}()
 
-	sshServer := &ssh.Server{
-		WorkDir:        workDir,
-		DefaultWorkDir: workDir,
-	}
+	sshServer := ssh.NewServer(logger, workDir, workDir)
+
 	go func() {
 		if err := sshServer.Start(); err != nil {
 			errChan <- err
@@ -177,23 +206,23 @@ func main() {
 	// Wait for either an error or shutdown signal
 	select {
 	case err := <-errChan:
-		log.Errorf("Error: %v", err)
+		logger.Error("Error occurred", "error", err)
 	case sig := <-sigChan:
-		log.Infof("Received signal %v, shutting down gracefully...", sig)
+		logger.Info("Received signal, shutting down gracefully...", "signal", sig)
 	}
 
 	// Graceful shutdown
-	log.Info("Stopping computer use processes...")
+	logger.Info("Stopping computer use processes...")
 	if toolBoxServer.ComputerUse != nil {
 		_, err := toolBoxServer.ComputerUse.Stop()
 		if err != nil {
-			log.Errorf("Failed to stop computer use: %v", err)
+			logger.Error("Failed to stop computer use", "error", err)
 		}
 	}
 
 	// Handle entrypoint command shutdown
 	if entrypointCmd != nil && entrypointCmd.Process != nil {
-		log.Info("Waiting for entrypoint command to complete...")
+		logger.Info("Waiting for entrypoint command to complete...")
 
 		// Create a channel to signal when WaitGroup is done
 		done := make(chan struct{})
@@ -206,14 +235,14 @@ func main() {
 		timer := time.NewTimer(time.Duration(c.EntrypointShutdownTimeoutSec) * time.Second)
 		select {
 		case <-done:
-			log.Info("Entrypoint command completed")
+			logger.Info("Entrypoint command completed")
 			if !timer.Stop() {
 				<-timer.C
 			}
 		case <-timer.C:
-			log.Warn("Entrypoint command did not complete within timeout, sending SIGTERM...")
+			logger.Warn("Entrypoint command did not complete within timeout, sending SIGTERM...")
 			if err := entrypointCmd.Process.Signal(syscall.SIGTERM); err != nil {
-				log.Errorf("Failed to send SIGTERM to entrypoint command: %v", err)
+				logger.Error("Failed to send SIGTERM to entrypoint command", "error", err)
 			}
 
 			// Wait a bit more for SIGTERM to take effect
@@ -228,43 +257,17 @@ func main() {
 
 			select {
 			case <-gracefulDone:
-				log.Info("Entrypoint command terminated gracefully")
+				logger.Info("Entrypoint command terminated gracefully")
 			case <-ctx.Done():
-				log.Warn("Entrypoint command did not respond to SIGTERM, sending SIGKILL...")
+				logger.Warn("Entrypoint command did not respond to SIGTERM, sending SIGKILL...")
 				if err := entrypointCmd.Process.Kill(); err != nil {
-					log.Errorf("Failed to kill entrypoint command: %v", err)
+					logger.Error("Failed to kill entrypoint command", "error", err)
 				}
 				entrypointWg.Wait()
-				log.Info("Entrypoint command killed")
+				logger.Info("Entrypoint command killed")
 			}
 		}
 	}
 
-	log.Info("Shutdown complete")
-}
-
-func initLogs(logWriter io.Writer) {
-	logLevel := log.WarnLevel
-
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
-
-	if logLevelSet {
-		var err error
-		logLevel, err = log.ParseLevel(logLevelEnv)
-		if err != nil {
-			logLevel = log.WarnLevel
-		}
-	}
-
-	log.SetLevel(logLevel)
-	logFormatter := &config.LogFormatter{
-		TextFormatter: &log.TextFormatter{
-			ForceColors: true,
-		},
-		LogFileWriter: logWriter,
-	}
-
-	log.SetFormatter(logFormatter)
-
-	golog.SetOutput(log.New().WriterLevel(log.DebugLevel))
+	logger.Info("Shutdown complete")
 }

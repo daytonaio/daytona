@@ -5,6 +5,7 @@ package lsp
 
 import (
 	"context"
+	"log/slog"
 )
 
 type LSPServer interface {
@@ -21,6 +22,8 @@ type LSPServer interface {
 
 type LSPServerAbstract struct {
 	client *Client
+
+	logger *slog.Logger
 
 	languageId  string
 	initialized bool

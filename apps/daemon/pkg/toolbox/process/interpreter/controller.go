@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -14,19 +15,18 @@ import (
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
 )
 
-func NewInterpreterController(workDir string) *Controller {
+func NewInterpreterController(logger *slog.Logger, workDir string) *Controller {
 	InitManager(workDir)
 	// Pre-warm the default interpreter context to reduce latency on first request
 	go func() {
-		_, err := GetOrCreateDefaultContext()
+		_, err := GetOrCreateDefaultContext(logger)
 		if err != nil {
-			log.Debugf("Failed to pre-create default interpreter context: %v", err)
+			logger.Debug("Failed to pre-create default interpreter context", "error", err)
 		}
 	}()
-	return &Controller{workDir: workDir}
+	return &Controller{logger: logger.With(slog.String("component", "interpreter_controller")), workDir: workDir}
 }
 
 // CreateContext creates a new interpreter context
@@ -65,7 +65,7 @@ func (c *Controller) CreateContext(ctx *gin.Context) {
 		cwd = *req.Cwd
 	}
 
-	iCtx, err := CreateContext(cwd, language)
+	iCtx, err := CreateContext(c.logger, cwd, language)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -136,7 +136,7 @@ func (c *Controller) Execute(ctx *gin.Context) {
 	var iCtx *Context
 
 	if req.ContextID == nil {
-		iCtx, err = GetOrCreateDefaultContext()
+		iCtx, err = GetOrCreateDefaultContext(c.logger)
 		if err != nil {
 			writeWSError(ws, "failed to get default context: "+err.Error(), websocket.CloseInternalServerErr)
 			return

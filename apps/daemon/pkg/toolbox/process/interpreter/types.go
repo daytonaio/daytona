@@ -6,6 +6,7 @@ package interpreter
 import (
 	"context"
 	"io"
+	"log/slog"
 	"os/exec"
 	"sync"
 	"time"
@@ -54,6 +55,7 @@ const (
 
 // Controller handles interpreter-related HTTP endpoints
 type Controller struct {
+	logger  *slog.Logger
 	workDir string
 }
 
@@ -92,6 +94,8 @@ type ContextInfo struct {
 // Context represents an active interpreter context with operational methods
 type Context struct {
 	info ContextInfo
+
+	logger *slog.Logger
 
 	cmd        *exec.Cmd
 	stdin      io.WriteCloser
@@ -143,6 +147,7 @@ type wsClient struct {
 	send      chan wsFrame
 	done      chan struct{} // signals when clientWriter exits
 	closeOnce sync.Once
+	logger    *slog.Logger
 }
 
 type wsFrame struct {

@@ -8,8 +8,6 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/runner/pkg/common"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // RecoverFromStorageLimit attempts to recover a sandbox from storage limit issues
@@ -36,8 +34,16 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	newExpansion := currentExpansion + increment
 	newStorageQuota := originalStorageQuota + newExpansion
 
-	log.Infof("Storage recovery for sandbox %s: original=%.2fGB, current=%.2fGB, currentExpansion=%.2fGB, increment=%.2fGB, newExpansion=%.2fGB, newTotal=%.2fGB, max=%.2fGB",
-		sandboxId, originalStorageQuota, currentStorage, currentExpansion, increment, newExpansion, newStorageQuota, maxExpansion)
+	d.logger.InfoContext(ctx, "Sandbox storage recovery",
+		"sandboxId", sandboxId,
+		"originalStorageQuota", originalStorageQuota,
+		"currentStorage", currentStorage,
+		"currentExpansion", currentExpansion,
+		"increment", increment,
+		"newExpansion", newExpansion,
+		"newStorageQuota", newStorageQuota,
+		"maxExpansion", maxExpansion,
+	)
 
 	// Validate expansion limit
 	if newExpansion > maxExpansion {
@@ -46,7 +52,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 
 	// Stop container if running
 	if originalContainer.State.Running {
-		log.Info("Stopping sandbox")
+		d.logger.InfoContext(ctx, "Stopping sandbox", "sandboxId", sandboxId)
 		err = d.stopContainerWithRetry(ctx, sandboxId, 2)
 		if err != nil {
 			return fmt.Errorf("failed to stop sandbox: %w", err)

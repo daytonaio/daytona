@@ -4,12 +4,8 @@
 package config
 
 import (
-	"os"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -39,8 +35,7 @@ func GetConfig() (*Config, error) {
 
 	err := envconfig.Process("", config)
 	if err != nil {
-		log.Error(err)
-		os.Exit(2)
+		return nil, err
 	}
 
 	var validate = validator.New()

@@ -6,6 +6,7 @@ package ssh
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 
@@ -14,21 +15,20 @@ import (
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
 	"golang.org/x/sys/unix"
-
-	log "github.com/sirupsen/logrus"
 )
 
-// min returns the smaller of two integers
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
+type Server struct {
+	logger         *slog.Logger
+	workDir        string
+	defaultWorkDir string
 }
 
-type Server struct {
-	WorkDir        string
-	DefaultWorkDir string
+func NewServer(logger *slog.Logger, workDir, defaultWorkDir string) *Server {
+	return &Server{
+		logger:         logger.With(slog.String("component", "ssh_server")),
+		workDir:        workDir,
+		defaultWorkDir: defaultWorkDir,
+	}
 }
 
 func (s *Server) Start() error {
@@ -39,22 +39,22 @@ func (s *Server) Start() error {
 		Addr: fmt.Sprintf(":%d", config.SSH_PORT),
 		PublicKeyHandler: func(ctx ssh.Context, key ssh.PublicKey) bool {
 			// Allow all public key authentication attempts
-			log.Debugf("Public key authentication accepted for user: %s", ctx.User())
+			s.logger.Debug("Public key authentication accepted", "user", ctx.User())
 			return true
 		},
 		PasswordHandler: func(ctx ssh.Context, password string) bool {
-			log.Debugf("Password authentication attempt for user: %s", ctx.User())
+			s.logger.Debug("Password authentication attempt", "user", ctx.User())
 			if len(password) > 0 {
-				log.Debugf("Received password length: %d, starts with: %s", len(password), password[:min(len(password), 3)])
+				s.logger.Debug("Received password", "length", len(password))
 			} else {
-				log.Debugf("Received empty password")
+				s.logger.Debug("Received empty password")
 			}
 			// Only allow authentication with the hardcoded password 'sandbox-ssh'
 			authenticated := password == "sandbox-ssh"
 			if authenticated {
-				log.Debugf("Password authentication succeeded for user: %s", ctx.User())
+				s.logger.Debug("Password authentication succeeded", "user", ctx.User())
 			} else {
-				log.Debugf("Password authentication failed for user: %s (wrong password)", ctx.User())
+				s.logger.Debug("Password authentication failed (wrong password)", "user", ctx.User())
 			}
 			return authenticated
 		},
@@ -65,7 +65,7 @@ func (s *Server) Start() error {
 				s.sftpHandler(session)
 				return
 			default:
-				log.Errorf("Subsystem %s not supported\n", ss)
+				s.logger.Error("Subsystem not supported", "subsystem", ss)
 				session.Exit(1)
 				return
 			}
@@ -102,15 +102,15 @@ func (s *Server) Start() error {
 		},
 	}
 
-	log.Printf("Starting ssh server on port %d...\n", config.SSH_PORT)
+	s.logger.Info("Starting ssh server", "port", config.SSH_PORT)
 	return sshServer.ListenAndServe()
 }
 
 func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
-	dir := s.WorkDir
+	dir := s.workDir
 
-	if _, err := os.Stat(s.WorkDir); os.IsNotExist(err) {
-		dir = s.DefaultWorkDir
+	if _, err := os.Stat(s.workDir); os.IsNotExist(err) {
+		dir = s.defaultWorkDir
 	}
 
 	env := []string{}
@@ -118,7 +118,7 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	if ssh.AgentRequested(session) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
-			log.Errorf("Failed to start agent listener: %v", err)
+			s.logger.Error("Failed to start agent listener", "error", err)
 			return
 		}
 		defer l.Close()
@@ -149,7 +149,7 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	if err != nil {
 		// Debug log here because this gets called on each ssh "exit"
 		// TODO: Find a better way to handle this
-		log.Debugf("Failed to spawn tty: %v", err)
+		s.logger.Debug("Failed to spawn tty", "error", err)
 		return
 	}
 }
@@ -167,7 +167,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	if ssh.AgentRequested(session) {
 		l, err := ssh.NewAgentListener()
 		if err != nil {
-			log.Errorf("Failed to start agent listener: %v", err)
+			s.logger.Error("Failed to start agent listener", "error", err)
 			return
 		}
 		defer l.Close()
@@ -175,22 +175,22 @@ func (s *Server) handleNonPty(session ssh.Session) {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", "SSH_AUTH_SOCK", l.Addr().String()))
 	}
 
-	cmd.Dir = s.WorkDir
-	if _, err := os.Stat(s.WorkDir); os.IsNotExist(err) {
-		cmd.Dir = s.DefaultWorkDir
+	cmd.Dir = s.workDir
+	if _, err := os.Stat(s.workDir); os.IsNotExist(err) {
+		cmd.Dir = s.defaultWorkDir
 	}
 
 	cmd.Stdout = session
 	cmd.Stderr = session.Stderr()
 	stdinPipe, err := cmd.StdinPipe()
 	if err != nil {
-		log.Errorf("Unable to setup stdin for session: %v", err)
+		s.logger.Error("Unable to setup stdin for session", "error", err)
 		return
 	}
 	go func() {
 		_, err := io.Copy(stdinPipe, session)
 		if err != nil {
-			log.Errorf("Unable to read from session: %v", err)
+			s.logger.Error("Unable to read from session", "error", err)
 			return
 		}
 		_ = stdinPipe.Close()
@@ -198,7 +198,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 
 	err = cmd.Start()
 	if err != nil {
-		log.Errorf("Unable to start command: %v", err)
+		s.logger.Error("Unable to start command", "error", err)
 		return
 	}
 	sigs := make(chan ssh.Signal, 1)
@@ -212,21 +212,21 @@ func (s *Server) handleNonPty(session ssh.Session) {
 			signal := s.osSignalFrom(sig)
 			err := cmd.Process.Signal(signal)
 			if err != nil {
-				log.Warnf("Unable to send signal to process: %v", err)
+				s.logger.Warn("Unable to send signal to process", "error", err)
 			}
 		}
 	}()
 	err = cmd.Wait()
 
 	if err != nil {
-		log.Println(session.RawCommand(), " ", err)
+		s.logger.Info("Command exited", "command", session.RawCommand(), "error", err)
 		session.Exit(127)
 		return
 	}
 
 	err = session.Exit(0)
 	if err != nil {
-		log.Warnf("Unable to exit session: %v", err)
+		s.logger.Warn("Unable to exit session", "error", err)
 	}
 }
 
@@ -275,12 +275,12 @@ func (s *Server) sftpHandler(session ssh.Session) {
 		serverOptions...,
 	)
 	if err != nil {
-		log.Errorf("sftp server init error: %s\n", err)
+		s.logger.Error("sftp server init error", "error", err)
 		return
 	}
 	if err := server.Serve(); err == io.EOF {
 		server.Close()
 	} else if err != nil {
-		log.Errorf("sftp server completed with error: %s\n", err)
+		s.logger.Error("sftp server completed with error", "error", err)
 	}
 }

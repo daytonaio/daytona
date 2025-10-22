@@ -12,7 +12,6 @@ import (
 
 	"github.com/creack/pty"
 	"github.com/daytonaio/daemon/pkg/common"
-	log "github.com/sirupsen/logrus"
 )
 
 // Info returns the current session information
@@ -69,7 +68,7 @@ func (s *PTYSession) start() error {
 	s.ptmx = ptmx
 	s.info.Active = true
 
-	log.Debugf("Started PTY session %s with PID %d", s.info.ID, s.cmd.Process.Pid)
+	s.logger.Debug("Started PTY session", "sessionId", s.info.ID, "pid", s.cmd.Process.Pid)
 
 	// 1) PTY -> clients broadcaster
 	go s.ptyReadLoop()
@@ -119,7 +118,7 @@ func (s *PTYSession) start() error {
 		// Remove session from manager - process has exited and won't be reused
 		ptyManager.Delete(sessionID)
 
-		log.Debugf("PTY session %s process exited with code %d%s and cleaned up", sessionID, exitCode, exitReason)
+		s.logger.Debug("PTY session process exited and cleaned up", "sessionId", sessionID, "exitCode", exitCode, "exitReason", exitReason)
 	}()
 
 	return nil
@@ -226,7 +225,7 @@ func (s *PTYSession) resize(cols, rows uint16) error {
 
 	if s.ptmx != nil {
 		if err := pty.Setsize(s.ptmx, &pty.Winsize{Cols: cols, Rows: rows}); err != nil {
-			log.Debug("PTY resize error:", err)
+			s.logger.Debug("PTY resize error", "error", err)
 			return err
 		}
 	} else {

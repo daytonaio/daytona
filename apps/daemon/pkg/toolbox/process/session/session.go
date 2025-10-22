@@ -10,7 +10,6 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/internal/util"
-	log "github.com/sirupsen/logrus"
 )
 
 // CreateSession godoc
@@ -36,7 +35,7 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
 	versionComparison, err := util.CompareVersions(sdkVersion, "0.103.0-0")
 	if err != nil {
-		log.Error(err)
+		s.logger.ErrorContext(c.Request.Context(), "failed to compare versions", "error", err)
 		versionComparison = util.Pointer(1)
 	}
 

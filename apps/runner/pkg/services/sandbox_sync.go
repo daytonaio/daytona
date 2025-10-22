@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
@@ -13,15 +14,16 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
-	log "github.com/sirupsen/logrus"
 )
 
 type SandboxSyncServiceConfig struct {
+	Logger   *slog.Logger
 	Docker   *docker.DockerClient
 	Interval time.Duration
 }
 
 type SandboxSyncService struct {
+	log      *slog.Logger
 	docker   *docker.DockerClient
 	interval time.Duration
 	client   *apiclient.APIClient
@@ -29,6 +31,7 @@ type SandboxSyncService struct {
 
 func NewSandboxSyncService(config SandboxSyncServiceConfig) *SandboxSyncService {
 	return &SandboxSyncService{
+		log:      config.Logger.With(slog.String("component", "sandbox_sync_service")),
 		docker:   config.Docker,
 		interval: config.Interval,
 	}
@@ -54,7 +57,7 @@ func (s *SandboxSyncService) GetLocalContainerStates(ctx context.Context) (map[s
 		// Get the current state of this container
 		state, err := s.docker.DeduceSandboxState(ctx, sandboxId)
 		if err != nil {
-			log.Debugf("Failed to deduce state for sandbox %s: %v", sandboxId, err)
+			s.log.DebugContext(ctx, "Failed to deduce state for sandbox", "sandboxId", sandboxId, "error", err)
 			continue
 		}
 
@@ -123,12 +126,11 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 		convertedRemoteState := s.convertFromApiState(remoteState)
 
 		if localState != convertedRemoteState {
-			log.Infof("State mismatch for sandbox %s: local=%s, remote=%s",
-				sandboxId, localState, convertedRemoteState)
+			s.log.InfoContext(ctx, "State mismatch for sandbox", "sandboxId", sandboxId, "localState", localState, "remoteState", convertedRemoteState)
 
 			err := s.SyncSandboxState(ctx, sandboxId, localState)
 			if err != nil {
-				log.Errorf("Failed to sync state for sandbox %s: %v", sandboxId, err)
+				s.log.ErrorContext(ctx, "Failed to sync state for sandbox", "sandboxId", sandboxId, "error", err)
 				continue
 			}
 			syncCount++
@@ -136,7 +138,7 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 	}
 
 	if syncCount > 0 {
-		log.Infof("Synchronized %d sandbox states", syncCount)
+		s.log.InfoContext(ctx, "Synchronized sandbox states", "syncCount", syncCount)
 	}
 
 	return nil
@@ -144,12 +146,12 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 
 // StartSyncProcess starts a background goroutine that synchronizes sandbox states
 func (s *SandboxSyncService) StartSyncProcess(ctx context.Context) {
-	fmt.Println("Starting sandbox sync process")
+	s.log.InfoContext(ctx, "Starting sandbox sync process")
 	go func() {
 		// Perform initial sync
 		err := s.PerformSync(ctx)
 		if err != nil {
-			log.Errorf("Failed to perform initial sync: %v", err)
+			s.log.ErrorContext(ctx, "Failed to perform initial sync", "error", err)
 		}
 
 		// Set up ticker for periodic sync
@@ -161,10 +163,10 @@ func (s *SandboxSyncService) StartSyncProcess(ctx context.Context) {
 			case <-ticker.C:
 				err := s.PerformSync(ctx)
 				if err != nil {
-					log.Errorf("Failed to perform sync: %v", err)
+					s.log.ErrorContext(ctx, "Failed to perform sync", "error", err)
 				}
 			case <-ctx.Done():
-				log.Info("Sandbox sync service stopped")
+				s.log.InfoContext(ctx, "Sandbox sync service stopped")
 				return
 			}
 		}
