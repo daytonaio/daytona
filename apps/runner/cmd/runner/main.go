@@ -5,15 +5,11 @@ package main
 
 import (
 	"context"
-	"io"
 	"log/slog"
 	"os"
 	"os/signal"
-	"path/filepath"
-	"strings"
+	"syscall"
 	"time"
-
-	golog "log"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/internal/metrics"
@@ -29,54 +25,86 @@ import (
 	"github.com/daytonaio/runner/pkg/runner/v2/poller"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/daytonaio/runner/pkg/sshgateway"
+	"github.com/daytonaio/runner/pkg/telemetry"
 	"github.com/docker/docker/client"
-	"github.com/joho/godotenv"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
-
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
-
-	log "github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
 )
 
 func main() {
+	// Init slog logger
+	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
+		TimeFormat: time.RFC3339,
+		Level:      util.ParseLogLevel(os.Getenv("LOG_LEVEL")),
+	}))
+
+	slog.SetDefault(logger)
+
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Errorf("Failed to get config: %v", err)
+		logger.Error("Failed to get config", "error", err)
 		return
 	}
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	// Init telemetry
+	otelCfg := telemetry.OtelConfig{
+		TracingEnabled: cfg.OtelTracingEnabled,
+		LoggingEnabled: cfg.OtelLoggingEnabled,
+		Environment:    cfg.Environment,
+	}
+
+	shutdownTracing, err := telemetry.InitTracing(otelCfg)
 	if err != nil {
-		log.Errorf("Error creating Docker client: %v", err)
+		logger.Error("Failed to initialize tracing", "error", err)
+		return
+	}
+	defer shutdownTracing()
+
+	// Reassign logger to get the instrumented logger instance with OTEL support.
+	// so all subsequent code uses the instrumented logger instead of the original.
+	logger, shutdownLogging, err := telemetry.InitLogging(otelCfg, logger)
+	if err != nil {
+		logger.Error("Failed to initialize OTEL logging", "error", err)
+		return
+	}
+	defer shutdownLogging()
+
+	cli, err := client.NewClientWithOpts(
+		client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+		client.WithTraceProvider(otel.GetTracerProvider()),
+	)
+	if err != nil {
+		logger.Error("Error creating Docker client", "error", err)
 		return
 	}
 
 	// Initialize net rules manager
 	persistent := cfg.Environment != "development"
-	netRulesManager, err := netrules.NewNetRulesManager(persistent)
+	netRulesManager, err := netrules.NewNetRulesManager(logger, persistent)
 	if err != nil {
-		log.Error(err)
+		logger.Error("Failed to initialize net rules manager", "error", err)
 		return
 	}
 
 	// Start net rules manager
 	if err = netRulesManager.Start(); err != nil {
-		log.Error(err)
+		logger.Error("Failed to start net rules manager", "error", err)
 		return
 	}
 	defer netRulesManager.Stop()
 
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
-		log.Errorf("Error writing daemon binary: %v", err)
+		logger.Error("Error writing daemon binary", "error", err)
 		return
 	}
 
 	pluginPath, err := daemon.WriteStaticBinary("daytona-computer-use")
 	if err != nil {
-		log.Errorf("Error writing plugin binary: %v", err)
+		logger.Error("Error writing plugin binary", "error", err)
 		return
 	}
 
@@ -87,8 +115,8 @@ func main() {
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:                 cli,
+		Logger:                    logger,
 		StatesCache:               statesCache,
-		LogWriter:                 os.Stdout,
 		AWSRegion:                 cfg.AWSRegion,
 		AWSEndpointUrl:            cfg.AWSEndpointUrl,
 		AWSAccessKeyId:            cfg.AWSAccessKeyId,
@@ -110,19 +138,22 @@ func main() {
 			dockerClient.CleanupOrphanedVolumeMounts(ctx)
 		},
 	}
-	monitor := docker.NewDockerMonitor(cli, netRulesManager, monitorOpts)
+	monitor := docker.NewDockerMonitor(logger, cli, netRulesManager, monitorOpts)
 	go func() {
+		logger.Info("Starting Docker monitor")
 		err = monitor.Start()
 		if err != nil {
-			log.Fatal(err)
+			logger.Error("Failed to start Docker events monitor", "error", err)
+			return
 		}
 	}()
 	defer monitor.Stop()
 
-	sandboxService := services.NewSandboxService(statesCache, dockerClient)
+	sandboxService := services.NewSandboxService(logger, statesCache, dockerClient)
 
 	// Initialize sandbox state synchronization service
 	sandboxSyncService := services.NewSandboxSyncService(services.SandboxSyncServiceConfig{
+		Logger:   logger,
 		Docker:   dockerClient,
 		Interval: 10 * time.Second, // Sync every 10 seconds
 	})
@@ -131,24 +162,21 @@ func main() {
 	// Initialize SSH Gateway if enabled
 	var sshGatewayService *sshgateway.Service
 	if sshgateway.IsSSHGatewayEnabled() {
-		sshGatewayService = sshgateway.NewService(dockerClient)
+		sshGatewayService = sshgateway.NewService(logger, dockerClient)
 
 		go func() {
-			log.Info("Starting SSH Gateway")
+			logger.Info("Starting SSH Gateway")
 			if err := sshGatewayService.Start(ctx); err != nil {
-				log.Errorf("SSH Gateway error: %v", err)
+				logger.Error("SSH Gateway error", "error", err)
 			}
 		}()
 	} else {
-		log.Info("Gateway disabled - set SSH_GATEWAY_ENABLE=true to enable")
+		logger.Info("Gateway disabled - set SSH_GATEWAY_ENABLE=true to enable")
 	}
-
-	// Setup structured logger
-	slogLogger := newSLogger()
 
 	// Create metrics collector
 	metricsCollector := metrics.NewCollector(metrics.CollectorConfig{
-		Logger:                             slogLogger,
+		Logger:                             logger,
 		Docker:                             dockerClient,
 		WindowSize:                         cfg.CollectorWindowSize,
 		CPUUsageSnapshotInterval:           cfg.CPUUsageSnapshotInterval,
@@ -170,46 +198,46 @@ func main() {
 			Interval:   cfg.HealthcheckInterval,
 			Timeout:    cfg.HealthcheckTimeout,
 			Collector:  metricsCollector,
-			Logger:     slogLogger,
+			Logger:     logger,
 			Domain:     cfg.Domain,
 			ApiPort:    cfg.ApiPort,
 			ProxyPort:  cfg.ApiPort,
 			TlsEnabled: cfg.EnableTLS,
 		})
 		if err != nil {
-			log.Fatalf("Failed to create healthcheck service: %v", err)
+			logger.Error("Failed to create healthcheck service", "error", err)
+			return
 		}
 
 		go func() {
-			log.Info("Starting healthcheck service")
+			logger.Info("Starting healthcheck service")
 			healthcheckService.Start(ctx)
 		}()
 
 		executorService, err := executor.NewExecutor(&executor.ExecutorConfig{
-			Logger:    slogLogger,
+			Logger:    logger,
 			Docker:    dockerClient,
 			Collector: metricsCollector,
 		})
 		if err != nil {
-			log.Fatalf("Failed to create executor service: %v", err)
+			logger.Error("Failed to create executor service", "error", err)
+			return
 		}
 
 		pollerService, err := poller.NewService(&poller.PollerServiceConfig{
 			PollTimeout: cfg.PollTimeout,
 			PollLimit:   cfg.PollLimit,
-			Logger:      slogLogger,
+			Logger:      logger,
 			Executor:    executorService,
 		})
 		if err != nil {
-			log.Fatalf("Failed to create poller service: %v", err)
+			logger.Error("Failed to create poller service", "error", err)
+			return
 		}
 
 		go func() {
-			log.Info("Starting poller service")
+			logger.Info("Starting poller service")
 			pollerService.Start(ctx)
-			if err != nil {
-				log.Errorf("Poller service error: %v", err)
-			}
 		}()
 	}
 
@@ -219,6 +247,7 @@ func main() {
 		TLSCertFile: cfg.TLSCertFile,
 		TLSKeyFile:  cfg.TLSKeyFile,
 		EnableTLS:   cfg.EnableTLS,
+		LogRequests: cfg.ApiLogRequests,
 	})
 
 	apiServerErrChan := make(chan error)
@@ -229,98 +258,15 @@ func main() {
 	}()
 
 	interruptChannel := make(chan os.Signal, 1)
-	signal.Notify(interruptChannel, os.Interrupt)
+	signal.Notify(interruptChannel, os.Interrupt, syscall.SIGTERM)
 
 	select {
 	case err := <-apiServerErrChan:
-		log.Errorf("API server error: %v", err)
+		logger.Error("API server error", "error", err)
 		return
 	case <-interruptChannel:
+		logger.Info("Signal received, shutting down")
 		apiServer.Stop()
-	}
-}
-
-func init() {
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Printf("Error loading .env file: %v", err)
-		// Continue anyway, as environment variables might be set directly
-	}
-
-	logLevel := log.WarnLevel
-
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
-
-	if logLevelSet {
-		var err error
-		logLevel, err = log.ParseLevel(logLevelEnv)
-		if err != nil {
-			log.Warnf("Failed to parse log level '%s', using WarnLevel: %v", logLevelEnv, err)
-			logLevel = log.WarnLevel
-		}
-	}
-
-	log.SetLevel(logLevel)
-	log.SetOutput(os.Stdout)
-
-	logFilePath, logFilePathSet := os.LookupEnv("LOG_FILE_PATH")
-	if logFilePathSet {
-		logDir := filepath.Dir(logFilePath)
-
-		if err := os.MkdirAll(logDir, 0755); err != nil {
-			log.Errorf("Failed to create log directory: %v", err)
-			os.Exit(1)
-		}
-
-		file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Errorf("Failed to open log file: %v", err)
-			os.Exit(1)
-		}
-
-		log.SetOutput(io.MultiWriter(os.Stdout, file))
-	}
-
-	zerologLevel, err := zerolog.ParseLevel(logLevel.String())
-	if err != nil {
-		log.Warnf("Failed to parse zerolog level, using ErrorLevel: %v", err)
-		zerologLevel = zerolog.ErrorLevel
-	}
-
-	zerolog.SetGlobalLevel(zerologLevel)
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-
-	zlog.Logger = zlog.Output(zerolog.ConsoleWriter{
-		Out:        &util.DebugLogWriter{},
-		TimeFormat: time.RFC3339,
-	})
-
-	golog.SetOutput(&util.DebugLogWriter{})
-}
-
-func newSLogger() *slog.Logger {
-	log := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
-		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
-		TimeFormat: time.RFC3339,
-		Level:      parseLogLevel(os.Getenv("LOG_LEVEL")),
-	}))
-	slog.SetDefault(log)
-	return log
-}
-
-// parseLogLevel converts a string log level to slog.Level
-func parseLogLevel(level string) slog.Level {
-	switch strings.ToLower(level) {
-	case "debug":
-		return slog.LevelDebug
-	case "info":
-		return slog.LevelInfo
-	case "warn", "warning":
-		return slog.LevelWarn
-	case "error":
-		return slog.LevelError
-	default:
-		return slog.LevelInfo
+		logger.Info("Shutdown complete")
 	}
 }
