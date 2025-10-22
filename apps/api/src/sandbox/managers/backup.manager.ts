@@ -32,6 +32,7 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -68,6 +69,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
   @TrackJobExecution()
   @LogExecution('ad-hoc-backup-check')
+  @WithInstrumentation()
   async adHocBackupCheck(): Promise<void> {
     const lockKey = 'ad-hoc-backup-check'
     const hasLock = await this.redisLockProvider.lock(lockKey, 5 * 60)
@@ -133,6 +135,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
   @TrackJobExecution()
   @LogExecution('check-backup-states')
+  @WithInstrumentation()
   async checkBackupStates(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'check-backup-states'
@@ -230,6 +233,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
   @TrackJobExecution()
   @LogExecution('sync-stop-state-create-backups')
+  @WithInstrumentation()
   async syncStopStateCreateBackups(): Promise<void> {
     const lockKey = 'sync-stop-state-create-backups'
     const hasLock = await this.redisLockProvider.lock(lockKey, 10)

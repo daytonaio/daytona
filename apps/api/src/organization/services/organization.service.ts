@@ -42,6 +42,7 @@ import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-ex
 import { setTimeout } from 'timers/promises'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -305,6 +306,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   @Cron(CronExpression.EVERY_MINUTE, { name: 'stop-suspended-organization-sandboxes' })
   @TrackJobExecution()
   @LogExecution('stop-suspended-organization-sandboxes')
+  @WithInstrumentation()
   async stopSuspendedOrganizationSandboxes(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'stop-suspended-organization-sandboxes'
@@ -358,6 +360,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   @Cron(CronExpression.EVERY_MINUTE, { name: 'deactivate-suspended-organization-snapshots' })
   @TrackJobExecution()
   @LogExecution('deactivate-suspended-organization-snapshots')
+  @WithInstrumentation()
   async deactivateSuspendedOrganizationSnapshots(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'deactivate-suspended-organization-snapshots'

@@ -33,9 +33,28 @@ import { AuditModule } from './audit/audit.module'
 import { HealthModule } from './health/health.module'
 import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
 import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
+import { LoggerModule } from 'nestjs-pino'
 
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        autoLogging: false,
+        level: process.env.LOG_LEVEL ?? 'info',
+        // Nestjs logger compatible log levels
+        customLevels: {
+          log: 35,
+          verbose: 15,
+        },
+        // Disbale console logging if OTEL is enabled
+        transport:
+          process.env.OTEL_ENABLED === 'true'
+            ? {
+                targets: [],
+              }
+            : undefined,
+      },
+    }),
     TypedConfigModule.forRoot({
       isGlobal: true,
     }),

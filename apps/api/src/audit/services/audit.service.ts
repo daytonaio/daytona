@@ -18,6 +18,7 @@ import { AuditLogStorageAdapter } from '../interfaces/audit-storage.interface'
 import { AuditLogPublisher } from '../interfaces/audit-publisher.interface'
 import { AuditLogFilter } from '../interfaces/audit-filter.interface'
 import { DistributedLock } from '../../common/decorators/distributed-lock.decorator'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 @Injectable()
 export class AuditService implements OnApplicationBootstrap {
@@ -157,6 +158,7 @@ export class AuditService implements OnApplicationBootstrap {
     waitForCompletion: true,
   })
   @DistributedLock()
+  @WithInstrumentation()
   async resolveDanglingLogs() {
     const danglingLogs = await this.auditLogRepository.find({
       where: {
@@ -182,6 +184,7 @@ export class AuditService implements OnApplicationBootstrap {
     disabled: true,
   })
   @DistributedLock()
+  @WithInstrumentation()
   async publishAuditLogs() {
     // Safeguard
     if (!this.auditLogPublisher) {

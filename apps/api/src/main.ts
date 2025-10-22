@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import './tracing'
+import { otelSdk } from './tracing'
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
-import { ConsoleLogger, INestApplication, Logger, LogLevel, ValidationPipe } from '@nestjs/common'
+import { INestApplication, Logger, LogLevel, ValidationPipe } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
 import { AllExceptionsFilter } from './filters/all-exceptions.filter'
 import { NotFoundExceptionFilter } from './common/middleware/frontend.middleware'
@@ -28,6 +28,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { Partitioners } from 'kafkajs'
 import { isApiEnabled, isWorkerEnabled } from './common/utils/app-mode'
 import cluster from 'node:cluster'
+import { Logger as PinoLogger } from 'nestjs-pino'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -36,27 +37,26 @@ const httpsOptions: HttpsOptions = {
   key: process.env.CERT_KEY_PATH ? readFileSync(process.env.CERT_KEY_PATH) : undefined,
 }
 
-// Default log level
-const logLevels: LogLevel[] = ['log', 'error', 'warn']
-if (process.env.LOG_LEVEL) {
-  logLevels.push(process.env.LOG_LEVEL as LogLevel)
-}
-
 async function bootstrap() {
+  if (process.env.OTEL_ENABLED === 'true') {
+    await otelSdk.start()
+  }
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: new ConsoleLogger({
-      prefix: 'API',
-      logLevels,
-    }),
+    bufferLogs: true,
+    logger: [(process.env.LOG_LEVEL as LogLevel) || 'log'],
     httpsOptions: httpsEnabled ? httpsOptions : undefined,
   })
+  const configService = app.get(TypedConfigService)
+  if (configService.get('production')) {
+    app.useLogger(app.get(PinoLogger))
+  }
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   })
 
-  const configService = app.get(TypedConfigService)
+  // const configService = app.get(TypedConfigService)
   const httpAdapter = app.get(HttpAdapterHost)
   app.set('trust proxy', true)
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
