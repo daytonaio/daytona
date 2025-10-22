@@ -41,7 +41,7 @@ const Dashboard: React.FC = () => {
       return
     }
 
-    const excludedRoutes = [RoutePath.BILLING_WALLET, RoutePath.USER_INVITATIONS]
+    const excludedRoutes = [RoutePath.BILLING_WALLET, RoutePath.USER_INVITATIONS, RoutePath.MEMBERS]
     const shouldSkipRedirect = excludedRoutes.some((route) => location.pathname.startsWith(route))
 
     if (wallet && wallet.ongoingBalanceCents <= 0 && !shouldSkipRedirect) {
