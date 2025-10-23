@@ -26,7 +26,7 @@ var InitCmd = &cobra.Command{
 		var mcpServerName, agentName string
 
 		if len(args) == 1 {
-			if !slices.Contains(common.SupportedAgents, args[0]) || !slices.Contains(common.SupportedDaytonaMCPServers, args[0]) {
+			if !slices.Contains(common.SupportedAgents, args[0]) {
 				return fmt.Errorf("agent name %s is not supported", args[0])
 			}
 
