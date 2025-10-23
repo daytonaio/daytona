@@ -9,7 +9,7 @@ import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
-import { INestApplication, Logger, LogLevel, ValidationPipe } from '@nestjs/common'
+import { INestApplication, Logger, ValidationPipe } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
 import { AllExceptionsFilter } from './filters/all-exceptions.filter'
 import { NotFoundExceptionFilter } from './common/middleware/frontend.middleware'
@@ -43,20 +43,16 @@ async function bootstrap() {
   }
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
-    logger: [(process.env.LOG_LEVEL as LogLevel) || 'log'],
     httpsOptions: httpsEnabled ? httpsOptions : undefined,
   })
-  const configService = app.get(TypedConfigService)
-  if (configService.get('production')) {
-    app.useLogger(app.get(PinoLogger))
-  }
+  app.useLogger(app.get(PinoLogger))
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   })
 
-  // const configService = app.get(TypedConfigService)
+  const configService = app.get(TypedConfigService)
   const httpAdapter = app.get(HttpAdapterHost)
   app.set('trust proxy', true)
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))

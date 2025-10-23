@@ -268,8 +268,7 @@ export class RunnerService {
               } else if (e.name === 'AbortError') {
                 this.logger.error(`Runner ${runner.id} health check was aborted due to timeout`)
               } else {
-                this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-                this.logger.error(e)
+                this.logger.error(`Error checking runner ${runner.id}`, e)
               }
 
               // If last attempt, mark as unresponsive

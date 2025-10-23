@@ -87,6 +87,9 @@
     }
   },
   "targetDefaults": {
+    "@nx/webpack:webpack": {
+      "cache": true
+    },
     "@nx/js:swc": {
       "cache": true,
       "dependsOn": ["^build"],

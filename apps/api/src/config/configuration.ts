@@ -175,6 +175,15 @@ const configuration = {
     validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),
     userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
   },
+  log: {
+    console: {
+      disabled: process.env.LOG_CONSOLE_DISABLED === 'true',
+    },
+    level: process.env.LOG_LEVEL || 'info',
+    requests: {
+      enabled: process.env.LOG_REQUESTS_ENABLED === 'true',
+    },
+  },
 }
 
 export { configuration }
