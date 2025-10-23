@@ -22,7 +22,7 @@ export function useSandboxLogs(sandboxId: string) {
         throw new Error('No organization selected or sandbox ID missing')
       }
 
-      const response = await sandboxApi.getSandboxLogs(sandboxId, selectedOrganization.id)
+      const response = await sandboxApi.getSandboxLogs(sandboxId, selectedOrganization.id, true)
       return response.data
     },
     enabled: !!selectedOrganization && !!sandboxId,

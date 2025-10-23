@@ -926,6 +926,12 @@ export class SandboxController {
     description: 'ID or name of the sandbox',
     type: 'string',
   })
+  @ApiQuery({
+    name: 'timestamps',
+    required: false,
+    type: Boolean,
+    description: 'Whether to include timestamps in the logs',
+  })
   @ApiResponse({
     status: 200,
     description: 'Sandbox logs',
@@ -935,8 +941,9 @@ export class SandboxController {
   async getSandboxLogs(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Query('timestamps', new ParseBoolPipe({ optional: true })) timestamps?: boolean,
   ): Promise<string> {
-    return await this.sandboxService.getSandboxLogs(sandboxIdOrName, authContext.organizationId)
+    return await this.sandboxService.getSandboxLogs(sandboxIdOrName, authContext.organizationId, timestamps)
   }
 
   @Post(':sandboxIdOrName/ssh-access')

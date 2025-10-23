@@ -381,6 +381,12 @@ const docTemplate = `{
                         "name": "sandboxId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Whether to include timestamps in the logs",
+                        "name": "timestamps",
+                        "in": "query"
                     }
                 ],
                 "responses": {

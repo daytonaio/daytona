@@ -465,12 +465,14 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @summary Get sandbox logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSandboxLogs: async (
       sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
+      timestamps?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxIdOrName' is not null or undefined
@@ -495,6 +497,10 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
+
+      if (timestamps !== undefined) {
+        localVarQueryParameter['timestamps'] = timestamps
+      }
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -1590,17 +1596,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @summary Get sandbox logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getSandboxLogs(
       sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
+      timestamps?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxLogs(
         sandboxIdOrName,
         xDaytonaOrganizationID,
+        timestamps,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -2257,16 +2266,18 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @summary Get sandbox logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSandboxLogs(
       sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
+      timestamps?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<string> {
       return localVarFp
-        .getSandboxLogs(sandboxIdOrName, xDaytonaOrganizationID, options)
+        .getSandboxLogs(sandboxIdOrName, xDaytonaOrganizationID, timestamps, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2737,13 +2748,19 @@ export class SandboxApi extends BaseAPI {
    * @summary Get sandbox logs
    * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [timestamps] Whether to include timestamps in the logs
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public getSandboxLogs(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getSandboxLogs(
+    sandboxIdOrName: string,
+    xDaytonaOrganizationID?: string,
+    timestamps?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
     return SandboxApiFp(this.configuration)
-      .getSandboxLogs(sandboxIdOrName, xDaytonaOrganizationID, options)
+      .getSandboxLogs(sandboxIdOrName, xDaytonaOrganizationID, timestamps, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

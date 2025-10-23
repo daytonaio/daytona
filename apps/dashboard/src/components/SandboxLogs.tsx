@@ -14,6 +14,44 @@ interface SandboxLogsProps {
   sandboxState?: SandboxState
 }
 
+// Function to parse logs with timestamps and format them for display
+const parseLogsWithTimestamps = (logs: string): React.ReactElement[] => {
+  if (!logs) return []
+
+  const lines = logs.split('\n')
+  const parsedLines: React.ReactElement[] = []
+
+  lines.forEach((line, index) => {
+    if (line.trim() === '') {
+      parsedLines.push(<br key={index} />)
+      return
+    }
+
+    // Check if line starts with a timestamp (Docker format: YYYY-MM-DDTHH:MM:SS.sssssssssZ)
+    const timestampRegex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)\s+(.*)$/
+    const match = line.match(timestampRegex)
+
+    if (match) {
+      const [, timestamp, content] = match
+      parsedLines.push(
+        <div key={index} className="flex items-start gap-2">
+          <span className="text-gray-500 text-xs font-mono flex-shrink-0 mt-0.5">{timestamp}</span>
+          <span className="text-green-400 font-mono text-sm leading-relaxed whitespace-pre-wrap">{content}</span>
+        </div>,
+      )
+    } else {
+      // Line without timestamp
+      parsedLines.push(
+        <div key={index} className="text-green-400 font-mono text-sm leading-relaxed whitespace-pre-wrap">
+          {line}
+        </div>,
+      )
+    }
+  })
+
+  return parsedLines
+}
+
 const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId, sandboxState }) => {
   const { data: logs, isLoading, error, refetch, isRefetching } = useSandboxLogs(sandboxId)
 
@@ -91,9 +129,13 @@ const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId, sandboxState }) =>
         </Button>
       </div>
       <div className="flex-1 overflow-auto p-3">
-        <pre className="text-green-400 font-mono text-sm leading-relaxed whitespace-pre-wrap">
-          {logs || 'No logs available'}
-        </pre>
+        <div className="space-y-1">
+          {logs ? (
+            parseLogsWithTimestamps(logs)
+          ) : (
+            <span className="text-green-400 font-mono text-sm">No logs available</span>
+          )}
+        </div>
       </div>
     </div>
   )

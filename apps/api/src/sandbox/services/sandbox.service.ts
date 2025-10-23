@@ -1406,7 +1406,7 @@ export class SandboxService extends LockableEntity {
     return result.map((row) => row.region)
   }
 
-  async getSandboxLogs(sandboxIdOrName: string, organizationId: string): Promise<string> {
+  async getSandboxLogs(sandboxIdOrName: string, organizationId: string, timestamps?: boolean): Promise<string> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox.runnerId) {
@@ -1420,7 +1420,7 @@ export class SandboxService extends LockableEntity {
 
     try {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-      return await runnerAdapter.getSandboxLogs(sandbox.id)
+      return await runnerAdapter.getSandboxLogs(sandbox.id, timestamps)
     } catch (error) {
       this.logger.error(`Failed to fetch logs for sandbox ${sandboxIdOrName}:`, error)
       throw new HttpException(`Error fetching sandbox logs: ${error.message}`, 500)

@@ -245,10 +245,15 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * Get the entire log output of a sandbox container
      * @summary Get sandbox logs
      * @param {string} sandboxId Sandbox ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    logs: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+    logs: async (
+      sandboxId: string,
+      timestamps?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
       assertParamExists('logs', 'sandboxId', sandboxId)
       const localVarPath = `/sandboxes/{sandboxId}/logs`.replace(
@@ -268,6 +273,10 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       // authentication Bearer required
       await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
+
+      if (timestamps !== undefined) {
+        localVarQueryParameter['timestamps'] = timestamps
+      }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
@@ -614,14 +623,16 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * Get the entire log output of a sandbox container
      * @summary Get sandbox logs
      * @param {string} sandboxId Sandbox ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async logs(
       sandboxId: string,
+      timestamps?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.logs(sandboxId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.logs(sandboxId, timestamps, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath = operationServerMap['SandboxApi.logs']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
@@ -817,11 +828,12 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * Get the entire log output of a sandbox container
      * @summary Get sandbox logs
      * @param {string} sandboxId Sandbox ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    logs(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.logs(sandboxId, options).then((request) => request(axios, basePath))
+    logs(sandboxId: string, timestamps?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.logs(sandboxId, timestamps, options).then((request) => request(axios, basePath))
     },
     /**
      * Remove a sandbox that has been previously destroyed
@@ -965,13 +977,14 @@ export class SandboxApi extends BaseAPI {
    * Get the entire log output of a sandbox container
    * @summary Get sandbox logs
    * @param {string} sandboxId Sandbox ID
+   * @param {boolean} [timestamps] Whether to include timestamps in the logs
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public logs(sandboxId: string, options?: RawAxiosRequestConfig) {
+  public logs(sandboxId: string, timestamps?: boolean, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .logs(sandboxId, options)
+      .logs(sandboxId, timestamps, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -2318,6 +2318,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        timestamps: Annotated[Optional[StrictBool], Field(description="Whether to include timestamps in the logs")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2338,6 +2339,8 @@ class SandboxApi:
         :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param timestamps: Whether to include timestamps in the logs
+        :type timestamps: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2363,6 +2366,7 @@ class SandboxApi:
         _param = self._get_sandbox_logs_serialize(
             sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
+            timestamps=timestamps,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2388,6 +2392,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        timestamps: Annotated[Optional[StrictBool], Field(description="Whether to include timestamps in the logs")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2408,6 +2413,8 @@ class SandboxApi:
         :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param timestamps: Whether to include timestamps in the logs
+        :type timestamps: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2433,6 +2440,7 @@ class SandboxApi:
         _param = self._get_sandbox_logs_serialize(
             sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
+            timestamps=timestamps,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2458,6 +2466,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        timestamps: Annotated[Optional[StrictBool], Field(description="Whether to include timestamps in the logs")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2478,6 +2487,8 @@ class SandboxApi:
         :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param timestamps: Whether to include timestamps in the logs
+        :type timestamps: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2503,6 +2514,7 @@ class SandboxApi:
         _param = self._get_sandbox_logs_serialize(
             sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
+            timestamps=timestamps,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2523,6 +2535,7 @@ class SandboxApi:
         self,
         sandbox_id_or_name,
         x_daytona_organization_id,
+        timestamps,
         _request_auth,
         _content_type,
         _headers,
@@ -2547,6 +2560,10 @@ class SandboxApi:
         if sandbox_id_or_name is not None:
             _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
+        if timestamps is not None:
+            
+            _query_params.append(('timestamps', timestamps))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id

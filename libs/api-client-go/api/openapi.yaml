@@ -2171,6 +2171,14 @@ paths:
           schema:
             type: string
           style: simple
+        - description: Whether to include timestamps in the logs
+          explode: true
+          in: query
+          name: timestamps
+          required: false
+          schema:
+            type: boolean
+          style: form
       responses:
         '200':
           content:

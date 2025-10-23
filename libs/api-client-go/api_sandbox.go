@@ -1254,11 +1254,18 @@ type SandboxAPIGetSandboxLogsRequest struct {
 	ApiService             SandboxAPI
 	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
+	timestamps             *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r SandboxAPIGetSandboxLogsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxLogsRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Whether to include timestamps in the logs
+func (r SandboxAPIGetSandboxLogsRequest) Timestamps(timestamps bool) SandboxAPIGetSandboxLogsRequest {
+	r.timestamps = &timestamps
 	return r
 }
 
@@ -1304,6 +1311,9 @@ func (a *SandboxAPIService) GetSandboxLogsExecute(r SandboxAPIGetSandboxLogsRequ
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.timestamps != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "timestamps", r.timestamps, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

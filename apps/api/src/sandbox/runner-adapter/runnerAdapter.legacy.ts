@@ -282,8 +282,8 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     return response.data
   }
 
-  async getSandboxLogs(sandboxId: string): Promise<string> {
-    const response = await this.sandboxApiClient.logs(sandboxId)
+  async getSandboxLogs(sandboxId: string, timestamps?: boolean): Promise<string> {
+    const response = await this.sandboxApiClient.logs(sandboxId, timestamps)
     return response.data
   }
 

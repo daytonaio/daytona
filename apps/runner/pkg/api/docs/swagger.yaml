@@ -492,6 +492,10 @@ paths:
           name: sandboxId
           required: true
           type: string
+        - description: Whether to include timestamps in the logs
+          in: query
+          name: timestamps
+          type: boolean
       produces:
         - text/plain
       responses:
