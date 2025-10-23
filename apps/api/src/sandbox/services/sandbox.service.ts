@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+  HttpException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -1397,5 +1404,26 @@ export class SandboxService extends LockableEntity {
       .getRawMany()
 
     return result.map((row) => row.region)
+  }
+
+  async getSandboxLogs(sandboxIdOrName: string, organizationId: string): Promise<string> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} has no runner assigned`)
+    }
+
+    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} not found`)
+    }
+
+    try {
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      return await runnerAdapter.getSandboxLogs(sandbox.id)
+    } catch (error) {
+      this.logger.error(`Failed to fetch logs for sandbox ${sandboxIdOrName}:`, error)
+      throw new HttpException(`Error fetching sandbox logs: ${error.message}`, 500)
+    }
   }
 }

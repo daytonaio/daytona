@@ -916,6 +916,29 @@ export class SandboxController {
     return logProxy.create()
   }
 
+  @Get(':sandboxIdOrName/logs')
+  @ApiOperation({
+    summary: 'Get sandbox logs',
+    operationId: 'getSandboxLogs',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox logs',
+    type: String,
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getSandboxLogs(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+  ): Promise<string> {
+    return await this.sandboxService.getSandboxLogs(sandboxIdOrName, authContext.organizationId)
+  }
+
   @Post(':sandboxIdOrName/ssh-access')
   @HttpCode(200)
   @ApiOperation({

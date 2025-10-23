@@ -282,6 +282,11 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     return response.data
   }
 
+  async getSandboxLogs(sandboxId: string): Promise<string> {
+    const response = await this.sandboxApiClient.logs(sandboxId)
+    return response.data
+  }
+
   async getSandboxDaemonVersion(sandboxId: string): Promise<string> {
     const getVersionResponse = await this.toolboxApiClient.sandboxesSandboxIdToolboxPathGet(sandboxId, 'version')
     if (!getVersionResponse.data || !(getVersionResponse.data as any).version) {
