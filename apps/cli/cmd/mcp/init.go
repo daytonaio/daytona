@@ -43,14 +43,14 @@ var InitCmd = &cobra.Command{
 			agentName = args[1]
 		}
 
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-
 		mcpLogFileName := "daytona-mcp.log"
 		if mcpServerName != "" {
 			mcpLogFileName = fmt.Sprintf(common.MCP_LOG_FILE_NAME_FORMAT, mcpServerName)
+		}
+
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return err
 		}
 
 		var agentConfigFilePath, mcpLogFilePath string
@@ -80,7 +80,7 @@ var InitCmd = &cobra.Command{
 }
 
 func injectConfig(agentConfigFilePath, mcpLogFilePath, mcpServerName string) error {
-	daytonaMcpConfig, err := getDayonaMcpConfig(mcpLogFilePath)
+	daytonaMcpConfig, err := getDayonaMcpConfig(mcpLogFilePath, mcpServerName)
 	if err != nil {
 		return err
 	}
