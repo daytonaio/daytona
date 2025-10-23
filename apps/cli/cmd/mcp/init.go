@@ -7,18 +7,45 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/daytonaio/daytona/cli/cmd/mcp/agents"
+	"github.com/daytonaio/daytona/cli/cmd/mcp/common"
 	"github.com/spf13/cobra"
 )
 
 var InitCmd = &cobra.Command{
-	Use:   "init [AGENT_NAME]",
-	Short: "Initialize Daytona MCP Server with an agent (currently supported: claude, windsurf, cursor)",
-	Args:  cobra.MaximumNArgs(1),
+	Use:   "init [MCP_SERVER_NAME] [AGENT_NAME]",
+	Short: "Initialize any Daytona MCP Server with an agent. Currently available Daytona MCP Servers: <empty> for daytona code execution MCP, 'sandbox' for Sandbox actions MCP, 'fs' for Filesystem operations MCP, 'git' for Git operations MCP; currently supported agents: 'claude', 'windsurf', 'cursor'",
+	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			return fmt.Errorf("agent name is required")
+			return fmt.Errorf("mcp server name and agent name are required")
+		}
+
+		var mcpServerName, agentName string
+
+		if len(args) == 1 {
+			if !slices.Contains(common.SupportedAgents, args[0]) {
+				return fmt.Errorf("agent name %s is not supported", args[0])
+			}
+
+			agentName = args[0]
+			mcpServerName = ""
+		}
+
+		if len(args) == 2 {
+			if !slices.Contains(common.SupportedDaytonaMCPServers, args[0]) || !slices.Contains(common.SupportedAgents, args[1]) {
+				return fmt.Errorf("mcp server name %s or agent name %s is not supported", args[0], args[1])
+			}
+
+			mcpServerName = args[0]
+			agentName = args[1]
+		}
+
+		mcpLogFileName := "daytona-mcp.log"
+		if mcpServerName != "" {
+			mcpLogFileName = fmt.Sprintf(common.MCP_LOG_FILE_NAME_FORMAT, mcpServerName)
 		}
 
 		homeDir, err := os.UserHomeDir()
@@ -28,32 +55,32 @@ var InitCmd = &cobra.Command{
 
 		var agentConfigFilePath, mcpLogFilePath string
 
-		switch args[0] {
+		switch agentName {
 		case "claude":
-			agentConfigFilePath, mcpLogFilePath, err = agents.InitClaude(homeDir)
+			agentConfigFilePath, mcpLogFilePath, err = agents.InitClaude(homeDir, mcpLogFileName)
 			if err != nil {
 				return err
 			}
 		case "cursor":
-			agentConfigFilePath, mcpLogFilePath, err = agents.InitCursor(homeDir)
+			agentConfigFilePath, mcpLogFilePath, err = agents.InitCursor(homeDir, mcpLogFileName)
 			if err != nil {
 				return err
 			}
 		case "windsurf":
-			agentConfigFilePath, mcpLogFilePath, err = agents.InitWindsurf(homeDir)
+			agentConfigFilePath, mcpLogFilePath, err = agents.InitWindsurf(homeDir, mcpLogFileName)
 			if err != nil {
 				return err
 			}
 		default:
-			return fmt.Errorf("agent name %s is not supported", args[0])
+			return fmt.Errorf("agent name %s is not supported", agentName)
 		}
 
-		return injectConfig(agentConfigFilePath, mcpLogFilePath)
+		return injectConfig(agentConfigFilePath, mcpLogFilePath, mcpServerName)
 	},
 }
 
-func injectConfig(agentConfigFilePath, mcpLogFilePath string) error {
-	daytonaMcpConfig, err := getDayonaMcpConfig(mcpLogFilePath)
+func injectConfig(agentConfigFilePath, mcpLogFilePath, mcpServerName string) error {
+	daytonaMcpConfig, err := getDayonaMcpConfig(mcpLogFilePath, mcpServerName)
 	if err != nil {
 		return err
 	}
@@ -76,8 +103,13 @@ func injectConfig(agentConfigFilePath, mcpLogFilePath string) error {
 		mcpServers = make(map[string]interface{})
 	}
 
+	configServerName := "daytona-mcp"
+	if mcpServerName != "" {
+		configServerName = fmt.Sprintf("daytona-%s-mcp-server", mcpServerName)
+	}
+
 	// Add or update daytona-mcp configuration
-	mcpServers["daytona-mcp"] = daytonaMcpConfig
+	mcpServers[configServerName] = daytonaMcpConfig
 	agentConfig["mcpServers"] = mcpServers
 
 	// Write back the updated config with indentation

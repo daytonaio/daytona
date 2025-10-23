@@ -10,7 +10,7 @@ import (
 	"runtime"
 )
 
-func InitClaude(homeDir string) (string, string, error) {
+func InitClaude(homeDir, mcpLogFileName string) (string, string, error) {
 	var agentConfigFilePath string
 	var mcpLogFilePath string
 

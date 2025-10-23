@@ -10,7 +10,7 @@ import (
 	"runtime"
 )
 
-func InitWindsurf(homeDir string) (string, string, error) {
+func InitWindsurf(homeDir, mcpLogFileName string) (string, string, error) {
 	var agentConfigFilePath string
 	var mcpLogFilePath string
 
