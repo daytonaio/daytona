@@ -31,8 +31,13 @@ var ServeCmd = &cobra.Command{
 	Short: "Serve any Daytona MCP Server (empty string for daytona code execution MCP, 'sandbox' for Sandbox actions MCP, 'fs' for Filesystem operations MCP, 'git' for Git operations MCP)",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		mcpServerName := ""
+		if len(args) == 1 {
+			mcpServerName = args[0]
+		}
+
 		var server *mcp.Server
-		switch args[0] {
+		switch mcpServerName {
 		case "":
 			server = daytona.NewDaytonaMCPServer()
 		case "sandbox":
@@ -42,7 +47,7 @@ var ServeCmd = &cobra.Command{
 		case "git":
 			server = git.NewDaytonaGitMCPServer()
 		default:
-			return fmt.Errorf("mcp server name %s is not supported", args[0])
+			return fmt.Errorf("mcp server name %s is not supported", mcpServerName)
 		}
 
 		interruptChan := make(chan os.Signal, 1)
