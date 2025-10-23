@@ -65,6 +65,7 @@ import {
 } from '../../common/constants/error-messages'
 import { LockableEntity } from '../../common/services/lockable-entity.service'
 import { customAlphabet as customNanoid, urlAlphabet } from 'nanoid'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -1115,6 +1116,7 @@ export class SandboxService extends LockableEntity {
 
   @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-destroyed-sandboxes' })
   @LogExecution('cleanup-destroyed-sandboxes')
+  @WithInstrumentation()
   async cleanupDestroyedSandboxes() {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
@@ -1131,6 +1133,7 @@ export class SandboxService extends LockableEntity {
 
   @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-build-failed-sandboxes' })
   @LogExecution('cleanup-build-failed-sandboxes')
+  @WithInstrumentation()
   async cleanupBuildFailedSandboxes() {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
@@ -1243,6 +1246,7 @@ export class SandboxService extends LockableEntity {
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'handle-unschedulable-runners' })
   @LogExecution('handle-unschedulable-runners')
+  @WithInstrumentation()
   private async handleUnschedulableRunners() {
     const runners = await this.runnerRepository.find({ where: { unschedulable: true } })
 

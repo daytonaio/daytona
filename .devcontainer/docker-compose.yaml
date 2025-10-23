@@ -84,7 +84,12 @@ services:
     command: server /data --console-address ":9001"
 
   jaeger:
-    image: jaegertracing/all-in-one:1.67.0
+    image: jaegertracing/all-in-one:1.74.0
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.138.0
+    volumes:
+      - ./otel/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
 
 volumes:
   registry: {}

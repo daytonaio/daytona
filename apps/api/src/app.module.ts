@@ -33,9 +33,29 @@ import { AuditModule } from './audit/audit.module'
 import { HealthModule } from './health/health.module'
 import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
 import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
+import { LoggerModule } from 'nestjs-pino'
+import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util'
 
 @Module({
   imports: [
+    LoggerModule.forRootAsync({
+      useFactory: (configService: TypedConfigService) => {
+        const logConfig = configService.get('log')
+        const isProduction = configService.get('production')
+        return {
+          pinoHttp: {
+            autoLogging: logConfig.requests.enabled,
+            level: logConfig.level,
+            hooks: {
+              logMethod: swapMessageAndObject,
+            },
+            quietReqLogger: true,
+            transport: getPinoTransport(isProduction, logConfig),
+          },
+        }
+      },
+      inject: [TypedConfigService],
+    }),
     TypedConfigModule.forRoot({
       isGlobal: true,
     }),

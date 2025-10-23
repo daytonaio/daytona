@@ -28,6 +28,7 @@ import { Redis } from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { isValidUuid } from '../../common/utils/uuid'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 export type FetchWarmPoolSandboxParams = {
   snapshot: string
@@ -150,6 +151,7 @@ export class SandboxWarmPoolService {
   //  todo: make frequency configurable or more efficient
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'warm-pool-check' })
   @LogExecution('warm-pool-check')
+  @WithInstrumentation()
   async warmPoolCheck(): Promise<void> {
     const warmPoolItems = await this.warmPoolRepository.find()
 

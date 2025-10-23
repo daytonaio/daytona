@@ -25,7 +25,7 @@ import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 
-import { OtelSpan } from '../../common/decorators/otel.decorator'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 import { SandboxStartAction } from './sandbox-actions/sandbox-start.action'
 import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
@@ -76,8 +76,9 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
   @TrackJobExecution()
-  @OtelSpan()
+  @WithInstrumentation()
   @LogExecution('auto-stop-check')
+  @WithInstrumentation()
   async autostopCheck(): Promise<void> {
     const lockKey = 'auto-stop-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -144,6 +145,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
   @TrackJobExecution()
   @LogExecution('auto-archive-check')
+  @WithInstrumentation()
   async autoArchiveCheck(): Promise<void> {
     const lockKey = 'auto-archive-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -192,6 +194,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-delete-check' })
   @TrackJobExecution()
   @LogExecution('auto-delete-check')
+  @WithInstrumentation()
   async autoDeleteCheck(): Promise<void> {
     const lockKey = 'auto-delete-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -251,7 +254,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   @TrackJobExecution()
-  @OtelSpan()
+  @WithInstrumentation()
   @LogExecution('sync-states')
   async syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
@@ -320,6 +323,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
   @TrackJobExecution()
   @LogExecution('sync-archived-desired-states')
+  @WithInstrumentation()
   async syncArchivedDesiredStates(): Promise<void> {
     const lockKey = 'sync-archived-desired-states'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
