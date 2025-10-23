@@ -20,6 +20,7 @@ import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-ex
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout as sleep } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 @Injectable()
 export class UsageService implements TrackableJobExecutions, OnApplicationShutdown {
@@ -114,6 +115,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
   @Cron(CronExpression.EVERY_MINUTE, { name: 'close-and-reopen-usage-periods' })
   @TrackJobExecution()
   @LogExecution('close-and-reopen-usage-periods')
+  @WithInstrumentation()
   async closeAndReopenUsagePeriods() {
     if (!(await this.redisLockProvider.lock('close-and-reopen-usage-periods', 60))) {
       return
@@ -172,6 +174,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
   @Cron(CronExpression.EVERY_MINUTE, { name: 'archive-usage-periods' })
   @TrackJobExecution()
   @LogExecution('archive-usage-periods')
+  @WithInstrumentation()
   async archiveUsagePeriods() {
     const lockKey = 'archive-usage-periods'
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {
