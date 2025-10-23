@@ -23,10 +23,11 @@ import { OrGuard } from '../../auth/or.guard'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
 import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('runners')
 @Controller('runners')
-@UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
 @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'runner'])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
