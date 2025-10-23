@@ -229,7 +229,7 @@ export class VolumeService {
     }
 
     if (!volume || !volume.organizationId) {
-      throw new NotFoundException(`Sandbox with ID or name ${volumeIdOrName} not found`)
+      throw new NotFoundException(`Volume with ID or name ${volumeIdOrName} not found`)
     }
 
     return volume.organizationId
