@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/middlewares"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
+	"github.com/daytonaio/daemon/pkg/toolbox/process/interpreter"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
@@ -149,6 +150,13 @@ func (s *Server) Start() error {
 			ptyGroup.DELETE("/:sessionId", ptyController.DeletePTYSession)
 			ptyGroup.GET("/:sessionId/connect", ptyController.ConnectPTYSession)
 			ptyGroup.POST("/:sessionId/resize", ptyController.ResizePTYSession)
+		}
+
+		// Interpreter endpoints
+		interpreterController := interpreter.NewInterpreterController(s.WorkDir)
+		interpreterGroup := processController.Group("/interpreter")
+		{
+			interpreterGroup.GET("/execute", interpreterController.Execute)
 		}
 	}
 

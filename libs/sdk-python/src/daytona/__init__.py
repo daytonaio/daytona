@@ -14,6 +14,7 @@ from ._async.computer_use import (
 )
 from ._async.daytona import AsyncDaytona
 from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
+from ._sync.code_interpreter import CodeInterpreter
 from ._sync.daytona import Daytona
 from ._sync.sandbox import Sandbox
 from .common.charts import (
@@ -83,4 +84,5 @@ __all__ = [
     "CreateSandboxFromSnapshotParams",
     "CreateSnapshotParams",
     "PtySize",
+    "CodeInterpreter",
 ]
