@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getRelativeTimeString } from '@/lib/utils'
 import { Archive, Camera, X, GitFork, Trash, Play, Tag, Copy } from 'lucide-react'
 import { toast } from 'sonner'
+import SandboxLogs from './SandboxLogs'
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -154,11 +155,12 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         </SheetHeader>
 
         <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
-          {/* TODO: Add terminal tab */}
-          {/* <TabsList className="px-4 w-full flex-shrink-0">
+          <TabsList className="px-4 w-full flex-shrink-0">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="terminal">Terminal</TabsTrigger>
-          </TabsList> */}
+            <TabsTrigger value="logs">Logs</TabsTrigger>
+            {/* TODO: Add terminal tab */}
+            {/* <TabsTrigger value="terminal">Terminal</TabsTrigger> */}
+          </TabsList>
           <TabsContent value="overview" className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -264,6 +266,10 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 )}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="logs" className="flex-1 p-6 min-h-0">
+            <SandboxLogs sandboxId={sandbox.id} />
           </TabsContent>
 
           <TabsContent value="terminal" className="p-4">
