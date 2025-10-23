@@ -40,6 +40,7 @@ import { VolumeDto } from '../dto/volume.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { VolumeAccessGuard } from '../guards/volume-access.guard'
 
 @ApiTags('volumes')
 @Controller('volumes')
@@ -124,6 +125,7 @@ export class VolumeController {
     type: VolumeDto,
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
+  @UseGuards(VolumeAccessGuard)
   async getVolume(@Param('volumeId') volumeId: string): Promise<VolumeDto> {
     const volume = await this.volumeService.findOne(volumeId)
     return VolumeDto.fromVolume(volume)
@@ -149,6 +151,7 @@ export class VolumeController {
     targetType: AuditTarget.VOLUME,
     targetIdFromRequest: (req) => req.params.volumeId,
   })
+  @UseGuards(VolumeAccessGuard)
   async deleteVolume(@Param('volumeId') volumeId: string): Promise<void> {
     return this.volumeService.delete(volumeId)
   }
@@ -169,6 +172,7 @@ export class VolumeController {
     type: VolumeDto,
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
+  @UseGuards(VolumeAccessGuard)
   async getVolumeByName(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('name') name: string,
