@@ -21,7 +21,8 @@ import axios from 'axios'
 import type { AxiosRequestHeaders } from 'axios'
 import { AxiosHeaders } from 'axios'
 
-const timeoutMs = 3000
+const AXIOS_TIMEOUT_MS = 3000
+const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
 
 export interface ImageDetails {
   digest: string
@@ -302,12 +303,9 @@ export class DockerRegistryService {
 
   private async findRegistryByImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     // Parse the image to extract potential registry hostname
-    const imageParts = imageName.split('/')
+    const parsedImage = parseDockerImage(imageName)
 
-    // Check if the first part looks like a registry hostname (contains . or :)
-    const hasRegistryPrefix = imageParts.length > 1 && (imageParts[0].includes('.') || imageParts[0].includes(':'))
-
-    if (hasRegistryPrefix) {
+    if (parsedImage.registry) {
       // Image has registry prefix, try to find matching registry in database first
       const whereCondition = organizationId
         ? [{ organizationId }, { organizationId: IsNull() }]
@@ -326,7 +324,7 @@ export class DockerRegistryService {
       }
 
       // Not found in database, create temporary registry config for public access
-      return this.createTemporaryRegistryConfig(imageParts[0])
+      return this.createTemporaryRegistryConfig(parsedImage.registry)
     } else {
       // Image has no registry prefix (e.g., "alpine:3.21")
       // Create temporary Docker Hub config
@@ -338,7 +336,7 @@ export class DockerRegistryService {
     const registry = new DockerRegistry()
     registry.id = `temp-${hostname}`
     registry.name = `Temporary ${hostname}`
-    registry.url = hostname === 'docker.io' ? 'https://registry-1.docker.io' : `https://${hostname}`
+    registry.url = hostname === 'docker.io' ? `https://${DOCKER_HUB_REGISTRY}` : `https://${hostname}`
     registry.username = ''
     registry.password = ''
     registry.project = ''
@@ -349,7 +347,7 @@ export class DockerRegistryService {
 
   private async getDockerHubToken(repository: string): Promise<string | null> {
     try {
-      const tokenUrl = `https://auth.docker.io/token?service=registry-1.docker.io&scope=repository:${repository}:pull`
+      const tokenUrl = `https://auth.docker.io/token?service=${DOCKER_HUB_REGISTRY}&scope=repository:${repository}:pull`
       const response = await axios.get(tokenUrl, { timeout: 10000 })
       return response.data.token
     } catch (error) {
@@ -376,7 +374,7 @@ export class DockerRegistryService {
           Authorization: `Basic ${encodedCredentials}`,
         },
         validateStatus: (status) => status < 500,
-        timeout: timeoutMs,
+        timeout: AXIOS_TIMEOUT_MS,
       })
 
       if (response.status === 200) {
@@ -394,39 +392,43 @@ export class DockerRegistryService {
 
   async getImageDetails(image: string, organizationId?: string): Promise<ImageDetails> {
     try {
-      // Extract tag
-      const lastColonIndex = image.lastIndexOf(':')
-      const fullPath = image.substring(0, lastColonIndex)
-      const tag = image.substring(lastColonIndex + 1)
+      // Parse the image to extract components
+      const parsedImage = parseDockerImage(image)
 
       // Find the registry for this image (tries database first, then creates temporary config)
       const registry = await this.findRegistryByImageName(image, organizationId)
 
       const registryUrl = this.getRegistryUrl(registry)
 
-      // Remove registry prefix if present in the image name
+      // Build repository path for API calls
       let repoPath: string
 
       // Extract hostname from registry URL for comparison
       const registryHost = registryUrl.replace(/^https?:\/\//, '')
 
-      if (fullPath.startsWith(registryHost + '/')) {
-        // Image includes registry hostname, strip it
-        const projectAndRepo = fullPath.substring(registryHost.length + 1) // +1 for the slash
-        // Use project/repo directly as repoPath
-        repoPath = projectAndRepo
+      if (parsedImage.registry && image.startsWith(registryHost + '/')) {
+        // Image includes registry hostname, use project/repo directly
+        if (parsedImage.project) {
+          repoPath = `${parsedImage.project}/${parsedImage.repository}`
+        } else {
+          repoPath = parsedImage.repository
+        }
       } else {
         // Image name without registry prefix, use as-is
-        repoPath = fullPath
+        if (parsedImage.project) {
+          repoPath = `${parsedImage.project}/${parsedImage.repository}`
+        } else {
+          repoPath = parsedImage.repository
+        }
 
         // Special handling for Docker Hub - add library/ prefix for single-name images
-        if (registry.url.includes('registry-1.docker.io') && !repoPath.includes('/')) {
-          repoPath = `library/${repoPath}`
+        if (registry.url.includes(DOCKER_HUB_REGISTRY) && !parsedImage.project) {
+          repoPath = `library/${parsedImage.repository}`
         }
       }
 
       // Get the manifest using GET request to retrieve full body
-      const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${tag}`
+      const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${parsedImage.tag || 'latest'}`
 
       // Build headers - handle different auth methods
       const acceptHeader = [
@@ -445,7 +447,7 @@ export class DockerRegistryService {
       if (registry.username && registry.password) {
         const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
         baseHeaders.set('Authorization', `Basic ${encodedCredentials}`)
-      } else if (registry.url.includes('registry-1.docker.io')) {
+      } else if (registry.url.includes(DOCKER_HUB_REGISTRY)) {
         // Get anonymous token for Docker Hub
         const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
         bearerToken = await this.getDockerHubToken(dockerHubRepo)
@@ -455,7 +457,7 @@ export class DockerRegistryService {
       }
 
       const sendWithHeaders = async (url: string, headers: AxiosRequestHeaders | typeof baseHeaders) =>
-        axios({ method: 'get', url, headers, validateStatus: (s) => s < 500, timeout: timeoutMs })
+        axios({ method: 'get', url, headers, validateStatus: (s) => s < 500, timeout: AXIOS_TIMEOUT_MS })
 
       let manifestResponse = await sendWithHeaders(manifestUrl, baseHeaders)
 
@@ -522,7 +524,7 @@ export class DockerRegistryService {
           url: platformManifestUrl,
           headers: platformHeaders,
           validateStatus: (status) => status < 500,
-          timeout: timeoutMs,
+          timeout: AXIOS_TIMEOUT_MS,
         })
 
         if (platformResponse.status >= 300) {
@@ -558,7 +560,7 @@ export class DockerRegistryService {
       } else if (registry.username && registry.password) {
         const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
         configHeaders.set('Authorization', `Basic ${encodedCredentials}`)
-      } else if (registry.url.includes('registry-1.docker.io')) {
+      } else if (registry.url.includes(DOCKER_HUB_REGISTRY)) {
         const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
         const token = await this.getDockerHubToken(dockerHubRepo)
         if (token) {
@@ -571,7 +573,7 @@ export class DockerRegistryService {
         url: configUrl,
         headers: configHeaders,
         validateStatus: (status) => status < 500,
-        timeout: timeoutMs,
+        timeout: AXIOS_TIMEOUT_MS,
       })
 
       if (configResponse.status >= 300) {
@@ -622,7 +624,7 @@ export class DockerRegistryService {
           Authorization: `Basic ${encodedCredentials}`,
         },
         validateStatus: (status) => status < 500,
-        timeout: timeoutMs,
+        timeout: AXIOS_TIMEOUT_MS,
       })
 
       if (tagsResponse.status === 404) {
@@ -660,7 +662,7 @@ export class DockerRegistryService {
               Accept: 'application/vnd.docker.distribution.manifest.v2+json',
             },
             validateStatus: (status) => status < 500,
-            timeout: timeoutMs,
+            timeout: AXIOS_TIMEOUT_MS,
           })
 
           if (manifestResponse.status >= 300) {
@@ -684,7 +686,7 @@ export class DockerRegistryService {
               Authorization: `Basic ${encodedCredentials}`,
             },
             validateStatus: (status) => status < 500,
-            timeout: timeoutMs,
+            timeout: AXIOS_TIMEOUT_MS,
           })
 
           if (deleteResponse.status < 300) {
@@ -739,7 +741,7 @@ export class DockerRegistryService {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
         },
         validateStatus: (status) => status < 500,
-        timeout: timeoutMs,
+        timeout: AXIOS_TIMEOUT_MS,
       })
 
       if (manifestResponse.status >= 300) {
@@ -763,7 +765,7 @@ export class DockerRegistryService {
           Authorization: `Basic ${encodedCredentials}`,
         },
         validateStatus: (status) => status < 500,
-        timeout: timeoutMs,
+        timeout: AXIOS_TIMEOUT_MS,
       })
 
       if (deleteResponse.status < 300) {
