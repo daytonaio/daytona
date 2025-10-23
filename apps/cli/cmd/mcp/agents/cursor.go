@@ -10,7 +10,7 @@ import (
 	"runtime"
 )
 
-func InitCursor(homeDir string) (string, string, error) {
+func InitCursor(homeDir, mcpLogFileName string) (string, string, error) {
 	var agentConfigFilePath string
 	var mcpLogFilePath string
 
