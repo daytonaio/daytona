@@ -207,6 +207,34 @@ export class VolumeService {
     }
   }
 
+  async getOrganizationId(volumeIdOrName: string, organizationId?: string): Promise<string> {
+    let volume = await this.volumeRepository.findOne({
+      where: {
+        id: volumeIdOrName,
+        ...(organizationId ? { organizationId: organizationId } : {}),
+      },
+      select: ['organizationId'],
+      loadEagerRelations: false,
+    })
+
+    if (!volume && organizationId) {
+      volume = await this.volumeRepository.findOne({
+        where: {
+          name: volumeIdOrName,
+          organizationId: organizationId,
+        },
+        select: ['organizationId'],
+        loadEagerRelations: false,
+      })
+    }
+
+    if (!volume || !volume.organizationId) {
+      throw new NotFoundException(`Sandbox with ID or name ${volumeIdOrName} not found`)
+    }
+
+    return volume.organizationId
+  }
+
   @OnEvent(SandboxEvents.CREATED)
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     if (!event.sandbox.volumes.length) {

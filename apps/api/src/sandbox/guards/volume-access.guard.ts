@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common'
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { VolumeService } from '../services/volume.service'
@@ -20,18 +20,19 @@ export class VolumeAccessGuard implements CanActivate {
 
     const authContext: OrganizationAuthContext = request.user
 
-    let volume: Volume
     try {
-      volume = await this.volumeService.findOne(volumeIdOrName)
+      const volumeOrganizationId = await this.volumeService.getOrganizationId(
+        volumeIdOrName,
+        authContext.organizationId,
+      )
+
+      if (authContext.role !== SystemRole.ADMIN && volumeOrganizationId !== authContext.organizationId) {
+        throw new ForbiddenException('Request organization ID does not match resource organization ID')
+      }
     } catch (error) {
-      volume = await this.volumeService.findByName(authContext.organizationId, volumeIdOrName)
+      throw new NotFoundException(`Volume with ID or name ${volumeIdOrName} not found`)
     }
 
-    if (authContext.role !== SystemRole.ADMIN && volume.organizationId !== authContext.organizationId) {
-      throw new ForbiddenException('Request organization ID does not match resource organization ID')
-    }
-
-    request.volume = volume
     return true
   }
 }
