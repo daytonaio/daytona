@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useSandboxLogs } from '@/hooks/useSandboxLogs'
 import { Loader2, RefreshCw, Archive, Trash2, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -78,11 +78,19 @@ const parseLogsWithTimestamps = (logs: string, showTimestamps: boolean): React.R
 const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId, sandboxState }) => {
   const { data: logs, isLoading, error, refetch, isRefetching } = useSandboxLogs(sandboxId)
   const [showTimestamps, setShowTimestamps] = useState(true)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const handleTimestampToggle = (checked: boolean) => {
     setShowTimestamps(checked)
     refetch() // Refresh logs when toggling timestamp display
   }
+
+  // Auto-scroll to bottom when logs change
+  useEffect(() => {
+    if (scrollContainerRef.current && logs) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
+    }
+  }, [logs, showTimestamps])
 
   // Show appropriate message for archived or destroyed sandboxes
   if (sandboxState === SandboxState.ARCHIVED) {
@@ -167,7 +175,7 @@ const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId, sandboxState }) =>
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto p-3">
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto p-3">
         <div className="space-y-1">
           {logs ? (
             parseLogsWithTimestamps(logs, showTimestamps)
