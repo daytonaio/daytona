@@ -5,6 +5,9 @@ services:
     privileged: true
     ports:
       - 3000:3000
+    environment:
+      - OTEL_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     networks:
       - daytona-network
 
@@ -130,6 +133,13 @@ services:
 
   jaeger:
     image: jaegertracing/all-in-one:1.67.0
+    networks:
+      - daytona-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.138.0
+    volumes:
+      - ./otel/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
     networks:
       - daytona-network
 
