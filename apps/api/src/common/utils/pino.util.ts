@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import pino from 'pino'
+import pino, { TransportSingleOptions } from 'pino'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 /*
  * This is a workaround to swap the message and object in the arguments array.
@@ -83,4 +84,41 @@ export function swapMessageAndObject(
 
   // Default behavior for other cases
   method.apply(this, args)
+}
+
+type LogConfig = ReturnType<typeof TypedConfigService.prototype.get<'log'>>
+
+/*
+ * Get the pino transport based on the configuration
+ * @param isProduction - whether the application is in production mode
+ * @param logConfig - the log configuration
+ * @returns the pino transport
+ */
+export function getPinoTransport(
+  isProduction: boolean,
+  logConfig: LogConfig,
+): TransportSingleOptions<Record<string, any>> {
+  switch (true) {
+    // if console disabled, set destination to /dev/null
+    case logConfig.console.disabled:
+      return {
+        target: 'pino/file',
+        options: {
+          destination: '/dev/null',
+        },
+      }
+    // if production mode, no transport => raw NDJSON
+    case isProduction:
+      return undefined
+    // if non-production use pino-pretty
+    default:
+      return {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          singleLine: true,
+          ignore: 'pid,hostname',
+        },
+      }
+  }
 }

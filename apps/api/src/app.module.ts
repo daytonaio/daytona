@@ -34,31 +34,23 @@ import { HealthModule } from './health/health.module'
 import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
 import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
 import { LoggerModule } from 'nestjs-pino'
-import { swapMessageAndObject } from './common/utils/pino.util'
+import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util'
 
 @Module({
   imports: [
     LoggerModule.forRootAsync({
       useFactory: (configService: TypedConfigService) => {
-        const { console, level, requests } = configService.get('log')
+        const logConfig = configService.get('log')
         const isProduction = configService.get('production')
         return {
           pinoHttp: {
-            autoLogging: requests.enabled,
-            level,
+            autoLogging: logConfig.requests.enabled,
+            level: logConfig.level,
             hooks: {
               logMethod: swapMessageAndObject,
             },
             quietReqLogger: true,
-            transport: {
-              target: isProduction ? 'pino/file' : 'pino-pretty',
-              options: {
-                destination: console.disabled ? '/dev/null' : 1,
-                colorize: true,
-                singleLine: true,
-                ignore: 'pid,hostname',
-              },
-            },
+            transport: getPinoTransport(isProduction, logConfig),
           },
         }
       },
