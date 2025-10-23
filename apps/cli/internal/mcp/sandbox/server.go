@@ -4,39 +4,28 @@
 package sandbox
 
 import (
-	"context"
 	"time"
 
 	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-type DaytonaSandboxMCPServer struct {
-	*mcp.Server
-}
+func NewDaytonaSandboxMCPServer() *mcp.Server {
+	server := mcp.NewServer(&mcp.Implementation{
+		Name:    "Daytona Sandbox MCP Server",
+		Version: internal.SandboxMcpVersion,
+	}, &mcp.ServerOptions{
+		KeepAlive: 30 * time.Second,
+		HasTools:  true,
+	})
 
-func NewDaytonaSandboxMCPServer() *DaytonaSandboxMCPServer {
-	server := &DaytonaSandboxMCPServer{
-		Server: mcp.NewServer(&mcp.Implementation{
-			Name:    "Daytona Sandbox MCP Server",
-			Version: internal.SandboxMcpVersion,
-		}, &mcp.ServerOptions{
-			KeepAlive: 30 * time.Second,
-			HasTools:  true,
-		}),
-	}
-
-	server.addTools()
+	addTools(server)
 
 	return server
 }
 
-func (s *DaytonaSandboxMCPServer) Start(ctx context.Context, transport mcp.Transport) error {
-	return s.Server.Run(ctx, transport)
-}
-
-func (s *DaytonaSandboxMCPServer) addTools() {
-	mcp.AddTool(s.Server, getCreateSandboxTool(), handleCreateSandbox)
-	mcp.AddTool(s.Server, getDestroySandboxTool(), handleDestroySandbox)
-	mcp.AddTool(s.Server, getPreviewLinkTool(), handlePreviewLink)
+func addTools(server *mcp.Server) {
+	mcp.AddTool(server, getCreateSandboxTool(), handleCreateSandbox)
+	mcp.AddTool(server, getDestroySandboxTool(), handleDestroySandbox)
+	mcp.AddTool(server, getPreviewLinkTool(), handlePreviewLink)
 }

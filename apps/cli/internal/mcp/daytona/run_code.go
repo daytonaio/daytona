@@ -55,6 +55,7 @@ func getRunCodeTool() *mcp.Tool {
 }
 
 func handleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *RunCodeInput) (*mcp.CallToolResult, *ExecuteResponse, error) {
+	return &mcp.CallToolResult{IsError: false}, nil, fmt.Errorf("not implemented")
 	apiClient, err := apiclient_cli.GetApiClient(nil, mcp_headers.DaytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, err
