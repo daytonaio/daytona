@@ -1000,8 +1000,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         snapshot.entrypoint = ['sleep', 'infinity']
       }
     }
-
-    // todo: save here?
   }
 
   private getInitialRunnerSnapshotTag(snapshot: Snapshot) {

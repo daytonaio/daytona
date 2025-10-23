@@ -51,6 +51,11 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
     result.tag = `sha256:${digest}`
     // Split remaining parts
     parts = nameWithoutDigest.split('/')
+
+    // Throw if a part is empty
+    if (parts.some((part) => part === '')) {
+      throw new Error('Invalid image name. A part is empty')
+    }
   } else {
     const lastSlashIndex = imageName.lastIndexOf('/')
     const lastColonIndex = imageName.lastIndexOf(':')

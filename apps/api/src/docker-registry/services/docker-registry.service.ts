@@ -332,11 +332,16 @@ export class DockerRegistryService {
     }
   }
 
-  private createTemporaryRegistryConfig(hostname: string): DockerRegistry {
+  private createTemporaryRegistryConfig(registryOrigin: string): DockerRegistry {
     const registry = new DockerRegistry()
-    registry.id = `temp-${hostname}`
-    registry.name = `Temporary ${hostname}`
-    registry.url = hostname === 'docker.io' ? `https://${DOCKER_HUB_REGISTRY}` : `https://${hostname}`
+    registry.id = `temp-${registryOrigin}`
+    registry.name = `Temporary ${registryOrigin}`
+    registryOrigin = registryOrigin.replace(/^(https?:\/\/)/, '')
+    if (registryOrigin === 'docker.io') {
+      registry.url = `https://${DOCKER_HUB_REGISTRY}`
+    } else {
+      registry.url = `https://${registryOrigin}`
+    }
     registry.username = ''
     registry.password = ''
     registry.project = ''

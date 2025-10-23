@@ -195,7 +195,7 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     if (isBuild) {
-      this.buildOnRunner(sandbox.buildInfo, runner.id, sandbox.organizationId)
+      this.buildOnRunner(sandbox.buildInfo, runner, sandbox.organizationId)
       await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runner.id)
     } else {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
@@ -238,8 +238,7 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result
-  async buildOnRunner(buildInfo: BuildInfo, runnerId: string, organizationId: string) {
-    const runner = await this.runnerService.findOne(runnerId)
+  async buildOnRunner(buildInfo: BuildInfo, runner: Runner, organizationId: string) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     let retries = 0
@@ -251,7 +250,7 @@ export class SandboxStartAction extends SandboxAction {
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
           await this.runnerService.createSnapshotRunnerEntry(
-            runnerId,
+            runner.id,
             buildInfo.snapshotRef,
             SnapshotRunnerState.ERROR,
             err.message,
@@ -267,7 +266,7 @@ export class SandboxStartAction extends SandboxAction {
 
     if (retries === 10) {
       await this.runnerService.createSnapshotRunnerEntry(
-        runnerId,
+        runner.id,
         buildInfo.snapshotRef,
         SnapshotRunnerState.ERROR,
         'Timeout while building',
@@ -281,7 +280,7 @@ export class SandboxStartAction extends SandboxAction {
       state = SnapshotRunnerState.READY
     }
 
-    await this.runnerService.createSnapshotRunnerEntry(runnerId, buildInfo.snapshotRef, state)
+    await this.runnerService.createSnapshotRunnerEntry(runner.id, buildInfo.snapshotRef, state)
   }
 
   private async handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {

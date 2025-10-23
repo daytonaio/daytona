@@ -369,7 +369,7 @@ export class RunnerService {
   async getSnapshotRunners(snapshotRef: string): Promise<SnapshotRunner[]> {
     return this.snapshotRunnerRepository.find({
       where: {
-        snapshotRef: snapshotRef,
+        snapshotRef,
       },
       order: {
         state: 'ASC', // Sorts state BUILDING_SNAPSHOT before ERROR

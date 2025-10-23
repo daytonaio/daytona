@@ -12,7 +12,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, Raw, ILike, FindOptionsWhere } from 'typeorm'
+import { Repository, Not, In, Raw, ILike, FindOptionsWhere, Equal } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
@@ -101,6 +101,33 @@ export class SnapshotService {
     return filteredEntrypoint.length > 0 ? filteredEntrypoint : undefined
   }
 
+  private async checkForValidActiveSnapshot(
+    ref: string,
+    entrypoint: string[] | undefined,
+    skipValidation: boolean,
+  ): Promise<Snapshot | null> {
+    // Check if there is already an active snapshot with the same ref;
+    // Only check entrypoint if skipValidation is not set on the DTO
+    // We can skip the pulling and validation in that case - note: relevant only for Docker
+
+    const snapshotFindOptions: any = {
+      ref,
+      state: SnapshotState.ACTIVE,
+    }
+
+    if (!entrypoint || entrypoint.length === 0) {
+      return null
+    }
+
+    if (!skipValidation) {
+      snapshotFindOptions.entrypoint = Array.isArray(entrypoint) ? entrypoint : [entrypoint]
+    }
+
+    return await this.snapshotRepository.findOne({
+      where: snapshotFindOptions,
+    })
+  }
+
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     let pendingSnapshotCountIncrement: number | undefined
 
@@ -125,12 +152,18 @@ export class SnapshotService {
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-      const snapshotCount = await this.snapshotRepository.count({
-        where: { organizationId: organization.id },
-      })
+      const newSnapshotCount = 1
 
-      if (snapshotCount >= organization.snapshotQuota) {
-        throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
+      const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
+        organization,
+        newSnapshotCount,
+        createSnapshotDto.cpu,
+        createSnapshotDto.memory,
+        createSnapshotDto.disk,
+      )
+
+      if (pendingSnapshotCountIncremented) {
+        pendingSnapshotCountIncrement = newSnapshotCount
       }
 
       let imageDetails: ImageDetails | undefined = undefined
@@ -163,39 +196,15 @@ export class SnapshotService {
             : imageDetails.digest
         ref = `${defaultInternalRegistry.url.replace(/^https?:\/\//, '')}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
 
-        // Check if there is already an active snapshot with the same ref;
-        // only check entrypoint if skipValidation is not set on the DTO
-        const snapshotFindOptions: any = {
+        const existingSnapshot = await this.checkForValidActiveSnapshot(
           ref,
-          state: SnapshotState.ACTIVE,
-        }
+          entrypoint,
+          createSnapshotDto.skipValidation,
+        )
 
-        if (!createSnapshotDto.skipValidation) {
-          snapshotFindOptions.entrypoint = Array.isArray(entrypoint) ? entrypoint : [entrypoint]
-        }
-
-        const existingSnapshot = await this.snapshotRepository.findOne({
-          where: snapshotFindOptions,
-        })
-
-        // We can skip the pulling and validation in that case - note: relevant only for Docker
         if (existingSnapshot) {
           state = SnapshotState.ACTIVE
         }
-      }
-
-      const newSnapshotCount = 1
-
-      const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
-        organization,
-        newSnapshotCount,
-        createSnapshotDto.cpu,
-        createSnapshotDto.memory,
-        createSnapshotDto.disk,
-      )
-
-      if (pendingSnapshotCountIncremented) {
-        pendingSnapshotCountIncrement = newSnapshotCount
       }
 
       try {
@@ -236,14 +245,6 @@ export class SnapshotService {
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-      const snapshotCount = await this.snapshotRepository.count({
-        where: { organizationId: organization.id },
-      })
-
-      if (snapshotCount >= organization.snapshotQuota) {
-        throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
-      }
 
       const newSnapshotCount = 1
 
@@ -295,22 +296,12 @@ export class SnapshotService {
       const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
       snapshot.ref = `${defaultInternalRegistry.url}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
 
-      // Check if there is already an active snapshot with the same ref;
-      // only check entrypoint if skipValidation is not set on the DTO
-      const snapshotFindOptions: any = {
-        ref: snapshot.ref,
-        state: SnapshotState.ACTIVE,
-      }
+      const existingSnapshot = await this.checkForValidActiveSnapshot(
+        snapshot.ref,
+        entrypoint,
+        createSnapshotDto.skipValidation,
+      )
 
-      if (!createSnapshotDto.skipValidation) {
-        snapshotFindOptions.entrypoint = Array.isArray(entrypoint) ? entrypoint : [entrypoint]
-      }
-
-      const existingSnapshot = await this.snapshotRepository.findOne({
-        where: snapshotFindOptions,
-      })
-
-      // We can skip the pulling and validation in that case
       if (existingSnapshot) {
         snapshot.state = SnapshotState.ACTIVE
       }
