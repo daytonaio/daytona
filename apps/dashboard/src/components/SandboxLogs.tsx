@@ -5,15 +5,42 @@
 
 import React from 'react'
 import { useSandboxLogs } from '@/hooks/useSandboxLogs'
-import { Loader2, RefreshCw } from 'lucide-react'
+import { Loader2, RefreshCw, Archive, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { SandboxState } from '@daytonaio/api-client'
 
 interface SandboxLogsProps {
   sandboxId: string
+  sandboxState?: SandboxState
 }
 
-const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId }) => {
+const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId, sandboxState }) => {
   const { data: logs, isLoading, error, refetch, isRefetching } = useSandboxLogs(sandboxId)
+
+  // Show appropriate message for archived or destroyed sandboxes
+  if (sandboxState === SandboxState.ARCHIVED) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 bg-black font-mono text-sm">
+        <div className="text-center">
+          <Archive className="w-12 h-12 mb-4 mx-auto" />
+          <p className="mb-2 text-lg font-semibold">Sandbox Archived</p>
+          <p className="text-sm text-gray-400">Logs are not available for archived sandboxes</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (sandboxState === SandboxState.DESTROYED) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 bg-black font-mono text-sm">
+        <div className="text-center">
+          <Trash2 className="w-12 h-12 mb-4 mx-auto" />
+          <p className="mb-2 text-lg font-semibold">Sandbox Destroyed</p>
+          <p className="text-sm text-gray-400">Logs are not available for destroyed sandboxes</p>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (

@@ -269,7 +269,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
           </TabsContent>
 
           <TabsContent value="logs" className="flex-1 p-6 min-h-0">
-            <SandboxLogs sandboxId={sandbox.id} />
+            <SandboxLogs sandboxId={sandbox.id} sandboxState={sandbox.state} />
           </TabsContent>
 
           <TabsContent value="terminal" className="p-4">
