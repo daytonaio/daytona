@@ -1,57 +1,58 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-package tools
+package daytona
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/daytonaio/apiclient"
+	apiclient "github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
-type ExecuteCommandArgs struct {
-	Id      *string `json:"id,omitempty"`
-	Command *string `json:"command,omitempty"`
+type ShellInput struct {
+	Id      *string `json:"id,omitempty" jsonchema:"ID of the sandbox to execute the command in."`
+	Command *string `json:"command,omitempty" jsonchema:"Command to execute."`
 }
 
-type CommandResult struct {
-	Stdout    string `json:"stdout"`
-	Stderr    string `json:"stderr"`
-	ExitCode  int    `json:"exitCode"`
-	ErrorType string `json:"errorType,omitempty"`
+type ShellOutput struct {
+	Stdout    string `json:"stdout" jsonchema:"Standard output of the command."`
+	Stderr    string `json:"stderr" jsonchema:"Standard error output of the command."`
+	ExitCode  int    `json:"exitCode" jsonchema:"Exit code of the command."`
+	ErrorType string `json:"errorType,omitempty" jsonchema:"Error type of the command."`
 }
 
-func GetExecuteCommandTool() mcp.Tool {
-	return mcp.NewTool("execute_command",
-		mcp.WithDescription("Execute shell commands in the ephemeral Daytona Linux environment. Returns full stdout and stderr output with exit codes. Commands have sandbox user permissions and can install packages, modify files, and interact with running services. Always use /tmp directory. Use verbose flags where available for better output."),
-		mcp.WithString("command", mcp.Required(), mcp.Description("Command to execute.")),
-		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to execute the command in.")),
-	)
+func getShellTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name:        "shell",
+		Title:       "Shell",
+		Description: "Execute shell commands in the Daytona sandbox.",
+	}
 }
 
-func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args ExecuteCommandArgs) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient_cli.GetApiClient(nil, daytonaMCPHeaders)
+func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *ShellInput) (*mcp.CallToolResult, *ShellOutput, error) {
+	apiClient, err := apiclient_cli.GetApiClient(nil, mcp_headers.DaytonaMCPHeaders)
 	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, err
+		return returnCommandError(fmt.Sprintf("Error getting API client: %v", err), "APIError")
 	}
 
-	if args.Id == nil || *args.Id == "" {
+	if input.Id == nil || *input.Id == "" {
 		return returnCommandError("Sandbox ID is required", "SandboxError")
 	}
 
-	if args.Command == nil || *args.Command == "" {
+	if input.Command == nil || *input.Command == "" {
 		return returnCommandError("Command must be a non-empty string", "ValueError")
 	}
 
 	// Process the command
-	command := strings.TrimSpace(*args.Command)
+	command := strings.TrimSpace(*input.Command)
 	if strings.Contains(command, "&&") || strings.HasPrefix(command, "cd ") {
 		// Wrap complex commands in /bin/sh -c
 		command = fmt.Sprintf("/bin/sh -c %s", shellQuote(command))
@@ -60,7 +61,7 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args Execu
 	log.Infof("Executing command: %s", command)
 
 	// Execute the command
-	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).
+	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *input.Id).
 		ExecuteRequest(*apiclient.NewExecuteRequest(command)).
 		Execute()
 
@@ -78,7 +79,7 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args Execu
 	}
 
 	// Process command output
-	cmdResult := CommandResult{
+	cmdResult := ShellOutput{
 		Stdout:   strings.TrimSpace(result.Result),
 		ExitCode: int(result.ExitCode),
 	}
@@ -99,28 +100,22 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args Execu
 		log.Infof("Command exited with non-zero status - exit code: %d", cmdResult.ExitCode)
 	}
 
-	// Convert result to JSON
-	resultJSON, err := json.MarshalIndent(cmdResult, "", "  ")
-	if err != nil {
-		return returnCommandError(fmt.Sprintf("Error marshaling result: %v", err), "CommandExecutionError")
-	}
-
-	return mcp.NewToolResultText(string(resultJSON)), nil
+	return &mcp.CallToolResult{
+		IsError: false,
+	}, &cmdResult, nil
 }
 
 // Helper function to return command errors in a consistent format
-func returnCommandError(message, errorType string) (*mcp.CallToolResult, error) {
+func returnCommandError(message, errorType string) (*mcp.CallToolResult, *ShellOutput, error) {
 	return &mcp.CallToolResult{
-		IsError: true,
-		Result: mcp.Result{
-			Meta: map[string]interface{}{
-				"Stdout":    "",
-				"Stderr":    message,
-				"ExitCode":  -1,
-				"ErrorType": errorType,
-			},
+			IsError: true,
 		},
-	}, nil
+		&ShellOutput{
+			Stdout:    "",
+			Stderr:    message,
+			ExitCode:  -1,
+			ErrorType: errorType,
+		}, fmt.Errorf("error: %s", message)
 }
 
 // Helper function to quote shell commands

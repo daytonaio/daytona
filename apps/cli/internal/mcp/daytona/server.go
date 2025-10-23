@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cli/internal"
-	"github.com/daytonaio/daytona/cli/internal/mcp/daytona/tools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -37,6 +36,6 @@ func (s *DaytonaMCPServer) Start(ctx context.Context, transport mcp.Transport) e
 }
 
 func (s *DaytonaMCPServer) addTools() {
-	mcp.AddTool(s.Server, tools.GetRunCodeTool(), tools.HandleRunCode)
-	mcp.AddTool(s.Server, tools.GetShellTool(), tools.HandleShell)
+	mcp.AddTool(s.Server, getRunCodeTool(), handleRunCode)
+	mcp.AddTool(s.Server, getShellTool(), handleShell)
 }

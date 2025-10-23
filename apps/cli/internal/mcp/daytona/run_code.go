@@ -1,9 +1,13 @@
-package tools
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
+
+package daytona
 
 import (
 	"context"
 	"fmt"
 
+	apiclient "github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -42,7 +46,7 @@ type Chart struct {
 	Png      string        `json:"png,omitempty" jsonchema:"PNG of the chart."`
 }
 
-func GetRunCodeTool() *mcp.Tool {
+func getRunCodeTool() *mcp.Tool {
 	return &mcp.Tool{
 		Name:        "run_code",
 		Title:       "Run Code",
@@ -50,7 +54,7 @@ func GetRunCodeTool() *mcp.Tool {
 	}
 }
 
-func HandleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *RunCodeInput) (*mcp.CallToolResult, *ExecuteResponse, error) {
+func handleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *RunCodeInput) (*mcp.CallToolResult, *ExecuteResponse, error) {
 	apiClient, err := apiclient_cli.GetApiClient(nil, mcp_headers.DaytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, err
@@ -65,5 +69,51 @@ func HandleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *Run
 		input.Timeout = 0
 	}
 
-	return &mcp.CallToolResult{}, nil, nil
+	if input.SandboxId != "" {
+		sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, input.SandboxId).Execute()
+		if err != nil {
+			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
+		}
+
+		if sandbox.State != nil && *sandbox.State != apiclient.SANDBOXSTATE_STARTED {
+			_, _, err := apiClient.SandboxAPI.StartSandbox(ctx, input.SandboxId).Execute()
+			if err != nil {
+				return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to start sandbox: %v", err)
+			}
+		}
+	} else {
+		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).Execute()
+		if err != nil {
+			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to create sandbox: %v", err)
+		}
+
+		input.SandboxId = sandbox.Id
+	}
+
+	// TODO: Implement code execution
+	return &mcp.CallToolResult{IsError: false}, nil, nil
+
+	// timeout := float32(input.Timeout)
+
+	// executeResponse, resp, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, input.SandboxId).ExecuteRequest(apiclient.ExecuteRequest{
+	// 	Command: input.Code,
+	// 	AdditionalProperties: map[string]interface{}{
+	// 		"env": input.Params.Env,
+	// 		"argv": input.Params.Argv,
+	// 	},
+	// 	Timeout: &timeout,
+	// }).Execute()
+	// if err != nil {
+	// 	return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to execute code: %v", err)
+	// }
+
+	// return &mcp.CallToolResult{
+	// 	IsError: false,
+	// }, &ExecuteResponse{
+	// 	ExitCode: int(result.ExitCode),
+	// 	Result:   result.Result,
+	// 	Artifacts: &ExecutionArtifacts{
+	// 		Stdout: result.Stdout,
+	// 	},
+	// }, nil
 }
