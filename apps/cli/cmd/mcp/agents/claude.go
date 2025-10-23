@@ -5,19 +5,14 @@ package agents
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
-
-	"github.com/daytonaio/daytona/cli/cmd/mcp/common"
 )
 
-func InitClaude(homeDir, mcpServerName string) (string, string, error) {
+func InitClaude(homeDir, mcpLogFileName string) (string, string, error) {
 	var agentConfigFilePath string
 	var mcpLogFilePath string
-
-	mcpLogFileName := fmt.Sprintf(common.MCP_LOG_FILE_NAME_FORMAT, mcpServerName)
 
 	switch runtime.GOOS {
 	case "darwin":
