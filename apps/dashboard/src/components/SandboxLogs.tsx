@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useSandboxLogs } from '@/hooks/useSandboxLogs'
-import { Loader2, RefreshCw, Archive, Trash2 } from 'lucide-react'
+import { Loader2, RefreshCw, Archive, Trash2, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { SandboxState } from '@daytonaio/api-client'
 
 interface SandboxLogsProps {
@@ -15,7 +16,7 @@ interface SandboxLogsProps {
 }
 
 // Function to parse logs with timestamps and format them for display
-const parseLogsWithTimestamps = (logs: string): React.ReactElement[] => {
+const parseLogsWithTimestamps = (logs: string, showTimestamps: boolean): React.ReactElement[] => {
   if (!logs) return []
 
   const lines = logs.split('\n')
@@ -33,12 +34,34 @@ const parseLogsWithTimestamps = (logs: string): React.ReactElement[] => {
 
     if (match) {
       const [, timestamp, content] = match
-      parsedLines.push(
-        <div key={index} className="flex items-start gap-2">
-          <span className="text-gray-500 text-xs font-mono flex-shrink-0 mt-0.5">{timestamp}</span>
-          <span className="text-green-400 font-mono text-sm leading-relaxed whitespace-pre-wrap">{content}</span>
-        </div>,
-      )
+      if (showTimestamps) {
+        // Parse UTC timestamp and format it in browser's timezone
+        const date = new Date(timestamp)
+        const formattedTimestamp = date
+          .toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+          })
+          .replace(',', '')
+        parsedLines.push(
+          <div key={index} className="flex items-baseline gap-4">
+            <span className="text-gray-500 text-xs font-mono flex-shrink-0">{formattedTimestamp}</span>
+            <span className="text-green-400 font-mono text-sm leading-relaxed whitespace-pre-wrap">{content}</span>
+          </div>,
+        )
+      } else {
+        // Show only content without timestamp
+        parsedLines.push(
+          <div key={index} className="text-green-400 font-mono text-sm leading-relaxed whitespace-pre-wrap">
+            {content}
+          </div>,
+        )
+      }
     } else {
       // Line without timestamp
       parsedLines.push(
@@ -54,6 +77,12 @@ const parseLogsWithTimestamps = (logs: string): React.ReactElement[] => {
 
 const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId, sandboxState }) => {
   const { data: logs, isLoading, error, refetch, isRefetching } = useSandboxLogs(sandboxId)
+  const [showTimestamps, setShowTimestamps] = useState(true)
+
+  const handleTimestampToggle = (checked: boolean) => {
+    setShowTimestamps(checked)
+    refetch() // Refresh logs when toggling timestamp display
+  }
 
   // Show appropriate message for archived or destroyed sandboxes
   if (sandboxState === SandboxState.ARCHIVED) {
@@ -116,22 +145,32 @@ const SandboxLogs: React.FC<SandboxLogsProps> = ({ sandboxId, sandboxState }) =>
       <div className="flex items-center justify-between p-2 bg-gray-800 border-b border-gray-700">
         <div className="flex items-center gap-2 text-green-400 font-mono text-xs">
           <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-          <span>Sandbox Logs</span>
+          <span>Sandbox Entrypoint Logs</span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => refetch()}
-          disabled={isRefetching}
-          className="h-6 w-6 p-0 text-green-400 hover:bg-gray-700"
-        >
-          {isRefetching ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Clock className="w-3 h-3 text-gray-400" />
+            <Switch
+              checked={showTimestamps}
+              onCheckedChange={handleTimestampToggle}
+              className="data-[state=checked]:bg-green-400 scale-75"
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className="h-6 w-6 p-0 text-green-400 hover:bg-gray-700"
+          >
+            {isRefetching ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+          </Button>
+        </div>
       </div>
       <div className="flex-1 overflow-auto p-3">
         <div className="space-y-1">
           {logs ? (
-            parseLogsWithTimestamps(logs)
+            parseLogsWithTimestamps(logs, showTimestamps)
           ) : (
             <span className="text-green-400 font-mono text-sm">No logs available</span>
           )}
