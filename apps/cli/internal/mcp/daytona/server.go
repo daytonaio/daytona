@@ -37,6 +37,6 @@ func (s *DaytonaMCPServer) Start(ctx context.Context, transport mcp.Transport) e
 }
 
 func (s *DaytonaMCPServer) addTools() {
-	s.AddTool(tools.GetRunCodeTool(), tools.HandleRunCode)
-	s.AddTool(tools.GetShellTool(), tools.HandleShell)
+	mcp.AddTool(s.Server, tools.GetRunCodeTool(), tools.HandleRunCode)
+	mcp.AddTool(s.Server, tools.GetShellTool(), tools.HandleShell)
 }
