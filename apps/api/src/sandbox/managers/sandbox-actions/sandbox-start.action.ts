@@ -358,6 +358,8 @@ export class SandboxStartAction extends SandboxAction {
       await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT)
     } else if (sandboxInfo.state === SandboxState.ERROR) {
       await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+    } else if (sandboxInfo.state === SandboxState.UNKNOWN) {
+      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN)
     } else {
       await this.updateSandboxState(sandbox.id, SandboxState.STARTING)
     }
@@ -459,6 +461,10 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.STARTING:
       case SandboxState.RESTORING:
       case SandboxState.CREATING: {
+        break
+      }
+      case SandboxState.UNKNOWN: {
+        await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN)
         break
       }
       case SandboxState.ERROR: {
