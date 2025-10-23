@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     ripgrep \
     chromium \
+    iputils-ping \
+    bind9-dnsutils \
     # X11 libraries required for computer use plugin
     libx11-6 \
     libxrandr2 \
