@@ -77,7 +77,7 @@ func getDayonaMcpConfig(mcpLogFilePath, mcpServerName string) (map[string]interf
 		return nil, err
 	}
 
-	args := []string{"mcp", "start"}
+	args := []string{"mcp", "serve"}
 	if mcpServerName != "" {
 		args = append(args, mcpServerName)
 	}
