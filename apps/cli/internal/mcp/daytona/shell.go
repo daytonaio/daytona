@@ -19,7 +19,7 @@ import (
 )
 
 type ShellInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to execute the command in."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to execute the command in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
 	Command   *string `json:"command,omitempty" jsonchema:"Command to execute."`
 }
 
