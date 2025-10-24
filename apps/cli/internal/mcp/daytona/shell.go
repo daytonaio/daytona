@@ -11,6 +11,7 @@ import (
 	apiclient "github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/daytonaio/daytona/cli/internal/mcp/util"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -18,8 +19,8 @@ import (
 )
 
 type ShellInput struct {
-	Id      *string `json:"id,omitempty" jsonchema:"ID of the sandbox to execute the command in."`
-	Command *string `json:"command,omitempty" jsonchema:"Command to execute."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to execute the command in."`
+	Command   *string `json:"command,omitempty" jsonchema:"Command to execute."`
 }
 
 type ShellOutput struct {
@@ -43,12 +44,13 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 		return returnCommandError(fmt.Sprintf("Error getting API client: %v", err), "APIError")
 	}
 
-	if input.Id == nil || *input.Id == "" {
-		return returnCommandError("Sandbox ID is required", "SandboxError")
-	}
-
 	if input.Command == nil || *input.Command == "" {
 		return returnCommandError("Command must be a non-empty string", "ValueError")
+	}
+
+	sandboxId, err := util.GetSandbox(ctx, apiClient, input.SandboxId)
+	if err != nil {
+		return returnCommandError(fmt.Sprintf("Error getting sandbox: %v", err), "SandboxError")
 	}
 
 	// Process the command
@@ -61,7 +63,7 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 	log.Infof("Executing command: %s", command)
 
 	// Execute the command
-	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *input.Id).
+	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *sandboxId).
 		ExecuteRequest(*apiclient.NewExecuteRequest(command)).
 		Execute()
 
@@ -98,6 +100,11 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 	// Check for non-zero exit code
 	if cmdResult.ExitCode > 0 {
 		log.Infof("Command exited with non-zero status - exit code: %d", cmdResult.ExitCode)
+	}
+
+	_, _, err = apiClient.SandboxAPI.StopSandbox(ctx, *sandboxId).Execute()
+	if err != nil {
+		log.Warnf("Error stopping sandbox %s: %v", *sandboxId, err)
 	}
 
 	return &mcp.CallToolResult{

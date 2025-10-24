@@ -16,8 +16,8 @@ import (
 )
 
 type FileDownloadInput struct {
-	Id       *string `json:"id,omitempty" jsonchema:"ID of the sandbox to download the file from."`
-	FilePath *string `json:"filePath,omitempty" jsonchema:"Path to the file to download."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to download the file from."`
+	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to download."`
 }
 
 type FileDownloadOutput struct {
@@ -25,9 +25,9 @@ type FileDownloadOutput struct {
 }
 
 type Content struct {
-	Type string `json:"type"`
-	Text string `json:"text,omitempty"`
-	Data string `json:"data,omitempty"`
+	Type string `json:"type" jsonchema:"Type of the content."`
+	Text string `json:"text,omitempty" jsonchema:"Text of the content."`
+	Data string `json:"data,omitempty" jsonchema:"Data of the content."`
 }
 
 func getDownloadFileTool() *mcp.Tool {
@@ -44,7 +44,7 @@ func handleDownloadFile(ctx context.Context, request *mcp.CallToolRequest, input
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -53,7 +53,7 @@ func handleDownloadFile(ctx context.Context, request *mcp.CallToolRequest, input
 	}
 
 	// Download the file
-	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, *input.Id).Path(*input.FilePath).Execute()
+	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, *input.SandboxId).Path(*input.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error downloading file: %v", err)
 	}

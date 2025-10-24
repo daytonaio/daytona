@@ -18,7 +18,7 @@ import (
 )
 
 type FileUploadInput struct {
-	Id        *string `json:"id,omitempty" jsonchema:"ID of the sandbox to upload the file to."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to upload the file to."`
 	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise."`
 	Content   *string `json:"content,omitempty" jsonchema:"Content of the file to upload."`
 	Encoding  *string `json:"encoding,omitempty" jsonchema:"Encoding of the file to upload."`
@@ -43,7 +43,7 @@ func handleUploadFile(ctx context.Context, request *mcp.CallToolRequest, input *
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -65,7 +65,7 @@ func handleUploadFile(ctx context.Context, request *mcp.CallToolRequest, input *
 	}
 
 	// Get the sandbox using sandbox ID
-	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, *input.Id).Execute()
+	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, *input.SandboxId).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
 	}
@@ -76,7 +76,7 @@ func handleUploadFile(ctx context.Context, request *mcp.CallToolRequest, input *
 
 	// Check if file exists and handle overwrite
 	if !overwrite {
-		fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *input.Id).Path(*input.FilePath).Execute()
+		fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *input.SandboxId).Path(*input.FilePath).Execute()
 		if err == nil && fileInfo != nil {
 			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("file '%s' already exists and overwrite=false", *input.FilePath)
 		}
@@ -98,7 +98,7 @@ func handleUploadFile(ctx context.Context, request *mcp.CallToolRequest, input *
 	// Create parent directories if they don't exist
 	parentDir := filepath.Dir(*input.FilePath)
 	if parentDir != "" {
-		_, err := apiClient.ToolboxAPI.CreateFolder(ctx, *input.Id).Path(parentDir).Mode("0755").Execute()
+		_, err := apiClient.ToolboxAPI.CreateFolder(ctx, *input.SandboxId).Path(parentDir).Mode("0755").Execute()
 		if err != nil {
 			log.Errorf("Error creating parent directory: %v", err)
 			// Continue anyway as upload might handle this
@@ -124,13 +124,13 @@ func handleUploadFile(ctx context.Context, request *mcp.CallToolRequest, input *
 	}
 
 	// Upload the file
-	_, err = apiClient.ToolboxAPI.UploadFile(ctx, *input.Id).Path(*input.FilePath).File(tempFile).Execute()
+	_, err = apiClient.ToolboxAPI.UploadFile(ctx, *input.SandboxId).Path(*input.FilePath).File(tempFile).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error uploading file: %v", err)
 	}
 
 	// Get file info for size
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *input.Id).Path(*input.FilePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *input.SandboxId).Path(*input.FilePath).Execute()
 	if err != nil {
 		log.Errorf("Error getting file info after upload: %v", err)
 

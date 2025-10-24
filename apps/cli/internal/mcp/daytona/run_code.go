@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
-	apiclient "github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/daytonaio/daytona/cli/internal/mcp/util"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
@@ -70,25 +70,9 @@ func handleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *Run
 		input.Timeout = 0
 	}
 
-	if input.SandboxId != "" {
-		sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, input.SandboxId).Execute()
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
-		}
-
-		if sandbox.State != nil && *sandbox.State != apiclient.SANDBOXSTATE_STARTED {
-			_, _, err := apiClient.SandboxAPI.StartSandbox(ctx, input.SandboxId).Execute()
-			if err != nil {
-				return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to start sandbox: %v", err)
-			}
-		}
-	} else {
-		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).Execute()
-		if err != nil {
-			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to create sandbox: %v", err)
-		}
-
-		input.SandboxId = sandbox.Id
+	_, err = util.GetSandbox(ctx, apiClient, &input.SandboxId)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
 	}
 
 	// TODO: Implement code execution

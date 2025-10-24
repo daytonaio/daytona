@@ -17,7 +17,7 @@ import (
 )
 
 type DestroySandboxInput struct {
-	Id *string `json:"id,omitempty" jsonchema:"ID of the sandbox to destroy."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to destroy."`
 }
 
 type DestroySandboxOutput struct {
@@ -38,7 +38,7 @@ func handleDestroySandbox(ctx context.Context, request *mcp.CallToolRequest, inp
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -47,7 +47,7 @@ func handleDestroySandbox(ctx context.Context, request *mcp.CallToolRequest, inp
 	retryDelay := time.Second * 2
 
 	for retry := range maxRetries {
-		_, _, err := apiClient.SandboxAPI.DeleteSandbox(ctx, *input.Id).Execute()
+		_, _, err := apiClient.SandboxAPI.DeleteSandbox(ctx, *input.SandboxId).Execute()
 		if err != nil {
 			if retry == maxRetries-1 {
 				return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to destroy sandbox after %d retries: %v", maxRetries, err)
@@ -60,10 +60,10 @@ func handleDestroySandbox(ctx context.Context, request *mcp.CallToolRequest, inp
 			continue
 		}
 
-		log.Infof("Destroyed sandbox with ID: %s", *input.Id)
+		log.Infof("Destroyed sandbox with ID: %s", *input.SandboxId)
 
 		return &mcp.CallToolResult{IsError: false}, &DestroySandboxOutput{
-			Message: fmt.Sprintf("Destroyed sandbox with ID %s", *input.Id),
+			Message: fmt.Sprintf("Destroyed sandbox with ID %s", *input.SandboxId),
 		}, nil
 	}
 

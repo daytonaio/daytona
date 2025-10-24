@@ -15,7 +15,7 @@ import (
 )
 
 type MoveFileInput struct {
-	Id         *string `json:"id,omitempty" jsonchema:"ID of the sandbox to move the file in."`
+	SandboxId  *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to move the file in."`
 	SourcePath *string `json:"sourcePath,omitempty" jsonchema:"Source path of the file to move."`
 	DestPath   *string `json:"destPath,omitempty" jsonchema:"Destination path where to move the file."`
 }
@@ -38,7 +38,7 @@ func handleMoveFile(ctx context.Context, request *mcp.CallToolRequest, input *Mo
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -51,7 +51,7 @@ func handleMoveFile(ctx context.Context, request *mcp.CallToolRequest, input *Mo
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("destPath parameter is required")
 	}
 
-	_, err = apiClient.ToolboxAPI.MoveFile(ctx, *input.Id).Source(*input.SourcePath).Destination(*input.DestPath).Execute()
+	_, err = apiClient.ToolboxAPI.MoveFile(ctx, *input.SandboxId).Source(*input.SourcePath).Destination(*input.DestPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error moving file: %v", err)
 	}

@@ -16,8 +16,8 @@ import (
 )
 
 type FileInfoInput struct {
-	Id       *string `json:"id,omitempty" jsonchema:"ID of the sandbox to get the file information from."`
-	FilePath *string `json:"filePath,omitempty" jsonchema:"Path to the file to get information about."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to get the file information from."`
+	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to get information about."`
 }
 
 type FileInfoOutput struct {
@@ -38,7 +38,7 @@ func handleFileInfo(ctx context.Context, request *mcp.CallToolRequest, input *Fi
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -47,7 +47,7 @@ func handleFileInfo(ctx context.Context, request *mcp.CallToolRequest, input *Fi
 	}
 
 	// Get file info
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *input.Id).Path(*input.FilePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *input.SandboxId).Path(*input.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error getting file info: %v", err)
 	}

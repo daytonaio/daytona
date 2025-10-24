@@ -15,8 +15,8 @@ import (
 )
 
 type DeleteFileInput struct {
-	Id       *string `json:"id,omitempty"`
-	FilePath *string `json:"filePath,omitempty"`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to delete the file from."`
+	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to delete."`
 }
 
 type DeleteFileOutput struct {
@@ -37,7 +37,7 @@ func handleDeleteFile(ctx context.Context, request *mcp.CallToolRequest, input *
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -46,7 +46,7 @@ func handleDeleteFile(ctx context.Context, request *mcp.CallToolRequest, input *
 	}
 
 	// Execute delete command
-	_, err = apiClient.ToolboxAPI.DeleteFile(ctx, *input.Id).Path(*input.FilePath).Execute()
+	_, err = apiClient.ToolboxAPI.DeleteFile(ctx, *input.SandboxId).Path(*input.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error deleting file: %v", err)
 	}

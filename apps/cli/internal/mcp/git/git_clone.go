@@ -17,13 +17,13 @@ import (
 )
 
 type GitCloneInput struct {
-	Id       *string `json:"id,omitempty" jsonchema:"ID of the sandbox to clone the repository in."`
-	Url      *string `json:"url,omitempty" jsonchema:"URL of the Git repository to clone."`
-	Path     *string `json:"path,omitempty" jsonchema:"Directory to clone the repository into (defaults to current directory)."`
-	Branch   *string `json:"branch,omitempty" jsonchema:"Branch to clone."`
-	CommitId *string `json:"commitId,omitempty" jsonchema:"Commit ID to clone."`
-	Username *string `json:"username,omitempty" jsonchema:"Username to clone the repository with."`
-	Password *string `json:"password,omitempty" jsonchema:"Password to clone the repository with."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to clone the repository in."`
+	Url       *string `json:"url,omitempty" jsonchema:"URL of the Git repository to clone."`
+	Path      *string `json:"path,omitempty" jsonchema:"Directory to clone the repository into (defaults to current directory)."`
+	Branch    *string `json:"branch,omitempty" jsonchema:"Branch to clone."`
+	CommitId  *string `json:"commitId,omitempty" jsonchema:"Commit ID to clone."`
+	Username  *string `json:"username,omitempty" jsonchema:"Username to clone the repository with."`
+	Password  *string `json:"password,omitempty" jsonchema:"Password to clone the repository with."`
 }
 
 type GitCloneOutput struct {
@@ -44,7 +44,7 @@ func handleGitClone(ctx context.Context, request *mcp.CallToolRequest, input *Gi
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -53,7 +53,7 @@ func handleGitClone(ctx context.Context, request *mcp.CallToolRequest, input *Gi
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	_, err = apiClient.ToolboxAPI.GitCloneRepository(ctx, *input.Id).GitCloneRequest(*gitCloneRequest).Execute()
+	_, err = apiClient.ToolboxAPI.GitCloneRepository(ctx, *input.SandboxId).GitCloneRequest(*gitCloneRequest).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error cloning repository: %v", err)
 	}

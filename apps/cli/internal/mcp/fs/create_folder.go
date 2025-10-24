@@ -15,7 +15,7 @@ import (
 )
 
 type CreateFolderInput struct {
-	Id         *string `json:"id,omitempty" jsonchema:"ID of the sandbox to create the folder in."`
+	SandboxId  *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to create the folder in."`
 	FolderPath *string `json:"folderPath,omitempty" jsonchema:"Path to the folder to create."`
 	Mode       *string `json:"mode,omitempty" jsonchema:"Mode of the folder to create (defaults to 0755)."`
 }
@@ -38,7 +38,7 @@ func handleCreateFolder(ctx context.Context, request *mcp.CallToolRequest, input
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -52,7 +52,7 @@ func handleCreateFolder(ctx context.Context, request *mcp.CallToolRequest, input
 	}
 
 	// Create the folder
-	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, *input.Id).Path(*input.FolderPath).Mode(*input.Mode).Execute()
+	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, *input.SandboxId).Path(*input.FolderPath).Mode(*input.Mode).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error creating folder: %v", err)
 	}

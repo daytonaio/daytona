@@ -16,8 +16,8 @@ import (
 )
 
 type ListFilesInput struct {
-	Id   *string `json:"id,omitempty" jsonchema:"ID of the sandbox to list the files from."`
-	Path *string `json:"path,omitempty" jsonchema:"Path to the directory to list files from (defaults to current directory)."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to list the files from."`
+	Path      *string `json:"path,omitempty" jsonchema:"Path to the directory to list files from (defaults to current directory)."`
 }
 
 type ListFilesOutput struct {
@@ -38,7 +38,7 @@ func handleListFiles(ctx context.Context, request *mcp.CallToolRequest, input *L
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.Id == nil || *input.Id == "" {
+	if input.SandboxId == nil || *input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -49,7 +49,7 @@ func handleListFiles(ctx context.Context, request *mcp.CallToolRequest, input *L
 	}
 
 	// List files
-	files, _, err := apiClient.ToolboxAPI.ListFiles(ctx, *input.Id).Path(dirPath).Execute()
+	files, _, err := apiClient.ToolboxAPI.ListFiles(ctx, *input.SandboxId).Path(dirPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error listing files: %v", err)
 	}

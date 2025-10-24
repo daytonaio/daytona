@@ -19,7 +19,6 @@ import (
 )
 
 type CreateSandboxInput struct {
-	Id                  *string                    `json:"id,omitempty" jsonchema:"ID of the sandbox to create."`
 	Name                *string                    `json:"name,omitempty" jsonchema:"Name of the sandbox. If not provided, the sandbox ID will be used as the name."`
 	Target              *string                    `json:"target,omitempty" jsonchema:"Target region of the sandbox."`
 	Snapshot            *string                    `json:"snapshot,omitempty" jsonchema:"Snapshot of the sandbox (don't specify any if not explicitly instructed from user). Cannot be specified when using a build info entry."`
@@ -56,22 +55,6 @@ func handleCreateSandbox(ctx context.Context, request *mcp.CallToolRequest, inpu
 	apiClient, err := apiclient_cli.GetApiClient(nil, mcp_headers.DaytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, err
-	}
-
-	sandboxId := ""
-	if input.Id != nil && *input.Id != "" {
-		sandboxId = *input.Id
-	}
-
-	if sandboxId != "" {
-		sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
-		if err == nil && sandbox.State != nil && *sandbox.State == apiclient.SANDBOXSTATE_STARTED {
-			return &mcp.CallToolResult{IsError: false}, &CreateSandboxOutput{
-				Message: fmt.Sprintf("Reusing existing sandbox %s", sandboxId),
-			}, nil
-		}
-
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox %s not found or not running", sandboxId)
 	}
 
 	createSandboxReq, err := createSandboxRequest(*input)
