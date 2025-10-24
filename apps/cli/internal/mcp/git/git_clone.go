@@ -28,7 +28,7 @@ type GitCloneInput struct {
 }
 
 type GitCloneOutput struct {
-	Message string `json:"message,omitempty" jsonschema:"description=Message indicating the successful cloning of the repository."`
+	Message string `json:"message,omitempty" jsonschema:"Message indicating the successful cloning of the repository."`
 }
 
 func getGitCloneTool() *mcp.Tool {

@@ -24,7 +24,7 @@ func GetSandbox(ctx context.Context, apiClient *apiclient.APIClient, sandboxId *
 			}
 		}
 	} else {
-		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).Execute()
+		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*apiclient.NewCreateSandbox()).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to create sandbox: %v", err)
 		}

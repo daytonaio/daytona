@@ -27,29 +27,10 @@ var tlsCertFilePathFlag string
 var tlsKeyFilePathFlag string
 
 var ServeCmd = &cobra.Command{
-	Use:   "serve [MCP_SERVER_NAME]",
+	Use:   "serve",
 	Short: "Serve any Daytona MCP Server (empty string for daytona code execution MCP, 'sandbox' for Sandbox actions MCP, 'fs' for Filesystem operations MCP, 'git' for Git operations MCP)",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		mcpServerName := ""
-		if len(args) == 1 {
-			mcpServerName = args[0]
-		}
-
-		var server *mcp.Server
-		switch mcpServerName {
-		case "":
-			server = daytona.NewDaytonaMCPServer()
-		case "sandbox":
-			server = sandbox.NewDaytonaSandboxMCPServer()
-		case "fs":
-			server = fs.NewDaytonaFileSystemMCPServer()
-		case "git":
-			server = git.NewDaytonaGitMCPServer()
-		default:
-			return fmt.Errorf("mcp server name %s is not supported", mcpServerName)
-		}
-
 		interruptChan := make(chan os.Signal, 1)
 		signal.Notify(interruptChan, os.Interrupt)
 
@@ -64,13 +45,31 @@ var ServeCmd = &cobra.Command{
 				return fmt.Errorf("cannot start MCP server, port %d is already in use", portFlag)
 			}
 
-			handler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-				return server
+			daytonaMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
+				return daytona.NewDaytonaMCPServer()
 			}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
+			sandboxMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
+				return sandbox.NewDaytonaSandboxMCPServer()
+			}, &mcp.StreamableHTTPOptions{JSONResponse: true})
+
+			fsMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
+				return fs.NewDaytonaFileSystemMCPServer()
+			}, &mcp.StreamableHTTPOptions{JSONResponse: true})
+
+			gitMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
+				return git.NewDaytonaGitMCPServer()
+			}, &mcp.StreamableHTTPOptions{JSONResponse: true})
+
+			httpMux := http.NewServeMux()
+			httpMux.Handle("/mcp", daytonaMcpHandler)
+			httpMux.Handle("/mcp/sandbox", sandboxMcpHandler)
+			httpMux.Handle("/mcp/fs", fsMcpHandler)
+			httpMux.Handle("/mcp/git", gitMcpHandler)
+
 			httpServer = &http.Server{
-				Addr:    ":8080",
-				Handler: handler,
+				Addr:    fmt.Sprintf(":%d", portFlag),
+				Handler: httpMux,
 			}
 
 			listener, err := net.Listen("tcp", httpServer.Addr)
@@ -87,9 +86,23 @@ var ServeCmd = &cobra.Command{
 			}()
 
 		case "stdio":
-			_, err := net.Dial("tcp", fmt.Sprintf(":%d", portFlag))
-			if err == nil {
-				return fmt.Errorf("cannot start MCP server, port %d is already in use", portFlag)
+			mcpServerName := ""
+			if len(args) == 1 {
+				mcpServerName = args[0]
+			}
+
+			var server *mcp.Server
+			switch mcpServerName {
+			case "":
+				server = daytona.NewDaytonaMCPServer()
+			case "sandbox":
+				server = sandbox.NewDaytonaSandboxMCPServer()
+			case "fs":
+				server = fs.NewDaytonaFileSystemMCPServer()
+			case "git":
+				server = git.NewDaytonaGitMCPServer()
+			default:
+				return fmt.Errorf("mcp server name %s is not supported", mcpServerName)
 			}
 
 			go func() {
