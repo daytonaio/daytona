@@ -12,29 +12,32 @@ import (
 	apiclient "github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type PreviewLinkInput struct {
-	SandboxId   *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to generate the preview link for."`
-	Port        *int32  `json:"port,omitempty" jsonchema:"Port to expose."`
-	CheckServer *bool   `json:"checkServer,omitempty" jsonchema:"Check if a server is running on the specified port."`
-	Description *string `json:"description,omitempty" jsonchema:"Description of the service."`
+	SandboxId   *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to generate the preview link for."`
+	Port        *int32  `json:"port,omitempty" jsonschema:"required,type=integer,description=Port to expose."`
+	CheckServer *bool   `json:"checkServer,omitempty" jsonschema:"default=false,type=boolean,description=Check if a server is running on the specified port."`
+	Description *string `json:"description,omitempty" jsonschema:"type=string,description=Description of the service."`
 }
 
 type PreviewLinkOutput struct {
-	PreviewURL string `json:"previewURL" jsonchema:"Preview URL of the service."`
-	Accessible bool   `json:"accessible" jsonchema:"Whether the preview URL is accessible."`
-	StatusCode string `json:"statusCode" jsonchema:"Status code of the preview URL."`
+	PreviewURL string `json:"previewURL" jsonschema:"type=string,description=Preview URL of the service."`
+	Accessible bool   `json:"accessible" jsonschema:"type=boolean,description=Whether the preview URL is accessible."`
+	StatusCode string `json:"statusCode" jsonschema:"type=string,description=Status code of the preview URL."`
 }
 
 func getPreviewLinkTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "preview_link",
-		Title:       "Preview Link",
-		Description: "Generate accessible preview URLs for web applications running in the Daytona sandbox. Creates a secure tunnel to expose local ports externally without configuration. Validates if a server is actually running on the specified port and provides diagnostic information for troubleshooting. Supports custom descriptions and metadata for better organization of multiple services.",
+		Name:         "preview_link",
+		Title:        "Preview Link",
+		Description:  "Generate accessible preview URLs for web applications running in the Daytona sandbox. Creates a secure tunnel to expose local ports externally without configuration. Validates if a server is actually running on the specified port and provides diagnostic information for troubleshooting. Supports custom descriptions and metadata for better organization of multiple services.",
+		InputSchema:  jsonschema.Reflect(PreviewLinkInput{}),
+		OutputSchema: jsonschema.Reflect(PreviewLinkOutput{}),
 	}
 }
 

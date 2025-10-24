@@ -9,25 +9,28 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type DeleteFileInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to delete the file from."`
-	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to delete."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to delete the file from."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to delete."`
 }
 
 type DeleteFileOutput struct {
-	Message string `json:"message" jsonchema:"Message indicating the successful deletion of the file."`
+	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful deletion of the file."`
 }
 
 func getDeleteFileTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "delete_file",
-		Title:       "Delete File",
-		Description: "Delete a file or directory in the Daytona sandbox.",
+		Name:         "delete_file",
+		Title:        "Delete File",
+		Description:  "Delete a file or directory in the Daytona sandbox.",
+		InputSchema:  jsonschema.Reflect(DeleteFileInput{}),
+		OutputSchema: jsonschema.Reflect(DeleteFileOutput{}),
 	}
 }
 

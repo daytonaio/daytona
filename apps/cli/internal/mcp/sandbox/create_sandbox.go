@@ -12,6 +12,7 @@ import (
 	apiclient "github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -19,35 +20,37 @@ import (
 )
 
 type CreateSandboxInput struct {
-	Name                *string                    `json:"name,omitempty" jsonchema:"Name of the sandbox. If not provided, the sandbox ID will be used as the name."`
-	Target              *string                    `json:"target,omitempty" jsonchema:"Target region of the sandbox."`
-	Snapshot            *string                    `json:"snapshot,omitempty" jsonchema:"Snapshot of the sandbox (don't specify any if not explicitly instructed from user). Cannot be specified when using a build info entry."`
-	User                *string                    `json:"user,omitempty" jsonchema:"User associated with the sandbox."`
-	Env                 *map[string]string         `json:"env,omitempty" jsonchema:"Environment variables for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
-	Labels              *map[string]string         `json:"labels,omitempty" jsonchema:"Labels for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
-	Public              *bool                      `json:"public,omitempty" jsonchema:"Whether the sandbox http preview is publicly accessible."`
-	Cpu                 *int32                     `json:"cpu,omitempty" jsonchema:"CPU cores allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
-	Gpu                 *int32                     `json:"gpu,omitempty" jsonchema:"GPU units allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
-	Memory              *int32                     `json:"memory,omitempty" jsonchema:"Memory allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
-	Disk                *int32                     `json:"disk,omitempty" jsonchema:"Disk space allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
-	AutoStopInterval    *int32                     `json:"autoStopInterval,omitempty" jsonchema:"Auto-stop interval in minutes (0 means disabled) for the sandbox."`
-	AutoArchiveInterval *int32                     `json:"autoArchiveInterval,omitempty" jsonchema:"Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox."`
-	AutoDeleteInterval  *int32                     `json:"autoDeleteInterval,omitempty" jsonchema:"Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) for the sandbox."`
-	Volumes             *[]apiclient.SandboxVolume `json:"volumes,omitempty" jsonchema:"Volumes to attach to the sandbox."`
-	BuildInfo           *apiclient.CreateBuildInfo `json:"buildInfo,omitempty" jsonchema:"Build information for the sandbox."`
-	NetworkBlockAll     *bool                      `json:"networkBlockAll,omitempty" jsonchema:"Whether to block all network access to the sandbox."`
-	NetworkAllowList    *string                    `json:"networkAllowList,omitempty" jsonchema:"Comma-separated list of domains to allow network access to the sandbox."`
+	Name                *string                    `json:"name,omitempty" jsonschema:"type=string,description=Name of the sandbox. Don't provide this if not explicitly instructed from user. If not provided, the sandbox ID will be used as the name."`
+	Target              *string                    `json:"target,omitempty" jsonschema:"default=us,type=string,description=Target region of the sandbox (defaults to us)."`
+	Snapshot            *string                    `json:"snapshot,omitempty" jsonschema:"type=string,description=Snapshot of the sandbox (don't specify any if not explicitly instructed from user). Cannot be specified when using a build info entry."`
+	User                *string                    `json:"user,omitempty" jsonschema:"type=string,description=User associated with the sandbox."`
+	Env                 *map[string]string         `json:"env,omitempty" jsonschema:"type=object,additionalProperties=string,description=Environment variables for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
+	Labels              *map[string]string         `json:"labels,omitempty" jsonschema:"type=object,additionalProperties=string,description=Labels for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
+	Public              *bool                      `json:"public,omitempty" jsonschema:"default=true,type=boolean,description=Whether the sandbox http preview is publicly accessible (defaults to true)."`
+	Cpu                 *int32                     `json:"cpu,omitempty" jsonschema:"default=1,type=integer,description=CPU cores allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
+	Gpu                 *int32                     `json:"gpu,omitempty" jsonschema:"default=1,type=integer,description=GPU units allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
+	Memory              *int32                     `json:"memory,omitempty" jsonschema:"default=2,type=integer,description=Memory allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
+	Disk                *int32                     `json:"disk,omitempty" jsonschema:"default=4,type=integer,description=Disk space allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
+	AutoStopInterval    *int32                     `json:"autoStopInterval,omitempty" jsonschema:"default=15,type=integer,description=Auto-stop interval in minutes (0 means disabled) for the sandbox (defaults to 15)."`
+	AutoArchiveInterval *int32                     `json:"autoArchiveInterval,omitempty" jsonschema:"default=10080,type=integer,description=Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox (defaults to 10080)."`
+	AutoDeleteInterval  *int32                     `json:"autoDeleteInterval,omitempty" jsonschema:"default=-1,type=integer,description=Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) for the sandbox (defaults to -1)."`
+	Volumes             *[]apiclient.SandboxVolume `json:"volumes,omitempty" jsonschema:"type=array,items=object,description=Volumes to attach to the sandbox."`
+	BuildInfo           *apiclient.CreateBuildInfo `json:"buildInfo,omitempty" jsonschema:"type=object,description=Build information for the sandbox."`
+	NetworkBlockAll     *bool                      `json:"networkBlockAll,omitempty" jsonschema:"default=false,type=boolean,description=Whether to block all network access to the sandbox (defaults to false)."`
+	NetworkAllowList    *string                    `json:"networkAllowList,omitempty" jsonschema:"type=string,description=Comma-separated list of domains to allow network access to the sandbox."`
 }
 
 type CreateSandboxOutput struct {
-	Message string `json:"message" jsonchema:"Message indicating the successful creation of the sandbox."`
+	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful creation of the sandbox."`
 }
 
 func getCreateSandboxTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "create_sandbox",
-		Title:       "Create Sandbox",
-		Description: "Create a new sandbox with Daytona.",
+		Name:         "create_sandbox",
+		Title:        "Create Sandbox",
+		Description:  "Create a new sandbox with Daytona.",
+		InputSchema:  jsonschema.Reflect(CreateSandboxInput{}),
+		OutputSchema: jsonschema.Reflect(CreateSandboxOutput{}),
 	}
 }
 

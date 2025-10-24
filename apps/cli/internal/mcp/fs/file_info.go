@@ -10,25 +10,28 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type FileInfoInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to get the file information from."`
-	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to get information about."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to get the file information from."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to get information about."`
 }
 
 type FileInfoOutput struct {
-	FileInfo string `json:"fileInfo" jsonchema:"Information about the file."`
+	FileInfo string `json:"fileInfo" jsonschema:"type=string,description=Information about the file."`
 }
 
 func getFileInfoTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "get_file_info",
-		Title:       "Get File Info",
-		Description: "Get information about a file in the Daytona sandbox.",
+		Name:         "get_file_info",
+		Title:        "Get File Info",
+		Description:  "Get information about a file in the Daytona sandbox.",
+		InputSchema:  jsonschema.Reflect(FileInfoInput{}),
+		OutputSchema: jsonschema.Reflect(FileInfoOutput{}),
 	}
 }
 

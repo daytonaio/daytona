@@ -10,6 +10,7 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -17,18 +18,20 @@ import (
 )
 
 type DestroySandboxInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to destroy."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to destroy."`
 }
 
 type DestroySandboxOutput struct {
-	Message string `json:"message" jsonchema:"Message indicating the successful destruction of the sandbox."`
+	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful destruction of the sandbox."`
 }
 
 func getDestroySandboxTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "destroy_sandbox",
-		Title:       "Destroy Sandbox",
-		Description: "Destroy a sandbox with Daytona.",
+		Name:         "destroy_sandbox",
+		Title:        "Destroy Sandbox",
+		Description:  "Destroy a sandbox with Daytona.",
+		InputSchema:  jsonschema.Reflect(DestroySandboxInput{}),
+		OutputSchema: jsonschema.Reflect(DestroySandboxOutput{}),
 	}
 }
 

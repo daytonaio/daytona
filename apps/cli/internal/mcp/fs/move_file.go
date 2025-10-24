@@ -9,26 +9,29 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type MoveFileInput struct {
-	SandboxId  *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to move the file in."`
-	SourcePath *string `json:"sourcePath,omitempty" jsonchema:"Source path of the file to move."`
-	DestPath   *string `json:"destPath,omitempty" jsonchema:"Destination path where to move the file."`
+	SandboxId  *string `json:"sandboxId,omitempty" jsonschema:"ID of the sandbox to move the file in."`
+	SourcePath *string `json:"sourcePath,omitempty" jsonschema:"Source path of the file to move."`
+	DestPath   *string `json:"destPath,omitempty" jsonschema:"Destination path where to move the file."`
 }
 
 type MoveFileOutput struct {
-	Message string `json:"message" jsonchema:"Message indicating the successful movement of the file."`
+	Message string `json:"message" jsonschema:"Message indicating the successful movement of the file."`
 }
 
 func getMoveFileTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "move_file",
-		Title:       "Move File",
-		Description: "Move or rename a file in the Daytona sandbox.",
+		Name:         "move_file",
+		Title:        "Move File",
+		Description:  "Move or rename a file in the Daytona sandbox.",
+		InputSchema:  jsonschema.Reflect(MoveFileInput{}),
+		OutputSchema: jsonschema.Reflect(MoveFileOutput{}),
 	}
 }
 

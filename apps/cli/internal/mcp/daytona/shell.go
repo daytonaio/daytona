@@ -12,6 +12,7 @@ import (
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
 	"github.com/daytonaio/daytona/cli/internal/mcp/util"
+	"github.com/invopop/jsonschema"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -19,22 +20,24 @@ import (
 )
 
 type ShellInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to execute the command in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
-	Command   *string `json:"command,omitempty" jsonchema:"Command to execute."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"type=string,description=ID of the sandbox to execute the command in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
+	Command   *string `json:"command,omitempty" jsonschema:"required,type=string, description=Command to execute."`
 }
 
 type ShellOutput struct {
-	Stdout    string `json:"stdout" jsonchema:"Standard output of the command."`
-	Stderr    string `json:"stderr" jsonchema:"Standard error output of the command."`
-	ExitCode  int    `json:"exitCode" jsonchema:"Exit code of the command."`
-	ErrorType string `json:"errorType,omitempty" jsonchema:"Error type of the command."`
+	Stdout    string `json:"stdout" jsonschema:"type=string,description=Standard output of the command."`
+	Stderr    string `json:"stderr" jsonschema:"type=string,description=Standard error output of the command."`
+	ExitCode  int    `json:"exitCode" jsonschema:"type=integer,description=Exit code of the command."`
+	ErrorType string `json:"errorType,omitempty" jsonschema:"type=string,description=Error type of the command."`
 }
 
 func getShellTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "shell",
-		Title:       "Shell",
-		Description: "Execute shell commands in the Daytona sandbox.",
+		Name:         "shell",
+		Title:        "Shell",
+		Description:  "Execute shell commands in the Daytona sandbox.",
+		InputSchema:  jsonschema.Reflect(ShellInput{}),
+		OutputSchema: jsonschema.Reflect(ShellOutput{}),
 	}
 }
 

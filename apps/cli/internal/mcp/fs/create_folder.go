@@ -9,26 +9,29 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type CreateFolderInput struct {
-	SandboxId  *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to create the folder in."`
-	FolderPath *string `json:"folderPath,omitempty" jsonchema:"Path to the folder to create."`
-	Mode       *string `json:"mode,omitempty" jsonchema:"Mode of the folder to create (defaults to 0755)."`
+	SandboxId  *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to create the folder in."`
+	FolderPath *string `json:"folderPath,omitempty" jsonschema:"required,type=string,description=Path to the folder to create."`
+	Mode       *string `json:"mode,omitempty" jsonschema:"default=0755,type=string,description=Mode of the folder to create (defaults to 0755)."`
 }
 
 type CreateFolderOutput struct {
-	Message string `json:"message" jsonchema:"Message indicating the successful creation of the folder."`
+	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful creation of the folder."`
 }
 
 func getCreateFolderTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "create_folder",
-		Title:       "Create Folder",
-		Description: "Create a new folder in the Daytona sandbox.",
+		Name:         "create_folder",
+		Title:        "Create Folder",
+		Description:  "Create a new folder in the Daytona sandbox.",
+		InputSchema:  jsonschema.Reflect(CreateFolderInput{}),
+		OutputSchema: jsonschema.Reflect(CreateFolderOutput{}),
 	}
 }
 

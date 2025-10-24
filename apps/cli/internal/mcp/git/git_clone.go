@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -17,24 +18,26 @@ import (
 )
 
 type GitCloneInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to clone the repository in."`
-	Url       *string `json:"url,omitempty" jsonchema:"URL of the Git repository to clone."`
-	Path      *string `json:"path,omitempty" jsonchema:"Directory to clone the repository into (defaults to current directory)."`
-	Branch    *string `json:"branch,omitempty" jsonchema:"Branch to clone."`
-	CommitId  *string `json:"commitId,omitempty" jsonchema:"Commit ID to clone."`
-	Username  *string `json:"username,omitempty" jsonchema:"Username to clone the repository with."`
-	Password  *string `json:"password,omitempty" jsonchema:"Password to clone the repository with."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to clone the repository in."`
+	Url       *string `json:"url,omitempty" jsonschema:"required,type=string,description=URL of the Git repository to clone."`
+	Path      *string `json:"path,omitempty" jsonschema:"default=.,type=string,description=Directory to clone the repository into (defaults to current directory)."`
+	Branch    *string `json:"branch,omitempty" jsonschema:"default=main,type=string,description=Branch to clone."`
+	CommitId  *string `json:"commitId,omitempty" jsonschema:"type=string,description=Commit ID to clone."`
+	Username  *string `json:"username,omitempty" jsonschema:"type=string,description=Username to clone the repository with."`
+	Password  *string `json:"password,omitempty" jsonschema:"type=string,description=Password to clone the repository with."`
 }
 
 type GitCloneOutput struct {
-	Message string `json:"message" jsonchema:"Message indicating the successful cloning of the repository."`
+	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful cloning of the repository."`
 }
 
 func getGitCloneTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "git_clone",
-		Title:       "Git Clone",
-		Description: "Clone a Git repository into the Daytona sandbox.",
+		Name:         "git_clone",
+		Title:        "Git Clone",
+		Description:  "Clone a Git repository into the Daytona sandbox.",
+		InputSchema:  jsonschema.Reflect(GitCloneInput{}),
+		OutputSchema: jsonschema.Reflect(GitCloneOutput{}),
 	}
 }
 

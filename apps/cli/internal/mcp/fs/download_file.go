@@ -12,29 +12,32 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 type FileDownloadInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to download the file from."`
-	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to download."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to download the file from."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to download."`
 }
 
 type FileDownloadOutput struct {
-	Content string `json:"content" jsonchema:"Content of the file."`
+	Content []Content `json:"content" jsonschema:"type=array,items=object,description=Contents of the file."`
 }
 
 type Content struct {
-	Type string `json:"type" jsonchema:"Type of the content."`
-	Text string `json:"text,omitempty" jsonchema:"Text of the content."`
-	Data string `json:"data,omitempty" jsonchema:"Data of the content."`
+	Type string `json:"type" jsonschema:"type=string,description=Type of the content."`
+	Text string `json:"text,omitempty" jsonschema:"type=string,description=Text of the content."`
+	Data string `json:"data,omitempty" jsonschema:"type=string,description=Data of the content."`
 }
 
 func getDownloadFileTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "download_file",
-		Title:       "Download File",
-		Description: "Download a file from the Daytona sandbox. Returns the file content either as text or as a base64 encoded image. Handles special cases like matplotlib plots stored as JSON with embedded base64 images.",
+		Name:         "download_file",
+		Title:        "Download File",
+		Description:  "Download a file from the Daytona sandbox. Returns the file content either as text or as a base64 encoded image. Handles special cases like matplotlib plots stored as JSON with embedded base64 images.",
+		InputSchema:  jsonschema.Reflect(FileDownloadInput{}),
+		OutputSchema: jsonschema.Reflect(FileDownloadOutput{}),
 	}
 }
 
@@ -116,6 +119,11 @@ func handleDownloadFile(ctx context.Context, request *mcp.CallToolRequest, input
 	return &mcp.CallToolResult{
 			IsError: false,
 		}, &FileDownloadOutput{
-			Content: string(resultJSON),
+			Content: []Content{
+				{
+					Type: "text",
+					Text: string(resultJSON),
+				},
+			},
 		}, nil
 }

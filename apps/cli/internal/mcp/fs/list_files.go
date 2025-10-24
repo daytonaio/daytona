@@ -10,25 +10,28 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type ListFilesInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to list the files from."`
-	Path      *string `json:"path,omitempty" jsonchema:"Path to the directory to list files from (defaults to current directory)."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to list the files from."`
+	Path      *string `json:"path,omitempty" jsonschema:"required,type=string,description=Path to the directory to list files from (defaults to current directory)."`
 }
 
 type ListFilesOutput struct {
-	Files string `json:"files" jsonchema:"List of files in the directory."`
+	Files string `json:"files" jsonschema:"type=string,description=List of files in the directory."`
 }
 
 func getListFilesTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "list_files",
-		Title:       "List Files",
-		Description: "List files in a directory in the Daytona sandbox.",
+		Name:         "list_files",
+		Title:        "List Files",
+		Description:  "List files in a directory in the Daytona sandbox.",
+		InputSchema:  jsonschema.Reflect(ListFilesInput{}),
+		OutputSchema: jsonschema.Reflect(ListFilesOutput{}),
 	}
 }
 

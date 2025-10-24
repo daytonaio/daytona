@@ -12,28 +12,31 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type FileUploadInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonchema:"ID of the sandbox to upload the file to."`
-	FilePath  *string `json:"filePath,omitempty" jsonchema:"Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise."`
-	Content   *string `json:"content,omitempty" jsonchema:"Content of the file to upload."`
-	Encoding  *string `json:"encoding,omitempty" jsonchema:"Encoding of the file to upload."`
-	Overwrite *bool   `json:"overwrite,omitempty" jsonchema:"Overwrite the file if it already exists."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to upload the file to."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise."`
+	Content   *string `json:"content,omitempty" jsonschema:"required,type=string,description=Content of the file to upload."`
+	Encoding  *string `json:"encoding,omitempty" jsonschema:"default=text,type=string,description=Encoding of the file to upload."`
+	Overwrite *bool   `json:"overwrite,omitempty" jsonschema:"default=false,type=boolean,description=Overwrite the file if it already exists."`
 }
 
 type FileUploadOutput struct {
-	Message string `json:"message" jsonchema:"Message indicating the successful upload of the file."`
+	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful upload of the file."`
 }
 
 func getUploadFileTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:        "file_upload",
-		Title:       "Upload File",
-		Description: "Upload files to the Daytona sandbox from text or base64-encoded binary content. Creates necessary parent directories automatically and verifies successful writes. Files persist during the session and have appropriate permissions for further tool operations. Supports overwrite controls and maintains original file formats.",
+		Name:         "file_upload",
+		Title:        "Upload File",
+		Description:  "Upload files to the Daytona sandbox from text or base64-encoded binary content. Creates necessary parent directories automatically and verifies successful writes. Files persist during the session and have appropriate permissions for further tool operations. Supports overwrite controls and maintains original file formats.",
+		InputSchema:  jsonschema.Reflect(FileUploadInput{}),
+		OutputSchema: jsonschema.Reflect(FileUploadOutput{}),
 	}
 }
 
@@ -55,8 +58,9 @@ func handleUploadFile(ctx context.Context, request *mcp.CallToolRequest, input *
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("content parameter is required")
 	}
 
-	if input.Encoding == nil || *input.Encoding == "" {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("encoding parameter is required")
+	if input.Encoding == nil {
+		defaultEncoding := "text"
+		input.Encoding = &defaultEncoding
 	}
 
 	overwrite := false
