@@ -65,7 +65,7 @@ services:
     networks:
       - daytona-network
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/18/docker
 
   pgadmin:
     image: dpage/pgadmin4:9.2.0
