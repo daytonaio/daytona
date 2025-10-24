@@ -548,11 +548,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       },
     })
 
-    if (snapshot.ref && snapshotRunner) {
+    if (snapshot.skipValidation && snapshot.ref && snapshotRunner) {
       if (snapshotRunner.state === SnapshotRunnerState.READY) {
         await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
       } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, snapshotRunner.errorReason)
+        await this.snapshotRunnerRepository.delete(snapshotRunner.id)
       }
       return DONT_SYNC_AGAIN
     }
