@@ -24,12 +24,7 @@ export class RedisLockProvider {
 
   async renewLock(key: string, ttl: number): Promise<boolean> {
     // Check if the lock exists and renew it
-    const exists = await this.redis.exists(key)
-    if (exists) {
-      await this.redis.expire(key, ttl)
-      return true
-    }
-    return false
+    return (await this.redis.expire(key, ttl, 'XX')) !== 0
   }
 
   async waitForLock(key: string, ttl: number): Promise<void> {

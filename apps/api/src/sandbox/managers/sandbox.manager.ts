@@ -364,7 +364,13 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
       // Lock already acquired by caller (event-driven from service)
       lockKey = providedLockKey
       // Renew the lock to ensure it doesn't expire during recursive calls
-      await this.redisLockProvider.renewLock(lockKey, 60)
+      const lockRenewed = await this.redisLockProvider.renewLock(lockKey, 60)
+      if (!lockRenewed) {
+        lockKey = await this.tryLock(sandboxId, 60)
+        if (!lockKey) {
+          return
+        }
+      }
     } else {
       // Cron-driven: Try to acquire lock, skip if busy
       lockKey = await this.tryLock(sandboxId, 60)
