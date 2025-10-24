@@ -643,7 +643,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     let validationSuccess = false
     let creationSuccess = false
-    let errorMessage = ''
+    let errorMessage = 'Validation failed, ensure your entrypoint is valid/long-running'
 
     const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
@@ -652,7 +652,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       creationSuccess = true
     } catch (error) {
       validationSuccess = false
-      errorMessage = `Validation failed, ensure your entrypoint is valid/long-running: ${fromAxiosError(error)}`
+      errorMessage = `${errorMessage}: ${fromAxiosError(error)}`
       return { validationSuccess, errorMessage }
     }
 

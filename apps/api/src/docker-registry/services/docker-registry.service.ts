@@ -302,6 +302,9 @@ export class DockerRegistryService {
   }
 
   private async findRegistryByImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
+    // Remove docker.io prefix since it's the default registry
+    imageName = imageName.replace(/^docker\.io\//, '')
+
     // Parse the image to extract potential registry hostname
     const parsedImage = parseDockerImage(imageName)
 
@@ -397,6 +400,9 @@ export class DockerRegistryService {
 
   async getImageDetails(image: string, organizationId?: string): Promise<ImageDetails> {
     try {
+      // Remove docker.io prefix since it's the default registry
+      image = image.replace(/^docker\.io\//, '')
+
       // Parse the image to extract components
       const parsedImage = parseDockerImage(image)
 
