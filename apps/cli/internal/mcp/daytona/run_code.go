@@ -16,7 +16,7 @@ import (
 )
 
 type RunCodeInput struct {
-	SandboxId string         `json:"sandboxId" jsonchema:"ID of the sandbox to run the code in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
+	SandboxId *string        `json:"sandboxId" jsonchema:"ID of the sandbox to run the code in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
 	Code      string         `json:"code" jsonchema:"Code to run."`
 	Params    *CodeRunParams `json:"params,omitempty" jsonchema:"Parameters for the code run."`
 	Timeout   int            `json:"timeout" jsonchema:"Maximum time in seconds to wait for the code to complete. If not provided, the default timeout 0 (meaning indefinitely) will be used."`
@@ -70,7 +70,7 @@ func handleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *Run
 		input.Timeout = 0
 	}
 
-	_, err = util.GetSandbox(ctx, apiClient, &input.SandboxId)
+	_, err = util.GetSandbox(ctx, apiClient, input.SandboxId)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
 	}
