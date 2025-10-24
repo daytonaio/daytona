@@ -40,7 +40,7 @@ type CreateSandboxInput struct {
 }
 
 type CreateSandboxOutput struct {
-	Message string `json:"message,omitempty" jsonschema:"description=Message indicating the successful creation of the sandbox."`
+	Message string `json:"message,omitempty" jsonschema:"Message indicating the successful creation of the sandbox."`
 }
 
 func getCreateSandboxTool() *mcp.Tool {
