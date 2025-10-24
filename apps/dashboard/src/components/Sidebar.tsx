@@ -186,6 +186,9 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             <SidebarTrigger className="p-2 [&_svg]:size-5" />
           </div>
           <OrganizationPicker />
+          <div className="px-2 py-1 text-sm text-muted-foreground group-data-[state=collapsed]:hidden">
+            नमस्ते, {user?.profile.name || 'User'}!
+          </div>
           <SidebarGroupContent>
             <SidebarMenu>
               {sidebarItems.map((item) => (

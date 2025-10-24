@@ -119,7 +119,7 @@ const Onboarding: React.FC = () => {
         <div className="max-w-3xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-2xl font-bold mb-2">Get Started</h1>
+              <h1 className="text-2xl font-bold mb-2">नमस्ते! Get Started</h1>
               <p className="text-muted-foreground">Install and get your Sandboxes running.</p>
             </div>
             <div className="flex items-center space-x-2">
