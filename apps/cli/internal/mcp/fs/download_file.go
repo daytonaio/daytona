@@ -12,32 +12,29 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
-	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 type FileDownloadInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to download the file from."`
-	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,description=Path to the file to download."`
+	SandboxId string `json:"sandboxId" jsonschema:"ID of the sandbox to download the file from."`
+	FilePath  string `json:"filePath" jsonschema:"Path to the file to download."`
 }
 
 type FileDownloadOutput struct {
-	Content []Content `json:"content" jsonschema:"description=Contents of the file."`
+	Content []Content `json:"content,omitempty" jsonschema:"Contents of the file."`
 }
 
 type Content struct {
-	Type string `json:"type" jsonschema:"description=Type of the content."`
-	Text string `json:"text,omitempty" jsonschema:"description=Text of the content."`
-	Data string `json:"data,omitempty" jsonschema:"description=Data of the content."`
+	Type string `json:"type,omitempty" jsonschema:"Type of the content."`
+	Text string `json:"text,omitempty" jsonschema:"Text of the content."`
+	Data string `json:"data,omitempty" jsonschema:"Data of the content."`
 }
 
 func getDownloadFileTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:         "download_file",
-		Title:        "Download File",
-		Description:  "Download a file from the Daytona sandbox. Returns the file content either as text or as a base64 encoded image. Handles special cases like matplotlib plots stored as JSON with embedded base64 images.",
-		InputSchema:  jsonschema.Reflect(FileDownloadInput{}),
-		OutputSchema: jsonschema.Reflect(FileDownloadOutput{}),
+		Name:        "download_file",
+		Title:       "Download File",
+		Description: "Download a file from the Daytona sandbox. Returns the file content either as text or as a base64 encoded image. Handles special cases like matplotlib plots stored as JSON with embedded base64 images.",
 	}
 }
 
@@ -47,16 +44,16 @@ func handleDownloadFile(ctx context.Context, request *mcp.CallToolRequest, input
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.SandboxId == nil || *input.SandboxId == "" {
+	if input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	if input.FilePath == nil || *input.FilePath == "" {
+	if input.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("filePath parameter is required")
 	}
 
 	// Download the file
-	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, *input.SandboxId).Path(*input.FilePath).Execute()
+	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, input.SandboxId).Path(input.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error downloading file: %v", err)
 	}
@@ -69,7 +66,7 @@ func handleDownloadFile(ctx context.Context, request *mcp.CallToolRequest, input
 	}
 
 	// Process file content based on file type
-	ext := filepath.Ext(*input.FilePath)
+	ext := filepath.Ext(input.FilePath)
 	var result []Content
 
 	switch ext {

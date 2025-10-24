@@ -9,29 +9,26 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
-	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type CreateFolderInput struct {
-	SandboxId  *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to create the folder in."`
-	FolderPath *string `json:"folderPath,omitempty" jsonschema:"required,description=Path to the folder to create."`
-	Mode       *string `json:"mode,omitempty" jsonschema:"default=0755,description=Mode of the folder to create (defaults to 0755)."`
+	SandboxId  string `json:"sandboxId" jsonschema:"ID of the sandbox to create the folder in."`
+	FolderPath string `json:"folderPath" jsonschema:"Path to the folder to create."`
+	Mode       string `json:"mode,omitempty" jsonschema:"Mode of the folder to create (defaults to 0755)."`
 }
 
 type CreateFolderOutput struct {
-	Message string `json:"message" jsonschema:"description=Message indicating the successful creation of the folder."`
+	Message string `json:"message,omitempty" jsonschema:"Message indicating the successful creation of the folder."`
 }
 
 func getCreateFolderTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:         "create_folder",
-		Title:        "Create Folder",
-		Description:  "Create a new folder in the Daytona sandbox.",
-		InputSchema:  jsonschema.Reflect(CreateFolderInput{}),
-		OutputSchema: jsonschema.Reflect(CreateFolderOutput{}),
+		Name:        "create_folder",
+		Title:       "Create Folder",
+		Description: "Create a new folder in the Daytona sandbox.",
 	}
 }
 
@@ -41,30 +38,29 @@ func handleCreateFolder(ctx context.Context, request *mcp.CallToolRequest, input
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.SandboxId == nil || *input.SandboxId == "" {
+	if input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	if input.FolderPath == nil || *input.FolderPath == "" {
+	if input.FolderPath == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("folderPath parameter is required")
 	}
 
-	mode := "0755" // default mode
-	if input.Mode == nil || *input.Mode == "" {
-		input.Mode = &mode
+	if input.Mode == "" {
+		input.Mode = "0755"
 	}
 
 	// Create the folder
-	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, *input.SandboxId).Path(*input.FolderPath).Mode(*input.Mode).Execute()
+	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, input.SandboxId).Path(input.FolderPath).Mode(input.Mode).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error creating folder: %v", err)
 	}
 
-	log.Infof("Created folder: %s", *input.FolderPath)
+	log.Infof("Created folder: %s", input.FolderPath)
 
 	return &mcp.CallToolResult{
 			IsError: false,
 		}, &CreateFolderOutput{
-			Message: fmt.Sprintf("Created folder: %s", *input.FolderPath),
+			Message: fmt.Sprintf("Created folder: %s", input.FolderPath),
 		}, nil
 }

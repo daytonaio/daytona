@@ -10,7 +10,6 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
-	"github.com/invopop/jsonschema"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -18,20 +17,18 @@ import (
 )
 
 type DestroySandboxInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to destroy."`
+	SandboxId string `json:"sandboxId" jsonschema:"ID of the sandbox to destroy."`
 }
 
 type DestroySandboxOutput struct {
-	Message string `json:"message" jsonschema:"description=Message indicating the successful destruction of the sandbox."`
+	Message string `json:"message,omitempty" jsonschema:"Message indicating the successful destruction of the sandbox."`
 }
 
 func getDestroySandboxTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:         "destroy_sandbox",
-		Title:        "Destroy Sandbox",
-		Description:  "Destroy a sandbox with Daytona.",
-		InputSchema:  jsonschema.Reflect(DestroySandboxInput{}),
-		OutputSchema: jsonschema.Reflect(DestroySandboxOutput{}),
+		Name:        "destroy_sandbox",
+		Title:       "Destroy Sandbox",
+		Description: "Destroy a sandbox with Daytona.",
 	}
 }
 
@@ -41,7 +38,7 @@ func handleDestroySandbox(ctx context.Context, request *mcp.CallToolRequest, inp
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.SandboxId == nil || *input.SandboxId == "" {
+	if input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
@@ -50,7 +47,7 @@ func handleDestroySandbox(ctx context.Context, request *mcp.CallToolRequest, inp
 	retryDelay := time.Second * 2
 
 	for retry := range maxRetries {
-		_, _, err := apiClient.SandboxAPI.DeleteSandbox(ctx, *input.SandboxId).Execute()
+		_, _, err := apiClient.SandboxAPI.DeleteSandbox(ctx, input.SandboxId).Execute()
 		if err != nil {
 			if retry == maxRetries-1 {
 				return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to destroy sandbox after %d retries: %v", maxRetries, err)
@@ -63,10 +60,10 @@ func handleDestroySandbox(ctx context.Context, request *mcp.CallToolRequest, inp
 			continue
 		}
 
-		log.Infof("Destroyed sandbox with ID: %s", *input.SandboxId)
+		log.Infof("Destroyed sandbox with ID: %s", input.SandboxId)
 
 		return &mcp.CallToolResult{IsError: false}, &DestroySandboxOutput{
-			Message: fmt.Sprintf("Destroyed sandbox with ID %s", *input.SandboxId),
+			Message: fmt.Sprintf("Destroyed sandbox with ID %s", input.SandboxId),
 		}, nil
 	}
 

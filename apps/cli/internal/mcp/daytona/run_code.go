@@ -10,50 +10,45 @@ import (
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
 	"github.com/daytonaio/daytona/cli/internal/mcp/util"
-	"github.com/invopop/jsonschema"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type RunCodeInput struct {
-	SandboxId *string        `json:"sandboxId" jsonschema:"description=ID of the sandbox to run the code in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
-	Code      string         `json:"code" jsonschema:"required,description=Code to run."`
-	Params    *CodeRunParams `json:"params,omitempty" jsonschema:"description=Parameters for the code run."`
-	Timeout   int            `json:"timeout" jsonschema:"required,default=0,description=Maximum time in seconds to wait for the code to complete. If not provided, the default timeout 0 (meaning indefinitely) will be used."`
+	SandboxId *string       `json:"sandboxId,omitempty" jsonschema:"ID of the sandbox to run the code in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
+	Code      string        `json:"code" jsonschema:"Code to run."`
+	Params    CodeRunParams `json:"params,omitempty" jsonschema:"Parameters for the code run."`
+	Timeout   *int          `json:"timeout,omitempty" jsonschema:"Maximum time in seconds to wait for the code to complete. If not provided, the default timeout 0 (meaning indefinitely) will be used."`
 }
 
 type CodeRunParams struct {
-	Argv []string          `json:"argv,omitempty" jsonschema:"description=Command line arguments."`
-	Env  map[string]string `json:"env,omitempty" jsonschema:"description=Environment variables."`
+	Argv []string          `json:"argv,omitempty" jsonschema:"Command line arguments."`
+	Env  map[string]string `json:"env,omitempty" jsonschema:"Environment variables."`
 }
 
 type ExecuteResponse struct {
-	ExitCode             int                    `json:"exitCode" jsonschema:"description=Exit code of the code run."`
-	Result               string                 `json:"result" jsonschema:"description=Result of the code run."`
-	Artifacts            *ExecutionArtifacts    `json:"artifacts" jsonschema:"description=Artifacts of the code run."`
-	AdditionalProperties map[string]interface{} `json:"additionalProperties,omitempty" jsonschema:"description=Additional properties."`
+	ExitCode             *int                   `json:"exitCode,omitempty" jsonschema:"Exit code of the code run."`
+	Result               *string                `json:"result,omitempty" jsonschema:"Result of the code run."`
+	Artifacts            *ExecutionArtifacts    `json:"artifacts,omitempty" jsonschema:"Artifacts of the code run."`
+	AdditionalProperties map[string]interface{} `json:"additionalProperties,omitempty" jsonschema:"Additional properties."`
 }
 
 type ExecutionArtifacts struct {
-	Stdout string  `json:"stdout" jsonschema:"description=Standard output of the code run."`
-	Charts []Chart `json:"charts,omitempty" jsonschema:"description=Charts of the code run."`
+	Stdout *string `json:"stdout,omitempty" jsonschema:"Standard output of the code run."`
+	Charts []Chart `json:"charts,omitempty" jsonschema:"Charts of the code run."`
 }
 
 type Chart struct {
-	Type     string        `json:"type" jsonschema:"description=Type of the chart."`
-	Title    string        `json:"title" jsonschema:"description=Title of the chart."`
-	Elements []interface{} `json:"elements,omitempty" jsonschema:"description=Elements of the chart."`
-	Png      string        `json:"png,omitempty" jsonschema:"description=PNG of the chart."`
+	Type     string        `json:"type,omitempty" jsonschema:"Type of the chart."`
+	Title    string        `json:"title,omitempty" jsonschema:"Title of the chart."`
+	Elements []interface{} `json:"elements,omitempty" jsonschema:"Elements of the chart."`
+	Png      string        `json:"png,omitempty" jsonschema:"PNG of the chart."`
 }
 
 func getRunCodeTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:         "run_code",
-		Title:        "Run Code",
-		Description:  "Run code in the Daytona sandbox.",
-		InputSchema:  jsonschema.Reflect(RunCodeInput{}),
-		OutputSchema: jsonschema.Reflect(ExecuteResponse{}),
+		Name:        "run_code",
+		Title:       "Run Code",
+		Description: "Run code in the Daytona sandbox.",
 	}
 }
 
@@ -68,10 +63,10 @@ func handleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *Run
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("code is required")
 	}
 
-	if input.Timeout <= 0 {
-		log.Warnf("Timeout is less than 0, setting to 0")
-		input.Timeout = 0
-	}
+	// timeout := 0
+	// if input.Timeout != nil && *input.Timeout > 0 {
+	// 	timeout = *input.Timeout
+	// }
 
 	_, err = util.GetSandbox(ctx, apiClient, input.SandboxId)
 	if err != nil {

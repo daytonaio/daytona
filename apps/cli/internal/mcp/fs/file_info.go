@@ -10,28 +10,25 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
-	"github.com/invopop/jsonschema"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type FileInfoInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to get the file information from."`
-	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,description=Path to the file to get information about."`
+	SandboxId string `json:"sandboxId" jsonschema:"ID of the sandbox to get the file information from."`
+	FilePath  string `json:"filePath" jsonschema:"Path to the file to get information about."`
 }
 
 type FileInfoOutput struct {
-	FileInfo string `json:"fileInfo" jsonschema:"description=Information about the file."`
+	FileInfo string `json:"fileInfo,omitempty" jsonschema:"Information about the file."`
 }
 
 func getFileInfoTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:         "get_file_info",
-		Title:        "Get File Info",
-		Description:  "Get information about a file in the Daytona sandbox.",
-		InputSchema:  jsonschema.Reflect(FileInfoInput{}),
-		OutputSchema: jsonschema.Reflect(FileInfoOutput{}),
+		Name:        "get_file_info",
+		Title:       "Get File Info",
+		Description: "Get information about a file in the Daytona sandbox.",
 	}
 }
 
@@ -41,16 +38,16 @@ func handleFileInfo(ctx context.Context, request *mcp.CallToolRequest, input *Fi
 		return &mcp.CallToolResult{IsError: true}, nil, err
 	}
 
-	if input.SandboxId == nil || *input.SandboxId == "" {
+	if input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	if input.FilePath == nil || *input.FilePath == "" {
+	if input.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("filePath parameter is required")
 	}
 
 	// Get file info
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *input.SandboxId).Path(*input.FilePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, input.SandboxId).Path(input.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error getting file info: %v", err)
 	}
@@ -61,7 +58,7 @@ func handleFileInfo(ctx context.Context, request *mcp.CallToolRequest, input *Fi
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error marshaling file info: %v", err)
 	}
 
-	log.Infof("Retrieved file info for: %s", *input.FilePath)
+	log.Infof("Retrieved file info for: %s", input.FilePath)
 
 	return &mcp.CallToolResult{
 			IsError: false,

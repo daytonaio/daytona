@@ -12,7 +12,6 @@ import (
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
 	"github.com/daytonaio/daytona/cli/internal/mcp/util"
-	"github.com/invopop/jsonschema"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -20,24 +19,22 @@ import (
 )
 
 type ShellInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"description=ID of the sandbox to execute the command in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
-	Command   *string `json:"command,omitempty" jsonschema:"required,description=Command to execute."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"ID of the sandbox to execute the command in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
+	Command   string  `json:"command" jsonschema:"Command to execute."`
 }
 
 type ShellOutput struct {
-	Stdout    string `json:"stdout" jsonschema:"description=Standard output of the command."`
-	Stderr    string `json:"stderr" jsonschema:"description=Standard error output of the command."`
-	ExitCode  int    `json:"exitCode" jsonschema:"description=Exit code of the command."`
-	ErrorType string `json:"errorType,omitempty" jsonschema:"description=Error type of the command."`
+	Stdout    *string `json:"stdout,omitempty" jsonschema:"Standard output of the command."`
+	Stderr    *string `json:"stderr,omitempty" jsonschema:"Standard error output of the command."`
+	ExitCode  *int    `json:"exitCode,omitempty" jsonschema:"Exit code of the command."`
+	ErrorType *string `json:"errorType,omitempty" jsonschema:"Error type of the command."`
 }
 
 func getShellTool() *mcp.Tool {
 	return &mcp.Tool{
-		Name:         "shell",
-		Title:        "Shell",
-		Description:  "Execute shell commands in the Daytona sandbox.",
-		InputSchema:  jsonschema.Reflect(ShellInput{}),
-		OutputSchema: jsonschema.Reflect(ShellOutput{}),
+		Name:        "shell",
+		Title:       "Shell",
+		Description: "Execute shell commands in the Daytona sandbox.",
 	}
 }
 
@@ -47,7 +44,7 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 		return returnCommandError(fmt.Sprintf("Error getting API client: %v", err), "APIError")
 	}
 
-	if input.Command == nil || *input.Command == "" {
+	if input.Command == "" {
 		return returnCommandError("Command must be a non-empty string", "ValueError")
 	}
 
@@ -57,7 +54,7 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 	}
 
 	// Process the command
-	command := strings.TrimSpace(*input.Command)
+	command := strings.TrimSpace(input.Command)
 	if strings.Contains(command, "&&") || strings.HasPrefix(command, "cd ") {
 		// Wrap complex commands in /bin/sh -c
 		command = fmt.Sprintf("/bin/sh -c %s", shellQuote(command))
@@ -83,17 +80,20 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 		}
 	}
 
+	stdout := strings.TrimSpace(result.Result)
+	exitCode := int(result.ExitCode)
+
 	// Process command output
 	cmdResult := ShellOutput{
-		Stdout:   strings.TrimSpace(result.Result),
-		ExitCode: int(result.ExitCode),
+		Stdout:   &stdout,
+		ExitCode: &exitCode,
 	}
 
 	// Log truncated output
-	outputLen := len(cmdResult.Stdout)
-	logOutput := cmdResult.Stdout
+	outputLen := len(*cmdResult.Stdout)
+	logOutput := *cmdResult.Stdout
 	if outputLen > 500 {
-		logOutput = cmdResult.Stdout[:500] + "..."
+		logOutput = (*cmdResult.Stdout)[:500] + "..."
 	}
 
 	log.Infof("Command completed - exit code: %d, output length: %d", cmdResult.ExitCode, outputLen)
@@ -101,7 +101,7 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 	log.Debugf("Command output (truncated): %s", logOutput)
 
 	// Check for non-zero exit code
-	if cmdResult.ExitCode > 0 {
+	if cmdResult.ExitCode != nil && *cmdResult.ExitCode > 0 {
 		log.Infof("Command exited with non-zero status - exit code: %d", cmdResult.ExitCode)
 	}
 
@@ -117,14 +117,15 @@ func handleShell(ctx context.Context, request *mcp.CallToolRequest, input *Shell
 
 // Helper function to return command errors in a consistent format
 func returnCommandError(message, errorType string) (*mcp.CallToolResult, *ShellOutput, error) {
+	exitCode := -1
 	return &mcp.CallToolResult{
 			IsError: true,
 		},
 		&ShellOutput{
-			Stdout:    "",
-			Stderr:    message,
-			ExitCode:  -1,
-			ErrorType: errorType,
+			Stdout:    nil,
+			Stderr:    &message,
+			ExitCode:  &exitCode,
+			ErrorType: &errorType,
 		}, fmt.Errorf("error: %s", message)
 }
 
