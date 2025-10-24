@@ -10,6 +10,7 @@ import (
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/daytonaio/daytona/cli/internal/mcp/util"
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	log "github.com/sirupsen/logrus"
@@ -40,6 +41,11 @@ func handleListFiles(ctx context.Context, request *mcp.CallToolRequest, input *L
 
 	if input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
+	}
+
+	_, err = util.GetSandbox(ctx, apiClient, &input.SandboxId)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
 	}
 
 	// Get directory path from request arguments (optional)

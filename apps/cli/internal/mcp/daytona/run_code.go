@@ -7,9 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
-	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
-	"github.com/daytonaio/daytona/cli/internal/mcp/util"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -53,50 +50,6 @@ func getRunCodeTool() *mcp.Tool {
 }
 
 func handleRunCode(ctx context.Context, request *mcp.CallToolRequest, input *RunCodeInput) (*mcp.CallToolResult, *ExecuteResponse, error) {
-	return &mcp.CallToolResult{IsError: false}, nil, fmt.Errorf("not implemented")
-	apiClient, err := apiclient_cli.GetApiClient(nil, mcp_headers.DaytonaMCPHeaders)
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, nil, err
-	}
-
-	if input.Code == "" {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("code is required")
-	}
-
-	// timeout := 0
-	// if input.Timeout != nil && *input.Timeout > 0 {
-	// 	timeout = *input.Timeout
-	// }
-
-	_, err = util.GetSandbox(ctx, apiClient, input.SandboxId)
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
-	}
-
-	// TODO: Implement code execution
-	return &mcp.CallToolResult{IsError: false}, nil, nil
-
-	// timeout := float32(input.Timeout)
-
-	// executeResponse, resp, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, input.SandboxId).ExecuteRequest(apiclient.ExecuteRequest{
-	// 	Command: input.Code,
-	// 	AdditionalProperties: map[string]interface{}{
-	// 		"env": input.Params.Env,
-	// 		"argv": input.Params.Argv,
-	// 	},
-	// 	Timeout: &timeout,
-	// }).Execute()
-	// if err != nil {
-	// 	return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to execute code: %v", err)
-	// }
-
-	// return &mcp.CallToolResult{
-	// 	IsError: false,
-	// }, &ExecuteResponse{
-	// 	ExitCode: int(result.ExitCode),
-	// 	Result:   result.Result,
-	// 	Artifacts: &ExecutionArtifacts{
-	// 		Stdout: result.Stdout,
-	// 	},
-	// }, nil
+	// TODO: implement once code interpreter is finished
+	return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("not implemented")
 }

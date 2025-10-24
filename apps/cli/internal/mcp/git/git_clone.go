@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	mcp_headers "github.com/daytonaio/daytona/cli/internal/mcp"
+	"github.com/daytonaio/daytona/cli/internal/mcp/util"
 
 	mcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -46,6 +47,11 @@ func handleGitClone(ctx context.Context, request *mcp.CallToolRequest, input *Gi
 
 	if input.SandboxId == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
+	}
+
+	_, err = util.GetSandbox(ctx, apiClient, &input.SandboxId)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
 	}
 
 	if input.Url == "" {
