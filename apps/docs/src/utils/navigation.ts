@@ -210,8 +210,8 @@ export function getPagination(
       sidebarConfig,
       (link as MainNavigationLink).relatedGroupCategory
     )
-    if (links && links.length > 0) {
-      result.next = { href: links[0].href, label: links[0].label }
+    if (links && links.length > 1) {
+      result.next = { href: links[1].href, label: links[1].label }
     }
   } else {
     const links = getNavLinksByCategory(sidebarConfig, group.category)
