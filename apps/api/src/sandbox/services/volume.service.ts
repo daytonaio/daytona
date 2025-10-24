@@ -207,30 +207,25 @@ export class VolumeService {
     }
   }
 
-  async getOrganizationId(volumeIdOrName: string, organizationId?: string): Promise<string> {
-    let volume = await this.volumeRepository.findOne({
+  async getOrganizationId(params: { id: string } | { name: string; organizationId: string }): Promise<string> {
+    if ('id' in params) {
+      const volume = await this.volumeRepository.findOneOrFail({
+        where: {
+          id: params.id,
+        },
+        select: ['organizationId'],
+      })
+      return volume.organizationId
+    }
+
+    const volume = await this.volumeRepository.findOneOrFail({
       where: {
-        id: volumeIdOrName,
-        ...(organizationId ? { organizationId: organizationId } : {}),
+        name: params.name,
+        organizationId: params.organizationId,
       },
       select: ['organizationId'],
       loadEagerRelations: false,
     })
-
-    if (!volume && organizationId) {
-      volume = await this.volumeRepository.findOne({
-        where: {
-          name: volumeIdOrName,
-          organizationId: organizationId,
-        },
-        select: ['organizationId'],
-        loadEagerRelations: false,
-      })
-    }
-
-    if (!volume || !volume.organizationId) {
-      throw new NotFoundException(`Volume with ID or name ${volumeIdOrName} not found`)
-    }
 
     return volume.organizationId
   }
