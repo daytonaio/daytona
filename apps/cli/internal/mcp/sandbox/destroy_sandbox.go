@@ -18,11 +18,11 @@ import (
 )
 
 type DestroySandboxInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to destroy."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to destroy."`
 }
 
 type DestroySandboxOutput struct {
-	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful destruction of the sandbox."`
+	Message string `json:"message" jsonschema:"description=Message indicating the successful destruction of the sandbox."`
 }
 
 func getDestroySandboxTool() *mcp.Tool {

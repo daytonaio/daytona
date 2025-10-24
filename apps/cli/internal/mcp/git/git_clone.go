@@ -18,17 +18,17 @@ import (
 )
 
 type GitCloneInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to clone the repository in."`
-	Url       *string `json:"url,omitempty" jsonschema:"required,type=string,description=URL of the Git repository to clone."`
-	Path      *string `json:"path,omitempty" jsonschema:"default=.,type=string,description=Directory to clone the repository into (defaults to current directory)."`
-	Branch    *string `json:"branch,omitempty" jsonschema:"default=main,type=string,description=Branch to clone."`
-	CommitId  *string `json:"commitId,omitempty" jsonschema:"type=string,description=Commit ID to clone."`
-	Username  *string `json:"username,omitempty" jsonschema:"type=string,description=Username to clone the repository with."`
-	Password  *string `json:"password,omitempty" jsonschema:"type=string,description=Password to clone the repository with."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to clone the repository in."`
+	Url       *string `json:"url,omitempty" jsonschema:"required,description=URL of the Git repository to clone."`
+	Path      *string `json:"path,omitempty" jsonschema:"default=.,description=Directory to clone the repository into (defaults to current directory)."`
+	Branch    *string `json:"branch,omitempty" jsonschema:"default=main,description=Branch to clone."`
+	CommitId  *string `json:"commitId,omitempty" jsonschema:"description=Commit ID to clone."`
+	Username  *string `json:"username,omitempty" jsonschema:"description=Username to clone the repository with."`
+	Password  *string `json:"password,omitempty" jsonschema:"description=Password to clone the repository with."`
 }
 
 type GitCloneOutput struct {
-	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful cloning of the repository."`
+	Message string `json:"message" jsonschema:"description=Message indicating the successful cloning of the repository."`
 }
 
 func getGitCloneTool() *mcp.Tool {

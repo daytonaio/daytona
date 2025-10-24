@@ -16,13 +16,13 @@ import (
 )
 
 type MoveFileInput struct {
-	SandboxId  *string `json:"sandboxId,omitempty" jsonschema:"ID of the sandbox to move the file in."`
-	SourcePath *string `json:"sourcePath,omitempty" jsonschema:"Source path of the file to move."`
-	DestPath   *string `json:"destPath,omitempty" jsonschema:"Destination path where to move the file."`
+	SandboxId  *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to move the file in."`
+	SourcePath *string `json:"sourcePath,omitempty" jsonschema:"required,description=Source path of the file to move."`
+	DestPath   *string `json:"destPath,omitempty" jsonschema:"required,description=Destination path where to move the file."`
 }
 
 type MoveFileOutput struct {
-	Message string `json:"message" jsonschema:"Message indicating the successful movement of the file."`
+	Message string `json:"message" jsonschema:"description=Message indicating the successful movement of the file."`
 }
 
 func getMoveFileTool() *mcp.Tool {

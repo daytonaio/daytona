@@ -17,34 +17,34 @@ import (
 )
 
 type RunCodeInput struct {
-	SandboxId *string        `json:"sandboxId" jsonschema:"type=string,description=ID of the sandbox to run the code in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
-	Code      string         `json:"code" jsonschema:"required,type=string,description=Code to run."`
-	Params    *CodeRunParams `json:"params,omitempty" jsonschema:"type=object,description=Parameters for the code run."`
-	Timeout   int            `json:"timeout" jsonschema:"required,default=0,type=integer,description=Maximum time in seconds to wait for the code to complete. If not provided, the default timeout 0 (meaning indefinitely) will be used."`
+	SandboxId *string        `json:"sandboxId" jsonschema:"description=ID of the sandbox to run the code in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
+	Code      string         `json:"code" jsonschema:"required,description=Code to run."`
+	Params    *CodeRunParams `json:"params,omitempty" jsonschema:"description=Parameters for the code run."`
+	Timeout   int            `json:"timeout" jsonschema:"required,default=0,description=Maximum time in seconds to wait for the code to complete. If not provided, the default timeout 0 (meaning indefinitely) will be used."`
 }
 
 type CodeRunParams struct {
-	Argv []string          `json:"argv,omitempty" jsonschema:"type=array,items=string,description=Command line arguments."`
-	Env  map[string]string `json:"env,omitempty" jsonschema:"type=object,additionalProperties=string,description=Environment variables."`
+	Argv []string          `json:"argv,omitempty" jsonschema:"description=Command line arguments."`
+	Env  map[string]string `json:"env,omitempty" jsonschema:"description=Environment variables."`
 }
 
 type ExecuteResponse struct {
-	ExitCode             int                    `json:"exitCode" jsonschema:"type=integer,description=Exit code of the code run."`
-	Result               string                 `json:"result" jsonschema:"type=string,description=Result of the code run."`
-	Artifacts            *ExecutionArtifacts    `json:"artifacts" jsonschema:"type=object,description=Artifacts of the code run."`
-	AdditionalProperties map[string]interface{} `json:"additionalProperties,omitempty" jsonschema:"type=object,additionalProperties=any,description=Additional properties."`
+	ExitCode             int                    `json:"exitCode" jsonschema:"description=Exit code of the code run."`
+	Result               string                 `json:"result" jsonschema:"description=Result of the code run."`
+	Artifacts            *ExecutionArtifacts    `json:"artifacts" jsonschema:"description=Artifacts of the code run."`
+	AdditionalProperties map[string]interface{} `json:"additionalProperties,omitempty" jsonschema:"description=Additional properties."`
 }
 
 type ExecutionArtifacts struct {
-	Stdout string  `json:"stdout" jsonschema:"type=string,description=Standard output of the code run."`
-	Charts []Chart `json:"charts,omitempty" jsonschema:"type=array,items=object,description=Charts of the code run."`
+	Stdout string  `json:"stdout" jsonschema:"description=Standard output of the code run."`
+	Charts []Chart `json:"charts,omitempty" jsonschema:"description=Charts of the code run."`
 }
 
 type Chart struct {
-	Type     string        `json:"type" jsonschema:"type=string,description=Type of the chart."`
-	Title    string        `json:"title" jsonschema:"type=string,description=Title of the chart."`
-	Elements []interface{} `json:"elements,omitempty" jsonschema:"type=array,items=object,description=Elements of the chart."`
-	Png      string        `json:"png,omitempty" jsonschema:"type=string,description=PNG of the chart."`
+	Type     string        `json:"type" jsonschema:"description=Type of the chart."`
+	Title    string        `json:"title" jsonschema:"description=Title of the chart."`
+	Elements []interface{} `json:"elements,omitempty" jsonschema:"description=Elements of the chart."`
+	Png      string        `json:"png,omitempty" jsonschema:"description=PNG of the chart."`
 }
 
 func getRunCodeTool() *mcp.Tool {

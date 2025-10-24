@@ -17,12 +17,12 @@ import (
 )
 
 type FileInfoInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to get the file information from."`
-	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to get information about."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to get the file information from."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,description=Path to the file to get information about."`
 }
 
 type FileInfoOutput struct {
-	FileInfo string `json:"fileInfo" jsonschema:"type=string,description=Information about the file."`
+	FileInfo string `json:"fileInfo" jsonschema:"description=Information about the file."`
 }
 
 func getFileInfoTool() *mcp.Tool {

@@ -17,12 +17,12 @@ import (
 )
 
 type ListFilesInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to list the files from."`
-	Path      *string `json:"path,omitempty" jsonschema:"required,type=string,description=Path to the directory to list files from (defaults to current directory)."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to list the files from."`
+	Path      *string `json:"path,omitempty" jsonschema:"required,description=Path to the directory to list files from (defaults to current directory)."`
 }
 
 type ListFilesOutput struct {
-	Files string `json:"files" jsonschema:"type=string,description=List of files in the directory."`
+	Files string `json:"files" jsonschema:"description=List of files in the directory."`
 }
 
 func getListFilesTool() *mcp.Tool {

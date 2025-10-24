@@ -17,18 +17,18 @@ import (
 )
 
 type FileDownloadInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to download the file from."`
-	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to download."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to download the file from."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,description=Path to the file to download."`
 }
 
 type FileDownloadOutput struct {
-	Content []Content `json:"content" jsonschema:"type=array,items=object,description=Contents of the file."`
+	Content []Content `json:"content" jsonschema:"description=Contents of the file."`
 }
 
 type Content struct {
-	Type string `json:"type" jsonschema:"type=string,description=Type of the content."`
-	Text string `json:"text,omitempty" jsonschema:"type=string,description=Text of the content."`
-	Data string `json:"data,omitempty" jsonschema:"type=string,description=Data of the content."`
+	Type string `json:"type" jsonschema:"description=Type of the content."`
+	Text string `json:"text,omitempty" jsonschema:"description=Text of the content."`
+	Data string `json:"data,omitempty" jsonschema:"description=Data of the content."`
 }
 
 func getDownloadFileTool() *mcp.Tool {

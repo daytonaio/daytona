@@ -19,16 +19,16 @@ import (
 )
 
 type PreviewLinkInput struct {
-	SandboxId   *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to generate the preview link for."`
-	Port        *int32  `json:"port,omitempty" jsonschema:"required,type=integer,description=Port to expose."`
-	CheckServer *bool   `json:"checkServer,omitempty" jsonschema:"default=false,type=boolean,description=Check if a server is running on the specified port."`
-	Description *string `json:"description,omitempty" jsonschema:"type=string,description=Description of the service."`
+	SandboxId   *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to generate the preview link for."`
+	Port        *int32  `json:"port,omitempty" jsonschema:"required,description=Port to expose."`
+	CheckServer *bool   `json:"checkServer,omitempty" jsonschema:"default=false,description=Check if a server is running on the specified port."`
+	Description *string `json:"description,omitempty" jsonschema:"description=Description of the service."`
 }
 
 type PreviewLinkOutput struct {
-	PreviewURL string `json:"previewURL" jsonschema:"type=string,description=Preview URL of the service."`
-	Accessible bool   `json:"accessible" jsonschema:"type=boolean,description=Whether the preview URL is accessible."`
-	StatusCode string `json:"statusCode" jsonschema:"type=string,description=Status code of the preview URL."`
+	PreviewURL string `json:"previewURL" jsonschema:"description=Preview URL of the service."`
+	Accessible bool   `json:"accessible" jsonschema:"description=Whether the preview URL is accessible."`
+	StatusCode string `json:"statusCode" jsonschema:"description=Status code of the preview URL."`
 }
 
 func getPreviewLinkTool() *mcp.Tool {

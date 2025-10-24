@@ -20,15 +20,15 @@ import (
 )
 
 type ShellInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"type=string,description=ID of the sandbox to execute the command in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
-	Command   *string `json:"command,omitempty" jsonschema:"required,type=string, description=Command to execute."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"description=ID of the sandbox to execute the command in. Don't provide this if not explicitly instructed from user. If not provided, a new sandbox will be created."`
+	Command   *string `json:"command,omitempty" jsonschema:"required,description=Command to execute."`
 }
 
 type ShellOutput struct {
-	Stdout    string `json:"stdout" jsonschema:"type=string,description=Standard output of the command."`
-	Stderr    string `json:"stderr" jsonschema:"type=string,description=Standard error output of the command."`
-	ExitCode  int    `json:"exitCode" jsonschema:"type=integer,description=Exit code of the command."`
-	ErrorType string `json:"errorType,omitempty" jsonschema:"type=string,description=Error type of the command."`
+	Stdout    string `json:"stdout" jsonschema:"description=Standard output of the command."`
+	Stderr    string `json:"stderr" jsonschema:"description=Standard error output of the command."`
+	ExitCode  int    `json:"exitCode" jsonschema:"description=Exit code of the command."`
+	ErrorType string `json:"errorType,omitempty" jsonschema:"description=Error type of the command."`
 }
 
 func getShellTool() *mcp.Tool {

@@ -16,12 +16,12 @@ import (
 )
 
 type DeleteFileInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to delete the file from."`
-	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to delete."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to delete the file from."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,description=Path to the file to delete."`
 }
 
 type DeleteFileOutput struct {
-	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful deletion of the file."`
+	Message string `json:"message" jsonschema:"description=Message indicating the successful deletion of the file."`
 }
 
 func getDeleteFileTool() *mcp.Tool {

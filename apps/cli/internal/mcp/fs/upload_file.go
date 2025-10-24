@@ -19,15 +19,15 @@ import (
 )
 
 type FileUploadInput struct {
-	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to upload the file to."`
-	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,type=string,description=Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise."`
-	Content   *string `json:"content,omitempty" jsonschema:"required,type=string,description=Content of the file to upload."`
-	Encoding  *string `json:"encoding,omitempty" jsonschema:"default=text,type=string,description=Encoding of the file to upload."`
-	Overwrite *bool   `json:"overwrite,omitempty" jsonschema:"default=false,type=boolean,description=Overwrite the file if it already exists."`
+	SandboxId *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to upload the file to."`
+	FilePath  *string `json:"filePath,omitempty" jsonschema:"required,description=Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise."`
+	Content   *string `json:"content,omitempty" jsonschema:"required,description=Content of the file to upload."`
+	Encoding  *string `json:"encoding,omitempty" jsonschema:"default=text,description=Encoding of the file to upload."`
+	Overwrite *bool   `json:"overwrite,omitempty" jsonschema:"default=false,description=Overwrite the file if it already exists."`
 }
 
 type FileUploadOutput struct {
-	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful upload of the file."`
+	Message string `json:"message" jsonschema:"description=Message indicating the successful upload of the file."`
 }
 
 func getUploadFileTool() *mcp.Tool {

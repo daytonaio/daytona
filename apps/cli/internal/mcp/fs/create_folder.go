@@ -16,13 +16,13 @@ import (
 )
 
 type CreateFolderInput struct {
-	SandboxId  *string `json:"sandboxId,omitempty" jsonschema:"required,type=string,description=ID of the sandbox to create the folder in."`
-	FolderPath *string `json:"folderPath,omitempty" jsonschema:"required,type=string,description=Path to the folder to create."`
-	Mode       *string `json:"mode,omitempty" jsonschema:"default=0755,type=string,description=Mode of the folder to create (defaults to 0755)."`
+	SandboxId  *string `json:"sandboxId,omitempty" jsonschema:"required,description=ID of the sandbox to create the folder in."`
+	FolderPath *string `json:"folderPath,omitempty" jsonschema:"required,description=Path to the folder to create."`
+	Mode       *string `json:"mode,omitempty" jsonschema:"default=0755,description=Mode of the folder to create (defaults to 0755)."`
 }
 
 type CreateFolderOutput struct {
-	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful creation of the folder."`
+	Message string `json:"message" jsonschema:"description=Message indicating the successful creation of the folder."`
 }
 
 func getCreateFolderTool() *mcp.Tool {

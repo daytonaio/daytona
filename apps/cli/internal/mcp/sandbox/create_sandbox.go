@@ -20,28 +20,28 @@ import (
 )
 
 type CreateSandboxInput struct {
-	Name                *string                    `json:"name,omitempty" jsonschema:"type=string,description=Name of the sandbox. Don't provide this if not explicitly instructed from user. If not provided, the sandbox ID will be used as the name."`
-	Target              *string                    `json:"target,omitempty" jsonschema:"default=us,type=string,description=Target region of the sandbox (defaults to us)."`
-	Snapshot            *string                    `json:"snapshot,omitempty" jsonschema:"type=string,description=Snapshot of the sandbox (don't specify any if not explicitly instructed from user). Cannot be specified when using a build info entry."`
-	User                *string                    `json:"user,omitempty" jsonschema:"type=string,description=User associated with the sandbox."`
-	Env                 *map[string]string         `json:"env,omitempty" jsonschema:"type=object,additionalProperties=string,description=Environment variables for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
-	Labels              *map[string]string         `json:"labels,omitempty" jsonschema:"type=object,additionalProperties=string,description=Labels for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
-	Public              *bool                      `json:"public,omitempty" jsonschema:"default=true,type=boolean,description=Whether the sandbox http preview is publicly accessible (defaults to true)."`
-	Cpu                 *int32                     `json:"cpu,omitempty" jsonschema:"default=1,type=integer,description=CPU cores allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
-	Gpu                 *int32                     `json:"gpu,omitempty" jsonschema:"default=1,type=integer,description=GPU units allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
-	Memory              *int32                     `json:"memory,omitempty" jsonschema:"default=2,type=integer,description=Memory allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
-	Disk                *int32                     `json:"disk,omitempty" jsonschema:"default=4,type=integer,description=Disk space allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
-	AutoStopInterval    *int32                     `json:"autoStopInterval,omitempty" jsonschema:"default=15,type=integer,description=Auto-stop interval in minutes (0 means disabled) for the sandbox (defaults to 15)."`
-	AutoArchiveInterval *int32                     `json:"autoArchiveInterval,omitempty" jsonschema:"default=10080,type=integer,description=Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox (defaults to 10080)."`
-	AutoDeleteInterval  *int32                     `json:"autoDeleteInterval,omitempty" jsonschema:"default=-1,type=integer,description=Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) for the sandbox (defaults to -1)."`
-	Volumes             *[]apiclient.SandboxVolume `json:"volumes,omitempty" jsonschema:"type=array,items=object,description=Volumes to attach to the sandbox."`
-	BuildInfo           *apiclient.CreateBuildInfo `json:"buildInfo,omitempty" jsonschema:"type=object,description=Build information for the sandbox."`
-	NetworkBlockAll     *bool                      `json:"networkBlockAll,omitempty" jsonschema:"default=false,type=boolean,description=Whether to block all network access to the sandbox (defaults to false)."`
-	NetworkAllowList    *string                    `json:"networkAllowList,omitempty" jsonschema:"type=string,description=Comma-separated list of domains to allow network access to the sandbox."`
+	Name                *string                    `json:"name,omitempty" jsonschema:"description=Name of the sandbox. Don't provide this if not explicitly instructed from user. If not provided, the sandbox ID will be used as the name."`
+	Target              *string                    `json:"target,omitempty" jsonschema:"default=us,description=Target region of the sandbox (defaults to us)."`
+	Snapshot            *string                    `json:"snapshot,omitempty" jsonschema:"description=Snapshot of the sandbox (don't specify any if not explicitly instructed from user). Cannot be specified when using a build info entry."`
+	User                *string                    `json:"user,omitempty" jsonschema:"description=User associated with the sandbox."`
+	Env                 *map[string]string         `json:"env,omitempty" jsonschema:"description=Environment variables for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
+	Labels              *map[string]string         `json:"labels,omitempty" jsonschema:"description=Labels for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"`
+	Public              *bool                      `json:"public,omitempty" jsonschema:"default=true,description=Whether the sandbox http preview is publicly accessible (defaults to true)."`
+	Cpu                 *int32                     `json:"cpu,omitempty" jsonschema:"default=1,description=CPU cores allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
+	Gpu                 *int32                     `json:"gpu,omitempty" jsonschema:"default=1,description=GPU units allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."`
+	Memory              *int32                     `json:"memory,omitempty" jsonschema:"default=2,description=Memory allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
+	Disk                *int32                     `json:"disk,omitempty" jsonschema:"default=4,description=Disk space allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."`
+	AutoStopInterval    *int32                     `json:"autoStopInterval,omitempty" jsonschema:"default=15,description=Auto-stop interval in minutes (0 means disabled) for the sandbox (defaults to 15)."`
+	AutoArchiveInterval *int32                     `json:"autoArchiveInterval,omitempty" jsonschema:"default=10080,description=Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox (defaults to 10080)."`
+	AutoDeleteInterval  *int32                     `json:"autoDeleteInterval,omitempty" jsonschema:"default=-1,description=Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) for the sandbox (defaults to -1)."`
+	Volumes             *[]apiclient.SandboxVolume `json:"volumes,omitempty" jsonschema:"description=Volumes to attach to the sandbox."`
+	BuildInfo           *apiclient.CreateBuildInfo `json:"buildInfo,omitempty" jsonschema:"description=Build information for the sandbox."`
+	NetworkBlockAll     *bool                      `json:"networkBlockAll,omitempty" jsonschema:"default=false,description=Whether to block all network access to the sandbox (defaults to false)."`
+	NetworkAllowList    *string                    `json:"networkAllowList,omitempty" jsonschema:"description=Comma-separated list of domains to allow network access to the sandbox."`
 }
 
 type CreateSandboxOutput struct {
-	Message string `json:"message" jsonschema:"type=string,description=Message indicating the successful creation of the sandbox."`
+	Message string `json:"message" jsonschema:"description=Message indicating the successful creation of the sandbox."`
 }
 
 func getCreateSandboxTool() *mcp.Tool {
