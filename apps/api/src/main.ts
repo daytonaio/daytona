@@ -47,6 +47,7 @@ async function bootstrap() {
     httpsOptions: httpsEnabled ? httpsOptions : undefined,
   })
   app.useLogger(app.get(PinoLogger))
+  app.flushLogs()
   app.enableCors({
     origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
