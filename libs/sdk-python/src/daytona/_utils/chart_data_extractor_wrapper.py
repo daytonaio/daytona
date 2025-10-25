@@ -15,6 +15,7 @@ from importlib.util import find_spec, spec_from_loader
 
 # Global variables to hold imported libraries if needed
 np = None
+pd = None
 mpl = None
 pil_img = None
 
@@ -28,6 +29,8 @@ def _parse_point(point):
         return point.isoformat()
     if isinstance(point, np.datetime64):
         return point.astype("datetime64[s]").astype(str)
+    if isinstance(point, pd.Timestamp):
+        return point.isoformat()
     return point
 
 
@@ -389,6 +392,12 @@ def _custom_json_serializer(obj):
         return obj.tolist()
     if isinstance(obj, set):
         return list(obj)
+    if isinstance(obj, pd.Timestamp):
+        return obj.isoformat(sep=" ")
+    if isinstance(obj, pd.Timedelta):
+        return str(obj)
+    if pd.isna(obj):
+        return None
     raise TypeError(f"Type {type(obj)} not serializable")
 
 
@@ -422,7 +431,7 @@ class MatplotlibFinder(MetaPathFinder):
     """Custom finder to intercept matplotlib.pyplot imports"""
 
     def find_spec(self, fullname, path, target=None):  # pylint: disable=unused-argument
-        global plt_patched, np, mpl, pil_img  # pylint: disable=global-statement
+        global plt_patched, np, pd, mpl, pil_img  # pylint: disable=global-statement
         if fullname == "matplotlib.pyplot" and not plt_patched:
             plt_patched = True
 
@@ -431,12 +440,14 @@ class MatplotlibFinder(MetaPathFinder):
             # pylint: disable=import-error
             import matplotlib
             import numpy
+            import pandas
             from PIL import Image
 
             # Store them in global variables for use throughout the module
             np = numpy
             mpl = matplotlib
             pil_img = Image
+            pd = pandas
 
             original_spec = find_spec(fullname)
             if original_spec is None:
