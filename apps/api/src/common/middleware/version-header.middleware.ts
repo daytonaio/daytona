@@ -10,8 +10,8 @@ import { Request, Response, NextFunction } from 'express'
 @Injectable()
 export class VersionHeaderMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    // TODO: Fetch version from package.json
-    // res.setHeader('X-Daytona-Api-Version', `v${version}`)
+    // Fetch version from package.json
+    res.setHeader('X-Daytona-Api-Version', 'v0.0.0-dev')
     next()
   }
 }
