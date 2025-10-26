@@ -280,7 +280,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
 
       try {
         await new Promise<void>((resolve, reject) => {
-          stream.on('data', (row: any) => {
+          stream.on('data', (row: Pick<Sandbox, 'id'>) => {
             if (processedCount >= maxProcessPerRun) {
               resolve()
               return
