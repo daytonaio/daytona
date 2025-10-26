@@ -177,6 +177,13 @@ export class ConfigurationDto {
   @IsString()
   sshGatewayPublicKey?: string
 
+  @ApiProperty({
+    description: 'Default OS user for sandboxes',
+    example: 'daytona',
+  })
+  @IsString()
+  defaultUser: string
+
   constructor(configService: TypedConfigService) {
     this.version = configService.getOrThrow('version')
 
@@ -188,6 +195,7 @@ export class ConfigurationDto {
     this.linkedAccountsEnabled = configService.get('oidc.managementApi.enabled')
     this.proxyTemplateUrl = configService.getOrThrow('proxy.templateUrl')
     this.defaultSnapshot = configService.getOrThrow('defaultSnapshot')
+    // Default user configuration will be handled in sandbox service
     this.dashboardUrl = configService.getOrThrow('dashboardUrl')
     this.maxAutoArchiveInterval = configService.getOrThrow('maxAutoArchiveInterval')
     this.maintananceMode = configService.getOrThrow('maintananceMode')

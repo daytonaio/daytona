@@ -246,8 +246,8 @@ export class SandboxService extends LockableEntity {
     sandbox.region = warmPoolItem.target
     sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
-    //  TODO: default user should be configurable
-    sandbox.osUser = 'daytona'
+    //  Default user is now configurable
+    sandbox.osUser = this.configService.get('defaultUser') || 'daytona'
     sandbox.env = warmPoolItem.env || {}
 
     sandbox.cpu = warmPoolItem.cpu
@@ -400,8 +400,8 @@ export class SandboxService extends LockableEntity {
       sandbox.region = region
       sandbox.class = sandboxClass
       sandbox.snapshot = snapshot.name
-      //  TODO: default user should be configurable
-      sandbox.osUser = createSandboxDto.user || 'daytona'
+      //  Default user is now configurable
+      sandbox.osUser = createSandboxDto.user || this.configService.get('defaultUser') || 'daytona'
       sandbox.env = createSandboxDto.env || {}
       sandbox.labels = createSandboxDto.labels || {}
       sandbox.volumes = createSandboxDto.volumes || []
