@@ -48,4 +48,10 @@ export interface UpdateDockerRegistry {
    * @memberof UpdateDockerRegistry
    */
   project?: string
+  /**
+   * Whether the registry is active and available for use
+   * @type {boolean}
+   * @memberof UpdateDockerRegistry
+   */
+  isActive?: boolean
 }

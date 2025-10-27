@@ -55,17 +55,16 @@ export interface CreateDockerRegistry {
    */
   registryType: CreateDockerRegistryRegistryTypeEnum
   /**
-   * Set as default registry
+   * Whether the registry is active is available for use
    * @type {boolean}
    * @memberof CreateDockerRegistry
    */
-  isDefault?: boolean
+  isActive?: boolean
 }
 
 export const CreateDockerRegistryRegistryTypeEnum = {
-  INTERNAL: 'internal',
-  ORGANIZATION: 'organization',
-  TRANSIENT: 'transient',
+  SNAPSHOT: 'snapshot',
+  SOURCE: 'source',
   BACKUP: 'backup',
 } as const
 

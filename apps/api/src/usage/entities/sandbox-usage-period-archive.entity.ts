@@ -40,7 +40,7 @@ export class SandboxUsagePeriodArchive {
   disk: number
 
   @Column()
-  region: string
+  regionId: string
 
   public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
     const usagePeriodEntity = new SandboxUsagePeriodArchive()
@@ -52,7 +52,7 @@ export class SandboxUsagePeriodArchive {
     usagePeriodEntity.gpu = usagePeriod.gpu
     usagePeriodEntity.mem = usagePeriod.mem
     usagePeriodEntity.disk = usagePeriod.disk
-    usagePeriodEntity.region = usagePeriod.region
+    usagePeriodEntity.regionId = usagePeriod.regionId
     return usagePeriodEntity
   }
 }

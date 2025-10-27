@@ -1510,36 +1510,6 @@ paths:
       summary: List all sandboxes paginated
       tags:
         - sandbox
-  /sandbox/regions:
-    get:
-      operationId: getSandboxRegions
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Region'
-                type: array
-          description: List of regions where sandboxes have been created
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: List all regions where sandboxes have been created
-      tags:
-        - sandbox
   /sandbox/for-runner:
     get:
       operationId: getSandboxesForRunner
@@ -2310,9 +2280,23 @@ paths:
   /runners:
     get:
       operationId: listRunners
-      parameters: []
+      parameters:
+        - description: Filter runners by region name
+          explode: true
+          in: query
+          name: region
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Runner'
+                type: array
           description: ''
       security:
         - bearer: []
@@ -2334,6 +2318,10 @@ paths:
         required: true
       responses:
         '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runner'
           description: ''
       security:
         - bearer: []
@@ -2368,7 +2356,8 @@ paths:
     patch:
       operationId: updateRunnerScheduling
       parameters:
-        - explode: false
+        - description: Runner ID
+          explode: false
           in: path
           name: id
           required: true
@@ -2376,7 +2365,7 @@ paths:
             type: string
           style: simple
       responses:
-        '200':
+        '204':
           description: ''
       security:
         - bearer: []
@@ -2384,16 +2373,16 @@ paths:
             - openid
             - profile
             - email
-      summary: Update runner scheduling status
+      summary: Delete runner
       tags:
         - runners
-  /runners/by-sandbox/{sandboxId}:
     get:
-      operationId: getRunnerBySandboxId
+      operationId: getRunnerById
       parameters:
-        - explode: false
+        - description: Runner ID
+          explode: false
           in: path
-          name: sandboxId
+          name: id
           required: true
           schema:
             type: string
@@ -2404,44 +2393,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Runner'
-          description: Runner found
+          description: ''
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Get runner by sandbox ID
+      summary: Get runner by ID
       tags:
         - runners
-  /runners/by-snapshot-ref:
-    get:
-      operationId: getRunnersBySnapshotRef
+  /runners/{id}/scheduling:
+    patch:
+      operationId: updateRunnerScheduling
       parameters:
-        - description: Snapshot ref
-          explode: true
-          in: query
-          name: ref
+        - description: Runner ID
+          explode: false
+          in: path
+          name: id
           required: true
           schema:
             type: string
-          style: form
+          style: simple
       responses:
         '200':
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/RunnerSnapshotDto'
-                type: array
-          description: Runners found for the snapshot
+                $ref: '#/components/schemas/Runner'
+          description: ''
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Get runners by snapshot ref
+      summary: Update runner scheduling status
       tags:
         - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
@@ -6796,9 +6783,9 @@ paths:
       summary: Update registry
       tags:
         - docker-registry
-  /docker-registry/{id}/set-default:
-    post:
-      operationId: setDefaultRegistry
+  /regions:
+    get:
+      operationId: listRegions
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -6808,7 +6795,259 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the docker registry
+        - description: Include global regions in the response
+          explode: true
+          in: query
+          name: includeGlobal
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Region'
+                type: array
+          description: List of all regions
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all regions
+      tags:
+        - regions
+    post:
+      operationId: createRegion
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegion'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+          description: The region has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new region
+      tags:
+        - regions
+  /regions/by-name/{name}:
+    get:
+      operationId: getRegionByName
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region name
+          explode: false
+          in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get region by name
+      tags:
+        - regions
+  /regions/{id}:
+    delete:
+      operationId: deleteRegion
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: The region has been successfully deleted.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete a region
+      tags:
+        - regions
+    get:
+      operationId: getRegionById
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get region by ID
+      tags:
+        - regions
+  /admin/registries:
+    get:
+      operationId: adminListRegistries
+      parameters:
+        - description: Filter registries by organization ID
+          explode: true
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: Filter registries by region name (organization ID is required)
+          explode: true
+          in: query
+          name: region
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/DockerRegistry'
+                type: array
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List registries
+      tags:
+        - admin/registries
+    post:
+      operationId: adminCreateRegistry
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateDockerRegistry'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockerRegistry'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create registry
+      tags:
+        - admin/registries
+  /admin/registries/{id}:
+    delete:
+      operationId: adminDeleteRegistry
+      parameters:
+        - description: Registry ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete registry
+      tags:
+        - admin/registries
+    get:
+      operationId: adminGetRegistry
+      parameters:
+        - description: Registry ID
           explode: false
           in: path
           name: id
@@ -6822,16 +7061,169 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DockerRegistry'
-          description: The docker registry has been set as default.
+          description: ''
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Set default registry
+      summary: Get registry
       tags:
-        - docker-registry
+        - admin/registries
+    patch:
+      operationId: adminUpdateRegistry
+      parameters:
+        - description: Registry ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateDockerRegistry'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockerRegistry'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update registry
+      tags:
+        - admin/registries
+  /admin/runners:
+    get:
+      operationId: adminListRunners
+      parameters:
+        - description: Filter runners by organization ID
+          explode: true
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: Filter runners by region name (organization ID is required)
+          explode: true
+          in: query
+          name: region
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Runner'
+                type: array
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all runners
+      tags:
+        - admin/runners
+    post:
+      operationId: adminCreateRunner
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateRunner'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runner'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create runner
+      tags:
+        - admin/runners
+  /admin/runners/by-sandbox/{sandboxId}:
+    get:
+      operationId: getRunnerBySandboxId
+      parameters:
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runner'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get runner by sandbox ID
+      tags:
+        - admin/runners
+  /admin/runners/by-snapshot-ref:
+    get:
+      operationId: getRunnersBySnapshotRef
+      parameters:
+        - description: Snapshot ref
+          explode: true
+          in: query
+          name: ref
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RunnerSnapshotDto'
+                type: array
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get runners by snapshot ref
+      tags:
+        - admin/runners
   /webhooks/organizations/{organizationId}/app-portal-access:
     post:
       operationId: WebhookController_getAppPortalAccess
@@ -7387,6 +7779,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7437,6 +7835,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7492,6 +7896,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7554,6 +7964,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7933,6 +8349,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7970,6 +8392,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -8647,17 +9075,6 @@ components:
         - total
         - totalPages
       type: object
-    Region:
-      example:
-        name: us
-      properties:
-        name:
-          description: Region name
-          example: us
-          type: string
-      required:
-        - name
-      type: object
     CreateBuildInfo:
       properties:
         dockerfileContent:
@@ -8934,15 +9351,11 @@ components:
         diskGiB: 1.4658129805029452
         apiUrl: apiUrl
         apiKey: apiKey
+        regionId: regionId
         proxyUrl: proxyUrl
         memoryGiB: 6.027456183070403
         domain: domain
         cpu: 0.8008281904610115
-        region: us
-        gpu: 5.962133916683182
-        class: small
-        version: version
-        gpuType: gpuType
       properties:
         domain:
           type: string
@@ -8958,35 +9371,17 @@ components:
           type: number
         diskGiB:
           type: number
-        gpu:
-          type: number
-        gpuType:
-          type: string
-        class:
-          enum:
-            - small
-            - medium
-            - large
-          example: small
-          type: string
-        region:
-          example: us
-          type: string
-        version:
+        regionId:
           type: string
       required:
         - apiKey
         - apiUrl
-        - class
         - cpu
         - diskGiB
         - domain
-        - gpu
-        - gpuType
         - memoryGiB
         - proxyUrl
-        - region
-        - version
+        - regionId
       type: object
     SandboxClass:
       description: The class of the runner
@@ -9029,8 +9424,8 @@ components:
         currentSnapshotCount: 12
         version: '0'
         disk: 100
+        regionId: 123e4567-e89b-12d3-a456-426614174000
         domain: runner1.example.com
-        region: us
         lastChecked: 2024-10-01T12:00:00Z
       properties:
         id:
@@ -9109,9 +9504,9 @@ components:
           description: Runner availability score
           example: 85
           type: number
-        region:
-          description: The region of the runner
-          example: us
+        regionId:
+          description: The region ID of the runner
+          example: 123e4567-e89b-12d3-a456-426614174000
           type: string
         state:
           allOf:
@@ -9151,34 +9546,11 @@ components:
         - id
         - memory
         - proxyUrl
-        - region
+        - regionId
         - state
         - unschedulable
         - updatedAt
         - version
-      type: object
-    RunnerSnapshotDto:
-      example:
-        runnerDomain: runner.example.com
-        runnerId: 123e4567-e89b-12d3-a456-426614174000
-        runnerSnapshotId: 123e4567-e89b-12d3-a456-426614174000
-      properties:
-        runnerSnapshotId:
-          description: Runner snapshot ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerId:
-          description: Runner ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerDomain:
-          description: Runner domain
-          example: runner.example.com
-          type: string
-      required:
-        - runnerDomain
-        - runnerId
-        - runnerSnapshotId
       type: object
     ProjectDirResponse:
       example:
@@ -11268,11 +11640,11 @@ components:
       type: object
     CreateDockerRegistry:
       example:
-        registryType: organization
+        registryType: source
         password: password
-        isDefault: true
         name: name
         project: project
+        isActive: true
         url: url
         username: username
       properties:
@@ -11292,16 +11664,15 @@ components:
           description: Registry project
           type: string
         registryType:
-          default: organization
+          default: source
           description: Registry type
           enum:
-            - internal
-            - organization
-            - transient
+            - snapshot
+            - source
             - backup
           type: string
-        isDefault:
-          description: Set as default registry
+        isActive:
+          description: Whether the registry is active is available for use
           type: boolean
       required:
         - name
@@ -11312,8 +11683,9 @@ components:
       type: object
     DockerRegistry:
       example:
-        registryType: internal
+        registryType: source
         createdAt: 2024-01-31T12:00:00Z
+        regionId: 123e4567-e89b-12d3-a456-426614174000
         name: My Docker Hub
         project: my-project
         id: 123e4567-e89b-12d3-a456-426614174000
@@ -11344,11 +11716,11 @@ components:
         registryType:
           description: Registry type
           enum:
-            - internal
-            - organization
-            - transient
+            - snapshot
+            - source
             - backup
-          example: internal
+            - transient
+          example: source
           type: string
         createdAt:
           description: Creation timestamp
@@ -11360,11 +11732,17 @@ components:
           example: 2024-01-31T12:00:00Z
           format: date-time
           type: string
+        regionId:
+          description: Region ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
       required:
         - createdAt
         - id
         - name
         - project
+        - regionId
         - registryType
         - updatedAt
         - url
@@ -11416,6 +11794,7 @@ components:
         password: password
         name: name
         project: project
+        isActive: true
         url: url
         username: username
       properties:
@@ -11434,10 +11813,224 @@ components:
         project:
           description: Registry project
           type: string
+        isActive:
+          description: Whether the registry is active and available for use
+          type: boolean
       required:
         - name
         - url
         - username
+      type: object
+    Region:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        name: us-east-1
+        id: 123e4567-e89b-12d3-a456-426614174000
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        id:
+          description: Region ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - name
+        - organizationId
+        - updatedAt
+      type: object
+    CreateRegion:
+      example:
+        name: us-east-1
+      properties:
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+      required:
+        - name
+      type: object
+    AdminCreateDockerRegistry:
+      example:
+        registryType: source
+        password: password
+        name: name
+        project: project
+        isFallback: true
+        isActive: true
+        url: url
+        username: username
+      properties:
+        name:
+          description: Registry name
+          type: string
+        url:
+          description: Registry URL
+          type: string
+        username:
+          description: Registry username
+          type: string
+        password:
+          description: Registry password
+          type: string
+        project:
+          description: Registry project
+          type: string
+        registryType:
+          default: source
+          description: Registry type
+          enum:
+            - snapshot
+            - source
+            - backup
+            - transient
+          type: string
+        isActive:
+          description: Whether the registry is active is available for use
+          type: boolean
+        isFallback:
+          description: Whether the registry can be used as a fallback registry
+          type: boolean
+      required:
+        - name
+        - password
+        - registryType
+        - url
+        - username
+      type: object
+    AdminUpdateDockerRegistry:
+      example:
+        password: password
+        name: name
+        project: project
+        isFallback: true
+        isActive: true
+        url: url
+        username: username
+      properties:
+        name:
+          description: Registry name
+          type: string
+        url:
+          description: Registry URL
+          type: string
+        username:
+          description: Registry username
+          type: string
+        password:
+          description: Registry password
+          type: string
+        project:
+          description: Registry project
+          type: string
+        isActive:
+          description: Whether the registry is active and available for use
+          type: boolean
+        isFallback:
+          description: Whether the registry can be used as a fallback registry
+          type: boolean
+      required:
+        - name
+        - url
+        - username
+      type: object
+    AdminCreateRunner:
+      example:
+        diskGiB: 1.4658129805029452
+        apiUrl: apiUrl
+        apiKey: apiKey
+        regionId: regionId
+        proxyUrl: proxyUrl
+        memoryGiB: 6.027456183070403
+        domain: domain
+        cpu: 0.8008281904610115
+        gpu: 5.962133916683182
+        class: small
+        version: version
+        gpuType: gpuType
+      properties:
+        domain:
+          type: string
+        apiUrl:
+          type: string
+        proxyUrl:
+          type: string
+        apiKey:
+          type: string
+        cpu:
+          type: number
+        memoryGiB:
+          type: number
+        diskGiB:
+          type: number
+        regionId:
+          type: string
+        gpu:
+          type: number
+        gpuType:
+          type: string
+        class:
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
+        version:
+          type: string
+      required:
+        - apiKey
+        - apiUrl
+        - class
+        - cpu
+        - diskGiB
+        - domain
+        - gpu
+        - gpuType
+        - memoryGiB
+        - proxyUrl
+        - regionId
+        - version
+      type: object
+    RunnerSnapshotDto:
+      example:
+        runnerDomain: runner.example.com
+        runnerId: 123e4567-e89b-12d3-a456-426614174000
+        runnerSnapshotId: 123e4567-e89b-12d3-a456-426614174000
+      properties:
+        runnerSnapshotId:
+          description: Runner snapshot ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        runnerId:
+          description: Runner ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        runnerDomain:
+          description: Runner domain
+          example: runner.example.com
+          type: string
+      required:
+        - runnerDomain
+        - runnerId
+        - runnerSnapshotId
       type: object
     WebhookAppPortalAccess:
       example:

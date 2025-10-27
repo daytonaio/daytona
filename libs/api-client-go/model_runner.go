@@ -59,8 +59,8 @@ type Runner struct {
 	CurrentSnapshotCount *float32 `json:"currentSnapshotCount,omitempty"`
 	// Runner availability score
 	AvailabilityScore *float32 `json:"availabilityScore,omitempty"`
-	// The region of the runner
-	Region string `json:"region"`
+	// The region ID of the runner
+	RegionId string `json:"regionId"`
 	// The state of the runner
 	State RunnerState `json:"state"`
 	// The last time the runner was checked
@@ -82,7 +82,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, regionId string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
@@ -95,7 +95,7 @@ func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey 
 	this.Gpu = gpu
 	this.GpuType = gpuType
 	this.Class = class
-	this.Region = region
+	this.RegionId = regionId
 	this.State = state
 	this.Unschedulable = unschedulable
 	this.CreatedAt = createdAt
@@ -632,28 +632,28 @@ func (o *Runner) SetAvailabilityScore(v float32) {
 	o.AvailabilityScore = &v
 }
 
-// GetRegion returns the Region field value
-func (o *Runner) GetRegion() string {
+// GetRegionId returns the RegionId field value
+func (o *Runner) GetRegionId() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.Region
+	return o.RegionId
 }
 
-// GetRegionOk returns a tuple with the Region field value
+// GetRegionIdOk returns a tuple with the RegionId field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetRegionOk() (*string, bool) {
+func (o *Runner) GetRegionIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Region, true
+	return &o.RegionId, true
 }
 
-// SetRegion sets field value
-func (o *Runner) SetRegion(v string) {
-	o.Region = v
+// SetRegionId sets field value
+func (o *Runner) SetRegionId(v string) {
+	o.RegionId = v
 }
 
 // GetState returns the State field value
@@ -853,7 +853,7 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.AvailabilityScore) {
 		toSerialize["availabilityScore"] = o.AvailabilityScore
 	}
-	toSerialize["region"] = o.Region
+	toSerialize["regionId"] = o.RegionId
 	toSerialize["state"] = o.State
 	if !IsNil(o.LastChecked) {
 		toSerialize["lastChecked"] = o.LastChecked
@@ -886,7 +886,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"gpu",
 		"gpuType",
 		"class",
-		"region",
+		"regionId",
 		"state",
 		"unschedulable",
 		"createdAt",
@@ -940,7 +940,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "currentAllocatedDiskGiB")
 		delete(additionalProperties, "currentSnapshotCount")
 		delete(additionalProperties, "availabilityScore")
-		delete(additionalProperties, "region")
+		delete(additionalProperties, "regionId")
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "lastChecked")
 		delete(additionalProperties, "unschedulable")

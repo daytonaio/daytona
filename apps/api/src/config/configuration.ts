@@ -57,17 +57,11 @@ const configuration = {
   dashboardUrl: process.env.DASHBOARD_URL,
   // Default to empty string - dashboard will then hit '/api'
   dashboardBaseApiUrl: process.env.DASHBOARD_BASE_API_URL || '',
-  transientRegistry: {
-    url: process.env.TRANSIENT_REGISTRY_URL,
-    admin: process.env.TRANSIENT_REGISTRY_ADMIN,
-    password: process.env.TRANSIENT_REGISTRY_PASSWORD,
-    projectId: process.env.TRANSIENT_REGISTRY_PROJECT_ID,
-  },
-  internalRegistry: {
-    url: process.env.INTERNAL_REGISTRY_URL,
-    admin: process.env.INTERNAL_REGISTRY_ADMIN,
-    password: process.env.INTERNAL_REGISTRY_PASSWORD,
-    projectId: process.env.INTERNAL_REGISTRY_PROJECT_ID,
+  defaultRegistry: {
+    url: process.env.DEFAULT_REGISTRY_URL,
+    admin: process.env.DEFAULT_REGISTRY_ADMIN,
+    password: process.env.DEFAULT_REGISTRY_PASSWORD,
+    projectId: process.env.DEFAULT_REGISTRY_PROJECT_ID,
   },
   s3: {
     endpoint: process.env.S3_ENDPOINT,
@@ -155,7 +149,7 @@ const configuration = {
     disk: parseInt(process.env.DEFAULT_RUNNER_DISK || '50', 10),
     gpu: parseInt(process.env.DEFAULT_RUNNER_GPU || '0', 10),
     gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
-    region: process.env.DEFAULT_RUNNER_REGION,
+    regionId: process.env.DEFAULT_RUNNER_REGION_ID,
     class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
     version: process.env.DEFAULT_RUNNER_VERSION || '0',
   },

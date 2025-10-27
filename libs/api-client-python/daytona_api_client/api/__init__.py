@@ -2,6 +2,8 @@
 
 # import apis into api package
 from daytona_api_client.api.health_api import HealthApi
+from daytona_api_client.api.admin_registries_api import AdminRegistriesApi
+from daytona_api_client.api.admin_runners_api import AdminRunnersApi
 from daytona_api_client.api.api_keys_api import ApiKeysApi
 from daytona_api_client.api.audit_api import AuditApi
 from daytona_api_client.api.config_api import ConfigApi
@@ -9,6 +11,7 @@ from daytona_api_client.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client.api.object_storage_api import ObjectStorageApi
 from daytona_api_client.api.organizations_api import OrganizationsApi
 from daytona_api_client.api.preview_api import PreviewApi
+from daytona_api_client.api.regions_api import RegionsApi
 from daytona_api_client.api.runners_api import RunnersApi
 from daytona_api_client.api.sandbox_api import SandboxApi
 from daytona_api_client.api.snapshots_api import SnapshotsApi

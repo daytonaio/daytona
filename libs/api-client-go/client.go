@@ -49,6 +49,10 @@ type APIClient struct {
 
 	// API Services
 
+	AdminRegistriesAPI AdminRegistriesAPI
+
+	AdminRunnersAPI AdminRunnersAPI
+
 	ApiKeysAPI ApiKeysAPI
 
 	AuditAPI AuditAPI
@@ -64,6 +68,8 @@ type APIClient struct {
 	OrganizationsAPI OrganizationsAPI
 
 	PreviewAPI PreviewAPI
+
+	RegionsAPI RegionsAPI
 
 	RunnersAPI RunnersAPI
 
@@ -98,6 +104,8 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.AdminRegistriesAPI = (*AdminRegistriesAPIService)(&c.common)
+	c.AdminRunnersAPI = (*AdminRunnersAPIService)(&c.common)
 	c.ApiKeysAPI = (*ApiKeysAPIService)(&c.common)
 	c.AuditAPI = (*AuditAPIService)(&c.common)
 	c.ConfigAPI = (*ConfigAPIService)(&c.common)
@@ -106,6 +114,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ObjectStorageAPI = (*ObjectStorageAPIService)(&c.common)
 	c.OrganizationsAPI = (*OrganizationsAPIService)(&c.common)
 	c.PreviewAPI = (*PreviewAPIService)(&c.common)
+	c.RegionsAPI = (*RegionsAPIService)(&c.common)
 	c.RunnersAPI = (*RunnersAPIService)(&c.common)
 	c.SandboxAPI = (*SandboxAPIService)(&c.common)
 	c.SnapshotsAPI = (*SnapshotsAPIService)(&c.common)

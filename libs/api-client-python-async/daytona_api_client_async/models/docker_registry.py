@@ -20,7 +20,7 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -36,14 +36,15 @@ class DockerRegistry(BaseModel):
     registry_type: StrictStr = Field(description="Registry type", alias="registryType")
     created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
     updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
+    region_id: Optional[StrictStr] = Field(description="Region ID", alias="regionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "url", "username", "project", "registryType", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "name", "url", "username", "project", "registryType", "createdAt", "updatedAt", "regionId"]
 
     @field_validator('registry_type')
     def registry_type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['internal', 'organization', 'transient', 'backup']):
-            raise ValueError("must be one of enum values ('internal', 'organization', 'transient', 'backup')")
+        if value not in set(['snapshot', 'source', 'backup', 'transient']):
+            raise ValueError("must be one of enum values ('snapshot', 'source', 'backup', 'transient')")
         return value
 
     model_config = ConfigDict(
@@ -92,6 +93,11 @@ class DockerRegistry(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if region_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.region_id is None and "region_id" in self.model_fields_set:
+            _dict['regionId'] = None
+
         return _dict
 
     @classmethod
@@ -111,7 +117,8 @@ class DockerRegistry(BaseModel):
             "project": obj.get("project"),
             "registryType": obj.get("registryType"),
             "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "updatedAt": obj.get("updatedAt"),
+            "regionId": obj.get("regionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

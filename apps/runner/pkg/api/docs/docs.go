@@ -1183,6 +1183,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "pushToInternalRegistry": {
+                    "description": "Deprecated: Use pushToSnapshotRegistry instead",
+                    "type": "boolean"
+                },
+                "pushToSnapshotRegistry": {
                     "type": "boolean"
                 },
                 "registry": {

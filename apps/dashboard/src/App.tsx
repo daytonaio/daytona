@@ -12,6 +12,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { useAuth } from 'react-oidc-context'
 import LoadingFallback from './components/LoadingFallback'
 import Snapshots from './pages/Snapshots'
+import Regions from './pages/Regions'
 import Registries from './pages/Registries'
 import { usePostHog } from 'posthog-js/react'
 import {
@@ -50,6 +51,7 @@ import { BillingProvider } from './providers/BillingProvider'
 import { useConfig } from './hooks/useConfig'
 import { addPylonWidget } from './lib/pylon-widget'
 import { QueryProvider } from './providers/QueryProvider'
+import Runners from './pages/Runners'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -157,6 +159,8 @@ function App() {
           <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
           <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
           <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
+          <Route path={getRouteSubPath(RoutePath.REGIONS)} element={<Regions />} />
+          <Route path={getRouteSubPath(RoutePath.RUNNERS)} element={<Runners />} />
           <Route
             path={getRouteSubPath(RoutePath.VOLUMES)}
             element={

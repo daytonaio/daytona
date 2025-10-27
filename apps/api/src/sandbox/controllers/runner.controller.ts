@@ -3,45 +3,48 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Body, Controller, Get, Post, Param, Patch, UseGuards, Query } from '@nestjs/common'
+import { Body, Controller, Get, Post, Param, Patch, UseGuards, Query, Delete, HttpCode } from '@nestjs/common'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
-import { Runner } from '../entities/runner.entity'
 import { RunnerService } from '../services/runner.service'
-import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiQuery } from '@nestjs/swagger'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
-import { SystemRole } from '../../user/enums/system-role.enum'
-import { ProxyGuard } from '../../auth/proxy.guard'
+import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiQuery, ApiParam } from '@nestjs/swagger'
 import { RunnerDto } from '../dto/runner.dto'
-import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { OrGuard } from '../../auth/or.guard'
+import { AuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
+import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
+import { SandboxClass } from '../enums/sandbox-class.enum'
+import { RunnerAccessGuard } from '../guards/runner-access.guard'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
 import { RunnerContext } from '../../common/interfaces/runner-context.interface'
 
 @ApiTags('runners')
 @Controller('runners')
-@UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
-@RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'runner'])
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class RunnerController {
   constructor(private readonly runnerService: RunnerService) {}
 
   @Post()
+  @HttpCode(201)
   @ApiOperation({
     summary: 'Create runner',
     operationId: 'createRunner',
   })
+  @ApiResponse({
+    status: 201,
+    type: RunnerDto,
+  })
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.RUNNER,
-    targetIdFromResult: (result: Runner) => result?.id,
+    targetIdFromResult: (result: RunnerDto) => result?.id,
     requestMetadata: {
       body: (req: TypedRequest<CreateRunnerDto>) => ({
         domain: req.body?.domain,
@@ -50,15 +53,33 @@ export class RunnerController {
         cpu: req.body?.cpu,
         memoryGiB: req.body?.memoryGiB,
         diskGiB: req.body?.diskGiB,
-        gpu: req.body?.gpu,
-        gpuType: req.body?.gpuType,
-        class: req.body?.class,
-        region: req.body?.region,
+        regionId: req.body?.regionId,
       }),
     },
   })
-  async create(@Body() createRunnerDto: CreateRunnerDto): Promise<Runner> {
-    return this.runnerService.create(createRunnerDto)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
+  async create(
+    @Body() createRunnerDto: CreateRunnerDto,
+    @AuthContext() authContext: OrganizationAuthContext,
+  ): Promise<RunnerDto> {
+    const runner = await this.runnerService.create(
+      {
+        domain: createRunnerDto.domain,
+        apiUrl: createRunnerDto.apiUrl,
+        proxyUrl: createRunnerDto.proxyUrl,
+        apiKey: createRunnerDto.apiKey,
+        cpu: createRunnerDto.cpu,
+        memoryGiB: createRunnerDto.memoryGiB,
+        diskGiB: createRunnerDto.diskGiB,
+        gpu: 0,
+        gpuType: '',
+        class: SandboxClass.SMALL,
+        regionId: createRunnerDto.regionId,
+        version: '0',
+      },
+      authContext.organization,
+    )
+    return RunnerDto.fromRunner(runner)
   }
 
   @Get('/me')
@@ -77,18 +98,66 @@ export class RunnerController {
   }
 
   @Get()
+  @HttpCode(200)
   @ApiOperation({
     summary: 'List all runners',
     operationId: 'listRunners',
   })
-  async findAll(): Promise<Runner[]> {
-    return this.runnerService.findAll()
+  @ApiResponse({
+    status: 200,
+    type: [RunnerDto],
+  })
+  @ApiQuery({
+    name: 'region',
+    description: 'Filter runners by region name',
+    type: String,
+    required: false,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
+  async findAll(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Query('region') region?: string,
+  ): Promise<RunnerDto[]> {
+    const runners = await this.runnerService.findAll(authContext.organizationId, region)
+    return runners.map(RunnerDto.fromRunner)
+  }
+
+  @Get(':id')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get runner by ID',
+    operationId: 'getRunnerById',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Runner ID',
+    type: String,
+  })
+  @UseGuards(RunnerAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
+  async getRunnerById(@Param('id') id: string): Promise<RunnerDto> {
+    const runner = await this.runnerService.findOne(id)
+    return RunnerDto.fromRunner(runner)
   }
 
   @Patch(':id/scheduling')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Update runner scheduling status',
     operationId: 'updateRunnerScheduling',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Runner ID',
+    type: String,
   })
   @Audit({
     action: AuditAction.UPDATE_SCHEDULING,
@@ -100,45 +169,38 @@ export class RunnerController {
       }),
     },
   })
+  @UseGuards(RunnerAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   async updateSchedulingStatus(
     @Param('id') id: string,
     @Body('unschedulable') unschedulable: boolean,
-  ): Promise<Runner> {
-    return this.runnerService.updateSchedulingStatus(id, unschedulable)
+  ): Promise<RunnerDto> {
+    const updatedRunner = await this.runnerService.updateSchedulingStatus(id, unschedulable)
+    return RunnerDto.fromRunner(updatedRunner)
   }
 
-  @Get('/by-sandbox/:sandboxId')
+  @Delete(':id')
+  @HttpCode(204)
   @ApiOperation({
-    summary: 'Get runner by sandbox ID',
-    operationId: 'getRunnerBySandboxId',
+    summary: 'Delete runner',
+    operationId: 'deleteRunner',
   })
   @ApiResponse({
-    status: 200,
-    description: 'Runner found',
-    type: RunnerDto,
+    status: 204,
   })
-  async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerDto> {
-    const runner = await this.runnerService.findBySandboxId(sandboxId)
-    return RunnerDto.fromRunner(runner)
-  }
-
-  @Get('/by-snapshot-ref')
-  @ApiOperation({
-    summary: 'Get runners by snapshot ref',
-    operationId: 'getRunnersBySnapshotRef',
-  })
-  @ApiQuery({
-    name: 'ref',
-    description: 'Snapshot ref',
+  @ApiParam({
+    name: 'id',
+    description: 'Runner ID',
     type: String,
-    required: true,
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Runners found for the snapshot',
-    type: [RunnerSnapshotDto],
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.RUNNER,
+    targetIdFromRequest: (req) => req.params.id,
   })
-  async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
-    return this.runnerService.getRunnersBySnapshotRef(ref)
+  @UseGuards(RunnerAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
+  async delete(@Param('id') id: string): Promise<void> {
+    return this.runnerService.remove(id)
   }
 }

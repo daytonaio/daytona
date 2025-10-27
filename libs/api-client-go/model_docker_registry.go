@@ -37,7 +37,9 @@ type DockerRegistry struct {
 	// Creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 	// Last update timestamp
-	UpdatedAt            time.Time `json:"updatedAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	// Region ID
+	RegionId             NullableString `json:"regionId"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -47,7 +49,7 @@ type _DockerRegistry DockerRegistry
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDockerRegistry(id string, name string, url string, username string, project string, registryType string, createdAt time.Time, updatedAt time.Time) *DockerRegistry {
+func NewDockerRegistry(id string, name string, url string, username string, project string, registryType string, createdAt time.Time, updatedAt time.Time, regionId NullableString) *DockerRegistry {
 	this := DockerRegistry{}
 	this.Id = id
 	this.Name = name
@@ -57,6 +59,7 @@ func NewDockerRegistry(id string, name string, url string, username string, proj
 	this.RegistryType = registryType
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
+	this.RegionId = regionId
 	return &this
 }
 
@@ -260,6 +263,32 @@ func (o *DockerRegistry) SetUpdatedAt(v time.Time) {
 	o.UpdatedAt = v
 }
 
+// GetRegionId returns the RegionId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *DockerRegistry) GetRegionId() string {
+	if o == nil || o.RegionId.Get() == nil {
+		var ret string
+		return ret
+	}
+
+	return *o.RegionId.Get()
+}
+
+// GetRegionIdOk returns a tuple with the RegionId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DockerRegistry) GetRegionIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.RegionId.Get(), o.RegionId.IsSet()
+}
+
+// SetRegionId sets field value
+func (o *DockerRegistry) SetRegionId(v string) {
+	o.RegionId.Set(&v)
+}
+
 func (o DockerRegistry) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -278,6 +307,7 @@ func (o DockerRegistry) ToMap() (map[string]interface{}, error) {
 	toSerialize["registryType"] = o.RegistryType
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+	toSerialize["regionId"] = o.RegionId.Get()
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -299,6 +329,7 @@ func (o *DockerRegistry) UnmarshalJSON(data []byte) (err error) {
 		"registryType",
 		"createdAt",
 		"updatedAt",
+		"regionId",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -336,6 +367,7 @@ func (o *DockerRegistry) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "registryType")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "regionId")
 		o.AdditionalProperties = additionalProperties
 	}
 

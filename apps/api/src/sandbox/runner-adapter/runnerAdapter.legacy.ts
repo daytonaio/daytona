@@ -240,14 +240,15 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     buildInfo: BuildInfo,
     organizationId?: string,
     registry?: DockerRegistry,
-    pushToInternalRegistry?: boolean,
+    pushToSnapshotRegistry?: boolean,
   ): Promise<void> {
     const request: BuildSnapshotRequestDTO = {
       snapshot: buildInfo.snapshotRef,
       dockerfile: buildInfo.dockerfileContent,
       organizationId: organizationId,
       context: buildInfo.contextHashes,
-      pushToInternalRegistry: pushToInternalRegistry,
+      pushToInternalRegistry: pushToSnapshotRegistry,
+      pushToSnapshotRegistry: pushToSnapshotRegistry,
     }
 
     if (registry) {

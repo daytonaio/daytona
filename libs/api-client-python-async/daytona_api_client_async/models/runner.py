@@ -48,7 +48,7 @@ class Runner(BaseModel):
     current_allocated_disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated disk in GiB", alias="currentAllocatedDiskGiB")
     current_snapshot_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current snapshot count", alias="currentSnapshotCount")
     availability_score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Runner availability score", alias="availabilityScore")
-    region: StrictStr = Field(description="The region of the runner")
+    region_id: StrictStr = Field(description="The region ID of the runner", alias="regionId")
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
@@ -56,7 +56,7 @@ class Runner(BaseModel):
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "regionId", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -135,7 +135,7 @@ class Runner(BaseModel):
             "currentAllocatedDiskGiB": obj.get("currentAllocatedDiskGiB"),
             "currentSnapshotCount": obj.get("currentSnapshotCount"),
             "availabilityScore": obj.get("availabilityScore"),
-            "region": obj.get("region"),
+            "regionId": obj.get("regionId"),
             "state": obj.get("state"),
             "lastChecked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),

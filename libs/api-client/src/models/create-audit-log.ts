@@ -132,6 +132,7 @@ export const CreateAuditLogTargetTypeEnum = {
   SNAPSHOT: 'snapshot',
   USER: 'user',
   VOLUME: 'volume',
+  REGION: 'region',
 } as const
 
 export type CreateAuditLogTargetTypeEnum =

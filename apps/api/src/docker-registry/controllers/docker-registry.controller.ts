@@ -13,7 +13,7 @@ import {
   Delete,
   UseGuards,
   HttpCode,
-  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiOAuth2, ApiHeader, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
@@ -23,26 +23,20 @@ import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
 import { DockerRegistryDto } from '../dto/docker-registry.dto'
 import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
 import { DockerRegistryAccessGuard } from '../guards/docker-registry-access.guard'
-import { DockerRegistry } from '../decorators/docker-registry.decorator'
-import { DockerRegistry as DockerRegistryEntity } from '../entities/docker-registry.entity'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { RegistryType } from '../enums/registry-type.enum'
 
 @ApiTags('docker-registry')
 @Controller('docker-registry')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class DockerRegistryController {
@@ -71,7 +65,7 @@ export class DockerRegistryController {
         url: req.body?.url,
         project: req.body?.project,
         registryType: req.body?.registryType,
-        isDefault: req.body?.isDefault,
+        isActive: req.body?.isActive,
       }),
     },
   })
@@ -79,16 +73,6 @@ export class DockerRegistryController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createDockerRegistryDto: CreateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
-    if (createDockerRegistryDto.registryType !== RegistryType.ORGANIZATION && authContext.role !== SystemRole.ADMIN) {
-      throw new ForbiddenException(
-        `Insufficient permissions for creating ${createDockerRegistryDto.registryType} registries`,
-      )
-    }
-
-    if (createDockerRegistryDto.isDefault && authContext.role !== SystemRole.ADMIN) {
-      throw new ForbiddenException('Insufficient permissions for setting a default registry')
-    }
-
     const dockerRegistry = await this.dockerRegistryService.create(createDockerRegistryDto, authContext.organizationId)
     return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
@@ -140,7 +124,11 @@ export class DockerRegistryController {
     type: DockerRegistryDto,
   })
   @UseGuards(DockerRegistryAccessGuard)
-  async findOne(@DockerRegistry() registry: DockerRegistryEntity): Promise<DockerRegistryDto> {
+  async findOne(@Param('id') registryId: string): Promise<DockerRegistryDto> {
+    const registry = await this.dockerRegistryService.findOne(registryId)
+    if (!registry) {
+      throw new NotFoundException('Registry not found')
+    }
     return DockerRegistryDto.fromDockerRegistry(registry)
   }
 
@@ -172,6 +160,7 @@ export class DockerRegistryController {
         username: req.body?.username,
         password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
         project: req.body?.project,
+        isActive: req.body?.isActive,
       }),
     },
   })
@@ -179,7 +168,10 @@ export class DockerRegistryController {
     @Param('id') registryId: string,
     @Body() updateDockerRegistryDto: UpdateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
-    const dockerRegistry = await this.dockerRegistryService.update(registryId, updateDockerRegistryDto)
+    const dockerRegistry = await this.dockerRegistryService.update(registryId, {
+      ...updateDockerRegistryDto,
+      isFallback: false,
+    })
     return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
 
@@ -207,32 +199,5 @@ export class DockerRegistryController {
   })
   async remove(@Param('id') registryId: string): Promise<void> {
     return this.dockerRegistryService.remove(registryId)
-  }
-
-  @Post(':id/set-default')
-  @ApiOperation({
-    summary: 'Set default registry',
-    operationId: 'setDefaultRegistry',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'ID of the docker registry',
-    type: 'string',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The docker registry has been set as default.',
-    type: DockerRegistryDto,
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(DockerRegistryAccessGuard)
-  @Audit({
-    action: AuditAction.SET_DEFAULT,
-    targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdFromRequest: (req) => req.params.id,
-  })
-  async setDefault(@Param('id') registryId: string): Promise<DockerRegistryDto> {
-    const dockerRegistry = await this.dockerRegistryService.setDefault(registryId)
-    return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
 }

@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -15,7 +22,6 @@ import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -67,6 +73,9 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { GlobalRegionsIds } from '../../region/constants/global-regions.constant'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { RegionService } from '../../region/services/region.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -96,6 +105,8 @@ export class SandboxService {
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly dockerRegistryService: DockerRegistryService,
+    private readonly regionService: RegionService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -236,7 +247,7 @@ export class SandboxService {
 
     sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
 
-    sandbox.region = warmPoolItem.target
+    sandbox.regionId = warmPoolItem.regionId
     sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
     //  TODO: default user should be configurable
@@ -259,7 +270,7 @@ export class SandboxService {
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.region,
+      regionId: sandbox.regionId,
       sandboxClass: sandbox.class,
       snapshotRef: snapshot.internalName,
     })
@@ -281,7 +292,7 @@ export class SandboxService {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const regionId = await this.getValidatedOrDefaultRegionId(organization, createSandboxDto.target)
       const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
       let snapshotIdOrName = createSandboxDto.snapshot
@@ -343,6 +354,16 @@ export class SandboxService {
         }
       }
 
+      // Backup registry must be configured for non-ephemeral sandboxes
+      if (createSandboxDto.autoDeleteInterval === 0) {
+        const registry = await this.dockerRegistryService.getAvailableBackupRegistry(regionId, organization.id)
+        if (!registry) {
+          throw new BadRequestError(
+            'No backup registry is configured for this organization. Persistent sandboxes require a backup registry.',
+          )
+        }
+      }
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
@@ -362,7 +383,7 @@ export class SandboxService {
         const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
           organizationId: organization.id,
           snapshot: snapshotIdOrName,
-          target: createSandboxDto.target,
+          regionId: createSandboxDto.target,
           class: createSandboxDto.class,
           cpu: cpu,
           mem: mem,
@@ -381,7 +402,7 @@ export class SandboxService {
       }
 
       const runner = await this.runnerService.getRandomAvailableRunner({
-        region,
+        regionId,
         sandboxClass,
         snapshotRef: snapshot.internalName,
       })
@@ -391,7 +412,7 @@ export class SandboxService {
       sandbox.organizationId = organization.id
 
       //  TODO: make configurable
-      sandbox.region = region
+      sandbox.regionId = regionId
       sandbox.class = sandboxClass
       sandbox.snapshot = snapshot.name
       //  TODO: default user should be configurable
@@ -523,7 +544,7 @@ export class SandboxService {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const regionId = await this.getValidatedOrDefaultRegionId(organization, createSandboxDto.target)
       const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
       const cpu = createSandboxDto.cpu || DEFAULT_CPU
@@ -555,7 +576,7 @@ export class SandboxService {
 
       sandbox.organizationId = organization.id
 
-      sandbox.region = region
+      sandbox.regionId = regionId
       sandbox.class = sandboxClass
       sandbox.osUser = createSandboxDto.user || 'daytona'
       sandbox.env = createSandboxDto.env || {}
@@ -616,7 +637,7 @@ export class SandboxService {
 
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
-          region: sandbox.region,
+          regionId: sandbox.regionId,
           sandboxClass: sandbox.class,
           snapshotRef: sandbox.buildInfo.snapshotRef,
         })
@@ -1082,12 +1103,36 @@ export class SandboxService {
     }
   }
 
-  private getValidatedOrDefaultRegion(region?: string): string {
-    if (!region || region.trim().length === 0) {
-      return 'us'
+  private async getValidatedOrDefaultRegionId(organization: Organization, regionId?: string): Promise<string> {
+    regionId = regionId?.trim()
+
+    if (!regionId) {
+      if (!organization.blockSharedInfrastructure) {
+        return GlobalRegionsIds.US
+      }
+
+      const regions = await this.regionService.findAll(organization.id)
+      if (regions.length === 0) {
+        throw new BadRequestException('No regions found for this organization')
+      }
+      return regions[0].id
     }
 
-    return region.trim()
+    const isGlobalRegion = Object.values(GlobalRegionsIds).includes(regionId as any)
+
+    if (isGlobalRegion) {
+      if (organization.blockSharedInfrastructure) {
+        throw new NotFoundException('Region not found')
+      }
+      return regionId
+    }
+
+    const regionOrganizationId = await this.regionService.getOrganizationId(regionId)
+    if (regionOrganizationId !== organization.id) {
+      throw new BadRequestException('Region not found')
+    }
+
+    return regionId
   }
 
   private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {
@@ -1399,16 +1444,5 @@ export class SandboxService {
     }
 
     return { valid: true, sandboxId: sshAccess.sandbox.id }
-  }
-
-  async getDistinctRegions(organizationId: string): Promise<string[]> {
-    const result = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
-      .select('DISTINCT sandbox.region', 'region')
-      .where('sandbox.organizationId = :organizationId', { organizationId })
-      .orderBy('sandbox.region', 'ASC')
-      .getRawMany()
-
-    return result.map((row) => row.region)
   }
 }

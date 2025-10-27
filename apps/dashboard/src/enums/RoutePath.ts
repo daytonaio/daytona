@@ -19,6 +19,8 @@ export enum RoutePath {
   KEYS = '/dashboard/keys',
   SANDBOXES = '/dashboard/sandboxes',
   SNAPSHOTS = '/dashboard/snapshots',
+  REGIONS = '/dashboard/regions',
+  RUNNERS = '/dashboard/runners',
   REGISTRIES = '/dashboard/registries',
   VOLUMES = '/dashboard/volumes',
   LIMITS = '/dashboard/limits',

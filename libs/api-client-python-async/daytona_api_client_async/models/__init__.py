@@ -16,6 +16,9 @@
 
 # import models into model package
 from daytona_api_client_async.models.account_provider import AccountProvider
+from daytona_api_client_async.models.admin_create_docker_registry import AdminCreateDockerRegistry
+from daytona_api_client_async.models.admin_create_runner import AdminCreateRunner
+from daytona_api_client_async.models.admin_update_docker_registry import AdminUpdateDockerRegistry
 from daytona_api_client_async.models.announcement import Announcement
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
@@ -37,6 +40,7 @@ from daytona_api_client_async.models.create_organization import CreateOrganizati
 from daytona_api_client_async.models.create_organization_invitation import CreateOrganizationInvitation
 from daytona_api_client_async.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client_async.models.create_organization_role import CreateOrganizationRole
+from daytona_api_client_async.models.create_region import CreateRegion
 from daytona_api_client_async.models.create_runner import CreateRunner
 from daytona_api_client_async.models.create_sandbox import CreateSandbox
 from daytona_api_client_async.models.create_session_request import CreateSessionRequest

@@ -17,10 +17,8 @@ export class WarmPool {
   @Column()
   snapshot: string
 
-  @Column({
-    default: 'us',
-  })
-  target: string
+  @Column()
+  regionId: string
 
   @Column()
   cpu: number

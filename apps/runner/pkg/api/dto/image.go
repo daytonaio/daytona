@@ -9,10 +9,12 @@ type PullSnapshotRequestDTO struct {
 } //	@name	PullSnapshotRequestDTO
 
 type BuildSnapshotRequestDTO struct {
-	Snapshot               string       `json:"snapshot,omitempty"` // Snapshot ID and tag or the build's hash
-	Registry               *RegistryDTO `json:"registry,omitempty"`
-	Dockerfile             string       `json:"dockerfile" validate:"required"`
-	OrganizationId         string       `json:"organizationId" validate:"required"`
-	Context                []string     `json:"context"`
-	PushToInternalRegistry bool         `json:"pushToInternalRegistry"`
+	Snapshot       string       `json:"snapshot,omitempty"` // Snapshot ID and tag or the build's hash
+	Registry       *RegistryDTO `json:"registry,omitempty"`
+	Dockerfile     string       `json:"dockerfile" validate:"required"`
+	OrganizationId string       `json:"organizationId" validate:"required"`
+	Context        []string     `json:"context"`
+	// Deprecated: Use pushToSnapshotRegistry instead
+	PushToInternalRegistry bool `json:"pushToInternalRegistry"`
+	PushToSnapshotRegistry bool `json:"pushToSnapshotRegistry"`
 } //	@name	BuildSnapshotRequestDTO
