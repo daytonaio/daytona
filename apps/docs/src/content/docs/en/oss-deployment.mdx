@@ -66,7 +66,9 @@ This configures dnsmasq with `address=/proxy.localhost/127.0.0.1`.
 - The registry is configured to allow image deletion for testing
 - Sandbox resource limits are disabled due to inability to partition cgroups in DinD environment where the sock is not mounted
 
-## Configuring outbound HTTP Proxy
+## Additional Network Options
+
+### HTTP Proxy
 
 To configurate an outbound HTTP proxy for the Daytona services, you can set the following environment variables in the `docker-compose.yaml` file for each service that requires proxy access (the API service is the only that requires outbound access to pull images):
 
@@ -83,6 +85,17 @@ environment:
   - NO_PROXY=localhost,runner,dex,registry,minio,jaeger,<your-proxy>
 ```
 
+### Extra CA Certificates
+
+To configure extra CA certificates (for example, paired with `DB_TLS` env vars), set the following environment variable in the API service:
+
+```yaml
+environment:
+  - NODE_EXTRA_CA_CERTS=/path/to/your/cert-bundle.pembundle
+```
+
+The provided file is a cert bundle. Meaning it can contain multiple CA certificates in PEM format.
+
 ## Environment Variables
 
 You can customize the deployment by modifying environment variables in the `docker-compose.yaml` file.
@@ -98,6 +111,8 @@ Below is a full list of environment variables with their default values:
 | `DB_USERNAME`                              | string  | `user`                                               | PostgreSQL database username                |
 | `DB_PASSWORD`                              | string  | `pass`                                               | PostgreSQL database password                |
 | `DB_DATABASE`                              | string  | `daytona`                                            | PostgreSQL database name                    |
+| `DB_TLS_ENABLED`                           | boolean | `false`                                              | Enable TLS for database connection          |
+| `DB_TLS_REJECT_UNAUTHORIZED`               | boolean | `true`                                               | Reject unauthorized TLS certificates        |
 | `REDIS_HOST`                               | string  | `redis`                                              | Redis server hostname                       |
 | `REDIS_PORT`                               | number  | `6379`                                               | Redis server port                           |
 | `OIDC_CLIENT_ID`                           | string  | `daytona`                                            | OIDC client identifier                      |
