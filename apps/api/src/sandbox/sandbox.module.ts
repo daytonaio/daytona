@@ -4,6 +4,7 @@
  */
 
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common'
+import { DataSource } from 'typeorm'
 import { RequestLoggerMiddleware } from './middleware/request-logger.middleware'
 import { SandboxController } from './controllers/sandbox.controller'
 import { SandboxService } from './services/sandbox.service'
@@ -45,6 +46,7 @@ import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.actio
 import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
 import { SshAccess } from './entities/ssh-access.entity'
+import { SandboxRepository } from './services/repositories/sandbox.repository'
 
 @Module({
   imports: [
@@ -93,8 +95,21 @@ import { SshAccess } from './entities/ssh-access.entity'
     SandboxStopAction,
     SandboxDestroyAction,
     SandboxArchiveAction,
+    {
+      provide: SandboxRepository,
+      inject: [DataSource],
+      useFactory: (dataSource: DataSource) => new SandboxRepository(dataSource),
+    },
   ],
-  exports: [SandboxService, RunnerService, RedisLockProvider, SnapshotService, VolumeService, VolumeManager],
+  exports: [
+    SandboxService,
+    RunnerService,
+    RedisLockProvider,
+    SnapshotService,
+    VolumeService,
+    VolumeManager,
+    SandboxRepository,
+  ],
 })
 export class SandboxModule {
   configure(consumer: MiddlewareConsumer) {

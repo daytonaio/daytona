@@ -39,10 +39,9 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
-import { LockableEntity } from '../../common/services/lockable-entity.service'
 
 @Injectable()
-export class SandboxManager extends LockableEntity implements TrackableJobExecutions, OnApplicationShutdown {
+export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
   activeJobs = new Set<string>()
 
   private readonly logger = new Logger(SandboxManager.name)
@@ -51,18 +50,16 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
     private readonly runnerService: RunnerService,
-    redisLockProvider: RedisLockProvider,
+    private readonly redisLockProvider: RedisLockProvider,
     private readonly sandboxStartAction: SandboxStartAction,
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: TypedConfigService,
-  ) {
-    super(redisLockProvider)
-  }
+  ) {}
 
-  protected getLockKey(id: string): string {
+  protected getStateChangeLockKey(id: string): string {
     return `sandbox:${id}:state-change`
   }
 
@@ -113,8 +110,9 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = await this.tryLock(sandbox.id, 30)
-              if (!lockKey) {
+              const lockKey = this.getStateChangeLockKey(sandbox.id)
+              const acquired = await this.redisLockProvider.lock(lockKey, 30)
+              if (!acquired) {
                 return
               }
 
@@ -131,7 +129,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
-                await this.unlock(lockKey)
+                await this.redisLockProvider.unlock(lockKey)
               }
             }),
           )
@@ -170,8 +168,9 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
 
       await Promise.all(
         sandboxes.map(async (sandbox) => {
-          const lockKey = await this.tryLock(sandbox.id, 30)
-          if (!lockKey) {
+          const lockKey = this.getStateChangeLockKey(sandbox.id)
+          const acquired = await this.redisLockProvider.lock(lockKey, 30)
+          if (!acquired) {
             return
           }
 
@@ -182,7 +181,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
           } finally {
-            await this.unlock(lockKey)
+            await this.redisLockProvider.unlock(lockKey)
           }
         }),
       )
@@ -228,8 +227,9 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = await this.tryLock(sandbox.id, 30)
-              if (!lockKey) {
+              const lockKey = this.getStateChangeLockKey(sandbox.id)
+              const acquired = await this.redisLockProvider.lock(lockKey, 30)
+              if (!acquired) {
                 return
               }
 
@@ -241,7 +241,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
-                await this.unlock(lockKey)
+                await this.redisLockProvider.unlock(lockKey)
               }
             }),
           )
@@ -358,8 +358,9 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     }
 
     //  prevent syncState cron from running multiple instances of the same sandbox
-    const lockKey = await this.tryLock(sandboxId, 360)
-    if (!lockKey) {
+    const lockKey = this.getStateChangeLockKey(sandboxId)
+    const acquired = await this.redisLockProvider.lock(lockKey, 30)
+    if (!acquired) {
       return
     }
 
@@ -368,7 +369,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     })
 
     if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
-      await this.unlock(lockKey)
+      await this.redisLockProvider.unlock(lockKey)
       return
     }
 
@@ -408,7 +409,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
       await this.sandboxRepository.save(sandbox)
     }
 
-    await this.unlock(lockKey)
+    await this.redisLockProvider.unlock(lockKey)
     if (syncState === SYNC_AGAIN) {
       this.syncInstanceState(sandboxId, startedAt)
     }

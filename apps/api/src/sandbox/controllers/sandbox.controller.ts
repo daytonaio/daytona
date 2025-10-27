@@ -531,7 +531,7 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
     @Body() updateStateDto: UpdateSandboxStateDto,
   ): Promise<void> {
-    await this.sandboxService.updateStateAndDesiredState(sandboxId, updateStateDto.state)
+    await this.sandboxService.updateState(sandboxId, updateStateDto.state)
   }
 
   @Post(':sandboxIdOrName/backup')
