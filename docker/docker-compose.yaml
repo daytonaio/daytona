@@ -54,7 +54,7 @@ services:
     ports:
       - 5556:5556
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5556/dex/.well-known/openid-configuration"]
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:5556/dex/.well-known/openid-configuration"]
 
   db:
     image: postgres:18
