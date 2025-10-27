@@ -80,7 +80,7 @@ The baseline configuration for the API service should be as follows:
 environment:
   - HTTP_PROXY=<your-proxy>
   - HTTPS_PROXY=<your-proxy>
-  - NO_PROXY=localhost,runner,dex,registry,minio,jaeger,<your-proxy>
+  - NO_PROXY=localhost,runner,dex,registry,minio,jaeger,otel-collector,<your-proxy>
 ```
 
 ## Environment Variables
