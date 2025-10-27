@@ -45,7 +45,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeBackupRegistry()
-    await this.initializeInternalRegistry()
+    await this.initializeSnapshotRegistry()
     await this.initializeDefaultSnapshot()
   }
 
@@ -91,15 +91,15 @@ Admin user created with API key: ${value}
   }
 
   private async initializeTransientRegistry(): Promise<void> {
-    const existingRegistry = await this.dockerRegistryService.getDefaultTransientRegistry()
+    const existingRegistry = await this.dockerRegistryService.getAvailableTransientRegistry()
     if (existingRegistry) {
       return
     }
 
-    const registryUrl = this.configService.getOrThrow('transientRegistry.url')
-    const registryAdmin = this.configService.getOrThrow('transientRegistry.admin')
-    const registryPassword = this.configService.getOrThrow('transientRegistry.password')
-    const registryProjectId = this.configService.getOrThrow('transientRegistry.projectId')
+    const registryUrl = this.configService.getOrThrow('defaultRegistry.url')
+    const registryAdmin = this.configService.getOrThrow('defaultRegistry.admin')
+    const registryPassword = this.configService.getOrThrow('defaultRegistry.password')
+    const registryProjectId = this.configService.getOrThrow('defaultRegistry.projectId')
 
     if (!registryUrl || !registryAdmin || !registryPassword || !registryProjectId) {
       this.logger.warn('Registry configuration not found, skipping transient registry setup')
@@ -115,41 +115,41 @@ Admin user created with API key: ${value}
       password: registryPassword,
       project: registryProjectId,
       registryType: RegistryType.TRANSIENT,
-      isDefault: true,
+      isActive: true,
     })
 
     this.logger.log('Default transient registry initialized successfully')
   }
 
-  private async initializeInternalRegistry(): Promise<void> {
-    const existingRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+  private async initializeSnapshotRegistry(): Promise<void> {
+    const existingRegistry = await this.dockerRegistryService.getAvailableSnapshotRegistry()
     if (existingRegistry) {
       return
     }
 
-    const registryUrl = this.configService.getOrThrow('internalRegistry.url')
-    const registryAdmin = this.configService.getOrThrow('internalRegistry.admin')
-    const registryPassword = this.configService.getOrThrow('internalRegistry.password')
-    const registryProjectId = this.configService.getOrThrow('internalRegistry.projectId')
+    const registryUrl = this.configService.getOrThrow('defaultRegistry.url')
+    const registryAdmin = this.configService.getOrThrow('defaultRegistry.admin')
+    const registryPassword = this.configService.getOrThrow('defaultRegistry.password')
+    const registryProjectId = this.configService.getOrThrow('defaultRegistry.projectId')
 
     if (!registryUrl || !registryAdmin || !registryPassword || !registryProjectId) {
-      this.logger.warn('Registry configuration not found, skipping internal registry setup')
+      this.logger.warn('Registry configuration not found, skipping snapshot registry setup')
       return
     }
 
-    this.logger.log('Initializing default internal registry...')
+    this.logger.log('Initializing default snapshot registry...')
 
     await this.dockerRegistryService.create({
-      name: 'Internal Registry',
+      name: 'Snapshot Registry',
       url: registryUrl,
       username: registryAdmin,
       password: registryPassword,
       project: registryProjectId,
-      registryType: RegistryType.INTERNAL,
-      isDefault: true,
+      registryType: RegistryType.SNAPSHOT,
+      isActive: true,
     })
 
-    this.logger.log('Default internal registry initialized successfully')
+    this.logger.log('Default snapshot registry initialized successfully')
   }
 
   private async initializeBackupRegistry(): Promise<void> {
@@ -158,10 +158,10 @@ Admin user created with API key: ${value}
       return
     }
 
-    const registryUrl = this.configService.getOrThrow('internalRegistry.url')
-    const registryAdmin = this.configService.getOrThrow('internalRegistry.admin')
-    const registryPassword = this.configService.getOrThrow('internalRegistry.password')
-    const registryProjectId = this.configService.getOrThrow('internalRegistry.projectId')
+    const registryUrl = this.configService.getOrThrow('defaultRegistry.url')
+    const registryAdmin = this.configService.getOrThrow('defaultRegistry.admin')
+    const registryPassword = this.configService.getOrThrow('defaultRegistry.password')
+    const registryProjectId = this.configService.getOrThrow('defaultRegistry.projectId')
 
     if (!registryUrl || !registryAdmin || !registryPassword || !registryProjectId) {
       this.logger.warn('Registry configuration not found, skipping backup registry setup')
@@ -178,10 +178,10 @@ Admin user created with API key: ${value}
         password: registryPassword,
         project: registryProjectId,
         registryType: RegistryType.BACKUP,
-        isDefault: true,
+        isActive: true,
+        isFallback: true,
       },
       undefined,
-      true,
     )
 
     this.logger.log('Default backup registry initialized successfully')

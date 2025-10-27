@@ -62,40 +62,8 @@ export interface CreateRunner {
   diskGiB: number
   /**
    *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  gpu: number
-  /**
-   *
    * @type {string}
    * @memberof CreateRunner
    */
-  gpuType: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  class: CreateRunnerClassEnum
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  region: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  version: string
+  regionId: string
 }
-
-export const CreateRunnerClassEnum = {
-  SMALL: 'small',
-  MEDIUM: 'medium',
-  LARGE: 'large',
-} as const
-
-export type CreateRunnerClassEnum = (typeof CreateRunnerClassEnum)[keyof typeof CreateRunnerClassEnum]

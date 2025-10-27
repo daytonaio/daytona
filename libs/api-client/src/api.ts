@@ -12,6 +12,8 @@
  * Do not edit the class manually.
  */
 
+export * from './api/admin-registries-api'
+export * from './api/admin-runners-api'
 export * from './api/api-keys-api'
 export * from './api/audit-api'
 export * from './api/config-api'
@@ -20,6 +22,7 @@ export * from './api/health-api'
 export * from './api/object-storage-api'
 export * from './api/organizations-api'
 export * from './api/preview-api'
+export * from './api/regions-api'
 export * from './api/runners-api'
 export * from './api/sandbox-api'
 export * from './api/snapshots-api'

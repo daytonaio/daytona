@@ -24,7 +24,7 @@ export class DockerRegistry {
   password: string
 
   @Column({ default: false })
-  isDefault: boolean
+  isActive: boolean
 
   @Column({ default: false })
   isFallback: boolean
@@ -36,12 +36,11 @@ export class DockerRegistry {
   organizationId?: string
 
   @Column({ nullable: true })
-  region: string | null
+  regionId: string | null
 
   @Column({
     type: 'enum',
     enum: RegistryType,
-    default: RegistryType.INTERNAL,
   })
   registryType: RegistryType
 

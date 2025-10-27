@@ -267,51 +267,6 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
     },
     /**
      *
-     * @summary Set default registry
-     * @param {string} id ID of the docker registry
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    setDefaultRegistry: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('setDefaultRegistry', 'id', id)
-      const localVarPath = `/docker-registry/{id}/set-default`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
      * @summary Update registry
      * @param {string} id ID of the docker registry
      * @param {UpdateDockerRegistry} updateDockerRegistry
@@ -499,31 +454,6 @@ export const DockerRegistryApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Set default registry
-     * @param {string} id ID of the docker registry
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async setDefaultRegistry(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DockerRegistry>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.setDefaultRegistry(id, xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['DockerRegistryApi.setDefaultRegistry']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
      * @summary Update registry
      * @param {string} id ID of the docker registry
      * @param {UpdateDockerRegistry} updateDockerRegistry
@@ -641,23 +571,6 @@ export const DockerRegistryApiFactory = function (
     },
     /**
      *
-     * @summary Set default registry
-     * @param {string} id ID of the docker registry
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    setDefaultRegistry(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<DockerRegistry> {
-      return localVarFp
-        .setDefaultRegistry(id, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
      * @summary Update registry
      * @param {string} id ID of the docker registry
      * @param {UpdateDockerRegistry} updateDockerRegistry
@@ -759,21 +672,6 @@ export class DockerRegistryApi extends BaseAPI {
   public listRegistries(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return DockerRegistryApiFp(this.configuration)
       .listRegistries(xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   *
-   * @summary Set default registry
-   * @param {string} id ID of the docker registry
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DockerRegistryApi
-   */
-  public setDefaultRegistry(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return DockerRegistryApiFp(this.configuration)
-      .setDefaultRegistry(id, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsString, IsOptional, IsUrl } from 'class-validator'
+import { IsString, IsOptional, IsUrl, IsBoolean } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'UpdateDockerRegistry' })
@@ -29,4 +29,9 @@ export class UpdateDockerRegistryDto {
   @IsString()
   @IsOptional()
   project?: string
+
+  @ApiPropertyOptional({ description: 'Whether the registry is active and available for use' })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean
 }

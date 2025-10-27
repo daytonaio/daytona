@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,8 +32,9 @@ class UpdateDockerRegistry(BaseModel):
     username: StrictStr = Field(description="Registry username")
     password: Optional[StrictStr] = Field(default=None, description="Registry password")
     project: Optional[StrictStr] = Field(default=None, description="Registry project")
+    is_active: Optional[StrictBool] = Field(default=None, description="Whether the registry is active and available for use", alias="isActive")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project"]
+    __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project", "isActive"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -97,7 +98,8 @@ class UpdateDockerRegistry(BaseModel):
             "url": obj.get("url"),
             "username": obj.get("username"),
             "password": obj.get("password"),
-            "project": obj.get("project")
+            "project": obj.get("project"),
+            "isActive": obj.get("isActive")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

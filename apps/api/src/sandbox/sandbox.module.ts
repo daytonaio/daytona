@@ -45,12 +45,14 @@ import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.actio
 import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
 import { SshAccess } from './entities/ssh-access.entity'
+import { RegionModule } from '../region/region.module'
 
 @Module({
   imports: [
     UserModule,
     DockerRegistryModule,
     OrganizationModule,
+    RegionModule,
     TypeOrmModule.forFeature([
       Sandbox,
       Runner,

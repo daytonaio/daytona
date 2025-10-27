@@ -42,7 +42,7 @@ export class DockerRegistryDto {
   @ApiProperty({
     description: 'Registry type',
     enum: RegistryType,
-    example: RegistryType.INTERNAL,
+    example: RegistryType.SOURCE,
   })
   registryType: RegistryType
 
@@ -58,6 +58,13 @@ export class DockerRegistryDto {
   })
   updatedAt: Date
 
+  @ApiProperty({
+    description: 'Region ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    nullable: true,
+  })
+  regionId: string | null
+
   static fromDockerRegistry(dockerRegistry: DockerRegistry): DockerRegistryDto {
     const dto: DockerRegistryDto = {
       id: dockerRegistry.id,
@@ -68,6 +75,7 @@ export class DockerRegistryDto {
       registryType: dockerRegistry.registryType,
       createdAt: dockerRegistry.createdAt,
       updatedAt: dockerRegistry.updatedAt,
+      regionId: dockerRegistry.regionId,
     }
 
     return dto

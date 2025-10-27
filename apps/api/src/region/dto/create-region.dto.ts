@@ -4,12 +4,15 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { IsString, IsNotEmpty } from 'class-validator'
 
-@ApiSchema({ name: 'Region' })
-export class RegionDto {
+@ApiSchema({ name: 'CreateRegion' })
+export class CreateRegionDto {
   @ApiProperty({
     description: 'Region name',
-    example: 'us',
+    example: 'us-east-1',
   })
+  @IsString()
+  @IsNotEmpty()
   name: string
 }

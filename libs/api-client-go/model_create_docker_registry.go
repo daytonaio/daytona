@@ -33,8 +33,8 @@ type CreateDockerRegistry struct {
 	Project *string `json:"project,omitempty"`
 	// Registry type
 	RegistryType string `json:"registryType"`
-	// Set as default registry
-	IsDefault            *bool `json:"isDefault,omitempty"`
+	// Whether the registry is active is available for use
+	IsActive             *bool `json:"isActive,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -59,7 +59,7 @@ func NewCreateDockerRegistry(name string, url string, username string, password 
 // but it doesn't guarantee that properties required by API are set
 func NewCreateDockerRegistryWithDefaults() *CreateDockerRegistry {
 	this := CreateDockerRegistry{}
-	var registryType string = "organization"
+	var registryType string = "source"
 	this.RegistryType = registryType
 	return &this
 }
@@ -216,36 +216,36 @@ func (o *CreateDockerRegistry) SetRegistryType(v string) {
 	o.RegistryType = v
 }
 
-// GetIsDefault returns the IsDefault field value if set, zero value otherwise.
-func (o *CreateDockerRegistry) GetIsDefault() bool {
-	if o == nil || IsNil(o.IsDefault) {
+// GetIsActive returns the IsActive field value if set, zero value otherwise.
+func (o *CreateDockerRegistry) GetIsActive() bool {
+	if o == nil || IsNil(o.IsActive) {
 		var ret bool
 		return ret
 	}
-	return *o.IsDefault
+	return *o.IsActive
 }
 
-// GetIsDefaultOk returns a tuple with the IsDefault field value if set, nil otherwise
+// GetIsActiveOk returns a tuple with the IsActive field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateDockerRegistry) GetIsDefaultOk() (*bool, bool) {
-	if o == nil || IsNil(o.IsDefault) {
+func (o *CreateDockerRegistry) GetIsActiveOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsActive) {
 		return nil, false
 	}
-	return o.IsDefault, true
+	return o.IsActive, true
 }
 
-// HasIsDefault returns a boolean if a field has been set.
-func (o *CreateDockerRegistry) HasIsDefault() bool {
-	if o != nil && !IsNil(o.IsDefault) {
+// HasIsActive returns a boolean if a field has been set.
+func (o *CreateDockerRegistry) HasIsActive() bool {
+	if o != nil && !IsNil(o.IsActive) {
 		return true
 	}
 
 	return false
 }
 
-// SetIsDefault gets a reference to the given bool and assigns it to the IsDefault field.
-func (o *CreateDockerRegistry) SetIsDefault(v bool) {
-	o.IsDefault = &v
+// SetIsActive gets a reference to the given bool and assigns it to the IsActive field.
+func (o *CreateDockerRegistry) SetIsActive(v bool) {
+	o.IsActive = &v
 }
 
 func (o CreateDockerRegistry) MarshalJSON() ([]byte, error) {
@@ -266,8 +266,8 @@ func (o CreateDockerRegistry) ToMap() (map[string]interface{}, error) {
 		toSerialize["project"] = o.Project
 	}
 	toSerialize["registryType"] = o.RegistryType
-	if !IsNil(o.IsDefault) {
-		toSerialize["isDefault"] = o.IsDefault
+	if !IsNil(o.IsActive) {
+		toSerialize["isActive"] = o.IsActive
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -322,7 +322,7 @@ func (o *CreateDockerRegistry) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "password")
 		delete(additionalProperties, "project")
 		delete(additionalProperties, "registryType")
-		delete(additionalProperties, "isDefault")
+		delete(additionalProperties, "isActive")
 		o.AdditionalProperties = additionalProperties
 	}
 

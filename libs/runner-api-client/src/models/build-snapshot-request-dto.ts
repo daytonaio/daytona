@@ -41,11 +41,17 @@ export interface BuildSnapshotRequestDTO {
    */
   organizationId: string
   /**
-   *
+   * Deprecated: Use pushToSnapshotRegistry instead
    * @type {boolean}
    * @memberof BuildSnapshotRequestDTO
    */
   pushToInternalRegistry?: boolean
+  /**
+   *
+   * @type {boolean}
+   * @memberof BuildSnapshotRequestDTO
+   */
+  pushToSnapshotRegistry?: boolean
   /**
    *
    * @type {RegistryDTO}

@@ -35,8 +35,6 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 import type { CreateRunner } from '../models'
 // @ts-ignore
 import type { Runner } from '../models'
-// @ts-ignore
-import type { RunnerSnapshotDto } from '../models'
 /**
  * RunnersApi - axios parameter creator
  * @export
@@ -124,13 +122,10 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getRunnerBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getRunnerBySandboxId', 'sandboxId', sandboxId)
-      const localVarPath = `/runners/by-sandbox/{sandboxId}`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
-      )
+    deleteRunner: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('deleteRunner', 'id', id)
+      const localVarPath = `/runners/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -138,7 +133,7 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
         baseOptions = configuration.baseOptions
       }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
 
@@ -159,15 +154,15 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Get runners by snapshot ref
-     * @param {string} ref Snapshot ref
+     * @summary Get runner by ID
+     * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getRunnersBySnapshotRef: async (ref: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'ref' is not null or undefined
-      assertParamExists('getRunnersBySnapshotRef', 'ref', ref)
-      const localVarPath = `/runners/by-snapshot-ref`
+    getRunnerById: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('getRunnerById', 'id', id)
+      const localVarPath = `/runners/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -184,10 +179,6 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
-
-      if (ref !== undefined) {
-        localVarQueryParameter['ref'] = ref
-      }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
@@ -201,10 +192,11 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary List all runners
+     * @param {string} [region] Filter runners by region name
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listRunners: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+    listRunners: async (region?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       const localVarPath = `/runners`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -223,6 +215,10 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
       // authentication oauth2 required
 
+      if (region !== undefined) {
+        localVarQueryParameter['region'] = region
+      }
+
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -235,7 +231,7 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Update runner scheduling status
-     * @param {string} id
+     * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -289,7 +285,7 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     async createRunner(
       createRunner: CreateRunner,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createRunner(createRunner, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -330,14 +326,14 @@ export const RunnersApiFp = function (configuration?: Configuration) {
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async getRunnerBySandboxId(
-      sandboxId: string,
+    async deleteRunner(
+      id: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerBySandboxId(sandboxId, options)
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRunner(id, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getRunnerBySandboxId']?.[localVarOperationServerIndex]?.url
+        operationServerMap['RunnersApi.deleteRunner']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -348,19 +344,19 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get runners by snapshot ref
-     * @param {string} ref Snapshot ref
+     * @summary Get runner by ID
+     * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async getRunnersBySnapshotRef(
-      ref: string,
+    async getRunnerById(
+      id: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RunnerSnapshotDto>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnersBySnapshotRef(ref, options)
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerById(id, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getRunnersBySnapshotRef']?.[localVarOperationServerIndex]?.url
+        operationServerMap['RunnersApi.getRunnerById']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -372,13 +368,15 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary List all runners
+     * @param {string} [region] Filter runners by region name
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async listRunners(
+      region?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(options)
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Runner>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(region, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['RunnersApi.listRunners']?.[localVarOperationServerIndex]?.url
@@ -393,14 +391,14 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Update runner scheduling status
-     * @param {string} id
+     * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async updateRunnerScheduling(
       id: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.updateRunnerScheduling(id, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -430,7 +428,7 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createRunner(createRunner: CreateRunner, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+    createRunner(createRunner: CreateRunner, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
       return localVarFp.createRunner(createRunner, options).then((request) => request(axios, basePath))
     },
     /**
@@ -449,36 +447,37 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
-      return localVarFp.getRunnerBySandboxId(sandboxId, options).then((request) => request(axios, basePath))
+    deleteRunner(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.deleteRunner(id, options).then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Get runners by snapshot ref
-     * @param {string} ref Snapshot ref
+     * @summary Get runner by ID
+     * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RunnerSnapshotDto>> {
-      return localVarFp.getRunnersBySnapshotRef(ref, options).then((request) => request(axios, basePath))
+    getRunnerById(id: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
+      return localVarFp.getRunnerById(id, options).then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary List all runners
+     * @param {string} [region] Filter runners by region name
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listRunners(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.listRunners(options).then((request) => request(axios, basePath))
+    listRunners(region?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Runner>> {
+      return localVarFp.listRunners(region, options).then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Update runner scheduling status
-     * @param {string} id
+     * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    updateRunnerScheduling(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+    updateRunnerScheduling(id: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
       return localVarFp.updateRunnerScheduling(id, options).then((request) => request(axios, basePath))
     },
   }
@@ -526,43 +525,44 @@ export class RunnersApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof RunnersApi
    */
-  public getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
+  public deleteRunner(id: string, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
-      .getRunnerBySandboxId(sandboxId, options)
+      .deleteRunner(id, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Get runners by snapshot ref
-   * @param {string} ref Snapshot ref
+   * @summary Get runner by ID
+   * @param {string} id Runner ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof RunnersApi
    */
-  public getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig) {
+  public getRunnerById(id: string, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
-      .getRunnersBySnapshotRef(ref, options)
+      .getRunnerById(id, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary List all runners
+   * @param {string} [region] Filter runners by region name
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof RunnersApi
    */
-  public listRunners(options?: RawAxiosRequestConfig) {
+  public listRunners(region?: string, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
-      .listRunners(options)
+      .listRunners(region, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Update runner scheduling status
-   * @param {string} id
+   * @param {string} id Runner ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof RunnersApi

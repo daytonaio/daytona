@@ -30,7 +30,9 @@ type UpdateDockerRegistry struct {
 	// Registry password
 	Password *string `json:"password,omitempty"`
 	// Registry project
-	Project              *string `json:"project,omitempty"`
+	Project *string `json:"project,omitempty"`
+	// Whether the registry is active and available for use
+	IsActive             *bool `json:"isActive,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -192,6 +194,38 @@ func (o *UpdateDockerRegistry) SetProject(v string) {
 	o.Project = &v
 }
 
+// GetIsActive returns the IsActive field value if set, zero value otherwise.
+func (o *UpdateDockerRegistry) GetIsActive() bool {
+	if o == nil || IsNil(o.IsActive) {
+		var ret bool
+		return ret
+	}
+	return *o.IsActive
+}
+
+// GetIsActiveOk returns a tuple with the IsActive field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateDockerRegistry) GetIsActiveOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsActive) {
+		return nil, false
+	}
+	return o.IsActive, true
+}
+
+// HasIsActive returns a boolean if a field has been set.
+func (o *UpdateDockerRegistry) HasIsActive() bool {
+	if o != nil && !IsNil(o.IsActive) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsActive gets a reference to the given bool and assigns it to the IsActive field.
+func (o *UpdateDockerRegistry) SetIsActive(v bool) {
+	o.IsActive = &v
+}
+
 func (o UpdateDockerRegistry) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -210,6 +244,9 @@ func (o UpdateDockerRegistry) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Project) {
 		toSerialize["project"] = o.Project
+	}
+	if !IsNil(o.IsActive) {
+		toSerialize["isActive"] = o.IsActive
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -261,6 +298,7 @@ func (o *UpdateDockerRegistry) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "username")
 		delete(additionalProperties, "password")
 		delete(additionalProperties, "project")
+		delete(additionalProperties, "isActive")
 		o.AdditionalProperties = additionalProperties
 	}
 

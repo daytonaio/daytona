@@ -1,6 +1,8 @@
 .gitignore
 .npmignore
 api.ts
+api/admin-registries-api.ts
+api/admin-runners-api.ts
 api/api-keys-api.ts
 api/audit-api.ts
 api/config-api.ts
@@ -9,6 +11,7 @@ api/health-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
 api/preview-api.ts
+api/regions-api.ts
 api/runners-api.ts
 api/sandbox-api.ts
 api/snapshots-api.ts
@@ -23,6 +26,9 @@ configuration.ts
 git_push.sh
 index.ts
 models/account-provider.ts
+models/admin-create-docker-registry.ts
+models/admin-create-runner.ts
+models/admin-update-docker-registry.ts
 models/announcement.ts
 models/api-key-list.ts
 models/api-key-response.ts
@@ -44,6 +50,7 @@ models/create-organization-invitation.ts
 models/create-organization-quota.ts
 models/create-organization-role.ts
 models/create-organization.ts
+models/create-region.ts
 models/create-runner.ts
 models/create-sandbox.ts
 models/create-session-request.ts

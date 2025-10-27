@@ -27,9 +27,13 @@ class Region(BaseModel):
     """
     Region
     """ # noqa: E501
+    id: StrictStr = Field(description="Region ID")
     name: StrictStr = Field(description="Region name")
+    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
+    created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
+    updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,7 +93,11 @@ class Region(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "id": obj.get("id"),
+            "name": obj.get("name"),
+            "organizationId": obj.get("organizationId"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

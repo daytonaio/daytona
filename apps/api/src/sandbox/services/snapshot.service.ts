@@ -34,6 +34,7 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
@@ -51,6 +52,7 @@ export class SnapshotService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly dockerRegistryService: DockerRegistryService,
     private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
@@ -92,6 +94,11 @@ export class SnapshotService {
         if (imageValidationError) {
           throw new BadRequestException(imageValidationError)
         }
+      }
+
+      const registry = await this.dockerRegistryService.getAvailableSnapshotRegistry(organization)
+      if (!registry) {
+        throw new BadRequestException('No snapshot registry is configured for this organization')
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)

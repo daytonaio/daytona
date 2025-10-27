@@ -1,5 +1,7 @@
 .gitignore
 api/openapi.yaml
+api_admin_registries.go
+api_admin_runners.go
 api_api_keys.go
 api_audit.go
 api_config.go
@@ -8,6 +10,7 @@ api_health.go
 api_object_storage.go
 api_organizations.go
 api_preview.go
+api_regions.go
 api_runners.go
 api_sandbox.go
 api_snapshots.go
@@ -21,6 +24,9 @@ configuration.go
 go.mod
 go.sum
 model_account_provider.go
+model_admin_create_docker_registry.go
+model_admin_create_runner.go
+model_admin_update_docker_registry.go
 model_announcement.go
 model_api_key_list.go
 model_api_key_response.go
@@ -42,6 +48,7 @@ model_create_organization.go
 model_create_organization_invitation.go
 model_create_organization_quota.go
 model_create_organization_role.go
+model_create_region.go
 model_create_runner.go
 model_create_sandbox.go
 model_create_session_request.go

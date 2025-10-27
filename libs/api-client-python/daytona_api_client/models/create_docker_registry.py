@@ -33,15 +33,15 @@ class CreateDockerRegistry(BaseModel):
     password: StrictStr = Field(description="Registry password")
     project: Optional[StrictStr] = Field(default=None, description="Registry project")
     registry_type: StrictStr = Field(description="Registry type", alias="registryType")
-    is_default: Optional[StrictBool] = Field(default=None, description="Set as default registry", alias="isDefault")
+    is_active: Optional[StrictBool] = Field(default=None, description="Whether the registry is active is available for use", alias="isActive")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project", "registryType", "isDefault"]
+    __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project", "registryType", "isActive"]
 
     @field_validator('registry_type')
     def registry_type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['internal', 'organization', 'transient', 'backup']):
-            raise ValueError("must be one of enum values ('internal', 'organization', 'transient', 'backup')")
+        if value not in set(['snapshot', 'source', 'backup']):
+            raise ValueError("must be one of enum values ('snapshot', 'source', 'backup')")
         return value
 
     model_config = ConfigDict(
@@ -107,8 +107,8 @@ class CreateDockerRegistry(BaseModel):
             "username": obj.get("username"),
             "password": obj.get("password"),
             "project": obj.get("project"),
-            "registryType": obj.get("registryType") if obj.get("registryType") is not None else 'organization',
-            "isDefault": obj.get("isDefault")
+            "registryType": obj.get("registryType") if obj.get("registryType") is not None else 'source',
+            "isActive": obj.get("isActive")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
