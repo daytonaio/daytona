@@ -399,7 +399,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     const size = limit
     const searchBody: Search_RequestBody = {
       query,
-      sort: [{ createdAt: { order: 'desc' } }],
+      sort: [{ createdAt: { order: 'desc' } }, { _id: { order: 'desc' } }],
       size: size + 1, // Request one extra to check if there are more results
     }
 
@@ -456,7 +456,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     // Only generate nextToken if we're already using cursor pagination OR if the next page would exceed the limit
     if (hasMore && items.length > 0 && (nextToken || wouldExceedLimit)) {
       const lastItem = items[items.length - 1]
-      const searchAfter = [lastItem._source.createdAt]
+      const searchAfter = [lastItem._source.createdAt, lastItem._id]
       nextTokenResult = Buffer.from(JSON.stringify(searchAfter)).toString('base64')
     }
 
