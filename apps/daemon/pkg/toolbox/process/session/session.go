@@ -34,11 +34,6 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
 
-	// Set up a new process group so we can kill all child processes when the session is deleted
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
-
 	// for backward compatibility (only sdk clients before 0.103.X), we use the home directory as the default directory
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
 	versionComparison, err := util.CompareVersions(sdkVersion, "0.103.0-0")
@@ -245,12 +240,14 @@ func (s *SessionController) terminateSession(ctx context.Context, session *sessi
 
 	pid := session.cmd.Process.Pid
 
-	// Send SIGTERM to entire process group (negative PID)
-	err := syscall.Kill(-pid, syscall.SIGTERM)
+	_ = s.signalProcessTree(pid, syscall.SIGTERM)
+
+	err := session.cmd.Process.Signal(syscall.SIGTERM)
 	if err != nil {
 		// If SIGTERM fails, try SIGKILL immediately
 		log.Warnf("SIGTERM failed for session %s, trying SIGKILL: %v", session.id, err)
-		return syscall.Kill(-pid, syscall.SIGKILL)
+		_ = s.signalProcessTree(pid, syscall.SIGKILL)
+		return session.cmd.Process.Kill()
 	}
 
 	// Wait for graceful termination
@@ -259,9 +256,35 @@ func (s *SessionController) terminateSession(ctx context.Context, session *sessi
 		return nil
 	}
 
-	// Force kill entire process group if still alive
-	log.Debugf("Session %s timeout, sending SIGKILL to process group", session.id)
-	return syscall.Kill(-pid, syscall.SIGKILL)
+	log.Debugf("Session %s timeout, sending SIGKILL to process tree", session.id)
+	_ = s.signalProcessTree(pid, syscall.SIGKILL)
+	return session.cmd.Process.Kill()
+}
+
+func (s *SessionController) signalProcessTree(pid int, sig syscall.Signal) error {
+	parent, err := process.NewProcess(int32(pid))
+	if err != nil {
+		return err
+	}
+
+	descendants, err := parent.Children()
+	if err != nil {
+		return err
+	}
+
+	for _, child := range descendants {
+		childPid := int(child.Pid)
+		_ = s.signalProcessTree(childPid, sig)
+	}
+
+	for _, child := range descendants {
+		// Convert to OS process to send custom signal
+		if childProc, err := os.FindProcess(int(child.Pid)); err == nil {
+			_ = childProc.Signal(sig)
+		}
+	}
+
+	return nil
 }
 
 func (s *SessionController) waitForTermination(ctx context.Context, pid int, timeout, interval time.Duration) bool {
@@ -278,12 +301,13 @@ func (s *SessionController) waitForTermination(ctx context.Context, pid int, tim
 		case <-ticker.C:
 			parent, err := process.NewProcess(int32(pid))
 			if err != nil {
+				// Process doesn't exist anymore
 				return true
 			}
 			children, err := parent.Children()
 			if err != nil {
-				// Unable to enumerate children; handle as needed (e.g., treat conservatively)
-				return false
+				// Unable to enumerate children - likely process is dying/dead
+				return true
 			}
 			if len(children) == 0 {
 				return true
