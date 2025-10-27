@@ -29,7 +29,7 @@ export class VolumeAccessGuard implements CanActivate {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
     } catch {
-      throw new NotFoundException(`Volume with ${volumeId ? 'ID' : 'name'} '${volumeId || volumeName}' not found`)
+      throw new NotFoundException(`Volume with ${volumeId ? 'ID' : 'name'} ${volumeId || volumeName} not found`)
     }
 
     return true

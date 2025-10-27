@@ -214,6 +214,7 @@ export class VolumeService {
           id: params.id,
         },
         select: ['organizationId'],
+        loadEagerRelations: false,
       })
       return volume.organizationId
     }

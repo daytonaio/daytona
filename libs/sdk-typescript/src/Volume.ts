@@ -63,11 +63,7 @@ export class VolumeService {
       const response = await this.volumesApi.getVolumeByName(name)
       return response.data as Volume
     } catch (error) {
-      if (
-        error instanceof DaytonaNotFoundError &&
-        create &&
-        error.message.match(/Volume with name ([\w-]+) not found/)
-      ) {
+      if (error instanceof DaytonaNotFoundError && create) {
         return await this.create(name)
       }
       throw error
