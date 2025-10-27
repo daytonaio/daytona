@@ -1,7 +1,6 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-import re
 from typing import List
 
 from daytona_api_client_async import CreateVolume, VolumesApi
@@ -52,7 +51,7 @@ class AsyncVolumeService:
         try:
             return Volume.from_dto(await self.__volumes_api.get_volume_by_name(name))
         except NotFoundException as e:
-            if create and re.search(r"Volume with name ([\w\-]+) not found", str(e)):
+            if create:
                 return await self.create(name)
             raise e
 
