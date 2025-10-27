@@ -35,6 +35,8 @@ type DaytonaConfiguration struct {
 	PylonAppId *string `json:"pylonAppId,omitempty"`
 	// Proxy template URL
 	ProxyTemplateUrl string `json:"proxyTemplateUrl"`
+	// Toolbox template URL
+	ProxyToolboxUrl string `json:"proxyToolboxUrl"`
 	// Default snapshot for sandboxes
 	DefaultSnapshot string `json:"defaultSnapshot"`
 	// Dashboard URL
@@ -60,13 +62,14 @@ type _DaytonaConfiguration DaytonaConfiguration
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDaytonaConfiguration(version string, oidc OidcConfig, linkedAccountsEnabled bool, announcements map[string]Announcement, proxyTemplateUrl string, defaultSnapshot string, dashboardUrl string, maxAutoArchiveInterval float32, maintananceMode bool, environment string) *DaytonaConfiguration {
+func NewDaytonaConfiguration(version string, oidc OidcConfig, linkedAccountsEnabled bool, announcements map[string]Announcement, proxyTemplateUrl string, proxyToolboxUrl string, defaultSnapshot string, dashboardUrl string, maxAutoArchiveInterval float32, maintananceMode bool, environment string) *DaytonaConfiguration {
 	this := DaytonaConfiguration{}
 	this.Version = version
 	this.Oidc = oidc
 	this.LinkedAccountsEnabled = linkedAccountsEnabled
 	this.Announcements = announcements
 	this.ProxyTemplateUrl = proxyTemplateUrl
+	this.ProxyToolboxUrl = proxyToolboxUrl
 	this.DefaultSnapshot = defaultSnapshot
 	this.DashboardUrl = dashboardUrl
 	this.MaxAutoArchiveInterval = maxAutoArchiveInterval
@@ -265,6 +268,30 @@ func (o *DaytonaConfiguration) GetProxyTemplateUrlOk() (*string, bool) {
 // SetProxyTemplateUrl sets field value
 func (o *DaytonaConfiguration) SetProxyTemplateUrl(v string) {
 	o.ProxyTemplateUrl = v
+}
+
+// GetProxyToolboxUrl returns the ProxyToolboxUrl field value
+func (o *DaytonaConfiguration) GetProxyToolboxUrl() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ProxyToolboxUrl
+}
+
+// GetProxyToolboxUrlOk returns a tuple with the ProxyToolboxUrl field value
+// and a boolean to check if the value has been set.
+func (o *DaytonaConfiguration) GetProxyToolboxUrlOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ProxyToolboxUrl, true
+}
+
+// SetProxyToolboxUrl sets field value
+func (o *DaytonaConfiguration) SetProxyToolboxUrl(v string) {
+	o.ProxyToolboxUrl = v
 }
 
 // GetDefaultSnapshot returns the DefaultSnapshot field value
@@ -504,6 +531,7 @@ func (o DaytonaConfiguration) ToMap() (map[string]interface{}, error) {
 		toSerialize["pylonAppId"] = o.PylonAppId
 	}
 	toSerialize["proxyTemplateUrl"] = o.ProxyTemplateUrl
+	toSerialize["proxyToolboxUrl"] = o.ProxyToolboxUrl
 	toSerialize["defaultSnapshot"] = o.DefaultSnapshot
 	toSerialize["dashboardUrl"] = o.DashboardUrl
 	toSerialize["maxAutoArchiveInterval"] = o.MaxAutoArchiveInterval
@@ -536,6 +564,7 @@ func (o *DaytonaConfiguration) UnmarshalJSON(data []byte) (err error) {
 		"linkedAccountsEnabled",
 		"announcements",
 		"proxyTemplateUrl",
+		"proxyToolboxUrl",
 		"defaultSnapshot",
 		"dashboardUrl",
 		"maxAutoArchiveInterval",
@@ -577,6 +606,7 @@ func (o *DaytonaConfiguration) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "announcements")
 		delete(additionalProperties, "pylonAppId")
 		delete(additionalProperties, "proxyTemplateUrl")
+		delete(additionalProperties, "proxyToolboxUrl")
 		delete(additionalProperties, "defaultSnapshot")
 		delete(additionalProperties, "dashboardUrl")
 		delete(additionalProperties, "maxAutoArchiveInterval")

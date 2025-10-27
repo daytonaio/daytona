@@ -37,6 +37,7 @@ class DaytonaConfiguration(BaseModel):
     announcements: Dict[str, Announcement] = Field(description="System announcements")
     pylon_app_id: Optional[StrictStr] = Field(default=None, description="Pylon application ID", alias="pylonAppId")
     proxy_template_url: StrictStr = Field(description="Proxy template URL", alias="proxyTemplateUrl")
+    proxy_toolbox_url: StrictStr = Field(description="Toolbox template URL", alias="proxyToolboxUrl")
     default_snapshot: StrictStr = Field(description="Default snapshot for sandboxes", alias="defaultSnapshot")
     dashboard_url: StrictStr = Field(description="Dashboard URL", alias="dashboardUrl")
     max_auto_archive_interval: Union[StrictFloat, StrictInt] = Field(description="Maximum auto-archive interval in minutes", alias="maxAutoArchiveInterval")
@@ -46,7 +47,7 @@ class DaytonaConfiguration(BaseModel):
     ssh_gateway_command: Optional[StrictStr] = Field(default=None, description="SSH Gateway command", alias="sshGatewayCommand")
     ssh_gateway_public_key: Optional[StrictStr] = Field(default=None, description="Base64 encoded SSH Gateway public key", alias="sshGatewayPublicKey")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["version", "posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl", "sshGatewayCommand", "sshGatewayPublicKey"]
+    __properties: ClassVar[List[str]] = ["version", "posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "proxyToolboxUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl", "sshGatewayCommand", "sshGatewayPublicKey"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -131,6 +132,7 @@ class DaytonaConfiguration(BaseModel):
             else None,
             "pylonAppId": obj.get("pylonAppId"),
             "proxyTemplateUrl": obj.get("proxyTemplateUrl"),
+            "proxyToolboxUrl": obj.get("proxyToolboxUrl"),
             "defaultSnapshot": obj.get("defaultSnapshot"),
             "dashboardUrl": obj.get("dashboardUrl"),
             "maxAutoArchiveInterval": obj.get("maxAutoArchiveInterval"),

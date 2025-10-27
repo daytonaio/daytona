@@ -17,16 +17,14 @@ IDE-like features such as code completion, symbol search, and more.
 new LspServer(
    languageId: LspLanguageId, 
    pathToProject: string, 
-   toolboxApi: ToolboxApi, 
-   sandboxId: string): LspServer
+   apiClient: LspApi): LspServer
 ```
 
 **Parameters**:
 
 - `languageId` _LspLanguageId_
 - `pathToProject` _string_
-- `toolboxApi` _ToolboxApi_
-- `sandboxId` _string_
+- `apiClient` _LspApi_
 
 
 **Returns**:

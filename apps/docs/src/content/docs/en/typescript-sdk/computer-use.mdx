@@ -27,13 +27,12 @@ for automating desktop interactions within a sandbox.
 #### new ComputerUse()
 
 ```ts
-new ComputerUse(sandboxId: string, toolboxApi: ToolboxApi): ComputerUse
+new ComputerUse(apiClient: ComputerUseApi): ComputerUse
 ```
 
 **Parameters**:
 
-- `sandboxId` _string_
-- `toolboxApi` _ToolboxApi_
+- `apiClient` _ComputerUseApi_
 
 
 **Returns**:
@@ -215,13 +214,12 @@ Display operations for computer use functionality
 #### new Display()
 
 ```ts
-new Display(sandboxId: string, toolboxApi: ToolboxApi): Display
+new Display(apiClient: ComputerUseApi): Display
 ```
 
 **Parameters**:
 
-- `sandboxId` _string_
-- `toolboxApi` _ToolboxApi_
+- `apiClient` _ComputerUseApi_
 
 
 **Returns**:
@@ -289,13 +287,12 @@ Keyboard operations for computer use functionality
 #### new Keyboard()
 
 ```ts
-new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
+new Keyboard(apiClient: ComputerUseApi): Keyboard
 ```
 
 **Parameters**:
 
-- `sandboxId` _string_
-- `toolboxApi` _ToolboxApi_
+- `apiClient` _ComputerUseApi_
 
 
 **Returns**:
@@ -460,13 +457,12 @@ Mouse operations for computer use functionality
 #### new Mouse()
 
 ```ts
-new Mouse(sandboxId: string, toolboxApi: ToolboxApi): Mouse
+new Mouse(apiClient: ComputerUseApi): Mouse
 ```
 
 **Parameters**:
 
-- `sandboxId` _string_
-- `toolboxApi` _ToolboxApi_
+- `apiClient` _ComputerUseApi_
 
 
 **Returns**:
@@ -552,14 +548,14 @@ console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${
 #### getPosition()
 
 ```ts
-getPosition(): Promise<MousePosition>
+getPosition(): Promise<MousePositionResponse>
 ```
 
 Gets the current mouse cursor position
 
 **Returns**:
 
-- `Promise<MousePosition>` - Current mouse position with x and y coordinates
+- `Promise<MousePositionResponse>` - Current mouse position with x and y coordinates
 
 **Example:**
 
@@ -573,7 +569,7 @@ console.log(`Mouse is at: ${position.x}, ${position.y}`);
 #### move()
 
 ```ts
-move(x: number, y: number): Promise<MouseMoveResponse>
+move(x: number, y: number): Promise<MousePositionResponse>
 ```
 
 Moves the mouse cursor to the specified coordinates
@@ -586,7 +582,7 @@ Moves the mouse cursor to the specified coordinates
 
 **Returns**:
 
-- `Promise<MouseMoveResponse>` - Move operation result
+- `Promise<MousePositionResponse>` - Position after move
 
 **Example:**
 
@@ -643,13 +639,12 @@ Screenshot operations for computer use functionality
 #### new Screenshot()
 
 ```ts
-new Screenshot(sandboxId: string, toolboxApi: ToolboxApi): Screenshot
+new Screenshot(apiClient: ComputerUseApi): Screenshot
 ```
 
 **Parameters**:
 
-- `sandboxId` _string_
-- `toolboxApi` _ToolboxApi_
+- `apiClient` _ComputerUseApi_
 
 
 **Returns**:
@@ -661,7 +656,7 @@ new Screenshot(sandboxId: string, toolboxApi: ToolboxApi): Screenshot
 #### takeCompressed()
 
 ```ts
-takeCompressed(options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
+takeCompressed(options?: ScreenshotOptions): Promise<ScreenshotResponse>
 ```
 
 Takes a compressed screenshot of the entire screen
@@ -673,7 +668,7 @@ Takes a compressed screenshot of the entire screen
 
 **Returns**:
 
-- `Promise<CompressedScreenshotResponse>` - Compressed screenshot data
+- `Promise<ScreenshotResponse>` - Compressed screenshot data
 
 **Example:**
 
@@ -700,7 +695,7 @@ const scaled = await sandbox.computerUse.screenshot.takeCompressed({
 #### takeCompressedRegion()
 
 ```ts
-takeCompressedRegion(region: ScreenshotRegion, options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
+takeCompressedRegion(region: ScreenshotRegion, options?: ScreenshotOptions): Promise<ScreenshotResponse>
 ```
 
 Takes a compressed screenshot of a specific region
@@ -713,7 +708,7 @@ Takes a compressed screenshot of a specific region
 
 **Returns**:
 
-- `Promise<CompressedScreenshotResponse>` - Compressed screenshot data
+- `Promise<ScreenshotResponse>` - Compressed screenshot data
 
 **Example:**
 
@@ -761,7 +756,7 @@ const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
 #### takeRegion()
 
 ```ts
-takeRegion(region: ScreenshotRegion, showCursor?: boolean): Promise<RegionScreenshotResponse>
+takeRegion(region: ScreenshotRegion, showCursor?: boolean): Promise<ScreenshotResponse>
 ```
 
 Takes a screenshot of a specific region
@@ -774,7 +769,7 @@ Takes a screenshot of a specific region
 
 **Returns**:
 
-- `Promise<RegionScreenshotResponse>` - Screenshot data with base64 encoded image
+- `Promise<ScreenshotResponse>` - Screenshot data with base64 encoded image
 
 **Example:**
 
