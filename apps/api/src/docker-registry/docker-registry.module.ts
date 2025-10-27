@@ -12,9 +12,10 @@ import { HttpModule } from '@nestjs/axios'
 import { DockerRegistryProvider } from './providers/docker-registry.provider'
 import { DOCKER_REGISTRY_PROVIDER } from './providers/docker-registry.provider.interface'
 import { OrganizationModule } from '../organization/organization.module'
+import { EncryptionModule } from '../encryption/encryption.modules'
 
 @Module({
-  imports: [OrganizationModule, TypeOrmModule.forFeature([DockerRegistry]), HttpModule],
+  imports: [OrganizationModule, TypeOrmModule.forFeature([DockerRegistry]), HttpModule, EncryptionModule],
   controllers: [DockerRegistryController],
   providers: [
     {

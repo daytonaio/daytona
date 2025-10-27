@@ -33,7 +33,23 @@ export class EncryptionService {
     })
   }
 
-  public async decrypt(input: string): Promise<string> {
+  /**
+   * Decrypts the input string. If backwardsCompatible is true, it will return the input string
+   * as is if decryption fails (for handling unencrypted data).
+   */
+  public async decrypt(input: string, backwardsCompatible = false): Promise<string> {
+    if (backwardsCompatible) {
+      try {
+        return await this._decrypt(input)
+      } catch {
+        return input
+      }
+    }
+
+    return this._decrypt(input)
+  }
+
+  private async _decrypt(input: string): Promise<string> {
     const encryptedData = this.deserialize(input)
     const key = (await promisify(scrypt)(this.secret, this.salt, 32)) as Buffer
     const encrypted = Buffer.from(encryptedData.data, this.encoding)

@@ -16,6 +16,7 @@ import {
   IDockerRegistryProvider,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
+import { EncryptionService } from '../../encryption/encryption.service'
 
 @Injectable()
 @ApiOAuth2(['openid', 'profile', 'email'])
@@ -25,6 +26,7 @@ export class DockerRegistryService {
     private readonly dockerRegistryRepository: Repository<DockerRegistry>,
     @Inject(DOCKER_REGISTRY_PROVIDER)
     private readonly dockerRegistryProvider: IDockerRegistryProvider,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async create(
@@ -42,6 +44,9 @@ export class DockerRegistryService {
       }
     }
 
+    const encryptedPassword = await this.encryptionService.encrypt(createDto.password)
+    createDto.password = encryptedPassword
+
     const registry = this.dockerRegistryRepository.create({
       ...createDto,
       organizationId,
@@ -51,24 +56,26 @@ export class DockerRegistryService {
   }
 
   async findAll(organizationId: string): Promise<DockerRegistry[]> {
-    return this.dockerRegistryRepository.find({
+    const registries = await this.dockerRegistryRepository.find({
       where: { organizationId },
       order: {
         createdAt: 'DESC',
       },
     })
+
+    return registries.map((registry) => {
+      // Don't expose passwords in the returned objects
+      registry.password = '****'
+      return registry
+    })
   }
 
   async findOne(registryId: string): Promise<DockerRegistry | null> {
-    return this.dockerRegistryRepository.findOne({
+    const registry = await this.dockerRegistryRepository.findOne({
       where: { id: registryId },
     })
-  }
 
-  async findOneOrFail(registryId: string): Promise<DockerRegistry> {
-    return this.dockerRegistryRepository.findOneOrFail({
-      where: { id: registryId },
-    })
+    return this.withDecryptedPassword(registry)
   }
 
   async update(registryId: string, updateDto: UpdateDockerRegistryDto): Promise<DockerRegistry> {
@@ -84,11 +91,14 @@ export class DockerRegistryService {
     registry.url = updateDto.url
     registry.username = updateDto.username
     if (updateDto.password) {
-      registry.password = updateDto.password
+      registry.password = await this.encryptionService.encrypt(updateDto.password)
     }
     registry.project = updateDto.project
 
-    return this.dockerRegistryRepository.save(registry)
+    const updatedRegistry = await this.dockerRegistryRepository.save(registry)
+    updatedRegistry.password = '****'
+
+    return updatedRegistry
   }
 
   async remove(registryId: string): Promise<void> {
@@ -123,15 +133,19 @@ export class DockerRegistryService {
   }
 
   async getDefaultInternalRegistry(): Promise<DockerRegistry | null> {
-    return this.dockerRegistryRepository.findOne({
+    const registry = await this.dockerRegistryRepository.findOne({
       where: { isDefault: true, registryType: RegistryType.INTERNAL },
     })
+
+    return this.withDecryptedPassword(registry)
   }
 
   async getDefaultTransientRegistry(): Promise<DockerRegistry | null> {
-    return this.dockerRegistryRepository.findOne({
+    const registry = await this.dockerRegistryRepository.findOne({
       where: { isDefault: true, registryType: RegistryType.TRANSIENT },
     })
+
+    return this.withDecryptedPassword(registry)
   }
 
   async getAvailableBackupRegistry(preferredRegion: string): Promise<DockerRegistry | null> {
@@ -149,7 +163,11 @@ export class DockerRegistryService {
     // If we have registries in the preferred region, randomly select one
     if (preferredRegionRegistries.length > 0) {
       const randomIndex = Math.floor(Math.random() * preferredRegionRegistries.length)
-      return preferredRegionRegistries[randomIndex]
+      const registry = preferredRegionRegistries[randomIndex]
+      if (!registry) {
+        throw new Error('No backup registry available in the preferred region')
+      }
+      return this.withDecryptedPassword(registry)
     }
 
     // If no registry found in preferred region, try to find a fallback registry
@@ -157,7 +175,11 @@ export class DockerRegistryService {
 
     if (fallbackRegistries.length > 0) {
       const randomIndex = Math.floor(Math.random() * fallbackRegistries.length)
-      return fallbackRegistries[randomIndex]
+      const registry = fallbackRegistries[randomIndex]
+      if (!registry) {
+        throw new Error('No fallback backup registry available')
+      }
+      return this.withDecryptedPassword(registry)
     }
 
     // If no fallback registry found either, throw an error
@@ -180,7 +202,7 @@ export class DockerRegistryService {
     for (const registry of registries) {
       const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
       if (imageName.startsWith(strippedUrl)) {
-        return registry
+        return this.withDecryptedPassword(registry)
       }
     }
 
@@ -291,5 +313,14 @@ export class DockerRegistryService {
     }
 
     return registry.url.startsWith('http') ? registry.url : `https://${registry.url}`
+  }
+
+  private async withDecryptedPassword(registry: DockerRegistry | null): Promise<DockerRegistry | null> {
+    if (!registry) {
+      return null
+    }
+
+    registry.password = await this.encryptionService.decrypt(registry.password, true)
+    return registry
   }
 }
