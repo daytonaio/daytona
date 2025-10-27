@@ -41,7 +41,7 @@ func ProxyRequest(ctx *gin.Context) {
 		}
 	}
 
-	proxy.NewProxyRequestHandler(getProxyTarget)(ctx)
+	proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
 }
 
 func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {

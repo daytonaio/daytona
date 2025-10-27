@@ -22,5 +22,8 @@ header:
     - 'apps/docs/**'
     - 'libs/computer-use/**'
     - 'hack/**'
+    - 'libs/toolbox-api-client/**'
+    - 'libs/toolbox-api-client-python/**'
+    - 'libs/toolbox-api-client-python-async/**'
 
   comment: on-failure

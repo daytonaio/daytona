@@ -35,3 +35,7 @@ type Match struct {
 type SearchFilesResponse struct {
 	Files []string `json:"files" validate:"required"`
 } // @name SearchFilesResponse
+
+type FilesDownloadRequest struct {
+	Paths []string `json:"paths" validate:"required"`
+} // @name FilesDownloadRequest

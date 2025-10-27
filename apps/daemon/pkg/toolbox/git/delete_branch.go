@@ -11,6 +11,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// DeleteBranch godoc
+//
+//	@Summary		Delete a branch
+//	@Description	Delete a branch from the Git repository
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	GitDeleteBranchRequest	true	"Delete branch request"
+//	@Success		204
+//	@Router			/git/branches [delete]
+//
+//	@id				DeleteBranch
 func DeleteBranch(c *gin.Context) {
 	var req GitDeleteBranchRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

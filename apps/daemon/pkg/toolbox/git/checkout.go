@@ -11,6 +11,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CheckoutBranch godoc
+//
+//	@Summary		Checkout branch or commit
+//	@Description	Switch to a different branch or commit in the Git repository
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	GitCheckoutRequest	true	"Checkout request"
+//	@Success		200
+//	@Router			/git/checkout [post]
+//
+//	@id				CheckoutBranch
 func CheckoutBranch(c *gin.Context) {
 	var req GitCheckoutRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

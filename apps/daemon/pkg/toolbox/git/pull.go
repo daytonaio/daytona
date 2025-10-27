@@ -13,6 +13,18 @@ import (
 	go_git_http "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
+// PullChanges godoc
+//
+//	@Summary		Pull changes from remote
+//	@Description	Pull changes from the remote Git repository
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	GitRepoRequest	true	"Pull request"
+//	@Success		200
+//	@Router			/git/pull [post]
+//
+//	@id				PullChanges
 func PullChanges(c *gin.Context) {
 	var req GitRepoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

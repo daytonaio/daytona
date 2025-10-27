@@ -3,17 +3,17 @@
 
 from typing import List, Optional
 
-from daytona_api_client_async import (
+from daytona_toolbox_api_client_async import (
     GitAddRequest,
+    GitApi,
     GitBranchRequest,
     GitCheckoutRequest,
     GitCloneRequest,
     GitCommitRequest,
-    GitDeleteBranchRequest,
+    GitGitDeleteBranchRequest,
     GitRepoRequest,
     GitStatus,
     ListBranchResponse,
-    ToolboxApi,
 )
 
 from .._utils.errors import intercept_errors
@@ -48,17 +48,14 @@ class AsyncGit:
 
     def __init__(
         self,
-        sandbox_id: str,
-        toolbox_api: ToolboxApi,
+        api_client: GitApi,
     ):
         """Initializes a new Git handler instance.
 
         Args:
-            sandbox_id (str): The Sandbox ID.
-            toolbox_api (ToolboxApi): API client for Sandbox operations.
+            api_client (GitApi): API client for Sandbox Git operations.
         """
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to add files: ")
     async def add(self, path: str, files: List[str]) -> None:
@@ -83,9 +80,8 @@ class AsyncGit:
             ])
             ```
         """
-        await self._toolbox_api.git_add_files(
-            self._sandbox_id,
-            git_add_request=GitAddRequest(path=path, files=files),
+        await self._api_client.add_files(
+            request=GitAddRequest(path=path, files=files),
         )
 
     @intercept_errors(message_prefix="Failed to list branches: ")
@@ -105,8 +101,7 @@ class AsyncGit:
             print(f"Branches: {response.branches}")
             ```
         """
-        return await self._toolbox_api.git_list_branches(
-            self._sandbox_id,
+        return await self._api_client.list_branches(
             path=path,
         )
 
@@ -160,9 +155,8 @@ class AsyncGit:
             )
             ```
         """
-        await self._toolbox_api.git_clone_repository(
-            self._sandbox_id,
-            git_clone_request=GitCloneRequest(
+        await self._api_client.clone_repository(
+            request=GitCloneRequest(
                 url=url,
                 branch=branch,
                 path=path,
@@ -200,9 +194,8 @@ class AsyncGit:
             )
             ```
         """
-        response = await self._toolbox_api.git_commit_changes(
-            self._sandbox_id,
-            git_commit_request=GitCommitRequest(
+        response = await self._api_client.commit_changes(
+            request=GitCommitRequest(
                 path=path,
                 message=message,
                 author=author,
@@ -242,9 +235,8 @@ class AsyncGit:
             )
             ```
         """
-        await self._toolbox_api.git_push_changes(
-            self._sandbox_id,
-            git_repo_request=GitRepoRequest(
+        await self._api_client.push_changes(
+            request=GitRepoRequest(
                 path=path,
                 username=username,
                 password=password,
@@ -280,9 +272,8 @@ class AsyncGit:
             )
             ```
         """
-        await self._toolbox_api.git_pull_changes(
-            self._sandbox_id,
-            git_repo_request=GitRepoRequest(
+        await self._api_client.pull_changes(
+            request=GitRepoRequest(
                 path=path,
                 username=username,
                 password=password,
@@ -313,8 +304,7 @@ class AsyncGit:
             print(f"Commits behind: {status.behind}")
             ```
         """
-        return await self._toolbox_api.git_get_status(
-            self._sandbox_id,
+        return await self._api_client.get_status(
             path=path,
         )
 
@@ -333,9 +323,8 @@ class AsyncGit:
             await sandbox.git.checkout_branch("workspace/repo", "feature-branch")
             ```
         """
-        await self._toolbox_api.git_checkout_branch(
-            self._sandbox_id,
-            git_checkout_request=GitCheckoutRequest(
+        await self._api_client.checkout_branch(
+            request=GitCheckoutRequest(
                 path=path,
                 branch=branch,
             ),
@@ -356,9 +345,8 @@ class AsyncGit:
             await sandbox.git.create_branch("workspace/repo", "new-feature")
             ```
         """
-        await self._toolbox_api.git_create_branch(
-            self._sandbox_id,
-            git_branch_request=GitBranchRequest(
+        await self._api_client.create_branch(
+            request=GitBranchRequest(
                 path=path,
                 name=name,
             ),
@@ -379,9 +367,8 @@ class AsyncGit:
             await sandbox.git.delete_branch("workspace/repo", "old-feature")
             ```
         """
-        await self._toolbox_api.git_delete_branch(
-            self._sandbox_id,
-            git_delete_branch_request=GitDeleteBranchRequest(
+        await self._api_client.delete_branch(
+            request=GitGitDeleteBranchRequest(
                 path=path,
                 name=name,
             ),

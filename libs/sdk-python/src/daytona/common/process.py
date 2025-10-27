@@ -5,10 +5,10 @@ import warnings
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from daytona_api_client import ExecuteResponse as ClientExecuteResponse
-from daytona_api_client import SessionExecuteRequest as ApiSessionExecuteRequest
-from daytona_api_client import SessionExecuteResponse as ApiSessionExecuteResponse
-from daytona_api_client_async import SessionExecuteRequest as AsyncApiSessionExecuteRequest
+from daytona_toolbox_api_client import ExecuteResponse as ClientExecuteResponse
+from daytona_toolbox_api_client import SessionExecuteRequest as ApiSessionExecuteRequest
+from daytona_toolbox_api_client import SessionExecuteResponse as ApiSessionExecuteResponse
+from daytona_toolbox_api_client_async import SessionExecuteRequest as AsyncApiSessionExecuteRequest
 from pydantic import ConfigDict, model_validator
 
 from .charts import Chart
@@ -80,6 +80,7 @@ class ExecuteResponse(ClientExecuteResponse):
         artifacts (Optional[ExecutionArtifacts]): Artifacts from the command execution
     """
 
+    exit_code: int
     artifacts: Optional[ExecutionArtifacts] = None
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme

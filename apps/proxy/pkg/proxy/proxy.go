@@ -9,6 +9,7 @@ import (
 	"maps"
 	"net"
 	"net/http"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -136,7 +137,7 @@ func StartProxy(config *config.Config) error {
 			return
 		}
 
-		_, _, err := proxy.parseHost(ctx.Request.Host)
+		targetPort, _, err := proxy.parseHost(ctx.Request.Host)
 		// if the host is not valid, we don't proxy the request
 		if err != nil {
 			switch ctx.Request.Method {
@@ -151,11 +152,47 @@ func StartProxy(config *config.Config) error {
 				}
 			}
 
+			if strings.HasPrefix(ctx.Request.URL.Path, "/toolbox/") {
+				_, sandboxID, _, err := proxy.parseToolboxSubpath(ctx.Request.URL.Path)
+				if err != nil {
+					ctx.Error(common_errors.NewNotFoundError(errors.New("not found")))
+					return
+				}
+
+				prefix := fmt.Sprintf("/toolbox/%s", sandboxID)
+
+				getProxyTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
+					return proxy.GetProxyTarget(ctx, true)
+				}
+
+				modifyResponse := func(res *http.Response) error {
+					if res.StatusCode >= 300 && res.StatusCode < 400 {
+						if loc := res.Header.Get("Location"); !strings.HasPrefix(loc, prefix) {
+							res.Header.Set("Location", prefix+loc)
+						}
+					}
+					return nil
+				}
+
+				common_proxy.NewProxyRequestHandler(getProxyTarget, modifyResponse)(ctx)
+				return
+			}
+
 			ctx.Error(common_errors.NewNotFoundError(errors.New("not found")))
 			return
 		}
 
-		common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget)(ctx)
+		// If toolbox only mode is enabled, only allow requests to the toolbox port
+		if targetPort != TOOLBOX_PORT && proxy.config.ToolboxOnlyMode {
+			ctx.Error(common_errors.NewNotFoundError(errors.New("not found")))
+			return
+		}
+
+		getProxyTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
+			return proxy.GetProxyTarget(ctx, false)
+		}
+
+		common_proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
 	})
 
 	httpServer := &http.Server{

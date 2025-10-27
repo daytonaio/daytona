@@ -36,7 +36,7 @@ var proxyTransport = &http.Transport{
 //	@Failure		409			{object}	string	"Sandbox container conflict"
 //	@Failure		500			{object}	string	"Internal server error"
 //	@Router			/workspaces/{workspaceId}/{projectId}/toolbox/{path} [get]
-func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.URL, extraHeaders map[string]string, err error)) gin.HandlerFunc {
+func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.URL, extraHeaders map[string]string, err error), modifyResponse func(*http.Response) error) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		target, extraHeaders, err := getProxyTarget(ctx)
 		if err != nil {
@@ -59,7 +59,8 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 					req.Header.Add(key, value)
 				}
 			},
-			Transport: proxyTransport,
+			Transport:      proxyTransport,
+			ModifyResponse: modifyResponse,
 		}
 
 		reverseProxy.ServeHTTP(ctx.Writer, ctx.Request)

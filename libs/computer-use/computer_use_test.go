@@ -314,7 +314,7 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	})
 
 	t.Run("MoveMouse", func(t *testing.T) {
-		req := &computeruse.MoveMouseRequest{
+		req := &computeruse.MouseMoveRequest{
 			Position: computeruse.Position{
 				X: 500,
 				Y: 300,
@@ -329,7 +329,7 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	})
 
 	t.Run("Click", func(t *testing.T) {
-		req := &computeruse.ClickRequest{
+		req := &computeruse.MouseClickRequest{
 			Position: computeruse.Position{
 				X: 400,
 				Y: 200,
@@ -359,7 +359,7 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	})
 
 	t.Run("Drag", func(t *testing.T) {
-		req := &computeruse.DragRequest{
+		req := &computeruse.MouseDragRequest{
 			StartX: 100,
 			StartY: 100,
 			EndX:   200,
@@ -375,7 +375,7 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	})
 
 	t.Run("Scroll", func(t *testing.T) {
-		req := &computeruse.ScrollRequest{
+		req := &computeruse.MouseScrollRequest{
 			Position: computeruse.Position{
 				X: 300,
 				Y: 300,
@@ -397,7 +397,7 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 // testKeyboardControlMethods tests all keyboard control methods
 func testKeyboardControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	t.Run("TypeText", func(t *testing.T) {
-		req := &computeruse.TypeTextRequest{
+		req := &computeruse.KeyboardTypeRequest{
 			Text:  "Hello, World!",
 			Delay: 10,
 		}
@@ -412,7 +412,7 @@ func testKeyboardControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	})
 
 	t.Run("PressKey", func(t *testing.T) {
-		req := &computeruse.PressKeyRequest{
+		req := &computeruse.KeyboardPressRequest{
 			Key:       "a",
 			Modifiers: []string{},
 		}
@@ -427,7 +427,7 @@ func testKeyboardControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	})
 
 	t.Run("PressHotkey", func(t *testing.T) {
-		req := &computeruse.PressHotkeyRequest{
+		req := &computeruse.KeyboardHotkeyRequest{
 			Keys: "ctrl+c",
 		}
 
@@ -510,14 +510,14 @@ func TestPluginIntegration(t *testing.T) {
 		assert.NotNil(t, screenshot)
 
 		// 5. Move mouse and click
-		_, err = client.plugin.MoveMouse(&computeruse.MoveMouseRequest{Position: computeruse.Position{X: 100, Y: 100}})
+		_, err = client.plugin.MoveMouse(&computeruse.MouseMoveRequest{Position: computeruse.Position{X: 100, Y: 100}})
 		assert.NoError(t, err)
 
-		_, err = client.plugin.Click(&computeruse.ClickRequest{Position: computeruse.Position{X: 200, Y: 200}, Button: "left"})
+		_, err = client.plugin.Click(&computeruse.MouseClickRequest{Position: computeruse.Position{X: 200, Y: 200}, Button: "left"})
 		assert.NoError(t, err)
 
 		// 6. Type some text
-		_, err = client.plugin.TypeText(&computeruse.TypeTextRequest{Text: "Test"})
+		_, err = client.plugin.TypeText(&computeruse.KeyboardTypeRequest{Text: "Test"})
 		assert.NoError(t, err)
 
 		// 7. Get display info
@@ -564,7 +564,7 @@ func TestErrorHandling(t *testing.T) {
 
 	t.Run("InvalidHotkey", func(t *testing.T) {
 		// Test invalid hotkey format
-		_, err := client.plugin.PressHotkey(&computeruse.PressHotkeyRequest{Keys: "invalid"})
+		_, err := client.plugin.PressHotkey(&computeruse.KeyboardHotkeyRequest{Keys: "invalid"})
 		assert.Error(t, err)
 	})
 
@@ -643,7 +643,7 @@ func TestConcurrentAccess(t *testing.T) {
 				x := 100 + (id * 50)
 				y := 100 + (id * 50)
 
-				_, err := client.plugin.MoveMouse(&computeruse.MoveMouseRequest{Position: computeruse.Position{X: x, Y: y}})
+				_, err := client.plugin.MoveMouse(&computeruse.MouseMoveRequest{Position: computeruse.Position{X: x, Y: y}})
 				if err != nil {
 					t.Errorf("Goroutine %d: MoveMouse failed: %v", id, err)
 					return
@@ -697,7 +697,7 @@ func TestPerformance(t *testing.T) {
 			x := 100 + (i * 10)
 			y := 100 + (i * 10)
 
-			_, err := client.plugin.MoveMouse(&computeruse.MoveMouseRequest{Position: computeruse.Position{X: x, Y: y}})
+			_, err := client.plugin.MoveMouse(&computeruse.MouseMoveRequest{Position: computeruse.Position{X: x, Y: y}})
 			assert.NoError(t, err)
 		}
 

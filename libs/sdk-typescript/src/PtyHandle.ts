@@ -6,7 +6,7 @@
 import WebSocket from 'isomorphic-ws'
 import { PtyResult } from './types/Pty'
 import { DaytonaError } from './errors/DaytonaError'
-import { PtySessionInfo } from '@daytonaio/api-client'
+import { PtySessionInfo } from '@daytonaio/toolbox-api-client'
 
 /**
  * PTY session handle for managing a single PTY session.
