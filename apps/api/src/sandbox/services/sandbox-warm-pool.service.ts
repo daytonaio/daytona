@@ -29,6 +29,7 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { isValidUuid } from '../../common/utils/uuid'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 export type FetchWarmPoolSandboxParams = {
   snapshot: string
@@ -149,7 +150,7 @@ export class SandboxWarmPoolService {
   }
 
   //  todo: make frequency configurable or more efficient
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'warm-pool-check' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: `${CRON_SCOPES.WARM_POOLS}:warm-pool-check` })
   @LogExecution('warm-pool-check')
   @WithInstrumentation()
   async warmPoolCheck(): Promise<void> {
