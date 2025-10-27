@@ -14,16 +14,16 @@ Provides file system operations within a Sandbox.
 
 ```ts
 new FileSystem(
-   sandboxId: string, 
    clientConfig: Configuration, 
-   toolboxApi: ToolboxApi): FileSystem
+   apiClient: FileSystemApi, 
+   ensureToolboxUrl: () => Promise<void>): FileSystem
 ```
 
 **Parameters**:
 
-- `sandboxId` _string_
 - `clientConfig` _Configuration_
-- `toolboxApi` _ToolboxApi_
+- `apiClient` _FileSystemApi_
+- `ensureToolboxUrl` _\(\) =\> Promise\<void\>_
 
 
 **Returns**:

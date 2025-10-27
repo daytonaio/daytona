@@ -6381,7 +6381,11 @@ paths:
           style: simple
       responses:
         '200':
-          description: ''
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: User access status to the sandbox
       security:
         - bearer: []
         - oauth2:
@@ -7239,6 +7243,7 @@ components:
         linkedAccountsEnabled: true
         version: 0.0.1
         oidc: ''
+        proxyToolboxUrl: https://proxy.example.com/toolbox
         posthog: ''
         maxAutoArchiveInterval: 43200
         pylonAppId: pylon-app-123
@@ -7285,6 +7290,10 @@ components:
           description: Proxy template URL
           example: 'https://{{PORT}}-{{sandboxId}}.proxy.example.com'
           type: string
+        proxyToolboxUrl:
+          description: Toolbox template URL
+          example: https://proxy.example.com/toolbox
+          type: string
         defaultSnapshot:
           description: Default snapshot for sandboxes
           example: ubuntu:22.04
@@ -7327,6 +7336,7 @@ components:
         - maxAutoArchiveInterval
         - oidc
         - proxyTemplateUrl
+        - proxyToolboxUrl
         - version
       type: object
     CreateApiKey:
