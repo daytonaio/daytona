@@ -19,6 +19,8 @@ RUN yarn nx build proxy --configuration=production --nxBail=true
 
 FROM alpine:3.18 AS proxy
 
+RUN apk add --no-cache curl
+
 WORKDIR /usr/local/bin
 
 COPY --from=build /daytona/dist/apps/proxy daytona-proxy
