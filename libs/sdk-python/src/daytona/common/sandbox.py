@@ -4,6 +4,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
+TOOLBOX_PORT = 2280
+
 
 @dataclass
 class Resources:

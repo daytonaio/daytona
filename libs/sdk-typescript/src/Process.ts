@@ -3,17 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Configuration } from '@daytonaio/api-client'
 import {
+  ProcessApi,
   Command,
-  Configuration,
   Session,
   SessionExecuteRequest,
   SessionExecuteResponse as ApiSessionExecuteResponse,
-  PortPreviewUrl,
-  ToolboxApi,
-  PtySessionInfo,
   PtyCreateRequest,
-} from '@daytonaio/api-client'
+  PtySessionInfo,
+} from '@daytonaio/toolbox-api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
 import { ArtifactParser } from './utils/ArtifactParser'
@@ -61,11 +60,11 @@ export interface SessionCommandLogsResponse {
  */
 export class Process {
   constructor(
-    private readonly sandboxId: string,
     private readonly clientConfig: Configuration,
     private readonly codeToolbox: SandboxCodeToolbox,
-    private readonly toolboxApi: ToolboxApi,
-    private readonly getPreviewLink: (port: number) => Promise<PortPreviewUrl>,
+    private readonly apiClient: ProcessApi,
+    private readonly getPreviewToken: () => Promise<string>,
+    private readonly ensureToolboxUrl: () => Promise<void>,
   ) {}
 
   /**
@@ -115,7 +114,7 @@ export class Process {
 
     command = `sh -c "${command}"`
 
-    const response = await this.toolboxApi.executeCommand(this.sandboxId, {
+    const response = await this.apiClient.executeCommand({
       command,
       timeout,
       cwd: cwd,
@@ -127,6 +126,7 @@ export class Process {
     // Return enhanced response with parsed artifacts
     return {
       ...response.data,
+      exitCode: response.data.code,
       result: artifacts.stdout,
       artifacts,
     }
@@ -214,7 +214,7 @@ export class Process {
    * await process.deleteSession(sessionId);
    */
   public async createSession(sessionId: string): Promise<void> {
-    await this.toolboxApi.createSession(this.sandboxId, {
+    await this.apiClient.createSession({
       sessionId,
     })
   }
@@ -234,7 +234,7 @@ export class Process {
    * });
    */
   public async getSession(sessionId: string): Promise<Session> {
-    const response = await this.toolboxApi.getSession(this.sandboxId, sessionId)
+    const response = await this.apiClient.getSession(sessionId)
     return response.data
   }
 
@@ -255,7 +255,7 @@ export class Process {
    * }
    */
   public async getSessionCommand(sessionId: string, commandId: string): Promise<Command> {
-    const response = await this.toolboxApi.getSessionCommand(this.sandboxId, sessionId, commandId)
+    const response = await this.apiClient.getSessionCommand(sessionId, commandId)
     return response.data
   }
 
@@ -295,11 +295,9 @@ export class Process {
     req: SessionExecuteRequest,
     timeout?: number,
   ): Promise<SessionExecuteResponse> {
-    const response = await this.toolboxApi.executeSessionCommand(
-      this.sandboxId,
+    const response = await this.apiClient.sessionExecuteCommand(
       sessionId,
       req,
-      undefined,
       timeout ? { timeout: timeout * 1000 } : {},
     )
 
@@ -360,7 +358,7 @@ export class Process {
     onStderr?: (chunk: string) => void,
   ): Promise<SessionCommandLogsResponse | void> {
     if (!onStdout && !onStderr) {
-      const response = await this.toolboxApi.getSessionCommandLogs(this.sandboxId, sessionId, commandId)
+      const response = await this.apiClient.getSessionCommandLogs(sessionId, commandId)
 
       // Parse the response data if it's available
       if (response.data) {
@@ -380,10 +378,10 @@ export class Process {
       }
     }
 
-    const previewLink = await this.getPreviewLink(2280)
-    const url = `${previewLink.url.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
+    await this.ensureToolboxUrl()
+    const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
 
-    const ws = createWebSocket(url, previewLink.token, this.clientConfig.baseOptions?.headers || {})
+    const ws = await createWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
 
     await stdDemuxStream(ws, onStdout, onStderr)
   }
@@ -403,7 +401,7 @@ export class Process {
    * });
    */
   public async listSessions(): Promise<Session[]> {
-    const response = await this.toolboxApi.listSessions(this.sandboxId)
+    const response = await this.apiClient.listSessions()
     return response.data
   }
 
@@ -418,7 +416,7 @@ export class Process {
    * await process.deleteSession('my-session');
    */
   public async deleteSession(sessionId: string): Promise<void> {
-    await this.toolboxApi.deleteSession(this.sandboxId, sessionId)
+    await this.apiClient.deleteSession(sessionId)
   }
 
   /**
@@ -470,7 +468,7 @@ export class Process {
       lazyStart: true,
     }
 
-    const response = await this.toolboxApi.createPTYSession(this.sandboxId, request)
+    const response = await this.apiClient.createPtySession(request)
 
     return await this.connectPty(response.data.sessionId, options)
   }
@@ -512,10 +510,10 @@ export class Process {
    */
   public async connectPty(sessionId: string, options?: PtyConnectOptions): Promise<PtyHandle> {
     // Get preview link for WebSocket connection
-    const previewLink = await this.getPreviewLink(2280)
-    const url = `${previewLink.url.replace(/^http/, 'ws')}/process/pty/${sessionId}/connect`
+    await this.ensureToolboxUrl()
+    const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/pty/${sessionId}/connect`
 
-    const ws = createWebSocket(url, previewLink.token, this.clientConfig.baseOptions?.headers || {})
+    const ws = await createWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
 
     const handle = new PtyHandle(
       ws,
@@ -549,7 +547,7 @@ export class Process {
    * }
    */
   public async listPtySessions(): Promise<PtySessionInfo[]> {
-    return (await this.toolboxApi.listPTYSessions(this.sandboxId)).data.sessions
+    return (await this.apiClient.listPtySessions()).data.sessions
   }
 
   /**
@@ -577,7 +575,7 @@ export class Process {
    * }
    */
   public async getPtySessionInfo(sessionId: string): Promise<PtySessionInfo> {
-    return (await this.toolboxApi.getPTYSession(this.sandboxId, sessionId)).data
+    return (await this.apiClient.getPtySession(sessionId)).data
   }
 
   /**
@@ -606,7 +604,7 @@ export class Process {
    * }
    */
   public async killPtySession(sessionId: string): Promise<void> {
-    await this.toolboxApi.deletePTYSession(this.sandboxId, sessionId)
+    await this.apiClient.deletePtySession(sessionId)
   }
 
   /**
@@ -635,7 +633,7 @@ export class Process {
    * await ptyHandle.resize(150, 40); // cols, rows
    */
   public async resizePtySession(sessionId: string, cols: number, rows: number): Promise<PtySessionInfo> {
-    return (await this.toolboxApi.resizePTYSession(this.sandboxId, sessionId, { cols, rows })).data
+    return (await this.apiClient.resizePtySession(sessionId, { cols, rows })).data
   }
 }
 
@@ -746,18 +744,18 @@ function findSubarray(haystack: Uint8Array, needle: Uint8Array): number {
   return -1
 }
 
-function createWebSocket(url: string, token: string, headers: Record<string, string>): WebSocket {
+async function createWebSocket(
+  url: string,
+  headers: Record<string, string>,
+  getPreviewToken: () => Promise<string>,
+): Promise<WebSocket> {
   if (RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.DENO || RUNTIME === Runtime.SERVERLESS) {
+    const previewToken = await getPreviewToken()
     return new WebSocket(
-      url + '&DAYTONA_SANDBOX_AUTH_KEY=' + token,
+      url + '&DAYTONA_SANDBOX_AUTH_KEY=' + previewToken,
       `X-Daytona-SDK-Version~${headers['X-Daytona-SDK-Version']}`,
     )
   } else {
-    return new WebSocket(url, {
-      headers: {
-        ...headers,
-        'X-Daytona-Preview-Token': token,
-      },
-    })
+    return new WebSocket(url, { headers })
   }
 }

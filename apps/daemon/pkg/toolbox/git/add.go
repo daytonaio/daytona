@@ -11,6 +11,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AddFiles godoc
+//
+//	@Summary		Add files to Git staging
+//	@Description	Add files to the Git staging area
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	GitAddRequest	true	"Add files request"
+//	@Success		200
+//	@Router			/git/add [post]
+//
+//	@id				AddFiles
 func AddFiles(c *gin.Context) {
 	var req GitAddRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

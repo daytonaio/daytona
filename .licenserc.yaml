@@ -21,5 +21,6 @@ header:
     - 'examples/**'
     - 'apps/docs/**'
     - 'hack/**'
+    - 'apps/daemon/pkg/toolbox/docs/docs.go'
 
   comment: on-failure

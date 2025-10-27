@@ -7,7 +7,7 @@ import json
 from typing import Awaitable, Callable, Optional, Union
 
 import websockets
-from daytona_api_client_async import PtySessionInfo
+from daytona_toolbox_api_client_async import PtySessionInfo
 from websockets.asyncio.client import Connection
 
 from .._utils.errors import DaytonaError

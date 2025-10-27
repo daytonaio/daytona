@@ -4,19 +4,19 @@
 import io
 import os
 from contextlib import ExitStack
-from typing import List, Union, overload
+from typing import Awaitable, Callable, List, Union, overload
 
 import aiofiles
 import aiofiles.os
 import httpx
-from daytona_api_client_async import (
-    DownloadFiles,
+from daytona_toolbox_api_client_async import (
     FileInfo,
+    FilesDownloadRequest,
+    FileSystemApi,
     Match,
     ReplaceRequest,
     ReplaceResult,
     SearchFilesResponse,
-    ToolboxApi,
 )
 from multipart import MultipartSegment, PushMultipartParser, parse_options_header
 
@@ -33,17 +33,18 @@ class AsyncFileSystem:
 
     def __init__(
         self,
-        sandbox_id: str,
-        toolbox_api: ToolboxApi,
+        api_client: FileSystemApi,
+        ensure_toolbox_url: Callable[[], Awaitable[None]],
     ):
         """Initializes a new FileSystem instance.
 
         Args:
-            sandbox_id (str): The Sandbox ID.
-            toolbox_api (ToolboxApi): API client for Sandbox operations.
+            api_client (FileSystemApi): API client for Sandbox file system operations.
+            ensure_toolbox_url (Callable[[], Awaitable[None]]): Ensures the toolbox API URL is initialized.
+            Must be called before invoking any private methods on the API client.
         """
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+        self._api_client = api_client
+        self._ensure_toolbox_url = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to create folder: ")
     async def create_folder(self, path: str, mode: str) -> None:
@@ -65,8 +66,7 @@ class AsyncFileSystem:
             ```
         """
         print(f"Creating folder {path} with mode {mode}")
-        await self._toolbox_api.create_folder(
-            self._sandbox_id,
+        await self._api_client.create_folder(
             path=path,
             mode=mode,
         )
@@ -85,7 +85,7 @@ class AsyncFileSystem:
             await sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        await self._toolbox_api.delete_file(self._sandbox_id, path=path, recursive=recursive)
+        await self._api_client.delete_file(path=path, recursive=recursive)
 
     @overload
     async def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:
@@ -202,11 +202,10 @@ class AsyncFileSystem:
         for f in files:
             src_file_meta_dict[f.source] = FileMeta(dst=f.destination)
 
+        await self._ensure_toolbox_url()
         # pylint: disable=protected-access
-        method, url, headers, body, *_ = self._toolbox_api._download_files_serialize(
-            self._sandbox_id,
-            download_files=DownloadFiles(paths=list(src_file_meta_dict.keys())),
-            x_daytona_organization_id=None,
+        method, url, headers, body, *_ = self._api_client._download_files_serialize(
+            download_files=FilesDownloadRequest(paths=list(src_file_meta_dict.keys())),
             _request_auth=None,
             _content_type=None,
             _headers=None,
@@ -335,8 +334,7 @@ class AsyncFileSystem:
                 print(f"{match.file}:{match.line}: {match.content.strip()}")
             ```
         """
-        return await self._toolbox_api.find_in_files(
-            self._sandbox_id,
+        return await self._api_client.find_in_files(
             path=path,
             pattern=pattern,
         )
@@ -375,7 +373,7 @@ class AsyncFileSystem:
                 print("Path is a directory")
             ```
         """
-        return await self._toolbox_api.get_file_info(self._sandbox_id, path=path)
+        return await self._api_client.get_file_info(path=path)
 
     @intercept_errors(message_prefix="Failed to list files: ")
     async def list_files(self, path: str) -> List[FileInfo]:
@@ -404,7 +402,7 @@ class AsyncFileSystem:
             print("Subdirectories:", ", ".join(d.name for d in dirs))
             ```
         """
-        return await self._toolbox_api.list_files(self._sandbox_id, path=path)
+        return await self._api_client.list_files(path=path)
 
     @intercept_errors(message_prefix="Failed to move files: ")
     async def move_files(self, source: str, destination: str) -> None:
@@ -437,8 +435,7 @@ class AsyncFileSystem:
             )
             ```
         """
-        await self._toolbox_api.move_file(
-            self._sandbox_id,
+        await self._api_client.move_file(
             source=source,
             destination=destination,
         )
@@ -482,7 +479,7 @@ class AsyncFileSystem:
 
         replace_request = ReplaceRequest(files=files, new_value=new_value, pattern=pattern)
 
-        return await self._toolbox_api.replace_in_files(self._sandbox_id, replace_request=replace_request)
+        return await self._api_client.replace_in_files(request=replace_request)
 
     @intercept_errors(message_prefix="Failed to search files: ")
     async def search_files(self, path: str, pattern: str) -> SearchFilesResponse:
@@ -511,8 +508,7 @@ class AsyncFileSystem:
             print(f"Found {len(result.files)} test files")
             ```
         """
-        return await self._toolbox_api.search_files(
-            self._sandbox_id,
+        return await self._api_client.search_files(
             path=path,
             pattern=pattern,
         )
@@ -546,8 +542,7 @@ class AsyncFileSystem:
             )
             ```
         """
-        await self._toolbox_api.set_file_permissions(
-            self._sandbox_id,
+        await self._api_client.set_file_permissions(
             path=path,
             mode=mode,
             owner=owner,
@@ -652,10 +647,9 @@ class AsyncFileSystem:
                 # HTTPX will stream this file object in 64 KiB chunks :contentReference[oaicite:1]{index=1}
                 file_fields[f"files[{i}].file"] = (filename, stream)
 
+            await self._ensure_toolbox_url()
             # pylint: disable=protected-access
-            _, url, headers, *_ = self._toolbox_api._upload_files_serialize(
-                self._sandbox_id, None, None, None, None, None
-            )
+            _, url, headers, *_ = self._api_client._upload_files_serialize(None, None, None, None)
             # strip any prior Content-Type so HTTPX can set its own multipart header
             headers.pop("Content-Type", None)
 
