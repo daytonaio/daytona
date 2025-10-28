@@ -8,6 +8,8 @@ import { SandboxService } from '../services/sandbox.service'
 import { OrganizationAuthContext, BaseAuthContext } from '../../common/interfaces/auth-context.interface'
 import { isRunnerContext, RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
+import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
 
 @Injectable()
 export class SandboxAccessGuard implements CanActivate {
@@ -23,30 +25,31 @@ export class SandboxAccessGuard implements CanActivate {
     const authContext: BaseAuthContext = request.user
 
     try {
-      // Check if this is a runner making the request
-      if (isRunnerContext(authContext)) {
-        // For runner authentication, verify that the runner ID matches the sandbox's runner ID
-        const runnerContext = authContext as RunnerContext
-        const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxIdOrName)
-        if (sandboxRunnerId !== runnerContext.runnerId) {
-          throw new ForbiddenException('Runner ID does not match sandbox runner ID')
+      switch (true) {
+        case isRunnerContext(authContext): {
+          // For runner authentication, verify that the runner ID matches the sandbox's runner ID
+          const runnerContext = authContext as RunnerContext
+          const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxIdOrName)
+          if (sandboxRunnerId !== runnerContext.runnerId) {
+            throw new ForbiddenException('Runner ID does not match sandbox runner ID')
+          }
+          break
         }
-      } else {
-        // For user/organization authentication, check organization access
-        const orgAuthContext = authContext as OrganizationAuthContext
-        const sandboxOrganizationId = await this.sandboxService.getOrganizationId(
-          sandboxIdOrName,
-          orgAuthContext.organizationId,
-        )
-        if (
-          orgAuthContext.role !== 'ssh-gateway' &&
-          orgAuthContext.role !== SystemRole.ADMIN &&
-          sandboxOrganizationId !== orgAuthContext.organizationId
-        ) {
-          throw new ForbiddenException('Request organization ID does not match resource organization ID')
+        case isProxyContext(authContext):
+        case isSshGatewayContext(authContext):
+          return true
+        default: {
+          // For user/organization authentication, check organization access
+          const orgAuthContext = authContext as OrganizationAuthContext
+          const sandboxOrganizationId = await this.sandboxService.getOrganizationId(
+            sandboxIdOrName,
+            orgAuthContext.organizationId,
+          )
+          if (orgAuthContext.role !== SystemRole.ADMIN && sandboxOrganizationId !== orgAuthContext.organizationId) {
+            throw new ForbiddenException('Request organization ID does not match resource organization ID')
+          }
         }
       }
-
       return true
     } catch (error) {
       if (!(error instanceof NotFoundException)) {

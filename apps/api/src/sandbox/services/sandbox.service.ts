@@ -62,7 +62,7 @@ import {
   ARCHIVE_SANDBOXES_MESSAGE,
   PER_SANDBOX_LIMIT_MESSAGE,
 } from '../../common/constants/error-messages'
-import { customAlphabet as customNanoid, urlAlphabet } from 'nanoid'
+import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
@@ -1004,6 +1004,7 @@ export class SandboxService {
 
     sandbox.pending = true
     sandbox.desiredState = SandboxDesiredState.STARTED
+    sandbox.authToken = nanoid(32).toLocaleLowerCase()
 
     try {
       await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
@@ -1062,6 +1063,19 @@ export class SandboxService {
     await this.sandboxRepository.save(sandbox)
 
     return sandbox
+  }
+
+  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    sandbox.lastActivityAt = lastActivityAt
+    await this.sandboxRepository.save(sandbox)
   }
 
   private getValidatedOrDefaultRegion(region?: string): string {
