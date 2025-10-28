@@ -39,6 +39,7 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -47,8 +48,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   private readonly logger = new Logger(SandboxManager.name)
 
   constructor(
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     private readonly runnerService: RunnerService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly sandboxStartAction: SandboxStartAction,
@@ -124,7 +124,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 } else {
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
-                await this.sandboxRepository.save(sandbox)
+                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
                 this.syncInstanceState(sandbox.id)
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
@@ -176,7 +176,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           try {
             sandbox.desiredState = SandboxDesiredState.ARCHIVED
-            await this.sandboxRepository.save(sandbox)
+            await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
             this.syncInstanceState(sandbox.id)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
@@ -236,7 +236,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               try {
                 sandbox.pending = true
                 sandbox.desiredState = SandboxDesiredState.DESTROYED
-                await this.sandboxRepository.save(sandbox)
+                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
                 this.syncInstanceState(sandbox.id)
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)

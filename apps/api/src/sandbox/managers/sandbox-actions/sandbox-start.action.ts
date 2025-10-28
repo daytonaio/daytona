@@ -242,12 +242,10 @@ export class SandboxStartAction extends SandboxAction {
         sandbox.prevRunnerId = originalRunnerId
         sandbox.runnerId = null
 
-        const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-          id: sandbox.id,
+        await this.sandboxRepository.update(sandbox.id, {
+          prevRunnerId: originalRunnerId,
+          runnerId: null,
         })
-        sandboxToUpdate.prevRunnerId = originalRunnerId
-        sandboxToUpdate.runnerId = null
-        await this.sandboxRepository.save(sandboxToUpdate)
       }
 
       // If the sandbox is on a runner and its backupState is COMPLETED

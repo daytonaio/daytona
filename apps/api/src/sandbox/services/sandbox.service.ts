@@ -65,7 +65,7 @@ import {
 import { customAlphabet as customNanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
-import { SandboxRepository } from './repositories/sandbox.repository'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -223,7 +223,7 @@ export class SandboxService {
 
     sandbox.state = SandboxState.ARCHIVING
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false })
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
     this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
     return sandbox
@@ -263,6 +263,7 @@ export class SandboxService {
     })
 
     sandbox.runnerId = runner.id
+    sandbox.pending = true
 
     await this.sandboxRepository.insert(sandbox)
     return sandbox
@@ -428,6 +429,7 @@ export class SandboxService {
       }
 
       sandbox.runnerId = runner.id
+      sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
       return SandboxDto.fromSandbox(sandbox)
@@ -627,6 +629,8 @@ export class SandboxService {
         }
         sandbox.state = SandboxState.PENDING_BUILD
       }
+
+      sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
       return SandboxDto.fromSandbox(sandbox)
@@ -950,7 +954,7 @@ export class SandboxService {
     sandbox.desiredState = SandboxDesiredState.DESTROYED
     sandbox.backupState = BackupState.NONE
     sandbox.name = 'DESTROYED_' + sandbox.name + '_' + Date.now()
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false })
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     return sandbox
@@ -1004,7 +1008,7 @@ export class SandboxService {
     sandbox.desiredState = SandboxDesiredState.STARTED
 
     try {
-      await this.sandboxRepository.saveWhere(sandbox, { pending: false })
+      await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -1043,7 +1047,7 @@ export class SandboxService {
       sandbox.desiredState = SandboxDesiredState.STOPPED
     }
 
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false })
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
     if (sandbox.autoDeleteInterval === 0) {
       this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
@@ -1215,7 +1219,7 @@ export class SandboxService {
     if (desiredState) {
       sandbox.desiredState = desiredState
     }
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false })
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
