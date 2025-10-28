@@ -49,7 +49,7 @@ type CreateWorkspace struct {
 	// Array of volumes to attach to the workspace
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the workspace
-	BuildInfo            *CreateBuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -553,7 +553,7 @@ func (o *CreateWorkspace) SetBuildInfo(v CreateBuildInfo) {
 }
 
 func (o CreateWorkspace) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -685,3 +685,5 @@ func (v *NullableCreateWorkspace) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

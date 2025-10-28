@@ -57,7 +57,7 @@ type CreateSandbox struct {
 	// Array of volumes to attach to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the sandbox
-	BuildInfo            *CreateBuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -689,7 +689,7 @@ func (o *CreateSandbox) SetBuildInfo(v CreateBuildInfo) {
 }
 
 func (o CreateSandbox) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -837,3 +837,5 @@ func (v *NullableCreateSandbox) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

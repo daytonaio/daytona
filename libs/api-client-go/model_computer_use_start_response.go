@@ -24,7 +24,7 @@ type ComputerUseStartResponse struct {
 	// A message indicating the result of starting computer use processes
 	Message string `json:"message"`
 	// Status information about all VNC desktop processes after starting
-	Status               map[string]interface{} `json:"status"`
+	Status map[string]interface{} `json:"status"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -98,7 +98,7 @@ func (o *ComputerUseStartResponse) SetStatus(v map[string]interface{}) {
 }
 
 func (o ComputerUseStartResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -131,10 +131,10 @@ func (o *ComputerUseStartResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -196,3 +196,5 @@ func (v *NullableComputerUseStartResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

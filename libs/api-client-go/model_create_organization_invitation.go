@@ -13,8 +13,8 @@ package apiclient
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
+	"fmt"
 )
 
 // checks if the CreateOrganizationInvitation type satisfies the MappedNullable interface at compile time
@@ -29,7 +29,7 @@ type CreateOrganizationInvitation struct {
 	// Array of assigned role IDs for the invitee
 	AssignedRoleIds []string `json:"assignedRoleIds"`
 	// Expiration date of the invitation
-	ExpiresAt            *time.Time `json:"expiresAt,omitempty"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -162,7 +162,7 @@ func (o *CreateOrganizationInvitation) SetExpiresAt(v time.Time) {
 }
 
 func (o CreateOrganizationInvitation) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -200,10 +200,10 @@ func (o *CreateOrganizationInvitation) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -267,3 +267,5 @@ func (v *NullableCreateOrganizationInvitation) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

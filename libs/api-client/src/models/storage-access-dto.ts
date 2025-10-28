@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,46 +12,49 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface StorageAccessDto
  */
 export interface StorageAccessDto {
-  /**
-   * Access key for storage authentication
-   * @type {string}
-   * @memberof StorageAccessDto
-   */
-  accessKey: string
-  /**
-   * Secret key for storage authentication
-   * @type {string}
-   * @memberof StorageAccessDto
-   */
-  secret: string
-  /**
-   * Session token for storage authentication
-   * @type {string}
-   * @memberof StorageAccessDto
-   */
-  sessionToken: string
-  /**
-   * Storage URL
-   * @type {string}
-   * @memberof StorageAccessDto
-   */
-  storageUrl: string
-  /**
-   * Organization ID
-   * @type {string}
-   * @memberof StorageAccessDto
-   */
-  organizationId: string
-  /**
-   * S3 bucket name
-   * @type {string}
-   * @memberof StorageAccessDto
-   */
-  bucket: string
+    /**
+     * Access key for storage authentication
+     * @type {string}
+     * @memberof StorageAccessDto
+     */
+    'accessKey': string;
+    /**
+     * Secret key for storage authentication
+     * @type {string}
+     * @memberof StorageAccessDto
+     */
+    'secret': string;
+    /**
+     * Session token for storage authentication
+     * @type {string}
+     * @memberof StorageAccessDto
+     */
+    'sessionToken': string;
+    /**
+     * Storage URL
+     * @type {string}
+     * @memberof StorageAccessDto
+     */
+    'storageUrl': string;
+    /**
+     * Organization ID
+     * @type {string}
+     * @memberof StorageAccessDto
+     */
+    'organizationId': string;
+    /**
+     * S3 bucket name
+     * @type {string}
+     * @memberof StorageAccessDto
+     */
+    'bucket': string;
 }
+

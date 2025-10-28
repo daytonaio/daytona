@@ -46,6 +46,10 @@ def main():
     print(f"Running code: {code}")
     run_code(code_interpreter, code)
     print("+++++++++++++++++++++++++++++")
+    code = "print(z+1)"
+    print(f"Running code: {code}")
+    run_code(code_interpreter, code)
+    print("+++++++++++++++++++++++++++++")
     code = "print(x+1)"
     print(f"Running code: {code}")
     run_code(code_interpreter, code)

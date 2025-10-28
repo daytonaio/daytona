@@ -1058,7 +1058,6 @@ Deprecated = ">=1.2.18,<2.0.0"
 environs = ">=10.0.0,<15.0.0"
 httpx = ">=0.28.0,<0.29.0"
 multipart = ">=1.0.0,<2.0.0"
-obstore = ">=0.7.0,<0.8.0"
 pydantic = ">=2.4.2,<3.0.0"
 toml = ">=0.10.0,<0.11.0"
 websockets = ">=15.0.0,<16.0.0"
@@ -4652,4 +4651,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "1436281cdbb636dc8b8a335f41d923777e1b780ff324ea30708c002ad98255ba"
+content-hash = "7754ef3a50492f805880c90c741760aaba2b0cd841baf0822a5dd42dcaffb404"

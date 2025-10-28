@@ -21,6 +21,11 @@ const (
     workerScriptPerms = 0700
 )
 
+// WebSocket close codes (4000-4999 are for private/application use)
+const (
+	WebSocketCloseTimeout = 4008 // Execution timeout
+)
+
 // Chunk type constants for websocket streaming
 const (
     ChunkTypeStdout   = "stdout"
@@ -54,9 +59,8 @@ type InterpreterSession struct {
 	cancel     context.CancelFunc
 	workerPath string // path to the worker script
 
-	// single optional websocket client
-	client   *wsClient
-	clientMu sync.RWMutex
+	// single websocket client (protected by mu)
+	client *wsClient
 
 	// command tracking
 	activeCommand *CommandExecution
@@ -65,7 +69,10 @@ type InterpreterSession struct {
 	// execution FIFO queue
 	queue chan execJob
 
-	// guards session state
+	// process exit notification
+	done chan struct{}
+
+	// guards session state and client
 	mu sync.Mutex
 }
 
@@ -95,11 +102,27 @@ type Error struct {
 	Traceback string `json:"traceback,omitempty"`
 }
 
+// CreateContextRequest represents a request to create a new interpreter context
+type CreateContextRequest struct {
+	Cwd      string `json:"cwd,omitempty"`      // Working directory (defaults to daemon workDir)
+	Language string `json:"language,omitempty"` // Language (currently only "python", default: "python")
+} // @name CreateContextRequest
+
+// CreateContextResponse represents the response when creating a context
+type CreateContextResponse struct {
+	ID        string    `json:"id"`
+	Cwd       string    `json:"cwd"`
+	Language  string    `json:"language"`
+	CreatedAt time.Time `json:"createdAt"`
+	Active    bool      `json:"active"`
+} // @name CreateContextResponse
+
 // InterpreterExecuteRequest represents a request to execute code
 type InterpreterExecuteRequest struct {
-	Code    string            `json:"code" binding:"required"`
-	Timeout *uint32           `json:"timeout,omitempty"` // timeout in seconds (0 means no timeout)
-	Envs    map[string]string `json:"envs,omitempty"`
+	Code      string            `json:"code" binding:"required"`
+	ContextID string            `json:"contextId,omitempty"` // Context ID (defaults to "default")
+	Timeout   *uint32           `json:"timeout,omitempty"`   // timeout in seconds (0 means no timeout)
+	Envs      map[string]string `json:"envs,omitempty"`
 } // @name InterpreterExecuteRequest
 
 // Internal message types for JSON protocol with Python worker

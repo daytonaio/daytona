@@ -26,7 +26,7 @@ type ScreenshotResponse struct {
 	// The current cursor position when the screenshot was taken
 	CursorPosition map[string]interface{} `json:"cursorPosition,omitempty"`
 	// The size of the screenshot data in bytes
-	SizeBytes            *float32 `json:"sizeBytes,omitempty"`
+	SizeBytes *float32 `json:"sizeBytes,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -139,7 +139,7 @@ func (o *ScreenshotResponse) SetSizeBytes(v float32) {
 }
 
 func (o ScreenshotResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -176,10 +176,10 @@ func (o *ScreenshotResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -242,3 +242,5 @@ func (v *NullableScreenshotResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

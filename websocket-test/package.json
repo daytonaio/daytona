@@ -1,0 +1,20 @@
+{
+  "name": "websocket-test-client",
+  "version": "1.0.0",
+  "description": "TypeScript WebSocket client for testing close code 4008",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/client.js",
+    "dev": "ts-node client.ts"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

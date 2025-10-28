@@ -21,13 +21,13 @@ var _ MappedNullable = &CompletionItem{}
 
 // CompletionItem struct for CompletionItem
 type CompletionItem struct {
-	Label                string                 `json:"label"`
-	Kind                 *float32               `json:"kind,omitempty"`
-	Detail               *string                `json:"detail,omitempty"`
-	Documentation        map[string]interface{} `json:"documentation,omitempty"`
-	SortText             *string                `json:"sortText,omitempty"`
-	FilterText           *string                `json:"filterText,omitempty"`
-	InsertText           *string                `json:"insertText,omitempty"`
+	Label string `json:"label"`
+	Kind *float32 `json:"kind,omitempty"`
+	Detail *string `json:"detail,omitempty"`
+	Documentation map[string]interface{} `json:"documentation,omitempty"`
+	SortText *string `json:"sortText,omitempty"`
+	FilterText *string `json:"filterText,omitempty"`
+	InsertText *string `json:"insertText,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -268,7 +268,7 @@ func (o *CompletionItem) SetInsertText(v string) {
 }
 
 func (o CompletionItem) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -317,10 +317,10 @@ func (o *CompletionItem) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -387,3 +387,5 @@ func (v *NullableCompletionItem) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

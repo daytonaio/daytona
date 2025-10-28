@@ -35,13 +35,19 @@ class ObjectStorage:
         bucket_name: str = "daytona-volume-builds",
     ):
         self.bucket_name = bucket_name
-        self.store = S3Store(
-            bucket=bucket_name,
-            endpoint=endpoint_url,
-            access_key_id=aws_access_key_id,
-            secret_access_key=aws_secret_access_key,
-            token=aws_session_token,
-        )
+        old_env = os.environ.copy()
+        try:
+            os.environ.clear()
+            self.store = S3Store(
+                bucket=bucket_name,
+                endpoint=endpoint_url,
+                access_key_id=aws_access_key_id,
+                secret_access_key=aws_secret_access_key,
+                token=aws_session_token,
+            )
+        finally:
+            os.environ.clear()
+            os.environ.update(old_env)
 
     def upload(self, path: str, organization_id: str, archive_base_path: str | None = None) -> str:
         """Uploads a file to the object storage service.
@@ -139,7 +145,10 @@ class ObjectStorage:
         """
         try:
             self.store.head(file_path)
-        except FileNotFoundError:
+        except FileNotFoundError as e:
+            return False
+        except Exception as e:
+            print(f"Error: {e}")
             return False
         return True
 

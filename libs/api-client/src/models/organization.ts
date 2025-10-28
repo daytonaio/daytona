@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,118 +12,121 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface Organization
  */
 export interface Organization {
-  /**
-   * Organization ID
-   * @type {string}
-   * @memberof Organization
-   */
-  id: string
-  /**
-   * Organization name
-   * @type {string}
-   * @memberof Organization
-   */
-  name: string
-  /**
-   * User ID of the organization creator
-   * @type {string}
-   * @memberof Organization
-   */
-  createdBy: string
-  /**
-   * Personal organization flag
-   * @type {boolean}
-   * @memberof Organization
-   */
-  personal: boolean
-  /**
-   * Creation timestamp
-   * @type {Date}
-   * @memberof Organization
-   */
-  createdAt: Date
-  /**
-   * Last update timestamp
-   * @type {Date}
-   * @memberof Organization
-   */
-  updatedAt: Date
-  /**
-   * Suspended flag
-   * @type {boolean}
-   * @memberof Organization
-   */
-  suspended: boolean
-  /**
-   * Suspended at
-   * @type {Date}
-   * @memberof Organization
-   */
-  suspendedAt: Date
-  /**
-   * Suspended reason
-   * @type {string}
-   * @memberof Organization
-   */
-  suspensionReason: string
-  /**
-   * Suspended until
-   * @type {Date}
-   * @memberof Organization
-   */
-  suspendedUntil: Date
-  /**
-   * Suspension cleanup grace period hours
-   * @type {number}
-   * @memberof Organization
-   */
-  suspensionCleanupGracePeriodHours: number
-  /**
-   * Total CPU quota
-   * @type {number}
-   * @memberof Organization
-   */
-  totalCpuQuota: number
-  /**
-   * Total memory quota
-   * @type {number}
-   * @memberof Organization
-   */
-  totalMemoryQuota: number
-  /**
-   * Total disk quota
-   * @type {number}
-   * @memberof Organization
-   */
-  totalDiskQuota: number
-  /**
-   * Max CPU per sandbox
-   * @type {number}
-   * @memberof Organization
-   */
-  maxCpuPerSandbox: number
-  /**
-   * Max memory per sandbox
-   * @type {number}
-   * @memberof Organization
-   */
-  maxMemoryPerSandbox: number
-  /**
-   * Max disk per sandbox
-   * @type {number}
-   * @memberof Organization
-   */
-  maxDiskPerSandbox: number
-  /**
-   * Sandbox default network block all
-   * @type {boolean}
-   * @memberof Organization
-   */
-  sandboxLimitedNetworkEgress: boolean
+    /**
+     * Organization ID
+     * @type {string}
+     * @memberof Organization
+     */
+    'id': string;
+    /**
+     * Organization name
+     * @type {string}
+     * @memberof Organization
+     */
+    'name': string;
+    /**
+     * User ID of the organization creator
+     * @type {string}
+     * @memberof Organization
+     */
+    'createdBy': string;
+    /**
+     * Personal organization flag
+     * @type {boolean}
+     * @memberof Organization
+     */
+    'personal': boolean;
+    /**
+     * Creation timestamp
+     * @type {Date}
+     * @memberof Organization
+     */
+    'createdAt': Date;
+    /**
+     * Last update timestamp
+     * @type {Date}
+     * @memberof Organization
+     */
+    'updatedAt': Date;
+    /**
+     * Suspended flag
+     * @type {boolean}
+     * @memberof Organization
+     */
+    'suspended': boolean;
+    /**
+     * Suspended at
+     * @type {Date}
+     * @memberof Organization
+     */
+    'suspendedAt': Date;
+    /**
+     * Suspended reason
+     * @type {string}
+     * @memberof Organization
+     */
+    'suspensionReason': string;
+    /**
+     * Suspended until
+     * @type {Date}
+     * @memberof Organization
+     */
+    'suspendedUntil': Date;
+    /**
+     * Suspension cleanup grace period hours
+     * @type {number}
+     * @memberof Organization
+     */
+    'suspensionCleanupGracePeriodHours': number;
+    /**
+     * Total CPU quota
+     * @type {number}
+     * @memberof Organization
+     */
+    'totalCpuQuota': number;
+    /**
+     * Total memory quota
+     * @type {number}
+     * @memberof Organization
+     */
+    'totalMemoryQuota': number;
+    /**
+     * Total disk quota
+     * @type {number}
+     * @memberof Organization
+     */
+    'totalDiskQuota': number;
+    /**
+     * Max CPU per sandbox
+     * @type {number}
+     * @memberof Organization
+     */
+    'maxCpuPerSandbox': number;
+    /**
+     * Max memory per sandbox
+     * @type {number}
+     * @memberof Organization
+     */
+    'maxMemoryPerSandbox': number;
+    /**
+     * Max disk per sandbox
+     * @type {number}
+     * @memberof Organization
+     */
+    'maxDiskPerSandbox': number;
+    /**
+     * Sandbox default network block all
+     * @type {boolean}
+     * @memberof Organization
+     */
+    'sandboxLimitedNetworkEgress': boolean;
 }
+

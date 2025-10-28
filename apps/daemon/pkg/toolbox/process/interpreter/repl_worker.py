@@ -40,6 +40,34 @@ class REPLWorker:
         
         signal.signal(signal.SIGINT, sigint_handler)
     
+    def _clean_traceback(self, exc_type, exc_value, exc_tb):
+        """
+        Filter traceback to show only user code frames (filename == '<string>').
+        This hides the worker implementation details from the user.
+        """
+        # Extract all traceback frames
+        tb_list = traceback.extract_tb(exc_tb)
+        
+        # Filter to only user code frames (compiled from '<string>')
+        user_frames = [frame for frame in tb_list if frame.filename == '<string>']
+        
+        if not user_frames:
+            # No user frames found (error before user code execution)
+            # Just show the exception without traceback details
+            return f"{exc_type.__name__}: {exc_value}\n"
+        
+        # Build a clean traceback showing only user code
+        result = ["Traceback (most recent call last):\n"]
+        for frame in user_frames:
+            result.append(f'  File "<stdin>", line {frame.lineno}\n')
+            if frame.line:
+                result.append(f"    {frame.line}\n")
+        
+        # Add the exception message
+        result.append(f"{exc_type.__name__}: {exc_value}\n")
+        
+        return "".join(result)
+    
     
     def send_stream(self, msg_id, stream_name, text):
         """Send a stream chunk (stdout or stderr)"""
@@ -106,6 +134,7 @@ class REPLWorker:
             self._emit_matplotlib_artifacts()
             
             # Send completion signal for interrupted execution
+            # The Go layer will close the websocket with error code for timeout
             self._send_chunk({
                 "type": "control", 
                 "text": "interrupted"
@@ -140,9 +169,9 @@ class REPLWorker:
             if stderr_text:
                 self.send_stream(msg_id, "stderr", stderr_text)
             
-            # Get traceback
-            tb_lines = traceback.format_exception(type(e), e, e.__traceback__)
-            tb_text = "".join(tb_lines)
+            # Get clean traceback (filtered to show only user code)
+            tb_text = self._clean_traceback(type(e), e, e.__traceback__)
+            
             # Emit error chunk
             self._send_chunk({
                 "type": "error",

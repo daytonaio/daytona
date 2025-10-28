@@ -6,6 +6,11 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"path"
+
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -21,10 +26,6 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
-	"net"
-	"net/http"
-	"os"
-	"path"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -156,6 +157,9 @@ func (s *Server) Start() error {
 		interpreterController := interpreter.NewInterpreterController(s.WorkDir)
 		interpreterGroup := processController.Group("/interpreter")
 		{
+			interpreterGroup.POST("/context", interpreterController.CreateContext)
+			interpreterGroup.GET("/context", interpreterController.ListContexts)
+			interpreterGroup.DELETE("/context/:id", interpreterController.DeleteContext)
 			interpreterGroup.GET("/execute", interpreterController.Execute)
 		}
 	}

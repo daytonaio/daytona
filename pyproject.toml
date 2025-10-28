@@ -14,6 +14,7 @@ package-mode = false
 daytona = {path = "libs/sdk-python", develop = true}
 daytona_api_client = {path = "libs/api-client-python", develop = true}
 daytona_api_client_async = {path = "libs/api-client-python-async", develop = true}
+obstore = "0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pydoc-markdown = ">=4.8.0,<5.0.0"
