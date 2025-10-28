@@ -495,6 +495,15 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * Creates a snapshot of the current state of the sandbox.
+   *
+   * @returns {Promise<void>}
+   */
+  public async snapshotSandbox(): Promise<void> {
+    await this.sandboxApi.snapshotSandbox(this.id)
+  }
+
+  /**
    * Assigns the API sandbox data to the Sandbox object.
    *
    * @param {SandboxDto} sandboxDto - The API sandbox instance to assign data from
