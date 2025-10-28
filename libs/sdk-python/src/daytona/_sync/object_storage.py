@@ -13,6 +13,7 @@ import threading
 from obstore.store import S3Store
 
 from .._utils.docs_ignore import docs_ignore
+from .._utils.environment import isolated_env
 
 
 class ObjectStorage:
@@ -35,13 +36,14 @@ class ObjectStorage:
         bucket_name: str = "daytona-volume-builds",
     ):
         self.bucket_name = bucket_name
-        self.store = S3Store(
-            bucket=bucket_name,
-            endpoint=endpoint_url,
-            access_key_id=aws_access_key_id,
-            secret_access_key=aws_secret_access_key,
-            token=aws_session_token,
-        )
+        with isolated_env():
+            self.store = S3Store(
+                bucket=bucket_name,
+                endpoint=endpoint_url,
+                access_key_id=aws_access_key_id,
+                secret_access_key=aws_secret_access_key,
+                token=aws_session_token,
+            )
 
     def upload(self, path: str, organization_id: str, archive_base_path: str | None = None) -> str:
         """Uploads a file to the object storage service.
