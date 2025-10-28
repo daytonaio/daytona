@@ -91,6 +91,7 @@ export class SandboxStartAction extends SandboxAction {
           }
 
           await this.sandboxRepository.save(sandboxToUpdate)
+          return DONT_SYNC_AGAIN
         }
       }
     }
@@ -396,65 +397,16 @@ export class SandboxStartAction extends SandboxAction {
             sandboxToUpdate.daemonVersion = daemonVersion
           }
           await this.sandboxRepository.save(sandboxToUpdate)
+          return DONT_SYNC_AGAIN
         } else {
           await this.updateSandboxState(sandbox.id, SandboxState.STARTED, undefined, undefined, daemonVersion)
-        }
 
-        //  if sandbox was transferred to a new runner, remove it from the old runner
-        if (sandbox.prevRunnerId) {
-          const runner = await this.runnerService.findOne(sandbox.prevRunnerId)
-          if (!runner) {
-            this.logger.warn(`Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`)
-            //  clear prevRunnerId to avoid trying to cleanup on a non-existent runner
-            sandbox.prevRunnerId = null
-
-            const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-              id: sandbox.id,
-            })
-            sandboxToUpdate.prevRunnerId = null
-            await this.sandboxRepository.save(sandboxToUpdate)
-            break
+          //  if sandbox was transferred to a new runner, remove it from the old runner
+          if (sandbox.prevRunnerId) {
+            await this.removeSandboxFromPreviousRunner(sandbox)
           }
 
-          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-          try {
-            // First try to destroy the sandbox
-            await runnerAdapter.destroySandbox(sandbox.id)
-
-            // Wait for sandbox to be destroyed before removing
-            let retries = 0
-            while (retries < 10) {
-              try {
-                const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-                if (sandboxInfo.state === SandboxState.DESTROYED) {
-                  break
-                }
-              } catch (e) {
-                if (e.response?.status === 404) {
-                  break // Sandbox already gone
-                }
-                throw e
-              }
-              await new Promise((resolve) => setTimeout(resolve, 1000 * retries))
-              retries++
-            }
-
-            // Finally remove the destroyed sandbox
-            await runnerAdapter.removeDestroyedSandbox(sandbox.id)
-
-            sandbox.prevRunnerId = null
-
-            const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-              id: sandbox.id,
-            })
-
-            sandboxToUpdate.prevRunnerId = null
-
-            await this.sandboxRepository.save(sandboxToUpdate)
-          } catch (error) {
-            this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
-          }
+          return DONT_SYNC_AGAIN
         }
         break
       }
@@ -707,5 +659,56 @@ export class SandboxStartAction extends SandboxAction {
 
     await runnerAdapter.createSandbox(sandbox, registry, undefined, metadata)
     return null
+  }
+
+  private async removeSandboxFromPreviousRunner(sandbox: Sandbox): Promise<void> {
+    const runner = await this.runnerService.findOne(sandbox.prevRunnerId)
+    if (!runner) {
+      this.logger.warn(`Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`)
+      //  clear prevRunnerId to avoid trying to cleanup on a non-existent runner
+      sandbox.prevRunnerId = null
+
+      const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
+        id: sandbox.id,
+      })
+      sandboxToUpdate.prevRunnerId = null
+      await this.sandboxRepository.update(sandbox.id, {
+        prevRunnerId: null,
+      })
+    }
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    try {
+      // First try to destroy the sandbox
+      await runnerAdapter.destroySandbox(sandbox.id)
+
+      // Wait for sandbox to be destroyed before removing
+      let retries = 0
+      while (retries < 10) {
+        try {
+          const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+          if (sandboxInfo.state === SandboxState.DESTROYED) {
+            break
+          }
+        } catch (e) {
+          if (e.response?.status === 404) {
+            break // Sandbox already gone
+          }
+          throw e
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000 * retries))
+        retries++
+      }
+
+      // Finally remove the destroyed sandbox
+      await runnerAdapter.removeDestroyedSandbox(sandbox.id)
+
+      await this.sandboxRepository.update(sandbox.id, {
+        prevRunnerId: null,
+      })
+    } catch (error) {
+      this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
+    }
   }
 }

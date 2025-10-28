@@ -5,19 +5,16 @@
 
 import { Repository, DataSource, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../../entities/sandbox.entity'
+import { Injectable } from '@nestjs/common'
+import { InjectDataSource } from '@nestjs/typeorm'
 
+@Injectable()
 export class SandboxRepository extends Repository<Sandbox> {
-  constructor(private dataSource: DataSource) {
+  constructor(@InjectDataSource() private dataSource: DataSource) {
     super(Sandbox, dataSource.createEntityManager(), dataSource.createQueryRunner())
   }
 
   async saveWhere(sandbox: Sandbox, whereCondition: FindOptionsWhere<Sandbox>): Promise<Sandbox | null> {
-    // First, fetch the entity to get its current version
-    const existingEntity = await this.findOne({ where: { id: sandbox.id } })
-    if (!existingEntity) {
-      return null
-    }
-
     // Build the update query
     const queryBuilder = this.createQueryBuilder().update(Sandbox).set(sandbox).where('id = :id', { id: sandbox.id })
 

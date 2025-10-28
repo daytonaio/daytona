@@ -77,7 +77,6 @@ export class SandboxService {
   private readonly logger = new Logger(SandboxService.name)
 
   constructor(
-    @InjectRepository(Sandbox)
     private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
