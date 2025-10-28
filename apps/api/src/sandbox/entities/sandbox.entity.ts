@@ -258,6 +258,26 @@ export class Sandbox {
   }
 
   @BeforeUpdate()
+  validateState() {
+    switch (this.state) {
+      case SandboxState.STARTING:
+        if ([SandboxState.STOPPED].includes(this.state) && this.desiredState === SandboxDesiredState.STARTED) {
+          break
+        }
+        throw new Error(
+          `Sandbox ${this.id} is not in a valid state to be starting. State: ${this.state}. Desired state: ${this.desiredState}`,
+        )
+      case SandboxState.STOPPING:
+        if ([SandboxState.STARTED].includes(this.state) && this.desiredState === SandboxDesiredState.STOPPED) {
+          break
+        }
+        throw new Error(
+          `Sandbox ${this.id} is not in a valid state to be stopping. State: ${this.state}. Desired state: ${this.desiredState}`,
+        )
+    }
+  }
+
+  @BeforeUpdate()
   validateDesiredState() {
     switch (this.desiredState) {
       case SandboxDesiredState.STARTED:
