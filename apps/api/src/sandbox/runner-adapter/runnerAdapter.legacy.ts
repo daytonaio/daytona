@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
@@ -94,7 +94,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
 
-    const retryErrorMap = new WeakMap<Error, string>()
+    const retryErrorMap = new WeakMap<AxiosError, string>()
 
     // Configure axios-retry to handle network errors
     axiosRetry(axiosInstance, {
