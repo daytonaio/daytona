@@ -529,9 +529,6 @@ export class Sandbox implements SandboxDto {
    * @returns {void}
    */
   private processSandboxDto(sandboxDto: SandboxDto) {
-    if (sandboxDto.state == SandboxState.STARTED && this.state != sandboxDto.state) {
-      // get preview link and store it in toolbox config
-    }
     this.id = sandboxDto.id
     this.name = sandboxDto.name
     this.organizationId = sandboxDto.organizationId
