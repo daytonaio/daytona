@@ -89,7 +89,9 @@ const configuration = {
     protocol: process.env.PROXY_PROTOCOL,
     apiKey: process.env.PROXY_API_KEY,
     templateUrl: process.env.PROXY_TEMPLATE_URL,
-    toolboxUrl: process.env.PROXY_TOOLBOX_URL || `${process.env.PROXY_PROTOCOL}://${process.env.PROXY_DOMAIN}/toolbox`,
+    toolboxUrl:
+      (process.env.PROXY_TOOLBOX_BASE_URL || `${process.env.PROXY_PROTOCOL}://${process.env.PROXY_DOMAIN}`) +
+      '/toolbox',
   },
   audit: {
     toolboxRequestsEnabled: process.env.AUDIT_TOOLBOX_REQUESTS_ENABLED === 'true',

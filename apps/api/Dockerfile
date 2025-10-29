@@ -85,7 +85,6 @@ ENV PROXY_DOMAIN=proxy.localhost:4000
 ENV PROXY_PROTOCOL=http
 ENV PROXY_API_KEY=super_secret_key
 ENV PROXY_TEMPLATE_URL=http://{{PORT}}-{{sandboxId}}.proxy.localhost:4000
-ENV PROXY_TOOLBOX_URL=http://proxy.localhost:4000/toolbox
 
 ENV DEFAULT_RUNNER_DOMAIN=runner:3003
 ENV DEFAULT_RUNNER_API_URL=http://runner:3003
