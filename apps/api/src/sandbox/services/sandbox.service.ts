@@ -1066,6 +1066,13 @@ export class SandboxService {
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
+    // Prevent spamming updates
+    const lockKey = `sandbox:update-last-activity:${sandboxId}`
+    const acquired = await this.redisLockProvider.lock(lockKey, 45)
+    if (!acquired) {
+      return
+    }
+
     const result = await this.sandboxRepository.update({ id: sandboxId }, { lastActivityAt })
 
     if (!result.affected || result.affected === 0) {
