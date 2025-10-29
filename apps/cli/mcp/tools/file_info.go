@@ -42,7 +42,7 @@ func FileInfo(ctx context.Context, request mcp.CallToolRequest, args FileInfoArg
 	}
 
 	// Get file info
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *args.Id).Path(*args.FilePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfoDeprecated(ctx, *args.Id).Path(*args.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error getting file info: %v", err)
 	}

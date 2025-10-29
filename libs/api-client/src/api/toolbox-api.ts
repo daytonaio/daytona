@@ -161,23 +161,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
   return {
     /**
      * Click mouse at specified coordinates
-     * @summary Click mouse
+     * @summary [DEPRECATED] Click mouse
      * @param {string} sandboxId
      * @param {MouseClickRequest} mouseClickRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    clickMouse: async (
+    clickMouseDeprecated: async (
       sandboxId: string,
       mouseClickRequest: MouseClickRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('clickMouse', 'sandboxId', sandboxId)
+      assertParamExists('clickMouseDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'mouseClickRequest' is not null or undefined
-      assertParamExists('clickMouse', 'mouseClickRequest', mouseClickRequest)
+      assertParamExists('clickMouseDeprecated', 'mouseClickRequest', mouseClickRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/click`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -216,15 +217,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Create folder inside sandbox
-     * @summary Create folder
+     * @summary [DEPRECATED] Create folder
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} mode
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createFolder: async (
+    createFolderDeprecated: async (
       sandboxId: string,
       path: string,
       mode: string,
@@ -232,11 +234,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('createFolder', 'sandboxId', sandboxId)
+      assertParamExists('createFolderDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('createFolder', 'path', path)
+      assertParamExists('createFolderDeprecated', 'path', path)
       // verify required parameter 'mode' is not null or undefined
-      assertParamExists('createFolder', 'mode', mode)
+      assertParamExists('createFolderDeprecated', 'mode', mode)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/folder`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -280,23 +282,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Create a new PTY session in the sandbox
-     * @summary Create PTY session
+     * @summary [DEPRECATED] Create PTY session
      * @param {string} sandboxId
      * @param {PtyCreateRequest} ptyCreateRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createPTYSession: async (
+    createPTYSessionDeprecated: async (
       sandboxId: string,
       ptyCreateRequest: PtyCreateRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('createPTYSession', 'sandboxId', sandboxId)
+      assertParamExists('createPTYSessionDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'ptyCreateRequest' is not null or undefined
-      assertParamExists('createPTYSession', 'ptyCreateRequest', ptyCreateRequest)
+      assertParamExists('createPTYSessionDeprecated', 'ptyCreateRequest', ptyCreateRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/pty`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -335,23 +338,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Create a new session in the sandbox
-     * @summary Create session
+     * @summary [DEPRECATED] Create session
      * @param {string} sandboxId
      * @param {CreateSessionRequest} createSessionRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createSession: async (
+    createSessionDeprecated: async (
       sandboxId: string,
       createSessionRequest: CreateSessionRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('createSession', 'sandboxId', sandboxId)
+      assertParamExists('createSessionDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'createSessionRequest' is not null or undefined
-      assertParamExists('createSession', 'createSessionRequest', createSessionRequest)
+      assertParamExists('createSessionDeprecated', 'createSessionRequest', createSessionRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -390,15 +394,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Delete file inside sandbox
-     * @summary Delete file
+     * @summary [DEPRECATED] Delete file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [recursive]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deleteFile: async (
+    deleteFileDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
@@ -406,9 +411,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('deleteFile', 'sandboxId', sandboxId)
+      assertParamExists('deleteFileDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('deleteFile', 'path', path)
+      assertParamExists('deleteFileDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -452,23 +457,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Delete a PTY session and terminate the associated process
-     * @summary Delete PTY session
+     * @summary [DEPRECATED] Delete PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deletePTYSession: async (
+    deletePTYSessionDeprecated: async (
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('deletePTYSession', 'sandboxId', sandboxId)
+      assertParamExists('deletePTYSessionDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('deletePTYSession', 'sessionId', sessionId)
+      assertParamExists('deletePTYSessionDeprecated', 'sessionId', sessionId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
@@ -503,23 +509,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Delete a specific session
-     * @summary Delete session
+     * @summary [DEPRECATED] Delete session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deleteSession: async (
+    deleteSessionDeprecated: async (
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('deleteSession', 'sandboxId', sandboxId)
+      assertParamExists('deleteSessionDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('deleteSession', 'sessionId', sessionId)
+      assertParamExists('deleteSessionDeprecated', 'sessionId', sessionId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
@@ -554,7 +561,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Download file from sandbox
-     * @summary Download file
+     * @summary [DEPRECATED] Download file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -562,16 +569,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @deprecated
      * @throws {RequiredError}
      */
-    downloadFile: async (
+    downloadFileDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('downloadFile', 'sandboxId', sandboxId)
+      assertParamExists('downloadFileDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('downloadFile', 'path', path)
+      assertParamExists('downloadFileDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/download`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -611,23 +618,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Streams back a multipart/form-data bundle of the requested paths
-     * @summary Download multiple files
+     * @summary [DEPRECATED] Download multiple files
      * @param {string} sandboxId
      * @param {DownloadFiles} downloadFiles
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    downloadFiles: async (
+    downloadFilesDeprecated: async (
       sandboxId: string,
       downloadFiles: DownloadFiles,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('downloadFiles', 'sandboxId', sandboxId)
+      assertParamExists('downloadFilesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'downloadFiles' is not null or undefined
-      assertParamExists('downloadFiles', 'downloadFiles', downloadFiles)
+      assertParamExists('downloadFilesDeprecated', 'downloadFiles', downloadFiles)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/bulk-download`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -666,23 +674,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Drag mouse from start to end coordinates
-     * @summary Drag mouse
+     * @summary [DEPRECATED] Drag mouse
      * @param {string} sandboxId
      * @param {MouseDragRequest} mouseDragRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    dragMouse: async (
+    dragMouseDeprecated: async (
       sandboxId: string,
       mouseDragRequest: MouseDragRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('dragMouse', 'sandboxId', sandboxId)
+      assertParamExists('dragMouseDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'mouseDragRequest' is not null or undefined
-      assertParamExists('dragMouse', 'mouseDragRequest', mouseDragRequest)
+      assertParamExists('dragMouseDeprecated', 'mouseDragRequest', mouseDragRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/drag`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -721,23 +730,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Execute command synchronously inside sandbox
-     * @summary Execute command
+     * @summary [DEPRECATED] Execute command
      * @param {string} sandboxId
      * @param {ExecuteRequest} executeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    executeCommand: async (
+    executeCommandDeprecated: async (
       sandboxId: string,
       executeRequest: ExecuteRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('executeCommand', 'sandboxId', sandboxId)
+      assertParamExists('executeCommandDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'executeRequest' is not null or undefined
-      assertParamExists('executeCommand', 'executeRequest', executeRequest)
+      assertParamExists('executeCommandDeprecated', 'executeRequest', executeRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/execute`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -776,15 +786,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Execute a command in a specific session
-     * @summary Execute command in session
+     * @summary [DEPRECATED] Execute command in session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {SessionExecuteRequest} sessionExecuteRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    executeSessionCommand: async (
+    executeSessionCommandDeprecated: async (
       sandboxId: string,
       sessionId: string,
       sessionExecuteRequest: SessionExecuteRequest,
@@ -792,11 +803,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('executeSessionCommand', 'sandboxId', sandboxId)
+      assertParamExists('executeSessionCommandDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('executeSessionCommand', 'sessionId', sessionId)
+      assertParamExists('executeSessionCommandDeprecated', 'sessionId', sessionId)
       // verify required parameter 'sessionExecuteRequest' is not null or undefined
-      assertParamExists('executeSessionCommand', 'sessionExecuteRequest', sessionExecuteRequest)
+      assertParamExists('executeSessionCommandDeprecated', 'sessionExecuteRequest', sessionExecuteRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
@@ -834,15 +845,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Search for text/pattern inside sandbox files
-     * @summary Search for text/pattern in files
+     * @summary [DEPRECATED] Search for text/pattern in files
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    findInFiles: async (
+    findInFilesDeprecated: async (
       sandboxId: string,
       path: string,
       pattern: string,
@@ -850,11 +862,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('findInFiles', 'sandboxId', sandboxId)
+      assertParamExists('findInFilesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('findInFiles', 'path', path)
+      assertParamExists('findInFilesDeprecated', 'path', path)
       // verify required parameter 'pattern' is not null or undefined
-      assertParamExists('findInFiles', 'pattern', pattern)
+      assertParamExists('findInFilesDeprecated', 'pattern', pattern)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/find`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -898,19 +910,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get status of all VNC desktop processes
-     * @summary Get computer use status
+     * @summary [DEPRECATED] Get computer use status
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getComputerUseStatus: async (
+    getComputerUseStatusDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getComputerUseStatus', 'sandboxId', sandboxId)
+      assertParamExists('getComputerUseStatusDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/status`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -946,19 +959,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get information about displays
-     * @summary Get display info
+     * @summary [DEPRECATED] Get display info
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getDisplayInfo: async (
+    getDisplayInfoDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getDisplayInfo', 'sandboxId', sandboxId)
+      assertParamExists('getDisplayInfoDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/display/info`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -994,23 +1008,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get file info inside sandbox
-     * @summary Get file info
+     * @summary [DEPRECATED] Get file info
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getFileInfo: async (
+    getFileInfoDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getFileInfo', 'sandboxId', sandboxId)
+      assertParamExists('getFileInfoDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('getFileInfo', 'path', path)
+      assertParamExists('getFileInfoDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/info`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1050,19 +1065,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get current mouse cursor position
-     * @summary Get mouse position
+     * @summary [DEPRECATED] Get mouse position
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getMousePosition: async (
+    getMousePositionDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getMousePosition', 'sandboxId', sandboxId)
+      assertParamExists('getMousePositionDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/position`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1098,23 +1114,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get PTY session information by ID
-     * @summary Get PTY session
+     * @summary [DEPRECATED] Get PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getPTYSession: async (
+    getPTYSessionDeprecated: async (
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getPTYSession', 'sandboxId', sandboxId)
+      assertParamExists('getPTYSessionDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('getPTYSession', 'sessionId', sessionId)
+      assertParamExists('getPTYSessionDeprecated', 'sessionId', sessionId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
@@ -1149,23 +1166,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get error logs for a specific VNC process
-     * @summary Get process errors
+     * @summary [DEPRECATED] Get process errors
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getProcessErrors: async (
+    getProcessErrorsDeprecated: async (
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'processName' is not null or undefined
-      assertParamExists('getProcessErrors', 'processName', processName)
+      assertParamExists('getProcessErrorsDeprecated', 'processName', processName)
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getProcessErrors', 'sandboxId', sandboxId)
+      assertParamExists('getProcessErrorsDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors`
         .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
@@ -1200,23 +1218,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get logs for a specific VNC process
-     * @summary Get process logs
+     * @summary [DEPRECATED] Get process logs
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getProcessLogs: async (
+    getProcessLogsDeprecated: async (
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'processName' is not null or undefined
-      assertParamExists('getProcessLogs', 'processName', processName)
+      assertParamExists('getProcessLogsDeprecated', 'processName', processName)
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getProcessLogs', 'sandboxId', sandboxId)
+      assertParamExists('getProcessLogsDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs`
         .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
@@ -1251,23 +1270,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get status of a specific VNC process
-     * @summary Get process status
+     * @summary [DEPRECATED] Get process status
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getProcessStatus: async (
+    getProcessStatusDeprecated: async (
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'processName' is not null or undefined
-      assertParamExists('getProcessStatus', 'processName', processName)
+      assertParamExists('getProcessStatusDeprecated', 'processName', processName)
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getProcessStatus', 'sandboxId', sandboxId)
+      assertParamExists('getProcessStatusDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status`
         .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
@@ -1302,20 +1322,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Get sandbox project dir
+     * @summary [DEPRECATED] Get sandbox project dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
-    getProjectDir: async (
+    getProjectDirDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getProjectDir', 'sandboxId', sandboxId)
+      assertParamExists('getProjectDirDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/project-dir`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1350,67 +1370,17 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Get session by ID
-     * @summary Get session
-     * @param {string} sandboxId
-     * @param {string} sessionId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSession: async (
-      sandboxId: string,
-      sessionId: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getSession', 'sandboxId', sandboxId)
-      // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('getSession', 'sessionId', sessionId)
-      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}`
-        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
-        .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
      * Get session command by ID
-     * @summary Get session command
+     * @summary [DEPRECATED] Get session command
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getSessionCommand: async (
+    getSessionCommandDeprecated: async (
       sandboxId: string,
       sessionId: string,
       commandId: string,
@@ -1418,11 +1388,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getSessionCommand', 'sandboxId', sandboxId)
+      assertParamExists('getSessionCommandDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('getSessionCommand', 'sessionId', sessionId)
+      assertParamExists('getSessionCommandDeprecated', 'sessionId', sessionId)
       // verify required parameter 'commandId' is not null or undefined
-      assertParamExists('getSessionCommand', 'commandId', commandId)
+      assertParamExists('getSessionCommandDeprecated', 'commandId', commandId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
@@ -1458,16 +1428,17 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get logs for a specific command in a session
-     * @summary Get command logs
+     * @summary [DEPRECATED] Get command logs
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getSessionCommandLogs: async (
+    getSessionCommandLogsDeprecated: async (
       sandboxId: string,
       sessionId: string,
       commandId: string,
@@ -1476,11 +1447,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getSessionCommandLogs', 'sandboxId', sandboxId)
+      assertParamExists('getSessionCommandLogsDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('getSessionCommandLogs', 'sessionId', sessionId)
+      assertParamExists('getSessionCommandLogsDeprecated', 'sessionId', sessionId)
       // verify required parameter 'commandId' is not null or undefined
-      assertParamExists('getSessionCommandLogs', 'commandId', commandId)
+      assertParamExists('getSessionCommandLogsDeprecated', 'commandId', commandId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
@@ -1519,20 +1490,73 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Get session by ID
+     * @summary [DEPRECATED] Get session
+     * @param {string} sandboxId
+     * @param {string} sessionId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getSessionDeprecated: async (
+      sandboxId: string,
+      sessionId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSessionDeprecated', 'sandboxId', sandboxId)
+      // verify required parameter 'sessionId' is not null or undefined
+      assertParamExists('getSessionDeprecated', 'sessionId', sessionId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+        .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      *
-     * @summary Get sandbox user home dir
+     * @summary [DEPRECATED] Get sandbox user home dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getUserHomeDir: async (
+    getUserHomeDirDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getUserHomeDir', 'sandboxId', sandboxId)
+      assertParamExists('getUserHomeDirDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/user-home-dir`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1568,19 +1592,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get list of open windows
-     * @summary Get windows
+     * @summary [DEPRECATED] Get windows
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getWindows: async (
+    getWindowsDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getWindows', 'sandboxId', sandboxId)
+      assertParamExists('getWindowsDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/display/windows`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1616,19 +1641,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Get sandbox work-dir
+     * @summary [DEPRECATED] Get sandbox work-dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getWorkDir: async (
+    getWorkDirDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getWorkDir', 'sandboxId', sandboxId)
+      assertParamExists('getWorkDirDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/work-dir`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1664,23 +1690,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Add files to git commit
-     * @summary Add files
+     * @summary [DEPRECATED] Add files
      * @param {string} sandboxId
      * @param {GitAddRequest} gitAddRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitAddFiles: async (
+    gitAddFilesDeprecated: async (
       sandboxId: string,
       gitAddRequest: GitAddRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitAddFiles', 'sandboxId', sandboxId)
+      assertParamExists('gitAddFilesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitAddRequest' is not null or undefined
-      assertParamExists('gitAddFiles', 'gitAddRequest', gitAddRequest)
+      assertParamExists('gitAddFilesDeprecated', 'gitAddRequest', gitAddRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/add`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1719,23 +1746,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Checkout branch or commit in git repository
-     * @summary Checkout branch
+     * @summary [DEPRECATED] Checkout branch
      * @param {string} sandboxId
      * @param {GitCheckoutRequest} gitCheckoutRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCheckoutBranch: async (
+    gitCheckoutBranchDeprecated: async (
       sandboxId: string,
       gitCheckoutRequest: GitCheckoutRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitCheckoutBranch', 'sandboxId', sandboxId)
+      assertParamExists('gitCheckoutBranchDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitCheckoutRequest' is not null or undefined
-      assertParamExists('gitCheckoutBranch', 'gitCheckoutRequest', gitCheckoutRequest)
+      assertParamExists('gitCheckoutBranchDeprecated', 'gitCheckoutRequest', gitCheckoutRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/checkout`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1774,23 +1802,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Clone git repository
-     * @summary Clone repository
+     * @summary [DEPRECATED] Clone repository
      * @param {string} sandboxId
      * @param {GitCloneRequest} gitCloneRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCloneRepository: async (
+    gitCloneRepositoryDeprecated: async (
       sandboxId: string,
       gitCloneRequest: GitCloneRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitCloneRepository', 'sandboxId', sandboxId)
+      assertParamExists('gitCloneRepositoryDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitCloneRequest' is not null or undefined
-      assertParamExists('gitCloneRepository', 'gitCloneRequest', gitCloneRequest)
+      assertParamExists('gitCloneRepositoryDeprecated', 'gitCloneRequest', gitCloneRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/clone`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1829,23 +1858,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Commit changes to git repository
-     * @summary Commit changes
+     * @summary [DEPRECATED] Commit changes
      * @param {string} sandboxId
      * @param {GitCommitRequest} gitCommitRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCommitChanges: async (
+    gitCommitChangesDeprecated: async (
       sandboxId: string,
       gitCommitRequest: GitCommitRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitCommitChanges', 'sandboxId', sandboxId)
+      assertParamExists('gitCommitChangesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitCommitRequest' is not null or undefined
-      assertParamExists('gitCommitChanges', 'gitCommitRequest', gitCommitRequest)
+      assertParamExists('gitCommitChangesDeprecated', 'gitCommitRequest', gitCommitRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/commit`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1884,23 +1914,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Create branch on git repository
-     * @summary Create branch
+     * @summary [DEPRECATED] Create branch
      * @param {string} sandboxId
      * @param {GitBranchRequest} gitBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCreateBranch: async (
+    gitCreateBranchDeprecated: async (
       sandboxId: string,
       gitBranchRequest: GitBranchRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitCreateBranch', 'sandboxId', sandboxId)
+      assertParamExists('gitCreateBranchDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitBranchRequest' is not null or undefined
-      assertParamExists('gitCreateBranch', 'gitBranchRequest', gitBranchRequest)
+      assertParamExists('gitCreateBranchDeprecated', 'gitBranchRequest', gitBranchRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/branches`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1939,23 +1970,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Delete branch on git repository
-     * @summary Delete branch
+     * @summary [DEPRECATED] Delete branch
      * @param {string} sandboxId
      * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitDeleteBranch: async (
+    gitDeleteBranchDeprecated: async (
       sandboxId: string,
       gitDeleteBranchRequest: GitDeleteBranchRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitDeleteBranch', 'sandboxId', sandboxId)
+      assertParamExists('gitDeleteBranchDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitDeleteBranchRequest' is not null or undefined
-      assertParamExists('gitDeleteBranch', 'gitDeleteBranchRequest', gitDeleteBranchRequest)
+      assertParamExists('gitDeleteBranchDeprecated', 'gitDeleteBranchRequest', gitDeleteBranchRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/branches`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1994,23 +2026,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get commit history from git repository
-     * @summary Get commit history
+     * @summary [DEPRECATED] Get commit history
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitGetHistory: async (
+    gitGetHistoryDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitGetHistory', 'sandboxId', sandboxId)
+      assertParamExists('gitGetHistoryDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('gitGetHistory', 'path', path)
+      assertParamExists('gitGetHistoryDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/history`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2050,23 +2083,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get status from git repository
-     * @summary Get git status
+     * @summary [DEPRECATED] Get git status
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitGetStatus: async (
+    gitGetStatusDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitGetStatus', 'sandboxId', sandboxId)
+      assertParamExists('gitGetStatusDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('gitGetStatus', 'path', path)
+      assertParamExists('gitGetStatusDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/status`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2106,23 +2140,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Get branch list from git repository
-     * @summary Get branch list
+     * @summary [DEPRECATED] Get branch list
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitListBranches: async (
+    gitListBranchesDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitListBranches', 'sandboxId', sandboxId)
+      assertParamExists('gitListBranchesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('gitListBranches', 'path', path)
+      assertParamExists('gitListBranchesDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/branches`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2162,23 +2197,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Pull changes from remote
-     * @summary Pull changes
+     * @summary [DEPRECATED] Pull changes
      * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitPullChanges: async (
+    gitPullChangesDeprecated: async (
       sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitPullChanges', 'sandboxId', sandboxId)
+      assertParamExists('gitPullChangesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitRepoRequest' is not null or undefined
-      assertParamExists('gitPullChanges', 'gitRepoRequest', gitRepoRequest)
+      assertParamExists('gitPullChangesDeprecated', 'gitRepoRequest', gitRepoRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/pull`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2217,23 +2253,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Push changes to remote
-     * @summary Push changes
+     * @summary [DEPRECATED] Push changes
      * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitPushChanges: async (
+    gitPushChangesDeprecated: async (
       sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('gitPushChanges', 'sandboxId', sandboxId)
+      assertParamExists('gitPushChangesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'gitRepoRequest' is not null or undefined
-      assertParamExists('gitPushChanges', 'gitRepoRequest', gitRepoRequest)
+      assertParamExists('gitPushChangesDeprecated', 'gitRepoRequest', gitRepoRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/git/push`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2272,21 +2309,22 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary List files
+     * @summary [DEPRECATED] List files
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [path]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listFiles: async (
+    listFilesDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       path?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('listFiles', 'sandboxId', sandboxId)
+      assertParamExists('listFilesDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2326,19 +2364,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * List all active PTY sessions in the sandbox
-     * @summary List PTY sessions
+     * @summary [DEPRECATED] List PTY sessions
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listPTYSessions: async (
+    listPTYSessionsDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('listPTYSessions', 'sandboxId', sandboxId)
+      assertParamExists('listPTYSessionsDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/pty`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2374,19 +2413,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * List all active sessions in the sandbox
-     * @summary List sessions
+     * @summary [DEPRECATED] List sessions
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listSessions: async (
+    listSessionsDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('listSessions', 'sandboxId', sandboxId)
+      assertParamExists('listSessionsDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2422,23 +2462,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
-     * @summary Get Lsp Completions
+     * @summary [DEPRECATED] Get Lsp Completions
      * @param {string} sandboxId
      * @param {LspCompletionParams} lspCompletionParams
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspCompletions: async (
+    lspCompletionsDeprecated: async (
       sandboxId: string,
       lspCompletionParams: LspCompletionParams,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('lspCompletions', 'sandboxId', sandboxId)
+      assertParamExists('lspCompletionsDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'lspCompletionParams' is not null or undefined
-      assertParamExists('lspCompletions', 'lspCompletionParams', lspCompletionParams)
+      assertParamExists('lspCompletionsDeprecated', 'lspCompletionParams', lspCompletionParams)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/completions`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2477,23 +2518,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * The document close notification is sent from the client to the server when the document got closed in the client.
-     * @summary Call Lsp DidClose
+     * @summary [DEPRECATED] Call Lsp DidClose
      * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspDidClose: async (
+    lspDidCloseDeprecated: async (
       sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('lspDidClose', 'sandboxId', sandboxId)
+      assertParamExists('lspDidCloseDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'lspDocumentRequest' is not null or undefined
-      assertParamExists('lspDidClose', 'lspDocumentRequest', lspDocumentRequest)
+      assertParamExists('lspDidCloseDeprecated', 'lspDocumentRequest', lspDocumentRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/did-close`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2532,23 +2574,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * The document open notification is sent from the client to the server to signal newly opened text documents.
-     * @summary Call Lsp DidOpen
+     * @summary [DEPRECATED] Call Lsp DidOpen
      * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspDidOpen: async (
+    lspDidOpenDeprecated: async (
       sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('lspDidOpen', 'sandboxId', sandboxId)
+      assertParamExists('lspDidOpenDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'lspDocumentRequest' is not null or undefined
-      assertParamExists('lspDidOpen', 'lspDocumentRequest', lspDocumentRequest)
+      assertParamExists('lspDidOpenDeprecated', 'lspDocumentRequest', lspDocumentRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/did-open`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2587,16 +2630,17 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * The document symbol request is sent from the client to the server.
-     * @summary Call Lsp DocumentSymbols
+     * @summary [DEPRECATED] Call Lsp DocumentSymbols
      * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} uri
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspDocumentSymbols: async (
+    lspDocumentSymbolsDeprecated: async (
       sandboxId: string,
       languageId: string,
       pathToProject: string,
@@ -2605,13 +2649,13 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('lspDocumentSymbols', 'sandboxId', sandboxId)
+      assertParamExists('lspDocumentSymbolsDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'languageId' is not null or undefined
-      assertParamExists('lspDocumentSymbols', 'languageId', languageId)
+      assertParamExists('lspDocumentSymbolsDeprecated', 'languageId', languageId)
       // verify required parameter 'pathToProject' is not null or undefined
-      assertParamExists('lspDocumentSymbols', 'pathToProject', pathToProject)
+      assertParamExists('lspDocumentSymbolsDeprecated', 'pathToProject', pathToProject)
       // verify required parameter 'uri' is not null or undefined
-      assertParamExists('lspDocumentSymbols', 'uri', uri)
+      assertParamExists('lspDocumentSymbolsDeprecated', 'uri', uri)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/document-symbols`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2659,23 +2703,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Start Lsp server process inside sandbox project
-     * @summary Start Lsp server
+     * @summary [DEPRECATED] Start Lsp server
      * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspStart: async (
+    lspStartDeprecated: async (
       sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('lspStart', 'sandboxId', sandboxId)
+      assertParamExists('lspStartDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'lspServerRequest' is not null or undefined
-      assertParamExists('lspStart', 'lspServerRequest', lspServerRequest)
+      assertParamExists('lspStartDeprecated', 'lspServerRequest', lspServerRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/start`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2714,23 +2759,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Stop Lsp server process inside sandbox project
-     * @summary Stop Lsp server
+     * @summary [DEPRECATED] Stop Lsp server
      * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspStop: async (
+    lspStopDeprecated: async (
       sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('lspStop', 'sandboxId', sandboxId)
+      assertParamExists('lspStopDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'lspServerRequest' is not null or undefined
-      assertParamExists('lspStop', 'lspServerRequest', lspServerRequest)
+      assertParamExists('lspStopDeprecated', 'lspServerRequest', lspServerRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/stop`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2769,16 +2815,17 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-     * @summary Call Lsp WorkspaceSymbols
+     * @summary [DEPRECATED] Call Lsp WorkspaceSymbols
      * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} query
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspWorkspaceSymbols: async (
+    lspWorkspaceSymbolsDeprecated: async (
       sandboxId: string,
       languageId: string,
       pathToProject: string,
@@ -2787,13 +2834,13 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'sandboxId', sandboxId)
+      assertParamExists('lspWorkspaceSymbolsDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'languageId' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'languageId', languageId)
+      assertParamExists('lspWorkspaceSymbolsDeprecated', 'languageId', languageId)
       // verify required parameter 'pathToProject' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'pathToProject', pathToProject)
+      assertParamExists('lspWorkspaceSymbolsDeprecated', 'pathToProject', pathToProject)
       // verify required parameter 'query' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'query', query)
+      assertParamExists('lspWorkspaceSymbolsDeprecated', 'query', query)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/workspace-symbols`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2841,15 +2888,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Move file inside sandbox
-     * @summary Move file
+     * @summary [DEPRECATED] Move file
      * @param {string} sandboxId
      * @param {string} source
      * @param {string} destination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    moveFile: async (
+    moveFileDeprecated: async (
       sandboxId: string,
       source: string,
       destination: string,
@@ -2857,11 +2905,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('moveFile', 'sandboxId', sandboxId)
+      assertParamExists('moveFileDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'source' is not null or undefined
-      assertParamExists('moveFile', 'source', source)
+      assertParamExists('moveFileDeprecated', 'source', source)
       // verify required parameter 'destination' is not null or undefined
-      assertParamExists('moveFile', 'destination', destination)
+      assertParamExists('moveFileDeprecated', 'destination', destination)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/move`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2905,23 +2953,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Move mouse cursor to specified coordinates
-     * @summary Move mouse
+     * @summary [DEPRECATED] Move mouse
      * @param {string} sandboxId
      * @param {MouseMoveRequest} mouseMoveRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    moveMouse: async (
+    moveMouseDeprecated: async (
       sandboxId: string,
       mouseMoveRequest: MouseMoveRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('moveMouse', 'sandboxId', sandboxId)
+      assertParamExists('moveMouseDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'mouseMoveRequest' is not null or undefined
-      assertParamExists('moveMouse', 'mouseMoveRequest', mouseMoveRequest)
+      assertParamExists('moveMouseDeprecated', 'mouseMoveRequest', mouseMoveRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/move`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -2960,23 +3009,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Press a hotkey combination
-     * @summary Press hotkey
+     * @summary [DEPRECATED] Press hotkey
      * @param {string} sandboxId
      * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    pressHotkey: async (
+    pressHotkeyDeprecated: async (
       sandboxId: string,
       keyboardHotkeyRequest: KeyboardHotkeyRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('pressHotkey', 'sandboxId', sandboxId)
+      assertParamExists('pressHotkeyDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'keyboardHotkeyRequest' is not null or undefined
-      assertParamExists('pressHotkey', 'keyboardHotkeyRequest', keyboardHotkeyRequest)
+      assertParamExists('pressHotkeyDeprecated', 'keyboardHotkeyRequest', keyboardHotkeyRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3015,23 +3065,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Press a key with optional modifiers
-     * @summary Press key
+     * @summary [DEPRECATED] Press key
      * @param {string} sandboxId
      * @param {KeyboardPressRequest} keyboardPressRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    pressKey: async (
+    pressKeyDeprecated: async (
       sandboxId: string,
       keyboardPressRequest: KeyboardPressRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('pressKey', 'sandboxId', sandboxId)
+      assertParamExists('pressKeyDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'keyboardPressRequest' is not null or undefined
-      assertParamExists('pressKey', 'keyboardPressRequest', keyboardPressRequest)
+      assertParamExists('pressKeyDeprecated', 'keyboardPressRequest', keyboardPressRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/key`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3070,23 +3121,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Replace text/pattern in multiple files inside sandbox
-     * @summary Replace in files
+     * @summary [DEPRECATED] Replace in files
      * @param {string} sandboxId
      * @param {ReplaceRequest} replaceRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    replaceInFiles: async (
+    replaceInFilesDeprecated: async (
       sandboxId: string,
       replaceRequest: ReplaceRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('replaceInFiles', 'sandboxId', sandboxId)
+      assertParamExists('replaceInFilesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'replaceRequest' is not null or undefined
-      assertParamExists('replaceInFiles', 'replaceRequest', replaceRequest)
+      assertParamExists('replaceInFilesDeprecated', 'replaceRequest', replaceRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/replace`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3125,15 +3177,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Resize a PTY session
-     * @summary Resize PTY session
+     * @summary [DEPRECATED] Resize PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {PtyResizeRequest} ptyResizeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    resizePTYSession: async (
+    resizePTYSessionDeprecated: async (
       sandboxId: string,
       sessionId: string,
       ptyResizeRequest: PtyResizeRequest,
@@ -3141,11 +3194,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('resizePTYSession', 'sandboxId', sandboxId)
+      assertParamExists('resizePTYSessionDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
-      assertParamExists('resizePTYSession', 'sessionId', sessionId)
+      assertParamExists('resizePTYSessionDeprecated', 'sessionId', sessionId)
       // verify required parameter 'ptyResizeRequest' is not null or undefined
-      assertParamExists('resizePTYSession', 'ptyResizeRequest', ptyResizeRequest)
+      assertParamExists('resizePTYSessionDeprecated', 'ptyResizeRequest', ptyResizeRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
@@ -3183,23 +3236,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Restart a specific VNC process
-     * @summary Restart process
+     * @summary [DEPRECATED] Restart process
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    restartProcess: async (
+    restartProcessDeprecated: async (
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'processName' is not null or undefined
-      assertParamExists('restartProcess', 'processName', processName)
+      assertParamExists('restartProcessDeprecated', 'processName', processName)
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('restartProcess', 'sandboxId', sandboxId)
+      assertParamExists('restartProcessDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart`
         .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
@@ -3234,23 +3288,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Scroll mouse at specified coordinates
-     * @summary Scroll mouse
+     * @summary [DEPRECATED] Scroll mouse
      * @param {string} sandboxId
      * @param {MouseScrollRequest} mouseScrollRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    scrollMouse: async (
+    scrollMouseDeprecated: async (
       sandboxId: string,
       mouseScrollRequest: MouseScrollRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('scrollMouse', 'sandboxId', sandboxId)
+      assertParamExists('scrollMouseDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'mouseScrollRequest' is not null or undefined
-      assertParamExists('scrollMouse', 'mouseScrollRequest', mouseScrollRequest)
+      assertParamExists('scrollMouseDeprecated', 'mouseScrollRequest', mouseScrollRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3289,15 +3344,16 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Search for files inside sandbox
-     * @summary Search files
+     * @summary [DEPRECATED] Search files
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    searchFiles: async (
+    searchFilesDeprecated: async (
       sandboxId: string,
       path: string,
       pattern: string,
@@ -3305,11 +3361,11 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('searchFiles', 'sandboxId', sandboxId)
+      assertParamExists('searchFilesDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('searchFiles', 'path', path)
+      assertParamExists('searchFilesDeprecated', 'path', path)
       // verify required parameter 'pattern' is not null or undefined
-      assertParamExists('searchFiles', 'pattern', pattern)
+      assertParamExists('searchFilesDeprecated', 'pattern', pattern)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/search`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3353,7 +3409,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Set file owner/group/permissions inside sandbox
-     * @summary Set file permissions
+     * @summary [DEPRECATED] Set file permissions
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3361,9 +3417,10 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [group]
      * @param {string} [mode]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    setFilePermissions: async (
+    setFilePermissionsDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
@@ -3373,9 +3430,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('setFilePermissions', 'sandboxId', sandboxId)
+      assertParamExists('setFilePermissionsDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('setFilePermissions', 'path', path)
+      assertParamExists('setFilePermissionsDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/permissions`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3427,19 +3484,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-     * @summary Start computer use processes
+     * @summary [DEPRECATED] Start computer use processes
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    startComputerUse: async (
+    startComputerUseDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('startComputerUse', 'sandboxId', sandboxId)
+      assertParamExists('startComputerUseDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/start`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3475,19 +3533,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-     * @summary Stop computer use processes
+     * @summary [DEPRECATED] Stop computer use processes
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    stopComputerUse: async (
+    stopComputerUseDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('stopComputerUse', 'sandboxId', sandboxId)
+      assertParamExists('stopComputerUseDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/stop`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3523,7 +3582,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Take a compressed screenshot of a specific region
-     * @summary Take compressed region screenshot
+     * @summary [DEPRECATED] Take compressed region screenshot
      * @param {string} sandboxId
      * @param {number} height
      * @param {number} width
@@ -3535,9 +3594,10 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [format]
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeCompressedRegionScreenshot: async (
+    takeCompressedRegionScreenshotDeprecated: async (
       sandboxId: string,
       height: number,
       width: number,
@@ -3551,15 +3611,15 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('takeCompressedRegionScreenshot', 'sandboxId', sandboxId)
+      assertParamExists('takeCompressedRegionScreenshotDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'height' is not null or undefined
-      assertParamExists('takeCompressedRegionScreenshot', 'height', height)
+      assertParamExists('takeCompressedRegionScreenshotDeprecated', 'height', height)
       // verify required parameter 'width' is not null or undefined
-      assertParamExists('takeCompressedRegionScreenshot', 'width', width)
+      assertParamExists('takeCompressedRegionScreenshotDeprecated', 'width', width)
       // verify required parameter 'y' is not null or undefined
-      assertParamExists('takeCompressedRegionScreenshot', 'y', y)
+      assertParamExists('takeCompressedRegionScreenshotDeprecated', 'y', y)
       // verify required parameter 'x' is not null or undefined
-      assertParamExists('takeCompressedRegionScreenshot', 'x', x)
+      assertParamExists('takeCompressedRegionScreenshotDeprecated', 'x', x)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3627,7 +3687,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Take a compressed screenshot with format, quality, and scale options
-     * @summary Take compressed screenshot
+     * @summary [DEPRECATED] Take compressed screenshot
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [scale]
@@ -3635,9 +3695,10 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [format]
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeCompressedScreenshot: async (
+    takeCompressedScreenshotDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       scale?: number,
@@ -3647,7 +3708,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('takeCompressedScreenshot', 'sandboxId', sandboxId)
+      assertParamExists('takeCompressedScreenshotDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3699,7 +3760,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Take a screenshot of a specific region
-     * @summary Take region screenshot
+     * @summary [DEPRECATED] Take region screenshot
      * @param {string} sandboxId
      * @param {number} height
      * @param {number} width
@@ -3708,9 +3769,10 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeRegionScreenshot: async (
+    takeRegionScreenshotDeprecated: async (
       sandboxId: string,
       height: number,
       width: number,
@@ -3721,15 +3783,15 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('takeRegionScreenshot', 'sandboxId', sandboxId)
+      assertParamExists('takeRegionScreenshotDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'height' is not null or undefined
-      assertParamExists('takeRegionScreenshot', 'height', height)
+      assertParamExists('takeRegionScreenshotDeprecated', 'height', height)
       // verify required parameter 'width' is not null or undefined
-      assertParamExists('takeRegionScreenshot', 'width', width)
+      assertParamExists('takeRegionScreenshotDeprecated', 'width', width)
       // verify required parameter 'y' is not null or undefined
-      assertParamExists('takeRegionScreenshot', 'y', y)
+      assertParamExists('takeRegionScreenshotDeprecated', 'y', y)
       // verify required parameter 'x' is not null or undefined
-      assertParamExists('takeRegionScreenshot', 'x', x)
+      assertParamExists('takeRegionScreenshotDeprecated', 'x', x)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot/region`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3785,21 +3847,22 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Take a screenshot of the entire screen
-     * @summary Take screenshot
+     * @summary [DEPRECATED] Take screenshot
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeScreenshot: async (
+    takeScreenshotDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       showCursor?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('takeScreenshot', 'sandboxId', sandboxId)
+      assertParamExists('takeScreenshotDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3839,23 +3902,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Type text using keyboard
-     * @summary Type text
+     * @summary [DEPRECATED] Type text
      * @param {string} sandboxId
      * @param {KeyboardTypeRequest} keyboardTypeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    typeText: async (
+    typeTextDeprecated: async (
       sandboxId: string,
       keyboardTypeRequest: KeyboardTypeRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('typeText', 'sandboxId', sandboxId)
+      assertParamExists('typeTextDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'keyboardTypeRequest' is not null or undefined
-      assertParamExists('typeText', 'keyboardTypeRequest', keyboardTypeRequest)
+      assertParamExists('typeTextDeprecated', 'keyboardTypeRequest', keyboardTypeRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/type`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3894,7 +3958,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Upload file inside sandbox
-     * @summary Upload file
+     * @summary [DEPRECATED] Upload file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3903,7 +3967,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @deprecated
      * @throws {RequiredError}
      */
-    uploadFile: async (
+    uploadFileDeprecated: async (
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
@@ -3911,9 +3975,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('uploadFile', 'sandboxId', sandboxId)
+      assertParamExists('uploadFileDeprecated', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('uploadFile', 'path', path)
+      assertParamExists('uploadFileDeprecated', 'path', path)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/upload`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -3961,19 +4025,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      * Upload multiple files inside sandbox
-     * @summary Upload multiple files
+     * @summary [DEPRECATED] Upload multiple files
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    uploadFiles: async (
+    uploadFilesDeprecated: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('uploadFiles', 'sandboxId', sandboxId)
+      assertParamExists('uploadFilesDeprecated', 'sandboxId', sandboxId)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/files/bulk-upload`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -4019,20 +4084,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
   return {
     /**
      * Click mouse at specified coordinates
-     * @summary Click mouse
+     * @summary [DEPRECATED] Click mouse
      * @param {string} sandboxId
      * @param {MouseClickRequest} mouseClickRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async clickMouse(
+    async clickMouseDeprecated(
       sandboxId: string,
       mouseClickRequest: MouseClickRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseClickResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.clickMouse(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.clickMouseDeprecated(
         sandboxId,
         mouseClickRequest,
         xDaytonaOrganizationID,
@@ -4040,7 +4106,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.clickMouse']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.clickMouseDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4051,22 +4117,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Create folder inside sandbox
-     * @summary Create folder
+     * @summary [DEPRECATED] Create folder
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} mode
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async createFolder(
+    async createFolderDeprecated(
       sandboxId: string,
       path: string,
       mode: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createFolder(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createFolderDeprecated(
         sandboxId,
         path,
         mode,
@@ -4075,7 +4142,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.createFolder']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.createFolderDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4086,20 +4153,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Create a new PTY session in the sandbox
-     * @summary Create PTY session
+     * @summary [DEPRECATED] Create PTY session
      * @param {string} sandboxId
      * @param {PtyCreateRequest} ptyCreateRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async createPTYSession(
+    async createPTYSessionDeprecated(
       sandboxId: string,
       ptyCreateRequest: PtyCreateRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PtyCreateResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createPTYSession(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createPTYSessionDeprecated(
         sandboxId,
         ptyCreateRequest,
         xDaytonaOrganizationID,
@@ -4107,7 +4175,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.createPTYSession']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.createPTYSessionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4118,20 +4186,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Create a new session in the sandbox
-     * @summary Create session
+     * @summary [DEPRECATED] Create session
      * @param {string} sandboxId
      * @param {CreateSessionRequest} createSessionRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async createSession(
+    async createSessionDeprecated(
       sandboxId: string,
       createSessionRequest: CreateSessionRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createSession(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createSessionDeprecated(
         sandboxId,
         createSessionRequest,
         xDaytonaOrganizationID,
@@ -4139,7 +4208,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.createSession']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.createSessionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4150,22 +4219,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Delete file inside sandbox
-     * @summary Delete file
+     * @summary [DEPRECATED] Delete file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [recursive]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async deleteFile(
+    async deleteFileDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       recursive?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteFile(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteFileDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -4174,7 +4244,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.deleteFile']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.deleteFileDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4185,20 +4255,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Delete a PTY session and terminate the associated process
-     * @summary Delete PTY session
+     * @summary [DEPRECATED] Delete PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async deletePTYSession(
+    async deletePTYSessionDeprecated(
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deletePTYSession(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deletePTYSessionDeprecated(
         sandboxId,
         sessionId,
         xDaytonaOrganizationID,
@@ -4206,7 +4277,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.deletePTYSession']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.deletePTYSessionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4217,20 +4288,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Delete a specific session
-     * @summary Delete session
+     * @summary [DEPRECATED] Delete session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async deleteSession(
+    async deleteSessionDeprecated(
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSession(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSessionDeprecated(
         sandboxId,
         sessionId,
         xDaytonaOrganizationID,
@@ -4238,7 +4310,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.deleteSession']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.deleteSessionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4249,7 +4321,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Download file from sandbox
-     * @summary Download file
+     * @summary [DEPRECATED] Download file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4257,13 +4329,13 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @deprecated
      * @throws {RequiredError}
      */
-    async downloadFile(
+    async downloadFileDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.downloadFile(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.downloadFileDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -4271,7 +4343,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.downloadFile']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.downloadFileDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4282,20 +4354,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Streams back a multipart/form-data bundle of the requested paths
-     * @summary Download multiple files
+     * @summary [DEPRECATED] Download multiple files
      * @param {string} sandboxId
      * @param {DownloadFiles} downloadFiles
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async downloadFiles(
+    async downloadFilesDeprecated(
       sandboxId: string,
       downloadFiles: DownloadFiles,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.downloadFiles(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.downloadFilesDeprecated(
         sandboxId,
         downloadFiles,
         xDaytonaOrganizationID,
@@ -4303,7 +4376,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.downloadFiles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.downloadFilesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4314,20 +4387,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Drag mouse from start to end coordinates
-     * @summary Drag mouse
+     * @summary [DEPRECATED] Drag mouse
      * @param {string} sandboxId
      * @param {MouseDragRequest} mouseDragRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async dragMouse(
+    async dragMouseDeprecated(
       sandboxId: string,
       mouseDragRequest: MouseDragRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseDragResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.dragMouse(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.dragMouseDeprecated(
         sandboxId,
         mouseDragRequest,
         xDaytonaOrganizationID,
@@ -4335,7 +4409,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.dragMouse']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.dragMouseDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4346,20 +4420,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Execute command synchronously inside sandbox
-     * @summary Execute command
+     * @summary [DEPRECATED] Execute command
      * @param {string} sandboxId
      * @param {ExecuteRequest} executeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async executeCommand(
+    async executeCommandDeprecated(
       sandboxId: string,
       executeRequest: ExecuteRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.executeCommand(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.executeCommandDeprecated(
         sandboxId,
         executeRequest,
         xDaytonaOrganizationID,
@@ -4367,7 +4442,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.executeCommand']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.executeCommandDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4378,22 +4453,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Execute a command in a specific session
-     * @summary Execute command in session
+     * @summary [DEPRECATED] Execute command in session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {SessionExecuteRequest} sessionExecuteRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async executeSessionCommand(
+    async executeSessionCommandDeprecated(
       sandboxId: string,
       sessionId: string,
       sessionExecuteRequest: SessionExecuteRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionExecuteResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.executeSessionCommand(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.executeSessionCommandDeprecated(
         sandboxId,
         sessionId,
         sessionExecuteRequest,
@@ -4402,7 +4478,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.executeSessionCommand']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.executeSessionCommandDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4413,22 +4489,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Search for text/pattern inside sandbox files
-     * @summary Search for text/pattern in files
+     * @summary [DEPRECATED] Search for text/pattern in files
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async findInFiles(
+    async findInFilesDeprecated(
       sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Match>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.findInFiles(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.findInFilesDeprecated(
         sandboxId,
         path,
         pattern,
@@ -4437,7 +4514,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.findInFiles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.findInFilesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4448,25 +4525,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get status of all VNC desktop processes
-     * @summary Get computer use status
+     * @summary [DEPRECATED] Get computer use status
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getComputerUseStatus(
+    async getComputerUseStatusDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStatusResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getComputerUseStatus(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getComputerUseStatusDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getComputerUseStatus']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getComputerUseStatusDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4477,25 +4555,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get information about displays
-     * @summary Get display info
+     * @summary [DEPRECATED] Get display info
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getDisplayInfo(
+    async getDisplayInfoDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DisplayInfoResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getDisplayInfo(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getDisplayInfoDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getDisplayInfo']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getDisplayInfoDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4506,20 +4585,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get file info inside sandbox
-     * @summary Get file info
+     * @summary [DEPRECATED] Get file info
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getFileInfo(
+    async getFileInfoDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileInfo>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getFileInfo(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getFileInfoDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -4527,7 +4607,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getFileInfo']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getFileInfoDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4538,25 +4618,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get current mouse cursor position
-     * @summary Get mouse position
+     * @summary [DEPRECATED] Get mouse position
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getMousePosition(
+    async getMousePositionDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MousePosition>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getMousePosition(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getMousePositionDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getMousePosition']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getMousePositionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4567,20 +4648,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get PTY session information by ID
-     * @summary Get PTY session
+     * @summary [DEPRECATED] Get PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getPTYSession(
+    async getPTYSessionDeprecated(
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PtySessionInfo>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getPTYSession(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getPTYSessionDeprecated(
         sandboxId,
         sessionId,
         xDaytonaOrganizationID,
@@ -4588,7 +4670,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getPTYSession']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getPTYSessionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4599,20 +4681,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get error logs for a specific VNC process
-     * @summary Get process errors
+     * @summary [DEPRECATED] Get process errors
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getProcessErrors(
+    async getProcessErrorsDeprecated(
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessErrorsResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessErrors(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessErrorsDeprecated(
         processName,
         sandboxId,
         xDaytonaOrganizationID,
@@ -4620,7 +4703,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getProcessErrors']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getProcessErrorsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4631,20 +4714,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get logs for a specific VNC process
-     * @summary Get process logs
+     * @summary [DEPRECATED] Get process logs
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getProcessLogs(
+    async getProcessLogsDeprecated(
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessLogsResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessLogs(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessLogsDeprecated(
         processName,
         sandboxId,
         xDaytonaOrganizationID,
@@ -4652,7 +4736,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getProcessLogs']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getProcessLogsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4663,20 +4747,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get status of a specific VNC process
-     * @summary Get process status
+     * @summary [DEPRECATED] Get process status
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getProcessStatus(
+    async getProcessStatusDeprecated(
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessStatusResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessStatus(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessStatusDeprecated(
         processName,
         sandboxId,
         xDaytonaOrganizationID,
@@ -4684,7 +4769,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getProcessStatus']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getProcessStatusDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4695,58 +4780,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get sandbox project dir
+     * @summary [DEPRECATED] Get sandbox project dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
-    async getProjectDir(
+    async getProjectDirDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectDirResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getProjectDir(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getProjectDirDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getProjectDir']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     * Get session by ID
-     * @summary Get session
-     * @param {string} sandboxId
-     * @param {string} sessionId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getSession(
-      sandboxId: string,
-      sessionId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getSession(
-        sandboxId,
-        sessionId,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getSession']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getProjectDirDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4757,22 +4810,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get session command by ID
-     * @summary Get session command
+     * @summary [DEPRECATED] Get session command
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getSessionCommand(
+    async getSessionCommandDeprecated(
       sandboxId: string,
       sessionId: string,
       commandId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Command>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommand(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommandDeprecated(
         sandboxId,
         sessionId,
         commandId,
@@ -4781,7 +4835,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getSessionCommand']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getSessionCommandDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4792,16 +4846,17 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get logs for a specific command in a session
-     * @summary Get command logs
+     * @summary [DEPRECATED] Get command logs
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getSessionCommandLogs(
+    async getSessionCommandLogsDeprecated(
       sandboxId: string,
       sessionId: string,
       commandId: string,
@@ -4809,7 +4864,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommandLogs(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommandLogsDeprecated(
         sandboxId,
         sessionId,
         commandId,
@@ -4819,7 +4874,40 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getSessionCommandLogs']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getSessionCommandLogsDeprecated']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get session by ID
+     * @summary [DEPRECATED] Get session
+     * @param {string} sandboxId
+     * @param {string} sessionId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    async getSessionDeprecated(
+      sandboxId: string,
+      sessionId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionDeprecated(
+        sandboxId,
+        sessionId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getSessionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4830,25 +4918,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get sandbox user home dir
+     * @summary [DEPRECATED] Get sandbox user home dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getUserHomeDir(
+    async getUserHomeDirDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserHomeDirResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getUserHomeDir(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getUserHomeDirDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getUserHomeDir']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getUserHomeDirDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4859,21 +4948,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get list of open windows
-     * @summary Get windows
+     * @summary [DEPRECATED] Get windows
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getWindows(
+    async getWindowsDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WindowsResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getWindows(sandboxId, xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getWindowsDeprecated(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getWindows']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getWindowsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4884,21 +4978,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get sandbox work-dir
+     * @summary [DEPRECATED] Get sandbox work-dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getWorkDir(
+    async getWorkDirDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkDirResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkDir(sandboxId, xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkDirDeprecated(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getWorkDir']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getWorkDirDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4909,20 +5008,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Add files to git commit
-     * @summary Add files
+     * @summary [DEPRECATED] Add files
      * @param {string} sandboxId
      * @param {GitAddRequest} gitAddRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitAddFiles(
+    async gitAddFilesDeprecated(
       sandboxId: string,
       gitAddRequest: GitAddRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitAddFiles(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitAddFilesDeprecated(
         sandboxId,
         gitAddRequest,
         xDaytonaOrganizationID,
@@ -4930,7 +5030,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitAddFiles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitAddFilesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4941,20 +5041,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Checkout branch or commit in git repository
-     * @summary Checkout branch
+     * @summary [DEPRECATED] Checkout branch
      * @param {string} sandboxId
      * @param {GitCheckoutRequest} gitCheckoutRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitCheckoutBranch(
+    async gitCheckoutBranchDeprecated(
       sandboxId: string,
       gitCheckoutRequest: GitCheckoutRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCheckoutBranch(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCheckoutBranchDeprecated(
         sandboxId,
         gitCheckoutRequest,
         xDaytonaOrganizationID,
@@ -4962,7 +5063,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitCheckoutBranch']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitCheckoutBranchDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4973,20 +5074,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Clone git repository
-     * @summary Clone repository
+     * @summary [DEPRECATED] Clone repository
      * @param {string} sandboxId
      * @param {GitCloneRequest} gitCloneRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitCloneRepository(
+    async gitCloneRepositoryDeprecated(
       sandboxId: string,
       gitCloneRequest: GitCloneRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCloneRepository(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCloneRepositoryDeprecated(
         sandboxId,
         gitCloneRequest,
         xDaytonaOrganizationID,
@@ -4994,7 +5096,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitCloneRepository']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitCloneRepositoryDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5005,20 +5107,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Commit changes to git repository
-     * @summary Commit changes
+     * @summary [DEPRECATED] Commit changes
      * @param {string} sandboxId
      * @param {GitCommitRequest} gitCommitRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitCommitChanges(
+    async gitCommitChangesDeprecated(
       sandboxId: string,
       gitCommitRequest: GitCommitRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GitCommitResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCommitChanges(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCommitChangesDeprecated(
         sandboxId,
         gitCommitRequest,
         xDaytonaOrganizationID,
@@ -5026,7 +5129,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitCommitChanges']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitCommitChangesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5037,20 +5140,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Create branch on git repository
-     * @summary Create branch
+     * @summary [DEPRECATED] Create branch
      * @param {string} sandboxId
      * @param {GitBranchRequest} gitBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitCreateBranch(
+    async gitCreateBranchDeprecated(
       sandboxId: string,
       gitBranchRequest: GitBranchRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCreateBranch(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCreateBranchDeprecated(
         sandboxId,
         gitBranchRequest,
         xDaytonaOrganizationID,
@@ -5058,7 +5162,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitCreateBranch']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitCreateBranchDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5069,20 +5173,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Delete branch on git repository
-     * @summary Delete branch
+     * @summary [DEPRECATED] Delete branch
      * @param {string} sandboxId
      * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitDeleteBranch(
+    async gitDeleteBranchDeprecated(
       sandboxId: string,
       gitDeleteBranchRequest: GitDeleteBranchRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitDeleteBranch(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitDeleteBranchDeprecated(
         sandboxId,
         gitDeleteBranchRequest,
         xDaytonaOrganizationID,
@@ -5090,7 +5195,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitDeleteBranch']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitDeleteBranchDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5101,20 +5206,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get commit history from git repository
-     * @summary Get commit history
+     * @summary [DEPRECATED] Get commit history
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitGetHistory(
+    async gitGetHistoryDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GitCommitInfo>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitGetHistory(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitGetHistoryDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -5122,7 +5228,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitGetHistory']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitGetHistoryDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5133,20 +5239,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get status from git repository
-     * @summary Get git status
+     * @summary [DEPRECATED] Get git status
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitGetStatus(
+    async gitGetStatusDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GitStatus>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitGetStatus(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitGetStatusDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -5154,7 +5261,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitGetStatus']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitGetStatusDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5165,20 +5272,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Get branch list from git repository
-     * @summary Get branch list
+     * @summary [DEPRECATED] Get branch list
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitListBranches(
+    async gitListBranchesDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListBranchResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitListBranches(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitListBranchesDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -5186,7 +5294,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitListBranches']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitListBranchesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5197,20 +5305,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Pull changes from remote
-     * @summary Pull changes
+     * @summary [DEPRECATED] Pull changes
      * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitPullChanges(
+    async gitPullChangesDeprecated(
       sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitPullChanges(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitPullChangesDeprecated(
         sandboxId,
         gitRepoRequest,
         xDaytonaOrganizationID,
@@ -5218,7 +5327,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitPullChanges']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitPullChangesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5229,20 +5338,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Push changes to remote
-     * @summary Push changes
+     * @summary [DEPRECATED] Push changes
      * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async gitPushChanges(
+    async gitPushChangesDeprecated(
       sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.gitPushChanges(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitPushChangesDeprecated(
         sandboxId,
         gitRepoRequest,
         xDaytonaOrganizationID,
@@ -5250,7 +5360,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.gitPushChanges']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.gitPushChangesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5261,20 +5371,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary List files
+     * @summary [DEPRECATED] List files
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [path]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async listFiles(
+    async listFilesDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       path?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileInfo>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listFiles(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listFilesDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         path,
@@ -5282,7 +5393,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.listFiles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.listFilesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5293,25 +5404,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * List all active PTY sessions in the sandbox
-     * @summary List PTY sessions
+     * @summary [DEPRECATED] List PTY sessions
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async listPTYSessions(
+    async listPTYSessionsDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PtyListResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listPTYSessions(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listPTYSessionsDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.listPTYSessions']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.listPTYSessionsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5322,21 +5434,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * List all active sessions in the sandbox
-     * @summary List sessions
+     * @summary [DEPRECATED] List sessions
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async listSessions(
+    async listSessionsDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Session>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listSessions(sandboxId, xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listSessionsDeprecated(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.listSessions']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.listSessionsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5347,20 +5464,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
-     * @summary Get Lsp Completions
+     * @summary [DEPRECATED] Get Lsp Completions
      * @param {string} sandboxId
      * @param {LspCompletionParams} lspCompletionParams
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async lspCompletions(
+    async lspCompletionsDeprecated(
       sandboxId: string,
       lspCompletionParams: LspCompletionParams,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CompletionList>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspCompletions(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspCompletionsDeprecated(
         sandboxId,
         lspCompletionParams,
         xDaytonaOrganizationID,
@@ -5368,7 +5486,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspCompletions']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.lspCompletionsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5379,20 +5497,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * The document close notification is sent from the client to the server when the document got closed in the client.
-     * @summary Call Lsp DidClose
+     * @summary [DEPRECATED] Call Lsp DidClose
      * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async lspDidClose(
+    async lspDidCloseDeprecated(
       sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspDidClose(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspDidCloseDeprecated(
         sandboxId,
         lspDocumentRequest,
         xDaytonaOrganizationID,
@@ -5400,7 +5519,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspDidClose']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.lspDidCloseDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5411,20 +5530,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * The document open notification is sent from the client to the server to signal newly opened text documents.
-     * @summary Call Lsp DidOpen
+     * @summary [DEPRECATED] Call Lsp DidOpen
      * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async lspDidOpen(
+    async lspDidOpenDeprecated(
       sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspDidOpen(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspDidOpenDeprecated(
         sandboxId,
         lspDocumentRequest,
         xDaytonaOrganizationID,
@@ -5432,7 +5552,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspDidOpen']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.lspDidOpenDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5443,16 +5563,17 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * The document symbol request is sent from the client to the server.
-     * @summary Call Lsp DocumentSymbols
+     * @summary [DEPRECATED] Call Lsp DocumentSymbols
      * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} uri
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async lspDocumentSymbols(
+    async lspDocumentSymbolsDeprecated(
       sandboxId: string,
       languageId: string,
       pathToProject: string,
@@ -5460,7 +5581,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<LspSymbol>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspDocumentSymbols(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspDocumentSymbolsDeprecated(
         sandboxId,
         languageId,
         pathToProject,
@@ -5470,7 +5591,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspDocumentSymbols']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.lspDocumentSymbolsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5481,20 +5602,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Start Lsp server process inside sandbox project
-     * @summary Start Lsp server
+     * @summary [DEPRECATED] Start Lsp server
      * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async lspStart(
+    async lspStartDeprecated(
       sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspStart(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspStartDeprecated(
         sandboxId,
         lspServerRequest,
         xDaytonaOrganizationID,
@@ -5502,7 +5624,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspStart']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.lspStartDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5513,20 +5635,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Stop Lsp server process inside sandbox project
-     * @summary Stop Lsp server
+     * @summary [DEPRECATED] Stop Lsp server
      * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async lspStop(
+    async lspStopDeprecated(
       sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspStop(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspStopDeprecated(
         sandboxId,
         lspServerRequest,
         xDaytonaOrganizationID,
@@ -5534,7 +5657,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspStop']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.lspStopDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5545,16 +5668,17 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-     * @summary Call Lsp WorkspaceSymbols
+     * @summary [DEPRECATED] Call Lsp WorkspaceSymbols
      * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} query
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async lspWorkspaceSymbols(
+    async lspWorkspaceSymbolsDeprecated(
       sandboxId: string,
       languageId: string,
       pathToProject: string,
@@ -5562,7 +5686,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<LspSymbol>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspWorkspaceSymbols(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspWorkspaceSymbolsDeprecated(
         sandboxId,
         languageId,
         pathToProject,
@@ -5572,7 +5696,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspWorkspaceSymbols']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.lspWorkspaceSymbolsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5583,22 +5707,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Move file inside sandbox
-     * @summary Move file
+     * @summary [DEPRECATED] Move file
      * @param {string} sandboxId
      * @param {string} source
      * @param {string} destination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async moveFile(
+    async moveFileDeprecated(
       sandboxId: string,
       source: string,
       destination: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.moveFile(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.moveFileDeprecated(
         sandboxId,
         source,
         destination,
@@ -5607,7 +5732,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.moveFile']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.moveFileDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5618,20 +5743,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Move mouse cursor to specified coordinates
-     * @summary Move mouse
+     * @summary [DEPRECATED] Move mouse
      * @param {string} sandboxId
      * @param {MouseMoveRequest} mouseMoveRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async moveMouse(
+    async moveMouseDeprecated(
       sandboxId: string,
       mouseMoveRequest: MouseMoveRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseMoveResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.moveMouse(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.moveMouseDeprecated(
         sandboxId,
         mouseMoveRequest,
         xDaytonaOrganizationID,
@@ -5639,7 +5765,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.moveMouse']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.moveMouseDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5650,20 +5776,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Press a hotkey combination
-     * @summary Press hotkey
+     * @summary [DEPRECATED] Press hotkey
      * @param {string} sandboxId
      * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async pressHotkey(
+    async pressHotkeyDeprecated(
       sandboxId: string,
       keyboardHotkeyRequest: KeyboardHotkeyRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.pressHotkey(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.pressHotkeyDeprecated(
         sandboxId,
         keyboardHotkeyRequest,
         xDaytonaOrganizationID,
@@ -5671,7 +5798,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.pressHotkey']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.pressHotkeyDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5682,20 +5809,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Press a key with optional modifiers
-     * @summary Press key
+     * @summary [DEPRECATED] Press key
      * @param {string} sandboxId
      * @param {KeyboardPressRequest} keyboardPressRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async pressKey(
+    async pressKeyDeprecated(
       sandboxId: string,
       keyboardPressRequest: KeyboardPressRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.pressKey(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.pressKeyDeprecated(
         sandboxId,
         keyboardPressRequest,
         xDaytonaOrganizationID,
@@ -5703,7 +5831,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.pressKey']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.pressKeyDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5714,20 +5842,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Replace text/pattern in multiple files inside sandbox
-     * @summary Replace in files
+     * @summary [DEPRECATED] Replace in files
      * @param {string} sandboxId
      * @param {ReplaceRequest} replaceRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async replaceInFiles(
+    async replaceInFilesDeprecated(
       sandboxId: string,
       replaceRequest: ReplaceRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ReplaceResult>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.replaceInFiles(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.replaceInFilesDeprecated(
         sandboxId,
         replaceRequest,
         xDaytonaOrganizationID,
@@ -5735,7 +5864,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.replaceInFiles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.replaceInFilesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5746,22 +5875,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Resize a PTY session
-     * @summary Resize PTY session
+     * @summary [DEPRECATED] Resize PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {PtyResizeRequest} ptyResizeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async resizePTYSession(
+    async resizePTYSessionDeprecated(
       sandboxId: string,
       sessionId: string,
       ptyResizeRequest: PtyResizeRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PtySessionInfo>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.resizePTYSession(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.resizePTYSessionDeprecated(
         sandboxId,
         sessionId,
         ptyResizeRequest,
@@ -5770,7 +5900,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.resizePTYSession']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.resizePTYSessionDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5781,20 +5911,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Restart a specific VNC process
-     * @summary Restart process
+     * @summary [DEPRECATED] Restart process
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async restartProcess(
+    async restartProcessDeprecated(
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessRestartResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.restartProcess(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.restartProcessDeprecated(
         processName,
         sandboxId,
         xDaytonaOrganizationID,
@@ -5802,7 +5933,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.restartProcess']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.restartProcessDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5813,20 +5944,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Scroll mouse at specified coordinates
-     * @summary Scroll mouse
+     * @summary [DEPRECATED] Scroll mouse
      * @param {string} sandboxId
      * @param {MouseScrollRequest} mouseScrollRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async scrollMouse(
+    async scrollMouseDeprecated(
       sandboxId: string,
       mouseScrollRequest: MouseScrollRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseScrollResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.scrollMouse(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.scrollMouseDeprecated(
         sandboxId,
         mouseScrollRequest,
         xDaytonaOrganizationID,
@@ -5834,7 +5966,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.scrollMouse']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.scrollMouseDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5845,22 +5977,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Search for files inside sandbox
-     * @summary Search files
+     * @summary [DEPRECATED] Search files
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async searchFiles(
+    async searchFilesDeprecated(
       sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SearchFilesResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.searchFiles(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.searchFilesDeprecated(
         sandboxId,
         path,
         pattern,
@@ -5869,7 +6002,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.searchFiles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.searchFilesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5880,7 +6013,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Set file owner/group/permissions inside sandbox
-     * @summary Set file permissions
+     * @summary [DEPRECATED] Set file permissions
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -5888,9 +6021,10 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} [group]
      * @param {string} [mode]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async setFilePermissions(
+    async setFilePermissionsDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
@@ -5899,7 +6033,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       mode?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.setFilePermissions(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.setFilePermissionsDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -5910,7 +6044,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.setFilePermissions']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.setFilePermissionsDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5921,25 +6055,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-     * @summary Start computer use processes
+     * @summary [DEPRECATED] Start computer use processes
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async startComputerUse(
+    async startComputerUseDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStartResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.startComputerUse(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.startComputerUseDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.startComputerUse']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.startComputerUseDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5950,25 +6085,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-     * @summary Stop computer use processes
+     * @summary [DEPRECATED] Stop computer use processes
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async stopComputerUse(
+    async stopComputerUseDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStopResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.stopComputerUse(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.stopComputerUseDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.stopComputerUse']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.stopComputerUseDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5979,7 +6115,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Take a compressed screenshot of a specific region
-     * @summary Take compressed region screenshot
+     * @summary [DEPRECATED] Take compressed region screenshot
      * @param {string} sandboxId
      * @param {number} height
      * @param {number} width
@@ -5991,9 +6127,10 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} [format]
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async takeCompressedRegionScreenshot(
+    async takeCompressedRegionScreenshotDeprecated(
       sandboxId: string,
       height: number,
       width: number,
@@ -6006,7 +6143,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       showCursor?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CompressedScreenshotResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.takeCompressedRegionScreenshot(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeCompressedRegionScreenshotDeprecated(
         sandboxId,
         height,
         width,
@@ -6021,7 +6158,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.takeCompressedRegionScreenshot']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.takeCompressedRegionScreenshotDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -6032,7 +6169,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Take a compressed screenshot with format, quality, and scale options
-     * @summary Take compressed screenshot
+     * @summary [DEPRECATED] Take compressed screenshot
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [scale]
@@ -6040,9 +6177,10 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} [format]
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async takeCompressedScreenshot(
+    async takeCompressedScreenshotDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       scale?: number,
@@ -6051,7 +6189,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       showCursor?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CompressedScreenshotResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.takeCompressedScreenshot(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeCompressedScreenshotDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         scale,
@@ -6062,7 +6200,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.takeCompressedScreenshot']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.takeCompressedScreenshotDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -6073,7 +6211,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Take a screenshot of a specific region
-     * @summary Take region screenshot
+     * @summary [DEPRECATED] Take region screenshot
      * @param {string} sandboxId
      * @param {number} height
      * @param {number} width
@@ -6082,9 +6220,10 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async takeRegionScreenshot(
+    async takeRegionScreenshotDeprecated(
       sandboxId: string,
       height: number,
       width: number,
@@ -6094,7 +6233,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       showCursor?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionScreenshotResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.takeRegionScreenshot(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeRegionScreenshotDeprecated(
         sandboxId,
         height,
         width,
@@ -6106,7 +6245,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.takeRegionScreenshot']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.takeRegionScreenshotDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -6117,20 +6256,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Take a screenshot of the entire screen
-     * @summary Take screenshot
+     * @summary [DEPRECATED] Take screenshot
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async takeScreenshot(
+    async takeScreenshotDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       showCursor?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ScreenshotResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.takeScreenshot(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeScreenshotDeprecated(
         sandboxId,
         xDaytonaOrganizationID,
         showCursor,
@@ -6138,7 +6278,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.takeScreenshot']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.takeScreenshotDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -6149,20 +6289,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Type text using keyboard
-     * @summary Type text
+     * @summary [DEPRECATED] Type text
      * @param {string} sandboxId
      * @param {KeyboardTypeRequest} keyboardTypeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async typeText(
+    async typeTextDeprecated(
       sandboxId: string,
       keyboardTypeRequest: KeyboardTypeRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.typeText(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.typeTextDeprecated(
         sandboxId,
         keyboardTypeRequest,
         xDaytonaOrganizationID,
@@ -6170,7 +6311,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.typeText']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.typeTextDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -6181,7 +6322,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Upload file inside sandbox
-     * @summary Upload file
+     * @summary [DEPRECATED] Upload file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -6190,14 +6331,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @deprecated
      * @throws {RequiredError}
      */
-    async uploadFile(
+    async uploadFileDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       file?: File,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFile(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFileDeprecated(
         sandboxId,
         path,
         xDaytonaOrganizationID,
@@ -6206,7 +6347,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.uploadFile']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.uploadFileDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -6217,21 +6358,26 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      * Upload multiple files inside sandbox
-     * @summary Upload multiple files
+     * @summary [DEPRECATED] Upload multiple files
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async uploadFiles(
+    async uploadFilesDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFiles(sandboxId, xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFilesDeprecated(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.uploadFiles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.uploadFilesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -6252,34 +6398,36 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
   return {
     /**
      * Click mouse at specified coordinates
-     * @summary Click mouse
+     * @summary [DEPRECATED] Click mouse
      * @param {string} sandboxId
      * @param {MouseClickRequest} mouseClickRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    clickMouse(
+    clickMouseDeprecated(
       sandboxId: string,
       mouseClickRequest: MouseClickRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<MouseClickResponse> {
       return localVarFp
-        .clickMouse(sandboxId, mouseClickRequest, xDaytonaOrganizationID, options)
+        .clickMouseDeprecated(sandboxId, mouseClickRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Create folder inside sandbox
-     * @summary Create folder
+     * @summary [DEPRECATED] Create folder
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} mode
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createFolder(
+    createFolderDeprecated(
       sandboxId: string,
       path: string,
       mode: string,
@@ -6287,58 +6435,61 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .createFolder(sandboxId, path, mode, xDaytonaOrganizationID, options)
+        .createFolderDeprecated(sandboxId, path, mode, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Create a new PTY session in the sandbox
-     * @summary Create PTY session
+     * @summary [DEPRECATED] Create PTY session
      * @param {string} sandboxId
      * @param {PtyCreateRequest} ptyCreateRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createPTYSession(
+    createPTYSessionDeprecated(
       sandboxId: string,
       ptyCreateRequest: PtyCreateRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PtyCreateResponse> {
       return localVarFp
-        .createPTYSession(sandboxId, ptyCreateRequest, xDaytonaOrganizationID, options)
+        .createPTYSessionDeprecated(sandboxId, ptyCreateRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Create a new session in the sandbox
-     * @summary Create session
+     * @summary [DEPRECATED] Create session
      * @param {string} sandboxId
      * @param {CreateSessionRequest} createSessionRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createSession(
+    createSessionDeprecated(
       sandboxId: string,
       createSessionRequest: CreateSessionRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .createSession(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
+        .createSessionDeprecated(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Delete file inside sandbox
-     * @summary Delete file
+     * @summary [DEPRECATED] Delete file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [recursive]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deleteFile(
+    deleteFileDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
@@ -6346,50 +6497,52 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deleteFile(sandboxId, path, xDaytonaOrganizationID, recursive, options)
+        .deleteFileDeprecated(sandboxId, path, xDaytonaOrganizationID, recursive, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Delete a PTY session and terminate the associated process
-     * @summary Delete PTY session
+     * @summary [DEPRECATED] Delete PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deletePTYSession(
+    deletePTYSessionDeprecated(
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deletePTYSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
+        .deletePTYSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Delete a specific session
-     * @summary Delete session
+     * @summary [DEPRECATED] Delete session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deleteSession(
+    deleteSessionDeprecated(
       sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deleteSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
+        .deleteSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Download file from sandbox
-     * @summary Download file
+     * @summary [DEPRECATED] Download file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -6397,84 +6550,88 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @deprecated
      * @throws {RequiredError}
      */
-    downloadFile(
+    downloadFileDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<File> {
       return localVarFp
-        .downloadFile(sandboxId, path, xDaytonaOrganizationID, options)
+        .downloadFileDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Streams back a multipart/form-data bundle of the requested paths
-     * @summary Download multiple files
+     * @summary [DEPRECATED] Download multiple files
      * @param {string} sandboxId
      * @param {DownloadFiles} downloadFiles
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    downloadFiles(
+    downloadFilesDeprecated(
       sandboxId: string,
       downloadFiles: DownloadFiles,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<File> {
       return localVarFp
-        .downloadFiles(sandboxId, downloadFiles, xDaytonaOrganizationID, options)
+        .downloadFilesDeprecated(sandboxId, downloadFiles, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Drag mouse from start to end coordinates
-     * @summary Drag mouse
+     * @summary [DEPRECATED] Drag mouse
      * @param {string} sandboxId
      * @param {MouseDragRequest} mouseDragRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    dragMouse(
+    dragMouseDeprecated(
       sandboxId: string,
       mouseDragRequest: MouseDragRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<MouseDragResponse> {
       return localVarFp
-        .dragMouse(sandboxId, mouseDragRequest, xDaytonaOrganizationID, options)
+        .dragMouseDeprecated(sandboxId, mouseDragRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Execute command synchronously inside sandbox
-     * @summary Execute command
+     * @summary [DEPRECATED] Execute command
      * @param {string} sandboxId
      * @param {ExecuteRequest} executeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    executeCommand(
+    executeCommandDeprecated(
       sandboxId: string,
       executeRequest: ExecuteRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ExecuteResponse> {
       return localVarFp
-        .executeCommand(sandboxId, executeRequest, xDaytonaOrganizationID, options)
+        .executeCommandDeprecated(sandboxId, executeRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Execute a command in a specific session
-     * @summary Execute command in session
+     * @summary [DEPRECATED] Execute command in session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {SessionExecuteRequest} sessionExecuteRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    executeSessionCommand(
+    executeSessionCommandDeprecated(
       sandboxId: string,
       sessionId: string,
       sessionExecuteRequest: SessionExecuteRequest,
@@ -6482,20 +6639,21 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<SessionExecuteResponse> {
       return localVarFp
-        .executeSessionCommand(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
+        .executeSessionCommandDeprecated(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Search for text/pattern inside sandbox files
-     * @summary Search for text/pattern in files
+     * @summary [DEPRECATED] Search for text/pattern in files
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    findInFiles(
+    findInFilesDeprecated(
       sandboxId: string,
       path: string,
       pattern: string,
@@ -6503,203 +6661,193 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<Match>> {
       return localVarFp
-        .findInFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
+        .findInFilesDeprecated(sandboxId, path, pattern, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get status of all VNC desktop processes
-     * @summary Get computer use status
-     * @param {string} sandboxId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getComputerUseStatus(
-      sandboxId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<ComputerUseStatusResponse> {
-      return localVarFp
-        .getComputerUseStatus(sandboxId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get information about displays
-     * @summary Get display info
-     * @param {string} sandboxId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getDisplayInfo(
-      sandboxId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<DisplayInfoResponse> {
-      return localVarFp
-        .getDisplayInfo(sandboxId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get file info inside sandbox
-     * @summary Get file info
-     * @param {string} sandboxId
-     * @param {string} path
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getFileInfo(
-      sandboxId: string,
-      path: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<FileInfo> {
-      return localVarFp
-        .getFileInfo(sandboxId, path, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get current mouse cursor position
-     * @summary Get mouse position
-     * @param {string} sandboxId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getMousePosition(
-      sandboxId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<MousePosition> {
-      return localVarFp
-        .getMousePosition(sandboxId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get PTY session information by ID
-     * @summary Get PTY session
-     * @param {string} sandboxId
-     * @param {string} sessionId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getPTYSession(
-      sandboxId: string,
-      sessionId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<PtySessionInfo> {
-      return localVarFp
-        .getPTYSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get error logs for a specific VNC process
-     * @summary Get process errors
-     * @param {string} processName
-     * @param {string} sandboxId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getProcessErrors(
-      processName: string,
-      sandboxId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<ProcessErrorsResponse> {
-      return localVarFp
-        .getProcessErrors(processName, sandboxId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get logs for a specific VNC process
-     * @summary Get process logs
-     * @param {string} processName
-     * @param {string} sandboxId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getProcessLogs(
-      processName: string,
-      sandboxId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<ProcessLogsResponse> {
-      return localVarFp
-        .getProcessLogs(processName, sandboxId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get status of a specific VNC process
-     * @summary Get process status
-     * @param {string} processName
-     * @param {string} sandboxId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getProcessStatus(
-      processName: string,
-      sandboxId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<ProcessStatusResponse> {
-      return localVarFp
-        .getProcessStatus(processName, sandboxId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get sandbox project dir
+     * @summary [DEPRECATED] Get computer use status
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
-    getProjectDir(
+    getComputerUseStatusDeprecated(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ComputerUseStatusResponse> {
+      return localVarFp
+        .getComputerUseStatusDeprecated(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get information about displays
+     * @summary [DEPRECATED] Get display info
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getDisplayInfoDeprecated(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<DisplayInfoResponse> {
+      return localVarFp
+        .getDisplayInfoDeprecated(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get file info inside sandbox
+     * @summary [DEPRECATED] Get file info
+     * @param {string} sandboxId
+     * @param {string} path
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getFileInfoDeprecated(
+      sandboxId: string,
+      path: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<FileInfo> {
+      return localVarFp
+        .getFileInfoDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get current mouse cursor position
+     * @summary [DEPRECATED] Get mouse position
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getMousePositionDeprecated(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<MousePosition> {
+      return localVarFp
+        .getMousePositionDeprecated(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get PTY session information by ID
+     * @summary [DEPRECATED] Get PTY session
+     * @param {string} sandboxId
+     * @param {string} sessionId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getPTYSessionDeprecated(
+      sandboxId: string,
+      sessionId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PtySessionInfo> {
+      return localVarFp
+        .getPTYSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get error logs for a specific VNC process
+     * @summary [DEPRECATED] Get process errors
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getProcessErrorsDeprecated(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ProcessErrorsResponse> {
+      return localVarFp
+        .getProcessErrorsDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get logs for a specific VNC process
+     * @summary [DEPRECATED] Get process logs
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getProcessLogsDeprecated(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ProcessLogsResponse> {
+      return localVarFp
+        .getProcessLogsDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get status of a specific VNC process
+     * @summary [DEPRECATED] Get process status
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getProcessStatusDeprecated(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ProcessStatusResponse> {
+      return localVarFp
+        .getProcessStatusDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary [DEPRECATED] Get sandbox project dir
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getProjectDirDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ProjectDirResponse> {
       return localVarFp
-        .getProjectDir(sandboxId, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Get session by ID
-     * @summary Get session
-     * @param {string} sandboxId
-     * @param {string} sessionId
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSession(
-      sandboxId: string,
-      sessionId: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Session> {
-      return localVarFp
-        .getSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
+        .getProjectDirDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get session command by ID
-     * @summary Get session command
+     * @summary [DEPRECATED] Get session command
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getSessionCommand(
+    getSessionCommandDeprecated(
       sandboxId: string,
       sessionId: string,
       commandId: string,
@@ -6707,21 +6855,22 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Command> {
       return localVarFp
-        .getSessionCommand(sandboxId, sessionId, commandId, xDaytonaOrganizationID, options)
+        .getSessionCommandDeprecated(sandboxId, sessionId, commandId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get logs for a specific command in a session
-     * @summary Get command logs
+     * @summary [DEPRECATED] Get command logs
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getSessionCommandLogs(
+    getSessionCommandLogsDeprecated(
       sandboxId: string,
       sessionId: string,
       commandId: string,
@@ -6730,391 +6879,432 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<string> {
       return localVarFp
-        .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+        .getSessionCommandLogsDeprecated(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get session by ID
+     * @summary [DEPRECATED] Get session
+     * @param {string} sandboxId
+     * @param {string} sessionId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @deprecated
+     * @throws {RequiredError}
+     */
+    getSessionDeprecated(
+      sandboxId: string,
+      sessionId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Session> {
+      return localVarFp
+        .getSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Get sandbox user home dir
+     * @summary [DEPRECATED] Get sandbox user home dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getUserHomeDir(
+    getUserHomeDirDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<UserHomeDirResponse> {
       return localVarFp
-        .getUserHomeDir(sandboxId, xDaytonaOrganizationID, options)
+        .getUserHomeDirDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get list of open windows
-     * @summary Get windows
+     * @summary [DEPRECATED] Get windows
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getWindows(
+    getWindowsDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<WindowsResponse> {
       return localVarFp
-        .getWindows(sandboxId, xDaytonaOrganizationID, options)
+        .getWindowsDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Get sandbox work-dir
+     * @summary [DEPRECATED] Get sandbox work-dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getWorkDir(
+    getWorkDirDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<WorkDirResponse> {
       return localVarFp
-        .getWorkDir(sandboxId, xDaytonaOrganizationID, options)
+        .getWorkDirDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Add files to git commit
-     * @summary Add files
+     * @summary [DEPRECATED] Add files
      * @param {string} sandboxId
      * @param {GitAddRequest} gitAddRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitAddFiles(
+    gitAddFilesDeprecated(
       sandboxId: string,
       gitAddRequest: GitAddRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitAddFiles(sandboxId, gitAddRequest, xDaytonaOrganizationID, options)
+        .gitAddFilesDeprecated(sandboxId, gitAddRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Checkout branch or commit in git repository
-     * @summary Checkout branch
+     * @summary [DEPRECATED] Checkout branch
      * @param {string} sandboxId
      * @param {GitCheckoutRequest} gitCheckoutRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCheckoutBranch(
+    gitCheckoutBranchDeprecated(
       sandboxId: string,
       gitCheckoutRequest: GitCheckoutRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitCheckoutBranch(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, options)
+        .gitCheckoutBranchDeprecated(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Clone git repository
-     * @summary Clone repository
+     * @summary [DEPRECATED] Clone repository
      * @param {string} sandboxId
      * @param {GitCloneRequest} gitCloneRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCloneRepository(
+    gitCloneRepositoryDeprecated(
       sandboxId: string,
       gitCloneRequest: GitCloneRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitCloneRepository(sandboxId, gitCloneRequest, xDaytonaOrganizationID, options)
+        .gitCloneRepositoryDeprecated(sandboxId, gitCloneRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Commit changes to git repository
-     * @summary Commit changes
+     * @summary [DEPRECATED] Commit changes
      * @param {string} sandboxId
      * @param {GitCommitRequest} gitCommitRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCommitChanges(
+    gitCommitChangesDeprecated(
       sandboxId: string,
       gitCommitRequest: GitCommitRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<GitCommitResponse> {
       return localVarFp
-        .gitCommitChanges(sandboxId, gitCommitRequest, xDaytonaOrganizationID, options)
+        .gitCommitChangesDeprecated(sandboxId, gitCommitRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Create branch on git repository
-     * @summary Create branch
+     * @summary [DEPRECATED] Create branch
      * @param {string} sandboxId
      * @param {GitBranchRequest} gitBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitCreateBranch(
+    gitCreateBranchDeprecated(
       sandboxId: string,
       gitBranchRequest: GitBranchRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitCreateBranch(sandboxId, gitBranchRequest, xDaytonaOrganizationID, options)
+        .gitCreateBranchDeprecated(sandboxId, gitBranchRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Delete branch on git repository
-     * @summary Delete branch
+     * @summary [DEPRECATED] Delete branch
      * @param {string} sandboxId
      * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitDeleteBranch(
+    gitDeleteBranchDeprecated(
       sandboxId: string,
       gitDeleteBranchRequest: GitDeleteBranchRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitDeleteBranch(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID, options)
+        .gitDeleteBranchDeprecated(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get commit history from git repository
-     * @summary Get commit history
+     * @summary [DEPRECATED] Get commit history
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitGetHistory(
+    gitGetHistoryDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<GitCommitInfo>> {
       return localVarFp
-        .gitGetHistory(sandboxId, path, xDaytonaOrganizationID, options)
+        .gitGetHistoryDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get status from git repository
-     * @summary Get git status
+     * @summary [DEPRECATED] Get git status
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitGetStatus(
+    gitGetStatusDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<GitStatus> {
       return localVarFp
-        .gitGetStatus(sandboxId, path, xDaytonaOrganizationID, options)
+        .gitGetStatusDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get branch list from git repository
-     * @summary Get branch list
+     * @summary [DEPRECATED] Get branch list
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitListBranches(
+    gitListBranchesDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ListBranchResponse> {
       return localVarFp
-        .gitListBranches(sandboxId, path, xDaytonaOrganizationID, options)
+        .gitListBranchesDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Pull changes from remote
-     * @summary Pull changes
+     * @summary [DEPRECATED] Pull changes
      * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitPullChanges(
+    gitPullChangesDeprecated(
       sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitPullChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
+        .gitPullChangesDeprecated(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Push changes to remote
-     * @summary Push changes
+     * @summary [DEPRECATED] Push changes
      * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    gitPushChanges(
+    gitPushChangesDeprecated(
       sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitPushChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
+        .gitPushChangesDeprecated(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary List files
+     * @summary [DEPRECATED] List files
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [path]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listFiles(
+    listFilesDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       path?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<FileInfo>> {
       return localVarFp
-        .listFiles(sandboxId, xDaytonaOrganizationID, path, options)
+        .listFilesDeprecated(sandboxId, xDaytonaOrganizationID, path, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * List all active PTY sessions in the sandbox
-     * @summary List PTY sessions
+     * @summary [DEPRECATED] List PTY sessions
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listPTYSessions(
+    listPTYSessionsDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PtyListResponse> {
       return localVarFp
-        .listPTYSessions(sandboxId, xDaytonaOrganizationID, options)
+        .listPTYSessionsDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * List all active sessions in the sandbox
-     * @summary List sessions
+     * @summary [DEPRECATED] List sessions
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listSessions(
+    listSessionsDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<Session>> {
       return localVarFp
-        .listSessions(sandboxId, xDaytonaOrganizationID, options)
+        .listSessionsDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
-     * @summary Get Lsp Completions
+     * @summary [DEPRECATED] Get Lsp Completions
      * @param {string} sandboxId
      * @param {LspCompletionParams} lspCompletionParams
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspCompletions(
+    lspCompletionsDeprecated(
       sandboxId: string,
       lspCompletionParams: LspCompletionParams,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<CompletionList> {
       return localVarFp
-        .lspCompletions(sandboxId, lspCompletionParams, xDaytonaOrganizationID, options)
+        .lspCompletionsDeprecated(sandboxId, lspCompletionParams, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The document close notification is sent from the client to the server when the document got closed in the client.
-     * @summary Call Lsp DidClose
+     * @summary [DEPRECATED] Call Lsp DidClose
      * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspDidClose(
+    lspDidCloseDeprecated(
       sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .lspDidClose(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
+        .lspDidCloseDeprecated(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The document open notification is sent from the client to the server to signal newly opened text documents.
-     * @summary Call Lsp DidOpen
+     * @summary [DEPRECATED] Call Lsp DidOpen
      * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspDidOpen(
+    lspDidOpenDeprecated(
       sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .lspDidOpen(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
+        .lspDidOpenDeprecated(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The document symbol request is sent from the client to the server.
-     * @summary Call Lsp DocumentSymbols
+     * @summary [DEPRECATED] Call Lsp DocumentSymbols
      * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} uri
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspDocumentSymbols(
+    lspDocumentSymbolsDeprecated(
       sandboxId: string,
       languageId: string,
       pathToProject: string,
@@ -7123,59 +7313,62 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<LspSymbol>> {
       return localVarFp
-        .lspDocumentSymbols(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
+        .lspDocumentSymbolsDeprecated(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Start Lsp server process inside sandbox project
-     * @summary Start Lsp server
+     * @summary [DEPRECATED] Start Lsp server
      * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspStart(
+    lspStartDeprecated(
       sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .lspStart(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+        .lspStartDeprecated(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Stop Lsp server process inside sandbox project
-     * @summary Stop Lsp server
+     * @summary [DEPRECATED] Stop Lsp server
      * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspStop(
+    lspStopDeprecated(
       sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .lspStop(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+        .lspStopDeprecated(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-     * @summary Call Lsp WorkspaceSymbols
+     * @summary [DEPRECATED] Call Lsp WorkspaceSymbols
      * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} query
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    lspWorkspaceSymbols(
+    lspWorkspaceSymbolsDeprecated(
       sandboxId: string,
       languageId: string,
       pathToProject: string,
@@ -7184,20 +7377,21 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<LspSymbol>> {
       return localVarFp
-        .lspWorkspaceSymbols(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
+        .lspWorkspaceSymbolsDeprecated(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Move file inside sandbox
-     * @summary Move file
+     * @summary [DEPRECATED] Move file
      * @param {string} sandboxId
      * @param {string} source
      * @param {string} destination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    moveFile(
+    moveFileDeprecated(
       sandboxId: string,
       source: string,
       destination: string,
@@ -7205,96 +7399,101 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .moveFile(sandboxId, source, destination, xDaytonaOrganizationID, options)
+        .moveFileDeprecated(sandboxId, source, destination, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Move mouse cursor to specified coordinates
-     * @summary Move mouse
+     * @summary [DEPRECATED] Move mouse
      * @param {string} sandboxId
      * @param {MouseMoveRequest} mouseMoveRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    moveMouse(
+    moveMouseDeprecated(
       sandboxId: string,
       mouseMoveRequest: MouseMoveRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<MouseMoveResponse> {
       return localVarFp
-        .moveMouse(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, options)
+        .moveMouseDeprecated(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Press a hotkey combination
-     * @summary Press hotkey
+     * @summary [DEPRECATED] Press hotkey
      * @param {string} sandboxId
      * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    pressHotkey(
+    pressHotkeyDeprecated(
       sandboxId: string,
       keyboardHotkeyRequest: KeyboardHotkeyRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .pressHotkey(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
+        .pressHotkeyDeprecated(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Press a key with optional modifiers
-     * @summary Press key
+     * @summary [DEPRECATED] Press key
      * @param {string} sandboxId
      * @param {KeyboardPressRequest} keyboardPressRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    pressKey(
+    pressKeyDeprecated(
       sandboxId: string,
       keyboardPressRequest: KeyboardPressRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .pressKey(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
+        .pressKeyDeprecated(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Replace text/pattern in multiple files inside sandbox
-     * @summary Replace in files
+     * @summary [DEPRECATED] Replace in files
      * @param {string} sandboxId
      * @param {ReplaceRequest} replaceRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    replaceInFiles(
+    replaceInFilesDeprecated(
       sandboxId: string,
       replaceRequest: ReplaceRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<ReplaceResult>> {
       return localVarFp
-        .replaceInFiles(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
+        .replaceInFilesDeprecated(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Resize a PTY session
-     * @summary Resize PTY session
+     * @summary [DEPRECATED] Resize PTY session
      * @param {string} sandboxId
      * @param {string} sessionId
      * @param {PtyResizeRequest} ptyResizeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    resizePTYSession(
+    resizePTYSessionDeprecated(
       sandboxId: string,
       sessionId: string,
       ptyResizeRequest: PtyResizeRequest,
@@ -7302,58 +7501,61 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PtySessionInfo> {
       return localVarFp
-        .resizePTYSession(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID, options)
+        .resizePTYSessionDeprecated(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Restart a specific VNC process
-     * @summary Restart process
+     * @summary [DEPRECATED] Restart process
      * @param {string} processName
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    restartProcess(
+    restartProcessDeprecated(
       processName: string,
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ProcessRestartResponse> {
       return localVarFp
-        .restartProcess(processName, sandboxId, xDaytonaOrganizationID, options)
+        .restartProcessDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Scroll mouse at specified coordinates
-     * @summary Scroll mouse
+     * @summary [DEPRECATED] Scroll mouse
      * @param {string} sandboxId
      * @param {MouseScrollRequest} mouseScrollRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    scrollMouse(
+    scrollMouseDeprecated(
       sandboxId: string,
       mouseScrollRequest: MouseScrollRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<MouseScrollResponse> {
       return localVarFp
-        .scrollMouse(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
+        .scrollMouseDeprecated(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Search for files inside sandbox
-     * @summary Search files
+     * @summary [DEPRECATED] Search files
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    searchFiles(
+    searchFilesDeprecated(
       sandboxId: string,
       path: string,
       pattern: string,
@@ -7361,12 +7563,12 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<SearchFilesResponse> {
       return localVarFp
-        .searchFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
+        .searchFilesDeprecated(sandboxId, path, pattern, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Set file owner/group/permissions inside sandbox
-     * @summary Set file permissions
+     * @summary [DEPRECATED] Set file permissions
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -7374,9 +7576,10 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [group]
      * @param {string} [mode]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    setFilePermissions(
+    setFilePermissionsDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
@@ -7386,46 +7589,48 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .setFilePermissions(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
+        .setFilePermissionsDeprecated(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-     * @summary Start computer use processes
+     * @summary [DEPRECATED] Start computer use processes
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    startComputerUse(
+    startComputerUseDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ComputerUseStartResponse> {
       return localVarFp
-        .startComputerUse(sandboxId, xDaytonaOrganizationID, options)
+        .startComputerUseDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-     * @summary Stop computer use processes
+     * @summary [DEPRECATED] Stop computer use processes
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    stopComputerUse(
+    stopComputerUseDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ComputerUseStopResponse> {
       return localVarFp
-        .stopComputerUse(sandboxId, xDaytonaOrganizationID, options)
+        .stopComputerUseDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Take a compressed screenshot of a specific region
-     * @summary Take compressed region screenshot
+     * @summary [DEPRECATED] Take compressed region screenshot
      * @param {string} sandboxId
      * @param {number} height
      * @param {number} width
@@ -7437,9 +7642,10 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [format]
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeCompressedRegionScreenshot(
+    takeCompressedRegionScreenshotDeprecated(
       sandboxId: string,
       height: number,
       width: number,
@@ -7453,7 +7659,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<CompressedScreenshotResponse> {
       return localVarFp
-        .takeCompressedRegionScreenshot(
+        .takeCompressedRegionScreenshotDeprecated(
           sandboxId,
           height,
           width,
@@ -7470,7 +7676,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      * Take a compressed screenshot with format, quality, and scale options
-     * @summary Take compressed screenshot
+     * @summary [DEPRECATED] Take compressed screenshot
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [scale]
@@ -7478,9 +7684,10 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [format]
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeCompressedScreenshot(
+    takeCompressedScreenshotDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       scale?: number,
@@ -7490,12 +7697,20 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<CompressedScreenshotResponse> {
       return localVarFp
-        .takeCompressedScreenshot(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor, options)
+        .takeCompressedScreenshotDeprecated(
+          sandboxId,
+          xDaytonaOrganizationID,
+          scale,
+          quality,
+          format,
+          showCursor,
+          options,
+        )
         .then((request) => request(axios, basePath))
     },
     /**
      * Take a screenshot of a specific region
-     * @summary Take region screenshot
+     * @summary [DEPRECATED] Take region screenshot
      * @param {string} sandboxId
      * @param {number} height
      * @param {number} width
@@ -7504,9 +7719,10 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeRegionScreenshot(
+    takeRegionScreenshotDeprecated(
       sandboxId: string,
       height: number,
       width: number,
@@ -7517,50 +7733,52 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<RegionScreenshotResponse> {
       return localVarFp
-        .takeRegionScreenshot(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, options)
+        .takeRegionScreenshotDeprecated(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Take a screenshot of the entire screen
-     * @summary Take screenshot
+     * @summary [DEPRECATED] Take screenshot
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [showCursor]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    takeScreenshot(
+    takeScreenshotDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       showCursor?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ScreenshotResponse> {
       return localVarFp
-        .takeScreenshot(sandboxId, xDaytonaOrganizationID, showCursor, options)
+        .takeScreenshotDeprecated(sandboxId, xDaytonaOrganizationID, showCursor, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Type text using keyboard
-     * @summary Type text
+     * @summary [DEPRECATED] Type text
      * @param {string} sandboxId
      * @param {KeyboardTypeRequest} keyboardTypeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    typeText(
+    typeTextDeprecated(
       sandboxId: string,
       keyboardTypeRequest: KeyboardTypeRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .typeText(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
+        .typeTextDeprecated(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Upload file inside sandbox
-     * @summary Upload file
+     * @summary [DEPRECATED] Upload file
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -7569,7 +7787,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @deprecated
      * @throws {RequiredError}
      */
-    uploadFile(
+    uploadFileDeprecated(
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
@@ -7577,24 +7795,25 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .uploadFile(sandboxId, path, xDaytonaOrganizationID, file, options)
+        .uploadFileDeprecated(sandboxId, path, xDaytonaOrganizationID, file, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Upload multiple files inside sandbox
-     * @summary Upload multiple files
+     * @summary [DEPRECATED] Upload multiple files
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    uploadFiles(
+    uploadFilesDeprecated(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .uploadFiles(sandboxId, xDaytonaOrganizationID, options)
+        .uploadFilesDeprecated(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -7609,37 +7828,39 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
 export class ToolboxApi extends BaseAPI {
   /**
    * Click mouse at specified coordinates
-   * @summary Click mouse
+   * @summary [DEPRECATED] Click mouse
    * @param {string} sandboxId
    * @param {MouseClickRequest} mouseClickRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public clickMouse(
+  public clickMouseDeprecated(
     sandboxId: string,
     mouseClickRequest: MouseClickRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .clickMouse(sandboxId, mouseClickRequest, xDaytonaOrganizationID, options)
+      .clickMouseDeprecated(sandboxId, mouseClickRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Create folder inside sandbox
-   * @summary Create folder
+   * @summary [DEPRECATED] Create folder
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} mode
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public createFolder(
+  public createFolderDeprecated(
     sandboxId: string,
     path: string,
     mode: string,
@@ -7647,64 +7868,67 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .createFolder(sandboxId, path, mode, xDaytonaOrganizationID, options)
+      .createFolderDeprecated(sandboxId, path, mode, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Create a new PTY session in the sandbox
-   * @summary Create PTY session
+   * @summary [DEPRECATED] Create PTY session
    * @param {string} sandboxId
    * @param {PtyCreateRequest} ptyCreateRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public createPTYSession(
+  public createPTYSessionDeprecated(
     sandboxId: string,
     ptyCreateRequest: PtyCreateRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .createPTYSession(sandboxId, ptyCreateRequest, xDaytonaOrganizationID, options)
+      .createPTYSessionDeprecated(sandboxId, ptyCreateRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Create a new session in the sandbox
-   * @summary Create session
+   * @summary [DEPRECATED] Create session
    * @param {string} sandboxId
    * @param {CreateSessionRequest} createSessionRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public createSession(
+  public createSessionDeprecated(
     sandboxId: string,
     createSessionRequest: CreateSessionRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .createSession(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
+      .createSessionDeprecated(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Delete file inside sandbox
-   * @summary Delete file
+   * @summary [DEPRECATED] Delete file
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [recursive]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public deleteFile(
+  public deleteFileDeprecated(
     sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
@@ -7712,55 +7936,57 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .deleteFile(sandboxId, path, xDaytonaOrganizationID, recursive, options)
+      .deleteFileDeprecated(sandboxId, path, xDaytonaOrganizationID, recursive, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Delete a PTY session and terminate the associated process
-   * @summary Delete PTY session
+   * @summary [DEPRECATED] Delete PTY session
    * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public deletePTYSession(
+  public deletePTYSessionDeprecated(
     sandboxId: string,
     sessionId: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .deletePTYSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
+      .deletePTYSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Delete a specific session
-   * @summary Delete session
+   * @summary [DEPRECATED] Delete session
    * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public deleteSession(
+  public deleteSessionDeprecated(
     sandboxId: string,
     sessionId: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .deleteSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
+      .deleteSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Download file from sandbox
-   * @summary Download file
+   * @summary [DEPRECATED] Download file
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -7769,92 +7995,96 @@ export class ToolboxApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public downloadFile(
+  public downloadFileDeprecated(
     sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .downloadFile(sandboxId, path, xDaytonaOrganizationID, options)
+      .downloadFileDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Streams back a multipart/form-data bundle of the requested paths
-   * @summary Download multiple files
+   * @summary [DEPRECATED] Download multiple files
    * @param {string} sandboxId
    * @param {DownloadFiles} downloadFiles
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public downloadFiles(
+  public downloadFilesDeprecated(
     sandboxId: string,
     downloadFiles: DownloadFiles,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .downloadFiles(sandboxId, downloadFiles, xDaytonaOrganizationID, options)
+      .downloadFilesDeprecated(sandboxId, downloadFiles, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Drag mouse from start to end coordinates
-   * @summary Drag mouse
+   * @summary [DEPRECATED] Drag mouse
    * @param {string} sandboxId
    * @param {MouseDragRequest} mouseDragRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public dragMouse(
+  public dragMouseDeprecated(
     sandboxId: string,
     mouseDragRequest: MouseDragRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .dragMouse(sandboxId, mouseDragRequest, xDaytonaOrganizationID, options)
+      .dragMouseDeprecated(sandboxId, mouseDragRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Execute command synchronously inside sandbox
-   * @summary Execute command
+   * @summary [DEPRECATED] Execute command
    * @param {string} sandboxId
    * @param {ExecuteRequest} executeRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public executeCommand(
+  public executeCommandDeprecated(
     sandboxId: string,
     executeRequest: ExecuteRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .executeCommand(sandboxId, executeRequest, xDaytonaOrganizationID, options)
+      .executeCommandDeprecated(sandboxId, executeRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Execute a command in a specific session
-   * @summary Execute command in session
+   * @summary [DEPRECATED] Execute command in session
    * @param {string} sandboxId
    * @param {string} sessionId
    * @param {SessionExecuteRequest} sessionExecuteRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public executeSessionCommand(
+  public executeSessionCommandDeprecated(
     sandboxId: string,
     sessionId: string,
     sessionExecuteRequest: SessionExecuteRequest,
@@ -7862,22 +8092,23 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .executeSessionCommand(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
+      .executeSessionCommandDeprecated(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Search for text/pattern inside sandbox files
-   * @summary Search for text/pattern in files
+   * @summary [DEPRECATED] Search for text/pattern in files
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} pattern
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public findInFiles(
+  public findInFilesDeprecated(
     sandboxId: string,
     path: string,
     pattern: string,
@@ -7885,163 +8116,13 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .findInFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
+      .findInFilesDeprecated(sandboxId, path, pattern, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get status of all VNC desktop processes
-   * @summary Get computer use status
-   * @param {string} sandboxId
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getComputerUseStatus(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return ToolboxApiFp(this.configuration)
-      .getComputerUseStatus(sandboxId, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Get information about displays
-   * @summary Get display info
-   * @param {string} sandboxId
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getDisplayInfo(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return ToolboxApiFp(this.configuration)
-      .getDisplayInfo(sandboxId, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Get file info inside sandbox
-   * @summary Get file info
-   * @param {string} sandboxId
-   * @param {string} path
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getFileInfo(
-    sandboxId: string,
-    path: string,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .getFileInfo(sandboxId, path, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Get current mouse cursor position
-   * @summary Get mouse position
-   * @param {string} sandboxId
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getMousePosition(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return ToolboxApiFp(this.configuration)
-      .getMousePosition(sandboxId, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Get PTY session information by ID
-   * @summary Get PTY session
-   * @param {string} sandboxId
-   * @param {string} sessionId
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getPTYSession(
-    sandboxId: string,
-    sessionId: string,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .getPTYSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Get error logs for a specific VNC process
-   * @summary Get process errors
-   * @param {string} processName
-   * @param {string} sandboxId
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getProcessErrors(
-    processName: string,
-    sandboxId: string,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .getProcessErrors(processName, sandboxId, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Get logs for a specific VNC process
-   * @summary Get process logs
-   * @param {string} processName
-   * @param {string} sandboxId
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getProcessLogs(
-    processName: string,
-    sandboxId: string,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .getProcessLogs(processName, sandboxId, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Get status of a specific VNC process
-   * @summary Get process status
-   * @param {string} processName
-   * @param {string} sandboxId
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public getProcessStatus(
-    processName: string,
-    sandboxId: string,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .getProcessStatus(processName, sandboxId, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   *
-   * @summary Get sandbox project dir
+   * @summary [DEPRECATED] Get computer use status
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -8049,45 +8130,191 @@ export class ToolboxApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getProjectDir(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getComputerUseStatusDeprecated(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return ToolboxApiFp(this.configuration)
-      .getProjectDir(sandboxId, xDaytonaOrganizationID, options)
+      .getComputerUseStatusDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Get session by ID
-   * @summary Get session
+   * Get information about displays
+   * @summary [DEPRECATED] Get display info
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getDisplayInfoDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .getDisplayInfoDeprecated(sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get file info inside sandbox
+   * @summary [DEPRECATED] Get file info
+   * @param {string} sandboxId
+   * @param {string} path
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getFileInfoDeprecated(
+    sandboxId: string,
+    path: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getFileInfoDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get current mouse cursor position
+   * @summary [DEPRECATED] Get mouse position
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getMousePositionDeprecated(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getMousePositionDeprecated(sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get PTY session information by ID
+   * @summary [DEPRECATED] Get PTY session
    * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getSession(
+  public getPTYSessionDeprecated(
     sandboxId: string,
     sessionId: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .getSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
+      .getPTYSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get error logs for a specific VNC process
+   * @summary [DEPRECATED] Get process errors
+   * @param {string} processName
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getProcessErrorsDeprecated(
+    processName: string,
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getProcessErrorsDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get logs for a specific VNC process
+   * @summary [DEPRECATED] Get process logs
+   * @param {string} processName
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getProcessLogsDeprecated(
+    processName: string,
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getProcessLogsDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get status of a specific VNC process
+   * @summary [DEPRECATED] Get process status
+   * @param {string} processName
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getProcessStatusDeprecated(
+    processName: string,
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getProcessStatusDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary [DEPRECATED] Get sandbox project dir
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getProjectDirDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .getProjectDirDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get session command by ID
-   * @summary Get session command
+   * @summary [DEPRECATED] Get session command
    * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} commandId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getSessionCommand(
+  public getSessionCommandDeprecated(
     sandboxId: string,
     sessionId: string,
     commandId: string,
@@ -8095,23 +8322,24 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .getSessionCommand(sandboxId, sessionId, commandId, xDaytonaOrganizationID, options)
+      .getSessionCommandDeprecated(sandboxId, sessionId, commandId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get logs for a specific command in a session
-   * @summary Get command logs
+   * @summary [DEPRECATED] Get command logs
    * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} commandId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [follow] Whether to stream the logs
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getSessionCommandLogs(
+  public getSessionCommandLogsDeprecated(
     sandboxId: string,
     sessionId: string,
     commandId: string,
@@ -8120,408 +8348,460 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+      .getSessionCommandLogsDeprecated(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get session by ID
+   * @summary [DEPRECATED] Get session
+   * @param {string} sandboxId
+   * @param {string} sessionId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @deprecated
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getSessionDeprecated(
+    sandboxId: string,
+    sessionId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getSessionDeprecated(sandboxId, sessionId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Get sandbox user home dir
+   * @summary [DEPRECATED] Get sandbox user home dir
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getUserHomeDir(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getUserHomeDirDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .getUserHomeDir(sandboxId, xDaytonaOrganizationID, options)
+      .getUserHomeDirDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get list of open windows
-   * @summary Get windows
+   * @summary [DEPRECATED] Get windows
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getWindows(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getWindowsDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .getWindows(sandboxId, xDaytonaOrganizationID, options)
+      .getWindowsDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Get sandbox work-dir
+   * @summary [DEPRECATED] Get sandbox work-dir
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getWorkDir(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getWorkDirDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .getWorkDir(sandboxId, xDaytonaOrganizationID, options)
+      .getWorkDirDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Add files to git commit
-   * @summary Add files
+   * @summary [DEPRECATED] Add files
    * @param {string} sandboxId
    * @param {GitAddRequest} gitAddRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitAddFiles(
+  public gitAddFilesDeprecated(
     sandboxId: string,
     gitAddRequest: GitAddRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitAddFiles(sandboxId, gitAddRequest, xDaytonaOrganizationID, options)
+      .gitAddFilesDeprecated(sandboxId, gitAddRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Checkout branch or commit in git repository
-   * @summary Checkout branch
+   * @summary [DEPRECATED] Checkout branch
    * @param {string} sandboxId
    * @param {GitCheckoutRequest} gitCheckoutRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitCheckoutBranch(
+  public gitCheckoutBranchDeprecated(
     sandboxId: string,
     gitCheckoutRequest: GitCheckoutRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCheckoutBranch(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, options)
+      .gitCheckoutBranchDeprecated(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Clone git repository
-   * @summary Clone repository
+   * @summary [DEPRECATED] Clone repository
    * @param {string} sandboxId
    * @param {GitCloneRequest} gitCloneRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitCloneRepository(
+  public gitCloneRepositoryDeprecated(
     sandboxId: string,
     gitCloneRequest: GitCloneRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCloneRepository(sandboxId, gitCloneRequest, xDaytonaOrganizationID, options)
+      .gitCloneRepositoryDeprecated(sandboxId, gitCloneRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Commit changes to git repository
-   * @summary Commit changes
+   * @summary [DEPRECATED] Commit changes
    * @param {string} sandboxId
    * @param {GitCommitRequest} gitCommitRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitCommitChanges(
+  public gitCommitChangesDeprecated(
     sandboxId: string,
     gitCommitRequest: GitCommitRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCommitChanges(sandboxId, gitCommitRequest, xDaytonaOrganizationID, options)
+      .gitCommitChangesDeprecated(sandboxId, gitCommitRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Create branch on git repository
-   * @summary Create branch
+   * @summary [DEPRECATED] Create branch
    * @param {string} sandboxId
    * @param {GitBranchRequest} gitBranchRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitCreateBranch(
+  public gitCreateBranchDeprecated(
     sandboxId: string,
     gitBranchRequest: GitBranchRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCreateBranch(sandboxId, gitBranchRequest, xDaytonaOrganizationID, options)
+      .gitCreateBranchDeprecated(sandboxId, gitBranchRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Delete branch on git repository
-   * @summary Delete branch
+   * @summary [DEPRECATED] Delete branch
    * @param {string} sandboxId
    * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitDeleteBranch(
+  public gitDeleteBranchDeprecated(
     sandboxId: string,
     gitDeleteBranchRequest: GitDeleteBranchRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitDeleteBranch(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID, options)
+      .gitDeleteBranchDeprecated(sandboxId, gitDeleteBranchRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get commit history from git repository
-   * @summary Get commit history
+   * @summary [DEPRECATED] Get commit history
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitGetHistory(
+  public gitGetHistoryDeprecated(
     sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitGetHistory(sandboxId, path, xDaytonaOrganizationID, options)
+      .gitGetHistoryDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get status from git repository
-   * @summary Get git status
+   * @summary [DEPRECATED] Get git status
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitGetStatus(
+  public gitGetStatusDeprecated(
     sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitGetStatus(sandboxId, path, xDaytonaOrganizationID, options)
+      .gitGetStatusDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get branch list from git repository
-   * @summary Get branch list
+   * @summary [DEPRECATED] Get branch list
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitListBranches(
+  public gitListBranchesDeprecated(
     sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitListBranches(sandboxId, path, xDaytonaOrganizationID, options)
+      .gitListBranchesDeprecated(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Pull changes from remote
-   * @summary Pull changes
+   * @summary [DEPRECATED] Pull changes
    * @param {string} sandboxId
    * @param {GitRepoRequest} gitRepoRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitPullChanges(
+  public gitPullChangesDeprecated(
     sandboxId: string,
     gitRepoRequest: GitRepoRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitPullChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
+      .gitPullChangesDeprecated(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Push changes to remote
-   * @summary Push changes
+   * @summary [DEPRECATED] Push changes
    * @param {string} sandboxId
    * @param {GitRepoRequest} gitRepoRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public gitPushChanges(
+  public gitPushChangesDeprecated(
     sandboxId: string,
     gitRepoRequest: GitRepoRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitPushChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
+      .gitPushChangesDeprecated(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary List files
+   * @summary [DEPRECATED] List files
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {string} [path]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public listFiles(sandboxId: string, xDaytonaOrganizationID?: string, path?: string, options?: RawAxiosRequestConfig) {
+  public listFilesDeprecated(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    path?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return ToolboxApiFp(this.configuration)
-      .listFiles(sandboxId, xDaytonaOrganizationID, path, options)
+      .listFilesDeprecated(sandboxId, xDaytonaOrganizationID, path, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * List all active PTY sessions in the sandbox
-   * @summary List PTY sessions
+   * @summary [DEPRECATED] List PTY sessions
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public listPTYSessions(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public listPTYSessionsDeprecated(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return ToolboxApiFp(this.configuration)
-      .listPTYSessions(sandboxId, xDaytonaOrganizationID, options)
+      .listPTYSessionsDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * List all active sessions in the sandbox
-   * @summary List sessions
+   * @summary [DEPRECATED] List sessions
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public listSessions(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public listSessionsDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .listSessions(sandboxId, xDaytonaOrganizationID, options)
+      .listSessionsDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
-   * @summary Get Lsp Completions
+   * @summary [DEPRECATED] Get Lsp Completions
    * @param {string} sandboxId
    * @param {LspCompletionParams} lspCompletionParams
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspCompletions(
+  public lspCompletionsDeprecated(
     sandboxId: string,
     lspCompletionParams: LspCompletionParams,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspCompletions(sandboxId, lspCompletionParams, xDaytonaOrganizationID, options)
+      .lspCompletionsDeprecated(sandboxId, lspCompletionParams, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The document close notification is sent from the client to the server when the document got closed in the client.
-   * @summary Call Lsp DidClose
+   * @summary [DEPRECATED] Call Lsp DidClose
    * @param {string} sandboxId
    * @param {LspDocumentRequest} lspDocumentRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspDidClose(
+  public lspDidCloseDeprecated(
     sandboxId: string,
     lspDocumentRequest: LspDocumentRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspDidClose(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
+      .lspDidCloseDeprecated(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The document open notification is sent from the client to the server to signal newly opened text documents.
-   * @summary Call Lsp DidOpen
+   * @summary [DEPRECATED] Call Lsp DidOpen
    * @param {string} sandboxId
    * @param {LspDocumentRequest} lspDocumentRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspDidOpen(
+  public lspDidOpenDeprecated(
     sandboxId: string,
     lspDocumentRequest: LspDocumentRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspDidOpen(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
+      .lspDidOpenDeprecated(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The document symbol request is sent from the client to the server.
-   * @summary Call Lsp DocumentSymbols
+   * @summary [DEPRECATED] Call Lsp DocumentSymbols
    * @param {string} sandboxId
    * @param {string} languageId
    * @param {string} pathToProject
    * @param {string} uri
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspDocumentSymbols(
+  public lspDocumentSymbolsDeprecated(
     sandboxId: string,
     languageId: string,
     pathToProject: string,
@@ -8530,65 +8810,68 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspDocumentSymbols(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
+      .lspDocumentSymbolsDeprecated(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Start Lsp server process inside sandbox project
-   * @summary Start Lsp server
+   * @summary [DEPRECATED] Start Lsp server
    * @param {string} sandboxId
    * @param {LspServerRequest} lspServerRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspStart(
+  public lspStartDeprecated(
     sandboxId: string,
     lspServerRequest: LspServerRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspStart(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+      .lspStartDeprecated(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Stop Lsp server process inside sandbox project
-   * @summary Stop Lsp server
+   * @summary [DEPRECATED] Stop Lsp server
    * @param {string} sandboxId
    * @param {LspServerRequest} lspServerRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspStop(
+  public lspStopDeprecated(
     sandboxId: string,
     lspServerRequest: LspServerRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspStop(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+      .lspStopDeprecated(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-   * @summary Call Lsp WorkspaceSymbols
+   * @summary [DEPRECATED] Call Lsp WorkspaceSymbols
    * @param {string} sandboxId
    * @param {string} languageId
    * @param {string} pathToProject
    * @param {string} query
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspWorkspaceSymbols(
+  public lspWorkspaceSymbolsDeprecated(
     sandboxId: string,
     languageId: string,
     pathToProject: string,
@@ -8597,22 +8880,23 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspWorkspaceSymbols(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
+      .lspWorkspaceSymbolsDeprecated(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Move file inside sandbox
-   * @summary Move file
+   * @summary [DEPRECATED] Move file
    * @param {string} sandboxId
    * @param {string} source
    * @param {string} destination
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public moveFile(
+  public moveFileDeprecated(
     sandboxId: string,
     source: string,
     destination: string,
@@ -8620,106 +8904,111 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .moveFile(sandboxId, source, destination, xDaytonaOrganizationID, options)
+      .moveFileDeprecated(sandboxId, source, destination, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Move mouse cursor to specified coordinates
-   * @summary Move mouse
+   * @summary [DEPRECATED] Move mouse
    * @param {string} sandboxId
    * @param {MouseMoveRequest} mouseMoveRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public moveMouse(
+  public moveMouseDeprecated(
     sandboxId: string,
     mouseMoveRequest: MouseMoveRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .moveMouse(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, options)
+      .moveMouseDeprecated(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Press a hotkey combination
-   * @summary Press hotkey
+   * @summary [DEPRECATED] Press hotkey
    * @param {string} sandboxId
    * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public pressHotkey(
+  public pressHotkeyDeprecated(
     sandboxId: string,
     keyboardHotkeyRequest: KeyboardHotkeyRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .pressHotkey(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
+      .pressHotkeyDeprecated(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Press a key with optional modifiers
-   * @summary Press key
+   * @summary [DEPRECATED] Press key
    * @param {string} sandboxId
    * @param {KeyboardPressRequest} keyboardPressRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public pressKey(
+  public pressKeyDeprecated(
     sandboxId: string,
     keyboardPressRequest: KeyboardPressRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .pressKey(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
+      .pressKeyDeprecated(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Replace text/pattern in multiple files inside sandbox
-   * @summary Replace in files
+   * @summary [DEPRECATED] Replace in files
    * @param {string} sandboxId
    * @param {ReplaceRequest} replaceRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public replaceInFiles(
+  public replaceInFilesDeprecated(
     sandboxId: string,
     replaceRequest: ReplaceRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .replaceInFiles(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
+      .replaceInFilesDeprecated(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Resize a PTY session
-   * @summary Resize PTY session
+   * @summary [DEPRECATED] Resize PTY session
    * @param {string} sandboxId
    * @param {string} sessionId
    * @param {PtyResizeRequest} ptyResizeRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public resizePTYSession(
+  public resizePTYSessionDeprecated(
     sandboxId: string,
     sessionId: string,
     ptyResizeRequest: PtyResizeRequest,
@@ -8727,64 +9016,67 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .resizePTYSession(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID, options)
+      .resizePTYSessionDeprecated(sandboxId, sessionId, ptyResizeRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Restart a specific VNC process
-   * @summary Restart process
+   * @summary [DEPRECATED] Restart process
    * @param {string} processName
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public restartProcess(
+  public restartProcessDeprecated(
     processName: string,
     sandboxId: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .restartProcess(processName, sandboxId, xDaytonaOrganizationID, options)
+      .restartProcessDeprecated(processName, sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Scroll mouse at specified coordinates
-   * @summary Scroll mouse
+   * @summary [DEPRECATED] Scroll mouse
    * @param {string} sandboxId
    * @param {MouseScrollRequest} mouseScrollRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public scrollMouse(
+  public scrollMouseDeprecated(
     sandboxId: string,
     mouseScrollRequest: MouseScrollRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .scrollMouse(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
+      .scrollMouseDeprecated(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Search for files inside sandbox
-   * @summary Search files
+   * @summary [DEPRECATED] Search files
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} pattern
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public searchFiles(
+  public searchFilesDeprecated(
     sandboxId: string,
     path: string,
     pattern: string,
@@ -8792,13 +9084,13 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .searchFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
+      .searchFilesDeprecated(sandboxId, path, pattern, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Set file owner/group/permissions inside sandbox
-   * @summary Set file permissions
+   * @summary [DEPRECATED] Set file permissions
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -8806,10 +9098,11 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} [group]
    * @param {string} [mode]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public setFilePermissions(
+  public setFilePermissionsDeprecated(
     sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
@@ -8819,43 +9112,53 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .setFilePermissions(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
+      .setFilePermissionsDeprecated(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-   * @summary Start computer use processes
+   * @summary [DEPRECATED] Start computer use processes
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public startComputerUse(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public startComputerUseDeprecated(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return ToolboxApiFp(this.configuration)
-      .startComputerUse(sandboxId, xDaytonaOrganizationID, options)
+      .startComputerUseDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
-   * @summary Stop computer use processes
+   * @summary [DEPRECATED] Stop computer use processes
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public stopComputerUse(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public stopComputerUseDeprecated(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return ToolboxApiFp(this.configuration)
-      .stopComputerUse(sandboxId, xDaytonaOrganizationID, options)
+      .stopComputerUseDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Take a compressed screenshot of a specific region
-   * @summary Take compressed region screenshot
+   * @summary [DEPRECATED] Take compressed region screenshot
    * @param {string} sandboxId
    * @param {number} height
    * @param {number} width
@@ -8867,10 +9170,11 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} [format]
    * @param {boolean} [showCursor]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public takeCompressedRegionScreenshot(
+  public takeCompressedRegionScreenshotDeprecated(
     sandboxId: string,
     height: number,
     width: number,
@@ -8884,7 +9188,7 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .takeCompressedRegionScreenshot(
+      .takeCompressedRegionScreenshotDeprecated(
         sandboxId,
         height,
         width,
@@ -8902,7 +9206,7 @@ export class ToolboxApi extends BaseAPI {
 
   /**
    * Take a compressed screenshot with format, quality, and scale options
-   * @summary Take compressed screenshot
+   * @summary [DEPRECATED] Take compressed screenshot
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {number} [scale]
@@ -8910,10 +9214,11 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} [format]
    * @param {boolean} [showCursor]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public takeCompressedScreenshot(
+  public takeCompressedScreenshotDeprecated(
     sandboxId: string,
     xDaytonaOrganizationID?: string,
     scale?: number,
@@ -8923,13 +9228,21 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .takeCompressedScreenshot(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor, options)
+      .takeCompressedScreenshotDeprecated(
+        sandboxId,
+        xDaytonaOrganizationID,
+        scale,
+        quality,
+        format,
+        showCursor,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Take a screenshot of a specific region
-   * @summary Take region screenshot
+   * @summary [DEPRECATED] Take region screenshot
    * @param {string} sandboxId
    * @param {number} height
    * @param {number} width
@@ -8938,10 +9251,11 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [showCursor]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public takeRegionScreenshot(
+  public takeRegionScreenshotDeprecated(
     sandboxId: string,
     height: number,
     width: number,
@@ -8952,55 +9266,57 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .takeRegionScreenshot(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, options)
+      .takeRegionScreenshotDeprecated(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Take a screenshot of the entire screen
-   * @summary Take screenshot
+   * @summary [DEPRECATED] Take screenshot
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [showCursor]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public takeScreenshot(
+  public takeScreenshotDeprecated(
     sandboxId: string,
     xDaytonaOrganizationID?: string,
     showCursor?: boolean,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .takeScreenshot(sandboxId, xDaytonaOrganizationID, showCursor, options)
+      .takeScreenshotDeprecated(sandboxId, xDaytonaOrganizationID, showCursor, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Type text using keyboard
-   * @summary Type text
+   * @summary [DEPRECATED] Type text
    * @param {string} sandboxId
    * @param {KeyboardTypeRequest} keyboardTypeRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public typeText(
+  public typeTextDeprecated(
     sandboxId: string,
     keyboardTypeRequest: KeyboardTypeRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .typeText(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
+      .typeTextDeprecated(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Upload file inside sandbox
-   * @summary Upload file
+   * @summary [DEPRECATED] Upload file
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -9010,7 +9326,7 @@ export class ToolboxApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public uploadFile(
+  public uploadFileDeprecated(
     sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
@@ -9018,22 +9334,23 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .uploadFile(sandboxId, path, xDaytonaOrganizationID, file, options)
+      .uploadFileDeprecated(sandboxId, path, xDaytonaOrganizationID, file, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Upload multiple files inside sandbox
-   * @summary Upload multiple files
+   * @summary [DEPRECATED] Upload multiple files
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public uploadFiles(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public uploadFilesDeprecated(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .uploadFiles(sandboxId, xDaytonaOrganizationID, options)
+      .uploadFilesDeprecated(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

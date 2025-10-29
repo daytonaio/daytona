@@ -69,7 +69,7 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest, args PreviewL
 		log.Infof("Checking if server is running - port: %d", *args.Port)
 
 		checkCmd := fmt.Sprintf("curl -s -o /dev/null -w '%%{http_code}' http://localhost:%d --max-time 2 || echo 'error'", *args.Port)
-		result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).ExecuteRequest(*apiclient.NewExecuteRequest(checkCmd)).Execute()
+		result, _, err := apiClient.ToolboxAPI.ExecuteCommandDeprecated(ctx, *args.Id).ExecuteRequest(*apiclient.NewExecuteRequest(checkCmd)).Execute()
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error checking server: %v", err)
 		}
@@ -80,7 +80,7 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest, args PreviewL
 
 			// Check what might be using the port
 			psCmd := fmt.Sprintf("ps aux | grep ':%d' | grep -v grep || echo 'No process found'", *args.Port)
-			psResult, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).ExecuteRequest(*apiclient.NewExecuteRequest(psCmd)).Execute()
+			psResult, _, err := apiClient.ToolboxAPI.ExecuteCommandDeprecated(ctx, *args.Id).ExecuteRequest(*apiclient.NewExecuteRequest(psCmd)).Execute()
 			if err != nil {
 				return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error checking processes: %v", err)
 			}
@@ -100,7 +100,7 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest, args PreviewL
 	var statusCode string
 	if checkServer {
 		checkCmd := fmt.Sprintf("curl -s -o /dev/null -w '%%{http_code}' %s --max-time 3 || echo 'error'", previewURL.Url)
-		result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).ExecuteRequest(*apiclient.NewExecuteRequest(checkCmd)).Execute()
+		result, _, err := apiClient.ToolboxAPI.ExecuteCommandDeprecated(ctx, *args.Id).ExecuteRequest(*apiclient.NewExecuteRequest(checkCmd)).Execute()
 		if err != nil {
 			log.Errorf("Error checking preview URL: %v", err)
 		} else {

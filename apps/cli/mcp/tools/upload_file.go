@@ -74,7 +74,7 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest, args FileUploa
 
 	// Check if file exists and handle overwrite
 	if !overwrite {
-		fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *args.Id).Path(*args.FilePath).Execute()
+		fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfoDeprecated(ctx, *args.Id).Path(*args.FilePath).Execute()
 		if err == nil && fileInfo != nil {
 			return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file '%s' already exists and overwrite=false", *args.FilePath)
 		}
@@ -96,7 +96,7 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest, args FileUploa
 	// Create parent directories if they don't exist
 	parentDir := filepath.Dir(*args.FilePath)
 	if parentDir != "" {
-		_, err := apiClient.ToolboxAPI.CreateFolder(ctx, *args.Id).Path(parentDir).Mode("0755").Execute()
+		_, err := apiClient.ToolboxAPI.CreateFolderDeprecated(ctx, *args.Id).Path(parentDir).Mode("0755").Execute()
 		if err != nil {
 			log.Errorf("Error creating parent directory: %v", err)
 			// Continue anyway as upload might handle this
@@ -122,13 +122,13 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest, args FileUploa
 	}
 
 	// Upload the file
-	_, err = apiClient.ToolboxAPI.UploadFile(ctx, *args.Id).Path(*args.FilePath).File(tempFile).Execute()
+	_, err = apiClient.ToolboxAPI.UploadFileDeprecated(ctx, *args.Id).Path(*args.FilePath).File(tempFile).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error uploading file: %v", err)
 	}
 
 	// Get file info for size
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *args.Id).Path(*args.FilePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfoDeprecated(ctx, *args.Id).Path(*args.FilePath).Execute()
 	if err != nil {
 		log.Errorf("Error getting file info after upload: %v", err)
 
