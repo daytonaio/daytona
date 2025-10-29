@@ -78,9 +78,5 @@ func GetConfig() (*Config, error) {
 		}
 	}
 
-	if config.ToolboxOnlyMode {
-		config.ToolboxOnlyMode = true
-	}
-
 	return config, nil
 }
