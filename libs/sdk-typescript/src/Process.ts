@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Configuration } from '@daytonaio/api-client'
 import {
+  Configuration,
   ProcessApi,
   Command,
   Session,

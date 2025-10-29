@@ -11,7 +11,7 @@ import {
   ReplaceRequest,
   ReplaceResult,
   SearchFilesResponse,
-} from '@daytonaio/api-client'
+} from '@daytonaio/toolbox-api-client'
 import FormData from 'form-data'
 import { FileSystemApi } from '@daytonaio/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
