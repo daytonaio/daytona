@@ -943,9 +943,7 @@ export class SandboxService {
   }
 
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
-    // Fetch to get actual ID for consistent locking
-    const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
-    const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')

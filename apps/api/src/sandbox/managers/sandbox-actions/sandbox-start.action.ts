@@ -670,9 +670,13 @@ export class SandboxStartAction extends SandboxAction {
         id: sandbox.id,
       })
       sandboxToUpdate.prevRunnerId = null
-      await this.sandboxRepository.update(sandbox.id, {
+      const result = await this.sandboxRepository.update(sandbox.id, {
         prevRunnerId: null,
       })
+      if (!result.affected) {
+        this.logger.error(`Failed to update sandbox ${sandbox.id} to remove previous runner ${sandbox.prevRunnerId}`)
+      }
+      return
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
