@@ -48,7 +48,7 @@ func CreateFolder(ctx context.Context, request mcp.CallToolRequest, args CreateF
 	}
 
 	// Create the folder
-	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, *args.Id).Path(*args.FolderPath).Mode(*args.Mode).Execute()
+	_, err = apiClient.ToolboxAPI.CreateFolderDeprecated(ctx, *args.Id).Path(*args.FolderPath).Mode(*args.Mode).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error creating folder: %v", err)
 	}

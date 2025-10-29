@@ -42,7 +42,7 @@ func DeleteFile(ctx context.Context, request mcp.CallToolRequest, args DeleteFil
 	}
 
 	// Execute delete command
-	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).
+	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommandDeprecated(ctx, *args.Id).
 		ExecuteRequest(*apiclient.NewExecuteRequest(fmt.Sprintf("rm -rf %s", *args.FilePath))).
 		Execute()
 	if err != nil {

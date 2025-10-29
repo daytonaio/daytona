@@ -19,7 +19,6 @@ import { DockerRegistryService } from '../../../docker-registry/services/docker-
 import { DockerRegistry } from '../../../docker-registry/entities/docker-registry.entity'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
-import { ToolboxService } from '../../services/toolbox.service'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Snapshot } from '../../entities/snapshot.entity'
 import { OrganizationService } from '../../../organization/services/organization.service'
@@ -36,7 +35,6 @@ export class SandboxStartAction extends SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
-    protected toolboxService: ToolboxService,
     protected readonly dockerProvider: DockerProvider,
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
@@ -44,7 +42,7 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly configService: TypedConfigService,
     protected readonly redisLockProvider: RedisLockProvider,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redisLockProvider)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {

@@ -52,7 +52,7 @@ func GitClone(ctx context.Context, request mcp.CallToolRequest, args GitCloneArg
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	_, err = apiClient.ToolboxAPI.GitCloneRepository(ctx, *args.Id).GitCloneRequest(*gitCloneRequest).Execute()
+	_, err = apiClient.ToolboxAPI.GitCloneRepositoryDeprecated(ctx, *args.Id).GitCloneRequest(*gitCloneRequest).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error cloning repository: %v", err)
 	}
