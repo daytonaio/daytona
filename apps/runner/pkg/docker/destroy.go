@@ -34,14 +34,6 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	// Ignore err because we want to destroy the container even if it exited
-	state, _ := d.DeduceSandboxState(ctx, containerId)
-	if state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying {
-		return nil
-	}
-
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
-
 	ct, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		if errdefs.IsNotFound(err) {
@@ -50,8 +42,46 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		return err
 	}
 
+	// Ignore err because we want to destroy the container even if it exited
+	state, _ := d.DeduceSandboxState(ctx, containerId)
+	if state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying {
+		log.Infof("Sandbox %s is already destroyed or destroying", containerId)
+		d.statesCache.SetSandboxState(ctx, containerId, state)
+		return nil
+	}
+
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
+
+	if state == enums.SandboxStateStopped {
+		err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
+			Force:         false,
+			RemoveVolumes: true,
+		})
+		if err == nil {
+			go func() {
+				containerShortId := ct.ID[:12]
+				err = d.netRulesManager.DeleteNetworkRules(containerShortId)
+				if err != nil {
+					log.Errorf("Failed to delete sandbox network settings: %v", err)
+				}
+			}()
+
+			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			return nil
+		}
+
+		if err != nil && errdefs.IsNotFound(err) {
+			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			return nil
+		}
+
+		log.Warnf("Failed to remove stopped sandbox without force: %v", err)
+		log.Warnf("Trying to remove stopped sandbox with force")
+	}
+
 	// Use exponential backoff helper for container removal
 	err = d.retryWithExponentialBackoff(
+		ctx,
 		"remove",
 		containerId,
 		constants.DEFAULT_MAX_RETRIES,
@@ -86,7 +116,6 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 }
 
 func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) error {
-
 	// Check if container exists and is in destroyed state
 	state, err := d.DeduceSandboxState(ctx, containerId)
 	if err != nil {
@@ -94,11 +123,12 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 	}
 
 	if state != enums.SandboxStateDestroyed {
-		return common_errors.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
+		return common_errors.NewBadRequestError(fmt.Errorf("sandbox %s is not in destroyed state", containerId))
 	}
 
 	// Use exponential backoff helper for container removal
 	err = d.retryWithExponentialBackoff(
+		ctx,
 		"remove",
 		containerId,
 		constants.DEFAULT_MAX_RETRIES,
@@ -118,7 +148,7 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		return err
 	}
 
-	log.Infof("Destroyed container %s removed successfully", containerId)
+	log.Infof("Destroyed sandbox %s removed successfully", containerId)
 
 	return nil
 }

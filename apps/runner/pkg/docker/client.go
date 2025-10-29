@@ -4,6 +4,7 @@
 package docker
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"sync"
@@ -67,28 +68,34 @@ type DockerClient struct {
 }
 
 // retryWithExponentialBackoff executes a function with exponential backoff retry logic
-func (d *DockerClient) retryWithExponentialBackoff(operationName, containerId string, maxRetries int, baseDelay, maxDelay time.Duration, operationFunc func() error) error {
-	for attempt := 1; attempt <= maxRetries; attempt++ {
-		log.Infof("%s container %s (attempt %d/%d)...", operationName, containerId, attempt, maxRetries)
+func (d *DockerClient) retryWithExponentialBackoff(ctx context.Context, operationName, containerId string, maxRetries int, baseDelay, maxDelay time.Duration, operationFunc func() error) error {
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		logAttempt := attempt + 1
+		log.Infof("%s sandbox %s (attempt %d/%d)...", operationName, containerId, logAttempt, maxRetries)
 
 		err := operationFunc()
 		if err == nil {
 			return nil
 		}
 
-		if attempt < maxRetries {
+		if attempt < maxRetries-1 {
 			// Calculate exponential backoff delay
 			delay := baseDelay * time.Duration(1<<(attempt-1))
 			if delay > maxDelay {
 				delay = maxDelay
 			}
 
-			log.Warnf("Failed to %s container %s (attempt %d/%d): %v. Retrying in %v...", operationName, containerId, attempt, maxRetries, err, delay)
-			time.Sleep(delay)
-			continue
+			log.Warnf("Failed to %s sandbox %s (attempt %d/%d): %v. Retrying in %v...", operationName, containerId, logAttempt, maxRetries, err, delay)
+
+			select {
+			case <-time.After(delay):
+				continue
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 		}
 
-		return fmt.Errorf("failed to %s container after %d attempts: %w", operationName, maxRetries, err)
+		return fmt.Errorf("failed to %s sandbox after %d attempts: %w", operationName, maxRetries, err)
 	}
 
 	return nil
