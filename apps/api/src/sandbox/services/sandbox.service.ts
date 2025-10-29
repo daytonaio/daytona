@@ -1066,16 +1066,11 @@ export class SandboxService {
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+    const result = await this.sandboxRepository.update({ id: sandboxId }, { lastActivityAt })
 
-    if (!sandbox) {
+    if (!result.affected || result.affected === 0) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
-
-    sandbox.lastActivityAt = lastActivityAt
-    await this.sandboxRepository.save(sandbox)
   }
 
   private getValidatedOrDefaultRegion(region?: string): string {
