@@ -45,7 +45,7 @@ export type {
   Match,
   ReplaceResult,
   SearchFilesResponse,
-} from '@daytonaio/api-client'
+} from '@daytonaio/toolbox-api-client'
 
 export type { ScreenshotRegion, ScreenshotOptions } from './ComputerUse'
 
