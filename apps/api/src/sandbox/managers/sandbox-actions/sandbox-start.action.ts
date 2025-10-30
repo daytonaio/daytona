@@ -664,12 +664,9 @@ export class SandboxStartAction extends SandboxAction {
     if (!runner) {
       this.logger.warn(`Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`)
 
-      const result = await this.sandboxRepository.update(sandbox.id, {
+      await this.sandboxRepository.update(sandbox.id, {
         prevRunnerId: null,
       })
-      if (!result.affected) {
-        this.logger.error(`Failed to update sandbox ${sandbox.id} to remove previous runner ${sandbox.prevRunnerId}`)
-      }
       return
     }
 
