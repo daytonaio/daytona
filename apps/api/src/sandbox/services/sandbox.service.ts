@@ -949,7 +949,7 @@ export class SandboxService extends LockableEntity {
       // Re-fetch with fresh state after acquiring lock
       const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
 
-      if (sandbox.pending) {
+      if (sandbox.pending && sandbox.state !== SandboxState.PENDING_BUILD) {
         throw new SandboxError('Sandbox state change in progress')
       }
       sandbox.pending = true
