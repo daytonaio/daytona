@@ -663,13 +663,7 @@ export class SandboxStartAction extends SandboxAction {
     const runner = await this.runnerService.findOne(sandbox.prevRunnerId)
     if (!runner) {
       this.logger.warn(`Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`)
-      //  clear prevRunnerId to avoid trying to cleanup on a non-existent runner
-      sandbox.prevRunnerId = null
 
-      const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-        id: sandbox.id,
-      })
-      sandboxToUpdate.prevRunnerId = null
       const result = await this.sandboxRepository.update(sandbox.id, {
         prevRunnerId: null,
       })
