@@ -47,7 +47,7 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		constants.DEFAULT_MAX_DELAY,
 		func() error {
 			return d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
-				Signal:  "SIGTERM",
+				Signal:  "SIGKILL",
 				Timeout: &timeout,
 			})
 		},
