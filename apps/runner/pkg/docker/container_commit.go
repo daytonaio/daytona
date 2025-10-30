@@ -93,7 +93,13 @@ func (d *DockerClient) exportImportContainer(ctx context.Context, containerId, i
 	// Preserve environment variables
 	if len(containerInfo.Config.Env) > 0 {
 		for _, env := range containerInfo.Config.Env {
-			changes = append(changes, fmt.Sprintf("ENV %s", env))
+			splitEnv := strings.SplitN(env, "=", 2)
+			if len(splitEnv) != 2 {
+				continue
+			}
+			// Quote the value to handle spaces and special characters
+			env = fmt.Sprintf(`%s="%s"`, splitEnv[0], splitEnv[1])
+			changes = append(changes, fmt.Sprintf(`ENV %s`, env))
 		}
 	}
 
