@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/client"
@@ -69,6 +70,11 @@ type DockerClient struct {
 
 // retryWithExponentialBackoff executes a function with exponential backoff retry logic
 func (d *DockerClient) retryWithExponentialBackoff(ctx context.Context, operationName, containerId string, maxRetries int, baseDelay, maxDelay time.Duration, operationFunc func() error) error {
+	if maxRetries <= 1 {
+		log.Debugf("Invalid max retries value: %d. Using default value: %d", maxRetries, constants.DEFAULT_MAX_RETRIES)
+		maxRetries = constants.DEFAULT_MAX_RETRIES
+	}
+
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		logAttempt := attempt + 1
 		log.Infof("%s sandbox %s (attempt %d/%d)...", operationName, containerId, logAttempt, maxRetries)
