@@ -18,23 +18,24 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Union
-from daytona_api_client.models.sandbox_usage_overview import SandboxUsageOverview
 from typing import Optional, Set
 from typing_extensions import Self
 
-class OrganizationUsageOverview(BaseModel):
+class SandboxUsageOverview(BaseModel):
     """
-    OrganizationUsageOverview
+    SandboxUsageOverview
     """ # noqa: E501
-    sandbox_usage: List[SandboxUsageOverview] = Field(alias="sandboxUsage")
-    total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(alias="totalSnapshotQuota")
-    current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(alias="currentSnapshotUsage")
-    total_volume_quota: Union[StrictFloat, StrictInt] = Field(alias="totalVolumeQuota")
-    current_volume_usage: Union[StrictFloat, StrictInt] = Field(alias="currentVolumeUsage")
+    region: StrictStr
+    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
+    current_cpu_usage: Union[StrictFloat, StrictInt] = Field(alias="currentCpuUsage")
+    total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
+    current_memory_usage: Union[StrictFloat, StrictInt] = Field(alias="currentMemoryUsage")
+    total_disk_quota: Union[StrictFloat, StrictInt] = Field(alias="totalDiskQuota")
+    current_disk_usage: Union[StrictFloat, StrictInt] = Field(alias="currentDiskUsage")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["sandboxUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
+    __properties: ClassVar[List[str]] = ["region", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +55,7 @@ class OrganizationUsageOverview(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of OrganizationUsageOverview from a JSON string"""
+        """Create an instance of SandboxUsageOverview from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -77,13 +78,6 @@ class OrganizationUsageOverview(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in sandbox_usage (list)
-        _items = []
-        if self.sandbox_usage:
-            for _item_sandbox_usage in self.sandbox_usage:
-                if _item_sandbox_usage:
-                    _items.append(_item_sandbox_usage.to_dict())
-            _dict['sandboxUsage'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -93,7 +87,7 @@ class OrganizationUsageOverview(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of OrganizationUsageOverview from a dict"""
+        """Create an instance of SandboxUsageOverview from a dict"""
         if obj is None:
             return None
 
@@ -101,11 +95,13 @@ class OrganizationUsageOverview(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sandboxUsage": [SandboxUsageOverview.from_dict(_item) for _item in obj["sandboxUsage"]] if obj.get("sandboxUsage") is not None else None,
-            "totalSnapshotQuota": obj.get("totalSnapshotQuota"),
-            "currentSnapshotUsage": obj.get("currentSnapshotUsage"),
-            "totalVolumeQuota": obj.get("totalVolumeQuota"),
-            "currentVolumeUsage": obj.get("currentVolumeUsage")
+            "region": obj.get("region"),
+            "totalCpuQuota": obj.get("totalCpuQuota"),
+            "currentCpuUsage": obj.get("currentCpuUsage"),
+            "totalMemoryQuota": obj.get("totalMemoryQuota"),
+            "currentMemoryUsage": obj.get("currentMemoryUsage"),
+            "totalDiskQuota": obj.get("totalDiskQuota"),
+            "currentDiskUsage": obj.get("currentDiskUsage")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

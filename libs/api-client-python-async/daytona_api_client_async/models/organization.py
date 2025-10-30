@@ -39,15 +39,9 @@ class Organization(BaseModel):
     suspension_reason: StrictStr = Field(description="Suspended reason", alias="suspensionReason")
     suspended_until: datetime = Field(description="Suspended until", alias="suspendedUntil")
     suspension_cleanup_grace_period_hours: Union[StrictFloat, StrictInt] = Field(description="Suspension cleanup grace period hours", alias="suspensionCleanupGracePeriodHours")
-    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(description="Total CPU quota", alias="totalCpuQuota")
-    total_memory_quota: Union[StrictFloat, StrictInt] = Field(description="Total memory quota", alias="totalMemoryQuota")
-    total_disk_quota: Union[StrictFloat, StrictInt] = Field(description="Total disk quota", alias="totalDiskQuota")
-    max_cpu_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max CPU per sandbox", alias="maxCpuPerSandbox")
-    max_memory_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max memory per sandbox", alias="maxMemoryPerSandbox")
-    max_disk_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max disk per sandbox", alias="maxDiskPerSandbox")
     sandbox_limited_network_egress: StrictBool = Field(description="Sandbox default network block all", alias="sandboxLimitedNetworkEgress")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "sandboxLimitedNetworkEgress"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -118,12 +112,6 @@ class Organization(BaseModel):
             "suspensionReason": obj.get("suspensionReason"),
             "suspendedUntil": obj.get("suspendedUntil"),
             "suspensionCleanupGracePeriodHours": obj.get("suspensionCleanupGracePeriodHours"),
-            "totalCpuQuota": obj.get("totalCpuQuota"),
-            "totalMemoryQuota": obj.get("totalMemoryQuota"),
-            "totalDiskQuota": obj.get("totalDiskQuota"),
-            "maxCpuPerSandbox": obj.get("maxCpuPerSandbox"),
-            "maxMemoryPerSandbox": obj.get("maxMemoryPerSandbox"),
-            "maxDiskPerSandbox": obj.get("maxDiskPerSandbox"),
             "sandboxLimitedNetworkEgress": obj.get("sandboxLimitedNetworkEgress")
         })
         # store additional fields in additional_properties

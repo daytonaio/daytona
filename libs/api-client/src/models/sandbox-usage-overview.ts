@@ -15,43 +15,49 @@
 /**
  *
  * @export
- * @interface UpdateOrganizationQuota
+ * @interface SandboxUsageOverview
  */
-export interface UpdateOrganizationQuota {
+export interface SandboxUsageOverview {
+  /**
+   *
+   * @type {string}
+   * @memberof SandboxUsageOverview
+   */
+  region: string
   /**
    *
    * @type {number}
-   * @memberof UpdateOrganizationQuota
+   * @memberof SandboxUsageOverview
    */
-  maxCpuPerSandbox: number | null
+  totalCpuQuota: number
   /**
    *
    * @type {number}
-   * @memberof UpdateOrganizationQuota
+   * @memberof SandboxUsageOverview
    */
-  maxMemoryPerSandbox: number | null
+  currentCpuUsage: number
   /**
    *
    * @type {number}
-   * @memberof UpdateOrganizationQuota
+   * @memberof SandboxUsageOverview
    */
-  maxDiskPerSandbox: number | null
+  totalMemoryQuota: number
   /**
    *
    * @type {number}
-   * @memberof UpdateOrganizationQuota
+   * @memberof SandboxUsageOverview
    */
-  snapshotQuota: number | null
+  currentMemoryUsage: number
   /**
    *
    * @type {number}
-   * @memberof UpdateOrganizationQuota
+   * @memberof SandboxUsageOverview
    */
-  maxSnapshotSize: number | null
+  totalDiskQuota: number
   /**
    *
    * @type {number}
-   * @memberof UpdateOrganizationQuota
+   * @memberof SandboxUsageOverview
    */
-  volumeQuota: number | null
+  currentDiskUsage: number
 }

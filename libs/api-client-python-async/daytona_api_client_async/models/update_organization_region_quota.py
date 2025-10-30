@@ -19,22 +19,19 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
-from daytona_api_client.models.sandbox_usage_overview import SandboxUsageOverview
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-class OrganizationUsageOverview(BaseModel):
+class UpdateOrganizationRegionQuota(BaseModel):
     """
-    OrganizationUsageOverview
+    UpdateOrganizationRegionQuota
     """ # noqa: E501
-    sandbox_usage: List[SandboxUsageOverview] = Field(alias="sandboxUsage")
-    total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(alias="totalSnapshotQuota")
-    current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(alias="currentSnapshotUsage")
-    total_volume_quota: Union[StrictFloat, StrictInt] = Field(alias="totalVolumeQuota")
-    current_volume_usage: Union[StrictFloat, StrictInt] = Field(alias="currentVolumeUsage")
+    total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalCpuQuota")
+    total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalMemoryQuota")
+    total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalDiskQuota")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["sandboxUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +51,7 @@ class OrganizationUsageOverview(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of OrganizationUsageOverview from a JSON string"""
+        """Create an instance of UpdateOrganizationRegionQuota from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -77,23 +74,31 @@ class OrganizationUsageOverview(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in sandbox_usage (list)
-        _items = []
-        if self.sandbox_usage:
-            for _item_sandbox_usage in self.sandbox_usage:
-                if _item_sandbox_usage:
-                    _items.append(_item_sandbox_usage.to_dict())
-            _dict['sandboxUsage'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if total_cpu_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_cpu_quota is None and "total_cpu_quota" in self.model_fields_set:
+            _dict['totalCpuQuota'] = None
+
+        # set to None if total_memory_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_memory_quota is None and "total_memory_quota" in self.model_fields_set:
+            _dict['totalMemoryQuota'] = None
+
+        # set to None if total_disk_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_disk_quota is None and "total_disk_quota" in self.model_fields_set:
+            _dict['totalDiskQuota'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of OrganizationUsageOverview from a dict"""
+        """Create an instance of UpdateOrganizationRegionQuota from a dict"""
         if obj is None:
             return None
 
@@ -101,11 +106,9 @@ class OrganizationUsageOverview(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sandboxUsage": [SandboxUsageOverview.from_dict(_item) for _item in obj["sandboxUsage"]] if obj.get("sandboxUsage") is not None else None,
-            "totalSnapshotQuota": obj.get("totalSnapshotQuota"),
-            "currentSnapshotUsage": obj.get("currentSnapshotUsage"),
-            "totalVolumeQuota": obj.get("totalVolumeQuota"),
-            "currentVolumeUsage": obj.get("currentVolumeUsage")
+            "totalCpuQuota": obj.get("totalCpuQuota"),
+            "totalMemoryQuota": obj.get("totalMemoryQuota"),
+            "totalDiskQuota": obj.get("totalDiskQuota")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
