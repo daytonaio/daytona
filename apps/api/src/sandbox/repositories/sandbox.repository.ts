@@ -5,7 +5,7 @@
 
 import { Repository, DataSource, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
-import { Injectable } from '@nestjs/common'
+import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 
 @Injectable()
@@ -29,9 +29,7 @@ export class SandboxRepository extends Repository<Sandbox> {
       })
 
       if (!existingSandbox) {
-        throw new Error(
-          `Failed to update sandbox ${sandbox.id} - entity was modified concurrently or conditions not met`,
-        )
+        throw new ConflictException('Sandbox was modified by another operation, please try again')
       }
 
       const mergedEntity = entityManager.merge(Sandbox, existingSandbox, sandbox)
