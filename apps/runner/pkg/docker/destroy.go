@@ -46,7 +46,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	// Ignore err because we want to destroy the container even if it exited
 	state, _ := d.DeduceSandboxState(ctx, containerId)
 	if state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying {
-		log.Infof("Sandbox %s is already destroyed or destroying", containerId)
+		log.Debugf("Sandbox %s is already destroyed or destroying", containerId)
 		d.statesCache.SetSandboxState(ctx, containerId, state)
 		return nil
 	}
@@ -149,7 +149,7 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		return err
 	}
 
-	log.Infof("Destroyed sandbox %s removed successfully", containerId)
+	log.Debugf("Destroyed sandbox %s removed successfully", containerId)
 
 	return nil
 }

@@ -18,7 +18,7 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	// Deduce sandbox state first
 	state, err := d.DeduceSandboxState(ctx, containerId)
 	if err == nil && state == enums.SandboxStateStopped {
-		log.Infof("Sandbox %s is already stopped", containerId)
+		log.Debugf("Sandbox %s is already stopped", containerId)
 		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 		return nil
 	}
@@ -77,7 +77,7 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		return ctx.Err()
 	}
 
-	log.Infof("Sandbox %s stopped successfully", containerId)
+	log.Debugf("Sandbox %s stopped successfully", containerId)
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 
 	return nil
