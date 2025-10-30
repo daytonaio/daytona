@@ -1667,7 +1667,7 @@ class FileSystemApi:
     @validate_call
     def list_files(
         self,
-        path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to current directory)")] = None,
+        path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to working directory)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1685,7 +1685,7 @@ class FileSystemApi:
 
         List files and directories in the specified path
 
-        :param path: Directory path to list (defaults to current directory)
+        :param path: Directory path to list (defaults to working directory)
         :type path: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1734,7 +1734,7 @@ class FileSystemApi:
     @validate_call
     def list_files_with_http_info(
         self,
-        path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to current directory)")] = None,
+        path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to working directory)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1752,7 +1752,7 @@ class FileSystemApi:
 
         List files and directories in the specified path
 
-        :param path: Directory path to list (defaults to current directory)
+        :param path: Directory path to list (defaults to working directory)
         :type path: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1801,7 +1801,7 @@ class FileSystemApi:
     @validate_call
     def list_files_without_preload_content(
         self,
-        path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to current directory)")] = None,
+        path: Annotated[Optional[StrictStr], Field(description="Directory path to list (defaults to working directory)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1819,7 +1819,7 @@ class FileSystemApi:
 
         List files and directories in the specified path
 
-        :param path: Directory path to list (defaults to current directory)
+        :param path: Directory path to list (defaults to working directory)
         :type path: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

@@ -749,7 +749,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Directory path to list (defaults to current directory)",
+                        "description": "Directory path to list (defaults to working directory)",
                         "name": "path",
                         "in": "query"
                     }
@@ -2521,11 +2521,15 @@ const docTemplate = `{
         "ExecuteResponse": {
             "type": "object",
             "required": [
-                "code",
+                "exitCode",
                 "result"
             ],
             "properties": {
                 "code": {
+                    "description": "Deprecated: Use ExitCode instead",
+                    "type": "integer"
+                },
+                "exitCode": {
                     "type": "integer"
                 },
                 "result": {

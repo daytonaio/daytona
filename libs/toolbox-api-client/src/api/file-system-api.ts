@@ -287,7 +287,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
     /**
      * List files and directories in the specified path
      * @summary List files and directories
-     * @param {string} [path] Directory path to list (defaults to current directory)
+     * @param {string} [path] Directory path to list (defaults to working directory)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -726,7 +726,7 @@ export const FileSystemApiFp = function (configuration?: Configuration) {
     /**
      * List files and directories in the specified path
      * @summary List files and directories
-     * @param {string} [path] Directory path to list (defaults to current directory)
+     * @param {string} [path] Directory path to list (defaults to working directory)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -973,7 +973,7 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
     /**
      * List files and directories in the specified path
      * @summary List files and directories
-     * @param {string} [path] Directory path to list (defaults to current directory)
+     * @param {string} [path] Directory path to list (defaults to working directory)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1153,7 +1153,7 @@ export class FileSystemApi extends BaseAPI {
   /**
    * List files and directories in the specified path
    * @summary List files and directories
-   * @param {string} [path] Directory path to list (defaults to current directory)
+   * @param {string} [path] Directory path to list (defaults to working directory)
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof FileSystemApi
