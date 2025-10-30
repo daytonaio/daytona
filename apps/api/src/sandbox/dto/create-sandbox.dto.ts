@@ -166,6 +166,7 @@ export class CreateSandboxDto {
     required: false,
   })
   @IsOptional()
+  @IsArray()
   volumes?: SandboxVolume[]
 
   @ApiPropertyOptional({
