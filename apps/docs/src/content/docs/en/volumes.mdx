@@ -31,7 +31,14 @@ See: [volume.get (Python SDK)](/docs/python-sdk/sync/volume/#volumeserviceget), 
 
 ## Mounting Volumes
 
-Once a volume is created, it can be mounted to a Sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object:
+Once a volume is created, it can be mounted to a Sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object. Volume mount paths must meet the following requirements:
+
+- **Must be absolute paths**: Mount paths must start with `/` (e.g., `/home/daytona/volume`)
+- **Cannot be root directory**: Cannot mount to `/` or `//`
+- **No relative path components**: Cannot contain `/../`, `/./`, or end with `/..` or `/.`
+- **No consecutive slashes**: Cannot contain multiple consecutive slashes like `//` (except at the beginning)
+- **Cannot mount to system directories**: The following system directories are prohibited:
+  - `/proc`, `/sys`, `/dev`, `/boot`, `/etc`, `/bin`, `/sbin`, `/lib`, `/lib64`
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
