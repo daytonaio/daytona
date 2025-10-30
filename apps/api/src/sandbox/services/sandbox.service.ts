@@ -1131,21 +1131,21 @@ export class SandboxService extends LockableEntity {
     const twoWeeksAgo = new Date()
     twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    const desiredDestroyedSandboxs = await this.sandboxRepository.delete({
+    const desiredDestroyedSandboxes = await this.sandboxRepository.delete({
       desiredState: SandboxDesiredState.DESTROYED,
       updatedAt: LessThan(twoWeeksAgo),
     })
 
-    const totalAffected = destroyedSandboxs.affected + desiredDestroyedSandboxs.affected
+    const totalAffected = destroyedSandboxes.affected + desiredDestroyedSandboxes.affected
 
     if (totalAffected > 0) {
       this.logger.debug(
-        `Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes and ${desiredDestroyedSandboxs.affected} desired-destroyed sandboxes`,
+        `Cleaned up ${destroyedSandboxes.affected} destroyed sandboxes and ${desiredDestroyedSandboxes.affected} desired-destroyed sandboxes`,
       )
     }
   }
@@ -1157,14 +1157,14 @@ export class SandboxService extends LockableEntity {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.BUILD_FAILED,
       desiredState: SandboxDesiredState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    if (destroyedSandboxes.affected > 0) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxes.affected} build failed sandboxes`)
     }
   }
 
