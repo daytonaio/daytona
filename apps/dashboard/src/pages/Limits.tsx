@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { OrganizationTier, Tier } from '@/billing-api'
 import { UserProfileIdentity } from './LinkedAccounts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { useConfig } from '@/hooks/useConfig'
 
@@ -30,6 +31,7 @@ const Limits: React.FC = () => {
   const [tiers, setTiers] = useState<Tier[]>([])
   const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
   const [usageOverview, setUsage] = useState<OrganizationUsageOverview | null>(null)
+  const [selectedRegion, setSelectedRegion] = useState<string>('')
   const [tierLoading, setTierLoading] = useState(false)
   const config = useConfig()
 
@@ -77,11 +79,16 @@ const Limits: React.FC = () => {
     }
     try {
       const response = await organizationsApi.getOrganizationUsageOverview(selectedOrganization.id)
-      setUsage(response.data)
+      const data = response.data
+      setUsage(data)
+
+      if (data.sandboxUsage.length > 0 && !selectedRegion) {
+        setSelectedRegion(data.sandboxUsage[0].region)
+      }
     } catch (error) {
       handleApiError(error, 'Failed to fetch usage data')
     }
-  }, [organizationsApi, selectedOrganization])
+  }, [organizationsApi, selectedOrganization, selectedRegion])
 
   const upgradeTier = useCallback(
     async (tier: number) => {
@@ -149,6 +156,13 @@ const Limits: React.FC = () => {
     )
   }
 
+  const currentSandboxUsage = useMemo(() => {
+    if (!usageOverview || !selectedRegion) {
+      return null
+    }
+    return usageOverview.sandboxUsage.find((usage) => usage.region === selectedRegion) || null
+  }, [usageOverview, selectedRegion])
+
   const githubConnected = useMemo(() => {
     if (!user?.profile?.identities) {
       return false
@@ -166,14 +180,39 @@ const Limits: React.FC = () => {
 
       <Card className="my-4">
         <CardHeader>
-          <CardTitle className="flex items-center mb-2">
-            Usage Limits{' '}
-            {organizationTier && (
-              <Badge variant="outline" className="ml-2 text-sm">
-                Tier {organizationTier.tier}
-              </Badge>
+          <div className="flex items-center justify-between mb-2">
+            <CardTitle className="flex items-center">
+              Usage Limits{' '}
+              {organizationTier && (
+                <Badge variant="outline" className="ml-2 text-sm">
+                  Tier {organizationTier.tier}
+                </Badge>
+              )}
+            </CardTitle>
+            {usageOverview && usageOverview.sandboxUsage.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Region:</span>
+                {usageOverview.sandboxUsage.length > 1 ? (
+                  <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                    <SelectTrigger className="w-auto min-w-12 max-w-48 gap-x-2">
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent className="min-w-24 max-w-48" align="end">
+                      {usageOverview.sandboxUsage.map((usage) => (
+                        <SelectItem key={usage.region} value={usage.region}>
+                          {usage.region}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge variant="secondary" className="max-w-48 truncate align-left">
+                    {usageOverview.sandboxUsage[0].region}
+                  </Badge>
+                )}
+              </div>
             )}
-          </CardTitle>
+          </div>
           <CardDescription>
             Limits help us mitigate misuse and manage infrastructure resources. Ensuring fair and stable access to
             sandboxes and compute capacity across all users.
@@ -185,7 +224,7 @@ const Limits: React.FC = () => {
               <Skeleton className="w-full h-full" />
             </div>
           )}
-          {usageOverview && (
+          {usageOverview && currentSandboxUsage && (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -199,9 +238,16 @@ const Limits: React.FC = () => {
                   <TableCell>
                     <div className="max-w-80">
                       <div className="w-full flex justify-end">
-                        {getUsageDisplay(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota, 'vCPU')}
+                        {getUsageDisplay(
+                          currentSandboxUsage.currentCpuUsage,
+                          currentSandboxUsage.totalCpuQuota,
+                          'vCPU',
+                        )}
                       </div>
-                      <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
+                      <QuotaLine
+                        current={currentSandboxUsage.currentCpuUsage}
+                        total={currentSandboxUsage.totalCpuQuota}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -210,9 +256,16 @@ const Limits: React.FC = () => {
                   <TableCell>
                     <div className="max-w-80">
                       <div className="w-full flex justify-end">
-                        {getUsageDisplay(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GiB')}
+                        {getUsageDisplay(
+                          currentSandboxUsage.currentMemoryUsage,
+                          currentSandboxUsage.totalMemoryQuota,
+                          'GiB',
+                        )}
                       </div>
-                      <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
+                      <QuotaLine
+                        current={currentSandboxUsage.currentMemoryUsage}
+                        total={currentSandboxUsage.totalMemoryQuota}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -221,9 +274,16 @@ const Limits: React.FC = () => {
                   <TableCell>
                     <div className="max-w-80">
                       <div className="w-full flex justify-end">
-                        {getUsageDisplay(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GiB')}
+                        {getUsageDisplay(
+                          currentSandboxUsage.currentDiskUsage,
+                          currentSandboxUsage.totalDiskQuota,
+                          'GiB',
+                        )}
                       </div>
-                      <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
+                      <QuotaLine
+                        current={currentSandboxUsage.currentDiskUsage}
+                        total={currentSandboxUsage.totalDiskQuota}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
