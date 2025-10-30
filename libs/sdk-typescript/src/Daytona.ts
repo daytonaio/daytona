@@ -505,7 +505,17 @@ export class Daytona {
           SandboxState.BUILD_FAILED,
         ]
 
+        const pendingBuildStart = Date.now()
+
         while (sandboxInstance.state === SandboxState.PENDING_BUILD) {
+          if (options.timeout) {
+            const elapsed = (Date.now() - pendingBuildStart) / 1000
+            if (elapsed > options.timeout) {
+              throw new DaytonaError(
+                `Sandbox build has been pending for more than ${options.timeout} seconds. Please check the sandbox state again later.`,
+              )
+            }
+          }
           await new Promise((resolve) => setTimeout(resolve, 1000))
           sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data
         }
