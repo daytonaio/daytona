@@ -5,7 +5,6 @@
 
 import { IsOptional, IsString, IsBoolean } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsValidNetworkAllowList } from '../decorators/is-valid-network-allow-list.decorator'
 
 @ApiSchema({ name: 'UpdateSandboxNetworkSettings' })
 export class UpdateSandboxNetworkSettingsDto {
@@ -23,6 +22,5 @@ export class UpdateSandboxNetworkSettingsDto {
   })
   @IsOptional()
   @IsString()
-  @IsValidNetworkAllowList()
   networkAllowList?: string
 }
