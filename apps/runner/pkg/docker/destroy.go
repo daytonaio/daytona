@@ -38,6 +38,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			return nil
 		}
 		return err
 	}
