@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
@@ -31,6 +31,9 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 
 const isDebugEnabled = process.env.DEBUG === 'true'
+
+// Network error codes that should trigger a retry
+const RETRYABLE_NETWORK_ERROR_CODES = ['ECONNRESET', 'ETIMEDOUT']
 
 @Injectable()
 export class RunnerAdapterLegacy implements RunnerAdapter {
@@ -91,21 +94,29 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
 
-    // Configure axios-retry to handle ECONNRESET errors
+    const retryErrorMap = new WeakMap<AxiosError, string>()
+
+    // Configure axios-retry to handle network errors
     axiosRetry(axiosInstance, {
       retries: 3,
       retryDelay: axiosRetry.exponentialDelay,
       retryCondition: (error) => {
-        // Retry on ECONNRESET errors
-        return (
-          (error as any).code === 'ECONNRESET' ||
-          error.message?.includes('ECONNRESET') ||
-          (error as any).cause?.code === 'ECONNRESET'
+        // Check if error code or message matches any retryable error
+        const matchedErrorCode = RETRYABLE_NETWORK_ERROR_CODES.find(
+          (code) =>
+            (error as any).code === code || error.message?.includes(code) || (error as any).cause?.code === code,
         )
+
+        if (matchedErrorCode) {
+          retryErrorMap.set(error, matchedErrorCode)
+          return true
+        }
+
+        return false
       },
       onRetry: (retryCount, error, requestConfig) => {
         this.logger.warn(
-          `Retrying request due to ECONNRESET (attempt ${retryCount}): ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
+          `Retrying request due to ${retryErrorMap.get(error)} (attempt ${retryCount}): ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
         )
       },
     })
