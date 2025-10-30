@@ -120,11 +120,14 @@ definitions:
   ExecuteResponse:
     properties:
       code:
+        description: 'Deprecated: Use ExitCode instead'
+        type: integer
+      exitCode:
         type: integer
       result:
         type: string
     required:
-      - code
+      - exitCode
       - result
     type: object
   FileInfo:
@@ -1285,7 +1288,7 @@ paths:
       description: List files and directories in the specified path
       operationId: ListFiles
       parameters:
-        - description: Directory path to list (defaults to current directory)
+        - description: Directory path to list (defaults to working directory)
           in: query
           name: path
           type: string

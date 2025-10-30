@@ -19,11 +19,17 @@
  */
 export interface ExecuteResponse {
   /**
+   * Deprecated: Use ExitCode instead
+   * @type {number}
+   * @memberof ExecuteResponse
+   */
+  code?: number
+  /**
    *
    * @type {number}
    * @memberof ExecuteResponse
    */
-  code: number
+  exitCode: number
   /**
    *
    * @type {string}

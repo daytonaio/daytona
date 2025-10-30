@@ -1119,7 +1119,7 @@ export class ToolboxController {
 
     // TODO: use new proxy - can't use it now because of this
     return {
-      exitCode: response.code,
+      exitCode: response.exitCode,
       result: response.result,
     }
   }

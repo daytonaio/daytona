@@ -17,7 +17,7 @@ import (
 //	@Description	List files and directories in the specified path
 //	@Tags			file-system
 //	@Produce		json
-//	@Param			path	query	string	false	"Directory path to list (defaults to current directory)"
+//	@Param			path	query	string	false	"Directory path to list (defaults to working directory)"
 //	@Success		200		{array}	FileInfo
 //	@Router			/files [get]
 //

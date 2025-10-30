@@ -17,8 +17,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,10 +26,11 @@ class ExecuteResponse(BaseModel):
     """
     ExecuteResponse
     """ # noqa: E501
-    code: StrictInt
+    code: Optional[StrictInt] = Field(default=None, description="Deprecated: Use ExitCode instead")
+    exit_code: StrictInt = Field(alias="exitCode")
     result: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["code", "result"]
+    __properties: ClassVar[List[str]] = ["code", "exitCode", "result"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,6 +91,7 @@ class ExecuteResponse(BaseModel):
 
         _obj = cls.model_validate({
             "code": obj.get("code"),
+            "exitCode": obj.get("exitCode"),
             "result": obj.get("result")
         })
         # store additional fields in additional_properties
