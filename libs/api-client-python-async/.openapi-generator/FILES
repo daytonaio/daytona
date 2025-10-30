@@ -130,6 +130,7 @@ daytona_api_client_async/models/sandbox_desired_state.py
 daytona_api_client_async/models/sandbox_info.py
 daytona_api_client_async/models/sandbox_labels.py
 daytona_api_client_async/models/sandbox_state.py
+daytona_api_client_async/models/sandbox_usage_overview.py
 daytona_api_client_async/models/sandbox_volume.py
 daytona_api_client_async/models/screenshot_response.py
 daytona_api_client_async/models/search_files_response.py
@@ -147,6 +148,7 @@ daytona_api_client_async/models/update_docker_registry.py
 daytona_api_client_async/models/update_organization_invitation.py
 daytona_api_client_async/models/update_organization_member_access.py
 daytona_api_client_async/models/update_organization_quota.py
+daytona_api_client_async/models/update_organization_region_quota.py
 daytona_api_client_async/models/update_organization_role.py
 daytona_api_client_async/models/update_sandbox_state_dto.py
 daytona_api_client_async/models/user.py

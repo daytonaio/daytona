@@ -216,6 +216,10 @@ const configuration = {
     volumeQuota: parseInt(process.env.ADMIN_VOLUME_QUOTA || '0', 10),
   },
   skipUserEmailVerification: process.env.SKIP_USER_EMAIL_VERIFICATION === 'true',
+  defaultRegionEnforceQuotas:
+    process.env.DEFAULT_REGION_ENFORCE_QUOTAS === undefined
+      ? true
+      : process.env.DEFAULT_REGION_ENFORCE_QUOTAS === 'true',
 }
 
 export { configuration }

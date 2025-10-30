@@ -128,6 +128,7 @@ model_sandbox_desired_state.go
 model_sandbox_info.go
 model_sandbox_labels.go
 model_sandbox_state.go
+model_sandbox_usage_overview.go
 model_sandbox_volume.go
 model_screenshot_response.go
 model_search_files_response.go
@@ -145,6 +146,7 @@ model_update_docker_registry.go
 model_update_organization_invitation.go
 model_update_organization_member_access.go
 model_update_organization_quota.go
+model_update_organization_region_quota.go
 model_update_organization_role.go
 model_update_sandbox_state_dto.go
 model_user.go

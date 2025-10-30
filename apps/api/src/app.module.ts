@@ -35,6 +35,7 @@ import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
 import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
 import { LoggerModule } from 'nestjs-pino'
 import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util'
+import { RegionModule } from './region/region.module'
 
 @Module({
   imports: [
@@ -130,6 +131,7 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
     UsageModule,
     AnalyticsModule,
     OrganizationModule,
+    RegionModule,
     EmailModule.forRootAsync({
       inject: [TypedConfigService],
       useFactory: (configService: TypedConfigService) => {

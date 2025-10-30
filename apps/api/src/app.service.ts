@@ -14,6 +14,8 @@ import { SnapshotService } from './sandbox/services/snapshot.service'
 import { SystemRole } from './user/enums/system-role.enum'
 import { TypedConfigService } from './config/typed-config.service'
 import { SchedulerRegistry } from '@nestjs/schedule'
+import { RegionService } from './region/services/region.service'
+import { DEFAULT_REGION_ORGANIZATION_ID } from './region/constants/default-region-organization.constant'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -30,6 +32,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     private readonly eventEmitterReadinessWatcher: EventEmitterReadinessWatcher,
     private readonly snapshotService: SnapshotService,
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly regionService: RegionService,
   ) {}
 
   async onApplicationShutdown(signal?: string) {
@@ -42,6 +45,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       await this.stopAllCronJobs()
     }
 
+    await this.initializeDefaultRegion()
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeBackupRegistry()
@@ -54,6 +58,28 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       this.logger.debug(`Stopping cron job: ${cronName}`)
       this.schedulerRegistry.deleteCronJob(cronName)
     }
+  }
+
+  private async initializeDefaultRegion(): Promise<void> {
+    if (
+      await this.regionService.findOneByNameAndOrganization(
+        this.configService.getOrThrow('defaultRegion'),
+        DEFAULT_REGION_ORGANIZATION_ID,
+      )
+    ) {
+      return
+    }
+
+    this.logger.log('Initializing default region...')
+    await this.eventEmitterReadinessWatcher.waitUntilReady()
+    const region = await this.regionService.create(
+      {
+        name: this.configService.getOrThrow('defaultRegion'),
+        enforceQuotas: this.configService.getOrThrow('defaultRegionEnforceQuotas'),
+      },
+      DEFAULT_REGION_ORGANIZATION_ID,
+    )
+    this.logger.log(`Default region created successfully: ${region.name}`)
   }
 
   private async initializeAdminUser(): Promise<void> {

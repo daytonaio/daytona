@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,8 +28,9 @@ class CreateOrganization(BaseModel):
     CreateOrganization
     """ # noqa: E501
     name: StrictStr = Field(description="The name of organization")
+    region: Optional[StrictStr] = Field(default=None, description="The region of the organization where region-specific quotas will be applied")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["name", "region"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -77,6 +78,11 @@ class CreateOrganization(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if region (nullable) is None
+        # and model_fields_set contains the field
+        if self.region is None and "region" in self.model_fields_set:
+            _dict['region'] = None
+
         return _dict
 
     @classmethod
@@ -89,7 +95,8 @@ class CreateOrganization(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "region": obj.get("region")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -460,11 +460,7 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'
-          description: Organization details
+          description: ''
       security:
         - bearer: []
         - oauth2:
@@ -472,6 +468,44 @@ paths:
             - profile
             - email
       summary: Update organization quota
+      tags:
+        - organizations
+  /organizations/{organizationId}/quota/{region}:
+    patch:
+      operationId: updateOrganizationRegionQuota
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Region where the updated quota will be applied
+          explode: false
+          in: path
+          name: region
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationRegionQuota'
+        required: true
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update organization region quota
       tags:
         - organizations
   /organizations/{organizationId}/leave:
@@ -7746,17 +7780,23 @@ components:
     CreateOrganization:
       example:
         name: My Organization
+        region: us
       properties:
         name:
           description: The name of organization
           example: My Organization
+          type: string
+        region:
+          description: The region of the organization where region-specific quotas
+            will be applied
+          example: us
+          nullable: true
           type: string
       required:
         - name
       type: object
     Organization:
       example:
-        totalCpuQuota: 6.027456183070403
         suspensionReason: suspensionReason
         suspendedAt: 2000-01-23T04:56:07.000+00:00
         defaultRegion: defaultRegion
@@ -7764,16 +7804,11 @@ components:
         suspensionCleanupGracePeriodHours: 0.8008281904610115
         suspended: true
         createdAt: 2000-01-23T04:56:07.000+00:00
-        maxCpuPerSandbox: 5.637376656633329
         sandboxLimitedNetworkEgress: true
         suspendedUntil: 2000-01-23T04:56:07.000+00:00
-        maxDiskPerSandbox: 7.061401241503109
         createdBy: createdBy
         name: name
-        maxMemoryPerSandbox: 2.3021358869347655
         id: id
-        totalMemoryQuota: 1.4658129805029452
-        totalDiskQuota: 5.962133916683182
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -7813,24 +7848,6 @@ components:
         suspensionCleanupGracePeriodHours:
           description: Suspension cleanup grace period hours
           type: number
-        totalCpuQuota:
-          description: Total CPU quota
-          type: number
-        totalMemoryQuota:
-          description: Total memory quota
-          type: number
-        totalDiskQuota:
-          description: Total disk quota
-          type: number
-        maxCpuPerSandbox:
-          description: Max CPU per sandbox
-          type: number
-        maxMemoryPerSandbox:
-          description: Max memory per sandbox
-          type: number
-        maxDiskPerSandbox:
-          description: Max disk per sandbox
-          type: number
         sandboxLimitedNetworkEgress:
           description: Sandbox default network block all
           type: boolean
@@ -7842,9 +7859,6 @@ components:
         - createdBy
         - defaultRegion
         - id
-        - maxCpuPerSandbox
-        - maxDiskPerSandbox
-        - maxMemoryPerSandbox
         - name
         - personal
         - sandboxLimitedNetworkEgress
@@ -7853,36 +7867,67 @@ components:
         - suspendedUntil
         - suspensionCleanupGracePeriodHours
         - suspensionReason
-        - totalCpuQuota
-        - totalDiskQuota
-        - totalMemoryQuota
         - updatedAt
       type: object
-    OrganizationUsageOverview:
+    SandboxUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
-        totalSnapshotQuota: 7.061401241503109
         currentDiskUsage: 2.3021358869347655
-        currentVolumeUsage: 2.027123023002322
-        currentMemoryUsage: 5.637376656633329
-        currentCpuUsage: 5.962133916683182
-        totalVolumeQuota: 3.616076749251911
-        currentSnapshotUsage: 9.301444243932576
-        totalMemoryQuota: 6.027456183070403
-        totalDiskQuota: 1.4658129805029452
+        currentMemoryUsage: 5.962133916683182
+        currentCpuUsage: 6.027456183070403
+        totalMemoryQuota: 1.4658129805029452
+        region: region
+        totalDiskQuota: 5.637376656633329
       properties:
+        region:
+          type: string
         totalCpuQuota:
-          type: number
-        totalMemoryQuota:
-          type: number
-        totalDiskQuota:
           type: number
         currentCpuUsage:
           type: number
+        totalMemoryQuota:
+          type: number
         currentMemoryUsage:
+          type: number
+        totalDiskQuota:
           type: number
         currentDiskUsage:
           type: number
+      required:
+        - currentCpuUsage
+        - currentDiskUsage
+        - currentMemoryUsage
+        - region
+        - totalCpuQuota
+        - totalDiskQuota
+        - totalMemoryQuota
+      type: object
+    OrganizationUsageOverview:
+      example:
+        totalSnapshotQuota: 7.061401241503109
+        sandboxUsage:
+          - totalCpuQuota: 0.8008281904610115
+            currentDiskUsage: 2.3021358869347655
+            currentMemoryUsage: 5.962133916683182
+            currentCpuUsage: 6.027456183070403
+            totalMemoryQuota: 1.4658129805029452
+            region: region
+            totalDiskQuota: 5.637376656633329
+          - totalCpuQuota: 0.8008281904610115
+            currentDiskUsage: 2.3021358869347655
+            currentMemoryUsage: 5.962133916683182
+            currentCpuUsage: 6.027456183070403
+            totalMemoryQuota: 1.4658129805029452
+            region: region
+            totalDiskQuota: 5.637376656633329
+        currentVolumeUsage: 2.027123023002322
+        totalVolumeQuota: 3.616076749251911
+        currentSnapshotUsage: 9.301444243932576
+      properties:
+        sandboxUsage:
+          items:
+            $ref: '#/components/schemas/SandboxUsageOverview'
+          type: array
         totalSnapshotQuota:
           type: number
         currentSnapshotUsage:
@@ -7892,38 +7937,21 @@ components:
         currentVolumeUsage:
           type: number
       required:
-        - currentCpuUsage
-        - currentDiskUsage
-        - currentMemoryUsage
         - currentSnapshotUsage
         - currentVolumeUsage
-        - totalCpuQuota
-        - totalDiskQuota
-        - totalMemoryQuota
+        - sandboxUsage
         - totalSnapshotQuota
         - totalVolumeQuota
       type: object
     UpdateOrganizationQuota:
       example:
-        snapshotQuota: 7.061401241503109
-        totalCpuQuota: 0.8008281904610115
-        maxCpuPerSandbox: 5.962133916683182
-        maxDiskPerSandbox: 2.3021358869347655
-        maxMemoryPerSandbox: 5.637376656633329
-        volumeQuota: 3.616076749251911
-        totalMemoryQuota: 6.027456183070403
-        maxSnapshotSize: 9.301444243932576
-        totalDiskQuota: 1.4658129805029452
+        snapshotQuota: 5.962133916683182
+        maxCpuPerSandbox: 0.8008281904610115
+        maxDiskPerSandbox: 1.4658129805029452
+        maxMemoryPerSandbox: 6.027456183070403
+        volumeQuota: 2.3021358869347655
+        maxSnapshotSize: 5.637376656633329
       properties:
-        totalCpuQuota:
-          nullable: true
-          type: number
-        totalMemoryQuota:
-          nullable: true
-          type: number
-        totalDiskQuota:
-          nullable: true
-          type: number
         maxCpuPerSandbox:
           nullable: true
           type: number
@@ -7948,10 +7976,27 @@ components:
         - maxMemoryPerSandbox
         - maxSnapshotSize
         - snapshotQuota
+        - volumeQuota
+      type: object
+    UpdateOrganizationRegionQuota:
+      example:
+        totalCpuQuota: 0.8008281904610115
+        totalMemoryQuota: 6.027456183070403
+        totalDiskQuota: 1.4658129805029452
+      properties:
+        totalCpuQuota:
+          nullable: true
+          type: number
+        totalMemoryQuota:
+          nullable: true
+          type: number
+        totalDiskQuota:
+          nullable: true
+          type: number
+      required:
         - totalCpuQuota
         - totalDiskQuota
         - totalMemoryQuota
-        - volumeQuota
       type: object
     OrganizationSuspension:
       example:
