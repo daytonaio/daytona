@@ -1128,13 +1128,25 @@ export class SandboxService extends LockableEntity {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
+    const twoWeeksAgo = new Date()
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
+
     const destroyedSandboxs = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
+    const desiredDestroyedSandboxs = await this.sandboxRepository.delete({
+      desiredState: SandboxDesiredState.DESTROYED,
+      updatedAt: LessThan(twoWeeksAgo),
+    })
+
+    const totalAffected = destroyedSandboxs.affected + desiredDestroyedSandboxs.affected
+
+    if (totalAffected > 0) {
+      this.logger.debug(
+        `Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes and ${desiredDestroyedSandboxs.affected} desired-destroyed sandboxes`,
+      )
     }
   }
 
