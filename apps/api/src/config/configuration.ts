@@ -18,6 +18,10 @@ const configuration = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
+    tls: {
+      enabled: process.env.DB_TLS_ENABLED === 'true',
+      rejectUnauthorized: process.env.DB_TLS_REJECT_UNAUTHORIZED !== 'false',
+    },
   },
   redis: {
     host: process.env.REDIS_HOST,
