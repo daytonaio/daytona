@@ -77,7 +77,7 @@ func (d *DockerClient) retryWithExponentialBackoff(ctx context.Context, operatio
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		logAttempt := attempt + 1
-		log.Infof("%s sandbox %s (attempt %d/%d)...", operationName, containerId, logAttempt, maxRetries)
+		log.Debugf("%s sandbox %s (attempt %d/%d)...", operationName, containerId, logAttempt, maxRetries)
 
 		err := operationFunc()
 		if err == nil {
