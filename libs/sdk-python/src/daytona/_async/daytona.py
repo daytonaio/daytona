@@ -437,11 +437,9 @@ class AsyncDaytona:
                     SandboxState.BUILD_FAILED,
                 ]
 
-            pending_build_start = time.time()
-
             while response_ref["response"].state == SandboxState.PENDING_BUILD:
                 if timeout:
-                    elapsed = time.time() - pending_build_start
+                    elapsed = time.time() - start_time
                     if elapsed > timeout:
                         raise DaytonaError(
                             f"Sandbox build has been pending for more than {timeout} seconds."
