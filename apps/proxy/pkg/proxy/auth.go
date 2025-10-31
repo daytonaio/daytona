@@ -29,19 +29,19 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxId string) (err error, did
 		}
 	}
 
-	authKey := ctx.Request.Header.Get(DAYTONA_SANDBOX_AUTH_KEY_HEADER)
+	authKey := ctx.Request.Header.Get(SANDBOX_AUTH_KEY_HEADER)
 	if authKey == "" {
-		if ctx.Query(DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM) != "" {
-			authKey = ctx.Query(DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM)
+		if ctx.Query(SANDBOX_AUTH_KEY_QUERY_PARAM) != "" {
+			authKey = ctx.Query(SANDBOX_AUTH_KEY_QUERY_PARAM)
 			newQuery := ctx.Request.URL.Query()
-			newQuery.Del(DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM)
+			newQuery.Del(SANDBOX_AUTH_KEY_QUERY_PARAM)
 			ctx.Request.URL.RawQuery = newQuery.Encode()
 		} else {
 			// Check for cookie
-			cookieSandboxId, err := ctx.Cookie(DAYTONA_SANDBOX_AUTH_COOKIE_NAME + sandboxId)
+			cookieSandboxId, err := ctx.Cookie(SANDBOX_AUTH_COOKIE_NAME + sandboxId)
 			if err == nil && cookieSandboxId != "" {
 				decodedValue := ""
-				err = p.secureCookie.Decode(DAYTONA_SANDBOX_AUTH_COOKIE_NAME+sandboxId, cookieSandboxId, &decodedValue)
+				err = p.secureCookie.Decode(SANDBOX_AUTH_COOKIE_NAME+sandboxId, cookieSandboxId, &decodedValue)
 				if err != nil {
 					return errors.New("sandbox not found"), false
 				}

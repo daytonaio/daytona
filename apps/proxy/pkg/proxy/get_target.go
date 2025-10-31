@@ -59,6 +59,12 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
 	}
 
+	// Skip last activity update if header is set
+	if ctx.Request.Header.Get(SKIP_LAST_ACTIVITY_UPDATE_HEADER) != "true" {
+		p.updateLastActivity(ctx.Request.Context(), sandboxID, true)
+		ctx.Request.Header.Del(SKIP_LAST_ACTIVITY_UPDATE_HEADER)
+	}
+
 	// Build the target URL
 	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
 
@@ -203,4 +209,44 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxID string, err
 	sandboxID = hostPrefix[dashIndex+1:]
 
 	return targetPort, sandboxID, nil
+}
+
+func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, shouldPollUpdate bool) {
+	// Prevent frequent updates by caching the last update
+	cached, err := p.sandboxLastActivityUpdateCache.Has(ctx, sandboxId)
+	if err != nil {
+		// If cache doesn't work, skip the update to avoid spamming the API
+		log.Errorf("failed to check last activity update cache for sandbox %s: %v", sandboxId, err)
+		return
+	}
+
+	if !cached {
+		_, err := p.apiclient.SandboxAPI.UpdateLastActivity(ctx, sandboxId).Execute()
+		if err != nil {
+			log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
+			return
+		}
+
+		err = p.sandboxLastActivityUpdateCache.Set(ctx, sandboxId, true, 45*time.Second)
+		if err != nil {
+			log.Errorf("failed to set last activity update cache for sandbox %s: %v", sandboxId, err)
+		}
+	}
+
+	if shouldPollUpdate {
+		// Update keep alive every 45 seconds until the request is done
+		go func() {
+			ticker := time.NewTicker(45 * time.Second)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					p.updateLastActivity(ctx, sandboxId, false)
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+	}
 }

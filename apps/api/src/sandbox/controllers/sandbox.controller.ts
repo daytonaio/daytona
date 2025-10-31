@@ -69,6 +69,8 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { RegionDto } from '../dto/region.dto'
+import { ProxyGuard } from '../../auth/proxy.guard'
+import { OrGuard } from '../../auth/or.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -605,6 +607,25 @@ export class SandboxController {
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.updatePublicStatus(sandboxIdOrName, isPublic, authContext.organizationId)
     return SandboxDto.fromSandbox(sandbox)
+  }
+
+  @Post(':sandboxId/last-activity')
+  @ApiOperation({
+    summary: 'Update sandbox last activity',
+    operationId: 'updateLastActivity',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Last activity has been updated',
+  })
+  @UseGuards(OrGuard([SandboxAccessGuard, ProxyGuard]))
+  async updateLastActivity(@Param('sandboxId') sandboxId: string): Promise<void> {
+    await this.sandboxService.updateLastActivityAt(sandboxId, new Date())
   }
 
   @Post(':sandboxIdOrName/autostop/:interval')
