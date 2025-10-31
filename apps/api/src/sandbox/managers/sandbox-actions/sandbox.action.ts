@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
@@ -19,6 +19,8 @@ export type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
 export abstract class SandboxAction {
+  protected readonly logger: Logger
+
   constructor(
     protected readonly runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
@@ -36,9 +38,21 @@ export abstract class SandboxAction {
     errorReason?: string,
     daemonVersion?: string,
   ) {
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
+    const sandbox = await this.sandboxRepository.findOneBy({
       id: sandboxId,
+      pending: true,
     })
+    if (!sandbox) {
+      //  this should never happen
+      //  if it does, we need to log the error and return
+      //  this indicates a concurrency error and should be investigated
+      //  we don't to throw the error, just log it and return to avoid setting the error state
+      //  on the otherwise ready sandbox
+      const err = new Error(`sandbox ${sandboxId} is not in a pending state`)
+      this.logger.error(err)
+      return
+    }
+
     if (sandbox.state === state && sandbox.runnerId === runnerId && sandbox.errorReason === errorReason) {
       return
     }

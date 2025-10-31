@@ -328,7 +328,10 @@ export class Sandbox {
 
   @BeforeUpdate()
   updatePendingFlag() {
-    if (String(this.state) === String(this.desiredState)) {
+    if (!this.pending && String(this.state) !== String(this.desiredState)) {
+      this.pending = true
+    }
+    if (this.pending && String(this.state) === String(this.desiredState)) {
       this.pending = false
     }
     if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
