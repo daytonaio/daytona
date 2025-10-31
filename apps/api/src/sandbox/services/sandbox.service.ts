@@ -223,7 +223,7 @@ export class SandboxService {
 
     sandbox.state = SandboxState.ARCHIVING
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: SandboxState.STOPPED })
 
     this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
     return sandbox
