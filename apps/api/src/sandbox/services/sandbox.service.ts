@@ -288,7 +288,7 @@ export class SandboxService extends LockableEntity {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const region = this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
       const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
       let snapshotIdOrName = createSandboxDto.snapshot
@@ -529,7 +529,7 @@ export class SandboxService extends LockableEntity {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const region = this.getValidatedOrDefaultRegion(organization, createSandboxDto.target)
       const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
       const cpu = createSandboxDto.cpu || DEFAULT_CPU
@@ -1087,9 +1087,9 @@ export class SandboxService extends LockableEntity {
     return sandbox
   }
 
-  private getValidatedOrDefaultRegion(region?: string): string {
+  private getValidatedOrDefaultRegion(organization: Organization, region?: string): string {
     if (!region || region.trim().length === 0) {
-      return 'us'
+      return organization.defaultRegion
     }
 
     return region.trim()

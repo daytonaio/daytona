@@ -30,6 +30,11 @@ export class Organization {
   telemetryEnabled: boolean
 
   @Column({
+    default: 'us',
+  })
+  defaultRegion: string
+
+  @Column({
     type: 'int',
     default: 10,
     name: 'total_cpu_quota',
