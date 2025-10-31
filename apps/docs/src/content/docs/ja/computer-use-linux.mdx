@@ -1,0 +1,106 @@
+---
+title: コンピューター使用 - Linux
+description: Daytona を用いて、Linux 環境でデスクトップの自動化と GUI 操作をプログラムから実行します。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+**コンピューター使用**は、Daytona のサンドボックス内にあるデスクトップ環境をプログラムから制御できる機能です。GUI 操作の自動化やデスクトップアプリのテストに必要な、マウス／キーボード操作、スクリーンショット取得、ディスプレイ制御を提供します。
+
+多くの用途では、このインスタンスタイプの利用を推奨します。
+
+## 一般的なユースケース \{#common-use-cases\}
+
+* **GUIアプリケーションのテスト** - デスクトップアプリの操作を自動化し、ボタンのクリックやフォーム入力、UI動作の検証を行う
+* **ビジュアルテストとスクリーンショット** - アプリのスクリーンショットを取得し、UIの状態を比較してビジュアルリグレッションテストを実施する
+* **デスクトップ自動化** - 繰り返し作業やGUI経由のファイル管理、複雑なワークフローを自動化する
+* **Human-in-the-Loop** - [Daytona Dashboard](https://app.daytona.io/dashboard/sandboxes) からVNCインターフェースに直接アクセスし、自動化スクリプトと併用してデスクトップ環境を手動で操作・対話する
+
+## SDK リファレンス \{#sdk-references\}
+
+コンピューター使用の自動化を始めるには、利用したい SDK を選んでください:
+
+### TypeScript SDK \{#typescript-sdk\}
+
+TypeScript のコンピューター使用操作に関する完全な API リファレンス。
+
+[TypeScript SDK を表示 →](/docs/ja/typescript-sdk/computer-use)
+
+### Python SDK \{#python-sdk\}
+
+Python向けのコンピューター使用操作に関する完全なAPIリファレンス（同期・非同期）。
+
+[Python SDK を表示 →](/docs/ja/python-sdk/sync/computer-use)
+
+## クイック例 \{#quick-example\}
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona
+
+    # 環境変数で初期化（推奨）
+    daytona = Daytona()
+    # または明示的に設定:
+    # daytona = Daytona(
+    #     api_key=os.getenv('DAYTONA_API_KEY'),
+    #     api_url=os.getenv('DAYTONA_API_URL', 'https://app.daytona.io/api')
+    # )
+
+    # デフォルトのスナップショットからサンドボックスを作成（デスクトップ環境を含む）
+    sandbox = daytona.create()
+
+    # コンピューター使用のプロセスを開始
+    result = sandbox.computer_use.start()
+    print("コンピューター使用を開始:", result.message)
+
+    # スクリーンショットを取得
+    screenshot = sandbox.computer_use.screenshot.take_full_screen()
+
+    # クリックして入力
+    sandbox.computer_use.mouse.click(100, 200)
+    sandbox.computer_use.keyboard.type('Hello, Linux!')
+    sandbox.computer_use.keyboard.hotkey('ctrl+s')
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    // 環境変数で初期化（推奨）
+    const daytona = new Daytona();
+    // または明示的に設定:
+    // const daytona = new Daytona({
+    //     apiKey: process.env.DAYTONA_API_KEY,
+    //     apiUrl: process.env.DAYTONA_API_URL || 'https://app.daytona.io/api'
+    // });
+
+    // デフォルトのスナップショットからサンドボックスを作成（デスクトップ環境を含む）
+    const sandbox = await daytona.create();
+
+    // コンピューター使用のプロセスを開始
+    await sandbox.computerUse.start();
+
+    // スクリーンショットを取得
+    const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+
+    // クリックして入力
+    await sandbox.computerUse.mouse.click(100, 200);
+    await sandbox.computerUse.keyboard.type('Hello, Linux!');
+    await sandbox.computerUse.keyboard.hotkey('ctrl+s');
+    ```
+  </TabItem>
+</Tabs>
+
+**環境変数（.envファイル）：**
+
+```bash
+DAYTONA_API_KEY=your-api-key-here
+DAYTONA_API_URL=https://app.daytona.io/api
+```
+
+## 関連ドキュメント \{#related-documentation\}
+
+* [コンピューター使用 - Windows](/docs/ja/computer-use-windows)
+* [コンピューター使用 - macOS](/docs/ja/computer-use-macos)
