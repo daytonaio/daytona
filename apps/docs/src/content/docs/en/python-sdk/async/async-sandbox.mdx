@@ -47,19 +47,20 @@ Represents a Daytona Sandbox.
 #### AsyncSandbox.\_\_init\_\_
 
 ```python
-def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
-             toolbox_api: ToolboxApi, code_toolbox: SandboxCodeToolbox)
+def __init__(sandbox_dto: SandboxDto, toolbox_api: ApiClient,
+             sandbox_api: SandboxApi, code_toolbox: SandboxCodeToolbox,
+             get_toolbox_base_url: Callable[[], Awaitable[str]])
 ```
 
 Initialize a new Sandbox instance.
 
 **Arguments**:
 
-- `id` _str_ - Unique identifier for the Sandbox.
-- `instance` _SandboxInstance_ - The underlying Sandbox instance.
+- `sandbox_dto` _SandboxDto_ - The sandbox data from the API.
+- `toolbox_api` _ApiClient_ - API client for toolbox operations.
 - `sandbox_api` _SandboxApi_ - API client for Sandbox operations.
-- `toolbox_api` _ToolboxApi_ - API client for toolbox operations.
 - `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
+- `get_toolbox_base_url` _Callable[[], Awaitable[str]]_ - Function to get the toolbox base URL.
 
 #### AsyncSandbox.refresh\_data
 

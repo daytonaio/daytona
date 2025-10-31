@@ -88,8 +88,8 @@ import {
   PtySessionInfoDto,
   PtyListResponseDto,
   PtyResizeRequestDto,
-} from '../dto/toolbox.dto'
-import { ToolboxService } from '../services/toolbox.service'
+} from '../dto/toolbox.deprecated.dto'
+import { ToolboxService } from '../services/toolbox.deprecated.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import {
   CompletionListDto,
@@ -255,8 +255,8 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/project-dir')
   @ApiOperation({
-    summary: 'Get sandbox project dir',
-    operationId: 'getProjectDir',
+    summary: '[DEPRECATED] Get sandbox project dir',
+    operationId: 'getProjectDir_deprecated',
     deprecated: true,
   })
   @ApiResponse({
@@ -275,8 +275,9 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/user-home-dir')
   @ApiOperation({
-    summary: 'Get sandbox user home dir',
-    operationId: 'getUserHomeDir',
+    summary: '[DEPRECATED] Get sandbox user home dir',
+    operationId: 'getUserHomeDir_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -294,8 +295,9 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/work-dir')
   @ApiOperation({
-    summary: 'Get sandbox work-dir',
-    operationId: 'getWorkDir',
+    summary: '[DEPRECATED] Get sandbox work-dir',
+    operationId: 'getWorkDir_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -313,8 +315,9 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/files')
   @ApiOperation({
-    summary: 'List files',
-    operationId: 'listFiles',
+    summary: '[DEPRECATED] List files',
+    operationId: 'listFiles_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -333,9 +336,10 @@ export class ToolboxController {
 
   @Delete(':sandboxId/toolbox/files')
   @ApiOperation({
-    summary: 'Delete file',
+    summary: '[DEPRECATED] Delete file',
     description: 'Delete file inside sandbox',
-    operationId: 'deleteFile',
+    operationId: 'deleteFile_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -364,9 +368,9 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/files/download')
   @ApiOperation({
-    summary: 'Download file',
+    summary: '[DEPRECATED] Download file',
     description: 'Download file from sandbox',
-    operationId: 'downloadFile',
+    operationId: 'downloadFile_deprecated',
     deprecated: true,
   })
   @ApiResponse({
@@ -399,9 +403,10 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/files/bulk-download')
   @ApiOperation({
-    summary: 'Download multiple files',
+    summary: '[DEPRECATED] Download multiple files',
     description: 'Streams back a multipart/form-data bundle of the requested paths',
-    operationId: 'downloadFiles',
+    operationId: 'downloadFiles_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -425,9 +430,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/files/find')
   @ApiOperation({
-    summary: 'Search for text/pattern in files',
+    summary: '[DEPRECATED] Search for text/pattern in files',
     description: 'Search for text/pattern inside sandbox files',
-    operationId: 'findInFiles',
+    operationId: 'findInFiles_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -449,9 +455,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Create folder',
+    summary: '[DEPRECATED] Create folder',
     description: 'Create folder inside sandbox',
-    operationId: 'createFolder',
+    operationId: 'createFolder_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -481,9 +488,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/files/info')
   @ApiOperation({
-    summary: 'Get file info',
+    summary: '[DEPRECATED] Get file info',
     description: 'Get file info inside sandbox',
-    operationId: 'getFileInfo',
+    operationId: 'getFileInfo_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -504,9 +512,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Move file',
+    summary: '[DEPRECATED] Move file',
     description: 'Move file inside sandbox',
-    operationId: 'moveFile',
+    operationId: 'moveFile_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -538,9 +547,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Set file permissions',
+    summary: '[DEPRECATED] Set file permissions',
     description: 'Set file owner/group/permissions inside sandbox',
-    operationId: 'setFilePermissions',
+    operationId: 'setFilePermissions_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -576,9 +586,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Replace in files',
+    summary: '[DEPRECATED] Replace in files',
     description: 'Replace text/pattern in multiple files inside sandbox',
-    operationId: 'replaceInFiles',
+    operationId: 'replaceInFiles_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -611,9 +622,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/files/search')
   @ApiOperation({
-    summary: 'Search files',
+    summary: '[DEPRECATED] Search files',
     description: 'Search for files inside sandbox',
-    operationId: 'searchFiles',
+    operationId: 'searchFiles_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -634,9 +646,9 @@ export class ToolboxController {
   @HttpCode(200)
   @Post(':sandboxId/toolbox/files/upload')
   @ApiOperation({
-    summary: 'Upload file',
+    summary: '[DEPRECATED] Upload file',
     description: 'Upload file inside sandbox',
-    operationId: 'uploadFile',
+    operationId: 'uploadFile_deprecated',
     deprecated: true,
   })
   @ApiResponse({
@@ -678,9 +690,10 @@ export class ToolboxController {
   @HttpCode(200)
   @Post(':sandboxId/toolbox/files/bulk-upload')
   @ApiOperation({
-    summary: 'Upload multiple files',
+    summary: '[DEPRECATED] Upload multiple files',
     description: 'Upload multiple files inside sandbox',
-    operationId: 'uploadFiles',
+    operationId: 'uploadFiles_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -707,9 +720,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Add files',
+    summary: '[DEPRECATED] Add files',
     description: 'Add files to git commit',
-    operationId: 'gitAddFiles',
+    operationId: 'gitAddFiles_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -740,9 +754,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/git/branches')
   @ApiOperation({
-    summary: 'Get branch list',
+    summary: '[DEPRECATED] Get branch list',
     description: 'Get branch list from git repository',
-    operationId: 'gitListBranches',
+    operationId: 'gitListBranches_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -763,9 +778,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Create branch',
+    summary: '[DEPRECATED] Create branch',
     description: 'Create branch on git repository',
-    operationId: 'gitCreateBranch',
+    operationId: 'gitCreateBranch_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -798,9 +814,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Delete branch',
+    summary: '[DEPRECATED] Delete branch',
     description: 'Delete branch on git repository',
-    operationId: 'gitDeleteBranch',
+    operationId: 'gitDeleteBranch_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -833,9 +850,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Clone repository',
+    summary: '[DEPRECATED] Clone repository',
     description: 'Clone git repository',
-    operationId: 'gitCloneRepository',
+    operationId: 'gitCloneRepository_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -872,9 +890,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Commit changes',
+    summary: '[DEPRECATED] Commit changes',
     description: 'Commit changes to git repository',
-    operationId: 'gitCommitChanges',
+    operationId: 'gitCommitChanges_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -909,9 +928,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/git/history')
   @ApiOperation({
-    summary: 'Get commit history',
+    summary: '[DEPRECATED] Get commit history',
     description: 'Get commit history from git repository',
-    operationId: 'gitGetHistory',
+    operationId: 'gitGetHistory_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -932,9 +952,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Pull changes',
+    summary: '[DEPRECATED] Pull changes',
     description: 'Pull changes from remote',
-    operationId: 'gitPullChanges',
+    operationId: 'gitPullChanges_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -968,9 +989,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Push changes',
+    summary: '[DEPRECATED] Push changes',
     description: 'Push changes to remote',
-    operationId: 'gitPushChanges',
+    operationId: 'gitPushChanges_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1004,9 +1026,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Checkout branch',
+    summary: '[DEPRECATED] Checkout branch',
     description: 'Checkout branch or commit in git repository',
-    operationId: 'gitCheckoutBranch',
+    operationId: 'gitCheckoutBranch_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1037,9 +1060,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/git/status')
   @ApiOperation({
-    summary: 'Get git status',
+    summary: '[DEPRECATED] Get git status',
     description: 'Get status from git repository',
-    operationId: 'gitGetStatus',
+    operationId: 'gitGetStatus_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1060,9 +1084,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Execute command',
+    summary: '[DEPRECATED] Execute command',
     description: 'Execute command synchronously inside sandbox',
-    operationId: 'executeCommand',
+    operationId: 'executeCommand_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1094,7 +1119,7 @@ export class ToolboxController {
 
     // TODO: use new proxy - can't use it now because of this
     return {
-      exitCode: response.code,
+      exitCode: response.exitCode ?? response.code,
       result: response.result,
     }
   }
@@ -1102,9 +1127,10 @@ export class ToolboxController {
   // Session management endpoints
   @Get(':sandboxId/toolbox/process/session')
   @ApiOperation({
-    summary: 'List sessions',
+    summary: '[DEPRECATED] List sessions',
     description: 'List all active sessions in the sandbox',
-    operationId: 'listSessions',
+    operationId: 'listSessions_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1122,9 +1148,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/process/session/:sessionId')
   @ApiOperation({
-    summary: 'Get session',
+    summary: '[DEPRECATED] Get session',
     description: 'Get session by ID',
-    operationId: 'getSession',
+    operationId: 'getSession_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1145,9 +1172,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Create session',
+    summary: '[DEPRECATED] Create session',
     description: 'Create a new session in the sandbox',
-    operationId: 'createSession',
+    operationId: 'createSession_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1178,9 +1206,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Execute command in session',
+    summary: '[DEPRECATED] Execute command in session',
     description: 'Execute a command in a specific session',
-    operationId: 'executeSessionCommand',
+    operationId: 'executeSessionCommand_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1222,9 +1251,10 @@ export class ToolboxController {
 
   @Delete(':sandboxId/toolbox/process/session/:sessionId')
   @ApiOperation({
-    summary: 'Delete session',
+    summary: '[DEPRECATED] Delete session',
     description: 'Delete a specific session',
-    operationId: 'deleteSession',
+    operationId: 'deleteSession_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1252,9 +1282,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/process/session/:sessionId/command/:commandId')
   @ApiOperation({
-    summary: 'Get session command',
+    summary: '[DEPRECATED] Get session command',
     description: 'Get session command by ID',
-    operationId: 'getSessionCommand',
+    operationId: 'getSessionCommand_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1274,9 +1305,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/process/session/:sessionId/command/:commandId/logs')
   @ApiOperation({
-    summary: 'Get command logs',
+    summary: '[DEPRECATED] Get command logs',
     description: 'Get logs for a specific command in a session',
-    operationId: 'getSessionCommandLogs',
+    operationId: 'getSessionCommandLogs_deprecated',
+    deprecated: true,
   })
   // When follow is true, the response is an octet stream
   @ApiResponse({
@@ -1305,9 +1337,10 @@ export class ToolboxController {
   // PTY endpoints
   @Get(':sandboxId/toolbox/process/pty')
   @ApiOperation({
-    summary: 'List PTY sessions',
+    summary: '[DEPRECATED] List PTY sessions',
     description: 'List all active PTY sessions in the sandbox',
-    operationId: 'listPTYSessions',
+    operationId: 'listPTYSessions_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1327,9 +1360,10 @@ export class ToolboxController {
   @HttpCode(201)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Create PTY session',
+    summary: '[DEPRECATED] Create PTY session',
     description: 'Create a new PTY session in the sandbox',
-    operationId: 'createPTYSession',
+    operationId: 'createPTYSession_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 201,
@@ -1350,9 +1384,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/process/pty/:sessionId')
   @ApiOperation({
-    summary: 'Get PTY session',
+    summary: '[DEPRECATED] Get PTY session',
     description: 'Get PTY session information by ID',
-    operationId: 'getPTYSession',
+    operationId: 'getPTYSession_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1371,9 +1406,10 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/process/pty/:sessionId/resize')
   @ApiOperation({
-    summary: 'Resize PTY session',
+    summary: '[DEPRECATED] Resize PTY session',
     description: 'Resize a PTY session',
-    operationId: 'resizePTYSession',
+    operationId: 'resizePTYSession_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1395,9 +1431,10 @@ export class ToolboxController {
 
   @Delete(':sandboxId/toolbox/process/pty/:sessionId')
   @ApiOperation({
-    summary: 'Delete PTY session',
+    summary: '[DEPRECATED] Delete PTY session',
     description: 'Delete a PTY session and terminate the associated process',
-    operationId: 'deletePTYSession',
+    operationId: 'deletePTYSession_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1417,10 +1454,11 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Get Lsp Completions',
+    summary: '[DEPRECATED] Get Lsp Completions',
     description:
       'The Completion request is sent from the client to the server to compute completion items at a given cursor position.',
-    operationId: 'LspCompletions',
+    operationId: 'LspCompletions_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1443,10 +1481,11 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Call Lsp DidClose',
+    summary: '[DEPRECATED] Call Lsp DidClose',
     description:
       'The document close notification is sent from the client to the server when the document got closed in the client.',
-    operationId: 'LspDidClose',
+    operationId: 'LspDidClose_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1468,10 +1507,11 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Call Lsp DidOpen',
+    summary: '[DEPRECATED] Call Lsp DidOpen',
     description:
       'The document open notification is sent from the client to the server to signal newly opened text documents.',
-    operationId: 'LspDidOpen',
+    operationId: 'LspDidOpen_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1491,9 +1531,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/lsp/document-symbols')
   @ApiOperation({
-    summary: 'Call Lsp DocumentSymbols',
+    summary: '[DEPRECATED] Call Lsp DocumentSymbols',
     description: 'The document symbol request is sent from the client to the server.',
-    operationId: 'LspDocumentSymbols',
+    operationId: 'LspDocumentSymbols_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1516,9 +1557,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Start Lsp server',
+    summary: '[DEPRECATED] Start Lsp server',
     description: 'Start Lsp server process inside sandbox project',
-    operationId: 'LspStart',
+    operationId: 'LspStart_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1540,9 +1582,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Stop Lsp server',
+    summary: '[DEPRECATED] Stop Lsp server',
     description: 'Stop Lsp server process inside sandbox project',
-    operationId: 'LspStop',
+    operationId: 'LspStop_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1562,10 +1605,11 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/lsp/workspace-symbols')
   @ApiOperation({
-    summary: 'Call Lsp WorkspaceSymbols',
+    summary: '[DEPRECATED] Call Lsp WorkspaceSymbols',
     description:
       'The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.',
-    operationId: 'LspWorkspaceSymbols',
+    operationId: 'LspWorkspaceSymbols_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1591,9 +1635,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Start computer use processes',
+    summary: '[DEPRECATED] Start computer use processes',
     description: 'Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
-    operationId: 'startComputerUse',
+    operationId: 'startComputerUse_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1618,9 +1663,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Stop computer use processes',
+    summary: '[DEPRECATED] Stop computer use processes',
     description: 'Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
-    operationId: 'stopComputerUse',
+    operationId: 'stopComputerUse_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1643,9 +1689,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/status')
   @ApiOperation({
-    summary: 'Get computer use status',
+    summary: '[DEPRECATED] Get computer use status',
     description: 'Get status of all VNC desktop processes',
-    operationId: 'getComputerUseStatus',
+    operationId: 'getComputerUseStatus_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1663,9 +1710,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/process/:processName/status')
   @ApiOperation({
-    summary: 'Get process status',
+    summary: '[DEPRECATED] Get process status',
     description: 'Get status of a specific VNC process',
-    operationId: 'getProcessStatus',
+    operationId: 'getProcessStatus_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1686,9 +1734,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Restart process',
+    summary: '[DEPRECATED] Restart process',
     description: 'Restart a specific VNC process',
-    operationId: 'restartProcess',
+    operationId: 'restartProcess_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1717,9 +1766,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/process/:processName/logs')
   @ApiOperation({
-    summary: 'Get process logs',
+    summary: '[DEPRECATED] Get process logs',
     description: 'Get logs for a specific VNC process',
-    operationId: 'getProcessLogs',
+    operationId: 'getProcessLogs_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1738,9 +1788,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/process/:processName/errors')
   @ApiOperation({
-    summary: 'Get process errors',
+    summary: '[DEPRECATED] Get process errors',
     description: 'Get error logs for a specific VNC process',
-    operationId: 'getProcessErrors',
+    operationId: 'getProcessErrors_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1760,9 +1811,10 @@ export class ToolboxController {
   // Mouse endpoints
   @Get(':sandboxId/toolbox/computeruse/mouse/position')
   @ApiOperation({
-    summary: 'Get mouse position',
+    summary: '[DEPRECATED] Get mouse position',
     description: 'Get current mouse cursor position',
-    operationId: 'getMousePosition',
+    operationId: 'getMousePosition_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1782,9 +1834,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Move mouse',
+    summary: '[DEPRECATED] Move mouse',
     description: 'Move mouse cursor to specified coordinates',
-    operationId: 'moveMouse',
+    operationId: 'moveMouse_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1807,9 +1860,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Click mouse',
+    summary: '[DEPRECATED] Click mouse',
     description: 'Click mouse at specified coordinates',
-    operationId: 'clickMouse',
+    operationId: 'clickMouse_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1832,9 +1886,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Drag mouse',
+    summary: '[DEPRECATED] Drag mouse',
     description: 'Drag mouse from start to end coordinates',
-    operationId: 'dragMouse',
+    operationId: 'dragMouse_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1857,9 +1912,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Scroll mouse',
+    summary: '[DEPRECATED] Scroll mouse',
     description: 'Scroll mouse at specified coordinates',
-    operationId: 'scrollMouse',
+    operationId: 'scrollMouse_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1883,9 +1939,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Type text',
+    summary: '[DEPRECATED] Type text',
     description: 'Type text using keyboard',
-    operationId: 'typeText',
+    operationId: 'typeText_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1907,9 +1964,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Press key',
+    summary: '[DEPRECATED] Press key',
     description: 'Press a key with optional modifiers',
-    operationId: 'pressKey',
+    operationId: 'pressKey_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1931,9 +1989,10 @@ export class ToolboxController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Press hotkey',
+    summary: '[DEPRECATED] Press hotkey',
     description: 'Press a hotkey combination',
-    operationId: 'pressHotkey',
+    operationId: 'pressHotkey_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1954,9 +2013,10 @@ export class ToolboxController {
   // Screenshot endpoints
   @Get(':sandboxId/toolbox/computeruse/screenshot')
   @ApiOperation({
-    summary: 'Take screenshot',
+    summary: '[DEPRECATED] Take screenshot',
     description: 'Take a screenshot of the entire screen',
-    operationId: 'takeScreenshot',
+    operationId: 'takeScreenshot_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -1975,9 +2035,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/screenshot/region')
   @ApiOperation({
-    summary: 'Take region screenshot',
+    summary: '[DEPRECATED] Take region screenshot',
     description: 'Take a screenshot of a specific region',
-    operationId: 'takeRegionScreenshot',
+    operationId: 'takeRegionScreenshot_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -2000,9 +2061,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/screenshot/compressed')
   @ApiOperation({
-    summary: 'Take compressed screenshot',
+    summary: '[DEPRECATED] Take compressed screenshot',
     description: 'Take a compressed screenshot with format, quality, and scale options',
-    operationId: 'takeCompressedScreenshot',
+    operationId: 'takeCompressedScreenshot_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -2024,9 +2086,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/screenshot/region/compressed')
   @ApiOperation({
-    summary: 'Take compressed region screenshot',
+    summary: '[DEPRECATED] Take compressed region screenshot',
     description: 'Take a compressed screenshot of a specific region',
-    operationId: 'takeCompressedRegionScreenshot',
+    operationId: 'takeCompressedRegionScreenshot_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -2053,9 +2116,10 @@ export class ToolboxController {
   // Display endpoints
   @Get(':sandboxId/toolbox/computeruse/display/info')
   @ApiOperation({
-    summary: 'Get display info',
+    summary: '[DEPRECATED] Get display info',
     description: 'Get information about displays',
-    operationId: 'getDisplayInfo',
+    operationId: 'getDisplayInfo_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -2073,9 +2137,10 @@ export class ToolboxController {
 
   @Get(':sandboxId/toolbox/computeruse/display/windows')
   @ApiOperation({
-    summary: 'Get windows',
+    summary: '[DEPRECATED] Get windows',
     description: 'Get list of open windows',
-    operationId: 'getWindows',
+    operationId: 'getWindows_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,

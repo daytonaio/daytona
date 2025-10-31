@@ -101,7 +101,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def click_mouse(
+    async def click_mouse_deprecated(
         self,
         sandbox_id: StrictStr,
         mouse_click_request: MouseClickRequest,
@@ -119,7 +119,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> MouseClickResponse:
-        """Click mouse
+        """(Deprecated) [DEPRECATED] Click mouse
 
         Click mouse at specified coordinates
 
@@ -150,8 +150,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/click is deprecated.", DeprecationWarning)
 
-        _param = self._click_mouse_serialize(
+        _param = self._click_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_click_request=mouse_click_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -176,7 +177,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def click_mouse_with_http_info(
+    async def click_mouse_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         mouse_click_request: MouseClickRequest,
@@ -194,7 +195,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[MouseClickResponse]:
-        """Click mouse
+        """(Deprecated) [DEPRECATED] Click mouse
 
         Click mouse at specified coordinates
 
@@ -225,8 +226,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/click is deprecated.", DeprecationWarning)
 
-        _param = self._click_mouse_serialize(
+        _param = self._click_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_click_request=mouse_click_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -251,7 +253,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def click_mouse_without_preload_content(
+    async def click_mouse_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         mouse_click_request: MouseClickRequest,
@@ -269,7 +271,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Click mouse
+        """(Deprecated) [DEPRECATED] Click mouse
 
         Click mouse at specified coordinates
 
@@ -300,8 +302,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/click is deprecated.", DeprecationWarning)
 
-        _param = self._click_mouse_serialize(
+        _param = self._click_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_click_request=mouse_click_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -321,7 +324,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _click_mouse_serialize(
+    def _click_mouse_deprecated_serialize(
         self,
         sandbox_id,
         mouse_click_request,
@@ -406,7 +409,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_folder(
+    async def create_folder_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -425,7 +428,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Create folder
+        """(Deprecated) [DEPRECATED] Create folder
 
         Create folder inside sandbox
 
@@ -458,8 +461,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/folder is deprecated.", DeprecationWarning)
 
-        _param = self._create_folder_serialize(
+        _param = self._create_folder_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             mode=mode,
@@ -485,7 +489,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_folder_with_http_info(
+    async def create_folder_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -504,7 +508,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Create folder
+        """(Deprecated) [DEPRECATED] Create folder
 
         Create folder inside sandbox
 
@@ -537,8 +541,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/folder is deprecated.", DeprecationWarning)
 
-        _param = self._create_folder_serialize(
+        _param = self._create_folder_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             mode=mode,
@@ -564,7 +569,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_folder_without_preload_content(
+    async def create_folder_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -583,7 +588,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Create folder
+        """(Deprecated) [DEPRECATED] Create folder
 
         Create folder inside sandbox
 
@@ -616,8 +621,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/folder is deprecated.", DeprecationWarning)
 
-        _param = self._create_folder_serialize(
+        _param = self._create_folder_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             mode=mode,
@@ -638,7 +644,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _create_folder_serialize(
+    def _create_folder_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -710,7 +716,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_pty_session(
+    async def create_pty_session_deprecated(
         self,
         sandbox_id: StrictStr,
         pty_create_request: PtyCreateRequest,
@@ -728,7 +734,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PtyCreateResponse:
-        """Create PTY session
+        """(Deprecated) [DEPRECATED] Create PTY session
 
         Create a new PTY session in the sandbox
 
@@ -759,8 +765,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/pty is deprecated.", DeprecationWarning)
 
-        _param = self._create_pty_session_serialize(
+        _param = self._create_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             pty_create_request=pty_create_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -785,7 +792,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_pty_session_with_http_info(
+    async def create_pty_session_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         pty_create_request: PtyCreateRequest,
@@ -803,7 +810,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PtyCreateResponse]:
-        """Create PTY session
+        """(Deprecated) [DEPRECATED] Create PTY session
 
         Create a new PTY session in the sandbox
 
@@ -834,8 +841,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/pty is deprecated.", DeprecationWarning)
 
-        _param = self._create_pty_session_serialize(
+        _param = self._create_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             pty_create_request=pty_create_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -860,7 +868,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_pty_session_without_preload_content(
+    async def create_pty_session_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         pty_create_request: PtyCreateRequest,
@@ -878,7 +886,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Create PTY session
+        """(Deprecated) [DEPRECATED] Create PTY session
 
         Create a new PTY session in the sandbox
 
@@ -909,8 +917,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/pty is deprecated.", DeprecationWarning)
 
-        _param = self._create_pty_session_serialize(
+        _param = self._create_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             pty_create_request=pty_create_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -930,7 +939,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _create_pty_session_serialize(
+    def _create_pty_session_deprecated_serialize(
         self,
         sandbox_id,
         pty_create_request,
@@ -1015,7 +1024,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_session(
+    async def create_session_deprecated(
         self,
         sandbox_id: StrictStr,
         create_session_request: CreateSessionRequest,
@@ -1033,7 +1042,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Create session
+        """(Deprecated) [DEPRECATED] Create session
 
         Create a new session in the sandbox
 
@@ -1064,8 +1073,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
 
-        _param = self._create_session_serialize(
+        _param = self._create_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             create_session_request=create_session_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1090,7 +1100,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_session_with_http_info(
+    async def create_session_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         create_session_request: CreateSessionRequest,
@@ -1108,7 +1118,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Create session
+        """(Deprecated) [DEPRECATED] Create session
 
         Create a new session in the sandbox
 
@@ -1139,8 +1149,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
 
-        _param = self._create_session_serialize(
+        _param = self._create_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             create_session_request=create_session_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1165,7 +1176,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def create_session_without_preload_content(
+    async def create_session_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         create_session_request: CreateSessionRequest,
@@ -1183,7 +1194,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Create session
+        """(Deprecated) [DEPRECATED] Create session
 
         Create a new session in the sandbox
 
@@ -1214,8 +1225,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
 
-        _param = self._create_session_serialize(
+        _param = self._create_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             create_session_request=create_session_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1235,7 +1247,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _create_session_serialize(
+    def _create_session_deprecated_serialize(
         self,
         sandbox_id,
         create_session_request,
@@ -1313,7 +1325,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_file(
+    async def delete_file_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -1332,7 +1344,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Delete file
+        """(Deprecated) [DEPRECATED] Delete file
 
         Delete file inside sandbox
 
@@ -1365,8 +1377,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/files is deprecated.", DeprecationWarning)
 
-        _param = self._delete_file_serialize(
+        _param = self._delete_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1392,7 +1405,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_file_with_http_info(
+    async def delete_file_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -1411,7 +1424,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Delete file
+        """(Deprecated) [DEPRECATED] Delete file
 
         Delete file inside sandbox
 
@@ -1444,8 +1457,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/files is deprecated.", DeprecationWarning)
 
-        _param = self._delete_file_serialize(
+        _param = self._delete_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1471,7 +1485,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_file_without_preload_content(
+    async def delete_file_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -1490,7 +1504,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Delete file
+        """(Deprecated) [DEPRECATED] Delete file
 
         Delete file inside sandbox
 
@@ -1523,8 +1537,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/files is deprecated.", DeprecationWarning)
 
-        _param = self._delete_file_serialize(
+        _param = self._delete_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1545,7 +1560,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _delete_file_serialize(
+    def _delete_file_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -1617,7 +1632,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_pty_session(
+    async def delete_pty_session_deprecated(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -1635,7 +1650,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Delete PTY session
+        """(Deprecated) [DEPRECATED] Delete PTY session
 
         Delete a PTY session and terminate the associated process
 
@@ -1666,8 +1681,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/process/pty/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_pty_session_serialize(
+        _param = self._delete_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1692,7 +1708,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_pty_session_with_http_info(
+    async def delete_pty_session_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -1710,7 +1726,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Delete PTY session
+        """(Deprecated) [DEPRECATED] Delete PTY session
 
         Delete a PTY session and terminate the associated process
 
@@ -1741,8 +1757,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/process/pty/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_pty_session_serialize(
+        _param = self._delete_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1767,7 +1784,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_pty_session_without_preload_content(
+    async def delete_pty_session_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -1785,7 +1802,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Delete PTY session
+        """(Deprecated) [DEPRECATED] Delete PTY session
 
         Delete a PTY session and terminate the associated process
 
@@ -1816,8 +1833,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/process/pty/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_pty_session_serialize(
+        _param = self._delete_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1837,7 +1855,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _delete_pty_session_serialize(
+    def _delete_pty_session_deprecated_serialize(
         self,
         sandbox_id,
         session_id,
@@ -1902,7 +1920,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_session(
+    async def delete_session_deprecated(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -1920,7 +1938,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Delete session
+        """(Deprecated) [DEPRECATED] Delete session
 
         Delete a specific session
 
@@ -1951,8 +1969,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/process/session/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_session_serialize(
+        _param = self._delete_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1977,7 +1996,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_session_with_http_info(
+    async def delete_session_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -1995,7 +2014,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Delete session
+        """(Deprecated) [DEPRECATED] Delete session
 
         Delete a specific session
 
@@ -2026,8 +2045,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/process/session/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_session_serialize(
+        _param = self._delete_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2052,7 +2072,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def delete_session_without_preload_content(
+    async def delete_session_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -2070,7 +2090,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Delete session
+        """(Deprecated) [DEPRECATED] Delete session
 
         Delete a specific session
 
@@ -2101,8 +2121,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/process/session/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_session_serialize(
+        _param = self._delete_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2122,7 +2143,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _delete_session_serialize(
+    def _delete_session_deprecated_serialize(
         self,
         sandbox_id,
         session_id,
@@ -2187,7 +2208,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def download_file(
+    async def download_file_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -2205,7 +2226,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> bytearray:
-        """(Deprecated) Download file
+        """(Deprecated) [DEPRECATED] Download file
 
         Download file from sandbox
 
@@ -2238,7 +2259,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/download is deprecated.", DeprecationWarning)
 
-        _param = self._download_file_serialize(
+        _param = self._download_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2263,7 +2284,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def download_file_with_http_info(
+    async def download_file_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -2281,7 +2302,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[bytearray]:
-        """(Deprecated) Download file
+        """(Deprecated) [DEPRECATED] Download file
 
         Download file from sandbox
 
@@ -2314,7 +2335,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/download is deprecated.", DeprecationWarning)
 
-        _param = self._download_file_serialize(
+        _param = self._download_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2339,7 +2360,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def download_file_without_preload_content(
+    async def download_file_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -2357,7 +2378,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """(Deprecated) Download file
+        """(Deprecated) [DEPRECATED] Download file
 
         Download file from sandbox
 
@@ -2390,7 +2411,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/download is deprecated.", DeprecationWarning)
 
-        _param = self._download_file_serialize(
+        _param = self._download_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2410,7 +2431,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _download_file_serialize(
+    def _download_file_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -2484,7 +2505,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def download_files(
+    async def download_files_deprecated(
         self,
         sandbox_id: StrictStr,
         download_files: DownloadFiles,
@@ -2502,7 +2523,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> bytearray:
-        """Download multiple files
+        """(Deprecated) [DEPRECATED] Download multiple files
 
         Streams back a multipart/form-data bundle of the requested paths
 
@@ -2533,8 +2554,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/bulk-download is deprecated.", DeprecationWarning)
 
-        _param = self._download_files_serialize(
+        _param = self._download_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             download_files=download_files,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2559,7 +2581,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def download_files_with_http_info(
+    async def download_files_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         download_files: DownloadFiles,
@@ -2577,7 +2599,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[bytearray]:
-        """Download multiple files
+        """(Deprecated) [DEPRECATED] Download multiple files
 
         Streams back a multipart/form-data bundle of the requested paths
 
@@ -2608,8 +2630,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/bulk-download is deprecated.", DeprecationWarning)
 
-        _param = self._download_files_serialize(
+        _param = self._download_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             download_files=download_files,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2634,7 +2657,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def download_files_without_preload_content(
+    async def download_files_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         download_files: DownloadFiles,
@@ -2652,7 +2675,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Download multiple files
+        """(Deprecated) [DEPRECATED] Download multiple files
 
         Streams back a multipart/form-data bundle of the requested paths
 
@@ -2683,8 +2706,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/bulk-download is deprecated.", DeprecationWarning)
 
-        _param = self._download_files_serialize(
+        _param = self._download_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             download_files=download_files,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2704,7 +2728,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _download_files_serialize(
+    def _download_files_deprecated_serialize(
         self,
         sandbox_id,
         download_files,
@@ -2789,7 +2813,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def drag_mouse(
+    async def drag_mouse_deprecated(
         self,
         sandbox_id: StrictStr,
         mouse_drag_request: MouseDragRequest,
@@ -2807,7 +2831,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> MouseDragResponse:
-        """Drag mouse
+        """(Deprecated) [DEPRECATED] Drag mouse
 
         Drag mouse from start to end coordinates
 
@@ -2838,8 +2862,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/drag is deprecated.", DeprecationWarning)
 
-        _param = self._drag_mouse_serialize(
+        _param = self._drag_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_drag_request=mouse_drag_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2864,7 +2889,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def drag_mouse_with_http_info(
+    async def drag_mouse_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         mouse_drag_request: MouseDragRequest,
@@ -2882,7 +2907,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[MouseDragResponse]:
-        """Drag mouse
+        """(Deprecated) [DEPRECATED] Drag mouse
 
         Drag mouse from start to end coordinates
 
@@ -2913,8 +2938,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/drag is deprecated.", DeprecationWarning)
 
-        _param = self._drag_mouse_serialize(
+        _param = self._drag_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_drag_request=mouse_drag_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2939,7 +2965,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def drag_mouse_without_preload_content(
+    async def drag_mouse_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         mouse_drag_request: MouseDragRequest,
@@ -2957,7 +2983,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Drag mouse
+        """(Deprecated) [DEPRECATED] Drag mouse
 
         Drag mouse from start to end coordinates
 
@@ -2988,8 +3014,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/drag is deprecated.", DeprecationWarning)
 
-        _param = self._drag_mouse_serialize(
+        _param = self._drag_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_drag_request=mouse_drag_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3009,7 +3036,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _drag_mouse_serialize(
+    def _drag_mouse_deprecated_serialize(
         self,
         sandbox_id,
         mouse_drag_request,
@@ -3094,7 +3121,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def execute_command(
+    async def execute_command_deprecated(
         self,
         sandbox_id: StrictStr,
         execute_request: ExecuteRequest,
@@ -3112,7 +3139,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ExecuteResponse:
-        """Execute command
+        """(Deprecated) [DEPRECATED] Execute command
 
         Execute command synchronously inside sandbox
 
@@ -3143,8 +3170,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/execute is deprecated.", DeprecationWarning)
 
-        _param = self._execute_command_serialize(
+        _param = self._execute_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             execute_request=execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3169,7 +3197,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def execute_command_with_http_info(
+    async def execute_command_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         execute_request: ExecuteRequest,
@@ -3187,7 +3215,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ExecuteResponse]:
-        """Execute command
+        """(Deprecated) [DEPRECATED] Execute command
 
         Execute command synchronously inside sandbox
 
@@ -3218,8 +3246,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/execute is deprecated.", DeprecationWarning)
 
-        _param = self._execute_command_serialize(
+        _param = self._execute_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             execute_request=execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3244,7 +3273,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def execute_command_without_preload_content(
+    async def execute_command_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         execute_request: ExecuteRequest,
@@ -3262,7 +3291,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Execute command
+        """(Deprecated) [DEPRECATED] Execute command
 
         Execute command synchronously inside sandbox
 
@@ -3293,8 +3322,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/execute is deprecated.", DeprecationWarning)
 
-        _param = self._execute_command_serialize(
+        _param = self._execute_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             execute_request=execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3314,7 +3344,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _execute_command_serialize(
+    def _execute_command_deprecated_serialize(
         self,
         sandbox_id,
         execute_request,
@@ -3399,7 +3429,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def execute_session_command(
+    async def execute_session_command_deprecated(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -3418,7 +3448,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> SessionExecuteResponse:
-        """Execute command in session
+        """(Deprecated) [DEPRECATED] Execute command in session
 
         Execute a command in a specific session
 
@@ -3451,8 +3481,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec is deprecated.", DeprecationWarning)
 
-        _param = self._execute_session_command_serialize(
+        _param = self._execute_session_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             session_execute_request=session_execute_request,
@@ -3479,7 +3510,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def execute_session_command_with_http_info(
+    async def execute_session_command_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -3498,7 +3529,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[SessionExecuteResponse]:
-        """Execute command in session
+        """(Deprecated) [DEPRECATED] Execute command in session
 
         Execute a command in a specific session
 
@@ -3531,8 +3562,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec is deprecated.", DeprecationWarning)
 
-        _param = self._execute_session_command_serialize(
+        _param = self._execute_session_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             session_execute_request=session_execute_request,
@@ -3559,7 +3591,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def execute_session_command_without_preload_content(
+    async def execute_session_command_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -3578,7 +3610,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Execute command in session
+        """(Deprecated) [DEPRECATED] Execute command in session
 
         Execute a command in a specific session
 
@@ -3611,8 +3643,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec is deprecated.", DeprecationWarning)
 
-        _param = self._execute_session_command_serialize(
+        _param = self._execute_session_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             session_execute_request=session_execute_request,
@@ -3634,7 +3667,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _execute_session_command_serialize(
+    def _execute_session_command_deprecated_serialize(
         self,
         sandbox_id,
         session_id,
@@ -3722,7 +3755,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def find_in_files(
+    async def find_in_files_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -3741,7 +3774,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[Match]:
-        """Search for text/pattern in files
+        """(Deprecated) [DEPRECATED] Search for text/pattern in files
 
         Search for text/pattern inside sandbox files
 
@@ -3774,8 +3807,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/find is deprecated.", DeprecationWarning)
 
-        _param = self._find_in_files_serialize(
+        _param = self._find_in_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
@@ -3801,7 +3835,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def find_in_files_with_http_info(
+    async def find_in_files_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -3820,7 +3854,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[Match]]:
-        """Search for text/pattern in files
+        """(Deprecated) [DEPRECATED] Search for text/pattern in files
 
         Search for text/pattern inside sandbox files
 
@@ -3853,8 +3887,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/find is deprecated.", DeprecationWarning)
 
-        _param = self._find_in_files_serialize(
+        _param = self._find_in_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
@@ -3880,7 +3915,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def find_in_files_without_preload_content(
+    async def find_in_files_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -3899,7 +3934,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Search for text/pattern in files
+        """(Deprecated) [DEPRECATED] Search for text/pattern in files
 
         Search for text/pattern inside sandbox files
 
@@ -3932,8 +3967,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/find is deprecated.", DeprecationWarning)
 
-        _param = self._find_in_files_serialize(
+        _param = self._find_in_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
@@ -3954,7 +3990,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _find_in_files_serialize(
+    def _find_in_files_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -4033,7 +4069,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_computer_use_status(
+    async def get_computer_use_status_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4050,7 +4086,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ComputerUseStatusResponse:
-        """Get computer use status
+        """(Deprecated) [DEPRECATED] Get computer use status
 
         Get status of all VNC desktop processes
 
@@ -4079,8 +4115,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/status is deprecated.", DeprecationWarning)
 
-        _param = self._get_computer_use_status_serialize(
+        _param = self._get_computer_use_status_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4104,7 +4141,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_computer_use_status_with_http_info(
+    async def get_computer_use_status_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4121,7 +4158,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ComputerUseStatusResponse]:
-        """Get computer use status
+        """(Deprecated) [DEPRECATED] Get computer use status
 
         Get status of all VNC desktop processes
 
@@ -4150,8 +4187,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/status is deprecated.", DeprecationWarning)
 
-        _param = self._get_computer_use_status_serialize(
+        _param = self._get_computer_use_status_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4175,7 +4213,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_computer_use_status_without_preload_content(
+    async def get_computer_use_status_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4192,7 +4230,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get computer use status
+        """(Deprecated) [DEPRECATED] Get computer use status
 
         Get status of all VNC desktop processes
 
@@ -4221,8 +4259,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/status is deprecated.", DeprecationWarning)
 
-        _param = self._get_computer_use_status_serialize(
+        _param = self._get_computer_use_status_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4241,7 +4280,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_computer_use_status_serialize(
+    def _get_computer_use_status_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -4310,7 +4349,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_display_info(
+    async def get_display_info_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4327,7 +4366,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DisplayInfoResponse:
-        """Get display info
+        """(Deprecated) [DEPRECATED] Get display info
 
         Get information about displays
 
@@ -4356,8 +4395,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/display/info is deprecated.", DeprecationWarning)
 
-        _param = self._get_display_info_serialize(
+        _param = self._get_display_info_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4381,7 +4421,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_display_info_with_http_info(
+    async def get_display_info_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4398,7 +4438,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DisplayInfoResponse]:
-        """Get display info
+        """(Deprecated) [DEPRECATED] Get display info
 
         Get information about displays
 
@@ -4427,8 +4467,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/display/info is deprecated.", DeprecationWarning)
 
-        _param = self._get_display_info_serialize(
+        _param = self._get_display_info_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4452,7 +4493,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_display_info_without_preload_content(
+    async def get_display_info_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4469,7 +4510,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get display info
+        """(Deprecated) [DEPRECATED] Get display info
 
         Get information about displays
 
@@ -4498,8 +4539,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/display/info is deprecated.", DeprecationWarning)
 
-        _param = self._get_display_info_serialize(
+        _param = self._get_display_info_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4518,7 +4560,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_display_info_serialize(
+    def _get_display_info_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -4587,7 +4629,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_file_info(
+    async def get_file_info_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -4605,7 +4647,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> FileInfo:
-        """Get file info
+        """(Deprecated) [DEPRECATED] Get file info
 
         Get file info inside sandbox
 
@@ -4636,8 +4678,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/info is deprecated.", DeprecationWarning)
 
-        _param = self._get_file_info_serialize(
+        _param = self._get_file_info_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -4662,7 +4705,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_file_info_with_http_info(
+    async def get_file_info_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -4680,7 +4723,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[FileInfo]:
-        """Get file info
+        """(Deprecated) [DEPRECATED] Get file info
 
         Get file info inside sandbox
 
@@ -4711,8 +4754,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/info is deprecated.", DeprecationWarning)
 
-        _param = self._get_file_info_serialize(
+        _param = self._get_file_info_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -4737,7 +4781,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_file_info_without_preload_content(
+    async def get_file_info_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -4755,7 +4799,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get file info
+        """(Deprecated) [DEPRECATED] Get file info
 
         Get file info inside sandbox
 
@@ -4786,8 +4830,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/info is deprecated.", DeprecationWarning)
 
-        _param = self._get_file_info_serialize(
+        _param = self._get_file_info_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -4807,7 +4852,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_file_info_serialize(
+    def _get_file_info_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -4881,7 +4926,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_mouse_position(
+    async def get_mouse_position_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4898,7 +4943,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> MousePosition:
-        """Get mouse position
+        """(Deprecated) [DEPRECATED] Get mouse position
 
         Get current mouse cursor position
 
@@ -4927,8 +4972,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/mouse/position is deprecated.", DeprecationWarning)
 
-        _param = self._get_mouse_position_serialize(
+        _param = self._get_mouse_position_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4952,7 +4998,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_mouse_position_with_http_info(
+    async def get_mouse_position_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -4969,7 +5015,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[MousePosition]:
-        """Get mouse position
+        """(Deprecated) [DEPRECATED] Get mouse position
 
         Get current mouse cursor position
 
@@ -4998,8 +5044,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/mouse/position is deprecated.", DeprecationWarning)
 
-        _param = self._get_mouse_position_serialize(
+        _param = self._get_mouse_position_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5023,7 +5070,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_mouse_position_without_preload_content(
+    async def get_mouse_position_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -5040,7 +5087,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get mouse position
+        """(Deprecated) [DEPRECATED] Get mouse position
 
         Get current mouse cursor position
 
@@ -5069,8 +5116,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/mouse/position is deprecated.", DeprecationWarning)
 
-        _param = self._get_mouse_position_serialize(
+        _param = self._get_mouse_position_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5089,7 +5137,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_mouse_position_serialize(
+    def _get_mouse_position_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -5158,7 +5206,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_errors(
+    async def get_process_errors_deprecated(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5176,7 +5224,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProcessErrorsResponse:
-        """Get process errors
+        """(Deprecated) [DEPRECATED] Get process errors
 
         Get error logs for a specific VNC process
 
@@ -5207,8 +5255,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_errors_serialize(
+        _param = self._get_process_errors_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5233,7 +5282,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_errors_with_http_info(
+    async def get_process_errors_deprecated_with_http_info(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5251,7 +5300,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProcessErrorsResponse]:
-        """Get process errors
+        """(Deprecated) [DEPRECATED] Get process errors
 
         Get error logs for a specific VNC process
 
@@ -5282,8 +5331,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_errors_serialize(
+        _param = self._get_process_errors_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5308,7 +5358,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_errors_without_preload_content(
+    async def get_process_errors_deprecated_without_preload_content(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5326,7 +5376,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get process errors
+        """(Deprecated) [DEPRECATED] Get process errors
 
         Get error logs for a specific VNC process
 
@@ -5357,8 +5407,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_errors_serialize(
+        _param = self._get_process_errors_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5378,7 +5429,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_process_errors_serialize(
+    def _get_process_errors_deprecated_serialize(
         self,
         process_name,
         sandbox_id,
@@ -5450,7 +5501,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_logs(
+    async def get_process_logs_deprecated(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5468,7 +5519,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProcessLogsResponse:
-        """Get process logs
+        """(Deprecated) [DEPRECATED] Get process logs
 
         Get logs for a specific VNC process
 
@@ -5499,8 +5550,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_logs_serialize(
+        _param = self._get_process_logs_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5525,7 +5577,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_logs_with_http_info(
+    async def get_process_logs_deprecated_with_http_info(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5543,7 +5595,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProcessLogsResponse]:
-        """Get process logs
+        """(Deprecated) [DEPRECATED] Get process logs
 
         Get logs for a specific VNC process
 
@@ -5574,8 +5626,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_logs_serialize(
+        _param = self._get_process_logs_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5600,7 +5653,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_logs_without_preload_content(
+    async def get_process_logs_deprecated_without_preload_content(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5618,7 +5671,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get process logs
+        """(Deprecated) [DEPRECATED] Get process logs
 
         Get logs for a specific VNC process
 
@@ -5649,8 +5702,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_logs_serialize(
+        _param = self._get_process_logs_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5670,7 +5724,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_process_logs_serialize(
+    def _get_process_logs_deprecated_serialize(
         self,
         process_name,
         sandbox_id,
@@ -5742,7 +5796,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_status(
+    async def get_process_status_deprecated(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5760,7 +5814,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProcessStatusResponse:
-        """Get process status
+        """(Deprecated) [DEPRECATED] Get process status
 
         Get status of a specific VNC process
 
@@ -5791,8 +5845,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_status_serialize(
+        _param = self._get_process_status_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5817,7 +5872,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_status_with_http_info(
+    async def get_process_status_deprecated_with_http_info(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5835,7 +5890,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProcessStatusResponse]:
-        """Get process status
+        """(Deprecated) [DEPRECATED] Get process status
 
         Get status of a specific VNC process
 
@@ -5866,8 +5921,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_status_serialize(
+        _param = self._get_process_status_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5892,7 +5948,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_process_status_without_preload_content(
+    async def get_process_status_deprecated_without_preload_content(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -5910,7 +5966,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get process status
+        """(Deprecated) [DEPRECATED] Get process status
 
         Get status of a specific VNC process
 
@@ -5941,8 +5997,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status is deprecated.", DeprecationWarning)
 
-        _param = self._get_process_status_serialize(
+        _param = self._get_process_status_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -5962,7 +6019,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_process_status_serialize(
+    def _get_process_status_deprecated_serialize(
         self,
         process_name,
         sandbox_id,
@@ -6034,7 +6091,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_project_dir(
+    async def get_project_dir_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -6051,7 +6108,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProjectDirResponse:
-        """(Deprecated) Get sandbox project dir
+        """(Deprecated) [DEPRECATED] Get sandbox project dir
 
 
         :param sandbox_id: (required)
@@ -6081,7 +6138,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("GET /toolbox/{sandboxId}/toolbox/project-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_project_dir_serialize(
+        _param = self._get_project_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6105,7 +6162,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_project_dir_with_http_info(
+    async def get_project_dir_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -6122,7 +6179,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProjectDirResponse]:
-        """(Deprecated) Get sandbox project dir
+        """(Deprecated) [DEPRECATED] Get sandbox project dir
 
 
         :param sandbox_id: (required)
@@ -6152,7 +6209,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("GET /toolbox/{sandboxId}/toolbox/project-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_project_dir_serialize(
+        _param = self._get_project_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6176,7 +6233,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_project_dir_without_preload_content(
+    async def get_project_dir_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -6193,7 +6250,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """(Deprecated) Get sandbox project dir
+        """(Deprecated) [DEPRECATED] Get sandbox project dir
 
 
         :param sandbox_id: (required)
@@ -6223,7 +6280,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("GET /toolbox/{sandboxId}/toolbox/project-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_project_dir_serialize(
+        _param = self._get_project_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6242,7 +6299,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_project_dir_serialize(
+    def _get_project_dir_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -6311,7 +6368,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_pty_session(
+    async def get_pty_session_deprecated(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -6329,7 +6386,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PtySessionInfo:
-        """Get PTY session
+        """(Deprecated) [DEPRECATED] Get PTY session
 
         Get PTY session information by ID
 
@@ -6360,8 +6417,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/pty/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_pty_session_serialize(
+        _param = self._get_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -6386,7 +6444,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_pty_session_with_http_info(
+    async def get_pty_session_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -6404,7 +6462,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PtySessionInfo]:
-        """Get PTY session
+        """(Deprecated) [DEPRECATED] Get PTY session
 
         Get PTY session information by ID
 
@@ -6435,8 +6493,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/pty/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_pty_session_serialize(
+        _param = self._get_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -6461,7 +6520,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_pty_session_without_preload_content(
+    async def get_pty_session_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -6479,7 +6538,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get PTY session
+        """(Deprecated) [DEPRECATED] Get PTY session
 
         Get PTY session information by ID
 
@@ -6510,8 +6569,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/pty/{sessionId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_pty_session_serialize(
+        _param = self._get_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -6531,7 +6591,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_pty_session_serialize(
+    def _get_pty_session_deprecated_serialize(
         self,
         sandbox_id,
         session_id,
@@ -6603,299 +6663,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_session(
-        self,
-        sandbox_id: StrictStr,
-        session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Session:
-        """Get session
-
-        Get session by ID
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param session_id: (required)
-        :type session_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_session_serialize(
-            sandbox_id=sandbox_id,
-            session_id=session_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    async def get_session_with_http_info(
-        self,
-        sandbox_id: StrictStr,
-        session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Session]:
-        """Get session
-
-        Get session by ID
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param session_id: (required)
-        :type session_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_session_serialize(
-            sandbox_id=sandbox_id,
-            session_id=session_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    async def get_session_without_preload_content(
-        self,
-        sandbox_id: StrictStr,
-        session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Get session
-
-        Get session by ID
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param session_id: (required)
-        :type session_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._get_session_serialize(
-            sandbox_id=sandbox_id,
-            session_id=session_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _get_session_serialize(
-        self,
-        sandbox_id,
-        session_id,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
-        if session_id is not None:
-            _path_params['sessionId'] = session_id
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-
-
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
-
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{sandboxId}/toolbox/process/session/{sessionId}',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    async def get_session_command(
+    async def get_session_command_deprecated(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -6914,7 +6682,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> Command:
-        """Get session command
+        """(Deprecated) [DEPRECATED] Get session command
 
         Get session command by ID
 
@@ -6947,8 +6715,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_session_command_serialize(
+        _param = self._get_session_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -6974,7 +6743,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_session_command_with_http_info(
+    async def get_session_command_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -6993,7 +6762,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[Command]:
-        """Get session command
+        """(Deprecated) [DEPRECATED] Get session command
 
         Get session command by ID
 
@@ -7026,8 +6795,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_session_command_serialize(
+        _param = self._get_session_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -7053,7 +6823,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_session_command_without_preload_content(
+    async def get_session_command_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -7072,7 +6842,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get session command
+        """(Deprecated) [DEPRECATED] Get session command
 
         Get session command by ID
 
@@ -7105,8 +6875,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_session_command_serialize(
+        _param = self._get_session_command_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -7127,7 +6898,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_session_command_serialize(
+    def _get_session_command_deprecated_serialize(
         self,
         sandbox_id,
         session_id,
@@ -7202,7 +6973,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_session_command_logs(
+    async def get_session_command_logs_deprecated(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -7222,7 +6993,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> str:
-        """Get command logs
+        """(Deprecated) [DEPRECATED] Get command logs
 
         Get logs for a specific command in a session
 
@@ -7257,8 +7028,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_session_command_logs_serialize(
+        _param = self._get_session_command_logs_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -7285,7 +7057,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_session_command_logs_with_http_info(
+    async def get_session_command_logs_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -7305,7 +7077,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[str]:
-        """Get command logs
+        """(Deprecated) [DEPRECATED] Get command logs
 
         Get logs for a specific command in a session
 
@@ -7340,8 +7112,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_session_command_logs_serialize(
+        _param = self._get_session_command_logs_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -7368,7 +7141,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_session_command_logs_without_preload_content(
+    async def get_session_command_logs_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -7388,7 +7161,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get command logs
+        """(Deprecated) [DEPRECATED] Get command logs
 
         Get logs for a specific command in a session
 
@@ -7423,8 +7196,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_session_command_logs_serialize(
+        _param = self._get_session_command_logs_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -7446,7 +7220,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_session_command_logs_serialize(
+    def _get_session_command_logs_deprecated_serialize(
         self,
         sandbox_id,
         session_id,
@@ -7526,7 +7300,302 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_user_home_dir(
+    async def get_session_deprecated(
+        self,
+        sandbox_id: StrictStr,
+        session_id: StrictStr,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Session:
+        """(Deprecated) [DEPRECATED] Get session
+
+        Get session by ID
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param session_id: (required)
+        :type session_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId} is deprecated.", DeprecationWarning)
+
+        _param = self._get_session_deprecated_serialize(
+            sandbox_id=sandbox_id,
+            session_id=session_id,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Session",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def get_session_deprecated_with_http_info(
+        self,
+        sandbox_id: StrictStr,
+        session_id: StrictStr,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Session]:
+        """(Deprecated) [DEPRECATED] Get session
+
+        Get session by ID
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param session_id: (required)
+        :type session_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId} is deprecated.", DeprecationWarning)
+
+        _param = self._get_session_deprecated_serialize(
+            sandbox_id=sandbox_id,
+            session_id=session_id,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Session",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def get_session_deprecated_without_preload_content(
+        self,
+        sandbox_id: StrictStr,
+        session_id: StrictStr,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """(Deprecated) [DEPRECATED] Get session
+
+        Get session by ID
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param session_id: (required)
+        :type session_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId} is deprecated.", DeprecationWarning)
+
+        _param = self._get_session_deprecated_serialize(
+            sandbox_id=sandbox_id,
+            session_id=session_id,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Session",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _get_session_deprecated_serialize(
+        self,
+        sandbox_id,
+        session_id,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id is not None:
+            _path_params['sandboxId'] = sandbox_id
+        if session_id is not None:
+            _path_params['sessionId'] = session_id
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/toolbox/{sandboxId}/toolbox/process/session/{sessionId}',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def get_user_home_dir_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7543,7 +7612,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> UserHomeDirResponse:
-        """Get sandbox user home dir
+        """(Deprecated) [DEPRECATED] Get sandbox user home dir
 
 
         :param sandbox_id: (required)
@@ -7571,8 +7640,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/user-home-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_user_home_dir_serialize(
+        _param = self._get_user_home_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7596,7 +7666,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_user_home_dir_with_http_info(
+    async def get_user_home_dir_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7613,7 +7683,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[UserHomeDirResponse]:
-        """Get sandbox user home dir
+        """(Deprecated) [DEPRECATED] Get sandbox user home dir
 
 
         :param sandbox_id: (required)
@@ -7641,8 +7711,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/user-home-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_user_home_dir_serialize(
+        _param = self._get_user_home_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7666,7 +7737,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_user_home_dir_without_preload_content(
+    async def get_user_home_dir_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7683,7 +7754,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get sandbox user home dir
+        """(Deprecated) [DEPRECATED] Get sandbox user home dir
 
 
         :param sandbox_id: (required)
@@ -7711,8 +7782,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/user-home-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_user_home_dir_serialize(
+        _param = self._get_user_home_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7731,7 +7803,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_user_home_dir_serialize(
+    def _get_user_home_dir_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -7800,7 +7872,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_windows(
+    async def get_windows_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7817,7 +7889,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> WindowsResponse:
-        """Get windows
+        """(Deprecated) [DEPRECATED] Get windows
 
         Get list of open windows
 
@@ -7846,8 +7918,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/display/windows is deprecated.", DeprecationWarning)
 
-        _param = self._get_windows_serialize(
+        _param = self._get_windows_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7871,7 +7944,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_windows_with_http_info(
+    async def get_windows_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7888,7 +7961,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[WindowsResponse]:
-        """Get windows
+        """(Deprecated) [DEPRECATED] Get windows
 
         Get list of open windows
 
@@ -7917,8 +7990,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/display/windows is deprecated.", DeprecationWarning)
 
-        _param = self._get_windows_serialize(
+        _param = self._get_windows_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7942,7 +8016,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_windows_without_preload_content(
+    async def get_windows_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7959,7 +8033,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get windows
+        """(Deprecated) [DEPRECATED] Get windows
 
         Get list of open windows
 
@@ -7988,8 +8062,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/display/windows is deprecated.", DeprecationWarning)
 
-        _param = self._get_windows_serialize(
+        _param = self._get_windows_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -8008,7 +8083,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_windows_serialize(
+    def _get_windows_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -8077,7 +8152,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_work_dir(
+    async def get_work_dir_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -8094,7 +8169,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> WorkDirResponse:
-        """Get sandbox work-dir
+        """(Deprecated) [DEPRECATED] Get sandbox work-dir
 
 
         :param sandbox_id: (required)
@@ -8122,8 +8197,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/work-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_work_dir_serialize(
+        _param = self._get_work_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -8147,7 +8223,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_work_dir_with_http_info(
+    async def get_work_dir_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -8164,7 +8240,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[WorkDirResponse]:
-        """Get sandbox work-dir
+        """(Deprecated) [DEPRECATED] Get sandbox work-dir
 
 
         :param sandbox_id: (required)
@@ -8192,8 +8268,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/work-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_work_dir_serialize(
+        _param = self._get_work_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -8217,7 +8294,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_work_dir_without_preload_content(
+    async def get_work_dir_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -8234,7 +8311,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get sandbox work-dir
+        """(Deprecated) [DEPRECATED] Get sandbox work-dir
 
 
         :param sandbox_id: (required)
@@ -8262,8 +8339,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/work-dir is deprecated.", DeprecationWarning)
 
-        _param = self._get_work_dir_serialize(
+        _param = self._get_work_dir_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -8282,7 +8360,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_work_dir_serialize(
+    def _get_work_dir_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -8351,7 +8429,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_add_files(
+    async def git_add_files_deprecated(
         self,
         sandbox_id: StrictStr,
         git_add_request: GitAddRequest,
@@ -8369,7 +8447,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Add files
+        """(Deprecated) [DEPRECATED] Add files
 
         Add files to git commit
 
@@ -8400,8 +8478,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/add is deprecated.", DeprecationWarning)
 
-        _param = self._git_add_files_serialize(
+        _param = self._git_add_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_add_request=git_add_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -8426,7 +8505,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_add_files_with_http_info(
+    async def git_add_files_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_add_request: GitAddRequest,
@@ -8444,7 +8523,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Add files
+        """(Deprecated) [DEPRECATED] Add files
 
         Add files to git commit
 
@@ -8475,8 +8554,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/add is deprecated.", DeprecationWarning)
 
-        _param = self._git_add_files_serialize(
+        _param = self._git_add_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_add_request=git_add_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -8501,7 +8581,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_add_files_without_preload_content(
+    async def git_add_files_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_add_request: GitAddRequest,
@@ -8519,7 +8599,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Add files
+        """(Deprecated) [DEPRECATED] Add files
 
         Add files to git commit
 
@@ -8550,8 +8630,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/add is deprecated.", DeprecationWarning)
 
-        _param = self._git_add_files_serialize(
+        _param = self._git_add_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_add_request=git_add_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -8571,7 +8652,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_add_files_serialize(
+    def _git_add_files_deprecated_serialize(
         self,
         sandbox_id,
         git_add_request,
@@ -8649,7 +8730,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_checkout_branch(
+    async def git_checkout_branch_deprecated(
         self,
         sandbox_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
@@ -8667,7 +8748,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Checkout branch
+        """(Deprecated) [DEPRECATED] Checkout branch
 
         Checkout branch or commit in git repository
 
@@ -8698,8 +8779,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/checkout is deprecated.", DeprecationWarning)
 
-        _param = self._git_checkout_branch_serialize(
+        _param = self._git_checkout_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_checkout_request=git_checkout_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -8724,7 +8806,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_checkout_branch_with_http_info(
+    async def git_checkout_branch_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
@@ -8742,7 +8824,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Checkout branch
+        """(Deprecated) [DEPRECATED] Checkout branch
 
         Checkout branch or commit in git repository
 
@@ -8773,8 +8855,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/checkout is deprecated.", DeprecationWarning)
 
-        _param = self._git_checkout_branch_serialize(
+        _param = self._git_checkout_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_checkout_request=git_checkout_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -8799,7 +8882,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_checkout_branch_without_preload_content(
+    async def git_checkout_branch_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
@@ -8817,7 +8900,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Checkout branch
+        """(Deprecated) [DEPRECATED] Checkout branch
 
         Checkout branch or commit in git repository
 
@@ -8848,8 +8931,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/checkout is deprecated.", DeprecationWarning)
 
-        _param = self._git_checkout_branch_serialize(
+        _param = self._git_checkout_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_checkout_request=git_checkout_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -8869,7 +8953,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_checkout_branch_serialize(
+    def _git_checkout_branch_deprecated_serialize(
         self,
         sandbox_id,
         git_checkout_request,
@@ -8947,7 +9031,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_clone_repository(
+    async def git_clone_repository_deprecated(
         self,
         sandbox_id: StrictStr,
         git_clone_request: GitCloneRequest,
@@ -8965,7 +9049,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Clone repository
+        """(Deprecated) [DEPRECATED] Clone repository
 
         Clone git repository
 
@@ -8996,8 +9080,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/clone is deprecated.", DeprecationWarning)
 
-        _param = self._git_clone_repository_serialize(
+        _param = self._git_clone_repository_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_clone_request=git_clone_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9022,7 +9107,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_clone_repository_with_http_info(
+    async def git_clone_repository_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_clone_request: GitCloneRequest,
@@ -9040,7 +9125,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Clone repository
+        """(Deprecated) [DEPRECATED] Clone repository
 
         Clone git repository
 
@@ -9071,8 +9156,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/clone is deprecated.", DeprecationWarning)
 
-        _param = self._git_clone_repository_serialize(
+        _param = self._git_clone_repository_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_clone_request=git_clone_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9097,7 +9183,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_clone_repository_without_preload_content(
+    async def git_clone_repository_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_clone_request: GitCloneRequest,
@@ -9115,7 +9201,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Clone repository
+        """(Deprecated) [DEPRECATED] Clone repository
 
         Clone git repository
 
@@ -9146,8 +9232,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/clone is deprecated.", DeprecationWarning)
 
-        _param = self._git_clone_repository_serialize(
+        _param = self._git_clone_repository_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_clone_request=git_clone_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9167,7 +9254,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_clone_repository_serialize(
+    def _git_clone_repository_deprecated_serialize(
         self,
         sandbox_id,
         git_clone_request,
@@ -9245,7 +9332,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_commit_changes(
+    async def git_commit_changes_deprecated(
         self,
         sandbox_id: StrictStr,
         git_commit_request: GitCommitRequest,
@@ -9263,7 +9350,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> GitCommitResponse:
-        """Commit changes
+        """(Deprecated) [DEPRECATED] Commit changes
 
         Commit changes to git repository
 
@@ -9294,8 +9381,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/commit is deprecated.", DeprecationWarning)
 
-        _param = self._git_commit_changes_serialize(
+        _param = self._git_commit_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_commit_request=git_commit_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9320,7 +9408,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_commit_changes_with_http_info(
+    async def git_commit_changes_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_commit_request: GitCommitRequest,
@@ -9338,7 +9426,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[GitCommitResponse]:
-        """Commit changes
+        """(Deprecated) [DEPRECATED] Commit changes
 
         Commit changes to git repository
 
@@ -9369,8 +9457,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/commit is deprecated.", DeprecationWarning)
 
-        _param = self._git_commit_changes_serialize(
+        _param = self._git_commit_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_commit_request=git_commit_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9395,7 +9484,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_commit_changes_without_preload_content(
+    async def git_commit_changes_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_commit_request: GitCommitRequest,
@@ -9413,7 +9502,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Commit changes
+        """(Deprecated) [DEPRECATED] Commit changes
 
         Commit changes to git repository
 
@@ -9444,8 +9533,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/commit is deprecated.", DeprecationWarning)
 
-        _param = self._git_commit_changes_serialize(
+        _param = self._git_commit_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_commit_request=git_commit_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9465,7 +9555,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_commit_changes_serialize(
+    def _git_commit_changes_deprecated_serialize(
         self,
         sandbox_id,
         git_commit_request,
@@ -9550,7 +9640,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_create_branch(
+    async def git_create_branch_deprecated(
         self,
         sandbox_id: StrictStr,
         git_branch_request: GitBranchRequest,
@@ -9568,7 +9658,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Create branch
+        """(Deprecated) [DEPRECATED] Create branch
 
         Create branch on git repository
 
@@ -9599,8 +9689,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_create_branch_serialize(
+        _param = self._git_create_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_branch_request=git_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9625,7 +9716,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_create_branch_with_http_info(
+    async def git_create_branch_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_branch_request: GitBranchRequest,
@@ -9643,7 +9734,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Create branch
+        """(Deprecated) [DEPRECATED] Create branch
 
         Create branch on git repository
 
@@ -9674,8 +9765,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_create_branch_serialize(
+        _param = self._git_create_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_branch_request=git_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9700,7 +9792,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_create_branch_without_preload_content(
+    async def git_create_branch_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_branch_request: GitBranchRequest,
@@ -9718,7 +9810,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Create branch
+        """(Deprecated) [DEPRECATED] Create branch
 
         Create branch on git repository
 
@@ -9749,8 +9841,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_create_branch_serialize(
+        _param = self._git_create_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_branch_request=git_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9770,7 +9863,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_create_branch_serialize(
+    def _git_create_branch_deprecated_serialize(
         self,
         sandbox_id,
         git_branch_request,
@@ -9848,7 +9941,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_delete_branch(
+    async def git_delete_branch_deprecated(
         self,
         sandbox_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
@@ -9866,7 +9959,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Delete branch
+        """(Deprecated) [DEPRECATED] Delete branch
 
         Delete branch on git repository
 
@@ -9897,8 +9990,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_delete_branch_serialize(
+        _param = self._git_delete_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_delete_branch_request=git_delete_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9923,7 +10017,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_delete_branch_with_http_info(
+    async def git_delete_branch_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
@@ -9941,7 +10035,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Delete branch
+        """(Deprecated) [DEPRECATED] Delete branch
 
         Delete branch on git repository
 
@@ -9972,8 +10066,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_delete_branch_serialize(
+        _param = self._git_delete_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_delete_branch_request=git_delete_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9998,7 +10093,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_delete_branch_without_preload_content(
+    async def git_delete_branch_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
@@ -10016,7 +10111,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Delete branch
+        """(Deprecated) [DEPRECATED] Delete branch
 
         Delete branch on git repository
 
@@ -10047,8 +10142,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("DELETE /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_delete_branch_serialize(
+        _param = self._git_delete_branch_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_delete_branch_request=git_delete_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10068,7 +10164,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_delete_branch_serialize(
+    def _git_delete_branch_deprecated_serialize(
         self,
         sandbox_id,
         git_delete_branch_request,
@@ -10146,7 +10242,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_get_history(
+    async def git_get_history_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10164,7 +10260,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[GitCommitInfo]:
-        """Get commit history
+        """(Deprecated) [DEPRECATED] Get commit history
 
         Get commit history from git repository
 
@@ -10195,8 +10291,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/history is deprecated.", DeprecationWarning)
 
-        _param = self._git_get_history_serialize(
+        _param = self._git_get_history_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10221,7 +10318,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_get_history_with_http_info(
+    async def git_get_history_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10239,7 +10336,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[GitCommitInfo]]:
-        """Get commit history
+        """(Deprecated) [DEPRECATED] Get commit history
 
         Get commit history from git repository
 
@@ -10270,8 +10367,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/history is deprecated.", DeprecationWarning)
 
-        _param = self._git_get_history_serialize(
+        _param = self._git_get_history_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10296,7 +10394,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_get_history_without_preload_content(
+    async def git_get_history_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10314,7 +10412,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get commit history
+        """(Deprecated) [DEPRECATED] Get commit history
 
         Get commit history from git repository
 
@@ -10345,8 +10443,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/history is deprecated.", DeprecationWarning)
 
-        _param = self._git_get_history_serialize(
+        _param = self._git_get_history_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10366,7 +10465,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_get_history_serialize(
+    def _git_get_history_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -10440,7 +10539,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_get_status(
+    async def git_get_status_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10458,7 +10557,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> GitStatus:
-        """Get git status
+        """(Deprecated) [DEPRECATED] Get git status
 
         Get status from git repository
 
@@ -10489,8 +10588,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/status is deprecated.", DeprecationWarning)
 
-        _param = self._git_get_status_serialize(
+        _param = self._git_get_status_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10515,7 +10615,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_get_status_with_http_info(
+    async def git_get_status_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10533,7 +10633,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[GitStatus]:
-        """Get git status
+        """(Deprecated) [DEPRECATED] Get git status
 
         Get status from git repository
 
@@ -10564,8 +10664,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/status is deprecated.", DeprecationWarning)
 
-        _param = self._git_get_status_serialize(
+        _param = self._git_get_status_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10590,7 +10691,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_get_status_without_preload_content(
+    async def git_get_status_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10608,7 +10709,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get git status
+        """(Deprecated) [DEPRECATED] Get git status
 
         Get status from git repository
 
@@ -10639,8 +10740,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/status is deprecated.", DeprecationWarning)
 
-        _param = self._git_get_status_serialize(
+        _param = self._git_get_status_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10660,7 +10762,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_get_status_serialize(
+    def _git_get_status_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -10734,7 +10836,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_list_branches(
+    async def git_list_branches_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10752,7 +10854,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ListBranchResponse:
-        """Get branch list
+        """(Deprecated) [DEPRECATED] Get branch list
 
         Get branch list from git repository
 
@@ -10783,8 +10885,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_list_branches_serialize(
+        _param = self._git_list_branches_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10809,7 +10912,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_list_branches_with_http_info(
+    async def git_list_branches_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10827,7 +10930,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ListBranchResponse]:
-        """Get branch list
+        """(Deprecated) [DEPRECATED] Get branch list
 
         Get branch list from git repository
 
@@ -10858,8 +10961,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_list_branches_serialize(
+        _param = self._git_list_branches_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10884,7 +10988,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_list_branches_without_preload_content(
+    async def git_list_branches_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -10902,7 +11006,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get branch list
+        """(Deprecated) [DEPRECATED] Get branch list
 
         Get branch list from git repository
 
@@ -10933,8 +11037,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/git/branches is deprecated.", DeprecationWarning)
 
-        _param = self._git_list_branches_serialize(
+        _param = self._git_list_branches_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -10954,7 +11059,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_list_branches_serialize(
+    def _git_list_branches_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -11028,7 +11133,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_pull_changes(
+    async def git_pull_changes_deprecated(
         self,
         sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
@@ -11046,7 +11151,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Pull changes
+        """(Deprecated) [DEPRECATED] Pull changes
 
         Pull changes from remote
 
@@ -11077,8 +11182,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/pull is deprecated.", DeprecationWarning)
 
-        _param = self._git_pull_changes_serialize(
+        _param = self._git_pull_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -11103,7 +11209,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_pull_changes_with_http_info(
+    async def git_pull_changes_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
@@ -11121,7 +11227,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Pull changes
+        """(Deprecated) [DEPRECATED] Pull changes
 
         Pull changes from remote
 
@@ -11152,8 +11258,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/pull is deprecated.", DeprecationWarning)
 
-        _param = self._git_pull_changes_serialize(
+        _param = self._git_pull_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -11178,7 +11285,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_pull_changes_without_preload_content(
+    async def git_pull_changes_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
@@ -11196,7 +11303,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Pull changes
+        """(Deprecated) [DEPRECATED] Pull changes
 
         Pull changes from remote
 
@@ -11227,8 +11334,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/pull is deprecated.", DeprecationWarning)
 
-        _param = self._git_pull_changes_serialize(
+        _param = self._git_pull_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -11248,7 +11356,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_pull_changes_serialize(
+    def _git_pull_changes_deprecated_serialize(
         self,
         sandbox_id,
         git_repo_request,
@@ -11326,7 +11434,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_push_changes(
+    async def git_push_changes_deprecated(
         self,
         sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
@@ -11344,7 +11452,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Push changes
+        """(Deprecated) [DEPRECATED] Push changes
 
         Push changes to remote
 
@@ -11375,8 +11483,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/push is deprecated.", DeprecationWarning)
 
-        _param = self._git_push_changes_serialize(
+        _param = self._git_push_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -11401,7 +11510,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_push_changes_with_http_info(
+    async def git_push_changes_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
@@ -11419,7 +11528,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Push changes
+        """(Deprecated) [DEPRECATED] Push changes
 
         Push changes to remote
 
@@ -11450,8 +11559,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/push is deprecated.", DeprecationWarning)
 
-        _param = self._git_push_changes_serialize(
+        _param = self._git_push_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -11476,7 +11586,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def git_push_changes_without_preload_content(
+    async def git_push_changes_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
@@ -11494,7 +11604,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Push changes
+        """(Deprecated) [DEPRECATED] Push changes
 
         Push changes to remote
 
@@ -11525,8 +11635,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/git/push is deprecated.", DeprecationWarning)
 
-        _param = self._git_push_changes_serialize(
+        _param = self._git_push_changes_deprecated_serialize(
             sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -11546,7 +11657,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _git_push_changes_serialize(
+    def _git_push_changes_deprecated_serialize(
         self,
         sandbox_id,
         git_repo_request,
@@ -11624,7 +11735,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_files(
+    async def list_files_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -11642,7 +11753,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[FileInfo]:
-        """List files
+        """(Deprecated) [DEPRECATED] List files
 
 
         :param sandbox_id: (required)
@@ -11672,8 +11783,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files is deprecated.", DeprecationWarning)
 
-        _param = self._list_files_serialize(
+        _param = self._list_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             path=path,
@@ -11698,7 +11810,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_files_with_http_info(
+    async def list_files_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -11716,7 +11828,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[FileInfo]]:
-        """List files
+        """(Deprecated) [DEPRECATED] List files
 
 
         :param sandbox_id: (required)
@@ -11746,8 +11858,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files is deprecated.", DeprecationWarning)
 
-        _param = self._list_files_serialize(
+        _param = self._list_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             path=path,
@@ -11772,7 +11885,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_files_without_preload_content(
+    async def list_files_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -11790,7 +11903,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List files
+        """(Deprecated) [DEPRECATED] List files
 
 
         :param sandbox_id: (required)
@@ -11820,8 +11933,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files is deprecated.", DeprecationWarning)
 
-        _param = self._list_files_serialize(
+        _param = self._list_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             path=path,
@@ -11841,7 +11955,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _list_files_serialize(
+    def _list_files_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -11915,7 +12029,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_pty_sessions(
+    async def list_pty_sessions_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -11932,7 +12046,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PtyListResponse:
-        """List PTY sessions
+        """(Deprecated) [DEPRECATED] List PTY sessions
 
         List all active PTY sessions in the sandbox
 
@@ -11961,8 +12075,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/pty is deprecated.", DeprecationWarning)
 
-        _param = self._list_pty_sessions_serialize(
+        _param = self._list_pty_sessions_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -11986,7 +12101,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_pty_sessions_with_http_info(
+    async def list_pty_sessions_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -12003,7 +12118,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PtyListResponse]:
-        """List PTY sessions
+        """(Deprecated) [DEPRECATED] List PTY sessions
 
         List all active PTY sessions in the sandbox
 
@@ -12032,8 +12147,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/pty is deprecated.", DeprecationWarning)
 
-        _param = self._list_pty_sessions_serialize(
+        _param = self._list_pty_sessions_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -12057,7 +12173,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_pty_sessions_without_preload_content(
+    async def list_pty_sessions_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -12074,7 +12190,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List PTY sessions
+        """(Deprecated) [DEPRECATED] List PTY sessions
 
         List all active PTY sessions in the sandbox
 
@@ -12103,8 +12219,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/pty is deprecated.", DeprecationWarning)
 
-        _param = self._list_pty_sessions_serialize(
+        _param = self._list_pty_sessions_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -12123,7 +12240,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _list_pty_sessions_serialize(
+    def _list_pty_sessions_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -12192,7 +12309,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_sessions(
+    async def list_sessions_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -12209,7 +12326,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[Session]:
-        """List sessions
+        """(Deprecated) [DEPRECATED] List sessions
 
         List all active sessions in the sandbox
 
@@ -12238,8 +12355,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
 
-        _param = self._list_sessions_serialize(
+        _param = self._list_sessions_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -12263,7 +12381,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_sessions_with_http_info(
+    async def list_sessions_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -12280,7 +12398,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[Session]]:
-        """List sessions
+        """(Deprecated) [DEPRECATED] List sessions
 
         List all active sessions in the sandbox
 
@@ -12309,8 +12427,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
 
-        _param = self._list_sessions_serialize(
+        _param = self._list_sessions_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -12334,7 +12453,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def list_sessions_without_preload_content(
+    async def list_sessions_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -12351,7 +12470,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List sessions
+        """(Deprecated) [DEPRECATED] List sessions
 
         List all active sessions in the sandbox
 
@@ -12380,8 +12499,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
 
-        _param = self._list_sessions_serialize(
+        _param = self._list_sessions_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -12400,7 +12520,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _list_sessions_serialize(
+    def _list_sessions_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -12469,7 +12589,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_completions(
+    async def lsp_completions_deprecated(
         self,
         sandbox_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
@@ -12487,7 +12607,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> CompletionList:
-        """Get Lsp Completions
+        """(Deprecated) [DEPRECATED] Get Lsp Completions
 
         The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
@@ -12518,8 +12638,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/completions is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_completions_serialize(
+        _param = self._lsp_completions_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_completion_params=lsp_completion_params,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -12544,7 +12665,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_completions_with_http_info(
+    async def lsp_completions_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
@@ -12562,7 +12683,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[CompletionList]:
-        """Get Lsp Completions
+        """(Deprecated) [DEPRECATED] Get Lsp Completions
 
         The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
@@ -12593,8 +12714,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/completions is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_completions_serialize(
+        _param = self._lsp_completions_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_completion_params=lsp_completion_params,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -12619,7 +12741,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_completions_without_preload_content(
+    async def lsp_completions_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
@@ -12637,7 +12759,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get Lsp Completions
+        """(Deprecated) [DEPRECATED] Get Lsp Completions
 
         The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
@@ -12668,8 +12790,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/completions is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_completions_serialize(
+        _param = self._lsp_completions_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_completion_params=lsp_completion_params,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -12689,7 +12812,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _lsp_completions_serialize(
+    def _lsp_completions_deprecated_serialize(
         self,
         sandbox_id,
         lsp_completion_params,
@@ -12774,7 +12897,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_did_close(
+    async def lsp_did_close_deprecated(
         self,
         sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
@@ -12792,7 +12915,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Call Lsp DidClose
+        """(Deprecated) [DEPRECATED] Call Lsp DidClose
 
         The document close notification is sent from the client to the server when the document got closed in the client.
 
@@ -12823,8 +12946,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/did-close is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_did_close_serialize(
+        _param = self._lsp_did_close_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -12849,7 +12973,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_did_close_with_http_info(
+    async def lsp_did_close_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
@@ -12867,7 +12991,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Call Lsp DidClose
+        """(Deprecated) [DEPRECATED] Call Lsp DidClose
 
         The document close notification is sent from the client to the server when the document got closed in the client.
 
@@ -12898,8 +13022,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/did-close is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_did_close_serialize(
+        _param = self._lsp_did_close_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -12924,7 +13049,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_did_close_without_preload_content(
+    async def lsp_did_close_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
@@ -12942,7 +13067,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Call Lsp DidClose
+        """(Deprecated) [DEPRECATED] Call Lsp DidClose
 
         The document close notification is sent from the client to the server when the document got closed in the client.
 
@@ -12973,8 +13098,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/did-close is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_did_close_serialize(
+        _param = self._lsp_did_close_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -12994,7 +13120,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _lsp_did_close_serialize(
+    def _lsp_did_close_deprecated_serialize(
         self,
         sandbox_id,
         lsp_document_request,
@@ -13072,7 +13198,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_did_open(
+    async def lsp_did_open_deprecated(
         self,
         sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
@@ -13090,7 +13216,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Call Lsp DidOpen
+        """(Deprecated) [DEPRECATED] Call Lsp DidOpen
 
         The document open notification is sent from the client to the server to signal newly opened text documents.
 
@@ -13121,8 +13247,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/did-open is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_did_open_serialize(
+        _param = self._lsp_did_open_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -13147,7 +13274,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_did_open_with_http_info(
+    async def lsp_did_open_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
@@ -13165,7 +13292,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Call Lsp DidOpen
+        """(Deprecated) [DEPRECATED] Call Lsp DidOpen
 
         The document open notification is sent from the client to the server to signal newly opened text documents.
 
@@ -13196,8 +13323,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/did-open is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_did_open_serialize(
+        _param = self._lsp_did_open_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -13222,7 +13350,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_did_open_without_preload_content(
+    async def lsp_did_open_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
@@ -13240,7 +13368,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Call Lsp DidOpen
+        """(Deprecated) [DEPRECATED] Call Lsp DidOpen
 
         The document open notification is sent from the client to the server to signal newly opened text documents.
 
@@ -13271,8 +13399,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/did-open is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_did_open_serialize(
+        _param = self._lsp_did_open_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -13292,7 +13421,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _lsp_did_open_serialize(
+    def _lsp_did_open_deprecated_serialize(
         self,
         sandbox_id,
         lsp_document_request,
@@ -13370,7 +13499,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_document_symbols(
+    async def lsp_document_symbols_deprecated(
         self,
         sandbox_id: StrictStr,
         language_id: StrictStr,
@@ -13390,7 +13519,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[LspSymbol]:
-        """Call Lsp DocumentSymbols
+        """(Deprecated) [DEPRECATED] Call Lsp DocumentSymbols
 
         The document symbol request is sent from the client to the server.
 
@@ -13425,8 +13554,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/lsp/document-symbols is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_document_symbols_serialize(
+        _param = self._lsp_document_symbols_deprecated_serialize(
             sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
@@ -13453,7 +13583,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_document_symbols_with_http_info(
+    async def lsp_document_symbols_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         language_id: StrictStr,
@@ -13473,7 +13603,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[LspSymbol]]:
-        """Call Lsp DocumentSymbols
+        """(Deprecated) [DEPRECATED] Call Lsp DocumentSymbols
 
         The document symbol request is sent from the client to the server.
 
@@ -13508,8 +13638,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/lsp/document-symbols is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_document_symbols_serialize(
+        _param = self._lsp_document_symbols_deprecated_serialize(
             sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
@@ -13536,7 +13667,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_document_symbols_without_preload_content(
+    async def lsp_document_symbols_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         language_id: StrictStr,
@@ -13556,7 +13687,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Call Lsp DocumentSymbols
+        """(Deprecated) [DEPRECATED] Call Lsp DocumentSymbols
 
         The document symbol request is sent from the client to the server.
 
@@ -13591,8 +13722,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/lsp/document-symbols is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_document_symbols_serialize(
+        _param = self._lsp_document_symbols_deprecated_serialize(
             sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
@@ -13614,7 +13746,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _lsp_document_symbols_serialize(
+    def _lsp_document_symbols_deprecated_serialize(
         self,
         sandbox_id,
         language_id,
@@ -13698,7 +13830,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_start(
+    async def lsp_start_deprecated(
         self,
         sandbox_id: StrictStr,
         lsp_server_request: LspServerRequest,
@@ -13716,7 +13848,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Start Lsp server
+        """(Deprecated) [DEPRECATED] Start Lsp server
 
         Start Lsp server process inside sandbox project
 
@@ -13747,8 +13879,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/start is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_start_serialize(
+        _param = self._lsp_start_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_server_request=lsp_server_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -13773,7 +13906,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_start_with_http_info(
+    async def lsp_start_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         lsp_server_request: LspServerRequest,
@@ -13791,7 +13924,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Start Lsp server
+        """(Deprecated) [DEPRECATED] Start Lsp server
 
         Start Lsp server process inside sandbox project
 
@@ -13822,8 +13955,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/start is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_start_serialize(
+        _param = self._lsp_start_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_server_request=lsp_server_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -13848,7 +13982,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_start_without_preload_content(
+    async def lsp_start_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         lsp_server_request: LspServerRequest,
@@ -13866,7 +14000,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Start Lsp server
+        """(Deprecated) [DEPRECATED] Start Lsp server
 
         Start Lsp server process inside sandbox project
 
@@ -13897,8 +14031,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/start is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_start_serialize(
+        _param = self._lsp_start_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_server_request=lsp_server_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -13918,7 +14053,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _lsp_start_serialize(
+    def _lsp_start_deprecated_serialize(
         self,
         sandbox_id,
         lsp_server_request,
@@ -13996,7 +14131,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_stop(
+    async def lsp_stop_deprecated(
         self,
         sandbox_id: StrictStr,
         lsp_server_request: LspServerRequest,
@@ -14014,7 +14149,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Stop Lsp server
+        """(Deprecated) [DEPRECATED] Stop Lsp server
 
         Stop Lsp server process inside sandbox project
 
@@ -14045,8 +14180,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/stop is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_stop_serialize(
+        _param = self._lsp_stop_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_server_request=lsp_server_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -14071,7 +14207,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_stop_with_http_info(
+    async def lsp_stop_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         lsp_server_request: LspServerRequest,
@@ -14089,7 +14225,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Stop Lsp server
+        """(Deprecated) [DEPRECATED] Stop Lsp server
 
         Stop Lsp server process inside sandbox project
 
@@ -14120,8 +14256,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/stop is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_stop_serialize(
+        _param = self._lsp_stop_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_server_request=lsp_server_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -14146,7 +14283,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_stop_without_preload_content(
+    async def lsp_stop_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         lsp_server_request: LspServerRequest,
@@ -14164,7 +14301,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Stop Lsp server
+        """(Deprecated) [DEPRECATED] Stop Lsp server
 
         Stop Lsp server process inside sandbox project
 
@@ -14195,8 +14332,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/lsp/stop is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_stop_serialize(
+        _param = self._lsp_stop_deprecated_serialize(
             sandbox_id=sandbox_id,
             lsp_server_request=lsp_server_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -14216,7 +14354,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _lsp_stop_serialize(
+    def _lsp_stop_deprecated_serialize(
         self,
         sandbox_id,
         lsp_server_request,
@@ -14294,7 +14432,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_workspace_symbols(
+    async def lsp_workspace_symbols_deprecated(
         self,
         sandbox_id: StrictStr,
         language_id: StrictStr,
@@ -14314,7 +14452,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[LspSymbol]:
-        """Call Lsp WorkspaceSymbols
+        """(Deprecated) [DEPRECATED] Call Lsp WorkspaceSymbols
 
         The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
@@ -14349,8 +14487,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/lsp/workspace-symbols is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_workspace_symbols_serialize(
+        _param = self._lsp_workspace_symbols_deprecated_serialize(
             sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
@@ -14377,7 +14516,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_workspace_symbols_with_http_info(
+    async def lsp_workspace_symbols_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         language_id: StrictStr,
@@ -14397,7 +14536,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[LspSymbol]]:
-        """Call Lsp WorkspaceSymbols
+        """(Deprecated) [DEPRECATED] Call Lsp WorkspaceSymbols
 
         The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
@@ -14432,8 +14571,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/lsp/workspace-symbols is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_workspace_symbols_serialize(
+        _param = self._lsp_workspace_symbols_deprecated_serialize(
             sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
@@ -14460,7 +14600,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_workspace_symbols_without_preload_content(
+    async def lsp_workspace_symbols_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         language_id: StrictStr,
@@ -14480,7 +14620,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Call Lsp WorkspaceSymbols
+        """(Deprecated) [DEPRECATED] Call Lsp WorkspaceSymbols
 
         The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
@@ -14515,8 +14655,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/lsp/workspace-symbols is deprecated.", DeprecationWarning)
 
-        _param = self._lsp_workspace_symbols_serialize(
+        _param = self._lsp_workspace_symbols_deprecated_serialize(
             sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
@@ -14538,7 +14679,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _lsp_workspace_symbols_serialize(
+    def _lsp_workspace_symbols_deprecated_serialize(
         self,
         sandbox_id,
         language_id,
@@ -14622,7 +14763,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def move_file(
+    async def move_file_deprecated(
         self,
         sandbox_id: StrictStr,
         source: StrictStr,
@@ -14641,7 +14782,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Move file
+        """(Deprecated) [DEPRECATED] Move file
 
         Move file inside sandbox
 
@@ -14674,8 +14815,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/move is deprecated.", DeprecationWarning)
 
-        _param = self._move_file_serialize(
+        _param = self._move_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             source=source,
             destination=destination,
@@ -14701,7 +14843,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def move_file_with_http_info(
+    async def move_file_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         source: StrictStr,
@@ -14720,7 +14862,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Move file
+        """(Deprecated) [DEPRECATED] Move file
 
         Move file inside sandbox
 
@@ -14753,8 +14895,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/move is deprecated.", DeprecationWarning)
 
-        _param = self._move_file_serialize(
+        _param = self._move_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             source=source,
             destination=destination,
@@ -14780,7 +14923,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def move_file_without_preload_content(
+    async def move_file_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         source: StrictStr,
@@ -14799,7 +14942,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Move file
+        """(Deprecated) [DEPRECATED] Move file
 
         Move file inside sandbox
 
@@ -14832,8 +14975,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/move is deprecated.", DeprecationWarning)
 
-        _param = self._move_file_serialize(
+        _param = self._move_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             source=source,
             destination=destination,
@@ -14854,7 +14998,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _move_file_serialize(
+    def _move_file_deprecated_serialize(
         self,
         sandbox_id,
         source,
@@ -14926,7 +15070,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def move_mouse(
+    async def move_mouse_deprecated(
         self,
         sandbox_id: StrictStr,
         mouse_move_request: MouseMoveRequest,
@@ -14944,7 +15088,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> MouseMoveResponse:
-        """Move mouse
+        """(Deprecated) [DEPRECATED] Move mouse
 
         Move mouse cursor to specified coordinates
 
@@ -14975,8 +15119,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/move is deprecated.", DeprecationWarning)
 
-        _param = self._move_mouse_serialize(
+        _param = self._move_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_move_request=mouse_move_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15001,7 +15146,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def move_mouse_with_http_info(
+    async def move_mouse_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         mouse_move_request: MouseMoveRequest,
@@ -15019,7 +15164,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[MouseMoveResponse]:
-        """Move mouse
+        """(Deprecated) [DEPRECATED] Move mouse
 
         Move mouse cursor to specified coordinates
 
@@ -15050,8 +15195,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/move is deprecated.", DeprecationWarning)
 
-        _param = self._move_mouse_serialize(
+        _param = self._move_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_move_request=mouse_move_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15076,7 +15222,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def move_mouse_without_preload_content(
+    async def move_mouse_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         mouse_move_request: MouseMoveRequest,
@@ -15094,7 +15240,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Move mouse
+        """(Deprecated) [DEPRECATED] Move mouse
 
         Move mouse cursor to specified coordinates
 
@@ -15125,8 +15271,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/move is deprecated.", DeprecationWarning)
 
-        _param = self._move_mouse_serialize(
+        _param = self._move_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_move_request=mouse_move_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15146,7 +15293,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _move_mouse_serialize(
+    def _move_mouse_deprecated_serialize(
         self,
         sandbox_id,
         mouse_move_request,
@@ -15231,7 +15378,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def press_hotkey(
+    async def press_hotkey_deprecated(
         self,
         sandbox_id: StrictStr,
         keyboard_hotkey_request: KeyboardHotkeyRequest,
@@ -15249,7 +15396,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Press hotkey
+        """(Deprecated) [DEPRECATED] Press hotkey
 
         Press a hotkey combination
 
@@ -15280,8 +15427,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey is deprecated.", DeprecationWarning)
 
-        _param = self._press_hotkey_serialize(
+        _param = self._press_hotkey_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_hotkey_request=keyboard_hotkey_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15306,7 +15454,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def press_hotkey_with_http_info(
+    async def press_hotkey_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         keyboard_hotkey_request: KeyboardHotkeyRequest,
@@ -15324,7 +15472,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Press hotkey
+        """(Deprecated) [DEPRECATED] Press hotkey
 
         Press a hotkey combination
 
@@ -15355,8 +15503,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey is deprecated.", DeprecationWarning)
 
-        _param = self._press_hotkey_serialize(
+        _param = self._press_hotkey_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_hotkey_request=keyboard_hotkey_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15381,7 +15530,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def press_hotkey_without_preload_content(
+    async def press_hotkey_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         keyboard_hotkey_request: KeyboardHotkeyRequest,
@@ -15399,7 +15548,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Press hotkey
+        """(Deprecated) [DEPRECATED] Press hotkey
 
         Press a hotkey combination
 
@@ -15430,8 +15579,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey is deprecated.", DeprecationWarning)
 
-        _param = self._press_hotkey_serialize(
+        _param = self._press_hotkey_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_hotkey_request=keyboard_hotkey_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15451,7 +15601,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _press_hotkey_serialize(
+    def _press_hotkey_deprecated_serialize(
         self,
         sandbox_id,
         keyboard_hotkey_request,
@@ -15529,7 +15679,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def press_key(
+    async def press_key_deprecated(
         self,
         sandbox_id: StrictStr,
         keyboard_press_request: KeyboardPressRequest,
@@ -15547,7 +15697,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Press key
+        """(Deprecated) [DEPRECATED] Press key
 
         Press a key with optional modifiers
 
@@ -15578,8 +15728,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/key is deprecated.", DeprecationWarning)
 
-        _param = self._press_key_serialize(
+        _param = self._press_key_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_press_request=keyboard_press_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15604,7 +15755,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def press_key_with_http_info(
+    async def press_key_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         keyboard_press_request: KeyboardPressRequest,
@@ -15622,7 +15773,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Press key
+        """(Deprecated) [DEPRECATED] Press key
 
         Press a key with optional modifiers
 
@@ -15653,8 +15804,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/key is deprecated.", DeprecationWarning)
 
-        _param = self._press_key_serialize(
+        _param = self._press_key_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_press_request=keyboard_press_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15679,7 +15831,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def press_key_without_preload_content(
+    async def press_key_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         keyboard_press_request: KeyboardPressRequest,
@@ -15697,7 +15849,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Press key
+        """(Deprecated) [DEPRECATED] Press key
 
         Press a key with optional modifiers
 
@@ -15728,8 +15880,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/key is deprecated.", DeprecationWarning)
 
-        _param = self._press_key_serialize(
+        _param = self._press_key_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_press_request=keyboard_press_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15749,7 +15902,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _press_key_serialize(
+    def _press_key_deprecated_serialize(
         self,
         sandbox_id,
         keyboard_press_request,
@@ -15827,7 +15980,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def replace_in_files(
+    async def replace_in_files_deprecated(
         self,
         sandbox_id: StrictStr,
         replace_request: ReplaceRequest,
@@ -15845,7 +15998,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[ReplaceResult]:
-        """Replace in files
+        """(Deprecated) [DEPRECATED] Replace in files
 
         Replace text/pattern in multiple files inside sandbox
 
@@ -15876,8 +16029,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/replace is deprecated.", DeprecationWarning)
 
-        _param = self._replace_in_files_serialize(
+        _param = self._replace_in_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             replace_request=replace_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15902,7 +16056,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def replace_in_files_with_http_info(
+    async def replace_in_files_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         replace_request: ReplaceRequest,
@@ -15920,7 +16074,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[ReplaceResult]]:
-        """Replace in files
+        """(Deprecated) [DEPRECATED] Replace in files
 
         Replace text/pattern in multiple files inside sandbox
 
@@ -15951,8 +16105,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/replace is deprecated.", DeprecationWarning)
 
-        _param = self._replace_in_files_serialize(
+        _param = self._replace_in_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             replace_request=replace_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -15977,7 +16132,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def replace_in_files_without_preload_content(
+    async def replace_in_files_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         replace_request: ReplaceRequest,
@@ -15995,7 +16150,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Replace in files
+        """(Deprecated) [DEPRECATED] Replace in files
 
         Replace text/pattern in multiple files inside sandbox
 
@@ -16026,8 +16181,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/replace is deprecated.", DeprecationWarning)
 
-        _param = self._replace_in_files_serialize(
+        _param = self._replace_in_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             replace_request=replace_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -16047,7 +16203,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _replace_in_files_serialize(
+    def _replace_in_files_deprecated_serialize(
         self,
         sandbox_id,
         replace_request,
@@ -16132,7 +16288,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def resize_pty_session(
+    async def resize_pty_session_deprecated(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -16151,7 +16307,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PtySessionInfo:
-        """Resize PTY session
+        """(Deprecated) [DEPRECATED] Resize PTY session
 
         Resize a PTY session
 
@@ -16184,8 +16340,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize is deprecated.", DeprecationWarning)
 
-        _param = self._resize_pty_session_serialize(
+        _param = self._resize_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             pty_resize_request=pty_resize_request,
@@ -16211,7 +16368,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def resize_pty_session_with_http_info(
+    async def resize_pty_session_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -16230,7 +16387,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PtySessionInfo]:
-        """Resize PTY session
+        """(Deprecated) [DEPRECATED] Resize PTY session
 
         Resize a PTY session
 
@@ -16263,8 +16420,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize is deprecated.", DeprecationWarning)
 
-        _param = self._resize_pty_session_serialize(
+        _param = self._resize_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             pty_resize_request=pty_resize_request,
@@ -16290,7 +16448,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def resize_pty_session_without_preload_content(
+    async def resize_pty_session_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         session_id: StrictStr,
@@ -16309,7 +16467,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Resize PTY session
+        """(Deprecated) [DEPRECATED] Resize PTY session
 
         Resize a PTY session
 
@@ -16342,8 +16500,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize is deprecated.", DeprecationWarning)
 
-        _param = self._resize_pty_session_serialize(
+        _param = self._resize_pty_session_deprecated_serialize(
             sandbox_id=sandbox_id,
             session_id=session_id,
             pty_resize_request=pty_resize_request,
@@ -16364,7 +16523,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _resize_pty_session_serialize(
+    def _resize_pty_session_deprecated_serialize(
         self,
         sandbox_id,
         session_id,
@@ -16452,7 +16611,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def restart_process(
+    async def restart_process_deprecated(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -16470,7 +16629,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProcessRestartResponse:
-        """Restart process
+        """(Deprecated) [DEPRECATED] Restart process
 
         Restart a specific VNC process
 
@@ -16501,8 +16660,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart is deprecated.", DeprecationWarning)
 
-        _param = self._restart_process_serialize(
+        _param = self._restart_process_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -16527,7 +16687,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def restart_process_with_http_info(
+    async def restart_process_deprecated_with_http_info(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -16545,7 +16705,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProcessRestartResponse]:
-        """Restart process
+        """(Deprecated) [DEPRECATED] Restart process
 
         Restart a specific VNC process
 
@@ -16576,8 +16736,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart is deprecated.", DeprecationWarning)
 
-        _param = self._restart_process_serialize(
+        _param = self._restart_process_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -16602,7 +16763,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def restart_process_without_preload_content(
+    async def restart_process_deprecated_without_preload_content(
         self,
         process_name: StrictStr,
         sandbox_id: StrictStr,
@@ -16620,7 +16781,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Restart process
+        """(Deprecated) [DEPRECATED] Restart process
 
         Restart a specific VNC process
 
@@ -16651,8 +16812,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart is deprecated.", DeprecationWarning)
 
-        _param = self._restart_process_serialize(
+        _param = self._restart_process_deprecated_serialize(
             process_name=process_name,
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -16672,7 +16834,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _restart_process_serialize(
+    def _restart_process_deprecated_serialize(
         self,
         process_name,
         sandbox_id,
@@ -16744,7 +16906,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def scroll_mouse(
+    async def scroll_mouse_deprecated(
         self,
         sandbox_id: StrictStr,
         mouse_scroll_request: MouseScrollRequest,
@@ -16762,7 +16924,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> MouseScrollResponse:
-        """Scroll mouse
+        """(Deprecated) [DEPRECATED] Scroll mouse
 
         Scroll mouse at specified coordinates
 
@@ -16793,8 +16955,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll is deprecated.", DeprecationWarning)
 
-        _param = self._scroll_mouse_serialize(
+        _param = self._scroll_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_scroll_request=mouse_scroll_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -16819,7 +16982,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def scroll_mouse_with_http_info(
+    async def scroll_mouse_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         mouse_scroll_request: MouseScrollRequest,
@@ -16837,7 +17000,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[MouseScrollResponse]:
-        """Scroll mouse
+        """(Deprecated) [DEPRECATED] Scroll mouse
 
         Scroll mouse at specified coordinates
 
@@ -16868,8 +17031,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll is deprecated.", DeprecationWarning)
 
-        _param = self._scroll_mouse_serialize(
+        _param = self._scroll_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_scroll_request=mouse_scroll_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -16894,7 +17058,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def scroll_mouse_without_preload_content(
+    async def scroll_mouse_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         mouse_scroll_request: MouseScrollRequest,
@@ -16912,7 +17076,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Scroll mouse
+        """(Deprecated) [DEPRECATED] Scroll mouse
 
         Scroll mouse at specified coordinates
 
@@ -16943,8 +17107,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll is deprecated.", DeprecationWarning)
 
-        _param = self._scroll_mouse_serialize(
+        _param = self._scroll_mouse_deprecated_serialize(
             sandbox_id=sandbox_id,
             mouse_scroll_request=mouse_scroll_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -16964,7 +17129,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _scroll_mouse_serialize(
+    def _scroll_mouse_deprecated_serialize(
         self,
         sandbox_id,
         mouse_scroll_request,
@@ -17049,7 +17214,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def search_files(
+    async def search_files_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -17068,7 +17233,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> SearchFilesResponse:
-        """Search files
+        """(Deprecated) [DEPRECATED] Search files
 
         Search for files inside sandbox
 
@@ -17101,8 +17266,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/search is deprecated.", DeprecationWarning)
 
-        _param = self._search_files_serialize(
+        _param = self._search_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
@@ -17128,7 +17294,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def search_files_with_http_info(
+    async def search_files_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -17147,7 +17313,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[SearchFilesResponse]:
-        """Search files
+        """(Deprecated) [DEPRECATED] Search files
 
         Search for files inside sandbox
 
@@ -17180,8 +17346,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/search is deprecated.", DeprecationWarning)
 
-        _param = self._search_files_serialize(
+        _param = self._search_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
@@ -17207,7 +17374,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def search_files_without_preload_content(
+    async def search_files_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -17226,7 +17393,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Search files
+        """(Deprecated) [DEPRECATED] Search files
 
         Search for files inside sandbox
 
@@ -17259,8 +17426,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/files/search is deprecated.", DeprecationWarning)
 
-        _param = self._search_files_serialize(
+        _param = self._search_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
@@ -17281,7 +17449,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _search_files_serialize(
+    def _search_files_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -17360,7 +17528,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def set_file_permissions(
+    async def set_file_permissions_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -17381,7 +17549,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Set file permissions
+        """(Deprecated) [DEPRECATED] Set file permissions
 
         Set file owner/group/permissions inside sandbox
 
@@ -17418,8 +17586,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/permissions is deprecated.", DeprecationWarning)
 
-        _param = self._set_file_permissions_serialize(
+        _param = self._set_file_permissions_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -17447,7 +17616,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def set_file_permissions_with_http_info(
+    async def set_file_permissions_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -17468,7 +17637,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Set file permissions
+        """(Deprecated) [DEPRECATED] Set file permissions
 
         Set file owner/group/permissions inside sandbox
 
@@ -17505,8 +17674,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/permissions is deprecated.", DeprecationWarning)
 
-        _param = self._set_file_permissions_serialize(
+        _param = self._set_file_permissions_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -17534,7 +17704,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def set_file_permissions_without_preload_content(
+    async def set_file_permissions_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -17555,7 +17725,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Set file permissions
+        """(Deprecated) [DEPRECATED] Set file permissions
 
         Set file owner/group/permissions inside sandbox
 
@@ -17592,8 +17762,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/permissions is deprecated.", DeprecationWarning)
 
-        _param = self._set_file_permissions_serialize(
+        _param = self._set_file_permissions_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -17616,7 +17787,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _set_file_permissions_serialize(
+    def _set_file_permissions_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -17698,7 +17869,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def start_computer_use(
+    async def start_computer_use_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -17715,7 +17886,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ComputerUseStartResponse:
-        """Start computer use processes
+        """(Deprecated) [DEPRECATED] Start computer use processes
 
         Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
@@ -17744,8 +17915,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/start is deprecated.", DeprecationWarning)
 
-        _param = self._start_computer_use_serialize(
+        _param = self._start_computer_use_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -17769,7 +17941,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def start_computer_use_with_http_info(
+    async def start_computer_use_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -17786,7 +17958,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ComputerUseStartResponse]:
-        """Start computer use processes
+        """(Deprecated) [DEPRECATED] Start computer use processes
 
         Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
@@ -17815,8 +17987,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/start is deprecated.", DeprecationWarning)
 
-        _param = self._start_computer_use_serialize(
+        _param = self._start_computer_use_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -17840,7 +18013,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def start_computer_use_without_preload_content(
+    async def start_computer_use_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -17857,7 +18030,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Start computer use processes
+        """(Deprecated) [DEPRECATED] Start computer use processes
 
         Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
@@ -17886,8 +18059,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/start is deprecated.", DeprecationWarning)
 
-        _param = self._start_computer_use_serialize(
+        _param = self._start_computer_use_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -17906,7 +18080,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _start_computer_use_serialize(
+    def _start_computer_use_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -17975,7 +18149,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def stop_computer_use(
+    async def stop_computer_use_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -17992,7 +18166,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ComputerUseStopResponse:
-        """Stop computer use processes
+        """(Deprecated) [DEPRECATED] Stop computer use processes
 
         Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
@@ -18021,8 +18195,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/stop is deprecated.", DeprecationWarning)
 
-        _param = self._stop_computer_use_serialize(
+        _param = self._stop_computer_use_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -18046,7 +18221,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def stop_computer_use_with_http_info(
+    async def stop_computer_use_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -18063,7 +18238,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ComputerUseStopResponse]:
-        """Stop computer use processes
+        """(Deprecated) [DEPRECATED] Stop computer use processes
 
         Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
@@ -18092,8 +18267,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/stop is deprecated.", DeprecationWarning)
 
-        _param = self._stop_computer_use_serialize(
+        _param = self._stop_computer_use_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -18117,7 +18293,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def stop_computer_use_without_preload_content(
+    async def stop_computer_use_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -18134,7 +18310,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Stop computer use processes
+        """(Deprecated) [DEPRECATED] Stop computer use processes
 
         Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
@@ -18163,8 +18339,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/stop is deprecated.", DeprecationWarning)
 
-        _param = self._stop_computer_use_serialize(
+        _param = self._stop_computer_use_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -18183,7 +18360,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _stop_computer_use_serialize(
+    def _stop_computer_use_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -18252,7 +18429,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_compressed_region_screenshot(
+    async def take_compressed_region_screenshot_deprecated(
         self,
         sandbox_id: StrictStr,
         height: Union[StrictFloat, StrictInt],
@@ -18277,7 +18454,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> CompressedScreenshotResponse:
-        """Take compressed region screenshot
+        """(Deprecated) [DEPRECATED] Take compressed region screenshot
 
         Take a compressed screenshot of a specific region
 
@@ -18322,8 +18499,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed is deprecated.", DeprecationWarning)
 
-        _param = self._take_compressed_region_screenshot_serialize(
+        _param = self._take_compressed_region_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             height=height,
             width=width,
@@ -18355,7 +18533,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_compressed_region_screenshot_with_http_info(
+    async def take_compressed_region_screenshot_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         height: Union[StrictFloat, StrictInt],
@@ -18380,7 +18558,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[CompressedScreenshotResponse]:
-        """Take compressed region screenshot
+        """(Deprecated) [DEPRECATED] Take compressed region screenshot
 
         Take a compressed screenshot of a specific region
 
@@ -18425,8 +18603,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed is deprecated.", DeprecationWarning)
 
-        _param = self._take_compressed_region_screenshot_serialize(
+        _param = self._take_compressed_region_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             height=height,
             width=width,
@@ -18458,7 +18637,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_compressed_region_screenshot_without_preload_content(
+    async def take_compressed_region_screenshot_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         height: Union[StrictFloat, StrictInt],
@@ -18483,7 +18662,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Take compressed region screenshot
+        """(Deprecated) [DEPRECATED] Take compressed region screenshot
 
         Take a compressed screenshot of a specific region
 
@@ -18528,8 +18707,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed is deprecated.", DeprecationWarning)
 
-        _param = self._take_compressed_region_screenshot_serialize(
+        _param = self._take_compressed_region_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             height=height,
             width=width,
@@ -18556,7 +18736,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _take_compressed_region_screenshot_serialize(
+    def _take_compressed_region_screenshot_deprecated_serialize(
         self,
         sandbox_id,
         height,
@@ -18665,7 +18845,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_compressed_screenshot(
+    async def take_compressed_screenshot_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -18686,7 +18866,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> CompressedScreenshotResponse:
-        """Take compressed screenshot
+        """(Deprecated) [DEPRECATED] Take compressed screenshot
 
         Take a compressed screenshot with format, quality, and scale options
 
@@ -18723,8 +18903,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed is deprecated.", DeprecationWarning)
 
-        _param = self._take_compressed_screenshot_serialize(
+        _param = self._take_compressed_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             scale=scale,
@@ -18752,7 +18933,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_compressed_screenshot_with_http_info(
+    async def take_compressed_screenshot_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -18773,7 +18954,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[CompressedScreenshotResponse]:
-        """Take compressed screenshot
+        """(Deprecated) [DEPRECATED] Take compressed screenshot
 
         Take a compressed screenshot with format, quality, and scale options
 
@@ -18810,8 +18991,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed is deprecated.", DeprecationWarning)
 
-        _param = self._take_compressed_screenshot_serialize(
+        _param = self._take_compressed_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             scale=scale,
@@ -18839,7 +19021,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_compressed_screenshot_without_preload_content(
+    async def take_compressed_screenshot_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -18860,7 +19042,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Take compressed screenshot
+        """(Deprecated) [DEPRECATED] Take compressed screenshot
 
         Take a compressed screenshot with format, quality, and scale options
 
@@ -18897,8 +19079,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed is deprecated.", DeprecationWarning)
 
-        _param = self._take_compressed_screenshot_serialize(
+        _param = self._take_compressed_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             scale=scale,
@@ -18921,7 +19104,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _take_compressed_screenshot_serialize(
+    def _take_compressed_screenshot_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -19010,7 +19193,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_region_screenshot(
+    async def take_region_screenshot_deprecated(
         self,
         sandbox_id: StrictStr,
         height: Union[StrictFloat, StrictInt],
@@ -19032,7 +19215,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RegionScreenshotResponse:
-        """Take region screenshot
+        """(Deprecated) [DEPRECATED] Take region screenshot
 
         Take a screenshot of a specific region
 
@@ -19071,8 +19254,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region is deprecated.", DeprecationWarning)
 
-        _param = self._take_region_screenshot_serialize(
+        _param = self._take_region_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             height=height,
             width=width,
@@ -19101,7 +19285,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_region_screenshot_with_http_info(
+    async def take_region_screenshot_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         height: Union[StrictFloat, StrictInt],
@@ -19123,7 +19307,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[RegionScreenshotResponse]:
-        """Take region screenshot
+        """(Deprecated) [DEPRECATED] Take region screenshot
 
         Take a screenshot of a specific region
 
@@ -19162,8 +19346,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region is deprecated.", DeprecationWarning)
 
-        _param = self._take_region_screenshot_serialize(
+        _param = self._take_region_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             height=height,
             width=width,
@@ -19192,7 +19377,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_region_screenshot_without_preload_content(
+    async def take_region_screenshot_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         height: Union[StrictFloat, StrictInt],
@@ -19214,7 +19399,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Take region screenshot
+        """(Deprecated) [DEPRECATED] Take region screenshot
 
         Take a screenshot of a specific region
 
@@ -19253,8 +19438,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region is deprecated.", DeprecationWarning)
 
-        _param = self._take_region_screenshot_serialize(
+        _param = self._take_region_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             height=height,
             width=width,
@@ -19278,7 +19464,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _take_region_screenshot_serialize(
+    def _take_region_screenshot_deprecated_serialize(
         self,
         sandbox_id,
         height,
@@ -19372,7 +19558,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_screenshot(
+    async def take_screenshot_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -19390,7 +19576,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ScreenshotResponse:
-        """Take screenshot
+        """(Deprecated) [DEPRECATED] Take screenshot
 
         Take a screenshot of the entire screen
 
@@ -19421,8 +19607,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot is deprecated.", DeprecationWarning)
 
-        _param = self._take_screenshot_serialize(
+        _param = self._take_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             show_cursor=show_cursor,
@@ -19447,7 +19634,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_screenshot_with_http_info(
+    async def take_screenshot_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -19465,7 +19652,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ScreenshotResponse]:
-        """Take screenshot
+        """(Deprecated) [DEPRECATED] Take screenshot
 
         Take a screenshot of the entire screen
 
@@ -19496,8 +19683,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot is deprecated.", DeprecationWarning)
 
-        _param = self._take_screenshot_serialize(
+        _param = self._take_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             show_cursor=show_cursor,
@@ -19522,7 +19710,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def take_screenshot_without_preload_content(
+    async def take_screenshot_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -19540,7 +19728,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Take screenshot
+        """(Deprecated) [DEPRECATED] Take screenshot
 
         Take a screenshot of the entire screen
 
@@ -19571,8 +19759,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot is deprecated.", DeprecationWarning)
 
-        _param = self._take_screenshot_serialize(
+        _param = self._take_screenshot_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             show_cursor=show_cursor,
@@ -19592,7 +19781,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _take_screenshot_serialize(
+    def _take_screenshot_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -19666,7 +19855,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def type_text(
+    async def type_text_deprecated(
         self,
         sandbox_id: StrictStr,
         keyboard_type_request: KeyboardTypeRequest,
@@ -19684,7 +19873,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Type text
+        """(Deprecated) [DEPRECATED] Type text
 
         Type text using keyboard
 
@@ -19715,8 +19904,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/type is deprecated.", DeprecationWarning)
 
-        _param = self._type_text_serialize(
+        _param = self._type_text_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_type_request=keyboard_type_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -19741,7 +19931,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def type_text_with_http_info(
+    async def type_text_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         keyboard_type_request: KeyboardTypeRequest,
@@ -19759,7 +19949,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Type text
+        """(Deprecated) [DEPRECATED] Type text
 
         Type text using keyboard
 
@@ -19790,8 +19980,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/type is deprecated.", DeprecationWarning)
 
-        _param = self._type_text_serialize(
+        _param = self._type_text_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_type_request=keyboard_type_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -19816,7 +20007,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def type_text_without_preload_content(
+    async def type_text_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         keyboard_type_request: KeyboardTypeRequest,
@@ -19834,7 +20025,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Type text
+        """(Deprecated) [DEPRECATED] Type text
 
         Type text using keyboard
 
@@ -19865,8 +20056,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/type is deprecated.", DeprecationWarning)
 
-        _param = self._type_text_serialize(
+        _param = self._type_text_deprecated_serialize(
             sandbox_id=sandbox_id,
             keyboard_type_request=keyboard_type_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -19886,7 +20078,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _type_text_serialize(
+    def _type_text_deprecated_serialize(
         self,
         sandbox_id,
         keyboard_type_request,
@@ -19964,7 +20156,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def upload_file(
+    async def upload_file_deprecated(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -19983,7 +20175,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """(Deprecated) Upload file
+        """(Deprecated) [DEPRECATED] Upload file
 
         Upload file inside sandbox
 
@@ -20018,7 +20210,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
-        _param = self._upload_file_serialize(
+        _param = self._upload_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -20044,7 +20236,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def upload_file_with_http_info(
+    async def upload_file_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -20063,7 +20255,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """(Deprecated) Upload file
+        """(Deprecated) [DEPRECATED] Upload file
 
         Upload file inside sandbox
 
@@ -20098,7 +20290,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
-        _param = self._upload_file_serialize(
+        _param = self._upload_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -20124,7 +20316,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def upload_file_without_preload_content(
+    async def upload_file_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         path: StrictStr,
@@ -20143,7 +20335,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """(Deprecated) Upload file
+        """(Deprecated) [DEPRECATED] Upload file
 
         Upload file inside sandbox
 
@@ -20178,7 +20370,7 @@ class ToolboxApi:
         """ # noqa: E501
         warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
-        _param = self._upload_file_serialize(
+        _param = self._upload_file_deprecated_serialize(
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -20199,7 +20391,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _upload_file_serialize(
+    def _upload_file_deprecated_serialize(
         self,
         sandbox_id,
         path,
@@ -20282,7 +20474,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def upload_files(
+    async def upload_files_deprecated(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -20299,7 +20491,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Upload multiple files
+        """(Deprecated) [DEPRECATED] Upload multiple files
 
         Upload multiple files inside sandbox
 
@@ -20328,8 +20520,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/bulk-upload is deprecated.", DeprecationWarning)
 
-        _param = self._upload_files_serialize(
+        _param = self._upload_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -20353,7 +20546,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def upload_files_with_http_info(
+    async def upload_files_deprecated_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -20370,7 +20563,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Upload multiple files
+        """(Deprecated) [DEPRECATED] Upload multiple files
 
         Upload multiple files inside sandbox
 
@@ -20399,8 +20592,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/bulk-upload is deprecated.", DeprecationWarning)
 
-        _param = self._upload_files_serialize(
+        _param = self._upload_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -20424,7 +20618,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def upload_files_without_preload_content(
+    async def upload_files_deprecated_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -20441,7 +20635,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Upload multiple files
+        """(Deprecated) [DEPRECATED] Upload multiple files
 
         Upload multiple files inside sandbox
 
@@ -20470,8 +20664,9 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/bulk-upload is deprecated.", DeprecationWarning)
 
-        _param = self._upload_files_serialize(
+        _param = self._upload_files_deprecated_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -20490,7 +20685,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _upload_files_serialize(
+    def _upload_files_deprecated_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,

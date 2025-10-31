@@ -10,7 +10,6 @@ import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { Repository } from 'typeorm'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { ToolboxService } from '../../services/toolbox.service'
 import { BackupState } from '../../enums/backup-state.enum'
 
 export const SYNC_AGAIN = 'sync-again'
@@ -24,7 +23,6 @@ export abstract class SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected readonly sandboxRepository: Repository<Sandbox>,
-    protected readonly toolboxService: ToolboxService,
   ) {}
 
   abstract run(sandbox: Sandbox): Promise<SyncState>

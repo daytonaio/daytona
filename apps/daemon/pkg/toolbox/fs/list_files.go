@@ -11,6 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ListFiles godoc
+//
+//	@Summary		List files and directories
+//	@Description	List files and directories in the specified path
+//	@Tags			file-system
+//	@Produce		json
+//	@Param			path	query	string	false	"Directory path to list (defaults to working directory)"
+//	@Success		200		{array}	FileInfo
+//	@Router			/files [get]
+//
+//	@id				ListFiles
 func ListFiles(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {

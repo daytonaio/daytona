@@ -31,6 +31,20 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+// SessionExecuteCommand godoc
+//
+//	@Summary		Execute command in session
+//	@Description	Execute a command within an existing shell session
+//	@Tags			process
+//	@Accept			json
+//	@Produce		json
+//	@Param			sessionId	path		string					true	"Session ID"
+//	@Param			request		body		SessionExecuteRequest	true	"Command execution request"
+//	@Success		200			{object}	SessionExecuteResponse
+//	@Success		202			{object}	SessionExecuteResponse
+//	@Router			/process/session/{sessionId}/exec [post]
+//
+//	@id				SessionExecuteCommand
 func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 

@@ -12,6 +12,8 @@ type ExecuteRequest struct {
 } // @name ExecuteRequest
 
 type ExecuteResponse struct {
-	Code   int    `json:"code" validate:"required"`
-	Result string `json:"result" validate:"required"`
+	// Deprecated: Use ExitCode instead
+	Code     int    `json:"code,omitempty"`
+	ExitCode int    `json:"exitCode" validate:"required"`
+	Result   string `json:"result" validate:"required"`
 } // @name ExecuteResponse

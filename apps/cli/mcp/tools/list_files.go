@@ -44,7 +44,7 @@ func ListFiles(ctx context.Context, request mcp.CallToolRequest, args ListFilesA
 	}
 
 	// List files
-	files, _, err := apiClient.ToolboxAPI.ListFiles(ctx, *args.Id).Path(dirPath).Execute()
+	files, _, err := apiClient.ToolboxAPI.ListFilesDeprecated(ctx, *args.Id).Path(dirPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error listing files: %v", err)
 	}

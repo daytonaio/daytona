@@ -1,6 +1,10 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
+//	@title			Daytona Daemon API
+//	@version		v0.0.0-dev
+//	@description	Daytona Daemon API
+
 package toolbox
 
 import (
@@ -25,8 +29,11 @@ import (
 	"os"
 	"path"
 
+	"github.com/daytonaio/daemon/pkg/toolbox/docs"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -44,6 +51,16 @@ type UserHomeDirResponse struct {
 	Dir string `json:"dir"`
 } // @name UserHomeDirResponse
 
+// GetWorkDir godoc
+//
+//	@Summary		Get working directory
+//	@Description	Get the current working directory path. This is default directory used for running commands.
+//	@Tags			info
+//	@Produce		json
+//	@Success		200	{object}	WorkDirResponse
+//	@Router			/work-dir [get]
+//
+//	@id				GetWorkDir
 func (s *Server) GetWorkDir(ctx *gin.Context) {
 	workDir := WorkDirResponse{
 		Dir: s.WorkDir,
@@ -52,6 +69,16 @@ func (s *Server) GetWorkDir(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, workDir)
 }
 
+// GetUserHomeDir godoc
+//
+//	@Summary		Get user home directory
+//	@Description	Get the current user home directory path.
+//	@Tags			info
+//	@Produce		json
+//	@Success		200	{object}	UserHomeDirResponse
+//	@Router			/user-home-dir [get]
+//
+//	@id				GetUserHomeDir
 func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -65,7 +92,27 @@ func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userHomeDirResponse)
 }
 
+// GetVersion godoc
+//
+//	@Summary		Get version
+//	@Description	Get the current daemon version
+//	@Tags			info
+//	@Produce		json
+//	@Success		200	{object}	map[string]string
+//	@Router			/version [get]
+//
+//	@id				GetVersion
+func (s *Server) GetVersion(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"version": internal.Version,
+	})
+}
+
 func (s *Server) Start() error {
+	docs.SwaggerInfo.Description = "Daytona Daemon API"
+	docs.SwaggerInfo.Title = "Daytona Daemon API"
+	docs.SwaggerInfo.BasePath = "/"
+
 	// Set Gin to release mode in production
 	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -77,11 +124,12 @@ func (s *Server) Start() error {
 	r.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
 
-	r.GET("/version", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"version": internal.Version,
-		})
-	})
+	// Add swagger UI in development mode
+	if os.Getenv("ENVIRONMENT") != "production" {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
+
+	r.GET("/version", s.GetVersion)
 
 	// keep /project-dir old behavior for backward compatibility
 	r.GET("/project-dir", s.GetUserHomeDir)
@@ -199,17 +247,21 @@ func (s *Server) Start() error {
 	computerUseController := r.Group("/computeruse")
 	{
 		if s.ComputerUse != nil {
+			computerUseHandler := computeruse.Handler{
+				ComputerUse: s.ComputerUse,
+			}
+
 			// Computer use status endpoint
 			computerUseController.GET("/status", computeruse.WrapStatusHandler(s.ComputerUse.GetStatus))
 
 			// Computer use management endpoints
-			computerUseController.POST("/start", s.startComputerUse)
-			computerUseController.POST("/stop", s.stopComputerUse)
-			computerUseController.GET("/process-status", s.getComputerUseStatus)
-			computerUseController.GET("/process/:processName/status", s.getProcessStatus)
-			computerUseController.POST("/process/:processName/restart", s.restartProcess)
-			computerUseController.GET("/process/:processName/logs", s.getProcessLogs)
-			computerUseController.GET("/process/:processName/errors", s.getProcessErrors)
+			computerUseController.POST("/start", computerUseHandler.StartComputerUse)
+			computerUseController.POST("/stop", computerUseHandler.StopComputerUse)
+			computerUseController.GET("/process-status", computerUseHandler.GetComputerUseStatus)
+			computerUseController.GET("/process/:processName/status", computerUseHandler.GetProcessStatus)
+			computerUseController.POST("/process/:processName/restart", computerUseHandler.RestartProcess)
+			computerUseController.GET("/process/:processName/logs", computerUseHandler.GetProcessLogs)
+			computerUseController.GET("/process/:processName/errors", computerUseHandler.GetProcessErrors)
 
 			// Screenshot endpoints
 			computerUseController.GET("/screenshot", computeruse.WrapScreenshotHandler(s.ComputerUse.TakeScreenshot))
@@ -234,28 +286,28 @@ func (s *Server) Start() error {
 			computerUseController.GET("/display/windows", computeruse.WrapWindowsHandler(s.ComputerUse.GetWindows))
 		} else {
 			// Register all endpoints with disabled middleware when plugin is not available
-			computerUseController.GET("/status", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/start", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/stop", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/process-status", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/process/:processName/status", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/process/:processName/restart", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/process/:processName/logs", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/process/:processName/errors", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot/region", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot/compressed", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot/region/compressed", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/mouse/position", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/move", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/click", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/drag", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/scroll", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/keyboard/type", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/keyboard/key", s.computerUseDisabledMiddleware())
-			computerUseController.POST("/keyboard/hotkey", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/display/info", s.computerUseDisabledMiddleware())
-			computerUseController.GET("/display/windows", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/status", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/start", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/stop", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/process-status", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/process/:processName/status", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/process/:processName/restart", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/process/:processName/logs", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/process/:processName/errors", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot/region", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot/compressed", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot/region/compressed", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/mouse/position", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/move", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/click", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/drag", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/scroll", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/keyboard/type", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/keyboard/key", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.POST("/keyboard/hotkey", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/display/info", computeruse.ComputerUseDisabledMiddleware())
+			computerUseController.GET("/display/windows", computeruse.ComputerUseDisabledMiddleware())
 		}
 	}
 
@@ -269,7 +321,7 @@ func (s *Server) Start() error {
 
 	proxyController := r.Group("/proxy")
 	{
-		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget))
+		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
 	}
 
 	go portDetector.Start(context.Background())
@@ -288,160 +340,4 @@ func (s *Server) Start() error {
 	}
 
 	return httpServer.Serve(listener)
-}
-
-// computerUseDisabledMiddleware returns a middleware that handles requests when computer-use is disabled
-func (s *Server) computerUseDisabledMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"message":  "Computer-use functionality is not available",
-			"details":  "The computer-use plugin failed to initialize due to missing dependencies in the runtime environment.",
-			"solution": "Install the required X11 dependencies (x11-apps, xvfb, etc.) to enable computer-use functionality. Check the daemon logs for specific error details.",
-		})
-		c.Abort()
-	}
-}
-
-// Computer use management handlers
-func (s *Server) startComputerUse(ctx *gin.Context) {
-	_, err := s.ComputerUse.Start()
-	if err != nil {
-		ctx.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":   "Failed to start computer use",
-			"details": err.Error(),
-		})
-		return
-	}
-
-	status, err := s.ComputerUse.GetProcessStatus()
-	if err != nil {
-		ctx.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":   "Failed to get computer use status",
-			"details": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Computer use processes started successfully",
-		"status":  status,
-	})
-}
-
-func (s *Server) stopComputerUse(ctx *gin.Context) {
-	_, err := s.ComputerUse.Stop()
-	if err != nil {
-		ctx.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":   "Failed to stop computer use",
-			"details": err.Error(),
-		})
-		return
-	}
-
-	status, err := s.ComputerUse.GetProcessStatus()
-	if err != nil {
-		ctx.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":   "Failed to get computer use status",
-			"details": err.Error(),
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Computer use processes stopped successfully",
-		"status":  status,
-	})
-}
-
-func (s *Server) getComputerUseStatus(ctx *gin.Context) {
-	status, err := s.ComputerUse.GetProcessStatus()
-	if err != nil {
-		ctx.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":   "Failed to get computer use status",
-			"details": err.Error(),
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": status,
-	})
-}
-
-func (s *Server) getProcessStatus(ctx *gin.Context) {
-	processName := ctx.Param("processName")
-	req := &computeruse.ProcessRequest{
-		ProcessName: processName,
-	}
-	isRunning, err := s.ComputerUse.IsProcessRunning(req)
-	if err != nil {
-		ctx.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":   "Failed to get process status",
-			"details": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"processName": processName,
-		"running":     isRunning,
-	})
-}
-
-func (s *Server) restartProcess(ctx *gin.Context) {
-	processName := ctx.Param("processName")
-	req := &computeruse.ProcessRequest{
-		ProcessName: processName,
-	}
-	_, err := s.ComputerUse.RestartProcess(req)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"message":     fmt.Sprintf("Process %s restarted successfully", processName),
-		"processName": processName,
-	})
-}
-
-func (s *Server) getProcessLogs(ctx *gin.Context) {
-	processName := ctx.Param("processName")
-	req := &computeruse.ProcessRequest{
-		ProcessName: processName,
-	}
-	logs, err := s.ComputerUse.GetProcessLogs(req)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"processName": processName,
-		"logs":        logs,
-	})
-}
-
-func (s *Server) getProcessErrors(ctx *gin.Context) {
-	processName := ctx.Param("processName")
-	req := &computeruse.ProcessRequest{
-		ProcessName: processName,
-	}
-	errors, err := s.ComputerUse.GetProcessErrors(req)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"processName": processName,
-		"errors":      errors,
-	})
 }

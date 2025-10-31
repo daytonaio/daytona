@@ -47,7 +47,7 @@ func MoveFile(ctx context.Context, request mcp.CallToolRequest, args MoveFileArg
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("destPath parameter is required")
 	}
 
-	_, err = apiClient.ToolboxAPI.MoveFile(ctx, *args.Id).Source(*args.SourcePath).Destination(*args.DestPath).Execute()
+	_, err = apiClient.ToolboxAPI.MoveFileDeprecated(ctx, *args.Id).Source(*args.SourcePath).Destination(*args.DestPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error moving file: %v", err)
 	}
