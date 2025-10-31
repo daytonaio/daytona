@@ -32,6 +32,12 @@ export class SandboxDestroyAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
+    // Handle PENDING_BUILD state without runner assignment
+    if (sandbox.state === SandboxState.PENDING_BUILD && !sandbox.runnerId) {
+      await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
+      return DONT_SYNC_AGAIN
+    }
+
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN

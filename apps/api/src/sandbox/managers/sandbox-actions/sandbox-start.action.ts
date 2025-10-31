@@ -27,6 +27,7 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { RedisLockProvider } from '../../common/redis-lock.provider'
+import { BadRequestError } from '../../../exceptions/bad-request.exception'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -136,18 +137,29 @@ export class SandboxStartAction extends SandboxAction {
     const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
 
     // Try to assign a new available runner
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.region,
-      sandboxClass: sandbox.class,
-      excludedRunnerIds: excludedRunnerIds,
-    })
-    runnerId = runner.id
+    try {
+      const runner = await this.runnerService.getRandomAvailableRunner({
+        region: sandbox.region,
+        sandboxClass: sandbox.class,
+        excludedRunnerIds: excludedRunnerIds,
+      })
+      runnerId = runner.id
 
-    this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
+      this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
 
-    await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runnerId)
+      await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runnerId)
 
-    return SYNC_AGAIN
+      return SYNC_AGAIN
+    } catch (error) {
+      // Only handle "No available runners" - keep sandbox in PENDING_BUILD state. The sync cron will retry on the next cycle
+      if (error instanceof BadRequestError && error.message === 'No available runners') {
+        this.logger.debug(
+          `No available runners for sandbox ${sandbox.id} in region ${sandbox.region}. Keeping in PENDING_BUILD state.`,
+        )
+        return DONT_SYNC_AGAIN
+      }
+      throw error
+    }
   }
 
   private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
