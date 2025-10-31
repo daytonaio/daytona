@@ -458,9 +458,23 @@ export class SandboxStartAction extends SandboxAction {
         }
         break
       }
-      case SandboxState.STARTING:
-      case SandboxState.RESTORING:
+      case SandboxState.STARTING: {
+        console.log(`Timeout while starting sandbox ${sandbox.id} last activity at ${sandbox.lastActivityAt}`)
+        if (await this.checkTimeoutError(sandbox, 5, 'Timeout while starting sandbox')) {
+          return DONT_SYNC_AGAIN
+        }
+        break
+      }
+      case SandboxState.RESTORING: {
+        if (await this.checkTimeoutError(sandbox, 30, 'Timeout while starting sandbox')) {
+          return DONT_SYNC_AGAIN
+        }
+        break
+      }
       case SandboxState.CREATING: {
+        if (await this.checkTimeoutError(sandbox, 15, 'Timeout while creating sandbox')) {
+          return DONT_SYNC_AGAIN
+        }
         break
       }
       case SandboxState.UNKNOWN: {
@@ -480,6 +494,19 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     return SYNC_AGAIN
+  }
+
+  private async checkTimeoutError(sandbox: Sandbox, timeoutMinutes: number, errorReason: string): Promise<boolean> {
+    if (
+      sandbox.lastActivityAt &&
+      new Date(sandbox.lastActivityAt).getTime() < Date.now() - 1000 * 60 * timeoutMinutes
+    ) {
+      sandbox.state = SandboxState.ERROR
+      sandbox.errorReason = errorReason
+      await this.sandboxRepository.save(sandbox)
+      return true
+    }
+    return false
   }
 
   // TODO: revise/cleanup
@@ -647,13 +674,14 @@ export class SandboxStartAction extends SandboxAction {
     const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
 
     let availableRunners: Runner[] = []
+    const excludedRunnerIds: string[] = excludedRunnerId ? [excludedRunnerId] : []
 
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
           region: sandbox.region,
           sandboxClass: sandbox.class,
           snapshotRef,
-          excludedRunnerIds: [excludedRunnerId],
+          excludedRunnerIds,
         })
       : []
     if (runnersWithBaseSnapshot.length > 0) {
@@ -663,7 +691,7 @@ export class SandboxStartAction extends SandboxAction {
       availableRunners = await this.runnerService.findAvailableRunners({
         region: sandbox.region,
         sandboxClass: sandbox.class,
-        excludedRunnerIds: [excludedRunnerId],
+        excludedRunnerIds,
       })
     }
 
