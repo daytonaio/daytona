@@ -208,7 +208,6 @@ Setting ["autoDeleteInterval: 0"](#auto-delete-interval) has the same effect as 
 Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox.
 Learn more about network limits in the [Network Limits](/docs/en/network-limits) documentation.
 
-
 ## Sandbox Information
 
 The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
@@ -389,14 +388,14 @@ Daytona Sandboxes can be automatically stopped, archived, and deleted based on u
 
 The auto-stop interval parameter sets the amount of time after which a running Sandbox will be automatically stopped.
 
+Sandbox activity, such as SDK API calls or network requests through [preview URLs](/docs/en/preview-and-authentication), will reset the auto-stop timer.
+
 The parameter can either be set to:
 
 - a time interval in minutes
 - `0`, which disables the auto-stop functionality, allowing the sandbox to run indefinitely
 
 If the parameter is not set, the default interval of `15` minutes will be used.
-
-:::
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">

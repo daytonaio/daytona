@@ -31,9 +31,10 @@ type RunnerInfo struct {
 	ApiKey string `json:"apiKey"`
 }
 
-const DAYTONA_SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
-const DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
-const DAYTONA_SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
+const SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
+const SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
+const SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
+const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Daytona-Skip-Last-Activity-Update"
 const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
 
@@ -42,10 +43,11 @@ type Proxy struct {
 	secureCookie *securecookie.SecureCookie
 	cookieDomain string
 
-	apiclient                *apiclient.APIClient
-	runnerCache              common_cache.ICache[RunnerInfo]
-	sandboxPublicCache       common_cache.ICache[bool]
-	sandboxAuthKeyValidCache common_cache.ICache[bool]
+	apiclient                      *apiclient.APIClient
+	runnerCache                    common_cache.ICache[RunnerInfo]
+	sandboxPublicCache             common_cache.ICache[bool]
+	sandboxAuthKeyValidCache       common_cache.ICache[bool]
+	sandboxLastActivityUpdateCache common_cache.ICache[bool]
 }
 
 func StartProxy(config *config.Config) error {
@@ -88,10 +90,15 @@ func StartProxy(config *config.Config) error {
 		if err != nil {
 			return err
 		}
+		proxy.sandboxLastActivityUpdateCache, err = common_cache.NewRedisCache[bool](config.Redis, "proxy:sandbox-last-activity-update:")
+		if err != nil {
+			return err
+		}
 	} else {
 		proxy.runnerCache = common_cache.NewMapCache[RunnerInfo]()
 		proxy.sandboxPublicCache = common_cache.NewMapCache[bool]()
 		proxy.sandboxAuthKeyValidCache = common_cache.NewMapCache[bool]()
+		proxy.sandboxLastActivityUpdateCache = common_cache.NewMapCache[bool]()
 	}
 
 	router := gin.New()

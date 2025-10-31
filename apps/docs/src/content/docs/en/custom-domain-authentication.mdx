@@ -48,7 +48,17 @@ To override Daytona's default CORS settings, send:
 X-Daytona-Disable-CORS: true
 ```
 
-#### Authentication
+### Disable Last Activity Update
+
+To prevent sandbox last activity updates when previewing, you can set the `X-Daytona-Skip-Last-Activity-Update` header to `true`.
+This will stop Daytona from keeping sandboxes, that have [auto-stop enabled](/docs/sandbox-management#auto-stop-interval), started:
+
+```bash
+curl -H "X-Daytona-Skip-Last-Activity-Update: true" \
+https://3000-sandbox-123456.proxy.daytona.work
+```
+
+### Authentication
 
 For private preview links, users should send:
 
