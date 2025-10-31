@@ -31,6 +31,8 @@ type Config struct {
 	AWSSecretAccessKey     string `envconfig:"AWS_SECRET_ACCESS_KEY"`
 	AWSDefaultBucket       string `envconfig:"AWS_DEFAULT_BUCKET"`
 	ResourceLimitsDisabled bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
+	OtelTracingEnabled     bool   `envconfig:"OTEL_TRACING_ENABLED"`
+	OtelLoggingEnabled     bool   `envconfig:"OTEL_LOGGING_ENABLED"`
 }
 
 var DEFAULT_API_PORT int = 8080

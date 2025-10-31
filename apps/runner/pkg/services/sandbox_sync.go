@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	apiclient "github.com/daytonaio/apiclient"
@@ -14,7 +15,6 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	log "github.com/sirupsen/logrus"
 )
 
 type SandboxSyncServiceConfig struct {
@@ -55,7 +55,7 @@ func (s *SandboxSyncService) GetLocalContainerStates(ctx context.Context) (map[s
 		// Get the current state of this container
 		state, err := s.docker.DeduceSandboxState(ctx, sandboxId)
 		if err != nil {
-			log.Debugf("Failed to deduce state for sandbox %s: %v", sandboxId, err)
+			slog.DebugContext(ctx, "Failed to deduce state for sandbox", "sandboxId", sandboxId, "error", err)
 			continue
 		}
 
@@ -124,12 +124,11 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 		convertedRemoteState := s.convertFromApiState(remoteState)
 
 		if localState != convertedRemoteState {
-			log.Infof("State mismatch for sandbox %s: local=%s, remote=%s",
-				sandboxId, localState, convertedRemoteState)
+			slog.InfoContext(ctx, "State mismatch for sandbox", "sandboxId", sandboxId, "localState", localState, "remoteState", convertedRemoteState)
 
 			err := s.SyncSandboxState(ctx, sandboxId, localState)
 			if err != nil {
-				log.Errorf("Failed to sync state for sandbox %s: %v", sandboxId, err)
+				slog.ErrorContext(ctx, "Failed to sync state for sandbox", "sandboxId", sandboxId, "error", err)
 				continue
 			}
 			syncCount++
@@ -137,7 +136,7 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 	}
 
 	if syncCount > 0 {
-		log.Infof("Synchronized %d sandbox states", syncCount)
+		slog.InfoContext(ctx, "Synchronized sandbox states", "syncCount", syncCount)
 	}
 
 	return nil
@@ -145,12 +144,12 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 
 // StartSyncProcess starts a background goroutine that synchronizes sandbox states
 func (s *SandboxSyncService) StartSyncProcess(ctx context.Context) {
-	fmt.Println("Starting sandbox sync process")
+	slog.InfoContext(ctx, "Starting sandbox sync process")
 	go func() {
 		// Perform initial sync
 		err := s.PerformSync(ctx)
 		if err != nil {
-			log.Errorf("Failed to perform initial sync: %v", err)
+			slog.ErrorContext(ctx, "Failed to perform initial sync", "error", err)
 		}
 
 		// Set up ticker for periodic sync
@@ -162,10 +161,10 @@ func (s *SandboxSyncService) StartSyncProcess(ctx context.Context) {
 			case <-ticker.C:
 				err := s.PerformSync(ctx)
 				if err != nil {
-					log.Errorf("Failed to perform sync: %v", err)
+					slog.ErrorContext(ctx, "Failed to perform sync", "error", err)
 				}
 			case <-ctx.Done():
-				log.Info("Sandbox sync service stopped")
+				slog.InfoContext(ctx, "Sandbox sync service stopped")
 				return
 			}
 		}

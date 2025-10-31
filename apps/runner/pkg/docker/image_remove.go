@@ -5,11 +5,10 @@ package docker
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/errdefs"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) RemoveImage(ctx context.Context, imageName string, force bool) error {
@@ -19,13 +18,13 @@ func (d *DockerClient) RemoveImage(ctx context.Context, imageName string, force 
 	})
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			log.Infof("Image %s already removed and not found", imageName)
+			slog.InfoContext(ctx, "Image already removed and not found", "imageName", imageName)
 			return nil
 		}
 		return err
 	}
 
-	log.Infof("Image %s deleted successfully", imageName)
+	slog.InfoContext(ctx, "Image deleted successfully", "imageName", imageName)
 
 	return nil
 }

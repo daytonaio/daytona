@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
@@ -19,8 +20,6 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const systemMetricsKey = "__system_metrics__"
@@ -76,7 +75,7 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	// Get CPU metrics
 	cpuPercent, err := cpu.Percent(15*time.Second, false)
 	if err != nil {
-		log.Errorf("Error getting CPU metrics: %v", err)
+		slog.ErrorContext(ctx, "Error getting CPU metrics", "error", err)
 	} else {
 		metrics.CPUUsage = cpuPercent[0]
 	}
@@ -84,7 +83,7 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	// Get memory metrics
 	memory, err := mem.VirtualMemory()
 	if err != nil {
-		log.Errorf("Error getting memory metrics: %v", err)
+		slog.ErrorContext(ctx, "Error getting memory metrics", "error", err)
 	} else {
 		metrics.RAMUsage = (float64(memory.Total-memory.Available) / float64(memory.Total)) * 100
 	}
@@ -92,7 +91,7 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	// Get disk metrics
 	diskUsage, err := disk.Usage("/var/lib/docker")
 	if err != nil {
-		log.Errorf("Error getting disk metrics: %v", err)
+		slog.ErrorContext(ctx, "Error getting disk metrics", "error", err)
 	} else {
 		metrics.DiskUsage = diskUsage.UsedPercent
 	}
@@ -100,7 +99,7 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	// Get snapshot count
 	info, err := s.docker.ApiClient().Info(ctx)
 	if err != nil {
-		log.Errorf("Error getting snapshot count: %v", err)
+		slog.ErrorContext(ctx, "Error getting snapshot count", "error", err)
 	} else {
 		metrics.SnapshotCount = info.Images
 	}
@@ -116,7 +115,7 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMetrics {
 	metrics, err := s.cache.Get(ctx, systemMetricsKey)
 	if err != nil || metrics == nil {
-		log.Errorf("Error getting system metrics: %v", err)
+		slog.ErrorContext(ctx, "Error getting system metrics", "error", err)
 
 		// Return default values if no metrics are cached
 		return &models.SystemMetrics{
@@ -137,7 +136,7 @@ func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMet
 func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *models.SystemMetrics) {
 	containers, err := s.docker.ApiClient().ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
-		log.Errorf("Error listing containers when getting allocated resources: %v", err)
+		slog.ErrorContext(ctx, "Error listing containers when getting allocated resources", "error", err)
 		return
 	}
 
@@ -148,7 +147,7 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 	for _, ctr := range containers {
 		cpu, memory, disk, err := s.getContainerAllocatedResources(ctx, ctr.ID)
 		if err != nil {
-			log.Errorf("Error getting allocated resources for container %s: %v", ctr.ID, err)
+			slog.ErrorContext(ctx, "Error getting allocated resources for container", "containerID", ctr.ID, "error", err)
 		} else {
 			// For CPU and memory: only count running containers
 			if ctr.State == "running" {
@@ -196,7 +195,7 @@ func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, con
 				// Parse size string like "10G" and convert to GB
 				diskGB, err := s.parseStorageQuotaGB(sizeStr)
 				if err != nil {
-					log.Errorf("Error parsing storage quota for container %s: %v", containerId, err)
+					slog.ErrorContext(ctx, "Error parsing storage quota for container", "containerID", containerId, "error", err)
 				} else {
 					if diskGB > 0 {
 						allocatedDisk = diskGB

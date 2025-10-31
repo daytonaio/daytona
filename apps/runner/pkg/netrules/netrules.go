@@ -5,13 +5,13 @@ package netrules
 
 import (
 	"context"
+	"log/slog"
 	"os/exec"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/coreos/go-iptables/iptables"
-	log "github.com/sirupsen/logrus"
 )
 
 // NetRulesManager provides thread-safe operations for managing network rules
@@ -131,16 +131,16 @@ func (manager *NetRulesManager) persistRulesLoop() {
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 
-	log.Info("Starting iptables persistence loop")
+	slog.Info("Starting iptables persistence loop")
 
 	for {
 		select {
 		case <-manager.ctx.Done():
-			log.Info("Stopping iptables persistence loop")
+			slog.Info("Stopping iptables persistence loop")
 			return
 		case <-ticker.C:
 			if err := manager.saveIptablesRules(); err != nil {
-				log.Errorf("Failed to save iptables rules: %v", err)
+				slog.Error("Failed to save iptables rules", "error", err)
 			}
 		}
 	}

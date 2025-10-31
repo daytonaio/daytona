@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"strings"
 
 	"github.com/daytonaio/common-go/pkg/timer"
@@ -19,8 +20,6 @@ import (
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/pkg/jsonmessage"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) error {
@@ -43,7 +42,7 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		}
 	}
 
-	log.Infof("Pulling image %s...", imageName)
+	slog.InfoContext(ctx, "Pulling image", "imageName", imageName)
 
 	sandboxIdValue := ctx.Value(constants.ID_KEY)
 
@@ -66,7 +65,7 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		return err
 	}
 
-	log.Infof("Image %s pulled successfully", imageName)
+	slog.InfoContext(ctx, "Image pulled successfully", "imageName", imageName)
 
 	return nil
 }

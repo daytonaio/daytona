@@ -5,13 +5,10 @@ package main
 
 import (
 	"context"
-	"io"
+	"log/slog"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"time"
-
-	golog "log"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/internal/util"
@@ -23,19 +20,26 @@ import (
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/daytonaio/runner/pkg/sshgateway"
+	"github.com/daytonaio/runner/pkg/telemetry"
 	"github.com/docker/docker/client"
-	"github.com/joho/godotenv"
-
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
+	"go.opentelemetry.io/otel"
 )
 
 func main() {
+	// Init slog logger
+	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
+		TimeFormat: time.RFC3339,
+		Level:      util.ParseLogLevel(os.Getenv("LOG_LEVEL")),
+	}))
+
+	slog.SetDefault(logger)
+
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Errorf("Failed to get config: %v", err)
+		logger.Error("Failed to get config", "error", err)
 		return
 	}
 
@@ -46,9 +50,25 @@ func main() {
 		EnableTLS:   cfg.EnableTLS,
 	})
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	// Init tracing
+	shutdownTracing, err := telemetry.InitTracing(cfg)
 	if err != nil {
-		log.Errorf("Error creating Docker client: %v", err)
+		logger.Error("Failed to initialize tracing", "error", err)
+		return
+	}
+	defer shutdownTracing()
+
+	// Init logging
+	shutdownLogging, err := telemetry.InitLogging(logger, cfg)
+	if err != nil {
+		logger.Error("Failed to initialize OTEL logging", "error", err)
+		return
+	}
+	defer shutdownLogging()
+
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation(), client.WithTraceProvider(otel.GetTracerProvider()))
+	if err != nil {
+		logger.Error("Error creating Docker client", "error", err)
 		return
 	}
 
@@ -56,13 +76,13 @@ func main() {
 	persistent := cfg.Environment != "development"
 	netRulesManager, err := netrules.NewNetRulesManager(persistent)
 	if err != nil {
-		log.Error(err)
+		logger.Error("Failed to initialize net rules manager", "error", err)
 		return
 	}
 
 	// Start net rules manager
 	if err = netRulesManager.Start(); err != nil {
-		log.Error(err)
+		logger.Error("Failed to start net rules manager", "error", err)
 		return
 	}
 
@@ -71,7 +91,7 @@ func main() {
 	go func() {
 		err = monitor.Start()
 		if err != nil {
-			log.Fatal(err)
+			logger.Error("Failed to start Docker events monitor", "error", err)
 		}
 	}()
 	defer monitor.Stop()
@@ -79,13 +99,13 @@ func main() {
 
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
-		log.Errorf("Error writing daemon binary: %v", err)
+		logger.Error("Error writing daemon binary", "error", err)
 		return
 	}
 
 	pluginPath, err := daemon.WriteStaticBinary("daytona-computer-use")
 	if err != nil {
-		log.Errorf("Error writing plugin binary: %v", err)
+		logger.Error("Error writing plugin binary", "error", err)
 		return
 	}
 
@@ -97,7 +117,6 @@ func main() {
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:              cli,
 		StatesCache:            statesCache,
-		LogWriter:              os.Stdout,
 		AWSRegion:              cfg.AWSRegion,
 		AWSEndpointUrl:         cfg.AWSEndpointUrl,
 		AWSAccessKeyId:         cfg.AWSAccessKeyId,
@@ -129,13 +148,13 @@ func main() {
 		sshGatewayService = sshgateway.NewService(dockerClient)
 
 		go func() {
-			log.Info("Starting SSH Gateway")
+			logger.Info("Starting SSH Gateway")
 			if err := sshGatewayService.Start(ctx); err != nil {
-				log.Errorf("SSH Gateway error: %v", err)
+				logger.Error("SSH Gateway error", "error", err)
 			}
 		}()
 	} else {
-		log.Info("Gateway disabled - set SSH_GATEWAY_ENABLE=true to enable")
+		logger.Info("Gateway disabled - set SSH_GATEWAY_ENABLE=true to enable")
 	}
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
@@ -159,68 +178,9 @@ func main() {
 
 	select {
 	case err := <-apiServerErrChan:
-		log.Errorf("API server error: %v", err)
+		logger.Error("API server error", "error", err)
 		return
 	case <-interruptChannel:
 		apiServer.Stop()
 	}
-}
-
-func init() {
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Printf("Error loading .env file: %v", err)
-		// Continue anyway, as environment variables might be set directly
-	}
-
-	logLevel := log.WarnLevel
-
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
-
-	if logLevelSet {
-		var err error
-		logLevel, err = log.ParseLevel(logLevelEnv)
-		if err != nil {
-			log.Warnf("Failed to parse log level '%s', using WarnLevel: %v", logLevelEnv, err)
-			logLevel = log.WarnLevel
-		}
-	}
-
-	log.SetLevel(logLevel)
-	log.SetOutput(os.Stdout)
-
-	logFilePath, logFilePathSet := os.LookupEnv("LOG_FILE_PATH")
-	if logFilePathSet {
-		logDir := filepath.Dir(logFilePath)
-
-		if err := os.MkdirAll(logDir, 0755); err != nil {
-			log.Errorf("Failed to create log directory: %v", err)
-			os.Exit(1)
-		}
-
-		file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Errorf("Failed to open log file: %v", err)
-			os.Exit(1)
-		}
-
-		log.SetOutput(io.MultiWriter(os.Stdout, file))
-	}
-
-	zerologLevel, err := zerolog.ParseLevel(logLevel.String())
-	if err != nil {
-		log.Warnf("Failed to parse zerolog level, using ErrorLevel: %v", err)
-		zerologLevel = zerolog.ErrorLevel
-	}
-
-	zerolog.SetGlobalLevel(zerologLevel)
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-
-	zlog.Logger = zlog.Output(zerolog.ConsoleWriter{
-		Out:        &util.DebugLogWriter{},
-		TimeFormat: time.RFC3339,
-	})
-
-	golog.SetOutput(&util.DebugLogWriter{})
 }
