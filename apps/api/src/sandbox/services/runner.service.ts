@@ -122,6 +122,10 @@ export class RunnerService {
         : MoreThanOrEqual(this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')),
     }
 
+    const excludedRunnerIds = params.excludedRunnerIds?.length
+      ? params.excludedRunnerIds.filter((id) => !!id)
+      : undefined
+
     if (params.snapshotRef !== undefined) {
       const snapshotRunners = await this.snapshotRunnerRepository.find({
         where: {
@@ -132,8 +136,8 @@ export class RunnerService {
 
       let runnerIds = snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)
 
-      if (params.excludedRunnerIds?.length) {
-        runnerIds = runnerIds.filter((id) => !params.excludedRunnerIds.includes(id))
+      if (excludedRunnerIds?.length) {
+        runnerIds = runnerIds.filter((id) => !excludedRunnerIds.includes(id))
       }
 
       if (!runnerIds.length) {
@@ -141,8 +145,8 @@ export class RunnerService {
       }
 
       runnerFilter.id = In(runnerIds)
-    } else if (params.excludedRunnerIds?.length) {
-      runnerFilter.id = Not(In(params.excludedRunnerIds))
+    } else if (excludedRunnerIds?.length) {
+      runnerFilter.id = Not(In(excludedRunnerIds))
     }
 
     if (params.region !== undefined) {
