@@ -218,6 +218,6 @@ export class ConfigurationDto {
       this.pylonAppId = configService.get('pylonAppId')
     }
     // TODO: announcements
-    this.announcements = {} as Record<string, Announcement>
+    this.announcements = {}
   }
 }
