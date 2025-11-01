@@ -3,7 +3,7 @@ title: "AsyncVolume"
 hideTitleOnPage: true
 ---
 
-## ボリューム
+## ボリューム \{#volume\}
 
 ```python
 class Volume(VolumeDto)
@@ -13,16 +13,15 @@ Daytonaのボリューム（S3互換オブジェクトストレージをバッ�
 
 **属性**:
 
-- `id` _StrictStr_ - ボリュームの一意な識別子。
-- `name` _StrictStr_ - ボリューム名。
-- `organization_id` _StrictStr_ - ボリュームが属する組織ID。
-- `state` _StrictStr_ - ボリュームの状態。
-- `created_at` _StrictStr_ - ボリュームの作成日時。
-- `updated_at` _StrictStr_ - ボリュームの最終更新日時。
-- `last_used_at` _StrictStr_ - ボリュームの最終使用日時。
+* `id` *StrictStr* - ボリュームの一意な識別子。
+* `name` *StrictStr* - ボリューム名。
+* `organization_id` *StrictStr* - ボリュームが属する組織ID。
+* `state` *StrictStr* - ボリュームの状態。
+* `created_at` *StrictStr* - ボリュームの作成日時。
+* `updated_at` *StrictStr* - ボリュームの最終更新日時。
+* `last_used_at` *StrictStr* - ボリュームの最終使用日時。
 
-
-## AsyncVolumeService
+## AsyncVolumeService \{#asyncvolumeservice\}
 
 ```python
 class AsyncVolumeService()
@@ -30,7 +29,7 @@ class AsyncVolumeService()
 
 Daytonaのボリューム（ボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント））を管理するサービスです。ボリュームの一覧、取得、作成、削除に使用できます。
 
-#### AsyncVolumeService.list
+#### AsyncVolumeService.list \{#asyncvolumeservicelist\}
 
 ```python
 async def list() -> List[Volume]
@@ -40,8 +39,7 @@ async def list() -> List[Volume]
 
 **Returns**:
 
-- `List[Volume]` - すべてのボリュームのリスト。
-  
+* `List[Volume]` - すべてのボリュームのリスト。
 
 **Example**:
 
@@ -52,7 +50,7 @@ async with AsyncDaytona() as daytona:
         print(f"{volume.name} ({volume.id})")
 ```
 
-#### AsyncVolumeService.get
+#### AsyncVolumeService.get \{#asyncvolumeserviceget\}
 
 ```python
 async def get(name: str, create: bool = False) -> Volume
@@ -62,14 +60,12 @@ async def get(name: str, create: bool = False) -> Volume
 
 **Arguments**:
 
-- `name` _str_ - 取得するボリューム名。
-- `create` _bool_ - True の場合、存在しなければ新規にボリュームを作成します。
-  
+* `name` *str* - 取得するボリューム名。
+* `create` *bool* - True の場合、存在しなければ新規にボリュームを作成します。
 
 **Returns**:
 
-- `Volume` - 取得したボリュームオブジェクト。
-  
+* `Volume` - 取得したボリュームオブジェクト。
 
 **Example**:
 
@@ -79,7 +75,7 @@ async with AsyncDaytona() as daytona:
     print(f"{volume.name} ({volume.id})")
 ```
 
-#### AsyncVolumeService.create
+#### AsyncVolumeService.create \{#asyncvolumeservicecreate\}
 
 ```python
 async def create(name: str) -> Volume
@@ -89,13 +85,11 @@ async def create(name: str) -> Volume
 
 **Arguments**:
 
-- `name` _str_ - 作成するボリューム名。
-  
+* `name` *str* - 作成するボリューム名。
 
 **Returns**:
 
-- `Volume` - 作成されたボリュームオブジェクト。
-  
+* `Volume` - 作成されたボリュームオブジェクト。
 
 **Example**:
 
@@ -105,7 +99,7 @@ async with AsyncDaytona() as daytona:
     print(f"{volume.name} ({volume.id}); state: {volume.state}")
 ```
 
-#### AsyncVolumeService.delete
+#### AsyncVolumeService.delete \{#asyncvolumeservicedelete\}
 
 ```python
 async def delete(volume: Volume) -> None
@@ -115,8 +109,7 @@ async def delete(volume: Volume) -> None
 
 **Arguments**:
 
-- `volume` _Volume_ - 削除するボリューム。
-  
+* `volume` *Volume* - 削除するボリューム。
 
 **Example**:
 
@@ -126,4 +119,3 @@ async with AsyncDaytona() as daytona:
     await daytona.volume.delete(volume)
     print("Volume deleted")
 ```
-

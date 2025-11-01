@@ -1,27 +1,34 @@
 ---
-title: API Keys
+title: API キー
 ---
 
-DaytonaのAPIキーは、[Daytona API](/docs/ja/tools/api)へのリクエストを認証するために使用します。
+Daytona の API キーは、[Daytona API](/docs/ja/tools/api) へのリクエストを認証するために使用します。API キーは [API Keys](https://app.daytona.io/dashboard/keys) ページで表示、作成、削除できます。
 
-[Configuration](/docs/ja/configuration)ページでは、`DAYTONA_API_KEY` 環境変数の設定方法を説明しています。
+## API キーの作成 \{#creating-an-api-key\}
 
-APIキーを管理するには、Dashboardの[Keys](https://app.daytona.io/dashboard/keys)セクションに移動します。`Create Key` をクリックして新しいキーを作成し、クリップボードにコピーします。
+Daytona プラットフォームから API キーを取得できます。
 
-## 権限
+1. [Daytona Dashboard](https://app.daytona.io/dashboard/) の [API Keys](https://app.daytona.io/dashboard/keys) に移動します。
+2. **`Create Key`** ボタンをクリックします。
+3. 表示されたモーダルで新しいキーを作成し、クリップボードにコピーします。
 
-新しいAPIキーを追加する際、キーに付与する権限のセットを選択するよう求められます:
+アプリケーションで API キーを使用するには、[Configuration](/docs/ja/configuration) ページの説明に従って `DAYTONA_API_KEY` 環境変数を設定します。
 
-| 権限 | 説明 |
-|------------|-------------|
-| **`Sandboxes`** | サンドボックスの作成および管理を許可します |
-| **`Snapshots`** | スナップショットの作成および管理を許可します |
-| **`Registries`** | レジストリの作成および管理を許可します |
-| **`Volumes`** | ボリュームの作成および管理を許可します |
+## 権限とスコープ \{#permissions-scopes\}
 
-各権限には細かなスコープがあります:
+新しい API キーを作成する際、そのキーに付与する特定の権限（スコープ）を選択できます。スコープはキーで実行可能な操作を制御します。各キーには必要最小限のスコープのみを付与してください。
 
-- `write:*` は作成および更新
-- `delete:*` はリソースの削除
+以下は、利用可能なスコープとその説明の一覧です:
 
-例: `write:sandboxes`, `delete:sandboxes`
+| Resource    | Scope                | Description                |
+|-------------|----------------------|----------------------------|
+| Sandboxes   | `write:sandboxes`    | サンドボックスの作成/変更     |
+|             | `delete:sandboxes`   | サンドボックスの削除           |
+| Snapshots   | `write:snapshots`    | スナップショットの作成/変更     |
+|             | `delete:snapshots`   | スナップショットの削除           |
+| Registries  | `write:registries`   | レジストリの作成/変更        |
+|             | `delete:registries`  | レジストリの削除              |
+| Volumes     | `read:volumes`       | ボリュームの表示              |
+|             | `write:volumes`      | ボリュームの作成/変更          |
+|             | `delete:volumes`     | ボリュームの削除              |
+| Audit       | `read:audit_logs`    | 監査ログの表示               |

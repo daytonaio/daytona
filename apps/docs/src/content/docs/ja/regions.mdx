@@ -4,27 +4,40 @@ title: リージョンの選択
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona は現在、以下のリージョンで利用可能です。
+Daytona SDK は、複数の地理的リージョンで実行するように設定できます。現在利用可能なリージョンは次のとおりです。
 
-- 米国（US）
-- 欧州（EU）
+| リージョン | ターゲット |
+| ------------- | ---- |
+| United States | `us` |
+| Europe        | `eu` |
 
-Daytona の[設定](/docs/ja/configuration)手順でリージョンを選択できます。
+リージョンは初期化時に `target` パラメータを設定して指定します。
 
-```python
-from daytona import Daytona, DaytonaConfig
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
 
-config = DaytonaConfig(
-    target="us"
-)
+    # Daytona を US リージョンで使用するように設定
+    config = DaytonaConfig(
+        target="us"
+    )
 
-daytona = Daytona(config)
-```
+    # 指定した設定で Daytona クライアントを初期化
+    daytona = Daytona(config)
+    ```
+  </TabItem>
 
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-const daytona: Daytona = new Daytona({
-    target: "eu"
-});
-```
+    # Daytona を EU リージョンで使用するように設定
+    const daytona: Daytona = new Daytona({
+        target: "eu"
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+詳細は [Configuration](/docs/configuration) を参照してください。
