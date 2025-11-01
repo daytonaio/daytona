@@ -19,7 +19,7 @@ export type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
 export abstract class SandboxAction {
-  protected readonly logger: Logger
+  protected readonly logger = new Logger(SandboxAction.name)
 
   constructor(
     protected readonly runnerService: RunnerService,
@@ -65,6 +65,10 @@ export abstract class SandboxAction {
 
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
+    }
+
+    if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {
+      sandbox.errorReason = 'Sandbox is in error state during update'
     }
 
     if (daemonVersion !== undefined) {

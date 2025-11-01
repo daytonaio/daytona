@@ -27,6 +27,8 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { RedisLockProvider } from '../../common/redis-lock.provider'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -43,6 +45,7 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly organizationService: OrganizationService,
     protected readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRedis() private readonly redis: Redis,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }
@@ -356,7 +359,7 @@ export class SandboxStartAction extends SandboxAction {
     if (sandboxInfo.state === SandboxState.PULLING_SNAPSHOT) {
       await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT)
     } else if (sandboxInfo.state === SandboxState.ERROR) {
-      await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+      await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'Sandbox is in error state on runner')
     } else if (sandboxInfo.state === SandboxState.UNKNOWN) {
       await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN)
     } else {
@@ -375,6 +378,10 @@ export class SandboxStartAction extends SandboxAction {
 
     switch (sandboxInfo.state) {
       case SandboxState.STARTED: {
+        // Clear any DESTROYED retry key since sandbox is now started
+        const destroyedRetryKey = `destroyed-retry-${sandbox.id}`
+        await this.redis.del(destroyedRetryKey)
+
         let daemonVersion: string | undefined
         try {
           daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
@@ -418,13 +425,48 @@ export class SandboxStartAction extends SandboxAction {
         break
       }
       case SandboxState.ERROR: {
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+        await this.updateSandboxState(
+          sandbox.id,
+          SandboxState.ERROR,
+          undefined,
+          'Sandbox is in error state on runner while starting',
+        )
         break
+      }
+      case SandboxState.DESTROYED: {
+        // Retry up to 3 times since the sandbox might not have started spinning up on the runner yet
+        const destroyedRetryKey = `destroyed-retry-${sandbox.id}`
+        const retryCountRaw = await this.redis.get(destroyedRetryKey)
+        const retryCount = retryCountRaw ? parseInt(retryCountRaw) : 0
+
+        if (retryCount < 3) {
+          // Increment retry count and set expiration (5 minutes should be enough for retries)
+          await this.redis.setex(destroyedRetryKey, 300, String(retryCount + 1))
+          this.logger.warn(
+            `Sandbox ${sandbox.id} is in DESTROYED state on runner, retrying (attempt ${retryCount + 1}/3)`,
+          )
+          break // Continue to return SYNC_AGAIN
+        } else {
+          // Max retries reached, clear the retry key and handle as error
+          await this.redis.del(destroyedRetryKey)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.ERROR,
+            undefined,
+            'Sandbox is in DESTROYED state on runner after 3 retries',
+          )
+          return DONT_SYNC_AGAIN
+        }
       }
       // also any other state that is not STARTED
       default: {
         console.error(`Sandbox ${sandbox.id} is in unexpected state ${sandboxInfo.state}`)
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+        await this.updateSandboxState(
+          sandbox.id,
+          SandboxState.ERROR,
+          undefined,
+          `Sandbox is in unexpected state: ${sandboxInfo.state}`,
+        )
         break
       }
     }
