@@ -19,7 +19,7 @@ export type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
 export abstract class SandboxAction {
-  protected readonly logger: Logger
+  protected readonly logger = new Logger(SandboxAction.name)
 
   constructor(
     protected readonly runnerService: RunnerService,
