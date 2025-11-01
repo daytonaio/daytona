@@ -373,6 +373,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       return
     }
 
+    //  prevent potential race condition, or SYNC_AGAIN loop bug
+    //  this should never happen
+    if (String(sandbox.state) === String(sandbox.desiredState)) {
+      this.logger.warn(`Sandbox ${sandboxId} is already in the desired state ${sandbox.desiredState}, skipping sync`)
+      await this.redisLockProvider.unlock(lockKey)
+      return
+    }
+
     let syncState = DONT_SYNC_AGAIN
 
     try {
