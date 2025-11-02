@@ -10,9 +10,7 @@ import { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common'
-import { HttpAdapterHost } from '@nestjs/core'
 import { AllExceptionsFilter } from './filters/all-exceptions.filter'
-import { NotFoundExceptionFilter } from './common/middleware/frontend.middleware'
 import { MetricsInterceptor } from './interceptors/metrics.interceptor'
 import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface'
 import { TypedConfigService } from './config/typed-config.service'
@@ -28,7 +26,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { Partitioners } from 'kafkajs'
 import { isApiEnabled, isWorkerEnabled } from './common/utils/app-mode'
 import cluster from 'node:cluster'
-import { Logger as PinoLogger } from 'nestjs-pino'
+import { Logger as PinoLogger, LoggerErrorInterceptor } from 'nestjs-pino'
 import { RunnerAdapterFactory } from './sandbox/runner-adapter/runnerAdapter'
 
 // https options
@@ -55,10 +53,9 @@ async function bootstrap() {
   })
 
   const configService = app.get(TypedConfigService)
-  const httpAdapter = app.get(HttpAdapterHost)
   app.set('trust proxy', true)
-  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
-  app.useGlobalFilters(new NotFoundExceptionFilter())
+  app.useGlobalFilters(new AllExceptionsFilter())
+  app.useGlobalInterceptors(new LoggerErrorInterceptor())
   app.useGlobalInterceptors(new MetricsInterceptor(configService))
   app.useGlobalInterceptors(app.get(AuditInterceptor))
   app.useGlobalPipes(

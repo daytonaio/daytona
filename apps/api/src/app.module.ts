@@ -171,7 +171,7 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(VersionHeaderMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL })
-    consumer.apply(MaintenanceMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL })
+    consumer.apply(VersionHeaderMiddleware).forRoutes({ path: '{*path}', method: RequestMethod.ALL })
+    consumer.apply(MaintenanceMiddleware).forRoutes({ path: '{*path}', method: RequestMethod.ALL })
   }
 }
