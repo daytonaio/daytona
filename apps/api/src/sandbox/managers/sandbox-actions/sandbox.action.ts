@@ -67,6 +67,10 @@ export abstract class SandboxAction {
       sandbox.errorReason = errorReason
     }
 
+    if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {
+      sandbox.errorReason = 'Sandbox is in error state during update'
+    }
+
     if (daemonVersion !== undefined) {
       sandbox.daemonVersion = daemonVersion
     }
