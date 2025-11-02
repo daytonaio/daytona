@@ -18271,6 +18271,7 @@ __metadata:
     dotenv: "npm:^17.0.1"
     ejs: "npm:^3.1.10"
     envalid: "npm:^8.0.0"
+    es-toolkit: "npm:^1.41.0"
     eslint: "npm:^9.8.0"
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.31.0"
@@ -19479,6 +19480,18 @@ __metadata:
     is-date-object: "npm:^1.0.5"
     is-symbol: "npm:^1.0.4"
   checksum: 10c0/c7e87467abb0b438639baa8139f701a06537d2b9bc758f23e8622c3b42fd0fdb5bde0f535686119e446dd9d5e4c0f238af4e14960f4771877cf818d023f6730b
+  languageName: node
+  linkType: hard
+
+"es-toolkit@npm:^1.41.0":
+  version: 1.41.0
+  resolution: "es-toolkit@npm:1.41.0"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@4.3.0":
+      unplugged: true
+    prettier-plugin-sort-re-exports@0.0.1:
+      unplugged: true
+  checksum: 10c0/4edcc19984df0e521d222082d055f131233cada9277de3f427311ecd43dc99442dc66a39f86b1b10c298c5a72133231928eb91668c0bff4f11e12af8b6d758a3
   languageName: node
   linkType: hard
 

@@ -125,6 +125,7 @@
     "dotenv": "^17.0.1",
     "ejs": "^3.1.10",
     "envalid": "^8.0.0",
+    "es-toolkit": "^1.41.0",
     "expand-tilde": "^2.0.2",
     "express": "^5.1.0",
     "express-openid-connect": "^2.18.0",

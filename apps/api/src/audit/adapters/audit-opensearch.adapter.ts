@@ -13,7 +13,9 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { OpensearchClient } from 'nestjs-opensearch'
 import { PolicyEnvelope } from '@opensearch-project/opensearch/api/_types/ism._common.js'
 import { QueryContainer } from '@opensearch-project/opensearch/api/_types/_common.query_dsl.js'
-import { Bulk_RequestBody, Search_RequestBody } from '@opensearch-project/opensearch/api/index.js'
+import { Bulk_RequestBody, Search_RequestBody, Search_Response } from '@opensearch-project/opensearch/api/index.js'
+import { TotalHits } from '@opensearch-project/opensearch/api/_types/_core.search.js'
+import { isMatch } from 'es-toolkit/compat'
 
 // Safe limit for offset-based pagination to avoid hitting OpenSearch's 10000 limit
 const MAX_OFFSET_PAGINATION_LIMIT = 10000
@@ -30,7 +32,11 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
   }
 
   async onModuleInit(): Promise<void> {
-    await this.initialize()
+    await this.putIndexTemplate()
+    await this.setupISM()
+    await this.createDataStream()
+
+    this.logger.log('OpenSearch audit storage adapter initialized')
   }
 
   async write(auditLogs: AuditLog[]): Promise<void> {
@@ -102,43 +108,21 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     return this.processSearchResponse(response, page, limit, nextToken, query)
   }
 
-  private async initialize() {
-    this.logger.log('Initializing OpenSearch audit storage adapter')
-
-    // Step 1: Create index template for the data stream (if it doesn't exist)
-    const templateName = `${this.indexName}-template`
+  private async createDataStream() {
     try {
-      await this.client.indices.getIndexTemplate({ name: templateName })
-      this.logger.log(`Index template already exists: ${templateName}. Skipping creation.`)
+      await this.client.indices.createDataStream({ name: this.indexName })
+      this.logger.debug(`Created data stream: ${this.indexName}.`)
     } catch (error) {
-      if (error instanceof errors.ResponseError && error.statusCode === 404) {
-        await this.createIndexTemplate(templateName)
-        this.logger.log(`Created index template: ${templateName}.`)
+      if (error instanceof errors.ResponseError && error.body.error.type === 'resource_already_exists_exception') {
+        this.logger.debug(`Data stream already exists: ${this.indexName}. Skipping creation.`)
         return
       }
       throw error
     }
-
-    // Step 2: Create data stream (if it doesn't exist)
-    try {
-      await this.client.indices.getDataStream({ name: this.indexName })
-      this.logger.log(`Data stream already exists: ${this.indexName}. Skipping creation.`)
-    } catch (error) {
-      if (error instanceof errors.ResponseError && error.statusCode === 404) {
-        await this.client.indices.createDataStream({ name: this.indexName })
-        this.logger.log(`Created data stream: ${this.indexName}.`)
-        return
-      }
-      throw error
-    }
-
-    // Step 3: Set up cleanup (ISM for OpenSearch)
-    await this.setupCleanup()
-
-    this.logger.log('OpenSearch audit storage adapter initialized')
   }
 
-  private async createIndexTemplate(templateName: string) {
+  private async putIndexTemplate() {
+    const templateName = `${this.indexName}-template`
     await this.client.indices.putIndexTemplate({
       name: templateName,
       body: {
@@ -179,6 +163,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
               },
             ],
             properties: {
+              id: { type: 'keyword' },
               actorEmail: { type: 'keyword' },
               action: { type: 'keyword' },
               targetType: { type: 'keyword' },
@@ -210,20 +195,20 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     return auditLog
   }
 
-  private async setupCleanup(): Promise<void> {
+  private async setupISM(): Promise<void> {
     try {
       const retentionDays = this.configService.get('audit.retentionDays') || 0
       if (!retentionDays || retentionDays < 1) {
-        this.logger.log('Audit log retention not configured, skipping ILM setup')
+        this.logger.debug('Audit log retention not configured, skipping ISM setup')
         return
       }
 
       await this.createISMPolicy(retentionDays)
       await this.applyISMPolicyToIndexTemplate()
 
-      this.logger.log(`OpenSearch ILM policy configured for ${retentionDays} days retention`)
+      this.logger.debug(`OpenSearch ISM policy configured for ${retentionDays} days retention`)
     } catch (error) {
-      this.logger.error(`Failed to setup ILM policy: ${error.message}`)
+      this.logger.warn(`Failed to setup ISM policy: ${error.message}`)
     }
   }
 
@@ -277,35 +262,35 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
 
     try {
       // Check does policy already exist
-      const existingPolicy = await this.client.ism.existsPolicy({
+      const existingPolicy = await this.client.ism.getPolicy({
         policy_id: policyName,
       })
 
-      // If policy exists, update it
-      if (existingPolicy.body == true) {
-        this.logger.log(`ISM policy already exists: ${policyName}. Updating it.`)
-        const existingPolicy = await this.client.ism.getPolicy({
-          policy_id: policyName,
-        })
+      // Check does policy need to be updated
+      if (isMatch(existingPolicy.body, policy)) {
+        this.logger.debug(`ISM policy ${policyName} is up to date`)
+      } else {
+        this.logger.debug(`ISM policy ${policyName} is out of date. Updating it.`)
         await this.client.ism.putPolicy({
           policy_id: policyName,
           if_primary_term: existingPolicy.body._primary_term,
           if_seq_no: existingPolicy.body._seq_no,
           body: policy,
         })
-        return
-        // If policy does not exist, create it
-      } else {
-        this.logger.log(`ISM policy does not exist: ${policyName}. Creating it.`)
+        this.logger.debug(`ISM policy ${policyName} updated`)
+      }
+    } catch (error) {
+      if (error instanceof errors.ResponseError && error.statusCode === 404) {
+        this.logger.debug(`ISM policy ${policyName} not found, creating it.`)
         await this.client.ism.putPolicy({
           policy_id: policyName,
           body: policy,
         })
+        this.logger.debug(`ISM policy ${policyName} created`)
         return
       }
-    } catch (error) {
-      // Non-critical error, log warning and continue
-      this.logger.warn(`Failed to create ISM policy: ${error.message}`)
+      this.logger.error(`Failed to create ISM policy`, error)
+      throw error
     }
   }
 
@@ -320,7 +305,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
       })
 
       if (!existingTemplate.body?.index_templates?.[0]) {
-        this.logger.warn(`Index template ${templateName} not found, cannot apply ILM policy`)
+        this.logger.debug(`Index template ${templateName} not found, cannot apply ILM policy`)
         return
       }
 
@@ -347,7 +332,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
         body: template,
       })
 
-      this.logger.log(`Applied ILM policy ${policyName} to index template ${templateName}`)
+      this.logger.debug(`Applied ILM policy ${policyName} to index template ${templateName}`)
     } catch (error) {
       this.logger.error(`Failed to apply ILM policy to index template: ${error.message}`)
     }
@@ -399,7 +384,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     const size = limit
     const searchBody: Search_RequestBody = {
       query,
-      sort: [{ createdAt: { order: 'desc' } }, { _id: { order: 'desc' } }],
+      sort: [{ createdAt: { order: 'desc' } }, { id: { order: 'desc' } }],
       size: size + 1, // Request one extra to check if there are more results
     }
 
@@ -410,7 +395,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
         searchBody.search_after = searchAfter
         this.logger.debug(`Using cursor-based pagination with search_after: ${JSON.stringify(searchAfter)}`)
       } catch {
-        throw new Error(`Invalid nextToken provided: ${nextToken}`)
+        throw new BadRequestException(`Invalid nextToken provided: ${nextToken}`)
       }
     } else {
       // Offset-based pagination - only use when within safe limits
@@ -432,11 +417,12 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     return await this.client.search({
       index: this.indexName,
       body: searchBody,
+      track_total_hits: MAX_OFFSET_PAGINATION_LIMIT,
     })
   }
 
   private async processSearchResponse(
-    response: any,
+    response: Search_Response,
     page?: number,
     limit?: number,
     nextToken?: string,
@@ -444,6 +430,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
   ): Promise<PaginatedList<AuditLog>> {
     const size = limit
     const hits = response.body.hits?.hits || []
+    const totalHits = response.body.hits?.total as TotalHits
     const hasMore = hits.length > size
     const items = hasMore ? hits.slice(0, size) : hits
 
@@ -456,17 +443,21 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     // Only generate nextToken if we're already using cursor pagination OR if the next page would exceed the limit
     if (hasMore && items.length > 0 && (nextToken || wouldExceedLimit)) {
       const lastItem = items[items.length - 1]
-      const searchAfter = [lastItem._source.createdAt, lastItem._id]
+      const searchAfter = [lastItem._source.createdAt, lastItem._source.id]
       nextTokenResult = Buffer.from(JSON.stringify(searchAfter)).toString('base64')
     }
 
-    // Calculate totals - always get accurate count as it's efficient
-    const totalResponse = await this.client.count({
-      index: this.indexName,
-      body: { query },
-    })
-    const total = totalResponse.body.count
-    const totalPages = Math.ceil(total / limit)
+    let total = totalHits?.value
+    let totalPages = Math.ceil(total / limit)
+    if (totalHits?.relation === 'gte') {
+      // TODO: This should be cached to avoid hitting OpenSearch for every request
+      const totalResponse = await this.client.count({
+        index: this.indexName,
+        body: { query },
+      })
+      total = totalResponse.body.count
+      totalPages = Math.ceil(total / limit)
+    }
 
     return {
       items: items.map((hit) => this.mapSourceToAuditLog(hit._source)),
