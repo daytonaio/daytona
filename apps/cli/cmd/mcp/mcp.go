@@ -9,12 +9,12 @@ import (
 
 var MCPCmd = &cobra.Command{
 	Use:   "mcp",
-	Short: "Manage Daytona MCP Server",
-	Long:  "Commands for managing Daytona MCP Server",
+	Short: "Manage Daytona MCP Servers",
+	Long:  "Commands for managing Daytona MCP Servers",
 }
 
 func init() {
 	MCPCmd.AddCommand(InitCmd)
-	MCPCmd.AddCommand(StartCmd)
+	MCPCmd.AddCommand(ServeCmd)
 	MCPCmd.AddCommand(ConfigCmd)
 }
