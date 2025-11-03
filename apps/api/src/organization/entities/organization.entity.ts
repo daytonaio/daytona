@@ -29,6 +29,9 @@ export class Organization {
   })
   telemetryEnabled: boolean
 
+  @Column()
+  defaultRegion: string
+
   @Column({
     type: 'int',
     default: 10,
