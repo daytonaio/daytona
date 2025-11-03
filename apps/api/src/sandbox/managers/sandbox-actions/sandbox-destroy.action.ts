@@ -57,7 +57,7 @@ export class SandboxDestroyAction extends SandboxAction {
         }
 
         await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
-        return SYNC_AGAIN
+        return DONT_SYNC_AGAIN
       }
       default: {
         // destroy sandbox
