@@ -4,7 +4,8 @@
 import functools
 import inspect
 import json
-from typing import Callable, NoReturn, ParamSpec, TypeVar, Union
+import sys
+from typing import Callable, NoReturn, TypeVar, Union
 
 from daytona_api_client.exceptions import NotFoundException, OpenApiException
 from daytona_api_client_async.exceptions import NotFoundException as NotFoundExceptionAsync
@@ -15,6 +16,11 @@ from daytona_toolbox_api_client_async.exceptions import NotFoundException as Not
 from daytona_toolbox_api_client_async.exceptions import OpenApiException as OpenApiExceptionToolboxAsync
 
 from ..common.errors import DaytonaError, DaytonaNotFoundError
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 P = ParamSpec("P")
 T = TypeVar("T")
