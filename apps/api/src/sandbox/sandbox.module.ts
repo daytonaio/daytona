@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { RequestLoggerMiddleware } from './middleware/request-logger.middleware'
 import { SandboxController } from './controllers/sandbox.controller'
 import { SandboxService } from './services/sandbox.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
@@ -111,8 +110,4 @@ import { SandboxRepository } from './repositories/sandbox.repository'
     SandboxRepository,
   ],
 })
-export class SandboxModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestLoggerMiddleware).forRoutes({ path: 'sandbox', method: RequestMethod.POST })
-  }
-}
+export class SandboxModule {}
