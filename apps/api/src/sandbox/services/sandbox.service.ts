@@ -362,7 +362,7 @@ export class SandboxService {
         const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
           organizationId: organization.id,
           snapshot: snapshotIdOrName,
-          target: createSandboxDto.target,
+          target: region,
           class: createSandboxDto.class,
           cpu: cpu,
           mem: mem,
