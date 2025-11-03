@@ -401,7 +401,7 @@ export class RunnerService {
   async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 2): Promise<string[]> {
     const runners = await this.sandboxRepository
       .createQueryBuilder('sandbox')
-      .select('sandbox.runnerId')
+      .select('sandbox.runnerId', 'runnerId')
       .where('sandbox.state = :state', { state: SandboxState.BUILDING_SNAPSHOT })
       .andWhere('sandbox.buildInfoSnapshotRef IS NOT NULL')
       .groupBy('sandbox.runnerId')
