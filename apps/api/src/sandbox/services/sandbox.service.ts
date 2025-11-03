@@ -232,11 +232,10 @@ export class SandboxService {
   }
 
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
-    const sandbox = new Sandbox()
+    const sandbox = new Sandbox(warmPoolItem.target)
 
     sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
 
-    sandbox.region = warmPoolItem.target
     sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
     //  TODO: default user should be configurable
@@ -386,12 +385,11 @@ export class SandboxService {
         snapshotRef: snapshot.internalName,
       })
 
-      const sandbox = new Sandbox(createSandboxDto.name)
+      const sandbox = new Sandbox(region, createSandboxDto.name)
 
       sandbox.organizationId = organization.id
 
       //  TODO: make configurable
-      sandbox.region = region
       sandbox.class = sandboxClass
       sandbox.snapshot = snapshot.name
       //  TODO: default user should be configurable
@@ -551,11 +549,10 @@ export class SandboxService {
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
-      const sandbox = new Sandbox(createSandboxDto.name)
+      const sandbox = new Sandbox(region, createSandboxDto.name)
 
       sandbox.organizationId = organization.id
 
-      sandbox.region = region
       sandbox.class = sandboxClass
       sandbox.osUser = createSandboxDto.user || 'daytona'
       sandbox.env = createSandboxDto.env || {}

@@ -155,4 +155,8 @@ export class Organization {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(defaultRegion: string) {
+    this.defaultRegion = defaultRegion
+  }
 }

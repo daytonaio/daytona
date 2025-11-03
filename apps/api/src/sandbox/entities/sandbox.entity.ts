@@ -194,10 +194,11 @@ export class Sandbox {
   @Column({ nullable: true })
   daemonVersion?: string
 
-  constructor(name?: string) {
+  constructor(region: string, name?: string) {
     this.id = uuidv4()
     // Set name - use provided name or fallback to ID
     this.name = name || this.id
+    this.region = region
   }
 
   public setBackupState(
