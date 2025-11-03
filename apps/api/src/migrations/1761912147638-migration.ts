@@ -13,9 +13,17 @@ export class Migration1761912147638 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "organization" ADD "defaultRegion" character varying NOT NULL DEFAULT '${configuration.defaultRegion}'`,
     )
+
+    await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "region" SET DEFAULT '${configuration.defaultRegion}'`)
+    await queryRunner.query(
+      `ALTER TABLE "warm_pool" ALTER COLUMN "target" SET DEFAULT '${configuration.defaultRegion}'`,
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "organization" DROP COLUMN "defaultRegion"`)
+
+    await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "region" SET DEFAULT 'us'`)
+    await queryRunner.query(`ALTER TABLE "warm_pool" ALTER COLUMN "target" SET DEFAULT 'us'`)
   }
 }

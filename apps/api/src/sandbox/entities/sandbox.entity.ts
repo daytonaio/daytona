@@ -36,9 +36,7 @@ export class Sandbox {
   @Column()
   name: string
 
-  @Column({
-    default: 'us',
-  })
+  @Column()
   region: string
 
   @Column({
