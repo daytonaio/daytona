@@ -3,78 +3,56 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common'
-import { HttpAdapterHost } from '@nestjs/core'
+import { join } from 'node:path'
+import { STATUS_CODES } from 'node:http'
+import { Request, Response } from 'express'
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  Logger,
+  HttpStatus,
+  NotFoundException,
+} from '@nestjs/common'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
-
-  private handleCustomError(errorMessage: string): {
-    statusCode: number
-    errorType: string
-  } {
-    switch (errorMessage) {
-      case 'Sandbox not found':
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          errorType: 'Not Found',
-        }
-      case 'Unauthorized access':
-        return {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          errorType: 'Unauthorized',
-        }
-      case 'Forbidden operation':
-        return {
-          statusCode: HttpStatus.FORBIDDEN,
-          errorType: 'Forbidden',
-        }
-      default:
-        return {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          errorType: 'Internal Server Error',
-        }
-    }
-  }
+  private readonly logger = new Logger(AllExceptionsFilter.name)
 
   catch(exception: unknown, host: ArgumentsHost): void {
-    const { httpAdapter } = this.httpAdapterHost
     const ctx = host.switchToHttp()
+    const response = ctx.getResponse<Response>()
+    const request = ctx.getRequest<Request>()
 
     let statusCode: number
-    let message: string
     let error: string
+    let message: string
+
+    // If the exception is a NotFoundException and the request path is not an API request, serve the dashboard index.html file
+    if (exception instanceof NotFoundException && !request.path.startsWith('/api/')) {
+      const response = ctx.getResponse()
+      response.sendFile(join(__dirname, '..', 'dashboard', 'index.html'))
+      return
+    }
 
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus()
-      const response = exception.getResponse()
-      if (typeof response === 'object' && response !== null) {
-        message = (response as any).message || exception.message
-        error = (response as any).error || 'Http Exception'
-      } else {
-        message = exception.message
-        error = 'Http Exception'
-      }
-    } else if (exception instanceof Error) {
-      const customError = this.handleCustomError(exception.message)
-      statusCode = customError.statusCode
-      error = customError.errorType
+      error = STATUS_CODES[statusCode]
       message = exception.message
     } else {
+      this.logger.error(exception)
+      error = STATUS_CODES[HttpStatus.INTERNAL_SERVER_ERROR]
+      message = 'An unexpected error occurred.'
       statusCode = HttpStatus.INTERNAL_SERVER_ERROR
-      message = 'Internal server error'
-      error = 'Unknown Error'
     }
 
-    const responseBody = {
-      statusCode,
+    response.status(statusCode).json({
+      path: request.url,
       timestamp: new Date().toISOString(),
-      path: httpAdapter.getRequestUrl(ctx.getRequest()),
+      statusCode,
       error,
       message,
-    }
-
-    httpAdapter.reply(ctx.getResponse(), responseBody, statusCode)
+    })
   }
 }
