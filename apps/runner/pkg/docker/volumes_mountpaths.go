@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,7 +16,6 @@ import (
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO) ([]string, error) {
@@ -39,7 +39,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		defer volumeMutex.Unlock()
 
 		if d.isDirectoryMounted(runnerVolumeMountPath) {
-			log.Infof("volume %s is already mounted to %s", volumeIdPrefixed, runnerVolumeMountPath)
+			slog.InfoContext(ctx, "volume is already mounted", "volumeId", volumeIdPrefixed, "runnerVolumeMountPath", runnerVolumeMountPath)
 			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 			continue
 		}
@@ -49,7 +49,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			return nil, fmt.Errorf("failed to create mount directory %s: %s", runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounting S3 volume %s to %s", volumeIdPrefixed, runnerVolumeMountPath)
+		slog.InfoContext(ctx, "mounting S3 volume", "volumeId", volumeIdPrefixed, "runnerVolumeMountPath", runnerVolumeMountPath)
 
 		cmd := d.getMountCmd(ctx, volumeIdPrefixed, runnerVolumeMountPath)
 		err = cmd.Run()
@@ -57,7 +57,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			return nil, fmt.Errorf("failed to mount S3 volume %s to %s: %s", volumeIdPrefixed, runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounted S3 volume %s to %s", volumeIdPrefixed, runnerVolumeMountPath)
+		slog.InfoContext(ctx, "mounted S3 volume", "volumeId", volumeIdPrefixed, "runnerVolumeMountPath", runnerVolumeMountPath)
 
 		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 	}

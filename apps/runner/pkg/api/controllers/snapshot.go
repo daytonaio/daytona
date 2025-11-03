@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -17,7 +18,6 @@ import (
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
@@ -212,6 +212,7 @@ type SnapshotExistsResponse struct {
 //
 //	@id				GetBuildLogs
 func GetBuildLogs(ctx *gin.Context) {
+	reqCtx := ctx.Request.Context()
 	snapshotRef := ctx.Query("snapshotRef")
 	if snapshotRef == "" {
 		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshotRef parameter is required")))
@@ -269,14 +270,14 @@ func GetBuildLogs(ctx *gin.Context) {
 		for {
 			line, err := reader.ReadBytes('\n')
 			if err != nil && err != io.EOF {
-				log.Errorf("Error reading log file: %v", err)
+				slog.ErrorContext(reqCtx, "Error reading log file", "error", err)
 				break
 			}
 
 			if len(line) > 0 {
 				_, writeErr := ctx.Writer.Write(line)
 				if writeErr != nil {
-					log.Errorf("Error writing to response: %v", writeErr)
+					slog.ErrorContext(reqCtx, "Error writing to response", "error", writeErr)
 					break
 				}
 				flusher.Flush()
@@ -287,7 +288,7 @@ func GetBuildLogs(ctx *gin.Context) {
 	for {
 		exists, err := runner.Docker.ImageExists(ctx.Request.Context(), checkSnapshotRef, false)
 		if err != nil {
-			log.Errorf("Error checking build status: %v", err)
+			slog.ErrorContext(reqCtx, "Error checking build status", "error", err)
 			break
 		}
 

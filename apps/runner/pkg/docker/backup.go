@@ -6,13 +6,12 @@ package docker
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models/enums"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type backupContext struct {
@@ -29,7 +28,7 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 		backup_context.cancel()
 	}
 
-	log.Infof("Creating backup for container %s...", containerId)
+	slog.InfoContext(ctx, "Creating backup for container", "containerId", containerId)
 
 	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
 
@@ -50,10 +49,10 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
 				d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
-				log.Infof("Backup for container %s canceled", containerId)
+				slog.InfoContext(ctx, "Backup for container canceled", "containerId", containerId)
 				return
 			}
-			log.Errorf("Error committing container %s: %v", containerId, err)
+			slog.ErrorContext(ctx, "Error committing container", "containerId", containerId, "error", err)
 			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 			return
 		}
@@ -62,21 +61,21 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
 				d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
-				log.Infof("Backup for container %s canceled", containerId)
+				slog.InfoContext(ctx, "Backup for container canceled", "containerId", containerId)
 				return
 			}
-			log.Errorf("Error pushing image %s: %v", backupDto.Snapshot, err)
+			slog.ErrorContext(ctx, "Error pushing image", "snapshot", backupDto.Snapshot, "error", err)
 			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 			return
 		}
 
 		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
 
-		log.Infof("Backup (%s) for container %s created successfully", backupDto.Snapshot, containerId)
+		slog.InfoContext(ctx, "Backup created successfully", "snapshot", backupDto.Snapshot, "containerId", containerId)
 
 		err = d.RemoveImage(ctx, backupDto.Snapshot, true)
 		if err != nil {
-			log.Errorf("Error removing image %s: %v", backupDto.Snapshot, err)
+			slog.ErrorContext(ctx, "Error removing image", "snapshot", backupDto.Snapshot, "error", err)
 			// Don't set backup to failed because the image is already pushed
 		}
 	}()

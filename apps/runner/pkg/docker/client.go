@@ -6,7 +6,7 @@ package docker
 import (
 	"context"
 	"fmt"
-	"io"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -14,13 +14,11 @@ import (
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/client"
-	log "github.com/sirupsen/logrus"
 )
 
 type DockerClientConfig struct {
 	ApiClient              client.APIClient
 	StatesCache            *cache.StatesCache
-	LogWriter              io.Writer
 	AWSRegion              string
 	AWSEndpointUrl         string
 	AWSAccessKeyId         string
@@ -35,7 +33,6 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 	return &DockerClient{
 		apiClient:              config.ApiClient,
 		statesCache:            config.StatesCache,
-		logWriter:              config.LogWriter,
 		awsRegion:              config.AWSRegion,
 		awsEndpointUrl:         config.AWSEndpointUrl,
 		awsAccessKeyId:         config.AWSAccessKeyId,
@@ -55,7 +52,6 @@ func (d *DockerClient) ApiClient() client.APIClient {
 type DockerClient struct {
 	apiClient              client.APIClient
 	statesCache            *cache.StatesCache
-	logWriter              io.Writer
 	awsRegion              string
 	awsEndpointUrl         string
 	awsAccessKeyId         string
@@ -71,13 +67,13 @@ type DockerClient struct {
 // retryWithExponentialBackoff executes a function with exponential backoff retry logic
 func (d *DockerClient) retryWithExponentialBackoff(ctx context.Context, operationName, containerId string, maxRetries int, baseDelay, maxDelay time.Duration, operationFunc func() error) error {
 	if maxRetries <= 1 {
-		log.Debugf("Invalid max retries value: %d. Using default value: %d", maxRetries, constants.DEFAULT_MAX_RETRIES)
+		slog.DebugContext(ctx, "Invalid max retries value. Using default value", "maxRetries", maxRetries, "defaultMaxRetries", constants.DEFAULT_MAX_RETRIES)
 		maxRetries = constants.DEFAULT_MAX_RETRIES
 	}
 
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		logAttempt := attempt + 1
-		log.Debugf("%s sandbox %s (attempt %d/%d)...", operationName, containerId, logAttempt, maxRetries)
+		slog.DebugContext(ctx, "Attempting operation", "operationName", operationName, "containerId", containerId, "attempt", logAttempt, "maxRetries", maxRetries)
 
 		err := operationFunc()
 		if err == nil {
@@ -91,7 +87,7 @@ func (d *DockerClient) retryWithExponentialBackoff(ctx context.Context, operatio
 				delay = maxDelay
 			}
 
-			log.Warnf("Failed to %s sandbox %s (attempt %d/%d): %v. Retrying in %v...", operationName, containerId, logAttempt, maxRetries, err, delay)
+			slog.WarnContext(ctx, "Operation failed, retrying", "operationName", operationName, "containerId", containerId, "attempt", logAttempt, "maxRetries", maxRetries, "error", err, "delay", delay)
 
 			select {
 			case <-time.After(delay):

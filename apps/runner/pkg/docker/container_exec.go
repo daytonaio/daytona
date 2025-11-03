@@ -8,6 +8,7 @@ import (
 	"context"
 	"io"
 
+	"github.com/daytonaio/runner/internal/util"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
 )
@@ -49,14 +50,8 @@ func (d *DockerClient) inspectExecResp(ctx context.Context, execID string, execS
 	errBuf := bytes.Buffer{}
 
 	go func() {
-		// StdCopy demultiplexes the stream into two buffers
-		outMw := io.Writer(&outBuf)
-		errMw := io.Writer(&errBuf)
-
-		if d.logWriter != nil {
-			outMw = io.MultiWriter(&outBuf, d.logWriter)
-			errMw = io.MultiWriter(&errBuf, d.logWriter)
-		}
+		outMw := io.MultiWriter(&outBuf, &util.DebugLogWriter{})
+		errMw := io.MultiWriter(&errBuf, &util.DebugLogWriter{})
 
 		_, err = stdcopy.StdCopy(outMw, errMw, resp.Reader)
 		outputDone <- err

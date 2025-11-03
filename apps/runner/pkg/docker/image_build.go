@@ -9,10 +9,12 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
+	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/storage"
 
@@ -25,9 +27,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		return fmt.Errorf("invalid image format: must contain exactly one colon (e.g., 'myimage:1.0')")
 	}
 
-	if d.logWriter != nil {
-		d.logWriter.Write([]byte("Building image...\n"))
-	}
+	slog.InfoContext(ctx, "Building image...")
 
 	// Check if image already exists
 	exists, err := d.ImageExists(ctx, buildImageDto.Snapshot, true)
@@ -35,9 +35,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		return fmt.Errorf("failed to check if image exists: %w", err)
 	}
 	if exists {
-		if d.logWriter != nil {
-			d.logWriter.Write([]byte("Image already built\n"))
-		}
+		slog.InfoContext(ctx, "Image already built")
 		return nil
 	}
 
@@ -74,9 +72,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 				return fmt.Errorf("failed to get tar from storage with hash %s: %w", hash, err)
 			}
 
-			if d.logWriter != nil {
-				d.logWriter.Write(fmt.Appendf(nil, "Processing context file with hash %s (%d bytes)\n", hash, len(tarData)))
-			}
+			slog.InfoContext(ctx, "Processing context file with hash", "hash", hash, "bytes", len(tarData))
 
 			if len(tarData) == 0 {
 				return fmt.Errorf("empty tar file received for hash %s", hash)
@@ -91,9 +87,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 					break // End of tar archive
 				}
 				if err != nil {
-					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Error reading tar with hash %s: %v\n", hash, err)))
-					}
+					slog.WarnContext(ctx, "Error reading tar with hash", "hash", hash, "error", err)
 					// Skip this tar file and continue with the next one
 					break
 				}
@@ -106,9 +100,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 				fileContent := new(bytes.Buffer)
 				_, err = io.Copy(fileContent, tarReader)
 				if err != nil {
-					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Failed to read file %s from tar: %v\n", header.Name, err)))
-					}
+					slog.WarnContext(ctx, "Failed to read file from tar", "file", header.Name, "error", err)
 					continue // Skip this file and continue with the next one
 				}
 
@@ -119,22 +111,16 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 				}
 
 				if err := tarWriter.WriteHeader(buildHeader); err != nil {
-					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Failed to write tar header for %s: %v\n", header.Name, err)))
-					}
+					slog.WarnContext(ctx, "Failed to write tar header", "file", header.Name, "error", err)
 					continue
 				}
 
 				if _, err := tarWriter.Write(fileContent.Bytes()); err != nil {
-					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Failed to write file %s to tar: %v\n", header.Name, err)))
-					}
+					slog.WarnContext(ctx, "Failed to write file to tar", "file", header.Name, "error", err)
 					continue
 				}
 
-				if d.logWriter != nil {
-					d.logWriter.Write([]byte(fmt.Sprintf("Added %s to build context\n", header.Name)))
-				}
+				slog.InfoContext(ctx, "Added file to build context", "file", header.Name)
 			}
 		}
 	}
@@ -164,20 +150,18 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		fmt.Println("Failed to open log file:", err)
+		slog.ErrorContext(ctx, "Failed to open log file", "error", err)
 	}
 	defer logFile.Close()
 
-	multiWriter := io.MultiWriter(d.logWriter, logFile)
+	multiWriter := io.MultiWriter(&util.DebugLogWriter{}, logFile)
 
 	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, multiWriter, 0, true, nil)
 	if err != nil {
 		return err
 	}
 
-	if d.logWriter != nil {
-		d.logWriter.Write([]byte("Image built successfully\n"))
-	}
+	slog.InfoContext(ctx, "Image built successfully")
 
 	return nil
 }
