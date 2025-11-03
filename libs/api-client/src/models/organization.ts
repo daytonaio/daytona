@@ -126,4 +126,10 @@ export interface Organization {
    * @memberof Organization
    */
   sandboxLimitedNetworkEgress: boolean
+  /**
+   * Default region
+   * @type {string}
+   * @memberof Organization
+   */
+  defaultRegion: string
 }

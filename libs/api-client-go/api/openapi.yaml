@@ -7759,6 +7759,7 @@ components:
         totalCpuQuota: 6.027456183070403
         suspensionReason: suspensionReason
         suspendedAt: 2000-01-23T04:56:07.000+00:00
+        defaultRegion: defaultRegion
         personal: true
         suspensionCleanupGracePeriodHours: 0.8008281904610115
         suspended: true
@@ -7833,9 +7834,13 @@ components:
         sandboxLimitedNetworkEgress:
           description: Sandbox default network block all
           type: boolean
+        defaultRegion:
+          description: Default region
+          type: string
       required:
         - createdAt
         - createdBy
+        - defaultRegion
         - id
         - maxCpuPerSandbox
         - maxDiskPerSandbox

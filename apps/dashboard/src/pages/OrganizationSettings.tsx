@@ -93,6 +93,11 @@ const OrganizationSettings: React.FC = () => {
           <Input id="organization-name" value={selectedOrganization.name} readOnly />
         </div>
 
+        <div className="space-y-3">
+          <Label htmlFor="organization-default-region">Default Region</Label>
+          <Input id="organization-default-region" value={selectedOrganization.defaultRegion} readOnly />
+        </div>
+
         {!selectedOrganization.personal && authenticatedUserOrganizationMember !== null && (
           <div className="space-y-3">
             <h2 className="text-lg font-semibold">Danger Zone</h2>

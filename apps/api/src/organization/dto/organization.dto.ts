@@ -98,6 +98,11 @@ export class OrganizationDto {
   })
   sandboxLimitedNetworkEgress: boolean
 
+  @ApiProperty({
+    description: 'Default region',
+  })
+  defaultRegion: string
+
   static fromOrganization(organization: Organization): OrganizationDto {
     const dto: OrganizationDto = {
       id: organization.id,
@@ -118,6 +123,7 @@ export class OrganizationDto {
       maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
+      defaultRegion: organization.defaultRegion,
     }
 
     return dto
