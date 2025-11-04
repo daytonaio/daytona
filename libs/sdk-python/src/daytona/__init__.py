@@ -37,7 +37,7 @@ from .common.daytona import (
 from .common.errors import DaytonaError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
-from .common.lsp_server import LspLanguageId
+from .common.lsp_server import LspCompletionPosition, LspLanguageId
 from .common.process import CodeRunParams, SessionExecuteRequest
 from .common.pty import PtySize
 from .common.sandbox import Resources
@@ -84,4 +84,5 @@ __all__ = [
     "CreateSandboxFromSnapshotParams",
     "CreateSnapshotParams",
     "PtySize",
+    "LspCompletionPosition",
 ]

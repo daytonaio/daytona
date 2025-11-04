@@ -12,14 +12,14 @@ from daytona_toolbox_api_client import (
     LspApi,
     LspCompletionParams,
     LspDocumentRequest,
-    LspPosition,
     LspServerRequest,
     LspSymbol,
 )
+from daytona_toolbox_api_client import Position as ApiPosition
 from deprecated import deprecated
 
 from .._utils.errors import intercept_errors
-from ..common.lsp_server import LspLanguageId, Position
+from ..common.lsp_server import LspCompletionPosition, LspLanguageId
 
 
 class LspServer:
@@ -211,13 +211,13 @@ class LspServer:
         )
 
     @intercept_errors(message_prefix="Failed to get completions: ")
-    def completions(self, path: str, position: Position) -> CompletionList:
+    def completions(self, path: str, position: LspCompletionPosition) -> CompletionList:
         """Gets completion suggestions at a position in a file.
 
         Args:
             path (str): Path to the file. Relative paths are resolved based on the project path
             set in the LSP server constructor.
-            position (Position): Cursor position to get completions for.
+            position (LspCompletionPosition): Cursor position to get completions for.
 
         Returns:
             CompletionList: List of completion suggestions. The list includes:
@@ -234,7 +234,7 @@ class LspServer:
         Example:
             ```python
             # Get completions at a specific position
-            pos = Position(line=10, character=15)
+            pos = LspCompletionPosition(line=10, character=15)
             completions = lsp.completions("workspace/project/src/index.ts", pos)
             for item in completions.items:
                 print(f"{item.label} ({item.kind}): {item.detail}")
@@ -245,6 +245,6 @@ class LspServer:
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
-                position=LspPosition(line=position.line, character=position.character),
+                position=ApiPosition(line=position.line, character=position.character),
             ),
         )
