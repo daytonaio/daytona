@@ -581,7 +581,7 @@ class Process:
                 print(f"Created: {session.created_at}")
             ```
         """
-        return (self._api_client.list_pty_sessions()).sessions
+        return self._api_client.list_pty_sessions()
 
     @intercept_errors(message_prefix="Failed to get PTY session info: ")
     def get_pty_session_info(self, session_id: str) -> PtySessionInfo:

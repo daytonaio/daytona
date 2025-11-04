@@ -598,7 +598,7 @@ class AsyncProcess:
                 print(f"Created: {session.created_at}")
             ```
         """
-        return (await self._api_client.list_pty_sessions()).sessions
+        return await self._api_client.list_pty_sessions()
 
     @intercept_errors(message_prefix="Failed to get PTY session info: ")
     async def get_pty_session_info(self, session_id: str) -> PtySessionInfo:
