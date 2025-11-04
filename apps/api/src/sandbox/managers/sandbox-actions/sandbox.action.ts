@@ -12,6 +12,8 @@ import { Repository } from 'typeorm'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { ToolboxService } from '../../services/toolbox.service'
 import { BackupState } from '../../enums/backup-state.enum'
+import { getStateChangeLockKey } from '../../utils/lock-key.util'
+import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 
 export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -27,17 +29,45 @@ export abstract class SandboxAction {
     @InjectRepository(Sandbox)
     protected readonly sandboxRepository: Repository<Sandbox>,
     protected readonly toolboxService: ToolboxService,
+    protected readonly redisLockProvider: RedisLockProvider,
   ) {}
 
-  abstract run(sandbox: Sandbox): Promise<SyncState>
+  abstract run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState>
 
   protected async updateSandboxState(
     sandboxId: string,
     state: SandboxState,
+    expectedLockCode: LockCode,
     runnerId?: string | null | undefined,
     errorReason?: string,
     daemonVersion?: string,
   ) {
+    //  check if the lock code is still valid
+    const lockKey = getStateChangeLockKey(sandboxId)
+    const currentLockCode = await this.redisLockProvider.getCode(lockKey)
+
+    if (currentLockCode == null) {
+      this.logger.warn(
+        'no lock code found - state update action expired - skipping',
+        'sandboxId',
+        sandboxId,
+        'state',
+        state,
+      )
+      return
+    }
+
+    if (expectedLockCode.getCode() !== currentLockCode.getCode()) {
+      this.logger.warn(
+        'lock code mismatch - state update action expired - skipping',
+        'sandboxId',
+        sandboxId,
+        'state',
+        state,
+      )
+      return
+    }
+
     const sandbox = await this.sandboxRepository.findOneBy({
       id: sandboxId,
       pending: true,

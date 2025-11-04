@@ -13,6 +13,7 @@ import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
+import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 
 @Injectable()
 export class SandboxDestroyAction extends SandboxAction {
@@ -22,13 +23,14 @@ export class SandboxDestroyAction extends SandboxAction {
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
     protected toolboxService: ToolboxService,
+    protected redisLockProvider: RedisLockProvider,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redisLockProvider)
   }
 
-  async run(sandbox: Sandbox): Promise<SyncState> {
+  async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     if (sandbox.state === SandboxState.ARCHIVED) {
-      await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
+      await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED, lockCode)
       return DONT_SYNC_AGAIN
     }
 
@@ -56,7 +58,7 @@ export class SandboxDestroyAction extends SandboxAction {
           }
         }
 
-        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
+        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED, lockCode)
         return DONT_SYNC_AGAIN
       }
       default: {
@@ -64,7 +66,7 @@ export class SandboxDestroyAction extends SandboxAction {
         try {
           const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
           if (sandboxInfo?.state === SandboxState.DESTROYED) {
-            await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
+            await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING, lockCode)
             return SYNC_AGAIN
           }
           await runnerAdapter.destroySandbox(sandbox.id)
@@ -74,7 +76,7 @@ export class SandboxDestroyAction extends SandboxAction {
             throw e
           }
         }
-        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
+        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING, lockCode)
         return SYNC_AGAIN
       }
     }
