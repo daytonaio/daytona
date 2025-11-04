@@ -189,7 +189,7 @@ export class LspServer {
    * });
    */
   public async sandboxSymbols(query: string): Promise<LspSymbol[]> {
-    const response = await this.apiClient.workspaceSymbols(this.languageId, this.pathToProject, query)
+    const response = await this.apiClient.workspaceSymbols(query, this.languageId, this.pathToProject)
     return response.data
   }
 

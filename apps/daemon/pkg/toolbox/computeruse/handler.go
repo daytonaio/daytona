@@ -93,7 +93,7 @@ func (h *Handler) StopComputerUse(ctx *gin.Context) {
 //
 //	@id				GetComputerUseStatus
 func (h *Handler) GetComputerUseStatus(ctx *gin.Context) {
-	status, err := h.ComputerUse.GetProcessStatus()
+	status, err := h.ComputerUse.GetStatus()
 	if err != nil {
 		ctx.JSON(http.StatusServiceUnavailable, gin.H{
 			"error":   "Failed to get computer use status",
@@ -101,9 +101,13 @@ func (h *Handler) GetComputerUseStatus(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": status,
-	})
+	if status == nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"status": "unknown",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, *status)
 }
 
 // GetProcessStatus godoc

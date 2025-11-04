@@ -350,7 +350,7 @@ definitions:
       pathToProject:
         type: string
       position:
-        $ref: '#/definitions/Position'
+        $ref: '#/definitions/LspPosition'
       uri:
         type: string
     required:
@@ -512,13 +512,10 @@ definitions:
     type: object
   Position:
     properties:
-      character:
+      x:
         type: integer
-      line:
+      'y':
         type: integer
-    required:
-      - character
-      - line
     type: object
   ProcessErrorsResponse:
     properties:

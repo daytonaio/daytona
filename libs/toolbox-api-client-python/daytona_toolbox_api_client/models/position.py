@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, StrictInt
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,10 +26,10 @@ class Position(BaseModel):
     """
     Position
     """ # noqa: E501
-    character: StrictInt
-    line: StrictInt
+    x: Optional[StrictInt] = None
+    y: Optional[StrictInt] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["character", "line"]
+    __properties: ClassVar[List[str]] = ["x", "y"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,8 +89,8 @@ class Position(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "character": obj.get("character"),
-            "line": obj.get("line")
+            "x": obj.get("x"),
+            "y": obj.get("y")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -20,7 +20,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_toolbox_api_client.models.completion_context import CompletionContext
-from daytona_toolbox_api_client.models.position import Position
+from daytona_toolbox_api_client.models.lsp_position import LspPosition
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,7 +31,7 @@ class LspCompletionParams(BaseModel):
     context: Optional[CompletionContext] = None
     language_id: StrictStr = Field(alias="languageId")
     path_to_project: StrictStr = Field(alias="pathToProject")
-    position: Position
+    position: LspPosition
     uri: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["context", "languageId", "pathToProject", "position", "uri"]
@@ -103,7 +103,7 @@ class LspCompletionParams(BaseModel):
             "context": CompletionContext.from_dict(obj["context"]) if obj.get("context") is not None else None,
             "languageId": obj.get("languageId"),
             "pathToProject": obj.get("pathToProject"),
-            "position": Position.from_dict(obj["position"]) if obj.get("position") is not None else None,
+            "position": LspPosition.from_dict(obj["position"]) if obj.get("position") is not None else None,
             "uri": obj.get("uri")
         })
         # store additional fields in additional_properties

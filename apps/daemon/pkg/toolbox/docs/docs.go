@@ -2869,7 +2869,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "position": {
-                    "$ref": "#/definitions/Position"
+                    "$ref": "#/definitions/LspPosition"
                 },
                 "uri": {
                     "type": "string"
@@ -3106,15 +3106,11 @@ const docTemplate = `{
         },
         "Position": {
             "type": "object",
-            "required": [
-                "character",
-                "line"
-            ],
             "properties": {
-                "character": {
+                "x": {
                     "type": "integer"
                 },
-                "line": {
+                "y": {
                     "type": "integer"
                 }
             }

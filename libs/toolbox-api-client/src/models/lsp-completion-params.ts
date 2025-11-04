@@ -17,7 +17,7 @@
 import type { CompletionContext } from './completion-context'
 // May contain unused imports in some cases
 // @ts-ignore
-import type { Position } from './position'
+import type { LspPosition } from './lsp-position'
 
 /**
  *
@@ -45,10 +45,10 @@ export interface LspCompletionParams {
   pathToProject: string
   /**
    *
-   * @type {Position}
+   * @type {LspPosition}
    * @memberof LspCompletionParams
    */
-  position: Position
+  position: LspPosition
   /**
    *
    * @type {string}

@@ -2460,7 +2460,7 @@
           "type": "string"
         },
         "position": {
-          "$ref": "#/definitions/Position"
+          "$ref": "#/definitions/LspPosition"
         },
         "uri": {
           "type": "string"
@@ -2673,12 +2673,11 @@
     },
     "Position": {
       "type": "object",
-      "required": ["character", "line"],
       "properties": {
-        "character": {
+        "x": {
           "type": "integer"
         },
-        "line": {
+        "y": {
           "type": "integer"
         }
       }

@@ -12,10 +12,10 @@ from daytona_toolbox_api_client import (
     LspApi,
     LspCompletionParams,
     LspDocumentRequest,
+    LspPosition,
     LspServerRequest,
     LspSymbol,
 )
-from daytona_toolbox_api_client import Position as ApiPosition
 from deprecated import deprecated
 
 from .._utils.errors import intercept_errors
@@ -245,6 +245,6 @@ class LspServer:
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
-                position=ApiPosition(line=position.line, character=position.character),
+                position=LspPosition(line=position.line, character=position.character),
             ),
         )

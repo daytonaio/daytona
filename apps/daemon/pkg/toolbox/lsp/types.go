@@ -18,6 +18,6 @@ type LspCompletionParams struct {
 	LanguageId    string             `json:"languageId" validate:"required"`
 	PathToProject string             `json:"pathToProject" validate:"required"`
 	Uri           string             `json:"uri" validate:"required"`
-	Position      Position           `json:"position" validate:"required"`
+	Position      LspPosition        `json:"position" validate:"required"`
 	Context       *CompletionContext `json:"context,omitempty" validate:"optional"`
 } // @name LspCompletionParams

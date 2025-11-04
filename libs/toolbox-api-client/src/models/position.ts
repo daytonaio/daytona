@@ -23,11 +23,11 @@ export interface Position {
    * @type {number}
    * @memberof Position
    */
-  character: number
+  x?: number
   /**
    *
    * @type {number}
    * @memberof Position
    */
-  line: number
+  y?: number
 }
