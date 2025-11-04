@@ -17,6 +17,7 @@ import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { ToolboxService } from '../../services/toolbox.service'
 import { TypedConfigService } from '../../../config/typed-config.service'
+import { ARCHIVE_RETRY_ERROR_SUBSTRINGS } from '../../constants/errors-for-archive-retry'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -26,11 +27,11 @@ export class SandboxArchiveAction extends SandboxAction {
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
     private readonly redisLockProvider: RedisLockProvider,
-    @InjectRedis() private readonly redis: Redis,
+    @InjectRedis() protected readonly redis: Redis,
     protected toolboxService: ToolboxService,
     private readonly configService: TypedConfigService,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redis)
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
@@ -88,9 +89,31 @@ export class SandboxArchiveAction extends SandboxAction {
             case SandboxState.DESTROYED:
               await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, null)
               return DONT_SYNC_AGAIN
-            default:
-              await runnerAdapter.destroySandbox(sandbox.id)
-              return SYNC_AGAIN
+            default: {
+              const result = await this.retryOperation(
+                sandbox.id,
+                'archive',
+                async () => {
+                  await runnerAdapter.destroySandbox(sandbox.id)
+                },
+                ARCHIVE_RETRY_ERROR_SUBSTRINGS,
+                3,
+                async (error) => {
+                  //  fail for errors other than sandbox not found or sandbox already destroyed
+                  if (
+                    (error.response?.data?.statusCode === 400 &&
+                      error.response?.data?.message.includes('Sandbox already destroyed')) ||
+                    error.response?.status === 404
+                  ) {
+                    //  if the sandbox is already destroyed, do nothing
+                    await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, null)
+                    return DONT_SYNC_AGAIN
+                  }
+                  return null
+                },
+              )
+              return result
+            }
           }
         } catch (error) {
           //  fail for errors other than sandbox not found or sandbox already destroyed
