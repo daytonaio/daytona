@@ -476,22 +476,36 @@ export class DockerProvider implements OnModuleInit {
       const apiUrl = `${registryUrl}/v2/${parts[1]}/${parts[2]}/manifests/${tag}`
       const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
 
-      const response = await axios({
-        method: 'get',
-        url: apiUrl,
-        headers: {
-          Authorization: `Basic ${encodedCredentials}`,
-        },
-        validateStatus: (status) => status < 500,
-        timeout: 30000,
-      })
+      const maxAttempts = 3
 
-      if (response.status === 200) {
-        this.logger.debug(`Image ${imageName} exists in registry`)
-        return true
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const response = await axios({
+            method: 'get',
+            url: apiUrl,
+            headers: {
+              Authorization: `Basic ${encodedCredentials}`,
+            },
+            validateStatus: (status) => status < 500,
+            timeout: 30000,
+          })
+
+          if (response.status === 200) {
+            this.logger.debug(`Image ${imageName} exists in registry`)
+            return true
+          }
+
+          this.logger.debug(`Image ${imageName} does not exist in registry (status: ${response.status})`)
+          return false
+        } catch (error) {
+          this.logger.warn(
+            `Error checking if image ${imageName} exists in registry (attempt ${attempt}/${maxAttempts}): ${error.message}`,
+          )
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, attempt * 2000))
+          }
+        }
       }
-
-      this.logger.debug(`Image ${imageName} does not exist in registry (status: ${response.status})`)
       return false
     } catch (error) {
       this.logger.error(`Error checking if image ${imageName} exists in registry: ${error.message}`)
