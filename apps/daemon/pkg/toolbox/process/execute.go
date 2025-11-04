@@ -74,14 +74,12 @@ func ExecuteCommand(c *gin.Context) {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			exitCode := exitError.ExitCode()
 			c.JSON(http.StatusOK, ExecuteResponse{
-				Code:     exitCode,
 				ExitCode: exitCode,
 				Result:   string(output),
 			})
 			return
 		}
 		c.JSON(http.StatusOK, ExecuteResponse{
-			Code:     -1,
 			ExitCode: -1,
 			Result:   string(output),
 		})
@@ -90,7 +88,6 @@ func ExecuteCommand(c *gin.Context) {
 
 	if cmd.ProcessState == nil {
 		c.JSON(http.StatusOK, ExecuteResponse{
-			Code:     -1,
 			ExitCode: -1,
 			Result:   string(output),
 		})
@@ -99,7 +96,6 @@ func ExecuteCommand(c *gin.Context) {
 
 	exitCode := cmd.ProcessState.ExitCode()
 	c.JSON(http.StatusOK, ExecuteResponse{
-		Code:     exitCode,
 		ExitCode: exitCode,
 		Result:   string(output),
 	})

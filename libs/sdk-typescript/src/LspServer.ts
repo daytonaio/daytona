@@ -225,7 +225,10 @@ export class LspServer {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
       uri: 'file://' + path,
-      position,
+      position: {
+        line: position.line,
+        character: position.character,
+      },
     })
     return response.data
   }

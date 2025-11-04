@@ -26,11 +26,10 @@ class ExecuteResponse(BaseModel):
     """
     ExecuteResponse
     """ # noqa: E501
-    code: Optional[StrictInt] = Field(default=None, description="Deprecated: Use ExitCode instead")
-    exit_code: StrictInt = Field(alias="exitCode")
+    exit_code: Optional[StrictInt] = Field(default=None, alias="exitCode")
     result: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["code", "exitCode", "result"]
+    __properties: ClassVar[List[str]] = ["exitCode", "result"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,7 +89,6 @@ class ExecuteResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "code": obj.get("code"),
             "exitCode": obj.get("exitCode"),
             "result": obj.get("result")
         })

@@ -119,15 +119,11 @@ definitions:
     type: object
   ExecuteResponse:
     properties:
-      code:
-        description: 'Deprecated: Use ExitCode instead'
-        type: integer
       exitCode:
         type: integer
       result:
         type: string
     required:
-      - exitCode
       - result
     type: object
   FileInfo:

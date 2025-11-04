@@ -2521,14 +2521,9 @@ const docTemplate = `{
         "ExecuteResponse": {
             "type": "object",
             "required": [
-                "exitCode",
                 "result"
             ],
             "properties": {
-                "code": {
-                    "description": "Deprecated: Use ExitCode instead",
-                    "type": "integer"
-                },
                 "exitCode": {
                     "type": "integer"
                 },

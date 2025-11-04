@@ -8,6 +8,7 @@ from daytona_toolbox_api_client_async import (
     LspApi,
     LspCompletionParams,
     LspDocumentRequest,
+    LspPosition,
     LspServerRequest,
     LspSymbol,
 )
@@ -240,6 +241,6 @@ class AsyncLspServer:
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
-                position=position,
+                position=LspPosition(line=position.line, character=position.character),
             ),
         )

@@ -213,7 +213,7 @@ class Sandbox(SandboxDto):
         return LspServer(
             language_id,
             path_to_project,
-            LspApi(self._api_client),
+            LspApi(self._toolbox_api),
         )
 
     @intercept_errors(message_prefix="Failed to set labels: ")
