@@ -235,11 +235,13 @@ class AsyncLspServer:
                 print(f"{item.label} ({item.kind}): {item.detail}")
             ```
         """
+        position_dict = position if isinstance(position, dict) else vars(position)
+
         return await self._api_client.completions(
             request=LspCompletionParams(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
-                position=position,
+                position=position_dict,
             ),
         )
