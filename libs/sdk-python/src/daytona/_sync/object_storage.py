@@ -9,6 +9,7 @@ import hashlib
 import os
 import tarfile
 import threading
+from typing import Optional
 
 from obstore.store import S3Store
 
@@ -45,7 +46,7 @@ class ObjectStorage:
                 token=aws_session_token,
             )
 
-    def upload(self, path: str, organization_id: str, archive_base_path: str | None = None) -> str:
+    def upload(self, path: str, organization_id: str, archive_base_path: Optional[str] = None) -> str:
         """Uploads a file to the object storage service.
 
         Args:
@@ -89,7 +90,7 @@ class ObjectStorage:
         # Remove leading separators (both / and \)
         return path_without_drive.lstrip("/").lstrip("\\")
 
-    def _compute_hash_for_path_md5(self, path_str: str, archive_base_path: str | None = None) -> str:
+    def _compute_hash_for_path_md5(self, path_str: str, archive_base_path: Optional[str] = None) -> str:
         """Computes the MD5 hash for a given path.
 
         Args:
@@ -145,7 +146,7 @@ class ObjectStorage:
             return False
         return True
 
-    def _upload_as_tar(self, s3_key: str, source_path: str, archive_base_path: str | None = None) -> None:
+    def _upload_as_tar(self, s3_key: str, source_path: str, archive_base_path: Optional[str] = None) -> None:
         """Uploads a file to the object storage service as a tar.
 
         Args:

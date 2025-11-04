@@ -38,7 +38,7 @@ from .common.errors import DaytonaError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
 from .common.lsp_server import LspCompletionPosition, LspLanguageId
-from .common.process import CodeRunParams, ExecutionArtifacts, SessionExecuteRequest
+from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
 from .common.pty import PtySize
 from .common.sandbox import Resources
 from .common.snapshot import CreateSnapshotParams
@@ -86,4 +86,5 @@ __all__ = [
     "PtySize",
     "LspCompletionPosition",
     "ExecutionArtifacts",
+    "ExecuteResponse",
 ]

@@ -6,6 +6,7 @@ import hashlib
 import os
 import tarfile
 import threading
+from typing import Optional
 
 import aiofiles
 import aiofiles.os
@@ -44,7 +45,7 @@ class AsyncObjectStorage:
                 token=aws_session_token,
             )
 
-    async def upload(self, path: str, organization_id: str, archive_base_path: str | None = None) -> str:
+    async def upload(self, path: str, organization_id: str, archive_base_path: Optional[str] = None) -> str:
         """Uploads a file to the object storage service.
 
         Args:
@@ -88,7 +89,7 @@ class AsyncObjectStorage:
         # Remove leading separators (both / and \)
         return path_without_drive.lstrip("/").lstrip("\\")
 
-    async def _compute_hash_for_path_md5(self, path_str: str, archive_base_path: str | None = None) -> str:
+    async def _compute_hash_for_path_md5(self, path_str: str, archive_base_path: Optional[str] = None) -> str:
         """Computes the MD5 hash for a given path.
 
         Args:
@@ -144,7 +145,7 @@ class AsyncObjectStorage:
             return False
         return True
 
-    async def _upload_as_tar(self, s3_key: str, source_path: str, archive_base_path: str | None = None) -> None:
+    async def _upload_as_tar(self, s3_key: str, source_path: str, archive_base_path: Optional[str] = None) -> None:
         """Uploads a file to the object storage service as a tar.
 
         Args:

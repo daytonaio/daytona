@@ -8,7 +8,7 @@
 import io
 import os
 from contextlib import ExitStack
-from typing import Callable, List, Union, overload
+from typing import Callable, List, Optional, Union, overload
 
 import httpx
 from daytona_toolbox_api_client import (
@@ -190,10 +190,10 @@ class FileSystem:
             return []
 
         class FileMeta:
-            def __init__(self, dst: str | None):
+            def __init__(self, dst: Optional[str]):
                 self.dst = dst
-                self.error: str | None = None
-                self.result: str | bytes | None = None
+                self.error: Optional[str] = None
+                self.result: Union[str, bytes, None] = None
 
         src_file_meta_dict = {}
         file_writers = []

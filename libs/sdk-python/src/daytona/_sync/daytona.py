@@ -456,15 +456,14 @@ class Daytona:
             raise DaytonaError(f"Unsupported language: {language}")
         language = enum_language
 
-        match language:
-            case CodeLanguage.JAVASCRIPT:
-                return SandboxJsCodeToolbox()
-            case CodeLanguage.TYPESCRIPT:
-                return SandboxTsCodeToolbox()
-            case CodeLanguage.PYTHON:
-                return SandboxPythonCodeToolbox()
-            case _:
-                raise DaytonaError(f"Unsupported language: {language}")
+        if language == CodeLanguage.JAVASCRIPT:
+            return SandboxJsCodeToolbox()
+        if language == CodeLanguage.TYPESCRIPT:
+            return SandboxTsCodeToolbox()
+        if language == CodeLanguage.PYTHON:
+            return SandboxPythonCodeToolbox()
+
+        raise DaytonaError(f"Unsupported language: {language}")
 
     def delete(self, sandbox: Sandbox, timeout: Optional[float] = 60) -> None:
         """Deletes a Sandbox.
