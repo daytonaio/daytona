@@ -46,7 +46,7 @@ export abstract class SandboxAction {
     const lockKey = getStateChangeLockKey(sandboxId)
     const currentLockCode = await this.redisLockProvider.getCode(lockKey)
 
-    if (currentLockCode == null) {
+    if (currentLockCode === null) {
       this.logger.warn(
         'no lock code found - state update action expired - skipping',
         'sandboxId',
