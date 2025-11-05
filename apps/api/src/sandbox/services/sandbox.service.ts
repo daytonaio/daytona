@@ -67,6 +67,10 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { AuditService } from '../../audit/services/audit.service'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { AuditActorId, AuditSource, AuditSourceType } from '../../audit/constants/audit-actor.constant'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -96,10 +100,52 @@ export class SandboxService {
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly auditService: AuditService,
   ) {}
 
   protected getLockKey(id: string): string {
     return `sandbox:${id}:state-change`
+  }
+
+  private async createSystemAuditLog(
+    sandboxId: string,
+    action: AuditAction,
+    reason: string,
+    source: AuditSourceType = AuditSource.SYSTEM,
+    runnerId?: string,
+    additionalMetadata?: Record<string, any>,
+  ): Promise<void> {
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: { id: sandboxId },
+        select: ['id', 'organizationId', 'runnerId'],
+      })
+
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found, skipping audit log`)
+        return
+      }
+
+      const actorId =
+        source === AuditSource.RUNNER ? runnerId || sandbox.runnerId || AuditActorId.SYSTEM : AuditActorId.SYSTEM
+
+      await this.auditService.createLog({
+        actorId,
+        actorEmail: '',
+        organizationId: sandbox.organizationId,
+        action,
+        targetType: AuditTarget.SANDBOX,
+        targetId: sandboxId,
+        statusCode: 200,
+        source,
+        metadata: {
+          reason,
+          ...additionalMetadata,
+        },
+      })
+    } catch (auditError) {
+      this.logger.error(`Failed to create audit log for ${reason} of sandbox ${sandboxId}:`, auditError)
+    }
   }
 
   private async validateOrganizationQuotas(
@@ -1229,6 +1275,7 @@ export class SandboxService {
       throw new BadRequestError('Sandbox is not in a valid state to be updated')
     }
 
+    const previousState = sandbox.state
     sandbox.state = newState
     //  we need to update the desired state to match the new state
     const desiredState = this.getExpectedDesiredStateForState(newState)
@@ -1236,6 +1283,19 @@ export class SandboxService {
       sandbox.desiredState = desiredState
     }
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+    if (newState === SandboxState.STOPPED) {
+      await this.createSystemAuditLog(
+        sandboxId,
+        AuditAction.STOP,
+        'runner-state-sync',
+        AuditSource.RUNNER,
+        sandbox.runnerId,
+        {
+          previousState,
+        },
+      )
+    }
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
@@ -1292,10 +1352,13 @@ export class SandboxService {
 
   @OnEvent(OrganizationEvents.SUSPENDED_SANDBOX_STOPPED)
   async handleSuspendedSandboxStopped(event: OrganizationSuspendedSandboxStoppedEvent) {
-    await this.stop(event.sandboxId).catch((error) => {
-      //  log the error for now, but don't throw it as it will be retried
+    try {
+      const sandbox = await this.stop(event.sandboxId)
+      const action = sandbox.desiredState === SandboxDesiredState.STOPPED ? AuditAction.STOP : AuditAction.DELETE
+      await this.createSystemAuditLog(sandbox.id, action, 'organization-suspended')
+    } catch (error) {
       this.logger.error(`Error stopping sandbox from suspended organization. SandboxId: ${event.sandboxId}: `, error)
-    })
+    }
   }
 
   private resolveAutoStopInterval(autoStopInterval: number): number {
