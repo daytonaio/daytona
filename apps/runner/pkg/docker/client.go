@@ -31,6 +31,7 @@ type DockerClientConfig struct {
 	ResourceLimitsDisabled bool
 	DaemonStartTimeoutSec  int
 	SandboxStartTimeoutSec int
+	UseSnapshotEntrypoint  bool
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
@@ -59,6 +60,7 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		resourceLimitsDisabled: config.ResourceLimitsDisabled,
 		daemonStartTimeoutSec:  config.DaemonStartTimeoutSec,
 		sandboxStartTimeoutSec: config.SandboxStartTimeoutSec,
+		useSnapshotEntrypoint:  config.UseSnapshotEntrypoint,
 	}
 }
 
@@ -82,6 +84,7 @@ type DockerClient struct {
 	resourceLimitsDisabled bool
 	daemonStartTimeoutSec  int
 	sandboxStartTimeoutSec int
+	useSnapshotEntrypoint  bool
 }
 
 // retryWithExponentialBackoff executes a function with exponential backoff retry logic
