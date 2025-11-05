@@ -26,7 +26,7 @@ import { OrganizationService } from '../../../organization/services/organization
 import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
-import { RedisLockProvider } from '../../common/redis-lock.provider'
+import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -42,34 +42,34 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
     protected readonly configService: TypedConfigService,
-    private readonly redisLockProvider: RedisLockProvider,
+    protected readonly redisLockProvider: RedisLockProvider,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redisLockProvider)
   }
 
-  async run(sandbox: Sandbox): Promise<SyncState> {
+  async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     switch (sandbox.state) {
       case SandboxState.PENDING_BUILD: {
-        return this.handleUnassignedBuildSandbox(sandbox)
+        return this.handleUnassignedBuildSandbox(sandbox, lockCode)
       }
       case SandboxState.BUILDING_SNAPSHOT: {
-        return this.handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox)
+        return this.handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox, lockCode)
       }
       case SandboxState.UNKNOWN: {
-        return this.handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox)
+        return this.handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox, lockCode)
       }
       case SandboxState.ARCHIVED:
       case SandboxState.ARCHIVING:
       case SandboxState.STOPPED: {
-        return this.handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox)
+        return this.handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox, lockCode)
       }
       case SandboxState.RESTORING:
       case SandboxState.CREATING: {
-        return this.handleRunnerSandboxPullingSnapshotStateCheck(sandbox)
+        return this.handleRunnerSandboxPullingSnapshotStateCheck(sandbox, lockCode)
       }
       case SandboxState.PULLING_SNAPSHOT:
       case SandboxState.STARTING: {
-        return this.handleRunnerSandboxStartedStateCheck(sandbox)
+        return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
       }
       case SandboxState.ERROR: {
         const runner = await this.runnerService.findOne(sandbox.runnerId)
@@ -99,7 +99,7 @@ export class SandboxStartAction extends SandboxAction {
     return DONT_SYNC_AGAIN
   }
 
-  private async handleUnassignedBuildSandbox(sandbox: Sandbox): Promise<SyncState> {
+  private async handleUnassignedBuildSandbox(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     // Try to assign an available runner with the snapshot build
     let runnerId: string
     try {
@@ -114,7 +114,7 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     if (runnerId) {
-      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, runnerId)
+      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode, runnerId)
       return SYNC_AGAIN
     }
 
@@ -125,10 +125,16 @@ export class SandboxStartAction extends SandboxAction {
       const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
       if (runner.availabilityScore >= this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold')) {
         if (snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
-          await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runner.id)
+          await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
           return SYNC_AGAIN
         } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-          await this.updateSandboxState(sandbox.id, SandboxState.BUILD_FAILED, undefined, snapshotRunner.errorReason)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.BUILD_FAILED,
+            lockCode,
+            undefined,
+            snapshotRunner.errorReason,
+          )
           return DONT_SYNC_AGAIN
         }
       }
@@ -146,22 +152,31 @@ export class SandboxStartAction extends SandboxAction {
 
     this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
 
-    await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runnerId)
+    await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, lockCode, runnerId)
 
     return SYNC_AGAIN
   }
 
-  private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
+  private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+  ): Promise<SyncState> {
     const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, sandbox.buildInfo.snapshotRef)
     if (snapshotRunner) {
       switch (snapshotRunner.state) {
         case SnapshotRunnerState.READY: {
           // TODO: "UNKNOWN" should probably be changed to something else
-          await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN)
+          await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode)
           return SYNC_AGAIN
         }
         case SnapshotRunnerState.ERROR: {
-          await this.updateSandboxState(sandbox.id, SandboxState.BUILD_FAILED, undefined, snapshotRunner.errorReason)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.BUILD_FAILED,
+            lockCode,
+            undefined,
+            snapshotRunner.errorReason,
+          )
           return DONT_SYNC_AGAIN
         }
       }
@@ -175,7 +190,10 @@ export class SandboxStartAction extends SandboxAction {
     return DONT_SYNC_AGAIN
   }
 
-  private async handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
+  private async handleRunnerSandboxUnknownStateOnDesiredStateStart(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+  ): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
@@ -219,12 +237,15 @@ export class SandboxStartAction extends SandboxAction {
 
     await runnerAdapter.createSandbox(sandbox, registry, entrypoint, metadata)
 
-    await this.updateSandboxState(sandbox.id, SandboxState.CREATING)
+    await this.updateSandboxState(sandbox.id, SandboxState.CREATING, lockCode)
     //  sync states again immediately for sandbox
     return SYNC_AGAIN
   }
 
-  private async handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
+  private async handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+  ): Promise<SyncState> {
     const organization = await this.organizationService.findOne(sandbox.organizationId)
 
     //  check if sandbox is assigned to a runner and if that runner is unschedulable
@@ -287,13 +308,14 @@ export class SandboxStartAction extends SandboxAction {
         await this.updateSandboxState(
           sandbox.id,
           SandboxState.ERROR,
+          lockCode,
           undefined,
           'Sandbox has no runner and backup is not completed',
         )
         return DONT_SYNC_AGAIN
       }
 
-      const syncCheck = await this.restoreSandboxOnNewRunner(sandbox, organization, sandbox.prevRunnerId)
+      const syncCheck = await this.restoreSandboxOnNewRunner(sandbox, lockCode, organization, sandbox.prevRunnerId)
       if (syncCheck !== null) {
         return syncCheck
       }
@@ -324,7 +346,7 @@ export class SandboxStartAction extends SandboxAction {
           )
           if (matchesRecovery) {
             try {
-              await this.restoreSandboxOnNewRunner(sandbox, organization, sandbox.runnerId, true)
+              await this.restoreSandboxOnNewRunner(sandbox, lockCode, organization, sandbox.runnerId, true)
               this.logger.warn(`Sandbox ${sandbox.id} transferred to a new runner`)
               return SYNC_AGAIN
             } catch (restoreError) {
@@ -335,7 +357,7 @@ export class SandboxStartAction extends SandboxAction {
         throw error
       }
 
-      await this.updateSandboxState(sandbox.id, SandboxState.STARTING)
+      await this.updateSandboxState(sandbox.id, SandboxState.STARTING, lockCode)
       return SYNC_AGAIN
     }
 
@@ -343,7 +365,7 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   //  used to check if sandbox is pulling snapshot on runner and update sandbox state accordingly
-  private async handleRunnerSandboxPullingSnapshotStateCheck(sandbox: Sandbox): Promise<SyncState> {
+  private async handleRunnerSandboxPullingSnapshotStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     //  edge case when sandbox is being transferred to a new runner
     if (!sandbox.runnerId) {
       return SYNC_AGAIN
@@ -354,13 +376,13 @@ export class SandboxStartAction extends SandboxAction {
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
     if (sandboxInfo.state === SandboxState.PULLING_SNAPSHOT) {
-      await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT)
+      await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, lockCode)
     } else if (sandboxInfo.state === SandboxState.ERROR) {
-      await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+      await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode)
     } else if (sandboxInfo.state === SandboxState.UNKNOWN) {
-      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN)
+      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode)
     } else {
-      await this.updateSandboxState(sandbox.id, SandboxState.STARTING)
+      await this.updateSandboxState(sandbox.id, SandboxState.STARTING, lockCode)
     }
 
     return SYNC_AGAIN
@@ -368,7 +390,7 @@ export class SandboxStartAction extends SandboxAction {
 
   //  used to check if sandbox is started on runner and update sandbox state accordingly
   //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
-  private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox): Promise<SyncState> {
+  private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
@@ -397,7 +419,7 @@ export class SandboxStartAction extends SandboxAction {
           await this.sandboxRepository.save(sandboxToUpdate)
           return DONT_SYNC_AGAIN
         } else {
-          await this.updateSandboxState(sandbox.id, SandboxState.STARTED, undefined, undefined, daemonVersion)
+          await this.updateSandboxState(sandbox.id, SandboxState.STARTED, lockCode, undefined, undefined, daemonVersion)
 
           //  if sandbox was transferred to a new runner, remove it from the old runner
           if (sandbox.prevRunnerId) {
@@ -414,17 +436,17 @@ export class SandboxStartAction extends SandboxAction {
         break
       }
       case SandboxState.UNKNOWN: {
-        await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN)
+        await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode)
         break
       }
       case SandboxState.ERROR: {
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode)
         break
       }
       // also any other state that is not STARTED
       default: {
         console.error(`Sandbox ${sandbox.id} is in unexpected state ${sandboxInfo.state}`)
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode)
         break
       }
     }
@@ -514,6 +536,7 @@ export class SandboxStartAction extends SandboxAction {
 
   private async restoreSandboxOnNewRunner(
     sandbox: Sandbox,
+    lockCode: LockCode,
     organization: Organization,
     excludedRunnerId: string,
     isRecovery?: boolean,
@@ -569,7 +592,13 @@ export class SandboxStartAction extends SandboxAction {
 
     if (!exists) {
       if (!isRecovery) {
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'No valid backup snapshot found')
+        await this.updateSandboxState(
+          sandbox.id,
+          SandboxState.ERROR,
+          lockCode,
+          undefined,
+          'No valid backup snapshot found',
+        )
       } else {
         throw new Error('No valid backup snapshot found')
       }
@@ -641,7 +670,7 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runner.id)
+    await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, lockCode, runner.id)
 
     sandbox.snapshot = validBackup
 

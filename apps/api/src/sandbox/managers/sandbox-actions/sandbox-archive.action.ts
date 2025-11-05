@@ -9,7 +9,7 @@ import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
 import { BackupState } from '../../enums/backup-state.enum'
 import { Repository } from 'typeorm'
-import { RedisLockProvider } from '../../common/redis-lock.provider'
+import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { RunnerService } from '../../services/runner.service'
 import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
@@ -25,15 +25,15 @@ export class SandboxArchiveAction extends SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
-    private readonly redisLockProvider: RedisLockProvider,
+    protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
     protected toolboxService: ToolboxService,
     private readonly configService: TypedConfigService,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redisLockProvider)
   }
 
-  async run(sandbox: Sandbox): Promise<SyncState> {
+  async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     const lockKey = 'archive-lock-' + sandbox.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return DONT_SYNC_AGAIN
@@ -54,6 +54,7 @@ export class SandboxArchiveAction extends SandboxAction {
             await this.updateSandboxState(
               sandbox.id,
               SandboxState.ERROR,
+              lockCode,
               undefined,
               'Failed to archive sandbox after 3 retries',
             )
@@ -86,7 +87,7 @@ export class SandboxArchiveAction extends SandboxAction {
               //  wait until sandbox is destroyed on runner
               return SYNC_AGAIN
             case SandboxState.DESTROYED:
-              await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, null)
+              await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
               return DONT_SYNC_AGAIN
             default:
               await runnerAdapter.destroySandbox(sandbox.id)
@@ -104,7 +105,7 @@ export class SandboxArchiveAction extends SandboxAction {
             throw error
           }
           //  if the sandbox is already destroyed, do nothing
-          await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, null)
+          await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
           return DONT_SYNC_AGAIN
         }
       }
