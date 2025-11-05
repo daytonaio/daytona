@@ -6,6 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { RECOVERY_ERROR_SUBSTRINGS } from '../../constants/errors-for-recovery'
+import { START_RETRY_ERROR_SUBSTRINGS } from '../../constants/errors-for-start-retry'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from './sandbox.action'
@@ -27,6 +28,8 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { RedisLockProvider } from '../../common/redis-lock.provider'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -43,8 +46,9 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly organizationService: OrganizationService,
     protected readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRedis() protected redis: Redis,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redis)
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
@@ -314,15 +318,22 @@ export class SandboxStartAction extends SandboxAction {
         }
       }
 
-      try {
-        await runnerAdapter.startSandbox(sandbox.id, metadata)
-      } catch (error) {
-        // Check against a list of substrings that should trigger an automatic recovery
-        if (error?.message) {
-          const matchesRecovery = RECOVERY_ERROR_SUBSTRINGS.some((substring) =>
-            error.message.toLowerCase().includes(substring.toLowerCase()),
-          )
-          if (matchesRecovery) {
+      const result = await this.retryOperation(
+        sandbox.id,
+        'start',
+        async () => {
+          await runnerAdapter.startSandbox(sandbox.id, metadata)
+          await this.updateSandboxState(sandbox.id, SandboxState.STARTING)
+        },
+        START_RETRY_ERROR_SUBSTRINGS,
+        3,
+        async (error) => {
+          // Check against a list of substrings that should trigger an automatic recovery
+          const isRestorableError =
+            error?.message &&
+            RECOVERY_ERROR_SUBSTRINGS.some((substring) => error.message.toLowerCase().includes(substring.toLowerCase()))
+
+          if (isRestorableError) {
             try {
               await this.restoreSandboxOnNewRunner(sandbox, organization, sandbox.runnerId, true)
               this.logger.warn(`Sandbox ${sandbox.id} transferred to a new runner`)
@@ -331,12 +342,10 @@ export class SandboxStartAction extends SandboxAction {
               this.logger.warn(`Sandbox ${sandbox.id} recovery attempt failed:`, restoreError.message)
             }
           }
-        }
-        throw error
-      }
-
-      await this.updateSandboxState(sandbox.id, SandboxState.STARTING)
-      return SYNC_AGAIN
+          return null
+        },
+      )
+      return result
     }
 
     return SYNC_AGAIN

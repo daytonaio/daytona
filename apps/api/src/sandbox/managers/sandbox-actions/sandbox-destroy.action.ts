@@ -13,6 +13,9 @@ import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
+import { DESTROY_RETRY_ERROR_SUBSTRINGS } from '../../constants/errors-for-destroy-retry'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 @Injectable()
 export class SandboxDestroyAction extends SandboxAction {
@@ -22,8 +25,9 @@ export class SandboxDestroyAction extends SandboxAction {
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
     protected toolboxService: ToolboxService,
+    @InjectRedis() protected redis: Redis,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redis)
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
@@ -67,15 +71,32 @@ export class SandboxDestroyAction extends SandboxAction {
             await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
             return SYNC_AGAIN
           }
-          await runnerAdapter.destroySandbox(sandbox.id)
         } catch (e) {
           //  if the sandbox is not found on runner, it is already destroyed
           if (e.response?.status !== 404) {
             throw e
           }
         }
-        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
-        return SYNC_AGAIN
+
+        const result = await this.retryOperation(
+          sandbox.id,
+          'destroy',
+          async () => {
+            await runnerAdapter.destroySandbox(sandbox.id)
+            await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
+          },
+          DESTROY_RETRY_ERROR_SUBSTRINGS,
+          3,
+          async (error) => {
+            //  if the sandbox is not found on runner, it is already destroyed
+            if (error.response?.status === 404) {
+              await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
+              return SYNC_AGAIN
+            }
+            return null
+          },
+        )
+        return result
       }
     }
   }

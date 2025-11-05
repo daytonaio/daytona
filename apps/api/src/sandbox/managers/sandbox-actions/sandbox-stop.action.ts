@@ -14,6 +14,9 @@ import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
+import { STOP_RETRY_ERROR_SUBSTRINGS } from '../../constants/errors-for-stop-retry'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 @Injectable()
 export class SandboxStopAction extends SandboxAction {
@@ -23,8 +26,9 @@ export class SandboxStopAction extends SandboxAction {
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
     protected toolboxService: ToolboxService,
+    @InjectRedis() protected redis: Redis,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redis)
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
@@ -37,11 +41,16 @@ export class SandboxStopAction extends SandboxAction {
 
     switch (sandbox.state) {
       case SandboxState.STARTED: {
-        // stop sandbox
-        await runnerAdapter.stopSandbox(sandbox.id)
-        await this.updateSandboxState(sandbox.id, SandboxState.STOPPING)
-        //  sync states again immediately for sandbox
-        return SYNC_AGAIN
+        const result = await this.retryOperation(
+          sandbox.id,
+          'stop',
+          async () => {
+            await runnerAdapter.stopSandbox(sandbox.id)
+            await this.updateSandboxState(sandbox.id, SandboxState.STOPPING)
+          },
+          STOP_RETRY_ERROR_SUBSTRINGS,
+        )
+        return result
       }
       case SandboxState.STOPPING: {
         // check if sandbox is stopped
