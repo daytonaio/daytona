@@ -27,6 +27,7 @@ import { DockerRegistry } from '../docker-registry/entities/docker-registry.enti
 import { SandboxSubscriber } from './subscribers/sandbox.subscriber'
 import { RedisLockProvider } from './common/redis-lock.provider'
 import { OrganizationModule } from '../organization/organization.module'
+import { AuditModule } from '../audit/audit.module'
 import { SandboxWarmPoolService } from './services/sandbox-warm-pool.service'
 import { WarmPool } from './entities/warm-pool.entity'
 import { PreviewController } from './controllers/preview.controller'
@@ -52,6 +53,7 @@ import { SandboxRepository } from './repositories/sandbox.repository'
     UserModule,
     DockerRegistryModule,
     OrganizationModule,
+    AuditModule,
     TypeOrmModule.forFeature([
       Sandbox,
       Runner,
