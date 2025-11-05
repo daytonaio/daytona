@@ -1229,13 +1229,15 @@ export class SandboxService {
       throw new BadRequestError('Sandbox is not in a valid state to be updated')
     }
 
+    const oldState = sandbox.state
+    const oldDesiredState = sandbox.desiredState
     sandbox.state = newState
     //  we need to update the desired state to match the new state
     const desiredState = this.getExpectedDesiredStateForState(newState)
     if (desiredState) {
       sandbox.desiredState = desiredState
     }
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: oldState, desiredState: oldDesiredState })
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
