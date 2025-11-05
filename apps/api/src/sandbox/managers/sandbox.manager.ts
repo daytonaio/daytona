@@ -4,16 +4,16 @@
  */
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, MoreThanOrEqual, Not, Raw, Repository } from 'typeorm'
-import { Sandbox } from '../entities/sandbox.entity'
+import { In, MoreThanOrEqual, Not, Raw } from 'typeorm'
+import { randomUUID } from 'crypto'
+
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
 import { RunnerState } from '../enums/runner-state.enum'
 
-import { RedisLockProvider } from '../common/redis-lock.provider'
+import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
 
@@ -32,14 +32,13 @@ import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './sandbox-actions/sandbox-archive.action'
 import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
-import { EventEmitter2 } from '@nestjs/event-emitter'
-import { TypedConfigService } from '../../config/typed-config.service'
 
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { getStateChangeLockKey } from '../utils/lock-key.util'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -55,13 +54,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
-    private readonly eventEmitter: EventEmitter2,
-    private readonly configService: TypedConfigService,
   ) {}
-
-  protected getStateChangeLockKey(id: string): string {
-    return `sandbox:${id}:state-change`
-  }
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish
@@ -110,7 +103,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = this.getStateChangeLockKey(sandbox.id)
+              const lockKey = getStateChangeLockKey(sandbox.id)
               const acquired = await this.redisLockProvider.lock(lockKey, 30)
               if (!acquired) {
                 return
@@ -168,7 +161,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       await Promise.all(
         sandboxes.map(async (sandbox) => {
-          const lockKey = this.getStateChangeLockKey(sandbox.id)
+          const lockKey = getStateChangeLockKey(sandbox.id)
           const acquired = await this.redisLockProvider.lock(lockKey, 30)
           if (!acquired) {
             return
@@ -227,7 +220,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = this.getStateChangeLockKey(sandbox.id)
+              const lockKey = getStateChangeLockKey(sandbox.id)
               const acquired = await this.redisLockProvider.lock(lockKey, 30)
               if (!acquired) {
                 return
@@ -357,9 +350,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       return
     }
 
+    //  generate a random lock code to prevent race condition if sandbox action continues
+    //  after the lock expires
+    const lockCode = new LockCode(randomUUID())
+
     //  prevent syncState cron from running multiple instances of the same sandbox
-    const lockKey = this.getStateChangeLockKey(sandboxId)
-    const acquired = await this.redisLockProvider.lock(lockKey, 30)
+    const lockKey = getStateChangeLockKey(sandboxId)
+    const acquired = await this.redisLockProvider.lock(lockKey, 30, lockCode)
     if (!acquired) {
       return
     }
@@ -386,19 +383,19 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     try {
       switch (sandbox.desiredState) {
         case SandboxDesiredState.STARTED: {
-          syncState = await this.sandboxStartAction.run(sandbox)
+          syncState = await this.sandboxStartAction.run(sandbox, lockCode)
           break
         }
         case SandboxDesiredState.STOPPED: {
-          syncState = await this.sandboxStopAction.run(sandbox)
+          syncState = await this.sandboxStopAction.run(sandbox, lockCode)
           break
         }
         case SandboxDesiredState.DESTROYED: {
-          syncState = await this.sandboxDestroyAction.run(sandbox)
+          syncState = await this.sandboxDestroyAction.run(sandbox, lockCode)
           break
         }
         case SandboxDesiredState.ARCHIVED: {
-          syncState = await this.sandboxArchiveAction.run(sandbox)
+          syncState = await this.sandboxArchiveAction.run(sandbox, lockCode)
           break
         }
       }
