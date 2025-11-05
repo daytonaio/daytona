@@ -6901,6 +6901,150 @@ paths:
       summary: Set default registry
       tags:
         - docker-registry
+  /audit:
+    get:
+      operationId: getAllAuditLogs
+      parameters:
+        - description: Page number of the results
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+          style: form
+        - description: Number of results per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            maximum: 200
+            minimum: 1
+            type: number
+          style: form
+        - description: From date (ISO 8601 format)
+          explode: true
+          in: query
+          name: from
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: To date (ISO 8601 format)
+          explode: true
+          in: query
+          name: to
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: "Token for cursor-based pagination. When provided, takes precedence\
+            \ over page parameter."
+          explode: true
+          in: query
+          name: nextToken
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogs'
+          description: Paginated list of all audit logs
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get all audit logs
+      tags:
+        - audit
+  /audit/organizations/{organizationId}:
+    get:
+      operationId: getOrganizationAuditLogs
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Page number of the results
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+          style: form
+        - description: Number of results per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            maximum: 200
+            minimum: 1
+            type: number
+          style: form
+        - description: From date (ISO 8601 format)
+          explode: true
+          in: query
+          name: from
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: To date (ISO 8601 format)
+          explode: true
+          in: query
+          name: to
+          required: false
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: "Token for cursor-based pagination. When provided, takes precedence\
+            \ over page parameter."
+          explode: true
+          in: query
+          name: nextToken
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogs'
+          description: Paginated list of organization audit logs
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get audit logs for organization
+      tags:
+        - audit
   /webhooks/organizations/{organizationId}/app-portal-access:
     post:
       operationId: WebhookController_getAppPortalAccess
@@ -7121,150 +7265,6 @@ paths:
       summary: Get temporary storage access for pushing objects
       tags:
         - object-storage
-  /audit:
-    get:
-      operationId: getAllAuditLogs
-      parameters:
-        - description: Page number of the results
-          explode: true
-          in: query
-          name: page
-          required: false
-          schema:
-            default: 1
-            minimum: 1
-            type: number
-          style: form
-        - description: Number of results per page
-          explode: true
-          in: query
-          name: limit
-          required: false
-          schema:
-            default: 100
-            maximum: 200
-            minimum: 1
-            type: number
-          style: form
-        - description: From date (ISO 8601 format)
-          explode: true
-          in: query
-          name: from
-          required: false
-          schema:
-            format: date-time
-            type: string
-          style: form
-        - description: To date (ISO 8601 format)
-          explode: true
-          in: query
-          name: to
-          required: false
-          schema:
-            format: date-time
-            type: string
-          style: form
-        - description: "Token for cursor-based pagination. When provided, takes precedence\
-            \ over page parameter."
-          explode: true
-          in: query
-          name: nextToken
-          required: false
-          schema:
-            type: string
-          style: form
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedAuditLogs'
-          description: Paginated list of all audit logs
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Get all audit logs
-      tags:
-        - audit
-  /audit/organizations/{organizationId}:
-    get:
-      operationId: getOrganizationAuditLogs
-      parameters:
-        - description: Organization ID
-          explode: false
-          in: path
-          name: organizationId
-          required: true
-          schema:
-            type: string
-          style: simple
-        - description: Page number of the results
-          explode: true
-          in: query
-          name: page
-          required: false
-          schema:
-            default: 1
-            minimum: 1
-            type: number
-          style: form
-        - description: Number of results per page
-          explode: true
-          in: query
-          name: limit
-          required: false
-          schema:
-            default: 100
-            maximum: 200
-            minimum: 1
-            type: number
-          style: form
-        - description: From date (ISO 8601 format)
-          explode: true
-          in: query
-          name: from
-          required: false
-          schema:
-            format: date-time
-            type: string
-          style: form
-        - description: To date (ISO 8601 format)
-          explode: true
-          in: query
-          name: to
-          required: false
-          schema:
-            format: date-time
-            type: string
-          style: form
-        - description: "Token for cursor-based pagination. When provided, takes precedence\
-            \ over page parameter."
-          explode: true
-          in: query
-          name: nextToken
-          required: false
-          schema:
-            type: string
-          style: form
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedAuditLogs'
-          description: Paginated list of organization audit logs
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Get audit logs for organization
-      tags:
-        - audit
   /health:
     get:
       operationId: HealthController_check
@@ -11562,6 +11562,118 @@ components:
         - url
         - username
       type: object
+    AuditLog:
+      example:
+        metadata:
+          key: ''
+        targetId: targetId
+        errorMessage: errorMessage
+        ipAddress: ipAddress
+        actorEmail: actorEmail
+        targetType: targetType
+        userAgent: userAgent
+        source: source
+        organizationId: organizationId
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        actorId: actorId
+        action: action
+        id: id
+        statusCode: 0.8008281904610115
+      properties:
+        id:
+          type: string
+        actorId:
+          type: string
+        actorEmail:
+          type: string
+        organizationId:
+          type: string
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+        statusCode:
+          type: number
+        errorMessage:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        source:
+          type: string
+        metadata:
+          additionalProperties: true
+          type: object
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - action
+        - actorEmail
+        - actorId
+        - createdAt
+        - id
+      type: object
+    PaginatedAuditLogs:
+      example:
+        total: 6.027456183070403
+        nextToken: nextToken
+        totalPages: 5.962133916683182
+        page: 1.4658129805029452
+        items:
+          - metadata:
+              key: ''
+            targetId: targetId
+            errorMessage: errorMessage
+            ipAddress: ipAddress
+            actorEmail: actorEmail
+            targetType: targetType
+            userAgent: userAgent
+            source: source
+            organizationId: organizationId
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            actorId: actorId
+            action: action
+            id: id
+            statusCode: 0.8008281904610115
+          - metadata:
+              key: ''
+            targetId: targetId
+            errorMessage: errorMessage
+            ipAddress: ipAddress
+            actorEmail: actorEmail
+            targetType: targetType
+            userAgent: userAgent
+            source: source
+            organizationId: organizationId
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            actorId: actorId
+            action: action
+            id: id
+            statusCode: 0.8008281904610115
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AuditLog'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+        nextToken:
+          description: Token for next page in cursor-based pagination
+          type: string
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
     WebhookAppPortalAccess:
       example:
         url: https://app.svix.com/app_1234567890
@@ -11682,118 +11794,6 @@ components:
         - secret
         - sessionToken
         - storageUrl
-      type: object
-    AuditLog:
-      example:
-        metadata:
-          key: ''
-        targetId: targetId
-        errorMessage: errorMessage
-        ipAddress: ipAddress
-        actorEmail: actorEmail
-        targetType: targetType
-        userAgent: userAgent
-        source: source
-        organizationId: organizationId
-        createdAt: 2000-01-23T04:56:07.000+00:00
-        actorId: actorId
-        action: action
-        id: id
-        statusCode: 0.8008281904610115
-      properties:
-        id:
-          type: string
-        actorId:
-          type: string
-        actorEmail:
-          type: string
-        organizationId:
-          type: string
-        action:
-          type: string
-        targetType:
-          type: string
-        targetId:
-          type: string
-        statusCode:
-          type: number
-        errorMessage:
-          type: string
-        ipAddress:
-          type: string
-        userAgent:
-          type: string
-        source:
-          type: string
-        metadata:
-          additionalProperties: true
-          type: object
-        createdAt:
-          format: date-time
-          type: string
-      required:
-        - action
-        - actorEmail
-        - actorId
-        - createdAt
-        - id
-      type: object
-    PaginatedAuditLogs:
-      example:
-        total: 6.027456183070403
-        nextToken: nextToken
-        totalPages: 5.962133916683182
-        page: 1.4658129805029452
-        items:
-          - metadata:
-              key: ''
-            targetId: targetId
-            errorMessage: errorMessage
-            ipAddress: ipAddress
-            actorEmail: actorEmail
-            targetType: targetType
-            userAgent: userAgent
-            source: source
-            organizationId: organizationId
-            createdAt: 2000-01-23T04:56:07.000+00:00
-            actorId: actorId
-            action: action
-            id: id
-            statusCode: 0.8008281904610115
-          - metadata:
-              key: ''
-            targetId: targetId
-            errorMessage: errorMessage
-            ipAddress: ipAddress
-            actorEmail: actorEmail
-            targetType: targetType
-            userAgent: userAgent
-            source: source
-            organizationId: organizationId
-            createdAt: 2000-01-23T04:56:07.000+00:00
-            actorId: actorId
-            action: action
-            id: id
-            statusCode: 0.8008281904610115
-      properties:
-        items:
-          items:
-            $ref: '#/components/schemas/AuditLog'
-          type: array
-        total:
-          type: number
-        page:
-          type: number
-        totalPages:
-          type: number
-        nextToken:
-          description: Token for next page in cursor-based pagination
-          type: string
-      required:
-        - items
-        - page
-        - total
-        - totalPages
       type: object
     uploadFile_deprecated_request:
       properties:
