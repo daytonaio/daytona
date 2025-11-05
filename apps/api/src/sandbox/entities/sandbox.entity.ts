@@ -326,7 +326,11 @@ export class Sandbox {
     if (this.pending && String(this.state) === String(this.desiredState)) {
       this.pending = false
     }
-    if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
+    if (
+      this.state === SandboxState.ERROR ||
+      this.state === SandboxState.BUILD_FAILED ||
+      (this.state === SandboxState.ARCHIVING && this.desiredState === SandboxDesiredState.ARCHIVED)
+    ) {
       this.pending = false
     }
   }
