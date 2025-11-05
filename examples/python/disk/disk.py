@@ -97,6 +97,9 @@ def main():
     sandbox.fs.upload_file(b"Hello, World!", "/workspace/new-file.txt")
     print(f"✅ Created file: {sandbox.name} ({sandbox.id}) - State: {sandbox.state}")
 
+    print("Sleeping for 20 seconds...")
+    time.sleep(20)
+
     # List files in the sandbox
     print("\n📋 Listing files in the sandbox...")
     files = sandbox.fs.list_files("/workspace")

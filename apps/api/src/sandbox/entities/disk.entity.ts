@@ -36,6 +36,12 @@ export class Disk {
     type: 'uuid',
     nullable: true,
   })
+  baseDiskId?: string
+
+  @Column({
+    type: 'uuid',
+    nullable: true,
+  })
   runnerId?: string
 
   @Column({

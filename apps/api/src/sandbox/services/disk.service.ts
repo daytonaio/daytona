@@ -73,42 +73,42 @@ export class DiskService {
   async create(organization: Organization, createDiskDto: CreateDiskDto): Promise<Disk> {
     let pendingDiskCountIncrement: number | undefined
 
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    const newDiskCount = 1
+
+    const { pendingDiskCountIncremented } = await this.validateOrganizationQuotas(organization, newDiskCount)
+
+    if (pendingDiskCountIncremented) {
+      pendingDiskCountIncrement = newDiskCount
+    }
+
+    const disk = new Disk()
+
+    // Generate ID
+    disk.id = uuidv4()
+
+    // Set name and size from DTO
+    disk.name = createDiskDto.name
+    disk.size = createDiskDto.size
+
+    // Check if disk with same name already exists for organization
+    const existingDisk = await this.diskRepository.findOne({
+      where: {
+        organizationId: organization.id,
+        name: disk.name,
+        state: Not(In([DiskState.STORED])), // Consider STORED as deleted state and exclude archived
+      },
+    })
+
+    if (existingDisk) {
+      throw new BadRequestError(`Disk with name ${disk.name} already exists`)
+    }
+
+    disk.organizationId = organization.id
+    disk.state = DiskState.FRESH
+
     try {
-      this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-      const newDiskCount = 1
-
-      const { pendingDiskCountIncremented } = await this.validateOrganizationQuotas(organization, newDiskCount)
-
-      if (pendingDiskCountIncremented) {
-        pendingDiskCountIncrement = newDiskCount
-      }
-
-      const disk = new Disk()
-
-      // Generate ID
-      disk.id = uuidv4()
-
-      // Set name and size from DTO
-      disk.name = createDiskDto.name
-      disk.size = createDiskDto.size
-
-      // Check if disk with same name already exists for organization
-      const existingDisk = await this.diskRepository.findOne({
-        where: {
-          organizationId: organization.id,
-          name: disk.name,
-          state: Not(In([DiskState.STORED])), // Consider STORED as deleted state and exclude archived
-        },
-      })
-
-      if (existingDisk) {
-        throw new BadRequestError(`Disk with name ${disk.name} already exists`)
-      }
-
-      disk.organizationId = organization.id
-      disk.state = DiskState.FRESH
-
       const savedDisk = await this.diskRepository.save(disk)
       this.logger.debug(`Created disk ${savedDisk.id} for organization ${organization.id}`)
       return savedDisk
@@ -179,6 +179,66 @@ export class DiskService {
     }
 
     return disk
+  }
+
+  async fork(baseDiskId: string, name: string): Promise<Disk> {
+    const baseDisk = await this.diskRepository.findOne({
+      where: { id: baseDiskId },
+    })
+
+    if (!baseDisk) {
+      throw new NotFoundException(`Disk with ID ${baseDisk} not found`)
+    }
+
+    if (baseDisk.state !== DiskState.STORED && baseDisk.state !== DiskState.DETACHED) {
+      throw new BadRequestError(`Disk must be in '${DiskState.STORED}' or '${DiskState.DETACHED}' state to be forked`)
+    }
+
+    // Validate organization quotas
+    let pendingDiskCountIncrement: number | undefined
+
+    const organization = await this.organizationService.findOne(baseDisk.organizationId)
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    const newDiskCount = 1
+
+    const { pendingDiskCountIncremented } = await this.validateOrganizationQuotas(organization, newDiskCount)
+
+    if (pendingDiskCountIncremented) {
+      pendingDiskCountIncrement = newDiskCount
+    }
+
+    const newDisk = new Disk()
+    newDisk.id = uuidv4()
+
+    newDisk.name = name
+    newDisk.size = baseDisk.size
+    newDisk.organizationId = organization.id
+    newDisk.state = DiskState.PENDING_FORK
+    newDisk.baseDiskId = baseDiskId
+
+    try {
+      // if the base disk is detached (still on the runner),
+      // lock it to prevent other operations from happening
+      // TODO: this should be don in transaction with the fork operation
+      if (baseDisk.state === DiskState.DETACHED) {
+        baseDisk.state = DiskState.LOCKED
+        await this.diskRepository.save(baseDisk)
+
+        // set the runner id to the same as the base disk
+        // when forking a detached disk, the new disk will be created on the same runner
+        // this allows "instant" fork operations
+        newDisk.runnerId = baseDisk.runnerId
+      }
+
+      const savedDisk = await this.diskRepository.save(newDisk)
+      this.logger.debug(`Forked disk ${savedDisk.id} from ${baseDiskId} for organization ${organization.id}`)
+      return savedDisk
+    } catch (error) {
+      await this.rollbackPendingUsage(organization.id, pendingDiskCountIncrement)
+      throw error
+    }
   }
 
   async attachToSandbox(diskId: string, sandboxId: string, skipStateCheck = false): Promise<Disk> {

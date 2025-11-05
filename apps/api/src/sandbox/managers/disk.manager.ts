@@ -105,7 +105,13 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
 
       const pendingDisks = await this.diskRepository.find({
         where: {
-          state: In([DiskState.PENDING_DELETE, DiskState.PENDING_PUSH, DiskState.PUSHING]),
+          state: In([
+            DiskState.PENDING_DELETE,
+            DiskState.PENDING_PUSH,
+            DiskState.PUSHING,
+            DiskState.PENDING_FORK,
+            DiskState.FORKING,
+          ]),
         },
       })
 
