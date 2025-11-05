@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/docker/docker/api/types/network"
@@ -48,12 +49,32 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 		}
 	}
 
+	workDir := ""
+	cmd := []string{}
+	entrypoint := sandboxDto.Entrypoint
+	if d.useDaemonEntrypoint {
+		// Inspect image
+		image, _, _ := d.apiClient.ImageInspectWithRaw(context.Background(), sandboxDto.Snapshot)
+		if image.Config.WorkingDir != "" {
+			workDir = image.Config.WorkingDir
+		}
+
+		// if workdir is empty, append flag env var to envVars
+		if workDir == "" {
+			envVars = append(envVars, fmt.Sprintf("%s=true", common_daemon.UserHomeAsWorkDirEnvVar))
+		}
+
+		entrypoint = []string{"/usr/local/bin/daytona"}
+		cmd = append(cmd, sandboxDto.Entrypoint...)
+	}
+
 	return &container.Config{
-		Hostname: sandboxDto.Id,
-		Image:    sandboxDto.Snapshot,
-		// User:         sandboxDto.OsUser,
+		Hostname:     sandboxDto.Id,
+		Image:        sandboxDto.Snapshot,
+		WorkingDir:   workDir,
 		Env:          envVars,
-		Entrypoint:   sandboxDto.Entrypoint,
+		Entrypoint:   entrypoint,
+		Cmd:          cmd,
 		Labels:       labels,
 		AttachStdout: true,
 		AttachStderr: true,

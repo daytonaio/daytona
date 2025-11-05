@@ -4,10 +4,10 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"os/signal"
 	"syscall"
 
@@ -15,6 +15,7 @@ import (
 
 	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
+	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
@@ -27,20 +28,37 @@ func main() {
 		panic(err)
 	}
 
-	workDirFlag := flag.String("work-dir", "", "optional; sets the working directory; defaults to the current directory; use "+common_daemon.UseUserHomeAsWorkDir+" to switch to the user's home directory")
-	flag.Parse()
-
-	if workDirFlag != nil && *workDirFlag != "" {
-		workDir := *workDirFlag
-		if workDir == common_daemon.UseUserHomeAsWorkDir {
-			workDir, err = os.UserHomeDir()
+	// If workdir in image is not set, use user home as workdir
+	_, userHomeAsWorkDirSet := os.LookupEnv(common_daemon.UserHomeAsWorkDirEnvVar)
+	if userHomeAsWorkDirSet {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			log.Warnf("failed to get home directory: %v", err)
+		} else {
+			err = os.Chdir(homeDir)
 			if err != nil {
-				panic(fmt.Errorf("failed to get user home directory: %w", err))
+				log.Warnf("failed to change working directory to home directory: %v", err)
 			}
 		}
-		err = os.Chdir(workDir)
+	}
+
+	// Execute passed arguments as command
+	args := os.Args[1:]
+	if len(args) > 0 {
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Stdout = &util.PrefixedWriter{Prefix: "[ENTRYPOINT] ", Writer: os.Stdout}
+		cmd.Stderr = &util.PrefixedWriter{Prefix: "[ENTRYPOINT] ", Writer: os.Stderr}
+
+		// Start command and wait for it in background to prevent zombie process
+		err := cmd.Start()
 		if err != nil {
-			panic(fmt.Errorf("failed to change working directory to %s: %w", workDir, err))
+			log.Errorf("failed to start command: %v", err)
+		} else {
+			go func() {
+				if err := cmd.Wait(); err != nil {
+					log.Errorf("command exited with error: %v", err)
+				}
+			}()
 		}
 	}
 
