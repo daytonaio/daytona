@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, LessThan, MoreThanOrEqual, Not, Repository } from 'typeorm'
+import { In, LessThan, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -1001,15 +1001,31 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     // If entrypoint is not explicitly set, set it from snapshotInfoResponse
     if (!snapshot.entrypoint) {
-      if (snapshotInfoResponse.entrypoint && snapshotInfoResponse.entrypoint.length > 0) {
-        if (Array.isArray(snapshotInfoResponse.entrypoint)) {
-          snapshot.entrypoint = snapshotInfoResponse.entrypoint
-        } else {
-          snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
+      let entrypoint: string[] = []
+      if (snapshotInfoResponse.entrypoint) {
+        switch (true) {
+          case typeof snapshotInfoResponse.entrypoint === 'string' && snapshotInfoResponse.entrypoint !== '':
+            entrypoint = [snapshotInfoResponse.entrypoint]
+            break
+          case Array.isArray(snapshotInfoResponse.entrypoint):
+            entrypoint = snapshotInfoResponse.entrypoint
+            break
+          default:
+            this.logger.warn(
+              `Unexpected entrypoint type for snapshot ${snapshot.id}: ${typeof snapshotInfoResponse.entrypoint}`,
+            )
         }
-      } else {
-        snapshot.entrypoint = ['sleep', 'infinity']
       }
+
+      if (snapshotInfoResponse.cmd?.length > 0) {
+        entrypoint = entrypoint.concat(snapshotInfoResponse.cmd)
+      }
+
+      if (entrypoint.length === 0) {
+        entrypoint = ['sleep', 'infinity']
+      }
+
+      snapshot.entrypoint = entrypoint
     }
   }
 

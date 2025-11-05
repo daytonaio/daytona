@@ -106,6 +106,7 @@ func main() {
 		ComputerUsePluginPath:  pluginPath,
 		NetRulesManager:        netRulesManager,
 		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
+		UseDaemonEntrypoint:    cfg.UseDaemonEntrypoint,
 	})
 
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
