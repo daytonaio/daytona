@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
-import { Repository } from 'typeorm'
+import { Repository, FindOptionsWhere } from 'typeorm'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { ToolboxService } from '../../services/toolbox.service'
 import { BackupState } from '../../enums/backup-state.enum'
@@ -68,10 +68,13 @@ export abstract class SandboxAction {
       return
     }
 
-    const sandbox = await this.sandboxRepository.findOneBy({
+    const query: FindOptionsWhere<Sandbox> = {
       id: sandboxId,
-      pending: true,
-    })
+    }
+    if (state !== SandboxState.ARCHIVED) {
+      query.pending = true
+    }
+    const sandbox = await this.sandboxRepository.findOneBy(query)
     if (!sandbox) {
       //  this should never happen
       //  if it does, we need to log the error and return

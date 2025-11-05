@@ -329,7 +329,7 @@ export class Sandbox {
     if (
       this.state === SandboxState.ERROR ||
       this.state === SandboxState.BUILD_FAILED ||
-      (this.state === SandboxState.ARCHIVING && this.desiredState === SandboxDesiredState.ARCHIVED)
+      this.desiredState === SandboxDesiredState.ARCHIVED
     ) {
       this.pending = false
     }
