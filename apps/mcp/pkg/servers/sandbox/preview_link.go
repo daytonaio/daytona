@@ -9,9 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/daytonaio/apiclient"
+	"github.com/daytonaio/mcp/internal/apiclient"
+	"github.com/daytonaio/toolbox_apiclient"
 
 	"github.com/daytonaio/mcp/internal/common"
+	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -44,11 +46,6 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	_, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
-	}
-
 	if input.Port == nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("port parameter is required")
 	}
@@ -58,24 +55,27 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 		checkServer = *input.CheckServer
 	}
 
-	log.Infof("Generating preview link - port: %d", *input.Port)
-
-	// Get the sandbox using sandbox ID
-	sandbox, _, err := s.apiClient.SandboxAPI.GetSandbox(ctx, input.SandboxId).Execute()
+	sandbox, stop, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
 	}
+	defer stop()
 
-	if sandbox == nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("no sandbox available")
+	proxyUrl, err := apiclient.ExtractProxyUrl(ctx, s.apiClient)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
 	}
+
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaFsMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+
+	log.Infof("Generating preview link - port: %d", *input.Port)
 
 	// Check if server is running on specified port
 	if checkServer {
 		log.Infof("Checking if server is running - port: %d", *input.Port)
 
 		checkCmd := fmt.Sprintf("curl -s -o /dev/null -w '%%{http_code}' http://localhost:%d --max-time 2 || echo 'error'", *input.Port)
-		result, _, err := s.apiClient.ToolboxAPI.ExecuteCommand(ctx, input.SandboxId).ExecuteRequest(*apiclient.NewExecuteRequest(checkCmd)).Execute()
+		result, _, err := toolboxApiClient.ProcessAPI.ExecuteCommand(ctx).Request(*toolbox_apiclient.NewExecuteRequest(checkCmd)).Execute()
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error checking server: %v", err)
 		}
@@ -86,7 +86,7 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 
 			// Check what might be using the port
 			psCmd := fmt.Sprintf("ps aux | grep ':%d' | grep -v grep || echo 'No process found'", *input.Port)
-			psResult, _, err := s.apiClient.ToolboxAPI.ExecuteCommand(ctx, input.SandboxId).ExecuteRequest(*apiclient.NewExecuteRequest(psCmd)).Execute()
+			psResult, _, err := toolboxApiClient.ProcessAPI.ExecuteCommand(ctx).Request(*toolbox_apiclient.NewExecuteRequest(psCmd)).Execute()
 			if err != nil {
 				return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error checking processes: %v", err)
 			}
@@ -106,7 +106,7 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 	var statusCode string
 	if checkServer {
 		checkCmd := fmt.Sprintf("curl -s -o /dev/null -w '%%{http_code}' %s --max-time 3 || echo 'error'", previewURL.Url)
-		result, _, err := s.apiClient.ToolboxAPI.ExecuteCommand(ctx, input.SandboxId).ExecuteRequest(*apiclient.NewExecuteRequest(checkCmd)).Execute()
+		result, _, err := toolboxApiClient.ProcessAPI.ExecuteCommand(ctx).Request(*toolbox_apiclient.NewExecuteRequest(checkCmd)).Execute()
 		if err != nil {
 			log.Errorf("Error checking preview URL: %v", err)
 		} else {

@@ -10,7 +10,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
+	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -42,11 +44,6 @@ func (s *DaytonaFileSystemMCPServer) handleUploadFile(ctx context.Context, reque
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	_, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
-	}
-
 	if input.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("filePath parameter is required")
 	}
@@ -59,21 +56,24 @@ func (s *DaytonaFileSystemMCPServer) handleUploadFile(ctx context.Context, reque
 		input.Encoding = "text"
 	}
 
-	// Get the sandbox using sandbox ID
-	sandbox, _, err := s.apiClient.SandboxAPI.GetSandbox(ctx, input.SandboxId).Execute()
+	sandbox, stop, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
 	}
+	defer stop()
 
-	if sandbox == nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("no sandbox available")
+	proxyUrl, err := apiclient.ExtractProxyUrl(ctx, s.apiClient)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
 	}
+
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaFsMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
 
 	// Check if file exists and handle overwrite
 	if !input.Overwrite {
-		fileInfo, _, err := s.apiClient.ToolboxAPI.GetFileInfo(ctx, input.SandboxId).Path(input.FilePath).Execute()
+		fileInfo, _, err := toolboxApiClient.FileSystemAPI.GetFileInfo(ctx).Path(input.FilePath).Execute()
 		if err == nil && fileInfo != nil {
-			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("file '%s' already exists and overwrite=false", input.FilePath)
+			return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("file '%s' already exists. Set overwrite to to overwrite the file", input.FilePath)
 		}
 	}
 
@@ -93,7 +93,7 @@ func (s *DaytonaFileSystemMCPServer) handleUploadFile(ctx context.Context, reque
 	// Create parent directories if they don't exist
 	parentDir := filepath.Dir(input.FilePath)
 	if parentDir != "" {
-		_, err := s.apiClient.ToolboxAPI.CreateFolder(ctx, input.SandboxId).Path(parentDir).Mode("0755").Execute()
+		_, err := toolboxApiClient.FileSystemAPI.CreateFolder(ctx).Path(parentDir).Mode("0755").Execute()
 		if err != nil {
 			log.Errorf("Error creating parent directory: %v", err)
 			// Continue anyway as upload might handle this
@@ -119,13 +119,13 @@ func (s *DaytonaFileSystemMCPServer) handleUploadFile(ctx context.Context, reque
 	}
 
 	// Upload the file
-	_, err = s.apiClient.ToolboxAPI.UploadFile(ctx, input.SandboxId).Path(input.FilePath).File(tempFile).Execute()
+	_, _, err = toolboxApiClient.FileSystemAPI.UploadFile(ctx).Path(input.FilePath).File(tempFile).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error uploading file: %v", err)
 	}
 
 	// Get file info for size
-	fileInfo, _, err := s.apiClient.ToolboxAPI.GetFileInfo(ctx, input.SandboxId).Path(input.FilePath).Execute()
+	fileInfo, _, err := toolboxApiClient.FileSystemAPI.GetFileInfo(ctx).Path(input.FilePath).Execute()
 	if err != nil {
 		log.Errorf("Error getting file info after upload: %v", err)
 

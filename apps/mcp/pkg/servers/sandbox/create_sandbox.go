@@ -78,6 +78,11 @@ func (s *DaytonaSandboxMCPServer) handleCreateSandbox(ctx context.Context, reque
 
 		log.Infof("Created new sandbox: %s", sandbox.Id)
 
+		_, _, err = s.apiClient.SandboxAPI.StopSandbox(ctx, sandbox.Id).Execute()
+		if err != nil {
+			log.Warnf("failed to stop sandbox: %v", err)
+		}
+
 		return &mcp.CallToolResult{IsError: false}, &CreateSandboxOutput{
 			Message: fmt.Sprintf("Created new sandbox %s", sandbox.Id),
 		}, nil

@@ -10,7 +10,9 @@ import (
 	"io"
 	"path/filepath"
 
+	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
+	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -43,17 +45,25 @@ func (s *DaytonaFileSystemMCPServer) handleDownloadFile(ctx context.Context, req
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	_, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
-	}
-
 	if input.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("filePath parameter is required")
 	}
 
+	sandbox, stop, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
+	}
+	defer stop()
+
+	proxyUrl, err := apiclient.ExtractProxyUrl(ctx, s.apiClient)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
+	}
+
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaFsMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+
 	// Download the file
-	file, _, err := s.apiClient.ToolboxAPI.DownloadFile(ctx, input.SandboxId).Path(input.FilePath).Execute()
+	file, _, err := toolboxApiClient.FileSystemAPI.DownloadFile(ctx).Path(input.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error downloading file: %v", err)
 	}

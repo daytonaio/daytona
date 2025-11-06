@@ -7,9 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/apiclient"
-
+	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
+	"github.com/daytonaio/mcp/internal/constants"
+	"github.com/daytonaio/toolbox_apiclient"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -43,11 +44,6 @@ func (s *DaytonaGitMCPServer) handleGitClone(ctx context.Context, request *mcp.C
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	_, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
-	}
-
 	if input.Url == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("url parameter is required")
 	}
@@ -60,7 +56,13 @@ func (s *DaytonaGitMCPServer) handleGitClone(ctx context.Context, request *mcp.C
 		input.Branch = "main"
 	}
 
-	gitCloneRequest := apiclient.GitCloneRequest{
+	sandbox, stop, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
+	}
+	defer stop()
+
+	gitCloneRequest := toolbox_apiclient.GitCloneRequest{
 		Url:      input.Url,
 		Path:     input.Path,
 		Branch:   &input.Branch,
@@ -69,7 +71,14 @@ func (s *DaytonaGitMCPServer) handleGitClone(ctx context.Context, request *mcp.C
 		Password: &input.Password,
 	}
 
-	_, err = s.apiClient.ToolboxAPI.GitCloneRepository(ctx, input.SandboxId).GitCloneRequest(gitCloneRequest).Execute()
+	proxyUrl, err := apiclient.ExtractProxyUrl(ctx, s.apiClient)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
+	}
+
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaGitMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+
+	_, err = toolboxApiClient.GitAPI.CloneRepository(ctx).Request(gitCloneRequest).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error cloning repository: %v", err)
 	}

@@ -7,7 +7,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
+	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -36,17 +38,25 @@ func (s *DaytonaFileSystemMCPServer) handleDeleteFile(ctx context.Context, reque
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
 	}
 
-	_, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
-	}
-
 	if input.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("filePath parameter is required")
 	}
 
+	sandbox, stop, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
+	}
+	defer stop()
+
+	proxyUrl, err := apiclient.ExtractProxyUrl(ctx, s.apiClient)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
+	}
+
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaFsMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+
 	// Execute delete command
-	_, err = s.apiClient.ToolboxAPI.DeleteFile(ctx, input.SandboxId).Path(input.FilePath).Recursive(true).Execute()
+	_, err = toolboxApiClient.FileSystemAPI.DeleteFile(ctx).Path(input.FilePath).Recursive(true).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error deleting file: %v", err)
 	}

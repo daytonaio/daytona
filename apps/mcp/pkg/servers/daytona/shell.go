@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/daytonaio/apiclient"
+	"github.com/daytonaio/toolbox_apiclient"
 
+	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
+	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -42,10 +44,11 @@ func (s *DaytonaMCPServer) handleShell(ctx context.Context, request *mcp.CallToo
 		return returnCommandError("Command must be a non-empty string", "ValueError")
 	}
 
-	sandboxId, err := common.GetSandbox(ctx, s.apiClient, input.SandboxId)
+	sandbox, stop, err := common.GetSandbox(ctx, s.apiClient, input.SandboxId)
 	if err != nil {
 		return returnCommandError(fmt.Sprintf("Error getting sandbox: %v", err), "SandboxError")
 	}
+	defer stop()
 
 	// Process the command
 	command := strings.TrimSpace(input.Command)
@@ -54,13 +57,17 @@ func (s *DaytonaMCPServer) handleShell(ctx context.Context, request *mcp.CallToo
 		command = fmt.Sprintf("/bin/sh -c %s", shellQuote(command))
 	}
 
+	proxyUrl, err := apiclient.ExtractProxyUrl(ctx, s.apiClient)
+	if err != nil {
+		return returnCommandError(fmt.Sprintf("Error extracting proxy URL: %v", err), "ProxyUrlError")
+	}
+
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+
 	log.Infof("Executing command: %s", command)
 
 	// Execute the command
-	result, _, err := s.apiClient.ToolboxAPI.ExecuteCommand(ctx, *sandboxId).
-		ExecuteRequest(*apiclient.NewExecuteRequest(command)).
-		Execute()
-
+	result, _, err := toolboxApiClient.ProcessAPI.ExecuteCommand(ctx).Request(*toolbox_apiclient.NewExecuteRequest(command)).Execute()
 	if err != nil {
 		// Classify error types
 		errStr := err.Error()
@@ -75,7 +82,7 @@ func (s *DaytonaMCPServer) handleShell(ctx context.Context, request *mcp.CallToo
 	}
 
 	stdout := strings.TrimSpace(result.Result)
-	exitCode := int(result.ExitCode)
+	exitCode := int(*result.ExitCode)
 
 	// Process command output
 	cmdResult := ShellOutput{
@@ -97,11 +104,6 @@ func (s *DaytonaMCPServer) handleShell(ctx context.Context, request *mcp.CallToo
 	// Check for non-zero exit code
 	if cmdResult.ExitCode != nil && *cmdResult.ExitCode > 0 {
 		log.Infof("Command exited with non-zero status - exit code: %d", cmdResult.ExitCode)
-	}
-
-	_, _, err = s.apiClient.SandboxAPI.StopSandbox(ctx, *sandboxId).Execute()
-	if err != nil {
-		log.Warnf("Error stopping sandbox %s: %v", *sandboxId, err)
 	}
 
 	return &mcp.CallToolResult{

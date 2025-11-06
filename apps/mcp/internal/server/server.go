@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
+	"github.com/daytonaio/mcp/internal/constants"
 	"github.com/daytonaio/mcp/pkg/servers/daytona"
 	"github.com/daytonaio/mcp/pkg/servers/fs"
 	"github.com/daytonaio/mcp/pkg/servers/git"
@@ -49,39 +50,23 @@ func (s *MCPServer) Start() error {
 	}
 
 	daytonaMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		authHeader := r.Header.Get("Authorization")
-		headers := map[string]string{
-			"Authorization":    authHeader,
-			"X-Daytona-Source": "daytona-mcp",
-		}
-		return daytona.NewDaytonaMCPServer(apiclient.NewApiClient(s.apiUrl, headers)).Server
+		apiClient := apiclient.NewApiClient(constants.DaytonaMcpSource, s.apiUrl, r.Header)
+		return daytona.NewDaytonaMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	sandboxMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		authHeader := r.Header.Get("Authorization")
-		headers := map[string]string{
-			"Authorization":    authHeader,
-			"X-Daytona-Source": "daytona-sandbox-mcp",
-		}
-		return sandbox.NewDaytonaSandboxMCPServer(apiclient.NewApiClient(s.apiUrl, headers)).Server
+		apiClient := apiclient.NewApiClient(constants.DaytonaSandboxMcpSource, s.apiUrl, r.Header)
+		return sandbox.NewDaytonaSandboxMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	fsMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		authHeader := r.Header.Get("Authorization")
-		headers := map[string]string{
-			"Authorization":    authHeader,
-			"X-Daytona-Source": "daytona-fs-mcp",
-		}
-		return fs.NewDaytonaFileSystemMCPServer(apiclient.NewApiClient(s.apiUrl, headers)).Server
+		apiClient := apiclient.NewApiClient(constants.DaytonaFsMcpSource, s.apiUrl, r.Header)
+		return fs.NewDaytonaFileSystemMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	gitMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		authHeader := r.Header.Get("Authorization")
-		headers := map[string]string{
-			"Authorization":    authHeader,
-			"X-Daytona-Source": "daytona-git-mcp",
-		}
-		return git.NewDaytonaGitMCPServer(apiclient.NewApiClient(s.apiUrl, headers)).Server
+		apiClient := apiclient.NewApiClient(constants.DaytonaGitMcpSource, s.apiUrl, r.Header)
+		return git.NewDaytonaGitMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	httpMux := http.NewServeMux()
