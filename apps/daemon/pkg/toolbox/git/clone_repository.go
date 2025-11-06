@@ -13,6 +13,18 @@ import (
 	go_git_http "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
+// CloneRepository godoc
+//
+//	@Summary		Clone a Git repository
+//	@Description	Clone a Git repository to the specified path
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	GitCloneRequest	true	"Clone repository request"
+//	@Success		200
+//	@Router			/git/clone [post]
+//
+//	@id				CloneRepository
 func CloneRepository(c *gin.Context) {
 	var req GitCloneRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

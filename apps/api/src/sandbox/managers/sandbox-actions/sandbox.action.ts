@@ -10,7 +10,6 @@ import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { Repository, FindOptionsWhere } from 'typeorm'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { ToolboxService } from '../../services/toolbox.service'
 import { BackupState } from '../../enums/backup-state.enum'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
@@ -28,7 +27,6 @@ export abstract class SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected readonly sandboxRepository: Repository<Sandbox>,
-    protected readonly toolboxService: ToolboxService,
     protected readonly redisLockProvider: RedisLockProvider,
   ) {}
 

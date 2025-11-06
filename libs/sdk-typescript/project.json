@@ -26,7 +26,7 @@
       "dependsOn": [
         {
           "target": "build",
-          "projects": ["api-client"]
+          "projects": ["api-client", "toolbox-api-client"]
         },
         "set-version"
       ]
@@ -49,7 +49,7 @@
         "build",
         {
           "target": "publish",
-          "projects": ["api-client"]
+          "projects": ["api-client", "toolbox-api-client"]
         }
       ]
     }

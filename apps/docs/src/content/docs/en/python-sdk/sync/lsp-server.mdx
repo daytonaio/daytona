@@ -16,7 +16,7 @@ IDE-like features such as code completion, symbol search, and more.
 
 ```python
 def __init__(language_id: LspLanguageId, path_to_project: str,
-             toolbox_api: ToolboxApi, sandbox_id: str)
+             api_client: LspApi)
 ```
 
 Initializes a new LSP server instance.
@@ -24,9 +24,8 @@ Initializes a new LSP server instance.
 **Arguments**:
 
 - `language_id` _LspLanguageId_ - The language server type (e.g., LspLanguageId.TYPESCRIPT).
-- `path_to_project` _str_ - Path to the project root directory. Relative paths are resolved
-  based on the sandbox working directory.
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `path_to_project` _str_ - Absolute path to the project root directory.
+- `api_client` _LspApi_ - API client for Sandbox operations.
 - `instance` _SandboxInstance_ - The Sandbox instance this server belongs to.
 
 #### LspServer.start
@@ -211,7 +210,7 @@ for symbol in symbols:
 
 ```python
 @intercept_errors(message_prefix="Failed to get completions: ")
-def completions(path: str, position: Position) -> CompletionList
+def completions(path: str, position: LspCompletionPosition) -> CompletionList
 ```
 
 Gets completion suggestions at a position in a file.
@@ -220,7 +219,7 @@ Gets completion suggestions at a position in a file.
 
 - `path` _str_ - Path to the file. Relative paths are resolved based on the project path
   set in the LSP server constructor.
-- `position` _Position_ - Cursor position to get completions for.
+- `position` _LspCompletionPosition_ - Cursor position to get completions for.
   
 
 **Returns**:
@@ -241,7 +240,7 @@ Gets completion suggestions at a position in a file.
 
 ```python
 # Get completions at a specific position
-pos = Position(line=10, character=15)
+pos = LspCompletionPosition(line=10, character=15)
 completions = lsp.completions("workspace/project/src/index.ts", pos)
 for item in completions.items:
     print(f"{item.label} ({item.kind}): {item.detail}")
@@ -261,13 +260,13 @@ Language IDs for Language Server Protocol (LSP).
     - `TYPESCRIPT` ("typescript")
     - `JAVASCRIPT` ("javascript")
 
-## Position
+## LspCompletionPosition
 
 ```python
-class Position()
+class LspCompletionPosition()
 ```
 
-Represents a zero-based position in a text document,
+Represents a zero-based completion position in a text document,
 specified by line number and character offset.
 
 **Attributes**:
@@ -275,13 +274,13 @@ specified by line number and character offset.
 - `line` _int_ - Zero-based line number in the document.
 - `character` _int_ - Zero-based character offset on the line.
 
-#### Position.\_\_init\_\_
+#### LspCompletionPosition.\_\_init\_\_
 
 ```python
 def __init__(line: int, character: int)
 ```
 
-Initialize a new Position instance.
+Initialize a new LspCompletionPosition instance.
 
 **Arguments**:
 

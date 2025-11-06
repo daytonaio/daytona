@@ -68,7 +68,7 @@ type PTYSessionInfo struct {
 	CreatedAt time.Time         `json:"createdAt"`
 	Active    bool              `json:"active"`
 	LazyStart bool              `json:"lazyStart"` // Whether this session uses lazy start
-}
+} // @name PtySessionInfo
 
 // API Request/Response types
 
@@ -80,20 +80,20 @@ type PTYCreateRequest struct {
 	Cols      *uint16           `json:"cols" validate:"optional"`
 	Rows      *uint16           `json:"rows" validate:"optional"`
 	LazyStart bool              `json:"lazyStart,omitempty"` // Don't start PTY until first client connects
-} // @name PTYCreateRequest
+} // @name PtyCreateRequest
 
 // PTYCreateResponse represents the response when creating a PTY session
 type PTYCreateResponse struct {
 	SessionID string `json:"sessionId"`
-} // @name PTYCreateResponse
+} // @name PtyCreateResponse
 
 // PTYListResponse represents the response when listing PTY sessions
 type PTYListResponse struct {
 	Sessions []PTYSessionInfo `json:"sessions"`
-} // @name PTYListResponse
+} // @name PtyListResponse
 
 // PTYResizeRequest represents a request to resize a PTY session
 type PTYResizeRequest struct {
 	Cols uint16 `json:"cols" binding:"required,min=1,max=1000"`
 	Rows uint16 `json:"rows" binding:"required,min=1,max=1000"`
-} // @name PTYResizeRequest
+} // @name PtyResizeRequest

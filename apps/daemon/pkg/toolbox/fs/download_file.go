@@ -13,6 +13,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// DownloadFile godoc
+//
+//	@Summary		Download a file
+//	@Description	Download a file by providing its path
+//	@Tags			file-system
+//	@Produce		octet-stream
+//	@Param			path	query	string	true	"File path to download"
+//	@Success		200		{file}	binary
+//	@Router			/files/download [get]
+//
+//	@id				DownloadFile
 func DownloadFile(c *gin.Context) {
 	requestedPath := c.Query("path")
 	if requestedPath == "" {

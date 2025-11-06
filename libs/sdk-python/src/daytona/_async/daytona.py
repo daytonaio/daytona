@@ -5,11 +5,13 @@ import asyncio
 import json
 import time
 import warnings
+from copy import deepcopy
 from importlib.metadata import version
-from typing import Callable, Dict, Optional, Union, overload
+from typing import Callable, Dict, List, Optional, Union, overload
 
 from daytona_api_client_async import (
     ApiClient,
+    ConfigApi,
     Configuration,
     CreateBuildInfo,
     CreateSandbox,
@@ -18,8 +20,8 @@ from daytona_api_client_async import (
     SandboxState,
     SnapshotsApi,
 )
-from daytona_api_client_async import ToolboxApi as ToolboxApi
 from daytona_api_client_async import VolumesApi as VolumesApi
+from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
 from environs import Env
 
 from .._utils.enum import to_enum
@@ -78,6 +80,7 @@ class AsyncDaytona:
     _organization_id: Optional[str] = None
     _api_url: str
     _target: Optional[str] = None
+    _api_clients: List[ApiClient | ToolboxApiClient] = []
 
     def __init__(self, config: Optional[DaytonaConfig] = None):
         """Initializes Daytona instance with optional configuration.
@@ -160,6 +163,7 @@ class AsyncDaytona:
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
         self._api_client = ApiClient(configuration)
+        self._api_clients.append(self._api_client)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
         self._api_client.default_headers["X-Daytona-Source"] = "python-sdk"
 
@@ -188,8 +192,9 @@ class AsyncDaytona:
 
         # Initialize API clients with the api_client instance
         self._sandbox_api = SandboxApi(self._api_client)
-        self._toolbox_api = ToolboxApi(self._api_client)
         self._object_storage_api = ObjectStorageApi(self._api_client)
+        self._config_api = ConfigApi(self._api_client)
+        self._proxy_toolbox_url = None
 
         # Initialize services
         self.volume = AsyncVolumeService(VolumesApi(self._api_client))
@@ -208,7 +213,7 @@ class AsyncDaytona:
         """Close the HTTP session and clean up resources.
 
         This method should be called when you're done using the AsyncDaytona instance
-        to properly close the underlying HTTP session and avoid resource leaks.
+        to properly close the underlying HTTP sessions and avoid resource leaks.
 
         Example:
             ```python
@@ -228,8 +233,9 @@ class AsyncDaytona:
             # Automatically closed
             ```
         """
-        if hasattr(self, "_api_client") and self._api_client:
-            await self._api_client.close()
+        if hasattr(self, "_api_clients") and self._api_clients:
+            for api_client in self._api_clients:
+                await api_client.close()
 
     # unasync: delete end
 
@@ -451,9 +457,10 @@ class AsyncDaytona:
 
         sandbox = AsyncSandbox(
             response,
+            self._clone_api_client_to_toolbox_api_client(),
             self._sandbox_api,
-            self._toolbox_api,
             code_toolbox,
+            self._get_proxy_toolbox_url,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -546,9 +553,10 @@ class AsyncDaytona:
         code_toolbox = SandboxPythonCodeToolbox()
         return AsyncSandbox(
             sandbox_instance,
+            self._clone_api_client_to_toolbox_api_client(),
             self._sandbox_api,
-            self._toolbox_api,
             code_toolbox,
+            self._get_proxy_toolbox_url,
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -613,9 +621,10 @@ class AsyncDaytona:
             items=[
                 AsyncSandbox(
                     sandbox,
+                    self._clone_api_client_to_toolbox_api_client(),
                     self._sandbox_api,
-                    self._toolbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
+                    self._get_proxy_toolbox_url,
                 )
                 for sandbox in response.items
             ],
@@ -669,3 +678,15 @@ class AsyncDaytona:
             DaytonaError: If timeout is negative; If Sandbox fails to stop or times out
         """
         await sandbox.stop(timeout)
+
+    def _clone_api_client_to_toolbox_api_client(self):
+        config = deepcopy(self._api_client.configuration)
+        new_client = ToolboxApiClient(config)
+        new_client.default_headers = deepcopy(self._api_client.default_headers)
+        self._api_clients.append(new_client)
+        return new_client
+
+    async def _get_proxy_toolbox_url(self):
+        if self._proxy_toolbox_url is None:
+            self._proxy_toolbox_url = (await self._config_api.config_controller_get_config()).proxy_toolbox_url
+        return self._proxy_toolbox_url

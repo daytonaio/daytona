@@ -54,6 +54,7 @@ ADDITIONAL_REPLACEMENTS = {
     "await ": "",
     # Module & class renames
     "daytona_api_client_async": "daytona_api_client",
+    "daytona_toolbox_api_client_async": "daytona_toolbox_api_client",
     "AsyncVolumeService": "VolumeService",
     "AsyncFileSystem": "FileSystem",
     "AsyncGit": "Git",

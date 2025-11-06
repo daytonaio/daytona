@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExecuteResponse as ClientExecuteResponse } from '@daytonaio/api-client'
 import { Chart } from './Charts'
 
 /**
@@ -26,7 +25,7 @@ export interface ExecutionArtifacts {
  * @property result - The output from the command execution
  * @property artifacts - Artifacts from the command execution
  */
-export interface ExecuteResponse extends ClientExecuteResponse {
+export interface ExecuteResponse {
   exitCode: number
   result: string
   artifacts?: ExecutionArtifacts

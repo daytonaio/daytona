@@ -9,6 +9,10 @@ from typing import Callable, NoReturn, ParamSpec, TypeVar, Union
 from daytona_api_client.exceptions import NotFoundException, OpenApiException
 from daytona_api_client_async.exceptions import NotFoundException as NotFoundExceptionAsync
 from daytona_api_client_async.exceptions import OpenApiException as OpenApiExceptionAsync
+from daytona_toolbox_api_client.exceptions import NotFoundException as NotFoundExceptionToolbox
+from daytona_toolbox_api_client.exceptions import OpenApiException as OpenApiExceptionToolbox
+from daytona_toolbox_api_client_async.exceptions import NotFoundException as NotFoundExceptionToolboxAsync
+from daytona_toolbox_api_client_async.exceptions import OpenApiException as OpenApiExceptionToolboxAsync
 
 from ..common.errors import DaytonaError, DaytonaNotFoundError
 
@@ -32,9 +36,19 @@ def intercept_errors(
                 msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)
                 raise e.__class__(msg) from None
 
-            if isinstance(e, (OpenApiException, OpenApiExceptionAsync)):
+            if isinstance(
+                e, (OpenApiException, OpenApiExceptionAsync, OpenApiExceptionToolbox, OpenApiExceptionToolboxAsync)
+            ):
                 msg = _get_open_api_exception_message(e)
-                if isinstance(e, (NotFoundException, NotFoundExceptionAsync)):
+                if isinstance(
+                    e,
+                    (
+                        NotFoundException,
+                        NotFoundExceptionAsync,
+                        NotFoundExceptionToolbox,
+                        NotFoundExceptionToolboxAsync,
+                    ),
+                ):
                     raise DaytonaNotFoundError(f"{message_prefix}{msg}") from None
                 raise DaytonaError(f"{message_prefix}{msg}") from None
 

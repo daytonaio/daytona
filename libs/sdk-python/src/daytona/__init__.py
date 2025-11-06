@@ -1,7 +1,8 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from daytona_api_client import SandboxState, SessionExecuteResponse
+from daytona_api_client import SandboxState
+from daytona_toolbox_api_client import SessionExecuteResponse
 
 from ._async.computer_use import (
     AsyncComputerUse,
@@ -36,7 +37,7 @@ from .common.daytona import (
 from .common.errors import DaytonaError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
-from .common.lsp_server import LspLanguageId
+from .common.lsp_server import LspCompletionPosition, LspLanguageId
 from .common.process import CodeRunParams, SessionExecuteRequest
 from .common.pty import PtySize
 from .common.sandbox import Resources
@@ -83,4 +84,5 @@ __all__ = [
     "CreateSandboxFromSnapshotParams",
     "CreateSnapshotParams",
     "PtySize",
+    "LspCompletionPosition",
 ]

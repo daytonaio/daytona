@@ -613,7 +613,7 @@ const Sandboxes: React.FC = () => {
 
     try {
       // First, check if computer use is already started
-      const statusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
+      const statusResponse = await toolboxApi.getComputerUseStatusDeprecated(id, selectedOrganization?.id)
       const status = statusResponse.data.status
 
       // Check if computer use is active (all processes running)
@@ -626,14 +626,14 @@ const Sandboxes: React.FC = () => {
       } else {
         // Computer use is not active, try to start it
         try {
-          await toolboxApi.startComputerUse(id, selectedOrganization?.id)
+          await toolboxApi.startComputerUseDeprecated(id, selectedOrganization?.id)
           toast.success('Starting VNC desktop...')
 
           // Wait a moment for processes to start, then open VNC
           await new Promise((resolve) => setTimeout(resolve, 5000))
 
           try {
-            const newStatusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
+            const newStatusResponse = await toolboxApi.getComputerUseStatusDeprecated(id, selectedOrganization?.id)
             const newStatus = newStatusResponse.data.status
 
             if (newStatus === 'active') {

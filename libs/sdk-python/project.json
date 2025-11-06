@@ -27,7 +27,12 @@
       "dependsOn": [
         {
           "target": "publish",
-          "projects": ["api-client-python", "api-client-python-async"]
+          "projects": [
+            "api-client-python",
+            "api-client-python-async",
+            "toolbox-api-client-python",
+            "toolbox-api-client-python-async"
+          ]
         }
       ]
     },

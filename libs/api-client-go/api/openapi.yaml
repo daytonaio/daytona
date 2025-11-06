@@ -2447,7 +2447,7 @@ paths:
   /toolbox/{sandboxId}/toolbox/project-dir:
     get:
       deprecated: true
-      operationId: getProjectDir
+      operationId: getProjectDir_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2477,12 +2477,13 @@ paths:
             - openid
             - profile
             - email
-      summary: Get sandbox project dir
+      summary: '[DEPRECATED] Get sandbox project dir'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/user-home-dir:
     get:
-      operationId: getUserHomeDir
+      deprecated: true
+      operationId: getUserHomeDir_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2512,12 +2513,13 @@ paths:
             - openid
             - profile
             - email
-      summary: Get sandbox user home dir
+      summary: '[DEPRECATED] Get sandbox user home dir'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/work-dir:
     get:
-      operationId: getWorkDir
+      deprecated: true
+      operationId: getWorkDir_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2547,13 +2549,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get sandbox work-dir
+      summary: '[DEPRECATED] Get sandbox work-dir'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files:
     delete:
+      deprecated: true
       description: Delete file inside sandbox
-      operationId: deleteFile
+      operationId: deleteFile_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2593,11 +2596,12 @@ paths:
             - openid
             - profile
             - email
-      summary: Delete file
+      summary: '[DEPRECATED] Delete file'
       tags:
         - toolbox
     get:
-      operationId: listFiles
+      deprecated: true
+      operationId: listFiles_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2636,14 +2640,14 @@ paths:
             - openid
             - profile
             - email
-      summary: List files
+      summary: '[DEPRECATED] List files'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/download:
     get:
       deprecated: true
       description: Download file from sandbox
-      operationId: downloadFile
+      operationId: downloadFile_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2681,13 +2685,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Download file
+      summary: '[DEPRECATED] Download file'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/bulk-download:
     post:
+      deprecated: true
       description: Streams back a multipart/form-data bundle of the requested paths
-      operationId: downloadFiles
+      operationId: downloadFiles_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2724,13 +2729,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Download multiple files
+      summary: '[DEPRECATED] Download multiple files'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/find:
     get:
+      deprecated: true
       description: Search for text/pattern inside sandbox files
-      operationId: findInFiles
+      operationId: findInFiles_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2776,13 +2782,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Search for text/pattern in files
+      summary: '[DEPRECATED] Search for text/pattern in files'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/folder:
     post:
+      deprecated: true
       description: Create folder inside sandbox
-      operationId: createFolder
+      operationId: createFolder_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2822,13 +2829,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Create folder
+      summary: '[DEPRECATED] Create folder'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/info:
     get:
+      deprecated: true
       description: Get file info inside sandbox
-      operationId: getFileInfo
+      operationId: getFileInfo_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2865,13 +2873,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get file info
+      summary: '[DEPRECATED] Get file info'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/move:
     post:
+      deprecated: true
       description: Move file inside sandbox
-      operationId: moveFile
+      operationId: moveFile_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2911,13 +2920,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Move file
+      summary: '[DEPRECATED] Move file'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/permissions:
     post:
+      deprecated: true
       description: Set file owner/group/permissions inside sandbox
-      operationId: setFilePermissions
+      operationId: setFilePermissions_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -2971,13 +2981,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Set file permissions
+      summary: '[DEPRECATED] Set file permissions'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/replace:
     post:
+      deprecated: true
       description: Replace text/pattern in multiple files inside sandbox
-      operationId: replaceInFiles
+      operationId: replaceInFiles_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3015,13 +3026,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Replace in files
+      summary: '[DEPRECATED] Replace in files'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/search:
     get:
+      deprecated: true
       description: Search for files inside sandbox
-      operationId: searchFiles
+      operationId: searchFiles_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3065,14 +3077,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Search files
+      summary: '[DEPRECATED] Search files'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/upload:
     post:
       deprecated: true
       description: Upload file inside sandbox
-      operationId: uploadFile
+      operationId: uploadFile_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3100,7 +3112,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/uploadFile_request'
+              $ref: '#/components/schemas/uploadFile_deprecated_request'
         required: true
       responses:
         '200':
@@ -3111,13 +3123,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Upload file
+      summary: '[DEPRECATED] Upload file'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/bulk-upload:
     post:
+      deprecated: true
       description: Upload multiple files inside sandbox
-      operationId: uploadFiles
+      operationId: uploadFiles_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3151,13 +3164,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Upload multiple files
+      summary: '[DEPRECATED] Upload multiple files'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/add:
     post:
+      deprecated: true
       description: Add files to git commit
-      operationId: gitAddFiles
+      operationId: gitAddFiles_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3189,13 +3203,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Add files
+      summary: '[DEPRECATED] Add files'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/branches:
     delete:
+      deprecated: true
       description: Delete branch on git repository
-      operationId: gitDeleteBranch
+      operationId: gitDeleteBranch_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3227,12 +3242,13 @@ paths:
             - openid
             - profile
             - email
-      summary: Delete branch
+      summary: '[DEPRECATED] Delete branch'
       tags:
         - toolbox
     get:
+      deprecated: true
       description: Get branch list from git repository
-      operationId: gitListBranches
+      operationId: gitListBranches_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3269,12 +3285,13 @@ paths:
             - openid
             - profile
             - email
-      summary: Get branch list
+      summary: '[DEPRECATED] Get branch list'
       tags:
         - toolbox
     post:
+      deprecated: true
       description: Create branch on git repository
-      operationId: gitCreateBranch
+      operationId: gitCreateBranch_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3306,13 +3323,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Create branch
+      summary: '[DEPRECATED] Create branch'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/clone:
     post:
+      deprecated: true
       description: Clone git repository
-      operationId: gitCloneRepository
+      operationId: gitCloneRepository_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3344,13 +3362,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Clone repository
+      summary: '[DEPRECATED] Clone repository'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/commit:
     post:
+      deprecated: true
       description: Commit changes to git repository
-      operationId: gitCommitChanges
+      operationId: gitCommitChanges_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3386,13 +3405,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Commit changes
+      summary: '[DEPRECATED] Commit changes'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/history:
     get:
+      deprecated: true
       description: Get commit history from git repository
-      operationId: gitGetHistory
+      operationId: gitGetHistory_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3431,13 +3451,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get commit history
+      summary: '[DEPRECATED] Get commit history'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/pull:
     post:
+      deprecated: true
       description: Pull changes from remote
-      operationId: gitPullChanges
+      operationId: gitPullChanges_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3469,13 +3490,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Pull changes
+      summary: '[DEPRECATED] Pull changes'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/push:
     post:
+      deprecated: true
       description: Push changes to remote
-      operationId: gitPushChanges
+      operationId: gitPushChanges_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3507,13 +3529,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Push changes
+      summary: '[DEPRECATED] Push changes'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/checkout:
     post:
+      deprecated: true
       description: Checkout branch or commit in git repository
-      operationId: gitCheckoutBranch
+      operationId: gitCheckoutBranch_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3545,13 +3568,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Checkout branch
+      summary: '[DEPRECATED] Checkout branch'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/git/status:
     get:
+      deprecated: true
       description: Get status from git repository
-      operationId: gitGetStatus
+      operationId: gitGetStatus_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3588,13 +3612,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get git status
+      summary: '[DEPRECATED] Get git status'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/execute:
     post:
+      deprecated: true
       description: Execute command synchronously inside sandbox
-      operationId: executeCommand
+      operationId: executeCommand_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3630,13 +3655,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Execute command
+      summary: '[DEPRECATED] Execute command'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/session:
     get:
+      deprecated: true
       description: List all active sessions in the sandbox
-      operationId: listSessions
+      operationId: listSessions_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3668,12 +3694,13 @@ paths:
             - openid
             - profile
             - email
-      summary: List sessions
+      summary: '[DEPRECATED] List sessions'
       tags:
         - toolbox
     post:
+      deprecated: true
       description: Create a new session in the sandbox
-      operationId: createSession
+      operationId: createSession_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3705,13 +3732,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Create session
+      summary: '[DEPRECATED] Create session'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/session/{sessionId}:
     delete:
+      deprecated: true
       description: Delete a specific session
-      operationId: deleteSession
+      operationId: deleteSession_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3744,12 +3772,13 @@ paths:
             - openid
             - profile
             - email
-      summary: Delete session
+      summary: '[DEPRECATED] Delete session'
       tags:
         - toolbox
     get:
+      deprecated: true
       description: Get session by ID
-      operationId: getSession
+      operationId: getSession_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3786,13 +3815,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get session
+      summary: '[DEPRECATED] Get session'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec:
     post:
+      deprecated: true
       description: Execute a command in a specific session
-      operationId: executeSessionCommand
+      operationId: executeSessionCommand_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3841,13 +3871,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Execute command in session
+      summary: '[DEPRECATED] Execute command in session'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}:
     get:
+      deprecated: true
       description: Get session command by ID
-      operationId: getSessionCommand
+      operationId: getSessionCommand_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3891,13 +3922,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get session command
+      summary: '[DEPRECATED] Get session command'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
     get:
+      deprecated: true
       description: Get logs for a specific command in a session
-      operationId: getSessionCommandLogs
+      operationId: getSessionCommandLogs_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3949,13 +3981,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get command logs
+      summary: '[DEPRECATED] Get command logs'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/pty:
     get:
+      deprecated: true
       description: List all active PTY sessions in the sandbox
-      operationId: listPTYSessions
+      operationId: listPTYSessions_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3985,12 +4018,13 @@ paths:
             - openid
             - profile
             - email
-      summary: List PTY sessions
+      summary: '[DEPRECATED] List PTY sessions'
       tags:
         - toolbox
     post:
+      deprecated: true
       description: Create a new PTY session in the sandbox
-      operationId: createPTYSession
+      operationId: createPTYSession_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4026,13 +4060,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Create PTY session
+      summary: '[DEPRECATED] Create PTY session'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}:
     delete:
+      deprecated: true
       description: Delete a PTY session and terminate the associated process
-      operationId: deletePTYSession
+      operationId: deletePTYSession_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4065,12 +4100,13 @@ paths:
             - openid
             - profile
             - email
-      summary: Delete PTY session
+      summary: '[DEPRECATED] Delete PTY session'
       tags:
         - toolbox
     get:
+      deprecated: true
       description: Get PTY session information by ID
-      operationId: getPTYSession
+      operationId: getPTYSession_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4107,13 +4143,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get PTY session
+      summary: '[DEPRECATED] Get PTY session'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize:
     post:
+      deprecated: true
       description: Resize a PTY session
-      operationId: resizePTYSession
+      operationId: resizePTYSession_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4156,14 +4193,15 @@ paths:
             - openid
             - profile
             - email
-      summary: Resize PTY session
+      summary: '[DEPRECATED] Resize PTY session'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/completions:
     post:
+      deprecated: true
       description: The Completion request is sent from the client to the server to
         compute completion items at a given cursor position.
-      operationId: LspCompletions
+      operationId: LspCompletions_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4199,14 +4237,15 @@ paths:
             - openid
             - profile
             - email
-      summary: Get Lsp Completions
+      summary: '[DEPRECATED] Get Lsp Completions'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/did-close:
     post:
+      deprecated: true
       description: The document close notification is sent from the client to the
         server when the document got closed in the client.
-      operationId: LspDidClose
+      operationId: LspDidClose_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4238,14 +4277,15 @@ paths:
             - openid
             - profile
             - email
-      summary: Call Lsp DidClose
+      summary: '[DEPRECATED] Call Lsp DidClose'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/did-open:
     post:
+      deprecated: true
       description: The document open notification is sent from the client to the server
         to signal newly opened text documents.
-      operationId: LspDidOpen
+      operationId: LspDidOpen_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4277,13 +4317,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Call Lsp DidOpen
+      summary: '[DEPRECATED] Call Lsp DidOpen'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/document-symbols:
     get:
+      deprecated: true
       description: The document symbol request is sent from the client to the server.
-      operationId: LspDocumentSymbols
+      operationId: LspDocumentSymbols_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4336,13 +4377,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Call Lsp DocumentSymbols
+      summary: '[DEPRECATED] Call Lsp DocumentSymbols'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/start:
     post:
+      deprecated: true
       description: Start Lsp server process inside sandbox project
-      operationId: LspStart
+      operationId: LspStart_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4374,13 +4416,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Start Lsp server
+      summary: '[DEPRECATED] Start Lsp server'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/stop:
     post:
+      deprecated: true
       description: Stop Lsp server process inside sandbox project
-      operationId: LspStop
+      operationId: LspStop_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4412,14 +4455,15 @@ paths:
             - openid
             - profile
             - email
-      summary: Stop Lsp server
+      summary: '[DEPRECATED] Stop Lsp server'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/workspace-symbols:
     get:
+      deprecated: true
       description: The workspace symbol request is sent from the client to the server
         to list project-wide symbols matching the query string.
-      operationId: LspWorkspaceSymbols
+      operationId: LspWorkspaceSymbols_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4472,13 +4516,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Call Lsp WorkspaceSymbols
+      summary: '[DEPRECATED] Call Lsp WorkspaceSymbols'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/start:
     post:
+      deprecated: true
       description: 'Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)'
-      operationId: startComputerUse
+      operationId: startComputerUse_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4508,13 +4553,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Start computer use processes
+      summary: '[DEPRECATED] Start computer use processes'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/stop:
     post:
+      deprecated: true
       description: 'Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)'
-      operationId: stopComputerUse
+      operationId: stopComputerUse_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4544,13 +4590,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Stop computer use processes
+      summary: '[DEPRECATED] Stop computer use processes'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/status:
     get:
+      deprecated: true
       description: Get status of all VNC desktop processes
-      operationId: getComputerUseStatus
+      operationId: getComputerUseStatus_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4580,13 +4627,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get computer use status
+      summary: '[DEPRECATED] Get computer use status'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status:
     get:
+      deprecated: true
       description: Get status of a specific VNC process
-      operationId: getProcessStatus
+      operationId: getProcessStatus_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4623,13 +4671,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get process status
+      summary: '[DEPRECATED] Get process status'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart:
     post:
+      deprecated: true
       description: Restart a specific VNC process
-      operationId: restartProcess
+      operationId: restartProcess_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4666,13 +4715,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Restart process
+      summary: '[DEPRECATED] Restart process'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs:
     get:
+      deprecated: true
       description: Get logs for a specific VNC process
-      operationId: getProcessLogs
+      operationId: getProcessLogs_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4709,13 +4759,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get process logs
+      summary: '[DEPRECATED] Get process logs'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors:
     get:
+      deprecated: true
       description: Get error logs for a specific VNC process
-      operationId: getProcessErrors
+      operationId: getProcessErrors_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4752,13 +4803,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get process errors
+      summary: '[DEPRECATED] Get process errors'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/mouse/position:
     get:
+      deprecated: true
       description: Get current mouse cursor position
-      operationId: getMousePosition
+      operationId: getMousePosition_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4788,13 +4840,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get mouse position
+      summary: '[DEPRECATED] Get mouse position'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/mouse/move:
     post:
+      deprecated: true
       description: Move mouse cursor to specified coordinates
-      operationId: moveMouse
+      operationId: moveMouse_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4830,13 +4883,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Move mouse
+      summary: '[DEPRECATED] Move mouse'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/mouse/click:
     post:
+      deprecated: true
       description: Click mouse at specified coordinates
-      operationId: clickMouse
+      operationId: clickMouse_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4872,13 +4926,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Click mouse
+      summary: '[DEPRECATED] Click mouse'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/mouse/drag:
     post:
+      deprecated: true
       description: Drag mouse from start to end coordinates
-      operationId: dragMouse
+      operationId: dragMouse_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4914,13 +4969,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Drag mouse
+      summary: '[DEPRECATED] Drag mouse'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll:
     post:
+      deprecated: true
       description: Scroll mouse at specified coordinates
-      operationId: scrollMouse
+      operationId: scrollMouse_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4956,13 +5012,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Scroll mouse
+      summary: '[DEPRECATED] Scroll mouse'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/keyboard/type:
     post:
+      deprecated: true
       description: Type text using keyboard
-      operationId: typeText
+      operationId: typeText_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -4994,13 +5051,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Type text
+      summary: '[DEPRECATED] Type text'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/keyboard/key:
     post:
+      deprecated: true
       description: Press a key with optional modifiers
-      operationId: pressKey
+      operationId: pressKey_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5032,13 +5090,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Press key
+      summary: '[DEPRECATED] Press key'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey:
     post:
+      deprecated: true
       description: Press a hotkey combination
-      operationId: pressHotkey
+      operationId: pressHotkey_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5070,13 +5129,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Press hotkey
+      summary: '[DEPRECATED] Press hotkey'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/screenshot:
     get:
+      deprecated: true
       description: Take a screenshot of the entire screen
-      operationId: takeScreenshot
+      operationId: takeScreenshot_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5113,13 +5173,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Take screenshot
+      summary: '[DEPRECATED] Take screenshot'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region:
     get:
+      deprecated: true
       description: Take a screenshot of a specific region
-      operationId: takeRegionScreenshot
+      operationId: takeRegionScreenshot_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5184,13 +5245,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Take region screenshot
+      summary: '[DEPRECATED] Take region screenshot'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed:
     get:
+      deprecated: true
       description: 'Take a compressed screenshot with format, quality, and scale options'
-      operationId: takeCompressedScreenshot
+      operationId: takeCompressedScreenshot_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5248,13 +5310,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Take compressed screenshot
+      summary: '[DEPRECATED] Take compressed screenshot'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed:
     get:
+      deprecated: true
       description: Take a compressed screenshot of a specific region
-      operationId: takeCompressedRegionScreenshot
+      operationId: takeCompressedRegionScreenshot_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5340,13 +5403,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Take compressed region screenshot
+      summary: '[DEPRECATED] Take compressed region screenshot'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/display/info:
     get:
+      deprecated: true
       description: Get information about displays
-      operationId: getDisplayInfo
+      operationId: getDisplayInfo_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5376,13 +5440,14 @@ paths:
             - openid
             - profile
             - email
-      summary: Get display info
+      summary: '[DEPRECATED] Get display info'
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/computeruse/display/windows:
     get:
+      deprecated: true
       description: Get list of open windows
-      operationId: getWindows
+      operationId: getWindows_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -5412,7 +5477,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Get windows
+      summary: '[DEPRECATED] Get windows'
       tags:
         - toolbox
   /snapshots:
@@ -6413,7 +6478,11 @@ paths:
           style: simple
       responses:
         '200':
-          description: ''
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: User access status to the sandbox
       security:
         - bearer: []
         - oauth2:
@@ -7271,6 +7340,7 @@ components:
         linkedAccountsEnabled: true
         version: 0.0.1
         oidc: ''
+        proxyToolboxUrl: https://proxy.example.com/toolbox
         posthog: ''
         maxAutoArchiveInterval: 43200
         pylonAppId: pylon-app-123
@@ -7317,6 +7387,10 @@ components:
           description: Proxy template URL
           example: 'https://{{PORT}}-{{sandboxId}}.proxy.example.com'
           type: string
+        proxyToolboxUrl:
+          description: Toolbox template URL
+          example: https://proxy.example.com/toolbox
+          type: string
         defaultSnapshot:
           description: Default snapshot for sandboxes
           example: ubuntu:22.04
@@ -7359,6 +7433,7 @@ components:
         - maxAutoArchiveInterval
         - oidc
         - proxyTemplateUrl
+        - proxyToolboxUrl
         - version
       type: object
     CreateApiKey:
@@ -11672,7 +11747,7 @@ components:
         - total
         - totalPages
       type: object
-    uploadFile_request:
+    uploadFile_deprecated_request:
       properties:
         file:
           format: binary

@@ -13,6 +13,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Start godoc
+//
+//	@Summary		Start LSP server
+//	@Description	Start a Language Server Protocol server for the specified language
+//	@Tags			lsp
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	LspServerRequest	true	"LSP server request"
+//	@Success		200
+//	@Router			/lsp/start [post]
+//
+//	@id				Start
 func Start(c *gin.Context) {
 	var req LspServerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -31,6 +43,18 @@ func Start(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// Stop godoc
+//
+//	@Summary		Stop LSP server
+//	@Description	Stop a Language Server Protocol server
+//	@Tags			lsp
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	LspServerRequest	true	"LSP server request"
+//	@Success		200
+//	@Router			/lsp/stop [post]
+//
+//	@id				Stop
 func Stop(c *gin.Context) {
 	var req LspServerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -49,6 +73,18 @@ func Stop(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// DidOpen godoc
+//
+//	@Summary		Notify document opened
+//	@Description	Notify the LSP server that a document has been opened
+//	@Tags			lsp
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	LspDocumentRequest	true	"Document request"
+//	@Success		200
+//	@Router			/lsp/did-open [post]
+//
+//	@id				DidOpen
 func DidOpen(c *gin.Context) {
 	var req LspDocumentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -75,6 +111,18 @@ func DidOpen(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// DidClose godoc
+//
+//	@Summary		Notify document closed
+//	@Description	Notify the LSP server that a document has been closed
+//	@Tags			lsp
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	LspDocumentRequest	true	"Document request"
+//	@Success		200
+//	@Router			/lsp/did-close [post]
+//
+//	@id				DidClose
 func DidClose(c *gin.Context) {
 	var req LspDocumentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -101,6 +149,18 @@ func DidClose(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// Completions godoc
+//
+//	@Summary		Get code completions
+//	@Description	Get code completion suggestions from the LSP server
+//	@Tags			lsp
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		LspCompletionParams	true	"Completion request"
+//	@Success		200		{object}	CompletionList
+//	@Router			/lsp/completions [post]
+//
+//	@id				Completions
 func Completions(c *gin.Context) {
 	var req LspCompletionParams
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -138,6 +198,19 @@ func Completions(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
+// DocumentSymbols godoc
+//
+//	@Summary		Get document symbols
+//	@Description	Get symbols (functions, classes, etc.) from a document
+//	@Tags			lsp
+//	@Produce		json
+//	@Param			languageId		query	string	true	"Language ID (e.g., python, typescript)"
+//	@Param			pathToProject	query	string	true	"Path to project"
+//	@Param			uri				query	string	true	"Document URI"
+//	@Success		200				{array}	LspSymbol
+//	@Router			/lsp/document-symbols [get]
+//
+//	@id				DocumentSymbols
 func DocumentSymbols(c *gin.Context) {
 	languageId := c.Query("languageId")
 	if languageId == "" {
@@ -177,6 +250,19 @@ func DocumentSymbols(c *gin.Context) {
 	c.JSON(http.StatusOK, symbols)
 }
 
+// WorkspaceSymbols godoc
+//
+//	@Summary		Get workspace symbols
+//	@Description	Search for symbols across the entire workspace
+//	@Tags			lsp
+//	@Produce		json
+//	@Param			query			query	string	true	"Search query"
+//	@Param			languageId		query	string	true	"Language ID (e.g., python, typescript)"
+//	@Param			pathToProject	query	string	true	"Path to project"
+//	@Success		200				{array}	LspSymbol
+//	@Router			/lsp/workspacesymbols [get]
+//
+//	@id				WorkspaceSymbols
 func WorkspaceSymbols(c *gin.Context) {
 	query := c.Query("query")
 	if query == "" {

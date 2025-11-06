@@ -5,7 +5,7 @@ import json
 import time
 from typing import Callable, Generator, Optional, Union
 
-from daytona_api_client_async import PtySessionInfo
+from daytona_toolbox_api_client import PtySessionInfo
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from websockets.sync.client import ClientConnection
 

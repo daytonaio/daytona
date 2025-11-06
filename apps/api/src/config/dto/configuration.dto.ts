@@ -119,6 +119,13 @@ export class ConfigurationDto {
   proxyTemplateUrl: string
 
   @ApiProperty({
+    description: 'Toolbox template URL',
+    example: 'https://proxy.example.com/toolbox',
+  })
+  @IsString()
+  proxyToolboxUrl: string
+
+  @ApiProperty({
     description: 'Default snapshot for sandboxes',
     example: 'ubuntu:22.04',
   })
@@ -187,6 +194,7 @@ export class ConfigurationDto {
     }
     this.linkedAccountsEnabled = configService.get('oidc.managementApi.enabled')
     this.proxyTemplateUrl = configService.getOrThrow('proxy.templateUrl')
+    this.proxyToolboxUrl = configService.getOrThrow('proxy.toolboxUrl')
     this.defaultSnapshot = configService.getOrThrow('defaultSnapshot')
     this.dashboardUrl = configService.getOrThrow('dashboardUrl')
     this.maxAutoArchiveInterval = configService.getOrThrow('maxAutoArchiveInterval')
@@ -210,6 +218,6 @@ export class ConfigurationDto {
       this.pylonAppId = configService.get('pylonAppId')
     }
     // TODO: announcements
-    // this.announcements = configService.get('announcements')
+    this.announcements = {}
   }
 }

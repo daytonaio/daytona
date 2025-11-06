@@ -37,15 +37,14 @@ sandbox.git.commit(
 #### Git.\_\_init\_\_
 
 ```python
-def __init__(sandbox_id: str, toolbox_api: ToolboxApi)
+def __init__(api_client: GitApi)
 ```
 
 Initializes a new Git handler instance.
 
 **Arguments**:
 
-- `sandbox_id` _str_ - The Sandbox ID.
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `api_client` _GitApi_ - API client for Sandbox Git operations.
 
 #### Git.add
 

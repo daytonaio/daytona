@@ -501,11 +501,11 @@ func (c *ComputerUse) GetProcessErrors(req *computeruse.ProcessRequest) (string,
 	return string(content), nil
 }
 
-func (c *ComputerUse) GetStatus() (*computeruse.StatusResponse, error) {
+func (c *ComputerUse) GetStatus() (*computeruse.ComputerUseStatusResponse, error) {
 	// Get the current process status
 	processStatus, err := c.GetProcessStatus()
 	if err != nil {
-		return &computeruse.StatusResponse{
+		return &computeruse.ComputerUseStatusResponse{
 			Status: "error",
 		}, err
 	}
@@ -522,7 +522,7 @@ func (c *ComputerUse) GetStatus() (*computeruse.StatusResponse, error) {
 	}
 
 	if allRunning {
-		return &computeruse.StatusResponse{
+		return &computeruse.ComputerUseStatusResponse{
 			Status: "active",
 		}, nil
 	}
@@ -537,12 +537,12 @@ func (c *ComputerUse) GetStatus() (*computeruse.StatusResponse, error) {
 	}
 
 	if anyRunning {
-		return &computeruse.StatusResponse{
+		return &computeruse.ComputerUseStatusResponse{
 			Status: "partial",
 		}, nil
 	}
 
-	return &computeruse.StatusResponse{
+	return &computeruse.ComputerUseStatusResponse{
 		Status: "inactive",
 	}, nil
 }

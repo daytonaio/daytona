@@ -77,14 +77,9 @@ type StdioStream struct {
 	out io.ReadCloser
 }
 
-type Position struct {
-	Line      int `json:"line" validate:"required"`
-	Character int `json:"character" validate:"required"`
-} // @name Position
-
 type Range struct {
-	Start Position `json:"start" validate:"required"`
-	End   Position `json:"end" validate:"required"`
+	Start LspPosition `json:"start" validate:"required"`
+	End   LspPosition `json:"end" validate:"required"`
 } // @name Range
 
 type TextDocumentIdentifier struct {
@@ -98,7 +93,7 @@ type VersionedTextDocumentIdentifier struct {
 
 type CompletionParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument" validate:"required"`
-	Position     Position               `json:"position" validate:"required"`
+	Position     LspPosition            `json:"position" validate:"required"`
 	Context      *CompletionContext     `json:"context,omitempty" validate:"optional"`
 } // @name CompletionParams
 
@@ -200,7 +195,7 @@ func (c *Client) GetWorkspaceSymbols(ctx context.Context, query string) ([]LspSy
 	return symbols, err
 }
 
-func (c *Client) GetCompletion(ctx context.Context, uri string, position Position, context *CompletionContext) (*CompletionList, error) {
+func (c *Client) GetCompletion(ctx context.Context, uri string, position LspPosition, context *CompletionContext) (*CompletionList, error) {
 	params := CompletionParams{
 		TextDocument: TextDocumentIdentifier{
 			URI: uri,

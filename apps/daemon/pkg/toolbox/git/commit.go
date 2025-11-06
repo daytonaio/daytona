@@ -14,6 +14,18 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
+// CommitChanges godoc
+//
+//	@Summary		Commit changes
+//	@Description	Commit staged changes to the Git repository
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		GitCommitRequest	true	"Commit request"
+//	@Success		200		{object}	GitCommitResponse
+//	@Router			/git/commit [post]
+//
+//	@id				CommitChanges
 func CommitChanges(c *gin.Context) {
 	var req GitCommitRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
