@@ -1,0 +1,38 @@
+{
+    "name": "toolbox-api-client-go",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "projectType": "library",
+    "sourceRoot": "libs/toolbox-api-client-go",
+    "tags": [],
+    "targets": {
+      "test": {
+        "executor": "@nx-go/nx-go:test"
+      },
+      "build": {
+        "executor": "@nx-go/nx-go:build",
+        "options": {
+          "main": "./{projectRoot}",
+          "outputPath": "dist/libs/toolbox-api-client-go"
+        }
+      },
+      "lint": {
+        "executor": "@nx-go/nx-go:lint"
+      },
+      "generate:api-client": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "yarn run openapi-generator-cli generate --git-repo-id=toolbox_apiclient --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g go --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=toolbox_apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/toolbox-api-client-go"
+        }
+      },
+      "tidy": {
+        "executor": "@nx-go/nx-go:tidy"
+      },
+      "format": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.yaml\""
+        }
+      }
+    }
+  }
+  
