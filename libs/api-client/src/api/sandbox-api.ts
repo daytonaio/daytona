@@ -462,7 +462,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary List all regions where sandboxes have been created
+     * @summary List all regions available to the organization
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -625,7 +625,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {Array<string>} [regionIds] List of regions IDs to filter by
      * @param {number} [minCpu] Minimum CPU
      * @param {number} [maxCpu] Maximum CPU
      * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -649,7 +649,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
-      regions?: Array<string>,
+      regionIds?: Array<string>,
       minCpu?: number,
       maxCpu?: number,
       minMemoryGiB?: number,
@@ -712,8 +712,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
         localVarQueryParameter['snapshots'] = snapshots
       }
 
-      if (regions) {
-        localVarQueryParameter['regions'] = regions
+      if (regionIds) {
+        localVarQueryParameter['regionIds'] = regionIds
       }
 
       if (minCpu !== undefined) {
@@ -1587,7 +1587,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary List all regions where sandboxes have been created
+     * @summary List all regions available to the organization
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1687,7 +1687,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {Array<string>} [regionIds] List of regions IDs to filter by
      * @param {number} [minCpu] Minimum CPU
      * @param {number} [maxCpu] Maximum CPU
      * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -1711,7 +1711,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
-      regions?: Array<string>,
+      regionIds?: Array<string>,
       minCpu?: number,
       maxCpu?: number,
       minMemoryGiB?: number,
@@ -1734,7 +1734,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         includeErroredDeleted,
         states,
         snapshots,
-        regions,
+        regionIds,
         minCpu,
         maxCpu,
         minMemoryGiB,
@@ -2254,7 +2254,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
-     * @summary List all regions where sandboxes have been created
+     * @summary List all regions available to the organization
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2314,7 +2314,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {Array<string>} [regionIds] List of regions IDs to filter by
      * @param {number} [minCpu] Minimum CPU
      * @param {number} [maxCpu] Maximum CPU
      * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -2338,7 +2338,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
-      regions?: Array<string>,
+      regionIds?: Array<string>,
       minCpu?: number,
       maxCpu?: number,
       minMemoryGiB?: number,
@@ -2362,7 +2362,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
           includeErroredDeleted,
           states,
           snapshots,
-          regions,
+          regionIds,
           minCpu,
           maxCpu,
           minMemoryGiB,
@@ -2734,7 +2734,7 @@ export class SandboxApi extends BaseAPI {
 
   /**
    *
-   * @summary List all regions where sandboxes have been created
+   * @summary List all regions available to the organization
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -2802,7 +2802,7 @@ export class SandboxApi extends BaseAPI {
    * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
    * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
    * @param {Array<string>} [snapshots] List of snapshot names to filter by
-   * @param {Array<string>} [regions] List of regions to filter by
+   * @param {Array<string>} [regionIds] List of regions IDs to filter by
    * @param {number} [minCpu] Minimum CPU
    * @param {number} [maxCpu] Maximum CPU
    * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -2827,7 +2827,7 @@ export class SandboxApi extends BaseAPI {
     includeErroredDeleted?: boolean,
     states?: Array<ListSandboxesPaginatedStatesEnum>,
     snapshots?: Array<string>,
-    regions?: Array<string>,
+    regionIds?: Array<string>,
     minCpu?: number,
     maxCpu?: number,
     minMemoryGiB?: number,
@@ -2851,7 +2851,7 @@ export class SandboxApi extends BaseAPI {
         includeErroredDeleted,
         states,
         snapshots,
-        regions,
+        regionIds,
         minCpu,
         maxCpu,
         minMemoryGiB,

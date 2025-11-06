@@ -252,7 +252,7 @@ export class SandboxDto {
       id: sandbox.id,
       organizationId: sandbox.organizationId,
       name: sandbox.name,
-      target: sandbox.region,
+      target: sandbox.regionId,
       snapshot: sandbox.snapshot,
       user: sandbox.osUser,
       env: sandbox.env,

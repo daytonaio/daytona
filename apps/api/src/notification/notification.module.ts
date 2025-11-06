@@ -10,9 +10,10 @@ import { OrganizationModule } from '../organization/organization.module'
 import { SandboxModule } from '../sandbox/sandbox.module'
 import { RedisModule } from '@nestjs-modules/ioredis'
 import { AuthModule } from '../auth/auth.module'
+import { RegionModule } from '../region/region.module'
 
 @Module({
-  imports: [OrganizationModule, SandboxModule, RedisModule, AuthModule],
+  imports: [OrganizationModule, SandboxModule, RedisModule, AuthModule, RegionModule],
   providers: [NotificationService, NotificationGateway],
   exports: [NotificationService],
 })

@@ -113,8 +113,8 @@ export class ListSandboxesQueryDto {
   snapshots?: string[]
 
   @ApiProperty({
-    name: 'regions',
-    description: 'List of regions to filter by',
+    name: 'regionIds',
+    description: 'List of regions IDs to filter by',
     required: false,
     type: [String],
   })
@@ -122,7 +122,7 @@ export class ListSandboxesQueryDto {
   @ToArray()
   @IsArray()
   @IsString({ each: true })
-  regions?: string[]
+  regionIds?: string[]
 
   @ApiProperty({
     name: 'minCpu',

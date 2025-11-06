@@ -46,9 +46,9 @@ class Organization(BaseModel):
     max_memory_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max memory per sandbox", alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max disk per sandbox", alias="maxDiskPerSandbox")
     sandbox_limited_network_egress: StrictBool = Field(description="Sandbox default network block all", alias="sandboxLimitedNetworkEgress")
-    default_region: StrictStr = Field(description="Default region", alias="defaultRegion")
+    default_region_id: StrictStr = Field(description="Default region ID", alias="defaultRegionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegion"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -126,7 +126,7 @@ class Organization(BaseModel):
             "maxMemoryPerSandbox": obj.get("maxMemoryPerSandbox"),
             "maxDiskPerSandbox": obj.get("maxDiskPerSandbox"),
             "sandboxLimitedNetworkEgress": obj.get("sandboxLimitedNetworkEgress"),
-            "defaultRegion": obj.get("defaultRegion")
+            "defaultRegionId": obj.get("defaultRegionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

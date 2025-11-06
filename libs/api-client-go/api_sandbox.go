@@ -128,7 +128,7 @@ type SandboxAPI interface {
 	GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		GetSandboxRegions List all regions where sandboxes have been created
+		GetSandboxRegions List all regions available to the organization
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@return SandboxAPIGetSandboxRegionsRequest
@@ -1265,7 +1265,7 @@ func (r SandboxAPIGetSandboxRegionsRequest) Execute() ([]Region, *http.Response,
 }
 
 /*
-GetSandboxRegions List all regions where sandboxes have been created
+GetSandboxRegions List all regions available to the organization
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return SandboxAPIGetSandboxRegionsRequest
@@ -1634,7 +1634,7 @@ type SandboxAPIListSandboxesPaginatedRequest struct {
 	includeErroredDeleted  *bool
 	states                 *[]string
 	snapshots              *[]string
-	regions                *[]string
+	regionIds              *[]string
 	minCpu                 *float32
 	maxCpu                 *float32
 	minMemoryGiB           *float32
@@ -1701,9 +1701,9 @@ func (r SandboxAPIListSandboxesPaginatedRequest) Snapshots(snapshots []string) S
 	return r
 }
 
-// List of regions to filter by
-func (r SandboxAPIListSandboxesPaginatedRequest) Regions(regions []string) SandboxAPIListSandboxesPaginatedRequest {
-	r.regions = &regions
+// List of regions IDs to filter by
+func (r SandboxAPIListSandboxesPaginatedRequest) RegionIds(regionIds []string) SandboxAPIListSandboxesPaginatedRequest {
+	r.regionIds = &regionIds
 	return r
 }
 
@@ -1855,15 +1855,15 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 			parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", t, "form", "multi")
 		}
 	}
-	if r.regions != nil {
-		t := *r.regions
+	if r.regionIds != nil {
+		t := *r.regionIds
 		if reflect.TypeOf(t).Kind() == reflect.Slice {
 			s := reflect.ValueOf(t)
 			for i := 0; i < s.Len(); i++ {
-				parameterAddToHeaderOrQuery(localVarQueryParams, "regions", s.Index(i).Interface(), "form", "multi")
+				parameterAddToHeaderOrQuery(localVarQueryParams, "regionIds", s.Index(i).Interface(), "form", "multi")
 			}
 		} else {
-			parameterAddToHeaderOrQuery(localVarQueryParams, "regions", t, "form", "multi")
+			parameterAddToHeaderOrQuery(localVarQueryParams, "regionIds", t, "form", "multi")
 		}
 	}
 	if r.minCpu != nil {

@@ -24,6 +24,19 @@ export class Runner {
   @Column()
   apiKey: string
 
+  @Column({ unique: true, default: '' })
+  tokenHash: string
+
+  @Column({
+    default: '',
+  })
+  tokenPrefix: string
+
+  @Column({
+    default: '',
+  })
+  tokenSuffix: string
+
   @Column()
   cpu: number
 
@@ -90,7 +103,7 @@ export class Runner {
   availabilityScore: number
 
   @Column()
-  region: string
+  regionId: string
 
   @Column({
     type: 'enum',
