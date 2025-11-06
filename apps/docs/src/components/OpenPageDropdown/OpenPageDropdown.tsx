@@ -8,8 +8,11 @@ import {
   DropdownMenuTrigger,
 } from '@radix-ui/react-dropdown-menu'
 import { clsx as cn } from 'clsx'
+import { GTProvider, T } from 'gt-react'
 import { ArrowUpRightIcon, ChevronDownIcon } from 'lucide-react'
+import loadTranslations from 'src/i18n/loadTranslations'
 
+import gtConfig from '../../../gt.config.json'
 import styles from './OpenPageDropdown.module.scss'
 
 function getPromptUrl(baseURL: string, url: string) {
@@ -35,7 +38,7 @@ const menuItems = {
           fill="currentColor"
         />
       </svg>
-      Open in Claude
+      <T>Open in Claude</T>
       <ArrowUpRightIcon size={13} />
     </a>
   ),
@@ -55,26 +58,25 @@ const menuItems = {
           fill="currentColor"
         />
       </svg>
-      Open in ChatGPT
+      <T>Open in ChatGPT</T>
       <ArrowUpRightIcon size={13} />
     </a>
   ),
 }
 
-export function OpenPageDropdown({
-  url,
-  className,
-}: {
+interface Props {
   url: string
   className?: string
-}) {
+}
+
+function OpenPageDropdownContent({ url, className }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(styles.dropdownMenuTrigger, className)}
         aria-label="Open Page LLM Actions Menu"
       >
-        Open
+        <T>Open</T>
         <ChevronDownIcon size={14} />
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
@@ -95,5 +97,22 @@ export function OpenPageDropdown({
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>
+  )
+}
+
+export const OpenPageDropdown = ({
+  locale,
+  ...props
+}: { locale: string } & Props) => {
+  return (
+    <GTProvider
+      config={gtConfig}
+      loadTranslations={loadTranslations}
+      locale={locale}
+      projectId={import.meta.env.PUBLIC_VITE_GT_PROJECT_ID}
+      devApiKey={import.meta.env.PUBLIC_VITE_GT_API_KEY}
+    >
+      <OpenPageDropdownContent {...props} />
+    </GTProvider>
   )
 }
