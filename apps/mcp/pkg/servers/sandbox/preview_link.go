@@ -66,7 +66,7 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
 	}
 
-	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaFsMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DAYTONA_FS_MCP_SOURCE, sandbox.Id, proxyUrl, request.Extra.Header)
 
 	log.Infof("Generating preview link - port: %d", *input.Port)
 

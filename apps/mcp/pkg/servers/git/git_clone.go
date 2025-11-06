@@ -76,7 +76,7 @@ func (s *DaytonaGitMCPServer) handleGitClone(ctx context.Context, request *mcp.C
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
 	}
 
-	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaGitMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DAYTONA_GIT_MCP_SOURCE, sandbox.Id, proxyUrl, request.Extra.Header)
 
 	_, err = toolboxApiClient.GitAPI.CloneRepository(ctx).Request(gitCloneRequest).Execute()
 	if err != nil {

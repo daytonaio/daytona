@@ -54,7 +54,7 @@ func (s *DaytonaFileSystemMCPServer) handleFileInfo(ctx context.Context, request
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
 	}
 
-	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaFsMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DAYTONA_FS_MCP_SOURCE, sandbox.Id, proxyUrl, request.Extra.Header)
 
 	// Get file info
 	fileInfo, _, err := toolboxApiClient.FileSystemAPI.GetFileInfo(ctx).Path(input.FilePath).Execute()

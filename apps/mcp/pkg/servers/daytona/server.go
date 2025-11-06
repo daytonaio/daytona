@@ -37,6 +37,6 @@ func NewDaytonaMCPServer(apiClient *apiclient.APIClient) *DaytonaMCPServer {
 }
 
 func (s *DaytonaMCPServer) addTools() {
-	mcp.AddTool(s.Server, s.getRunCodeTool(), s.handleRunCode)
-	mcp.AddTool(s.Server, s.getShellTool(), s.handleShell)
+	mcp.AddTool(s.Server, s.getCodeRunTool(), s.handleCodeRunTool)
+	mcp.AddTool(s.Server, s.getExecuteCommandTool(), s.handleExecuteCommand)
 }

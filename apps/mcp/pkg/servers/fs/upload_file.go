@@ -67,7 +67,7 @@ func (s *DaytonaFileSystemMCPServer) handleUploadFile(ctx context.Context, reque
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
 	}
 
-	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DaytonaFsMcpSource, sandbox.Id, proxyUrl, request.Extra.Header)
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DAYTONA_FS_MCP_SOURCE, sandbox.Id, proxyUrl, request.Extra.Header)
 
 	// Check if file exists and handle overwrite
 	if !input.Overwrite {

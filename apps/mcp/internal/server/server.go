@@ -53,22 +53,22 @@ func (s *MCPServer) Start() error {
 	}
 
 	daytonaMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		apiClient := apiclient.NewApiClient(constants.DaytonaMcpSource, s.apiUrl, r.Header)
+		apiClient := apiclient.NewApiClient(constants.DAYTONA_MCP_SOURCE, s.apiUrl, r.Header)
 		return daytona.NewDaytonaMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	sandboxMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		apiClient := apiclient.NewApiClient(constants.DaytonaSandboxMcpSource, s.apiUrl, r.Header)
+		apiClient := apiclient.NewApiClient(constants.DAYTONA_SANDBOX_MCP_SOURCE, s.apiUrl, r.Header)
 		return sandbox.NewDaytonaSandboxMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	fsMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		apiClient := apiclient.NewApiClient(constants.DaytonaFsMcpSource, s.apiUrl, r.Header)
+		apiClient := apiclient.NewApiClient(constants.DAYTONA_FS_MCP_SOURCE, s.apiUrl, r.Header)
 		return fs.NewDaytonaFileSystemMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	gitMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
-		apiClient := apiclient.NewApiClient(constants.DaytonaGitMcpSource, s.apiUrl, r.Header)
+		apiClient := apiclient.NewApiClient(constants.DAYTONA_GIT_MCP_SOURCE, s.apiUrl, r.Header)
 		return git.NewDaytonaGitMCPServer(apiClient).Server
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
