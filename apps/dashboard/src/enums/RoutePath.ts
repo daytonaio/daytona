@@ -29,6 +29,8 @@ export enum RoutePath {
   SETTINGS = '/dashboard/settings',
   ONBOARDING = '/dashboard/onboarding',
   AUDIT_LOGS = '/dashboard/audit-logs',
+  REGIONS = '/dashboard/regions',
+  RUNNERS = '/dashboard/runners',
 
   // User routes
   USER_INVITATIONS = '/dashboard/user/invitations',

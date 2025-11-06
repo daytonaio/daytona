@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { Sandbox, SandboxDesiredState } from '@daytonaio/api-client'
+import { Region, Sandbox, SandboxDesiredState } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Checkbox } from '../ui/checkbox'
@@ -51,6 +51,7 @@ interface GetColumnsProps {
   deletePermitted: boolean
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  regionsData: Region[]
 }
 
 export function getColumns({
@@ -65,6 +66,7 @@ export function getColumns({
   deletePermitted,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  regionsData,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const handleOpenWebTerminal = async (sandboxId: string) => {
     const url = await getWebTerminalUrl(sandboxId)
@@ -192,7 +194,7 @@ export function getColumns({
       cell: ({ row }) => {
         return (
           <div className="w-full truncate">
-            <span className="truncate block">{row.original.target}</span>
+            <span className="truncate block">{getRegionDisplayName(row.original.target, regionsData)}</span>
           </div>
         )
       },
@@ -319,6 +321,15 @@ function getDisplayName(sandbox: Sandbox): string {
     return withoutPrefix
   }
   return sandbox.name
+}
+
+function getRegionDisplayName(regionId: string, regions: Region[]): string {
+  const region = regions.find((region) => region.id === regionId)
+  if (!region) {
+    return regionId
+  } else {
+    return region.name
+  }
 }
 
 function getLastEvent(sandbox: Sandbox): { date: Date; relativeTimeString: string } {
