@@ -124,7 +124,7 @@ func (s *DaytonaMCPServer) handleExecuteCommand(ctx context.Context, request *mc
 	if artifacts.Stdout != nil {
 		stdout = strings.TrimSpace(*artifacts.Stdout)
 	}
-	exitCode := int(*result.ExitCode)
+	exitCode := int(result.GetExitCode())
 
 	// Process command output
 	cmdResult := ExecuteCommandOutput{
