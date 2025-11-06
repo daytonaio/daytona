@@ -1,0 +1,340 @@
+---
+title: オープンソースのデプロイ
+---
+
+このガイドでは、Docker Compose を使用してローカル環境で Daytona Open Source を実行する手順を説明します。
+
+Compose ファイルは、Daytona リポジトリの [docker](https://github.com/daytonaio/daytona/tree/main/docker) フォルダにあります。
+
+:::caution
+
+* このセットアップはまだ開発中で、**本番環境での使用は安全ではありません**
+* 本番環境向けのデプロイガイドは別途提供予定です
+  :::
+
+## 概要 \{#overview\}
+
+この Docker Compose 構成には、Daytona を稼働させるために必要なすべてのサービスが含まれています:
+
+* **API**: Daytona のメインアプリケーションサーバー
+* **Proxy**: リクエストのプロキシサービス
+* **Runner**: Daytona のランナーをホストするサービス
+* **SSH Gateway**: サンドボックスへの SSH アクセスを処理するサービス
+* **Database**: データ永続化のための PostgreSQL データベース
+* **Redis**: キャッシュとセッション用のインメモリデータストア
+* **Dex**: OIDC 認証プロバイダー
+* **Registry**: Web UI を備えた Docker イメージレジストリ
+* **MinIO**: S3 互換のオブジェクトストレージ
+* **MailDev**: メールテストサービス
+* **Jaeger**: 分散トレーシング
+* **PgAdmin**: データベース管理インターフェース
+
+## クイックスタート \{#quick-start\}
+
+1. [Daytona リポジトリ](https://github.com/daytonaio/daytona)をクローンする
+
+2. [Docker と Docker Compose をインストールする](https://docs.docker.com/get-docker/)
+
+3. すべてのサービスを起動するために（Daytona リポジトリのルートで）次のコマンドを実行する:
+
+   ```bash
+   docker compose -f docker/docker-compose.yaml up -d
+   ```
+
+4. サービスにアクセスする:
+   * Daytona Dashboard: http://localhost:3000
+     * 認証情報: dev@daytona.io `password`
+     * http://localhost:3000/dashboard/snapshots で既定のスナップショットが有効になっていることを確認する
+   * PgAdmin: http://localhost:5050
+   * Registry UI: http://localhost:5100
+   * MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
+
+## プロキシ URL の DNS 設定 \{#dns-setup-for-proxy-urls\}
+
+ローカル開発では、`*.proxy.localhost` ドメインを `127.0.0.1` に解決する必要があります。
+
+```bash
+./scripts/setup-proxy-dns.sh
+```
+
+これは dnsmasq を `address=/proxy.localhost/127.0.0.1` で設定します。
+
+**この設定を行わない場合**、SDK のサンプルやプロキシへの直接アクセスは動作しません。
+
+## 開発メモ \{#development-notes\}
+
+* サービス間通信を簡素化するため、共有ネットワークを使用しています
+* データベースおよびストレージのデータは Docker ボリュームに永続化されます
+* テスト用に、レジストリはイメージの削除を許可するよう設定されています
+* ソケットがマウントされていない DinD 環境では cgroups を分割できないため、サンドボックスのリソース制限は無効化されています
+
+## 追加のネットワーク設定 \{#additional-network-options\}
+
+### HTTPプロキシ \{#http-proxy\}
+
+Daytona のサービスで外向きの HTTP プロキシを設定するには、プロキシ経由のアクセスが必要な各サービス（イメージ取得のために外部アクセスが必要なのは API サービスのみ）について、`docker-compose.yaml` ファイル内で次の環境変数を設定します。
+
+* `HTTP_PROXY`: HTTP プロキシサーバーの URL
+* `HTTPS_PROXY`: HTTPS プロキシサーバーの URL
+* `NO_PROXY`: プロキシを経由しないホスト名または IP アドレスのカンマ区切りリスト
+
+API サービスの基本設定は次のとおりです。
+
+```yaml
+environment:
+  - HTTP_PROXY=<your-proxy>
+  - HTTPS_PROXY=<your-proxy>
+  - NO_PROXY=localhost,runner,dex,registry,minio,jaeger,otel-collector,<your-proxy>
+```
+
+### 追加 CA 証明書 \{#extra-ca-certificates\}
+
+追加の CA 証明書（例：`DB_TLS` 環境変数と併用する場合）を設定するには、API サービスで次の環境変数を指定します。
+
+```yaml
+environment:
+  - NODE_EXTRA_CA_CERTS=/path/to/your/cert-bundle.pem
+```
+
+提供されたファイルは証明書バンドルです。つまり、PEM 形式で複数の CA 証明書を含めることができます。
+
+## 環境変数 \{#environment-variables\}
+
+`docker-compose.yaml` ファイル内の環境変数を編集して、デプロイをカスタマイズできます。
+以下は既定値付きの環境変数の全一覧です：
+
+### API サービス \{#api-service\}
+
+| 変数                                       | 型      | デフォルト値                                         | 説明                                        |
+| ------------------------------------------ | ------- | ---------------------------------------------------- | ------------------------------------------- |
+| `PORT`                                     | number  | `3000`                                               | APIサービスポート                           |
+| `DB_HOST`                                  | string  | `db`                                                 | PostgreSQLデータベースホスト名              |
+| `DB_PORT`                                  | number  | `5432`                                               | PostgreSQLデータベースポート                |
+| `DB_USERNAME`                              | string  | `user`                                               | PostgreSQLデータベースユーザー名            |
+| `DB_PASSWORD`                              | string  | `pass`                                               | PostgreSQLデータベースパスワード            |
+| `DB_DATABASE`                              | string  | `daytona`                                            | PostgreSQLデータベース名                    |
+| `DB_TLS_ENABLED`                           | boolean | `false`                                              | データベース接続のTLSを有効化               |
+| `DB_TLS_REJECT_UNAUTHORIZED`               | boolean | `true`                                               | 未承認のTLS証明書を拒否                     |
+| `REDIS_HOST`                               | string  | `redis`                                              | Redisサーバーホスト名                       |
+| `REDIS_PORT`                               | number  | `6379`                                               | Redisサーバーポート                         |
+| `OIDC_CLIENT_ID`                           | string  | `daytona`                                            | OIDCクライアント識別子                      |
+| `OIDC_ISSUER_BASE_URL`                     | string  | `http://dex:5556/dex`                                | OIDC発行者ベースURL                         |
+| `PUBLIC_OIDC_DOMAIN`                       | string  | `http://localhost:5556/dex`                          | パブリックOIDCドメイン                      |
+| `OIDC_AUDIENCE`                            | string  | `daytona`                                            | OIDCオーディエンス識別子                    |
+| `OIDC_MANAGEMENT_API_ENABLED`              | boolean | (empty)                                              | OIDC管理APIを有効化                         |
+| `OIDC_MANAGEMENT_API_CLIENT_ID`            | string  | (empty)                                              | OIDC管理APIクライアントID                   |
+| `OIDC_MANAGEMENT_API_CLIENT_SECRET`        | string  | (empty)                                              | OIDC管理APIクライアントシークレット         |
+| `OIDC_MANAGEMENT_API_AUDIENCE`             | string  | (empty)                                              | OIDC管理APIオーディエンス                   |
+| `DEFAULT_SNAPSHOT`                         | string  | `daytonaio/sandbox:0.4.3`                            | デフォルトサンドボックススナップショットイメージ |
+| `DASHBOARD_URL`                            | string  | `http://localhost:3000/dashboard`                    | ダッシュボードURL                           |
+| `DASHBOARD_BASE_API_URL`                   | string  | `http://localhost:3000`                              | ダッシュボードベースAPI URL                 |
+| `POSTHOG_API_KEY`                          | string  | `phc_bYtEsdMDrNLydXPD4tufkBrHKgfO2zbycM30LOowYNv`    | 分析用PostHog APIキー                       |
+| `POSTHOG_HOST`                             | string  | `https://d18ag4dodbta3l.cloudfront.net`              | PostHogホストURL                            |
+| `POSTHOG_ENVIRONMENT`                      | string  | `local`                                              | PostHog環境識別子                           |
+| `TRANSIENT_REGISTRY_URL`                   | string  | `http://registry:6000`                               | 一時レジストリURL                           |
+| `TRANSIENT_REGISTRY_ADMIN`                 | string  | `admin`                                              | 一時レジストリ管理者ユーザー名              |
+| `TRANSIENT_REGISTRY_PASSWORD`              | string  | `password`                                           | 一時レジストリ管理者パスワード              |
+| `TRANSIENT_REGISTRY_PROJECT_ID`            | string  | `daytona`                                            | 一時レジストリプロジェクトID                |
+| `INTERNAL_REGISTRY_URL`                    | string  | `http://registry:6000`                               | 内部レジストリURL                           |
+| `INTERNAL_REGISTRY_ADMIN`                  | string  | `admin`                                              | 内部レジストリ管理者ユーザー名              |
+| `INTERNAL_REGISTRY_PASSWORD`               | string  | `password`                                           | 内部レジストリ管理者パスワード              |
+| `INTERNAL_REGISTRY_PROJECT_ID`             | string  | `daytona`                                            | 内部レジストリプロジェクトID                |
+| `SMTP_HOST`                                | string  | `maildev`                                            | SMTPサーバーホスト名                        |
+| `SMTP_PORT`                                | number  | `1025`                                               | SMTPサーバーポート                          |
+| `SMTP_USER`                                | string  | (empty)                                              | SMTPユーザー名                              |
+| `SMTP_PASSWORD`                            | string  | (empty)                                              | SMTPパスワード                              |
+| `SMTP_SECURE`                              | boolean | (empty)                                              | SMTP安全接続を有効化                        |
+| `SMTP_EMAIL_FROM`                          | string  | `"Daytona Team <no-reply@daytona.io>"`               | SMTP送信者メールアドレス                    |
+| `S3_ENDPOINT`                              | string  | `http://minio:9000`                                  | S3互換ストレージエンドポイント              |
+| `S3_STS_ENDPOINT`                          | string  | `http://minio:9000/minio/v1/assume-role`             | S3 STSエンドポイント                        |
+| `S3_REGION`                                | string  | `us-east-1`                                          | S3リージョン                                |
+| `S3_ACCESS_KEY`                            | string  | `minioadmin`                                         | S3アクセスキー                              |
+| `S3_SECRET_KEY`                            | string  | `minioadmin`                                         | S3シークレットキー                          |
+| `S3_DEFAULT_BUCKET`                        | string  | `daytona`                                            | S3デフォルトバケット名                      |
+| `S3_ACCOUNT_ID`                            | string  | `/`                                                  | S3アカウントID                              |
+| `S3_ROLE_NAME`                             | string  | `/`                                                  | S3ロール名                                  |
+| `ENVIRONMENT`                              | string  | `dev`                                                | アプリケーション環境                        |
+| `MAX_AUTO_ARCHIVE_INTERVAL`                | number  | `43200`                                              | 最大自動アーカイブ間隔(秒)                  |
+| `OTEL_ENABLED`                             | boolean | `true`                                               | OpenTelemetryトレースを有効化               |
+| `OTEL_COLLECTOR_URL`                       | string  | `http://jaeger:4318/v1/traces`                       | OpenTelemetryコレクターURL                  |
+| `MAINTENANCE_MODE`                         | boolean | `false`                                              | メンテナンスモードを有効化                  |
+| `PROXY_DOMAIN`                             | string  | `proxy.localhost:4000`                               | プロキシドメイン                            |
+| `PROXY_PROTOCOL`                           | string  | `http`                                               | プロキシプロトコル                          |
+| `PROXY_API_KEY`                            | string  | `super_secret_key`                                   | プロキシAPIキー                             |
+| `PROXY_TEMPLATE_URL`                       | string  | `http://{{PORT}}-{{sandboxId}}.proxy.localhost:4000` | プロキシテンプレートURLパターン             |
+| `PROXY_TOOLBOX_BASE_URL`                   | string  | `{PROXY_PROTOCOL}://{PROXY_DOMAIN}`                  | ツールボックスリクエスト用プロキシベースURL |
+| `DEFAULT_RUNNER_DOMAIN`                    | string  | `runner:3003`                                        | デフォルトランナードメイン                  |
+| `DEFAULT_RUNNER_API_URL`                   | string  | `http://runner:3003`                                 | デフォルトランナーAPI URL                   |
+| `DEFAULT_RUNNER_PROXY_URL`                 | string  | `http://runner:3003`                                 | デフォルトランナープロキシURL               |
+| `DEFAULT_RUNNER_API_KEY`                   | string  | `secret_api_token`                                   | デフォルトランナーAPIキー                   |
+| `DEFAULT_RUNNER_CPU`                       | number  | `4`                                                  | デフォルトランナーCPU割り当て               |
+| `DEFAULT_RUNNER_MEMORY`                    | number  | `8`                                                  | デフォルトランナーメモリ割り当て(GB)        |
+| `DEFAULT_RUNNER_DISK`                      | number  | `50`                                                 | デフォルトランナーディスク割り当て(GB)      |
+| `DEFAULT_RUNNER_GPU`                       | number  | `0`                                                  | デフォルトランナーGPU割り当て               |
+| `DEFAULT_RUNNER_GPU_TYPE`                  | string  | `none`                                               | デフォルトランナーGPUタイプ                 |
+| `DEFAULT_RUNNER_CAPACITY`                  | number  | `100`                                                | デフォルトランナー容量                      |
+| `DEFAULT_RUNNER_REGION`                    | string  | `us`                                                 | デフォルトランナーリージョン                |
+| `DEFAULT_RUNNER_CLASS`                     | string  | `small`                                              | デフォルトランナークラス                    |
+| `DEFAULT_ORG_QUOTA_TOTAL_CPU_QUOTA`        | number  | `10000`                                              | デフォルト組織合計CPUクォータ               |
+| `DEFAULT_ORG_QUOTA_TOTAL_MEMORY_QUOTA`     | number  | `10000`                                              | デフォルト組織合計メモリクォータ            |
+| `DEFAULT_ORG_QUOTA_TOTAL_DISK_QUOTA`       | number  | `100000`                                             | デフォルト組織合計ディスククォータ          |
+| `DEFAULT_ORG_QUOTA_MAX_CPU_PER_SANDBOX`    | number  | `100`                                                | デフォルト組織サンドボックスあたり最大CPU   |
+| `DEFAULT_ORG_QUOTA_MAX_MEMORY_PER_SANDBOX` | number  | `100`                                                | デフォルト組織サンドボックスあたり最大メモリ |
+| `DEFAULT_ORG_QUOTA_MAX_DISK_PER_SANDBOX`   | number  | `1000`                                               | デフォルト組織サンドボックスあたり最大ディスク |
+| `DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA`         | number  | `1000`                                               | デフォルト組織スナップショットクォータ      |
+| `DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE`      | number  | `1000`                                               | デフォルト組織最大スナップショットサイズ    |
+| `DEFAULT_ORG_QUOTA_VOLUME_QUOTA`           | number  | `10000`                                              | デフォルトの組織ボリュームクォータ           |
+| `SSH_GATEWAY_API_KEY`                      | string  | `ssh_secret_api_token`                               | SSHゲートウェイAPIキー                         |
+| `SSH_GATEWAY_COMMAND`                      | string  | `ssh -p 2222 {{TOKEN}}@localhost`                    | SSHゲートウェイコマンドテンプレート                |
+| `RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD` | number  | `10`                                                 | ランナー宣言的ビルドスコアしきい値    |
+| `RUNNER_AVAILABILITY_SCORE_THRESHOLD`      | number  | `10`                                                 | ランナー可用性スコアしきい値         |
+| `RUN_MIGRATIONS`                           | boolean | `true`                                               | 起動時のデータベースマイグレーションを有効化       |
+
+### ランナー \{#runner\}
+
+| 変数                         | 型      | デフォルト値                      | 説明                                   |
+| -------------------------- | ------- | --------------------------------- | ------------------------------------- |
+| `VERSION`                  | string  | `0.0.1`                           | ランナーサービスのバージョン           |
+| `ENVIRONMENT`              | string  | `development`                     | アプリケーション環境                   |
+| `API_PORT`                 | number  | `3003`                            | ランナー API サービスのポート          |
+| `API_TOKEN`                | string  | `secret_api_token`                | ランナー API の認証トークン            |
+| `LOG_FILE_PATH`            | string  | `/home/daytona/runner/runner.log` | ランナーのログファイルパス             |
+| `RESOURCE_LIMITS_DISABLED` | boolean | `true`                            | サンドボックスのリソース制限を無効化   |
+| `AWS_ENDPOINT_URL`         | string  | `http://minio:9000`               | AWS S3 互換ストレージのエンドポイント  |
+| `AWS_REGION`               | string  | `us-east-1`                       | AWS リージョン                         |
+| `AWS_ACCESS_KEY_ID`        | string  | `minioadmin`                      | AWS アクセスキー ID                    |
+| `AWS_SECRET_ACCESS_KEY`    | string  | `minioadmin`                      | AWS シークレットアクセスキー           |
+| `AWS_DEFAULT_BUCKET`       | string  | `daytona`                         | AWS のデフォルトバケット名             |
+| `SERVER_URL`               | string  | `http://api:3000/api`             | Daytona API サーバーの URL             |
+
+### SSH ゲートウェイ \{#ssh-gateway\}
+
+| 変数                | 型     | 既定値                                   | 説明                         |
+| ------------------ | ------ | -------------------------------------- | ---------------------------- |
+| `API_URL`          | string | `http://api:3000/api`                  | Daytona API の URL           |
+| `API_KEY`          | string | `ssh_secret_api_token`                 | API 認証キー                 |
+| `SSH_PRIVATE_KEY`  | string | （Base64 でエンコードされた OpenSSH 秘密鍵） | 認証用の SSH 秘密鍵          |
+| `SSH_HOST_KEY`     | string | （Base64 でエンコードされた OpenSSH ホスト鍵） | サーバー用の SSH ホスト鍵    |
+| `SSH_GATEWAY_PORT` | number | `2222`                                 | SSH ゲートウェイの待ち受けポート |
+
+### プロキシ \{#proxy\}
+
+| 変数                  | 型      | 既定値                        | 説明                               |
+| -------------------- | ------- | --------------------------- | ---------------------------------- |
+| `DAYTONA_API_URL`    | string  | `http://api:3000/api`       | Daytona API の URL                 |
+| `PROXY_PORT`         | number  | `4000`                      | プロキシサービスのポート           |
+| `PROXY_DOMAIN`       | string  | `proxy.localhost:4000`      | プロキシのドメイン                 |
+| `PROXY_API_KEY`      | string  | `super_secret_key`          | プロキシ API の認証キー            |
+| `PROXY_PROTOCOL`     | string  | `http`                      | プロキシのプロトコル（http または https） |
+| `OIDC_CLIENT_ID`     | string  | `daytona`                   | OIDC クライアント ID               |
+| `OIDC_CLIENT_SECRET` | string  | (empty)                     | OIDC クライアントシークレット      |
+| `OIDC_DOMAIN`        | string  | `http://dex:5556/dex`       | OIDC ドメイン                      |
+| `OIDC_PUBLIC_DOMAIN` | string  | `http://localhost:5556/dex` | OIDC パブリックドメイン            |
+| `OIDC_AUDIENCE`      | string  | `daytona`                   | OIDC オーディエンス識別子          |
+| `REDIS_HOST`         | string  | `redis`                     | Redis サーバーのホスト名           |
+| `REDIS_PORT`         | number  | `6379`                      | Redis サーバーのポート             |
+| `TOOLBOX_ONLY_MODE`  | boolean | `false`                     | Toolbox からのリクエストのみ許可   |
+
+## [OPTIONAL] 認証用に Auth0 を設定する \{#optional-configure-auth0-for-authentication\}
+
+デフォルトの compose セットアップでは、認証にローカルの Dex OIDC プロバイダーが使用されます。なお、以下の手順に従って、代替の OIDC プロバイダーとして Auth0 を設定することもできます。
+
+### ステップ 1: Auth0 テナントを作成する \{#step-1-create-your-auth0-tenant\}
+
+まず https://auth0.com/signup にアクセスしてサインアップを開始します。ユースケースに応じてアカウント種別を選択します。ビジネス向けアプリケーションなら `Company`、個人プロジェクトなら `Personal` を選択します。\
+「Let&#39;s get set up」ページでは、`My Daytona` のようなアプリケーション名を入力し、アプリケーションタイプに `Single Page Application (SPA)` を選択します。認証方法は `Email and Password` から始めて問題ありません。Google、GitHub、Facebook などのソーシャルプロバイダーは後から追加できます。設定が完了したら、右下の `Create Application` をクリックします。
+
+### ステップ 2: シングルページアプリケーションを設定する \{#step-2-configure-your-single-page-application\}
+
+左サイドバーの `Applications` &gt; `Applications` に移動し、先ほど作成したアプリケーションを選択します。`Settings` タブをクリックし、下へスクロールして `Application URIs` セクションを見つけ、コールバック URL とオリジン URL を設定します。
+`Allowed Callback URIs` フィールドに、次の URL を追加します：
+
+```
+http://localhost:3000
+http://localhost:3000/api/oauth2-redirect.html
+http://localhost:4000/callback
+http://proxy.localhost:4000/callback
+```
+
+「Allowed Logout URIs」には次を追加します：
+
+```
+http://localhost:3000
+```
+
+次に、`Allowed Web Origins` に以下を追加します：
+
+```
+http://localhost:3000
+```
+
+これらの設定を反映するには、ページ下部の `Save Changes` をクリックするのを忘れずに行ってください。
+
+### ステップ 3: Machine-to-Machine アプリケーションを作成する \{#step-3-create-machine-to-machine-application\}
+
+Auth0 の Management API と連携するには、Machine-to-Machine アプリケーションが必要です。`Applications` &gt; `Applications` に移動し、`Create Application` をクリックします。タイプとして `Machine to Machine Applications` を選択し、`My Management API M2M` のようなわかりやすい名前を付けます。
+アプリケーションを作成したら、新しい M2M アプリケーションの `APIs` タブに移動します。トグルまたは `Authorize` ボタンをクリックして `Auth0 Management API` を見つけて承認します。\
+承認後、権限を設定するために Management API の横にあるドロップダウン矢印をクリックします。M2M アプリケーションに次の権限を付与します。
+
+```
+read:users
+update:users
+read:connections
+create:guardian_enrollment_tickets
+read:connections_options
+```
+
+権限の変更を適用するには、`Save` をクリックします。
+
+### ステップ 4: カスタム API を設定する \{#step-4-set-up-custom-api\}
+
+Daytona アプリケーションでは、認証と認可を処理するためのカスタム API が必要です。左サイドバーの `Applications` &gt; `APIs` に移動し、`Create API` をクリックします。`My Daytona API` のようなわかりやすい名前を入力し、`my-daytona-api` のような識別子を指定します。識別子は、アプリケーション構成で使用される一意の文字列である必要があります。\
+API を作成したら、`Permissions` タブに移動して、アプリケーションで使用するスコープを定義します。以下の各権限を、対応する説明とともに追加してください:
+
+| Permission                  | Description                            |
+| --------------------------- | -------------------------------------- |
+| `read:node`                 | ワークスペースノード情報を取得          |
+| `create:node`               | 新規ワークスペースノードレコードを作成  |
+| `create:user`               | ユーザーアカウントを作成                |
+| `read:users`                | すべてのユーザーアカウントを取得        |
+| `regenerate-key-pair:users` | ユーザーの SSH キーペアを再生成         |
+| `read:workspaces`           | ワークスペースを読み取り（ユーザースコープ） |
+| `create:registry`           | 新規 Docker レジストリアカウントレコードを作成 |
+| `read:registries`           | すべての Docker レジストリレコードを取得 |
+| `read:registry`             | Docker レジストリレコードを取得         |
+| `write:registry`            | Docker レジストリレコードを作成または更新 |
+
+### ステップ 5: 環境変数の設定 \{#step-5-configure-environment-variables\}
+
+Auth0 のセットアップ手順をすべて完了したら、Daytona のデプロイで環境変数を設定する必要があります。これらの変数によって、先ほど構成した Auth0 サービスにアプリケーションが接続されます。
+
+#### 設定値の確認方法 \{#finding-your-configuration-values\}
+
+必要な値は Auth0 ダッシュボードで確認できます。SPA アプリケーションの設定は `Applications` &gt; `Applications` に移動し、該当する SPA アプリを選択して `Settings` タブをクリックします。M2M アプリケーションも同様に、Machine-to-Machine アプリを選択してください。カスタム API の設定は `Applications` &gt; `APIs` から対象のカスタム API を選択し、`Settings` を開きます。
+
+#### API サービスの設定 \{#api-service-configuration\}
+
+API サービスで次の環境変数を設定します:
+
+```bash
+OIDC_CLIENT_ID=your_spa_app_client_id
+OIDC_ISSUER_BASE_URL=your_spa_app_domain
+OIDC_AUDIENCE=your_custom_api_identifier
+OIDC_MANAGEMENT_API_ENABLED=true
+OIDC_MANAGEMENT_API_CLIENT_ID=your_m2m_app_client_id
+OIDC_MANAGEMENT_API_CLIENT_SECRET=your_m2m_app_client_secret
+OIDC_MANAGEMENT_API_AUDIENCE=your_auth0_managment_api_identifier
+```
+
+#### プロキシサービスの設定 \{#proxy-service-configuration\}
+
+プロキシサービスでは、次の環境変数を設定します:
+
+```bash
+OIDC_CLIENT_ID=your_spa_app_client_id
+OIDC_CLIENT_SECRET=
+OIDC_DOMAIN=your_spa_app_domain
+OIDC_AUDIENCE=your_custom_api_identifier（末尾スラッシュ付き）
+```
+
+プロキシ環境では、`OIDC_CLIENT_SECRET` は空のままにしておいてください。
