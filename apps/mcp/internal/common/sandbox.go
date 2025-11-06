@@ -13,35 +13,37 @@ import (
 )
 
 func GetSandbox(ctx context.Context, apiClient *apiclient.APIClient, sandboxId *string) (*apiclient.Sandbox, func(), error) {
-	stop := func() {
-		_, _, err := apiClient.SandboxAPI.StopSandbox(ctx, *sandboxId).Execute()
-		if err != nil {
-			log.Warnf("failed to stop sandbox %s: %v", *sandboxId, err)
-		}
-	}
+	var sbx *apiclient.Sandbox
 
-	if sandboxId == nil || *sandboxId == "" {
+	if sandboxId != nil && *sandboxId != "" {
+		sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, *sandboxId).Execute()
+		if err != nil {
+			return nil, func() {}, fmt.Errorf("failed to get sandbox %s: %v", *sandboxId, err)
+		}
+
+		if sandbox.State != nil && *sandbox.State != apiclient.SANDBOXSTATE_STARTED {
+			_, _, err := apiClient.SandboxAPI.StartSandbox(ctx, *sandboxId).Execute()
+			if err != nil {
+				return nil, func() {}, fmt.Errorf("failed to start sandbox %s: %v", *sandboxId, err)
+			}
+		}
+
+		sbx = sandbox
+	} else {
 		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*apiclient.NewCreateSandbox()).Execute()
 		if err != nil {
 			return nil, func() {}, fmt.Errorf("failed to create sandbox: %v", err)
 		}
 
-		return sandbox, stop, nil
+		sbx = sandbox
 	}
 
-	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, *sandboxId).Execute()
-	if err != nil {
-		return nil, func() {}, fmt.Errorf("failed to get sandbox %s: %v", *sandboxId, err)
-	}
-
-	if sandbox.State != nil && *sandbox.State != apiclient.SANDBOXSTATE_STARTED {
-		_, _, err := apiClient.SandboxAPI.StartSandbox(ctx, *sandboxId).Execute()
+	stop := func() {
+		_, _, err := apiClient.SandboxAPI.StopSandbox(ctx, sbx.Id).Execute()
 		if err != nil {
-			return nil, func() {}, fmt.Errorf("failed to start sandbox %s: %v", *sandboxId, err)
+			log.Warnf("failed to stop sandbox %s: %v", sbx.Id, err)
 		}
 	}
 
-	sandboxId = &sandbox.Id
-
-	return sandbox, stop, nil
+	return sbx, stop, nil
 }
