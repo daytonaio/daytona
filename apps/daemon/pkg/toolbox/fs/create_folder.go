@@ -12,6 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateFolder godoc
+//
+//	@Summary		Create a folder
+//	@Description	Create a folder with the specified path and optional permissions
+//	@Tags			file-system
+//	@Accept			json
+//	@Param			path	query	string	true	"Folder path to create"
+//	@Param			mode	query	string	true	"Octal permission mode (default: 0755)"
+//	@Success		201
+//	@Router			/files/folder [post]
+//
+//	@id				CreateFolder
 func CreateFolder(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {

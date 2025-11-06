@@ -14,6 +14,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// FindInFiles godoc
+//
+//	@Summary		Find text in files
+//	@Description	Search for text pattern within files in a directory
+//	@Tags			file-system
+//	@Produce		json
+//	@Param			path	query	string	true	"Directory path to search in"
+//	@Param			pattern	query	string	true	"Text pattern to search for"
+//	@Success		200		{array}	Match
+//	@Router			/files/find [get]
+//
+//	@id				FindInFiles
 func FindInFiles(c *gin.Context) {
 	path := c.Query("path")
 	pattern := c.Query("pattern")

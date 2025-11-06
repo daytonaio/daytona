@@ -60,7 +60,7 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args Execu
 	log.Infof("Executing command: %s", command)
 
 	// Execute the command
-	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).
+	result, _, err := apiClient.ToolboxAPI.ExecuteCommandDeprecated(ctx, *args.Id).
 		ExecuteRequest(*apiclient.NewExecuteRequest(command)).
 		Execute()
 

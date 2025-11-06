@@ -13,6 +13,18 @@ import (
 	go_git_http "github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
+// PushChanges godoc
+//
+//	@Summary		Push changes to remote
+//	@Description	Push local changes to the remote Git repository
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	GitRepoRequest	true	"Push request"
+//	@Success		200
+//	@Router			/git/push [post]
+//
+//	@id				PushChanges
 func PushChanges(c *gin.Context) {
 	var req GitRepoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

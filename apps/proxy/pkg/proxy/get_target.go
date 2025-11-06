@@ -18,13 +18,28 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
-	// Extract port and sandbox ID from the host header
-	// Expected format: 1234-some-id-uuid.proxy.domain
-	targetPort, sandboxID, err := p.parseHost(ctx.Request.Host)
-	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(err))
-		return nil, nil, err
+func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*url.URL, map[string]string, error) {
+	var targetPort, targetPath, sandboxID string
+
+	if toolboxSubpathRequest {
+		// Expected format: /toolbox/<sandboxID>/<targetPath>
+		var err error
+		targetPort, sandboxID, targetPath, err = p.parseToolboxSubpath(ctx.Param("path"))
+		if err != nil {
+			ctx.Error(common_errors.NewBadRequestError(err))
+			return nil, nil, err
+		}
+	} else {
+		// Extract port and sandbox ID from the host header
+		// Expected format: 1234-some-id-uuid.proxy.domain
+		var err error
+		targetPort, sandboxID, err = p.parseHost(ctx.Request.Host)
+		if err != nil {
+			ctx.Error(common_errors.NewBadRequestError(err))
+			return nil, nil, err
+		}
+
+		targetPath = ctx.Param("path")
 	}
 
 	if targetPort == "" {
@@ -68,18 +83,15 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 	// Build the target URL
 	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
 
-	// Get the wildcard path and normalize it
-	path := ctx.Param("path")
-
 	// Ensure path always has a leading slash but not duplicate slashes
-	if path == "" {
-		path = "/"
-	} else if !strings.HasPrefix(path, "/") {
-		path = "/" + path
+	if targetPath == "" {
+		targetPath = "/"
+	} else if !strings.HasPrefix(targetPath, "/") {
+		targetPath = "/" + targetPath
 	}
 
 	// Create the complete target URL with path
-	target, err := url.Parse(fmt.Sprintf("%s%s", targetURL, path))
+	target, err := url.Parse(fmt.Sprintf("%s%s", targetURL, targetPath))
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
 		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
@@ -249,4 +261,26 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 			}
 		}()
 	}
+}
+
+func (p *Proxy) parseToolboxSubpath(path string) (string, string, string, error) {
+	// Expected format: /toolbox/<sandboxID>/<path>
+	if path == "" {
+		return "", "", "", errors.New("path is required")
+	}
+
+	if !strings.HasPrefix(path, "/toolbox/") {
+		return "", "", "", errors.New("path must start with /toolbox/")
+	}
+
+	// Trim prefix and split by "/"
+	parts := strings.SplitN(strings.TrimPrefix(path, "/toolbox/"), "/", 2)
+	if len(parts) < 2 {
+		return "", "", "", errors.New("path must be of format /toolbox/<sandboxId>/<path>")
+	}
+
+	sandboxID := parts[0]
+	targetPath := "/" + parts[1]
+
+	return TOOLBOX_PORT, sandboxID, targetPath, nil
 }

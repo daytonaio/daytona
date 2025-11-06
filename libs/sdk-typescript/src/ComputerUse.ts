@@ -4,10 +4,9 @@
  */
 
 import {
-  ToolboxApi,
-  MousePosition,
+  ComputerUseApi,
+  MousePositionResponse,
   MouseMoveRequest,
-  MouseMoveResponse,
   MouseClickRequest,
   MouseClickResponse,
   MouseDragRequest,
@@ -17,8 +16,6 @@ import {
   KeyboardPressRequest,
   KeyboardHotkeyRequest,
   ScreenshotResponse,
-  RegionScreenshotResponse,
-  CompressedScreenshotResponse,
   DisplayInfoResponse,
   WindowsResponse,
   ComputerUseStartResponse,
@@ -28,7 +25,7 @@ import {
   ProcessRestartResponse,
   ProcessLogsResponse,
   ProcessErrorsResponse,
-} from '@daytonaio/api-client'
+} from '@daytonaio/toolbox-api-client'
 
 /**
  * Interface for region coordinates used in screenshot operations
@@ -54,15 +51,12 @@ export interface ScreenshotOptions {
  * Mouse operations for computer use functionality
  */
 export class Mouse {
-  constructor(
-    private readonly sandboxId: string,
-    private readonly toolboxApi: ToolboxApi,
-  ) {}
+  constructor(private readonly apiClient: ComputerUseApi) {}
 
   /**
    * Gets the current mouse cursor position
    *
-   * @returns {Promise<MousePosition>} Current mouse position with x and y coordinates
+   * @returns {Promise<MousePositionResponse>} Current mouse position with x and y coordinates
    *
    * @example
    * ```typescript
@@ -70,8 +64,8 @@ export class Mouse {
    * console.log(`Mouse is at: ${position.x}, ${position.y}`);
    * ```
    */
-  public async getPosition(): Promise<MousePosition> {
-    const response = await this.toolboxApi.getMousePosition(this.sandboxId)
+  public async getPosition(): Promise<MousePositionResponse> {
+    const response = await this.apiClient.getMousePosition()
     return response.data
   }
 
@@ -80,7 +74,7 @@ export class Mouse {
    *
    * @param {number} x - The x coordinate to move to
    * @param {number} y - The y coordinate to move to
-   * @returns {Promise<MouseMoveResponse>} Move operation result
+   * @returns {Promise<MousePositionResponse>} Position after move
    *
    * @example
    * ```typescript
@@ -88,9 +82,9 @@ export class Mouse {
    * console.log(`Mouse moved to: ${result.x}, ${result.y}`);
    * ```
    */
-  public async move(x: number, y: number): Promise<MouseMoveResponse> {
+  public async move(x: number, y: number): Promise<MousePositionResponse> {
     const request: MouseMoveRequest = { x, y }
-    const response = await this.toolboxApi.moveMouse(this.sandboxId, request)
+    const response = await this.apiClient.moveMouse(request)
     return response.data
   }
 
@@ -117,7 +111,7 @@ export class Mouse {
    */
   public async click(x: number, y: number, button = 'left', double = false): Promise<MouseClickResponse> {
     const request: MouseClickRequest = { x, y, button, double }
-    const response = await this.toolboxApi.clickMouse(this.sandboxId, request)
+    const response = await this.apiClient.click(request)
     return response.data
   }
 
@@ -145,7 +139,7 @@ export class Mouse {
     button = 'left',
   ): Promise<MouseDragResponse> {
     const request: MouseDragRequest = { startX, startY, endX, endY, button }
-    const response = await this.toolboxApi.dragMouse(this.sandboxId, request)
+    const response = await this.apiClient.drag(request)
     return response.data
   }
 
@@ -169,7 +163,7 @@ export class Mouse {
    */
   public async scroll(x: number, y: number, direction: 'up' | 'down', amount = 1): Promise<boolean> {
     const request: MouseScrollRequest = { x, y, direction, amount }
-    const response = await this.toolboxApi.scrollMouse(this.sandboxId, request)
+    const response = await this.apiClient.scroll(request)
     return response.data.success
   }
 }
@@ -178,10 +172,7 @@ export class Mouse {
  * Keyboard operations for computer use functionality
  */
 export class Keyboard {
-  constructor(
-    private readonly sandboxId: string,
-    private readonly toolboxApi: ToolboxApi,
-  ) {}
+  constructor(private readonly apiClient: ComputerUseApi) {}
 
   /**
    * Types the specified text
@@ -210,7 +201,7 @@ export class Keyboard {
    */
   public async type(text: string, delay?: number): Promise<void> {
     const request: KeyboardTypeRequest = { text, delay }
-    await this.toolboxApi.typeText(this.sandboxId, request)
+    await this.apiClient.typeText(request)
   }
 
   /**
@@ -249,7 +240,7 @@ export class Keyboard {
    */
   public async press(key: string, modifiers: string[] = []): Promise<void> {
     const request: KeyboardPressRequest = { key, modifiers }
-    await this.toolboxApi.pressKey(this.sandboxId, request)
+    await this.apiClient.pressKey(request)
   }
 
   /**
@@ -287,7 +278,7 @@ export class Keyboard {
    */
   public async hotkey(keys: string): Promise<void> {
     const request: KeyboardHotkeyRequest = { keys }
-    await this.toolboxApi.pressHotkey(this.sandboxId, request)
+    await this.apiClient.pressHotkey(request)
   }
 }
 
@@ -295,10 +286,7 @@ export class Keyboard {
  * Screenshot operations for computer use functionality
  */
 export class Screenshot {
-  constructor(
-    private readonly sandboxId: string,
-    private readonly toolboxApi: ToolboxApi,
-  ) {}
+  constructor(private readonly apiClient: ComputerUseApi) {}
 
   /**
    * Takes a screenshot of the entire screen
@@ -316,7 +304,7 @@ export class Screenshot {
    * ```
    */
   public async takeFullScreen(showCursor = false): Promise<ScreenshotResponse> {
-    const response = await this.toolboxApi.takeScreenshot(this.sandboxId, undefined, showCursor)
+    const response = await this.apiClient.takeScreenshot(showCursor)
     return response.data
   }
 
@@ -334,14 +322,12 @@ export class Screenshot {
    * console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.height}`);
    * ```
    */
-  public async takeRegion(region: ScreenshotRegion, showCursor = false): Promise<RegionScreenshotResponse> {
-    const response = await this.toolboxApi.takeRegionScreenshot(
-      this.sandboxId,
+  public async takeRegion(region: ScreenshotRegion, showCursor = false): Promise<ScreenshotResponse> {
+    const response = await this.apiClient.takeRegionScreenshot(
       region.height,
       region.width,
       region.y,
       region.x,
-      undefined,
       showCursor,
     )
     return response.data
@@ -372,14 +358,12 @@ export class Screenshot {
    * });
    * ```
    */
-  public async takeCompressed(options: ScreenshotOptions = {}): Promise<CompressedScreenshotResponse> {
-    const response = await this.toolboxApi.takeCompressedScreenshot(
-      this.sandboxId,
-      undefined,
-      options.scale,
-      options.quality,
-      options.format,
+  public async takeCompressed(options: ScreenshotOptions = {}): Promise<ScreenshotResponse> {
+    const response = await this.apiClient.takeCompressedScreenshot(
       options.showCursor,
+      options.format,
+      options.quality,
+      options.scale,
     )
     return response.data
   }
@@ -405,18 +389,16 @@ export class Screenshot {
   public async takeCompressedRegion(
     region: ScreenshotRegion,
     options: ScreenshotOptions = {},
-  ): Promise<CompressedScreenshotResponse> {
-    const response = await this.toolboxApi.takeCompressedRegionScreenshot(
-      this.sandboxId,
-      region.height,
-      region.width,
-      region.y,
+  ): Promise<ScreenshotResponse> {
+    const response = await this.apiClient.takeCompressedRegionScreenshot(
       region.x,
-      undefined,
-      options.scale,
-      options.quality,
-      options.format,
+      region.y,
+      region.width,
+      region.height,
       options.showCursor,
+      options.format,
+      options.quality,
+      options.scale,
     )
     return response.data
   }
@@ -426,10 +408,7 @@ export class Screenshot {
  * Display operations for computer use functionality
  */
 export class Display {
-  constructor(
-    private readonly sandboxId: string,
-    private readonly toolboxApi: ToolboxApi,
-  ) {}
+  constructor(private readonly apiClient: ComputerUseApi) {}
 
   /**
    * Gets information about the displays
@@ -447,7 +426,7 @@ export class Display {
    * ```
    */
   public async getInfo(): Promise<DisplayInfoResponse> {
-    const response = await this.toolboxApi.getDisplayInfo(this.sandboxId)
+    const response = await this.apiClient.getDisplayInfo()
     return response.data
   }
 
@@ -466,7 +445,7 @@ export class Display {
    * ```
    */
   public async getWindows(): Promise<WindowsResponse> {
-    const response = await this.toolboxApi.getWindows(this.sandboxId)
+    const response = await this.apiClient.getWindows()
     return response.data
   }
 }
@@ -490,14 +469,11 @@ export class ComputerUse {
   public readonly screenshot: Screenshot
   public readonly display: Display
 
-  constructor(
-    private readonly sandboxId: string,
-    private readonly toolboxApi: ToolboxApi,
-  ) {
-    this.mouse = new Mouse(sandboxId, toolboxApi)
-    this.keyboard = new Keyboard(sandboxId, toolboxApi)
-    this.screenshot = new Screenshot(sandboxId, toolboxApi)
-    this.display = new Display(sandboxId, toolboxApi)
+  constructor(private readonly apiClient: ComputerUseApi) {
+    this.mouse = new Mouse(apiClient)
+    this.keyboard = new Keyboard(apiClient)
+    this.screenshot = new Screenshot(apiClient)
+    this.display = new Display(apiClient)
   }
 
   /**
@@ -512,7 +488,7 @@ export class ComputerUse {
    * ```
    */
   public async start(): Promise<ComputerUseStartResponse> {
-    const response = await this.toolboxApi.startComputerUse(this.sandboxId)
+    const response = await this.apiClient.startComputerUse()
     return response.data
   }
 
@@ -528,7 +504,7 @@ export class ComputerUse {
    * ```
    */
   public async stop(): Promise<ComputerUseStopResponse> {
-    const response = await this.toolboxApi.stopComputerUse(this.sandboxId)
+    const response = await this.apiClient.stopComputerUse()
     return response.data
   }
 
@@ -544,7 +520,7 @@ export class ComputerUse {
    * ```
    */
   public async getStatus(): Promise<ComputerUseStatusResponse> {
-    const response = await this.toolboxApi.getComputerUseStatus(this.sandboxId)
+    const response = await this.apiClient.getComputerUseStatus()
     return response.data
   }
 
@@ -561,7 +537,7 @@ export class ComputerUse {
    * ```
    */
   public async getProcessStatus(processName: string): Promise<ProcessStatusResponse> {
-    const response = await this.toolboxApi.getProcessStatus(processName, this.sandboxId)
+    const response = await this.apiClient.getProcessStatus(processName)
     return response.data
   }
 
@@ -578,7 +554,7 @@ export class ComputerUse {
    * ```
    */
   public async restartProcess(processName: string): Promise<ProcessRestartResponse> {
-    const response = await this.toolboxApi.restartProcess(processName, this.sandboxId)
+    const response = await this.apiClient.restartProcess(processName)
     return response.data
   }
 
@@ -595,7 +571,7 @@ export class ComputerUse {
    * ```
    */
   public async getProcessLogs(processName: string): Promise<ProcessLogsResponse> {
-    const response = await this.toolboxApi.getProcessLogs(processName, this.sandboxId)
+    const response = await this.apiClient.getProcessLogs(processName)
     return response.data
   }
 
@@ -612,7 +588,7 @@ export class ComputerUse {
    * ```
    */
   public async getProcessErrors(processName: string): Promise<ProcessErrorsResponse> {
-    const response = await this.toolboxApi.getProcessErrors(processName, this.sandboxId)
+    const response = await this.apiClient.getProcessErrors(processName)
     return response.data
   }
 }

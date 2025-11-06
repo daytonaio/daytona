@@ -1,6 +1,6 @@
 import asyncio
 
-from daytona import AsyncDaytona, CreateSandboxFromImageParams, Image
+from daytona import AsyncDaytona, CreateSandboxFromImageParams, Image, LspCompletionPosition
 
 
 async def main():
@@ -55,7 +55,7 @@ async def main():
             await lsp.did_open(matches[0].file)
 
             # Get completions at a specific position
-            completions = await lsp.completions(matches[0].file, {"line": 12, "character": 18})
+            completions = await lsp.completions(matches[0].file, LspCompletionPosition(line=12, character=18))
             print("Completions:", completions)
 
         except Exception as error:

@@ -1,0 +1,2330 @@
+definitions:
+  Command:
+    properties:
+      command:
+        type: string
+      exitCode:
+        type: integer
+      id:
+        type: string
+    required:
+      - command
+      - id
+    type: object
+  CompletionContext:
+    properties:
+      triggerCharacter:
+        type: string
+      triggerKind:
+        type: integer
+    required:
+      - triggerKind
+    type: object
+  CompletionItem:
+    properties:
+      detail:
+        type: string
+      documentation: {}
+      filterText:
+        type: string
+      insertText:
+        type: string
+      kind:
+        type: integer
+      label:
+        type: string
+      sortText:
+        type: string
+    required:
+      - label
+    type: object
+  CompletionList:
+    properties:
+      isIncomplete:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/CompletionItem'
+        type: array
+    required:
+      - isIncomplete
+      - items
+    type: object
+  ComputerUseStartResponse:
+    properties:
+      message:
+        type: string
+      status:
+        additionalProperties:
+          $ref: '#/definitions/ProcessStatus'
+        type: object
+    type: object
+  ComputerUseStatusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  ComputerUseStopResponse:
+    properties:
+      message:
+        type: string
+      status:
+        additionalProperties:
+          $ref: '#/definitions/ProcessStatus'
+        type: object
+    type: object
+  CreateSessionRequest:
+    properties:
+      sessionId:
+        type: string
+    required:
+      - sessionId
+    type: object
+  DisplayInfo:
+    properties:
+      height:
+        type: integer
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      width:
+        type: integer
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  DisplayInfoResponse:
+    properties:
+      displays:
+        items:
+          $ref: '#/definitions/DisplayInfo'
+        type: array
+    type: object
+  Empty:
+    type: object
+  ExecuteRequest:
+    properties:
+      command:
+        type: string
+      cwd:
+        description: Current working directory
+        type: string
+      timeout:
+        description: Timeout in seconds, defaults to 10 seconds
+        type: integer
+    required:
+      - command
+    type: object
+  ExecuteResponse:
+    properties:
+      exitCode:
+        type: integer
+      result:
+        type: string
+    required:
+      - result
+    type: object
+  FileInfo:
+    properties:
+      group:
+        type: string
+      isDir:
+        type: boolean
+      modTime:
+        type: string
+      mode:
+        type: string
+      name:
+        type: string
+      owner:
+        type: string
+      permissions:
+        type: string
+      size:
+        type: integer
+    required:
+      - group
+      - isDir
+      - modTime
+      - mode
+      - name
+      - owner
+      - permissions
+      - size
+    type: object
+  FileStatus:
+    properties:
+      extra:
+        type: string
+      name:
+        type: string
+      staging:
+        $ref: '#/definitions/Status'
+      worktree:
+        $ref: '#/definitions/Status'
+    required:
+      - extra
+      - name
+      - staging
+      - worktree
+    type: object
+  FilesDownloadRequest:
+    properties:
+      paths:
+        items:
+          type: string
+        type: array
+    required:
+      - paths
+    type: object
+  GitAddRequest:
+    properties:
+      files:
+        description: files to add (use . for all files)
+        items:
+          type: string
+        type: array
+      path:
+        type: string
+    required:
+      - files
+      - path
+    type: object
+  GitBranchRequest:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    required:
+      - name
+      - path
+    type: object
+  GitCheckoutRequest:
+    properties:
+      branch:
+        type: string
+      path:
+        type: string
+    required:
+      - branch
+      - path
+    type: object
+  GitCloneRequest:
+    properties:
+      branch:
+        type: string
+      commit_id:
+        type: string
+      password:
+        type: string
+      path:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    required:
+      - path
+      - url
+    type: object
+  GitCommitInfo:
+    properties:
+      author:
+        type: string
+      email:
+        type: string
+      hash:
+        type: string
+      message:
+        type: string
+      timestamp:
+        type: string
+    required:
+      - author
+      - email
+      - hash
+      - message
+      - timestamp
+    type: object
+  GitCommitRequest:
+    properties:
+      allow_empty:
+        type: boolean
+      author:
+        type: string
+      email:
+        type: string
+      message:
+        type: string
+      path:
+        type: string
+    required:
+      - author
+      - email
+      - message
+      - path
+    type: object
+  GitCommitResponse:
+    properties:
+      hash:
+        type: string
+    required:
+      - hash
+    type: object
+  GitRepoRequest:
+    properties:
+      password:
+        type: string
+      path:
+        type: string
+      username:
+        type: string
+    required:
+      - path
+    type: object
+  GitStatus:
+    properties:
+      ahead:
+        type: integer
+      behind:
+        type: integer
+      branchPublished:
+        type: boolean
+      currentBranch:
+        type: string
+      fileStatus:
+        items:
+          $ref: '#/definitions/FileStatus'
+        type: array
+    required:
+      - currentBranch
+      - fileStatus
+    type: object
+  IsPortInUseResponse:
+    properties:
+      isInUse:
+        type: boolean
+    type: object
+  KeyboardHotkeyRequest:
+    properties:
+      keys:
+        description: e.g., "ctrl+c", "cmd+v"
+        type: string
+    type: object
+  KeyboardPressRequest:
+    properties:
+      key:
+        type: string
+      modifiers:
+        description: ctrl, alt, shift, cmd
+        items:
+          type: string
+        type: array
+    type: object
+  KeyboardTypeRequest:
+    properties:
+      delay:
+        description: milliseconds between keystrokes
+        type: integer
+      text:
+        type: string
+    type: object
+  ListBranchResponse:
+    properties:
+      branches:
+        items:
+          type: string
+        type: array
+    required:
+      - branches
+    type: object
+  LspCompletionParams:
+    properties:
+      context:
+        $ref: '#/definitions/CompletionContext'
+      languageId:
+        type: string
+      pathToProject:
+        type: string
+      position:
+        $ref: '#/definitions/LspPosition'
+      uri:
+        type: string
+    required:
+      - languageId
+      - pathToProject
+      - position
+      - uri
+    type: object
+  LspDocumentRequest:
+    properties:
+      languageId:
+        type: string
+      pathToProject:
+        type: string
+      uri:
+        type: string
+    required:
+      - languageId
+      - pathToProject
+      - uri
+    type: object
+  LspLocation:
+    properties:
+      range:
+        $ref: '#/definitions/LspRange'
+      uri:
+        type: string
+    required:
+      - range
+      - uri
+    type: object
+  LspPosition:
+    properties:
+      character:
+        type: integer
+      line:
+        type: integer
+    required:
+      - character
+      - line
+    type: object
+  LspRange:
+    properties:
+      end:
+        $ref: '#/definitions/LspPosition'
+      start:
+        $ref: '#/definitions/LspPosition'
+    required:
+      - end
+      - start
+    type: object
+  LspServerRequest:
+    properties:
+      languageId:
+        type: string
+      pathToProject:
+        type: string
+    required:
+      - languageId
+      - pathToProject
+    type: object
+  LspSymbol:
+    properties:
+      kind:
+        type: integer
+      location:
+        $ref: '#/definitions/LspLocation'
+      name:
+        type: string
+    required:
+      - kind
+      - location
+      - name
+    type: object
+  Match:
+    properties:
+      content:
+        type: string
+      file:
+        type: string
+      line:
+        type: integer
+    required:
+      - content
+      - file
+      - line
+    type: object
+  MouseClickRequest:
+    properties:
+      button:
+        description: left, right, middle
+        type: string
+      double:
+        type: boolean
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  MouseClickResponse:
+    properties:
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  MouseDragRequest:
+    properties:
+      button:
+        type: string
+      endX:
+        type: integer
+      endY:
+        type: integer
+      startX:
+        type: integer
+      startY:
+        type: integer
+    type: object
+  MouseDragResponse:
+    properties:
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  MouseMoveRequest:
+    properties:
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  MousePositionResponse:
+    properties:
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  MouseScrollRequest:
+    properties:
+      amount:
+        type: integer
+      direction:
+        description: up, down
+        type: string
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  PortList:
+    properties:
+      ports:
+        items:
+          type: integer
+        type: array
+    type: object
+  Position:
+    properties:
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  ProcessErrorsResponse:
+    properties:
+      errors:
+        type: string
+      processName:
+        type: string
+    type: object
+  ProcessLogsResponse:
+    properties:
+      logs:
+        type: string
+      processName:
+        type: string
+    type: object
+  ProcessRestartResponse:
+    properties:
+      message:
+        type: string
+      processName:
+        type: string
+    type: object
+  ProcessStatus:
+    properties:
+      autoRestart:
+        type: boolean
+      pid:
+        type: integer
+      priority:
+        type: integer
+      running:
+        type: boolean
+    type: object
+  ProcessStatusResponse:
+    properties:
+      processName:
+        type: string
+      running:
+        type: boolean
+    type: object
+  PtyCreateRequest:
+    properties:
+      cols:
+        type: integer
+      cwd:
+        type: string
+      envs:
+        additionalProperties:
+          type: string
+        type: object
+      id:
+        type: string
+      lazyStart:
+        description: Don't start PTY until first client connects
+        type: boolean
+      rows:
+        type: integer
+    type: object
+  PtyCreateResponse:
+    properties:
+      sessionId:
+        type: string
+    type: object
+  PtyListResponse:
+    properties:
+      sessions:
+        items:
+          $ref: '#/definitions/PtySessionInfo'
+        type: array
+    type: object
+  PtyResizeRequest:
+    properties:
+      cols:
+        maximum: 1000
+        minimum: 1
+        type: integer
+      rows:
+        maximum: 1000
+        minimum: 1
+        type: integer
+    required:
+      - cols
+      - rows
+    type: object
+  PtySessionInfo:
+    properties:
+      active:
+        type: boolean
+      cols:
+        type: integer
+      createdAt:
+        type: string
+      cwd:
+        type: string
+      envs:
+        additionalProperties:
+          type: string
+        type: object
+      id:
+        type: string
+      lazyStart:
+        description: Whether this session uses lazy start
+        type: boolean
+      rows:
+        type: integer
+    type: object
+  ReplaceRequest:
+    properties:
+      files:
+        items:
+          type: string
+        type: array
+      newValue:
+        type: string
+      pattern:
+        type: string
+    required:
+      - files
+      - newValue
+      - pattern
+    type: object
+  ReplaceResult:
+    properties:
+      error:
+        type: string
+      file:
+        type: string
+      success:
+        type: boolean
+    type: object
+  ScreenshotResponse:
+    properties:
+      cursorPosition:
+        $ref: '#/definitions/Position'
+      screenshot:
+        type: string
+      sizeBytes:
+        type: integer
+    type: object
+  ScrollResponse:
+    properties:
+      success:
+        type: boolean
+    type: object
+  SearchFilesResponse:
+    properties:
+      files:
+        items:
+          type: string
+        type: array
+    required:
+      - files
+    type: object
+  Session:
+    properties:
+      commands:
+        items:
+          $ref: '#/definitions/Command'
+        type: array
+      sessionId:
+        type: string
+    required:
+      - commands
+      - sessionId
+    type: object
+  SessionExecuteRequest:
+    properties:
+      async:
+        type: boolean
+      command:
+        type: string
+      runAsync:
+        type: boolean
+    required:
+      - command
+    type: object
+  SessionExecuteResponse:
+    properties:
+      cmdId:
+        type: string
+      exitCode:
+        type: integer
+      output:
+        type: string
+      stderr:
+        type: string
+      stdout:
+        type: string
+    type: object
+  Status:
+    enum:
+      - Unmodified
+      - Untracked
+      - Modified
+      - Added
+      - Deleted
+      - Renamed
+      - Copied
+      - Updated but unmerged
+    type: string
+    x-enum-varnames:
+      - Unmodified
+      - Untracked
+      - Modified
+      - Added
+      - Deleted
+      - Renamed
+      - Copied
+      - UpdatedButUnmerged
+  UserHomeDirResponse:
+    properties:
+      dir:
+        type: string
+    type: object
+  WindowInfo:
+    properties:
+      height:
+        type: integer
+      id:
+        type: integer
+      isActive:
+        type: boolean
+      title:
+        type: string
+      width:
+        type: integer
+      x:
+        type: integer
+      'y':
+        type: integer
+    type: object
+  WindowsResponse:
+    properties:
+      windows:
+        items:
+          $ref: '#/definitions/WindowInfo'
+        type: array
+    type: object
+  WorkDirResponse:
+    properties:
+      dir:
+        type: string
+    type: object
+  gin.H:
+    additionalProperties: {}
+    type: object
+  git.GitDeleteBranchRequest:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    required:
+      - name
+      - path
+    type: object
+info:
+  contact: {}
+  description: Daytona Daemon API
+  title: Daytona Daemon API
+  version: v0.0.0-dev
+paths:
+  /computeruse/display/info:
+    get:
+      description: Get information about all available displays
+      operationId: GetDisplayInfo
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DisplayInfoResponse'
+      summary: Get display information
+      tags:
+        - computer-use
+  /computeruse/display/windows:
+    get:
+      description: Get information about all open windows
+      operationId: GetWindows
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/WindowsResponse'
+      summary: Get windows information
+      tags:
+        - computer-use
+  /computeruse/keyboard/hotkey:
+    post:
+      consumes:
+        - application/json
+      description: Press a hotkey combination (e.g., ctrl+c, cmd+v)
+      operationId: PressHotkey
+      parameters:
+        - description: Hotkey press request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/KeyboardHotkeyRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Empty'
+      summary: Press hotkey
+      tags:
+        - computer-use
+  /computeruse/keyboard/key:
+    post:
+      consumes:
+        - application/json
+      description: Press a key with optional modifiers
+      operationId: PressKey
+      parameters:
+        - description: Key press request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/KeyboardPressRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Empty'
+      summary: Press key
+      tags:
+        - computer-use
+  /computeruse/keyboard/type:
+    post:
+      consumes:
+        - application/json
+      description: Type text with optional delay between keystrokes
+      operationId: TypeText
+      parameters:
+        - description: Text typing request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/KeyboardTypeRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Empty'
+      summary: Type text
+      tags:
+        - computer-use
+  /computeruse/mouse/click:
+    post:
+      consumes:
+        - application/json
+      description: Click the mouse button at the specified coordinates
+      operationId: Click
+      parameters:
+        - description: Mouse click request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/MouseClickRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MouseClickResponse'
+      summary: Click mouse button
+      tags:
+        - computer-use
+  /computeruse/mouse/drag:
+    post:
+      consumes:
+        - application/json
+      description: Drag the mouse from start to end coordinates
+      operationId: Drag
+      parameters:
+        - description: Mouse drag request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/MouseDragRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MouseDragResponse'
+      summary: Drag mouse
+      tags:
+        - computer-use
+  /computeruse/mouse/move:
+    post:
+      consumes:
+        - application/json
+      description: Move the mouse cursor to the specified coordinates
+      operationId: MoveMouse
+      parameters:
+        - description: Mouse move request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/MouseMoveRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MousePositionResponse'
+      summary: Move mouse cursor
+      tags:
+        - computer-use
+  /computeruse/mouse/position:
+    get:
+      description: Get the current mouse cursor position
+      operationId: GetMousePosition
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MousePositionResponse'
+      summary: Get mouse position
+      tags:
+        - computer-use
+  /computeruse/mouse/scroll:
+    post:
+      consumes:
+        - application/json
+      description: Scroll the mouse wheel at the specified coordinates
+      operationId: Scroll
+      parameters:
+        - description: Mouse scroll request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/MouseScrollRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ScrollResponse'
+      summary: Scroll mouse wheel
+      tags:
+        - computer-use
+  /computeruse/process-status:
+    get:
+      description: Get the status of all computer use processes
+      operationId: GetComputerUseStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ComputerUseStatusResponse'
+      summary: Get computer use process status
+      tags:
+        - computer-use
+  /computeruse/process/{processName}/errors:
+    get:
+      description: Get errors for a specific computer use process
+      operationId: GetProcessErrors
+      parameters:
+        - description: Process name to get errors for
+          in: path
+          name: processName
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ProcessErrorsResponse'
+      summary: Get process errors
+      tags:
+        - computer-use
+  /computeruse/process/{processName}/logs:
+    get:
+      description: Get logs for a specific computer use process
+      operationId: GetProcessLogs
+      parameters:
+        - description: Process name to get logs for
+          in: path
+          name: processName
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ProcessLogsResponse'
+      summary: Get process logs
+      tags:
+        - computer-use
+  /computeruse/process/{processName}/restart:
+    post:
+      description: Restart a specific computer use process
+      operationId: RestartProcess
+      parameters:
+        - description: Process name to restart
+          in: path
+          name: processName
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ProcessRestartResponse'
+      summary: Restart specific process
+      tags:
+        - computer-use
+  /computeruse/process/{processName}/status:
+    get:
+      description: Check if a specific computer use process is running
+      operationId: GetProcessStatus
+      parameters:
+        - description: Process name to check
+          in: path
+          name: processName
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ProcessStatusResponse'
+      summary: Get specific process status
+      tags:
+        - computer-use
+  /computeruse/screenshot:
+    get:
+      description: Take a screenshot of the entire screen
+      operationId: TakeScreenshot
+      parameters:
+        - description: Whether to show cursor in screenshot
+          in: query
+          name: showCursor
+          type: boolean
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ScreenshotResponse'
+      summary: Take a screenshot
+      tags:
+        - computer-use
+  /computeruse/screenshot/compressed:
+    get:
+      description: Take a compressed screenshot of the entire screen
+      operationId: TakeCompressedScreenshot
+      parameters:
+        - description: Whether to show cursor in screenshot
+          in: query
+          name: showCursor
+          type: boolean
+        - description: Image format (png or jpeg)
+          in: query
+          name: format
+          type: string
+        - description: JPEG quality (1-100)
+          in: query
+          name: quality
+          type: integer
+        - description: Scale factor (0.1-1.0)
+          in: query
+          name: scale
+          type: number
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ScreenshotResponse'
+      summary: Take a compressed screenshot
+      tags:
+        - computer-use
+  /computeruse/screenshot/region:
+    get:
+      description: Take a screenshot of a specific region of the screen
+      operationId: TakeRegionScreenshot
+      parameters:
+        - description: X coordinate of the region
+          in: query
+          name: x
+          required: true
+          type: integer
+        - description: Y coordinate of the region
+          in: query
+          name: 'y'
+          required: true
+          type: integer
+        - description: Width of the region
+          in: query
+          name: width
+          required: true
+          type: integer
+        - description: Height of the region
+          in: query
+          name: height
+          required: true
+          type: integer
+        - description: Whether to show cursor in screenshot
+          in: query
+          name: showCursor
+          type: boolean
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ScreenshotResponse'
+      summary: Take a region screenshot
+      tags:
+        - computer-use
+  /computeruse/screenshot/region/compressed:
+    get:
+      description: Take a compressed screenshot of a specific region of the screen
+      operationId: TakeCompressedRegionScreenshot
+      parameters:
+        - description: X coordinate of the region
+          in: query
+          name: x
+          required: true
+          type: integer
+        - description: Y coordinate of the region
+          in: query
+          name: 'y'
+          required: true
+          type: integer
+        - description: Width of the region
+          in: query
+          name: width
+          required: true
+          type: integer
+        - description: Height of the region
+          in: query
+          name: height
+          required: true
+          type: integer
+        - description: Whether to show cursor in screenshot
+          in: query
+          name: showCursor
+          type: boolean
+        - description: Image format (png or jpeg)
+          in: query
+          name: format
+          type: string
+        - description: JPEG quality (1-100)
+          in: query
+          name: quality
+          type: integer
+        - description: Scale factor (0.1-1.0)
+          in: query
+          name: scale
+          type: number
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ScreenshotResponse'
+      summary: Take a compressed region screenshot
+      tags:
+        - computer-use
+  /computeruse/start:
+    post:
+      description: Start all computer use processes and return their status
+      operationId: StartComputerUse
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ComputerUseStartResponse'
+      summary: Start computer use processes
+      tags:
+        - computer-use
+  /computeruse/status:
+    get:
+      description: Get the current status of the computer use system
+      operationId: GetComputerUseSystemStatus
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ComputerUseStatusResponse'
+      summary: Get computer use status
+      tags:
+        - computer-use
+  /computeruse/stop:
+    post:
+      description: Stop all computer use processes and return their status
+      operationId: StopComputerUse
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ComputerUseStopResponse'
+      summary: Stop computer use processes
+      tags:
+        - computer-use
+  /files:
+    delete:
+      description: Delete a file or directory at the specified path
+      operationId: DeleteFile
+      parameters:
+        - description: File or directory path to delete
+          in: query
+          name: path
+          required: true
+          type: string
+        - description: Enable recursive deletion for directories
+          in: query
+          name: recursive
+          type: boolean
+      responses:
+        '204':
+          description: No Content
+      summary: Delete a file or directory
+      tags:
+        - file-system
+    get:
+      description: List files and directories in the specified path
+      operationId: ListFiles
+      parameters:
+        - description: Directory path to list (defaults to working directory)
+          in: query
+          name: path
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/FileInfo'
+            type: array
+      summary: List files and directories
+      tags:
+        - file-system
+  /files/bulk-download:
+    post:
+      consumes:
+        - application/json
+      description: Download multiple files by providing their paths
+      operationId: DownloadFiles
+      parameters:
+        - description: Paths of files to download
+          in: body
+          name: downloadFiles
+          required: true
+          schema:
+            $ref: '#/definitions/FilesDownloadRequest'
+      produces:
+        - multipart/form-data
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Download multiple files
+      tags:
+        - file-system
+  /files/bulk-upload:
+    post:
+      consumes:
+        - multipart/form-data
+      description: Upload multiple files with their destination paths
+      operationId: UploadFiles
+      responses:
+        '200':
+          description: OK
+      summary: Upload multiple files
+      tags:
+        - file-system
+  /files/download:
+    get:
+      description: Download a file by providing its path
+      operationId: DownloadFile
+      parameters:
+        - description: File path to download
+          in: query
+          name: path
+          required: true
+          type: string
+      produces:
+        - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: file
+      summary: Download a file
+      tags:
+        - file-system
+  /files/find:
+    get:
+      description: Search for text pattern within files in a directory
+      operationId: FindInFiles
+      parameters:
+        - description: Directory path to search in
+          in: query
+          name: path
+          required: true
+          type: string
+        - description: Text pattern to search for
+          in: query
+          name: pattern
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Match'
+            type: array
+      summary: Find text in files
+      tags:
+        - file-system
+  /files/folder:
+    post:
+      consumes:
+        - application/json
+      description: Create a folder with the specified path and optional permissions
+      operationId: CreateFolder
+      parameters:
+        - description: Folder path to create
+          in: query
+          name: path
+          required: true
+          type: string
+        - description: 'Octal permission mode (default: 0755)'
+          in: query
+          name: mode
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Created
+      summary: Create a folder
+      tags:
+        - file-system
+  /files/info:
+    get:
+      description: Get detailed information about a file or directory
+      operationId: GetFileInfo
+      parameters:
+        - description: File or directory path
+          in: query
+          name: path
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/FileInfo'
+      summary: Get file information
+      tags:
+        - file-system
+  /files/move:
+    post:
+      description: Move or rename a file or directory from source to destination
+      operationId: MoveFile
+      parameters:
+        - description: Source file or directory path
+          in: query
+          name: source
+          required: true
+          type: string
+        - description: Destination file or directory path
+          in: query
+          name: destination
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+      summary: Move or rename file/directory
+      tags:
+        - file-system
+  /files/permissions:
+    post:
+      description: Set file permissions, ownership, and group for a file or directory
+      operationId: SetFilePermissions
+      parameters:
+        - description: File or directory path
+          in: query
+          name: path
+          required: true
+          type: string
+        - description: Owner (username or UID)
+          in: query
+          name: owner
+          type: string
+        - description: Group (group name or GID)
+          in: query
+          name: group
+          type: string
+        - description: File mode in octal format (e.g., 0755)
+          in: query
+          name: mode
+          type: string
+      responses:
+        '200':
+          description: OK
+      summary: Set file permissions
+      tags:
+        - file-system
+  /files/replace:
+    post:
+      consumes:
+        - application/json
+      description: Replace text pattern with new value in multiple files
+      operationId: ReplaceInFiles
+      parameters:
+        - description: Replace request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/ReplaceRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ReplaceResult'
+            type: array
+      summary: Replace text in files
+      tags:
+        - file-system
+  /files/search:
+    get:
+      description: Search for files matching a specific pattern in a directory
+      operationId: SearchFiles
+      parameters:
+        - description: Directory path to search in
+          in: query
+          name: path
+          required: true
+          type: string
+        - description: File pattern to match (e.g., *.txt, *.go)
+          in: query
+          name: pattern
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SearchFilesResponse'
+      summary: Search files by pattern
+      tags:
+        - file-system
+  /files/upload:
+    post:
+      consumes:
+        - multipart/form-data
+      description: Upload a file to the specified path
+      operationId: UploadFile
+      parameters:
+        - description: Destination path for the uploaded file
+          in: query
+          name: path
+          required: true
+          type: string
+        - description: File to upload
+          in: formData
+          name: file
+          required: true
+          type: file
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Upload a file
+      tags:
+        - file-system
+  /git/add:
+    post:
+      consumes:
+        - application/json
+      description: Add files to the Git staging area
+      operationId: AddFiles
+      parameters:
+        - description: Add files request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitAddRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Add files to Git staging
+      tags:
+        - git
+  /git/branches:
+    delete:
+      consumes:
+        - application/json
+      description: Delete a branch from the Git repository
+      operationId: DeleteBranch
+      parameters:
+        - description: Delete branch request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/git.GitDeleteBranchRequest'
+      produces:
+        - application/json
+      responses:
+        '204':
+          description: No Content
+      summary: Delete a branch
+      tags:
+        - git
+    get:
+      description: Get a list of all branches in the Git repository
+      operationId: ListBranches
+      parameters:
+        - description: Repository path
+          in: query
+          name: path
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ListBranchResponse'
+      summary: List branches
+      tags:
+        - git
+    post:
+      consumes:
+        - application/json
+      description: Create a new branch in the Git repository
+      operationId: CreateBranch
+      parameters:
+        - description: Create branch request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitBranchRequest'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+      summary: Create a new branch
+      tags:
+        - git
+  /git/checkout:
+    post:
+      consumes:
+        - application/json
+      description: Switch to a different branch or commit in the Git repository
+      operationId: CheckoutBranch
+      parameters:
+        - description: Checkout request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitCheckoutRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Checkout branch or commit
+      tags:
+        - git
+  /git/clone:
+    post:
+      consumes:
+        - application/json
+      description: Clone a Git repository to the specified path
+      operationId: CloneRepository
+      parameters:
+        - description: Clone repository request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitCloneRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Clone a Git repository
+      tags:
+        - git
+  /git/commit:
+    post:
+      consumes:
+        - application/json
+      description: Commit staged changes to the Git repository
+      operationId: CommitChanges
+      parameters:
+        - description: Commit request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitCommitRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/GitCommitResponse'
+      summary: Commit changes
+      tags:
+        - git
+  /git/history:
+    get:
+      description: Get the commit history of the Git repository
+      operationId: GetCommitHistory
+      parameters:
+        - description: Repository path
+          in: query
+          name: path
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitCommitInfo'
+            type: array
+      summary: Get commit history
+      tags:
+        - git
+  /git/pull:
+    post:
+      consumes:
+        - application/json
+      description: Pull changes from the remote Git repository
+      operationId: PullChanges
+      parameters:
+        - description: Pull request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitRepoRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Pull changes from remote
+      tags:
+        - git
+  /git/push:
+    post:
+      consumes:
+        - application/json
+      description: Push local changes to the remote Git repository
+      operationId: PushChanges
+      parameters:
+        - description: Push request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/GitRepoRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Push changes to remote
+      tags:
+        - git
+  /git/status:
+    get:
+      description: Get the Git status of the repository at the specified path
+      operationId: GetStatus
+      parameters:
+        - description: Repository path
+          in: query
+          name: path
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/GitStatus'
+      summary: Get Git status
+      tags:
+        - git
+  /lsp/completions:
+    post:
+      consumes:
+        - application/json
+      description: Get code completion suggestions from the LSP server
+      operationId: Completions
+      parameters:
+        - description: Completion request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/LspCompletionParams'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/CompletionList'
+      summary: Get code completions
+      tags:
+        - lsp
+  /lsp/did-close:
+    post:
+      consumes:
+        - application/json
+      description: Notify the LSP server that a document has been closed
+      operationId: DidClose
+      parameters:
+        - description: Document request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/LspDocumentRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Notify document closed
+      tags:
+        - lsp
+  /lsp/did-open:
+    post:
+      consumes:
+        - application/json
+      description: Notify the LSP server that a document has been opened
+      operationId: DidOpen
+      parameters:
+        - description: Document request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/LspDocumentRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Notify document opened
+      tags:
+        - lsp
+  /lsp/document-symbols:
+    get:
+      description: Get symbols (functions, classes, etc.) from a document
+      operationId: DocumentSymbols
+      parameters:
+        - description: Language ID (e.g., python, typescript)
+          in: query
+          name: languageId
+          required: true
+          type: string
+        - description: Path to project
+          in: query
+          name: pathToProject
+          required: true
+          type: string
+        - description: Document URI
+          in: query
+          name: uri
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/LspSymbol'
+            type: array
+      summary: Get document symbols
+      tags:
+        - lsp
+  /lsp/start:
+    post:
+      consumes:
+        - application/json
+      description: Start a Language Server Protocol server for the specified language
+      operationId: Start
+      parameters:
+        - description: LSP server request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/LspServerRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Start LSP server
+      tags:
+        - lsp
+  /lsp/stop:
+    post:
+      consumes:
+        - application/json
+      description: Stop a Language Server Protocol server
+      operationId: Stop
+      parameters:
+        - description: LSP server request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/LspServerRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+      summary: Stop LSP server
+      tags:
+        - lsp
+  /lsp/workspacesymbols:
+    get:
+      description: Search for symbols across the entire workspace
+      operationId: WorkspaceSymbols
+      parameters:
+        - description: Search query
+          in: query
+          name: query
+          required: true
+          type: string
+        - description: Language ID (e.g., python, typescript)
+          in: query
+          name: languageId
+          required: true
+          type: string
+        - description: Path to project
+          in: query
+          name: pathToProject
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/LspSymbol'
+            type: array
+      summary: Get workspace symbols
+      tags:
+        - lsp
+  /port:
+    get:
+      description: Get a list of all currently active ports
+      operationId: GetPorts
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PortList'
+      summary: Get active ports
+      tags:
+        - port
+  /port/{port}/in-use:
+    get:
+      description: Check if a specific port is currently in use
+      operationId: IsPortInUse
+      parameters:
+        - description: Port number (3000-9999)
+          in: path
+          name: port
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/IsPortInUseResponse'
+      summary: Check if port is in use
+      tags:
+        - port
+  /process/execute:
+    post:
+      consumes:
+        - application/json
+      description: Execute a shell command and return the output and exit code
+      operationId: ExecuteCommand
+      parameters:
+        - description: Command execution request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/ExecuteRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ExecuteResponse'
+      summary: Execute a command
+      tags:
+        - process
+  /process/pty:
+    get:
+      description: Get a list of all active pseudo-terminal sessions
+      operationId: ListPtySessions
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PtyListResponse'
+      summary: List all PTY sessions
+      tags:
+        - process
+    post:
+      consumes:
+        - application/json
+      description: Create a new pseudo-terminal session with specified configuration
+      operationId: CreatePtySession
+      parameters:
+        - description: PTY session creation request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/PtyCreateRequest'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/PtyCreateResponse'
+      summary: Create a new PTY session
+      tags:
+        - process
+  /process/pty/{sessionId}:
+    delete:
+      description: Delete a pseudo-terminal session and terminate its process
+      operationId: DeletePtySession
+      parameters:
+        - description: PTY session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete a PTY session
+      tags:
+        - process
+    get:
+      description: Get detailed information about a specific pseudo-terminal session
+      operationId: GetPtySession
+      parameters:
+        - description: PTY session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PtySessionInfo'
+      summary: Get PTY session information
+      tags:
+        - process
+  /process/pty/{sessionId}/connect:
+    get:
+      description: Establish a WebSocket connection to interact with a pseudo-terminal
+        session
+      operationId: ConnectPtySession
+      parameters:
+        - description: PTY session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+      responses:
+        '101':
+          description: Switching Protocols - WebSocket connection established
+      summary: Connect to PTY session via WebSocket
+      tags:
+        - process
+  /process/pty/{sessionId}/resize:
+    post:
+      consumes:
+        - application/json
+      description: Resize the terminal dimensions of a pseudo-terminal session
+      operationId: ResizePtySession
+      parameters:
+        - description: PTY session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+        - description: Resize request with new dimensions
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/PtyResizeRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PtySessionInfo'
+      summary: Resize a PTY session
+      tags:
+        - process
+  /process/session:
+    get:
+      description: Get a list of all active shell sessions
+      operationId: ListSessions
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Session'
+            type: array
+      summary: List all sessions
+      tags:
+        - process
+    post:
+      consumes:
+        - application/json
+      description: Create a new shell session for command execution
+      operationId: CreateSession
+      parameters:
+        - description: Session creation request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSessionRequest'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+      summary: Create a new session
+      tags:
+        - process
+  /process/session/{sessionId}:
+    delete:
+      description: Delete an existing shell session
+      operationId: DeleteSession
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+      responses:
+        '204':
+          description: No Content
+      summary: Delete a session
+      tags:
+        - process
+    get:
+      description: Get details of a specific session including its commands
+      operationId: GetSession
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Session'
+      summary: Get session details
+      tags:
+        - process
+  /process/session/{sessionId}/command/{commandId}:
+    get:
+      description: Get details of a specific command within a session
+      operationId: GetSessionCommand
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+        - description: Command ID
+          in: path
+          name: commandId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Command'
+      summary: Get session command details
+      tags:
+        - process
+  /process/session/{sessionId}/command/{commandId}/logs:
+    get:
+      description: Get logs for a specific command within a session. Supports both
+        HTTP and WebSocket streaming.
+      operationId: GetSessionCommandLogs
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+        - description: Command ID
+          in: path
+          name: commandId
+          required: true
+          type: string
+        - description: Follow logs in real-time (WebSocket only)
+          in: query
+          name: follow
+          type: boolean
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: Log content
+          schema:
+            type: string
+      summary: Get session command logs
+      tags:
+        - process
+  /process/session/{sessionId}/exec:
+    post:
+      consumes:
+        - application/json
+      description: Execute a command within an existing shell session
+      operationId: SessionExecuteCommand
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+        - description: Command execution request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/SessionExecuteRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SessionExecuteResponse'
+        '202':
+          description: Accepted
+          schema:
+            $ref: '#/definitions/SessionExecuteResponse'
+      summary: Execute command in session
+      tags:
+        - process
+  /user-home-dir:
+    get:
+      description: Get the current user home directory path.
+      operationId: GetUserHomeDir
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/UserHomeDirResponse'
+      summary: Get user home directory
+      tags:
+        - info
+  /version:
+    get:
+      description: Get the current daemon version
+      operationId: GetVersion
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get version
+      tags:
+        - info
+  /work-dir:
+    get:
+      description: Get the current working directory path. This is default directory
+        used for running commands.
+      operationId: GetWorkDir
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkDirResponse'
+      summary: Get working directory
+      tags:
+        - info
+swagger: '2.0'

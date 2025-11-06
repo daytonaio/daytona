@@ -171,7 +171,7 @@ export const PreviewApiFp = function (configuration?: Configuration) {
     async hasSandboxAccess(
       sandboxId: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.hasSandboxAccess(sandboxId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -249,7 +249,7 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    hasSandboxAccess(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+    hasSandboxAccess(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
       return localVarFp.hasSandboxAccess(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**

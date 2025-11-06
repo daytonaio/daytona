@@ -1,4 +1,4 @@
-from daytona import CreateSandboxFromImageParams, Daytona, Image
+from daytona import CreateSandboxFromImageParams, Daytona, Image, LspCompletionPosition
 
 
 def main():
@@ -54,7 +54,7 @@ def main():
         lsp.did_open(matches[0].file)
 
         # Get completions at a specific position
-        completions = lsp.completions(matches[0].file, {"line": 12, "character": 18})
+        completions = lsp.completions(matches[0].file, LspCompletionPosition(line=12, character=18))
         print("Completions:", completions)
 
     except Exception as error:

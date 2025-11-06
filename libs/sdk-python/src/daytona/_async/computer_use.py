@@ -3,8 +3,8 @@
 
 from typing import List, Optional
 
-from daytona_api_client_async import (
-    CompressedScreenshotResponse,
+from daytona_toolbox_api_client_async import (
+    ComputerUseApi,
     ComputerUseStartResponse,
     ComputerUseStatusResponse,
     ComputerUseStopResponse,
@@ -17,16 +17,13 @@ from daytona_api_client_async import (
     MouseDragRequest,
     MouseDragResponse,
     MouseMoveRequest,
-    MouseMoveResponse,
-    MousePosition,
+    MousePositionResponse,
     MouseScrollRequest,
     ProcessErrorsResponse,
     ProcessLogsResponse,
     ProcessRestartResponse,
     ProcessStatusResponse,
-    RegionScreenshotResponse,
     ScreenshotResponse,
-    ToolboxApi,
     WindowsResponse,
 )
 
@@ -37,16 +34,15 @@ from ..common.computer_use import ScreenshotOptions, ScreenshotRegion
 class AsyncMouse:
     """Mouse operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to get mouse position: ")
-    async def get_position(self) -> MousePosition:
+    async def get_position(self) -> MousePositionResponse:
         """Gets the current mouse cursor position.
 
         Returns:
-            MousePosition: Current mouse position with x and y coordinates.
+            MousePositionResponse: Current mouse position with x and y coordinates.
 
         Example:
             ```python
@@ -54,11 +50,11 @@ class AsyncMouse:
             print(f"Mouse is at: {position.x}, {position.y}")
             ```
         """
-        response = await self._toolbox_api.get_mouse_position(self._sandbox_id)
+        response = await self._api_client.get_mouse_position()
         return response
 
     @intercept_errors(message_prefix="Failed to move mouse: ")
-    async def move(self, x: int, y: int) -> MouseMoveResponse:
+    async def move(self, x: int, y: int) -> MousePositionResponse:
         """Moves the mouse cursor to the specified coordinates.
 
         Args:
@@ -66,7 +62,7 @@ class AsyncMouse:
             y (int): The y coordinate to move to.
 
         Returns:
-            MouseMoveResponse: Move operation result.
+            MousePositionResponse: Position after move.
 
         Example:
             ```python
@@ -75,7 +71,7 @@ class AsyncMouse:
             ```
         """
         request = MouseMoveRequest(x=x, y=y)
-        response = await self._toolbox_api.move_mouse(self._sandbox_id, request)
+        response = await self._api_client.move_mouse(request)
         return response
 
     @intercept_errors(message_prefix="Failed to click mouse: ")
@@ -104,7 +100,7 @@ class AsyncMouse:
             ```
         """
         request = MouseClickRequest(x=x, y=y, button=button, double=double)
-        response = await self._toolbox_api.click_mouse(self._sandbox_id, request)
+        response = await self._api_client.click(request)
         return response
 
     @intercept_errors(message_prefix="Failed to drag mouse: ")
@@ -128,7 +124,7 @@ class AsyncMouse:
             ```
         """
         request = MouseDragRequest(start_x=start_x, start_y=start_y, end_x=end_x, end_y=end_y, button=button)
-        response = await self._toolbox_api.drag_mouse(self._sandbox_id, request)
+        response = await self._api_client.drag(request=request)
         return response
 
     @intercept_errors(message_prefix="Failed to scroll mouse: ")
@@ -154,16 +150,15 @@ class AsyncMouse:
             ```
         """
         request = MouseScrollRequest(x=x, y=y, direction=direction, amount=amount)
-        response = await self._toolbox_api.scroll_mouse(self._sandbox_id, request)
+        response = await self._api_client.scroll(request=request)
         return response
 
 
 class AsyncKeyboard:
     """Keyboard operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to type text: ")
     async def type(self, text: str, delay: Optional[int] = None) -> None:
@@ -193,7 +188,7 @@ class AsyncKeyboard:
             ```
         """
         request = KeyboardTypeRequest(text=text, delay=delay)
-        await self._toolbox_api.type_text(self._sandbox_id, request)
+        await self._api_client.type_text(request=request)
 
     @intercept_errors(message_prefix="Failed to press key: ")
     async def press(self, key: str, modifiers: Optional[List[str]] = None) -> None:
@@ -229,7 +224,7 @@ class AsyncKeyboard:
             ```
         """
         request = KeyboardPressRequest(key=key, modifiers=modifiers or [])
-        await self._toolbox_api.press_key(self._sandbox_id, request)
+        await self._api_client.press_key(request=request)
 
     @intercept_errors(message_prefix="Failed to press hotkey: ")
     async def hotkey(self, keys: str) -> None:
@@ -266,15 +261,14 @@ class AsyncKeyboard:
             ```
         """
         request = KeyboardHotkeyRequest(keys=keys)
-        await self._toolbox_api.press_hotkey(self._sandbox_id, request)
+        await self._api_client.press_hotkey(request=request)
 
 
 class AsyncScreenshot:
     """Screenshot operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to take screenshot: ")
     async def take_full_screen(self, show_cursor: bool = False) -> ScreenshotResponse:
@@ -295,11 +289,11 @@ class AsyncScreenshot:
             with_cursor = await sandbox.computer_use.screenshot.take_full_screen(True)
             ```
         """
-        response = await self._toolbox_api.take_screenshot(self._sandbox_id, show_cursor=show_cursor)
+        response = await self._api_client.take_screenshot(show_cursor=show_cursor)
         return response
 
     @intercept_errors(message_prefix="Failed to take region screenshot: ")
-    async def take_region(self, region: ScreenshotRegion, show_cursor: bool = False) -> RegionScreenshotResponse:
+    async def take_region(self, region: ScreenshotRegion, show_cursor: bool = False) -> ScreenshotResponse:
         """Takes a screenshot of a specific region.
 
         Args:
@@ -307,7 +301,7 @@ class AsyncScreenshot:
             show_cursor (bool): Whether to show the cursor in the screenshot.
 
         Returns:
-            RegionScreenshotResponse: Screenshot data with base64 encoded image.
+            ScreenshotResponse: Screenshot data with base64 encoded image.
 
         Example:
             ```python
@@ -316,20 +310,20 @@ class AsyncScreenshot:
             print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
             ```
         """
-        response = await self._toolbox_api.take_region_screenshot(
-            self._sandbox_id, region.height, region.width, region.y, region.x, show_cursor=show_cursor
+        response = await self._api_client.take_region_screenshot(
+            height=region.height, width=region.width, y=region.y, x=region.x, show_cursor=show_cursor
         )
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
-    async def take_compressed(self, options: Optional[ScreenshotOptions] = None) -> CompressedScreenshotResponse:
+    async def take_compressed(self, options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse:
         """Takes a compressed screenshot of the entire screen.
 
         Args:
             options (ScreenshotOptions): Compression and display options.
 
         Returns:
-            CompressedScreenshotResponse: Compressed screenshot data.
+            ScreenshotResponse: Compressed screenshot data.
 
         Example:
             ```python
@@ -350,8 +344,7 @@ class AsyncScreenshot:
         if options is None:
             options = ScreenshotOptions()
 
-        response = await self._toolbox_api.take_compressed_screenshot(
-            self._sandbox_id,
+        response = await self._api_client.take_compressed_screenshot(
             scale=options.scale,
             quality=options.quality,
             format=options.fmt,
@@ -362,7 +355,7 @@ class AsyncScreenshot:
     @intercept_errors(message_prefix="Failed to take compressed region screenshot: ")
     async def take_compressed_region(
         self, region: ScreenshotRegion, options: Optional[ScreenshotOptions] = None
-    ) -> CompressedScreenshotResponse:
+    ) -> ScreenshotResponse:
         """Takes a compressed screenshot of a specific region.
 
         Args:
@@ -370,7 +363,7 @@ class AsyncScreenshot:
             options (ScreenshotOptions): Compression and display options.
 
         Returns:
-            CompressedScreenshotResponse: Compressed screenshot data.
+            ScreenshotResponse: Compressed screenshot data.
 
         Example:
             ```python
@@ -385,12 +378,11 @@ class AsyncScreenshot:
         if options is None:
             options = ScreenshotOptions()
 
-        response = await self._toolbox_api.take_compressed_region_screenshot(
-            self._sandbox_id,
-            region.height,
-            region.width,
-            region.y,
-            region.x,
+        response = await self._api_client.take_compressed_region_screenshot(
+            height=region.height,
+            width=region.width,
+            y=region.y,
+            x=region.x,
             scale=options.scale,
             quality=options.quality,
             format=options.fmt,
@@ -402,9 +394,8 @@ class AsyncScreenshot:
 class AsyncDisplay:
     """Display operations for computer use functionality."""
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to get display info: ")
     async def get_info(self) -> DisplayInfoResponse:
@@ -422,7 +413,7 @@ class AsyncDisplay:
                 print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
             ```
         """
-        response = await self._toolbox_api.get_display_info(self._sandbox_id)
+        response = await self._api_client.get_display_info()
         return response
 
     @intercept_errors(message_prefix="Failed to get windows: ")
@@ -440,7 +431,7 @@ class AsyncDisplay:
                 print(f"- {window.title} (ID: {window.id})")
             ```
         """
-        response = await self._toolbox_api.get_windows(self._sandbox_id)
+        response = await self._api_client.get_windows()
         return response
 
 
@@ -457,14 +448,13 @@ class AsyncComputerUse:
         display (AsyncDisplay): Display operations interface.
     """
 
-    def __init__(self, sandbox_id: str, toolbox_api: ToolboxApi):
-        self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
 
-        self.mouse = AsyncMouse(sandbox_id, toolbox_api)
-        self.keyboard = AsyncKeyboard(sandbox_id, toolbox_api)
-        self.screenshot = AsyncScreenshot(sandbox_id, toolbox_api)
-        self.display = AsyncDisplay(sandbox_id, toolbox_api)
+        self.mouse = AsyncMouse(api_client)
+        self.keyboard = AsyncKeyboard(api_client)
+        self.screenshot = AsyncScreenshot(api_client)
+        self.display = AsyncDisplay(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     async def start(self) -> ComputerUseStartResponse:
@@ -479,7 +469,7 @@ class AsyncComputerUse:
             print("Computer use processes started:", result.message)
             ```
         """
-        response = await self._toolbox_api.start_computer_use(self._sandbox_id)
+        response = await self._api_client.start_computer_use()
         return response
 
     @intercept_errors(message_prefix="Failed to stop computer use: ")
@@ -495,7 +485,7 @@ class AsyncComputerUse:
             print("Computer use processes stopped:", result.message)
             ```
         """
-        response = await self._toolbox_api.stop_computer_use(self._sandbox_id)
+        response = await self._api_client.stop_computer_use()
         return response
 
     @intercept_errors(message_prefix="Failed to get computer use status: ")
@@ -511,7 +501,7 @@ class AsyncComputerUse:
             print("Computer use status:", response.status)
             ```
         """
-        return await self._toolbox_api.get_computer_use_status(self._sandbox_id)
+        return await self._api_client.get_computer_use_status()
 
     @intercept_errors(message_prefix="Failed to get process status: ")
     async def get_process_status(self, process_name: str) -> ProcessStatusResponse:
@@ -529,7 +519,7 @@ class AsyncComputerUse:
             no_vnc_status = await sandbox.computer_use.get_process_status("novnc")
             ```
         """
-        response = await self._toolbox_api.get_process_status(process_name, self._sandbox_id)
+        response = await self._api_client.get_process_status(process_name=process_name)
         return response
 
     @intercept_errors(message_prefix="Failed to restart process: ")
@@ -548,7 +538,7 @@ class AsyncComputerUse:
             print("XFCE4 process restarted:", result.message)
             ```
         """
-        response = await self._toolbox_api.restart_process(process_name, self._sandbox_id)
+        response = await self._api_client.restart_process(process_name=process_name)
         return response
 
     @intercept_errors(message_prefix="Failed to get process logs: ")
@@ -567,7 +557,7 @@ class AsyncComputerUse:
             print("NoVNC logs:", logs)
             ```
         """
-        response = await self._toolbox_api.get_process_logs(process_name, self._sandbox_id)
+        response = await self._api_client.get_process_logs(process_name=process_name)
         return response
 
     @intercept_errors(message_prefix="Failed to get process errors: ")
@@ -586,5 +576,5 @@ class AsyncComputerUse:
             print("X11VNC errors:", errors)
             ```
         """
-        response = await self._toolbox_api.get_process_errors(process_name, self._sandbox_id)
+        response = await self._api_client.get_process_errors(process_name=process_name)
         return response

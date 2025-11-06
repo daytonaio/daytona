@@ -48,7 +48,7 @@ func FileDownload(ctx context.Context, request mcp.CallToolRequest, args FileDow
 	}
 
 	// Download the file
-	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, *args.Id).Path(*args.FilePath).Execute()
+	file, _, err := apiClient.ToolboxAPI.DownloadFileDeprecated(ctx, *args.Id).Path(*args.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error downloading file: %v", err)
 	}

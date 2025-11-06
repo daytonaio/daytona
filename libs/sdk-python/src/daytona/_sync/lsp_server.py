@@ -7,18 +7,18 @@
 
 from typing import List
 
-from daytona_api_client import (
+from daytona_toolbox_api_client import (
     CompletionList,
+    LspApi,
     LspCompletionParams,
     LspDocumentRequest,
     LspServerRequest,
     LspSymbol,
-    ToolboxApi,
 )
 from deprecated import deprecated
 
 from .._utils.errors import intercept_errors
-from ..common.lsp_server import LspLanguageId, Position
+from ..common.lsp_server import LspCompletionPosition, LspLanguageId
 
 
 class LspServer:
@@ -30,22 +30,19 @@ class LspServer:
         self,
         language_id: LspLanguageId,
         path_to_project: str,
-        toolbox_api: ToolboxApi,
-        sandbox_id: str,
+        api_client: LspApi,
     ):
         """Initializes a new LSP server instance.
 
         Args:
             language_id (LspLanguageId): The language server type (e.g., LspLanguageId.TYPESCRIPT).
-            path_to_project (str): Path to the project root directory. Relative paths are resolved
-            based on the sandbox working directory.
-            toolbox_api (ToolboxApi): API client for Sandbox operations.
+            path_to_project (str): Absolute path to the project root directory.
+            api_client (LspApi): API client for Sandbox operations.
             instance (SandboxInstance): The Sandbox instance this server belongs to.
         """
         self._language_id = str(language_id)
         self._path_to_project = path_to_project
-        self._toolbox_api = toolbox_api
-        self._sandbox_id = sandbox_id
+        self._api_client = api_client
 
     @intercept_errors(message_prefix="Failed to start LSP server: ")
     def start(self) -> None:
@@ -61,9 +58,8 @@ class LspServer:
             # Now ready for LSP operations
             ```
         """
-        self._toolbox_api.lsp_start(
-            self._sandbox_id,
-            lsp_server_request=LspServerRequest(
+        self._api_client.start(
+            request=LspServerRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
             ),
@@ -82,9 +78,8 @@ class LspServer:
             lsp.stop()  # Clean up resources
             ```
         """
-        self._toolbox_api.lsp_stop(
-            self._sandbox_id,
-            lsp_server_request=LspServerRequest(
+        self._api_client.stop(
+            request=LspServerRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
             ),
@@ -109,9 +104,8 @@ class LspServer:
             # Now can get completions, symbols, etc. for this file
             ```
         """
-        self._toolbox_api.lsp_did_open(
-            self._sandbox_id,
-            lsp_document_request=LspDocumentRequest(
+        self._api_client.did_open(
+            request=LspDocumentRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
@@ -135,9 +129,8 @@ class LspServer:
             lsp.did_close("workspace/project/src/index.ts")
             ```
         """
-        self._toolbox_api.lsp_did_close(
-            self._sandbox_id,
-            lsp_document_request=LspDocumentRequest(
+        self._api_client.did_close(
+            request=LspDocumentRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
@@ -166,8 +159,7 @@ class LspServer:
                 print(f"{symbol.kind} {symbol.name}: {symbol.location}")
             ```
         """
-        return self._toolbox_api.lsp_document_symbols(
-            self._sandbox_id,
+        return self._api_client.document_symbols(
             language_id=self._language_id,
             path_to_project=self._path_to_project,
             uri=f"file://{path}",
@@ -211,21 +203,20 @@ class LspServer:
                 print(f"{symbol.name} in {symbol.location}")
             ```
         """
-        return self._toolbox_api.lsp_workspace_symbols(
-            self._sandbox_id,
+        return self._api_client.workspace_symbols(
             language_id=self._language_id,
             path_to_project=self._path_to_project,
             query=query,
         )
 
     @intercept_errors(message_prefix="Failed to get completions: ")
-    def completions(self, path: str, position: Position) -> CompletionList:
+    def completions(self, path: str, position: LspCompletionPosition) -> CompletionList:
         """Gets completion suggestions at a position in a file.
 
         Args:
             path (str): Path to the file. Relative paths are resolved based on the project path
             set in the LSP server constructor.
-            position (Position): Cursor position to get completions for.
+            position (LspCompletionPosition): Cursor position to get completions for.
 
         Returns:
             CompletionList: List of completion suggestions. The list includes:
@@ -242,18 +233,19 @@ class LspServer:
         Example:
             ```python
             # Get completions at a specific position
-            pos = Position(line=10, character=15)
+            pos = LspCompletionPosition(line=10, character=15)
             completions = lsp.completions("workspace/project/src/index.ts", pos)
             for item in completions.items:
                 print(f"{item.label} ({item.kind}): {item.detail}")
             ```
         """
-        return self._toolbox_api.lsp_completions(
-            self._sandbox_id,
-            lsp_completion_params=LspCompletionParams(
+        position_dict = position if isinstance(position, dict) else vars(position)
+
+        return self._api_client.completions(
+            request=LspCompletionParams(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
-                position=position,
+                position=position_dict,
             ),
         )

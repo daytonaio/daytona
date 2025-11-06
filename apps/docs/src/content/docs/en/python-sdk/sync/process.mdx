@@ -14,18 +14,18 @@ Handles process and code execution within a Sandbox.
 #### Process.\_\_init\_\_
 
 ```python
-def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
-             toolbox_api: ToolboxApi,
-             get_preview_link: Callable[[int], PortPreviewUrl])
+def __init__(code_toolbox: SandboxPythonCodeToolbox, api_client: ProcessApi,
+             ensure_toolbox_url: Callable[[], None])
 ```
 
 Initialize a new Process instance.
 
 **Arguments**:
 
-- `sandbox_id` _str_ - The ID of the Sandbox.
 - `code_toolbox` _SandboxPythonCodeToolbox_ - Language-specific code execution toolbox.
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `api_client` _ProcessApi_ - API client for process operations.
+- `ensure_toolbox_url` _Callable[[], None]_ - Ensures the toolbox API URL is initialized.
+  Must be called before invoking any private methods on the API client.
 
 #### Process.exec
 
@@ -658,7 +658,7 @@ Artifacts from the command execution.
 ## ExecuteResponse
 
 ```python
-class ExecuteResponse(ClientExecuteResponse)
+class ExecuteResponse(BaseModel)
 ```
 
 Response from the command execution.

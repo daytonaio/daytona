@@ -15,8 +15,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
-import { ToolboxService } from '../../services/toolbox.service'
-import { TypedConfigService } from '../../../config/typed-config.service'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -27,10 +25,8 @@ export class SandboxArchiveAction extends SandboxAction {
     protected sandboxRepository: Repository<Sandbox>,
     protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
-    protected toolboxService: ToolboxService,
-    private readonly configService: TypedConfigService,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redisLockProvider)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {

@@ -15,6 +15,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ExecuteCommand godoc
+//
+//	@Summary		Execute a command
+//	@Description	Execute a shell command and return the output and exit code
+//	@Tags			process
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		ExecuteRequest	true	"Command execution request"
+//	@Success		200		{object}	ExecuteResponse
+//	@Router			/process/execute [post]
+//
+//	@id				ExecuteCommand
 func ExecuteCommand(c *gin.Context) {
 	var request ExecuteRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -60,30 +72,32 @@ func ExecuteCommand(c *gin.Context) {
 			return
 		}
 		if exitError, ok := err.(*exec.ExitError); ok {
+			exitCode := exitError.ExitCode()
 			c.JSON(http.StatusOK, ExecuteResponse{
-				Code:   exitError.ExitCode(),
-				Result: string(output),
+				ExitCode: exitCode,
+				Result:   string(output),
 			})
 			return
 		}
 		c.JSON(http.StatusOK, ExecuteResponse{
-			Code:   -1,
-			Result: string(output),
+			ExitCode: -1,
+			Result:   string(output),
 		})
 		return
 	}
 
 	if cmd.ProcessState == nil {
 		c.JSON(http.StatusOK, ExecuteResponse{
-			Code:   -1,
-			Result: string(output),
+			ExitCode: -1,
+			Result:   string(output),
 		})
 		return
 	}
 
+	exitCode := cmd.ProcessState.ExitCode()
 	c.JSON(http.StatusOK, ExecuteResponse{
-		Code:   cmd.ProcessState.ExitCode(),
-		Result: string(output),
+		ExitCode: exitCode,
+		Result:   string(output),
 	})
 }
 

@@ -8,7 +8,6 @@ import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
 import { RunnerState } from '../../enums/runner-state.enum'
-import { ToolboxService } from '../../services/toolbox.service'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
@@ -22,10 +21,9 @@ export class SandboxDestroyAction extends SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
-    protected toolboxService: ToolboxService,
     protected redisLockProvider: RedisLockProvider,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService, redisLockProvider)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {

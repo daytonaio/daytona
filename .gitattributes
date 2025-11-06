@@ -5,3 +5,5 @@ libs/api-client-python/** linguist-generated=true
 libs/api-client-python-async/** linguist-generated=true
 libs/runner-api-client/** linguist-generated=true
 apps/runner/pkg/api/docs/** linguist-generated=true
+libs/toolbox-api-client-python/** linguist-generated=true
+libs/toolbox-api-client-python-async/** linguist-generated=true

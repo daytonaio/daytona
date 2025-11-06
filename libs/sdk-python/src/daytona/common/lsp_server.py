@@ -26,8 +26,8 @@ class LspLanguageId(Enum):
         return super().__eq__(other)
 
 
-class Position:
-    """Represents a zero-based position in a text document,
+class LspCompletionPosition:
+    """Represents a zero-based completion position in a text document,
     specified by line number and character offset.
 
     Attributes:
@@ -36,7 +36,7 @@ class Position:
     """
 
     def __init__(self, line: int, character: int):
-        """Initialize a new Position instance.
+        """Initialize a new LspCompletionPosition instance.
 
         Args:
             line (int): Zero-based line number in the document.
