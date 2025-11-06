@@ -309,7 +309,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     if (sandbox.backupRegistryId) {
       registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
     } else {
-      registry = await this.dockerRegistryService.getAvailableBackupRegistry(sandbox.region)
+      registry = await this.dockerRegistryService.getAvailableBackupRegistry(sandbox.regionId)
     }
 
     if (!registry) {

@@ -10,7 +10,6 @@ import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
-import { RunnerService } from '../../sandbox/services/runner.service'
 import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.event'
 import { SnapshotEvents } from '../../sandbox/constants/snapshot-events'
 import { SnapshotDto } from '../../sandbox/dto/snapshot.dto'
@@ -22,12 +21,18 @@ import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
 import { VolumeLastUsedAtUpdatedEvent } from '../../sandbox/events/volume-last-used-at-updated.event'
 import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-desired-state-updated.event'
+import { RunnerEvents } from '../../sandbox/constants/runner-events'
+import { RunnerDto } from '../../sandbox/dto/runner.dto'
+import { RunnerCreatedEvent } from '../../sandbox/events/runner-created.event'
+import { RunnerStateUpdatedEvent } from '../../sandbox/events/runner-state-updated.event'
+import { RunnerUnschedulableUpdatedEvent } from '../../sandbox/events/runner-unschedulable-updated.event'
+import { RegionService } from '../../region/services/region.service'
 
 @Injectable()
 export class NotificationService {
   constructor(
     private readonly notificationGateway: NotificationGateway,
-    private readonly runnerService: RunnerService,
+    private readonly regionService: RegionService,
   ) {}
 
   @OnEvent(SandboxEvents.CREATED)
@@ -82,5 +87,26 @@ export class NotificationService {
   async handleVolumeLastUsedAtUpdated(event: VolumeLastUsedAtUpdatedEvent) {
     const dto = VolumeDto.fromVolume(event.volume)
     this.notificationGateway.emitVolumeLastUsedAtUpdated(dto)
+  }
+
+  @OnEvent(RunnerEvents.CREATED)
+  async handleRunnerCreated(event: RunnerCreatedEvent) {
+    const dto = RunnerDto.fromRunner(event.runner)
+    const organizationId = await this.regionService.getOrganizationId(event.runner.regionId)
+    this.notificationGateway.emitRunnerCreated(dto, organizationId)
+  }
+
+  @OnEvent(RunnerEvents.STATE_UPDATED)
+  async handleRunnerStateUpdated(event: RunnerStateUpdatedEvent) {
+    const dto = RunnerDto.fromRunner(event.runner)
+    const organizationId = await this.regionService.getOrganizationId(event.runner.regionId)
+    this.notificationGateway.emitRunnerStateUpdated(dto, organizationId, event.oldState, event.newState)
+  }
+
+  @OnEvent(RunnerEvents.UNSCHEDULABLE_UPDATED)
+  async handleRunnerUnschedulableUpdated(event: RunnerUnschedulableUpdatedEvent) {
+    const dto = RunnerDto.fromRunner(event.runner)
+    const organizationId = await this.regionService.getOrganizationId(event.runner.regionId)
+    this.notificationGateway.emitRunnerUnschedulableUpdated(dto, organizationId)
   }
 }

@@ -58,8 +58,8 @@ type Organization struct {
 	MaxDiskPerSandbox float32 `json:"maxDiskPerSandbox"`
 	// Sandbox default network block all
 	SandboxLimitedNetworkEgress bool `json:"sandboxLimitedNetworkEgress"`
-	// Default region
-	DefaultRegion string `json:"defaultRegion"`
+	// Default region ID
+	DefaultRegionId string `json:"defaultRegionId"`
 	// Authenticated rate limit per minute
 	AuthenticatedRateLimit NullableFloat32 `json:"authenticatedRateLimit"`
 	// Sandbox create rate limit per minute
@@ -75,7 +75,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, defaultRegion string, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, defaultRegionId string, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -95,7 +95,7 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
 	this.SandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
-	this.DefaultRegion = defaultRegion
+	this.DefaultRegionId = defaultRegionId
 	this.AuthenticatedRateLimit = authenticatedRateLimit
 	this.SandboxCreateRateLimit = sandboxCreateRateLimit
 	this.SandboxLifecycleRateLimit = sandboxLifecycleRateLimit
@@ -542,28 +542,28 @@ func (o *Organization) SetSandboxLimitedNetworkEgress(v bool) {
 	o.SandboxLimitedNetworkEgress = v
 }
 
-// GetDefaultRegion returns the DefaultRegion field value
-func (o *Organization) GetDefaultRegion() string {
+// GetDefaultRegionId returns the DefaultRegionId field value
+func (o *Organization) GetDefaultRegionId() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.DefaultRegion
+	return o.DefaultRegionId
 }
 
-// GetDefaultRegionOk returns a tuple with the DefaultRegion field value
+// GetDefaultRegionIdOk returns a tuple with the DefaultRegionId field value
 // and a boolean to check if the value has been set.
-func (o *Organization) GetDefaultRegionOk() (*string, bool) {
+func (o *Organization) GetDefaultRegionIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.DefaultRegion, true
+	return &o.DefaultRegionId, true
 }
 
-// SetDefaultRegion sets field value
-func (o *Organization) SetDefaultRegion(v string) {
-	o.DefaultRegion = v
+// SetDefaultRegionId sets field value
+func (o *Organization) SetDefaultRegionId(v string) {
+	o.DefaultRegionId = v
 }
 
 // GetAuthenticatedRateLimit returns the AuthenticatedRateLimit field value
@@ -672,7 +672,7 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
 	toSerialize["sandboxLimitedNetworkEgress"] = o.SandboxLimitedNetworkEgress
-	toSerialize["defaultRegion"] = o.DefaultRegion
+	toSerialize["defaultRegionId"] = o.DefaultRegionId
 	toSerialize["authenticatedRateLimit"] = o.AuthenticatedRateLimit.Get()
 	toSerialize["sandboxCreateRateLimit"] = o.SandboxCreateRateLimit.Get()
 	toSerialize["sandboxLifecycleRateLimit"] = o.SandboxLifecycleRateLimit.Get()
@@ -707,7 +707,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
 		"sandboxLimitedNetworkEgress",
-		"defaultRegion",
+		"defaultRegionId",
 		"authenticatedRateLimit",
 		"sandboxCreateRateLimit",
 		"sandboxLifecycleRateLimit",
@@ -758,7 +758,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
 		delete(additionalProperties, "sandboxLimitedNetworkEgress")
-		delete(additionalProperties, "defaultRegion")
+		delete(additionalProperties, "defaultRegionId")
 		delete(additionalProperties, "authenticatedRateLimit")
 		delete(additionalProperties, "sandboxCreateRateLimit")
 		delete(additionalProperties, "sandboxLifecycleRateLimit")

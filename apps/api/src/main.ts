@@ -120,16 +120,16 @@ async function bootstrap() {
     const runners = await runnerService.findAll()
     if (!runners.find((runner) => runner.domain === configService.getOrThrow('defaultRunner.domain'))) {
       Logger.log(`Creating default runner: ${configService.getOrThrow('defaultRunner.domain')}`)
-      const runner = await runnerService.create({
+      const { runner } = await runnerService.create({
         apiUrl: configService.getOrThrow('defaultRunner.apiUrl'),
         proxyUrl: configService.getOrThrow('defaultRunner.proxyUrl'),
-        apiKey: configService.getOrThrow('defaultRunner.apiKey'),
+        token: configService.getOrThrow('defaultRunner.token'),
         cpu: configService.getOrThrow('defaultRunner.cpu'),
         memoryGiB: configService.getOrThrow('defaultRunner.memory'),
         diskGiB: configService.getOrThrow('defaultRunner.disk'),
         gpu: configService.getOrThrow('defaultRunner.gpu'),
         gpuType: configService.getOrThrow('defaultRunner.gpuType'),
-        region: configService.getOrThrow('defaultRunner.region'),
+        regionId: configService.getOrThrow('defaultRegion.id'),
         class: configService.getOrThrow('defaultRunner.class'),
         domain: configService.getOrThrow('defaultRunner.domain'),
         version: configService.get('defaultRunner.version') || '0',

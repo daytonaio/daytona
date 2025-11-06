@@ -46,12 +46,12 @@ class Organization(BaseModel):
     max_memory_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max memory per sandbox", alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max disk per sandbox", alias="maxDiskPerSandbox")
     sandbox_limited_network_egress: StrictBool = Field(description="Sandbox default network block all", alias="sandboxLimitedNetworkEgress")
-    default_region: StrictStr = Field(description="Default region", alias="defaultRegion")
+    default_region_id: StrictStr = Field(description="Default region ID", alias="defaultRegionId")
     authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Authenticated rate limit per minute", alias="authenticatedRateLimit")
     sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit per minute", alias="sandboxCreateRateLimit")
     sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit per minute", alias="sandboxLifecycleRateLimit")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegion", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -144,7 +144,7 @@ class Organization(BaseModel):
             "maxMemoryPerSandbox": obj.get("maxMemoryPerSandbox"),
             "maxDiskPerSandbox": obj.get("maxDiskPerSandbox"),
             "sandboxLimitedNetworkEgress": obj.get("sandboxLimitedNetworkEgress"),
-            "defaultRegion": obj.get("defaultRegion"),
+            "defaultRegionId": obj.get("defaultRegionId"),
             "authenticatedRateLimit": obj.get("authenticatedRateLimit"),
             "sandboxCreateRateLimit": obj.get("sandboxCreateRateLimit"),
             "sandboxLifecycleRateLimit": obj.get("sandboxLifecycleRateLimit")

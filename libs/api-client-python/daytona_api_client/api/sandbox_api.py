@@ -2330,7 +2330,7 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[Region]:
-        """List all regions where sandboxes have been created
+        """List all regions available to the organization
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2396,7 +2396,7 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[Region]]:
-        """List all regions where sandboxes have been created
+        """List all regions available to the organization
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2462,7 +2462,7 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List all regions where sandboxes have been created
+        """List all regions available to the organization
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3187,7 +3187,7 @@ class SandboxApi:
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
-        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
         min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
@@ -3232,8 +3232,8 @@ class SandboxApi:
         :type states: List[str]
         :param snapshots: List of snapshot names to filter by
         :type snapshots: List[str]
-        :param regions: List of regions to filter by
-        :type regions: List[str]
+        :param region_ids: List of regions IDs to filter by
+        :type region_ids: List[str]
         :param min_cpu: Minimum CPU
         :type min_cpu: float
         :param max_cpu: Maximum CPU
@@ -3286,7 +3286,7 @@ class SandboxApi:
             include_errored_deleted=include_errored_deleted,
             states=states,
             snapshots=snapshots,
-            regions=regions,
+            region_ids=region_ids,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
             min_memory_gi_b=min_memory_gi_b,
@@ -3329,7 +3329,7 @@ class SandboxApi:
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
-        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
         min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
@@ -3374,8 +3374,8 @@ class SandboxApi:
         :type states: List[str]
         :param snapshots: List of snapshot names to filter by
         :type snapshots: List[str]
-        :param regions: List of regions to filter by
-        :type regions: List[str]
+        :param region_ids: List of regions IDs to filter by
+        :type region_ids: List[str]
         :param min_cpu: Minimum CPU
         :type min_cpu: float
         :param max_cpu: Maximum CPU
@@ -3428,7 +3428,7 @@ class SandboxApi:
             include_errored_deleted=include_errored_deleted,
             states=states,
             snapshots=snapshots,
-            regions=regions,
+            region_ids=region_ids,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
             min_memory_gi_b=min_memory_gi_b,
@@ -3471,7 +3471,7 @@ class SandboxApi:
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
-        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        region_ids: Annotated[Optional[List[StrictStr]], Field(description="List of regions IDs to filter by")] = None,
         min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
         max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
         min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
@@ -3516,8 +3516,8 @@ class SandboxApi:
         :type states: List[str]
         :param snapshots: List of snapshot names to filter by
         :type snapshots: List[str]
-        :param regions: List of regions to filter by
-        :type regions: List[str]
+        :param region_ids: List of regions IDs to filter by
+        :type region_ids: List[str]
         :param min_cpu: Minimum CPU
         :type min_cpu: float
         :param max_cpu: Maximum CPU
@@ -3570,7 +3570,7 @@ class SandboxApi:
             include_errored_deleted=include_errored_deleted,
             states=states,
             snapshots=snapshots,
-            regions=regions,
+            region_ids=region_ids,
             min_cpu=min_cpu,
             max_cpu=max_cpu,
             min_memory_gi_b=min_memory_gi_b,
@@ -3608,7 +3608,7 @@ class SandboxApi:
         include_errored_deleted,
         states,
         snapshots,
-        regions,
+        region_ids,
         min_cpu,
         max_cpu,
         min_memory_gi_b,
@@ -3630,7 +3630,7 @@ class SandboxApi:
         _collection_formats: Dict[str, str] = {
             'states': 'multi',
             'snapshots': 'multi',
-            'regions': 'multi',
+            'regionIds': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -3676,9 +3676,9 @@ class SandboxApi:
             
             _query_params.append(('snapshots', snapshots))
             
-        if regions is not None:
+        if region_ids is not None:
             
-            _query_params.append(('regions', regions))
+            _query_params.append(('regionIds', region_ids))
             
         if min_cpu is not None:
             

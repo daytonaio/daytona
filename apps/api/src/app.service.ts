@@ -14,6 +14,7 @@ import { SnapshotService } from './sandbox/services/snapshot.service'
 import { SystemRole } from './user/enums/system-role.enum'
 import { TypedConfigService } from './config/typed-config.service'
 import { SchedulerRegistry } from '@nestjs/schedule'
+import { RegionService } from './region/services/region.service'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -30,6 +31,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     private readonly eventEmitterReadinessWatcher: EventEmitterReadinessWatcher,
     private readonly snapshotService: SnapshotService,
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly regionService: RegionService,
   ) {}
 
   async onApplicationShutdown(signal?: string) {
@@ -42,6 +44,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       await this.stopAllCronJobs()
     }
 
+    await this.initializeDefaultRegion()
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeBackupRegistry()
@@ -55,6 +58,18 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       this.logger.debug(`Stopping cron job: ${cronName}`)
       this.schedulerRegistry.deleteCronJob(cronName)
     }
+  }
+
+  private async initializeDefaultRegion(): Promise<void> {
+    const existingRegion = await this.regionService.findOne(this.configService.getOrThrow('defaultRegion.id'))
+    if (existingRegion) {
+      return
+    }
+
+    await this.regionService.create({
+      id: this.configService.getOrThrow('defaultRegion.id'),
+      name: this.configService.getOrThrow('defaultRegion.name'),
+    })
   }
 
   private async initializeAdminUser(): Promise<void> {
@@ -162,7 +177,7 @@ Admin user created with API key: ${value}
 
   private async initializeBackupRegistry(): Promise<void> {
     const existingRegistry = await this.dockerRegistryService.getAvailableBackupRegistry(
-      this.configService.getOrThrow('defaultRegion'),
+      this.configService.getOrThrow('defaultRegion.id'),
     )
     if (existingRegistry) {
       return

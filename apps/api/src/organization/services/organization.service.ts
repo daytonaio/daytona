@@ -239,9 +239,9 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ForbiddenException('You have reached the maximum number of created organizations')
     }
 
-    const defaultRegion = this.configService.getOrThrow('defaultRegion')
+    const defaultRegionId = this.configService.getOrThrow('defaultRegion.id')
 
-    let organization = new Organization(defaultRegion)
+    let organization = new Organization(defaultRegionId)
 
     organization.name = createOrganizationDto.name
     organization.createdBy = createdBy

@@ -18,7 +18,7 @@ export class WarmPool {
   snapshot: string
 
   @Column()
-  target: string
+  regionId: string
 
   @Column()
   cpu: number

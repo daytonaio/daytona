@@ -99,9 +99,9 @@ export class OrganizationDto {
   sandboxLimitedNetworkEgress: boolean
 
   @ApiProperty({
-    description: 'Default region',
+    description: 'Default region ID',
   })
-  defaultRegion: string
+  defaultRegionId: string
 
   @ApiProperty({
     description: 'Authenticated rate limit per minute',
@@ -141,7 +141,7 @@ export class OrganizationDto {
       maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
-      defaultRegion: organization.defaultRegion,
+      defaultRegionId: organization.defaultRegionId,
       authenticatedRateLimit: organization.authenticatedRateLimit,
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
       sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,

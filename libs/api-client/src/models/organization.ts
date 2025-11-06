@@ -127,11 +127,11 @@ export interface Organization {
    */
   sandboxLimitedNetworkEgress: boolean
   /**
-   * Default region
+   * Default region ID
    * @type {string}
    * @memberof Organization
    */
-  defaultRegion: string
+  defaultRegionId: string
   /**
    * Authenticated rate limit per minute
    * @type {number}
