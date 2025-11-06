@@ -24,15 +24,10 @@ type CreateRunner struct {
 	Domain               string  `json:"domain"`
 	ApiUrl               string  `json:"apiUrl"`
 	ProxyUrl             string  `json:"proxyUrl"`
-	ApiKey               string  `json:"apiKey"`
 	Cpu                  float32 `json:"cpu"`
 	MemoryGiB            float32 `json:"memoryGiB"`
 	DiskGiB              float32 `json:"diskGiB"`
-	Gpu                  float32 `json:"gpu"`
-	GpuType              string  `json:"gpuType"`
-	Class                string  `json:"class"`
-	Region               string  `json:"region"`
-	Version              string  `json:"version"`
+	RegionId             string  `json:"regionId"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -42,20 +37,15 @@ type _CreateRunner CreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateRunner(domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memoryGiB float32, diskGiB float32, gpu float32, gpuType string, class string, region string, version string) *CreateRunner {
+func NewCreateRunner(domain string, apiUrl string, proxyUrl string, cpu float32, memoryGiB float32, diskGiB float32, regionId string) *CreateRunner {
 	this := CreateRunner{}
 	this.Domain = domain
 	this.ApiUrl = apiUrl
 	this.ProxyUrl = proxyUrl
-	this.ApiKey = apiKey
 	this.Cpu = cpu
 	this.MemoryGiB = memoryGiB
 	this.DiskGiB = diskGiB
-	this.Gpu = gpu
-	this.GpuType = gpuType
-	this.Class = class
-	this.Region = region
-	this.Version = version
+	this.RegionId = regionId
 	return &this
 }
 
@@ -139,30 +129,6 @@ func (o *CreateRunner) SetProxyUrl(v string) {
 	o.ProxyUrl = v
 }
 
-// GetApiKey returns the ApiKey field value
-func (o *CreateRunner) GetApiKey() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ApiKey
-}
-
-// GetApiKeyOk returns a tuple with the ApiKey field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetApiKeyOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ApiKey, true
-}
-
-// SetApiKey sets field value
-func (o *CreateRunner) SetApiKey(v string) {
-	o.ApiKey = v
-}
-
 // GetCpu returns the Cpu field value
 func (o *CreateRunner) GetCpu() float32 {
 	if o == nil {
@@ -235,124 +201,28 @@ func (o *CreateRunner) SetDiskGiB(v float32) {
 	o.DiskGiB = v
 }
 
-// GetGpu returns the Gpu field value
-func (o *CreateRunner) GetGpu() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.Gpu
-}
-
-// GetGpuOk returns a tuple with the Gpu field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetGpuOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Gpu, true
-}
-
-// SetGpu sets field value
-func (o *CreateRunner) SetGpu(v float32) {
-	o.Gpu = v
-}
-
-// GetGpuType returns the GpuType field value
-func (o *CreateRunner) GetGpuType() string {
+// GetRegionId returns the RegionId field value
+func (o *CreateRunner) GetRegionId() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.GpuType
+	return o.RegionId
 }
 
-// GetGpuTypeOk returns a tuple with the GpuType field value
+// GetRegionIdOk returns a tuple with the RegionId field value
 // and a boolean to check if the value has been set.
-func (o *CreateRunner) GetGpuTypeOk() (*string, bool) {
+func (o *CreateRunner) GetRegionIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.GpuType, true
+	return &o.RegionId, true
 }
 
-// SetGpuType sets field value
-func (o *CreateRunner) SetGpuType(v string) {
-	o.GpuType = v
-}
-
-// GetClass returns the Class field value
-func (o *CreateRunner) GetClass() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Class
-}
-
-// GetClassOk returns a tuple with the Class field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetClassOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Class, true
-}
-
-// SetClass sets field value
-func (o *CreateRunner) SetClass(v string) {
-	o.Class = v
-}
-
-// GetRegion returns the Region field value
-func (o *CreateRunner) GetRegion() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Region
-}
-
-// GetRegionOk returns a tuple with the Region field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetRegionOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Region, true
-}
-
-// SetRegion sets field value
-func (o *CreateRunner) SetRegion(v string) {
-	o.Region = v
-}
-
-// GetVersion returns the Version field value
-func (o *CreateRunner) GetVersion() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Version
-}
-
-// GetVersionOk returns a tuple with the Version field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetVersionOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Version, true
-}
-
-// SetVersion sets field value
-func (o *CreateRunner) SetVersion(v string) {
-	o.Version = v
+// SetRegionId sets field value
+func (o *CreateRunner) SetRegionId(v string) {
+	o.RegionId = v
 }
 
 func (o CreateRunner) MarshalJSON() ([]byte, error) {
@@ -368,15 +238,10 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize["domain"] = o.Domain
 	toSerialize["apiUrl"] = o.ApiUrl
 	toSerialize["proxyUrl"] = o.ProxyUrl
-	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["memoryGiB"] = o.MemoryGiB
 	toSerialize["diskGiB"] = o.DiskGiB
-	toSerialize["gpu"] = o.Gpu
-	toSerialize["gpuType"] = o.GpuType
-	toSerialize["class"] = o.Class
-	toSerialize["region"] = o.Region
-	toSerialize["version"] = o.Version
+	toSerialize["regionId"] = o.RegionId
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -393,15 +258,10 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 		"domain",
 		"apiUrl",
 		"proxyUrl",
-		"apiKey",
 		"cpu",
 		"memoryGiB",
 		"diskGiB",
-		"gpu",
-		"gpuType",
-		"class",
-		"region",
-		"version",
+		"regionId",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -434,15 +294,10 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "domain")
 		delete(additionalProperties, "apiUrl")
 		delete(additionalProperties, "proxyUrl")
-		delete(additionalProperties, "apiKey")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "memoryGiB")
 		delete(additionalProperties, "diskGiB")
-		delete(additionalProperties, "gpu")
-		delete(additionalProperties, "gpuType")
-		delete(additionalProperties, "class")
-		delete(additionalProperties, "region")
-		delete(additionalProperties, "version")
+		delete(additionalProperties, "regionId")
 		o.AdditionalProperties = additionalProperties
 	}
 

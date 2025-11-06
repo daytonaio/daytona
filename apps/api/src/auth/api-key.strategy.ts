@@ -117,7 +117,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     }
 
     try {
-      const runner = await this.runnerService.findByApiKey(token)
+      const runner = await this.runnerService.findByToken(token)
       if (runner) {
         this.logger.debug(`Runner API key found for runner: ${runner.id}`)
         return {

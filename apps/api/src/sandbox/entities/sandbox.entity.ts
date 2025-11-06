@@ -37,7 +37,7 @@ export class Sandbox {
   name: string
 
   @Column()
-  region: string
+  regionId: string
 
   @Column({
     type: 'uuid',
@@ -194,11 +194,11 @@ export class Sandbox {
   @Column({ nullable: true })
   daemonVersion?: string
 
-  constructor(region: string, name?: string) {
+  constructor(regionId: string, name?: string) {
     this.id = uuidv4()
     // Set name - use provided name or fallback to ID
     this.name = name || this.id
-    this.region = region
+    this.regionId = regionId
   }
 
   public setBackupState(

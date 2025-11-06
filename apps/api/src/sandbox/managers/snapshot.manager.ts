@@ -35,6 +35,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { RegionService } from '../../region/services/region.service'
 
 @Injectable()
 export class SnapshotManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -62,6 +63,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
     private readonly configService: TypedConfigService,
+    private readonly regionService: RegionService,
   ) {}
 
   async onApplicationShutdown() {
@@ -204,7 +206,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       const runners = await this.runnerRepository.find({
         where: {
           state: RunnerState.READY,
-          unschedulable: false,
+          unschedulable: Not(true),
         },
       })
 
@@ -716,6 +718,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         // Snapshots that have gone through the build process are already in the internal registry
         snapshot.internalName = await this.pushSnapshotToInternalRegistry(snapshot.id)
       }
+
+      const organization = await this.organizationService.findOne(snapshot.organizationId)
+      if (!organization) {
+        throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
+      }
+
       const runner = await this.runnerRepository.findOne({
         where: {
           state: RunnerState.READY,
@@ -723,13 +731,45 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           availabilityScore: MoreThanOrEqual(
             this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold'),
           ),
+          regionId: organization.defaultRegionId,
         },
       })
-      // Propagate snapshot to one runner so it can be used immediately
+      // Propagate snapshot to one runner in default region so it can be used immediately
       if (runner) {
+        const snapshotRunner = new SnapshotRunner()
+        snapshotRunner.snapshotRef = snapshot.internalName
+        snapshotRunner.runnerId = runner.id
+        snapshotRunner.state = SnapshotRunnerState.PULLING_SNAPSHOT
+        await this.snapshotRunnerRepository.save(snapshotRunner)
         await this.propagateSnapshotToRunner(snapshot.internalName, runner)
       }
       await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+
+      const customRegions = await this.regionService.findAll(organization.id)
+      const customRegionIds = customRegions.map((region) => region.id)
+
+      const customRunners = await this.runnerRepository.find({
+        where: {
+          state: RunnerState.READY,
+          unschedulable: Not(true),
+          availabilityScore: MoreThanOrEqual(
+            this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold'),
+          ),
+          regionId: In(customRegionIds),
+        },
+      })
+
+      customRunners.forEach(async (runner) => {
+        const snapshotRunner = new SnapshotRunner()
+        snapshotRunner.snapshotRef = snapshot.internalName
+        snapshotRunner.runnerId = runner.id
+        snapshotRunner.state = SnapshotRunnerState.PULLING_SNAPSHOT
+        await this.snapshotRunnerRepository.save(snapshotRunner)
+        //  do not await the propagation, let the sync job handle it
+        this.propagateSnapshotToRunner(snapshot.internalName, runner).catch((err) => {
+          this.logger.error(`Error propagating snapshot ${snapshot.id} to runner ${runner.id}: ${fromAxiosError(err)}`)
+        })
+      })
 
       // Best effort removal of old snapshot from transient registry
       const registry = await this.dockerRegistryService.findOneBySnapshotImageName(

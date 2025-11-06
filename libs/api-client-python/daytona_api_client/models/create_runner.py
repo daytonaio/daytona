@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,24 +30,12 @@ class CreateRunner(BaseModel):
     domain: StrictStr
     api_url: StrictStr = Field(alias="apiUrl")
     proxy_url: StrictStr = Field(alias="proxyUrl")
-    api_key: StrictStr = Field(alias="apiKey")
     cpu: Union[StrictFloat, StrictInt]
     memory_gi_b: Union[StrictFloat, StrictInt] = Field(alias="memoryGiB")
     disk_gi_b: Union[StrictFloat, StrictInt] = Field(alias="diskGiB")
-    gpu: Union[StrictFloat, StrictInt]
-    gpu_type: StrictStr = Field(alias="gpuType")
-    var_class: StrictStr = Field(alias="class")
-    region: StrictStr
-    version: StrictStr
+    region_id: StrictStr = Field(alias="regionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memoryGiB", "diskGiB", "gpu", "gpuType", "class", "region", "version"]
-
-    @field_validator('var_class')
-    def var_class_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['small', 'medium', 'large']):
-            raise ValueError("must be one of enum values ('small', 'medium', 'large')")
-        return value
+    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB", "regionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -110,15 +98,10 @@ class CreateRunner(BaseModel):
             "domain": obj.get("domain"),
             "apiUrl": obj.get("apiUrl"),
             "proxyUrl": obj.get("proxyUrl"),
-            "apiKey": obj.get("apiKey"),
             "cpu": obj.get("cpu"),
             "memoryGiB": obj.get("memoryGiB"),
             "diskGiB": obj.get("diskGiB"),
-            "gpu": obj.get("gpu"),
-            "gpuType": obj.get("gpuType"),
-            "class": obj.get("class"),
-            "region": obj.get("region"),
-            "version": obj.get("version")
+            "regionId": obj.get("regionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -26,6 +26,7 @@ from daytona_api_client.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client.api.object_storage_api import ObjectStorageApi
 from daytona_api_client.api.organizations_api import OrganizationsApi
 from daytona_api_client.api.preview_api import PreviewApi
+from daytona_api_client.api.regions_api import RegionsApi
 from daytona_api_client.api.runners_api import RunnersApi
 from daytona_api_client.api.sandbox_api import SandboxApi
 from daytona_api_client.api.snapshots_api import SnapshotsApi
@@ -69,7 +70,9 @@ from daytona_api_client.models.create_organization import CreateOrganization
 from daytona_api_client.models.create_organization_invitation import CreateOrganizationInvitation
 from daytona_api_client.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client.models.create_organization_role import CreateOrganizationRole
+from daytona_api_client.models.create_region import CreateRegion
 from daytona_api_client.models.create_runner import CreateRunner
+from daytona_api_client.models.create_runner_response import CreateRunnerResponse
 from daytona_api_client.models.create_sandbox import CreateSandbox
 from daytona_api_client.models.create_session_request import CreateSessionRequest
 from daytona_api_client.models.create_snapshot import CreateSnapshot
@@ -147,6 +150,7 @@ from daytona_api_client.models.registry_push_access_dto import RegistryPushAcces
 from daytona_api_client.models.replace_request import ReplaceRequest
 from daytona_api_client.models.replace_result import ReplaceResult
 from daytona_api_client.models.runner import Runner
+from daytona_api_client.models.runner_full import RunnerFull
 from daytona_api_client.models.runner_snapshot_dto import RunnerSnapshotDto
 from daytona_api_client.models.runner_state import RunnerState
 from daytona_api_client.models.sandbox import Sandbox

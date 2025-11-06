@@ -38,6 +38,7 @@ import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
+import { RunnerSubscriber } from './subscribers/runner.subscriber'
 import { WorkspaceController } from './controllers/workspace.deprecated.controller'
 import { RunnerAdapterFactory } from './runner-adapter/runnerAdapter'
 import { SandboxStartAction } from './managers/sandbox-actions/sandbox-start.action'
@@ -46,12 +47,14 @@ import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
 import { SshAccess } from './entities/ssh-access.entity'
 import { SandboxRepository } from './repositories/sandbox.repository'
+import { RegionModule } from '../region/region.module'
 
 @Module({
   imports: [
     UserModule,
     DockerRegistryModule,
     OrganizationModule,
+    RegionModule,
     TypeOrmModule.forFeature([
       Sandbox,
       Runner,
@@ -89,6 +92,7 @@ import { SandboxRepository } from './repositories/sandbox.repository'
     VolumeService,
     VolumeManager,
     VolumeSubscriber,
+    RunnerSubscriber,
     RunnerAdapterFactory,
     SandboxStartAction,
     SandboxStopAction,
