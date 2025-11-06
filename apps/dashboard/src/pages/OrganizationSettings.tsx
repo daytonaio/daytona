@@ -95,7 +95,7 @@ const OrganizationSettings: React.FC = () => {
 
         <div className="space-y-3">
           <Label htmlFor="organization-default-region">Default Region</Label>
-          <Input id="organization-default-region" value={selectedOrganization.defaultRegion} readOnly />
+          <Input id="organization-default-region" value={selectedOrganization.defaultRegionId} readOnly />
         </div>
 
         {!selectedOrganization.personal && authenticatedUserOrganizationMember !== null && (
