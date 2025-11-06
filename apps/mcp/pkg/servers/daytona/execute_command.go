@@ -73,7 +73,7 @@ func (s *DaytonaMCPServer) handleExecuteCommand(ctx context.Context, request *mc
 	command := fmt.Sprintf("echo '%s' | base64 -d | sh", base64UserCmd)
 
 	// Add environment variables if provided
-	if input.Env != nil && len(input.Env) > 0 {
+	if len(input.Env) > 0 {
 		var envExports []string
 		for key, value := range input.Env {
 			encodedValue := base64.StdEncoding.EncodeToString([]byte(value))
