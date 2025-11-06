@@ -50,7 +50,7 @@ Initializes Daytona instance with optional configuration.
 If no config is provided, reads from environment variables:
 - `DAYTONA_API_KEY`: Required API key for authentication
 - `DAYTONA_API_URL`: Required api URL
-- `DAYTONA_TARGET`: Optional target environment (defaults to 'us')
+- `DAYTONA_TARGET`: Optional target environment (if not provided, default region for the organization is used)
 
 **Arguments**:
 
@@ -389,8 +389,8 @@ Configuration options for initializing the Daytona client.
   here or in the environment variable `DAYTONA_API_URL`.
 - `server_url` _Optional[str]_ - Deprecated. Use `api_url` instead. This property will be removed
   in a future version.
-- `target` _Optional[str]_ - Target runner location for the Sandbox. Defaults to `'us'` if not set here
-  or in the environment variable `DAYTONA_TARGET`.
+- `target` _Optional[str]_ - Target runner location for the Sandbox. Default region for the organization is used 
+  if not set here or in the environment variable `DAYTONA_TARGET`.
   
 
 **Example**:

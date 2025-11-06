@@ -50,8 +50,8 @@ class DaytonaConfig(BaseModel):
             here or in the environment variable `DAYTONA_API_URL`.
         server_url (Optional[str]): Deprecated. Use `api_url` instead. This property will be removed
             in a future version.
-        target (Optional[str]): Target runner location for the Sandbox. Defaults to `'us'` if not set here
-            or in the environment variable `DAYTONA_TARGET`.
+        target (Optional[str]): Target runner location for the Sandbox. Default region for the organization is used
+            if not set here or in the environment variable `DAYTONA_TARGET`.
 
     Example:
         ```python
