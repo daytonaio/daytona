@@ -3,8 +3,15 @@ import matter from 'gray-matter'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
+import { processMarkdownContent, rewriteLinksToMd } from '../src/utils/md.js'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+const PUBLIC_WEB_URL = (
+  process.env.PUBLIC_WEB_URL || 'https://daytona.io'
+).replace(/\/$/, '')
+const DOCS_BASE_URL = `${PUBLIC_WEB_URL}/docs`
 
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../../../package.json'), 'utf8')
@@ -37,23 +44,6 @@ const SUBFOLDERS = new Set([
 ])
 const EXCLUDE_FILES = new Set(['404.md', 'api.mdx'])
 
-const processContent = content =>
-  content
-    .split('\n')
-    .filter(line => {
-      const trimmed = line.trim()
-      return !(
-        /^(import\s+.*from\s+['"](@components\/|@assets\/).*['"];?|export\s+(default|const|let|function|class)\b)/.test(
-          trimmed
-        ) ||
-        trimmed.startsWith('<Tab') ||
-        trimmed.startsWith('</Tab') ||
-        trimmed.startsWith('---')
-      )
-    })
-    .join('\n')
-    .trim()
-
 const extractSubHeadings = (content, slug) => {
   const headingRegex = /^(#{2,3})\s+(.*)/gm
   const headings = []
@@ -72,7 +62,7 @@ const extractSubHeadings = (content, slug) => {
 
 const parseMarkdownFile = filePath => {
   const { content, data } = matter(fs.readFileSync(filePath, 'utf8'))
-  const cleanContent = processContent(content)
+  const cleanContent = processMarkdownContent(content)
   const title = data.title || cleanContent.match(/^#\s+(.*)/)?.[1] || 'Untitled'
   const slug = filePath
     .replace(DOCS_PATH, '')
@@ -102,7 +92,7 @@ const searchDocs = () => {
         !EXCLUDE_FILES.has(file)
       ) {
         const fileContent = fs.readFileSync(fullPath, 'utf8')
-        const cleanContent = processContent(fileContent)
+        const cleanContent = processMarkdownContent(fileContent)
         fullContentArray.push(cleanContent)
         results.push(...parseMarkdownFile(fullPath))
       }
@@ -122,11 +112,12 @@ const generateLlmsTxtFile = docsData => {
     '',
     '## Docs',
     '',
-    ...docsData.map(doc => `- [${doc.title}](https://daytona.io${doc.url})`),
+    ...docsData.map(doc => `- [${doc.title}](${PUBLIC_WEB_URL}${doc.url})`),
   ]
+  const output = rewriteLinksToMd(llmsContent.join('\n'), DOCS_BASE_URL)
   fs.writeFileSync(
     path.join(__dirname, '../../../dist/apps/docs/dist/client/llms.txt'),
-    llmsContent.join('\n'),
+    output,
     'utf8'
   )
   console.log('llms.txt index updated')
@@ -134,10 +125,10 @@ const generateLlmsTxtFile = docsData => {
 
 const generateLlmsFullTxtFile = fullContent => {
   const content = [getVersionHeader(), fullContent].join('\n\n')
-
+  const output = rewriteLinksToMd(content, DOCS_BASE_URL)
   fs.writeFileSync(
     path.join(__dirname, '../../../dist/apps/docs/dist/client/llms-full.txt'),
-    content,
+    output,
     'utf8'
   )
   console.log('llms-full.txt index updated')
