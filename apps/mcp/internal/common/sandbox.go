@@ -41,5 +41,7 @@ func GetSandbox(ctx context.Context, apiClient *apiclient.APIClient, sandboxId *
 		}
 	}
 
+	sandboxId = &sandbox.Id
+
 	return sandbox, stop, nil
 }
