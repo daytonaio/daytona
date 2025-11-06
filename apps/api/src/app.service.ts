@@ -66,20 +66,27 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       id: DAYTONA_ADMIN_USER_ID,
       name: 'Daytona Admin',
       personalOrganizationQuota: {
-        totalCpuQuota: 0,
-        totalMemoryQuota: 0,
-        totalDiskQuota: 0,
-        maxCpuPerSandbox: 0,
-        maxMemoryPerSandbox: 0,
-        maxDiskPerSandbox: 0,
-        snapshotQuota: 100,
-        maxSnapshotSize: 100,
-        volumeQuota: 0,
+        totalCpuQuota: this.configService.getOrThrow('admin.totalCpuQuota'),
+        totalMemoryQuota: this.configService.getOrThrow('admin.totalMemoryQuota'),
+        totalDiskQuota: this.configService.getOrThrow('admin.totalDiskQuota'),
+        maxCpuPerSandbox: this.configService.getOrThrow('admin.maxCpuPerSandbox'),
+        maxMemoryPerSandbox: this.configService.getOrThrow('admin.maxMemoryPerSandbox'),
+        maxDiskPerSandbox: this.configService.getOrThrow('admin.maxDiskPerSandbox'),
+        snapshotQuota: this.configService.getOrThrow('admin.snapshotQuota'),
+        maxSnapshotSize: this.configService.getOrThrow('admin.maxSnapshotSize'),
+        volumeQuota: this.configService.getOrThrow('admin.volumeQuota'),
       },
       role: SystemRole.ADMIN,
     })
     const personalOrg = await this.organizationService.findPersonal(user.id)
-    const { value } = await this.apiKeyService.createApiKey(personalOrg.id, user.id, DAYTONA_ADMIN_USER_ID, [])
+    const { value } = await this.apiKeyService.createApiKey(
+      personalOrg.id,
+      user.id,
+      DAYTONA_ADMIN_USER_ID,
+      [],
+      undefined,
+      this.configService.getOrThrow('admin.apiKey'),
+    )
     this.logger.log(
       `
 =========================================

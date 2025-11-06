@@ -48,6 +48,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   activeJobs = new Set<string>()
   private readonly logger = new Logger(OrganizationService.name)
   private defaultOrganizationQuota: CreateOrganizationQuotaDto
+  private defaultSandboxLimitedNetworkEgress: boolean
 
   constructor(
     @InjectRepository(Organization)
@@ -61,6 +62,9 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly redisLockProvider: RedisLockProvider,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
+    this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
+      'organizationSandboxDefaultLimitedNetworkEgress',
+    )
   }
 
   async onApplicationShutdown() {
@@ -210,6 +214,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     creatorEmailVerified: boolean,
     personal = false,
     quota: CreateOrganizationQuotaDto = this.defaultOrganizationQuota,
+    sandboxLimitedNetworkEgress: boolean = this.defaultSandboxLimitedNetworkEgress,
   ): Promise<Organization> {
     if (personal) {
       const count = await entityManager.count(Organization, {
@@ -256,7 +261,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       organization.suspensionReason = 'Payment method required'
     }
 
-    organization.sandboxLimitedNetworkEgress = this.configService.get('organizationSandboxDefaultLimitedNetworkEgress')
+    organization.sandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
 
     const owner = new OrganizationUser()
     owner.userId = createdBy
@@ -432,6 +437,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,
       true,
       payload.personalOrganizationQuota,
+      payload.user.role == SystemRole.ADMIN ? true : undefined,
     )
   }
 
