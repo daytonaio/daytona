@@ -203,6 +203,18 @@ const configuration = {
     volumeQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_VOLUME_QUOTA || '100', 10),
   },
   defaultRegion: process.env.DEFAULT_REGION || 'us',
+  admin: {
+    apiKey: process.env.ADMIN_API_KEY,
+    totalCpuQuota: parseInt(process.env.ADMIN_TOTAL_CPU_QUOTA || '0', 10),
+    totalMemoryQuota: parseInt(process.env.ADMIN_TOTAL_MEMORY_QUOTA || '0', 10),
+    totalDiskQuota: parseInt(process.env.ADMIN_TOTAL_DISK_QUOTA || '0', 10),
+    maxCpuPerSandbox: parseInt(process.env.ADMIN_MAX_CPU_PER_SANDBOX || '0', 10),
+    maxMemoryPerSandbox: parseInt(process.env.ADMIN_MAX_MEMORY_PER_SANDBOX || '0', 10),
+    maxDiskPerSandbox: parseInt(process.env.ADMIN_MAX_DISK_PER_SANDBOX || '0', 10),
+    snapshotQuota: parseInt(process.env.ADMIN_SNAPSHOT_QUOTA || '100', 10),
+    maxSnapshotSize: parseInt(process.env.ADMIN_MAX_SNAPSHOT_SIZE || '100', 10),
+    volumeQuota: parseInt(process.env.ADMIN_VOLUME_QUOTA || '0', 10),
+  },
 }
 
 export { configuration }
