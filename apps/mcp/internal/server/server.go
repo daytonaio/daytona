@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
+	"github.com/daytonaio/mcp/internal/auth"
 	"github.com/daytonaio/mcp/internal/constants"
 	"github.com/daytonaio/mcp/pkg/servers/daytona"
 	"github.com/daytonaio/mcp/pkg/servers/fs"
@@ -27,6 +28,9 @@ type MCPServerConfig struct {
 	TLSCertFilePath string
 	TLSKeyFilePath  string
 	ApiUrl          string
+	Auth0Domain     string
+	Auth0ClientId   string
+	Auth0Audience   string
 }
 
 type MCPServer struct {
@@ -35,6 +39,9 @@ type MCPServer struct {
 	tlsKeyFilePath  string
 	apiUrl          string
 	httpServer      *http.Server
+	auth0Domain     string
+	auth0ClientId   string
+	auth0Audience   string
 }
 
 func NewMCPServer(config MCPServerConfig) *MCPServer {
@@ -43,6 +50,9 @@ func NewMCPServer(config MCPServerConfig) *MCPServer {
 		tlsCertFilePath: config.TLSCertFilePath,
 		tlsKeyFilePath:  config.TLSKeyFilePath,
 		apiUrl:          config.ApiUrl,
+		auth0Domain:     config.Auth0Domain,
+		auth0ClientId:   config.Auth0ClientId,
+		auth0Audience:   config.Auth0Audience,
 	}
 }
 
@@ -51,6 +61,9 @@ func (s *MCPServer) Start() error {
 	if err == nil {
 		return fmt.Errorf("cannot start MCP server, port %d is already in use", s.port)
 	}
+
+	// Create auth middleware
+	authMiddleware := auth.CreateAuthMiddleware(s.auth0Domain, s.auth0ClientId, s.auth0Audience)
 
 	daytonaMcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
 		apiClient := apiclient.NewApiClient(constants.DAYTONA_MCP_SOURCE, s.apiUrl, r.Header)
@@ -73,10 +86,24 @@ func (s *MCPServer) Start() error {
 	}, &mcp.StreamableHTTPOptions{JSONResponse: true})
 
 	httpMux := http.NewServeMux()
-	httpMux.Handle("/mcp", daytonaMcpHandler)
-	httpMux.Handle("/mcp/sandbox", sandboxMcpHandler)
-	httpMux.Handle("/mcp/fs", fsMcpHandler)
-	httpMux.Handle("/mcp/git", gitMcpHandler)
+
+	// Healthcheck (no auth required)
+	httpMux.Handle("/daytona", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	}))
+
+	// OAuth protected resource metadata endpoints (no auth required - these are discovery endpoints)
+	httpMux.Handle("/daytona/.well-known/oauth-protected-resource", auth.HandleOAuthProtectedResource(s.auth0Domain))
+	httpMux.Handle("/daytona/sandbox/.well-known/oauth-protected-resource", auth.HandleOAuthProtectedResource(s.auth0Domain))
+	httpMux.Handle("/daytona/fs/.well-known/oauth-protected-resource", auth.HandleOAuthProtectedResource(s.auth0Domain))
+	httpMux.Handle("/daytona/git/.well-known/oauth-protected-resource", auth.HandleOAuthProtectedResource(s.auth0Domain))
+
+	// MCP Servers (protected with auth middleware)
+	httpMux.Handle("/daytona/mcp", authMiddleware(daytonaMcpHandler))
+	httpMux.Handle("/daytona/sandbox/mcp", authMiddleware(sandboxMcpHandler))
+	httpMux.Handle("/daytona/fs/mcp", authMiddleware(fsMcpHandler))
+	httpMux.Handle("/daytona/git/mcp", authMiddleware(gitMcpHandler))
 
 	s.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.port),

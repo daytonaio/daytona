@@ -29,6 +29,9 @@ func main() {
 		TLSCertFilePath: cfg.TLSCertFilePath,
 		TLSKeyFilePath:  cfg.TLSKeyFilePath,
 		ApiUrl:          cfg.ApiUrl,
+		Auth0Domain:     cfg.Auth0Domain,
+		Auth0ClientId:   cfg.Auth0ClientId,
+		Auth0Audience:   cfg.Auth0Audience,
 	})
 
 	mcpServerErrChan := make(chan error)
