@@ -1,0 +1,76 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
+
+package fs
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/daytonaio/mcp/internal/apiclient"
+	"github.com/daytonaio/mcp/internal/common"
+	"github.com/daytonaio/mcp/internal/constants"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+
+	log "github.com/sirupsen/logrus"
+)
+
+type MoveFileInput struct {
+	SandboxId  string `json:"sandboxId" jsonschema:"ID of the sandbox to move the file in."`
+	SourcePath string `json:"sourcePath" jsonschema:"Source path of the file to move."`
+	DestPath   string `json:"destPath" jsonschema:"Destination path where to move the file."`
+}
+
+type MoveFileOutput struct {
+	Message string `json:"message,omitempty" jsonschema:"Message indicating the successful movement of the file."`
+}
+
+func (s *DaytonaFileSystemMCPServer) getMoveFileTool() *mcp.Tool {
+	return &mcp.Tool{
+		Name:        "move_file",
+		Title:       "Move File",
+		Description: "Move or rename a file in the Daytona sandbox.",
+	}
+}
+
+func (s *DaytonaFileSystemMCPServer) handleMoveFile(ctx context.Context, request *mcp.CallToolRequest, input *MoveFileInput) (*mcp.CallToolResult, *MoveFileOutput, error) {
+	if input.SandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sandbox ID is required")
+	}
+
+	// Get source and destination paths from request arguments
+	if input.SourcePath == "" {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("sourcePath parameter is required")
+	}
+
+	if input.DestPath == "" {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("destPath parameter is required")
+	}
+
+	sandbox, stop, err := common.GetSandbox(ctx, s.apiClient, &input.SandboxId)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to get sandbox: %v", err)
+	}
+	defer stop()
+
+	proxyUrl, err := apiclient.ExtractProxyUrl(ctx, s.apiClient)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error extracting proxy URL: %v", err)
+	}
+
+	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DAYTONA_FS_MCP_SOURCE, sandbox.Id, proxyUrl, request.Extra.Header)
+
+	_, err = toolboxApiClient.FileSystemAPI.MoveFile(ctx).Source(input.SourcePath).Destination(input.DestPath).Execute()
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error moving file: %v", err)
+	}
+
+	log.Infof("Moved file from %s to %s", input.SourcePath, input.DestPath)
+
+	return &mcp.CallToolResult{
+			IsError: false,
+		}, &MoveFileOutput{
+			Message: fmt.Sprintf("Moved file from %s to %s", input.SourcePath, input.DestPath),
+		}, nil
+}

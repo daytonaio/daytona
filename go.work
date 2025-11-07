@@ -1,12 +1,14 @@
-go 1.23.4
+go 1.23.5
 
 use (
 	./apps/cli
 	./apps/daemon
+	./apps/mcp
 	./apps/proxy
 	./apps/runner
 	./apps/ssh-gateway
 	./libs/api-client-go
 	./libs/common-go
 	./libs/computer-use
+	./libs/toolbox-api-client-go
 )
