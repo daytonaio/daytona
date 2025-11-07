@@ -437,7 +437,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,
       true,
       payload.personalOrganizationQuota,
-      payload.user.role == SystemRole.ADMIN ? true : undefined,
+      payload.user.role === SystemRole.ADMIN ? false : undefined,
     )
   }
 
