@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -15,8 +16,6 @@ import (
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type FileUploadInput struct {
@@ -95,7 +94,7 @@ func (s *DaytonaFileSystemMCPServer) handleUploadFile(ctx context.Context, reque
 	if parentDir != "" {
 		_, err := toolboxApiClient.FileSystemAPI.CreateFolder(ctx).Path(parentDir).Mode("0755").Execute()
 		if err != nil {
-			log.Errorf("Error creating parent directory: %v", err)
+			slog.Error("Error creating parent directory", "error", err)
 			// Continue anyway as upload might handle this
 		}
 	}
@@ -127,13 +126,13 @@ func (s *DaytonaFileSystemMCPServer) handleUploadFile(ctx context.Context, reque
 	// Get file info for size
 	fileInfo, _, err := toolboxApiClient.FileSystemAPI.GetFileInfo(ctx).Path(input.FilePath).Execute()
 	if err != nil {
-		log.Errorf("Error getting file info after upload: %v", err)
+		slog.Error("Error getting file info after upload", "error", err)
 
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error getting file info after upload: %v", err)
 	}
 
 	fileSizeKB := float64(fileInfo.Size) / 1024
-	log.Infof("File uploaded successfully: %s, size: %.2fKB", input.FilePath, fileSizeKB)
+	slog.Info("File uploaded successfully", "file_path", input.FilePath, "size", fileSizeKB)
 
 	return &mcp.CallToolResult{
 			IsError: false,

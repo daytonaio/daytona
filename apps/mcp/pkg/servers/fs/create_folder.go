@@ -6,14 +6,13 @@ package fs
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type CreateFolderInput struct {
@@ -66,7 +65,7 @@ func (s *DaytonaFileSystemMCPServer) handleCreateFolder(ctx context.Context, req
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error creating folder: %v", err)
 	}
 
-	log.Infof("Created folder: %s", input.FolderPath)
+	slog.Info("Created folder", "folder_path", input.FolderPath)
 
 	return &mcp.CallToolResult{
 			IsError: false,

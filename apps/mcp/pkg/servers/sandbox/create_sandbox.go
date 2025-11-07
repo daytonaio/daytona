@@ -6,13 +6,12 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
 	"github.com/daytonaio/apiclient"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type CreateSandboxInput struct {
@@ -69,18 +68,18 @@ func (s *DaytonaSandboxMCPServer) handleCreateSandbox(ctx context.Context, reque
 				return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to create sandbox after %d retries: %v", maxRetries, err)
 			}
 
-			log.Infof("Sandbox creation failed, retrying: %v", err)
+			slog.Warn("Sandbox creation failed, retrying", "error", err)
 
 			time.Sleep(retryDelay)
 			retryDelay = retryDelay * 3 / 2 // Exponential backoff
 			continue
 		}
 
-		log.Infof("Created new sandbox: %s", sandbox.Id)
+		slog.Info("Created new sandbox", "sandbox_id", sandbox.Id)
 
 		_, _, err = s.apiClient.SandboxAPI.StopSandbox(ctx, sandbox.Id).Execute()
 		if err != nil {
-			log.Warnf("failed to stop sandbox: %v", err)
+			slog.Warn("failed to stop sandbox", "error", err)
 		}
 
 		return &mcp.CallToolResult{IsError: false}, &CreateSandboxOutput{

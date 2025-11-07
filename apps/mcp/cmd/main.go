@@ -4,23 +4,31 @@
 package main
 
 import (
-	"io"
+	"log/slog"
 	"os"
 	"os/signal"
-	"path/filepath"
+	"time"
 
 	"github.com/daytonaio/mcp/internal/config"
 	"github.com/daytonaio/mcp/internal/server"
-	"github.com/joho/godotenv"
-	"github.com/rs/zerolog"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/daytonaio/mcp/internal/util"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 )
 
 func main() {
+	// Init slog logger
+	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
+		TimeFormat: time.RFC3339,
+		Level:      util.ParseLogLevel(os.Getenv("LOG_LEVEL")),
+	}))
+
+	slog.SetDefault(logger)
+
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Errorf("Failed to get config: %v", err)
+		slog.Error("Failed to get config", "error", err)
 		return
 	}
 
@@ -45,61 +53,9 @@ func main() {
 
 	select {
 	case err := <-mcpServerErrChan:
-		log.Errorf("MCP server error: %v", err)
+		slog.Error("MCP server error", "error", err)
 		return
 	case <-interruptChan:
 		server.Stop()
 	}
-}
-
-func init() {
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Printf("Error loading .env file: %v", err)
-		// Continue anyway, as environment variables might be set directly
-	}
-
-	logLevel := log.WarnLevel
-
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
-
-	if logLevelSet {
-		var err error
-		logLevel, err = log.ParseLevel(logLevelEnv)
-		if err != nil {
-			log.Warnf("Failed to parse log level '%s', using WarnLevel: %v", logLevelEnv, err)
-			logLevel = log.WarnLevel
-		}
-	}
-
-	log.SetLevel(logLevel)
-	log.SetOutput(os.Stdout)
-
-	logFilePath, logFilePathSet := os.LookupEnv("LOG_FILE_PATH")
-	if logFilePathSet {
-		logDir := filepath.Dir(logFilePath)
-
-		if err := os.MkdirAll(logDir, 0755); err != nil {
-			log.Errorf("Failed to create log directory: %v", err)
-			os.Exit(1)
-		}
-
-		file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Errorf("Failed to open log file: %v", err)
-			os.Exit(1)
-		}
-
-		log.SetOutput(io.MultiWriter(os.Stdout, file))
-	}
-
-	zerologLevel, err := zerolog.ParseLevel(logLevel.String())
-	if err != nil {
-		log.Warnf("Failed to parse zerolog level, using ErrorLevel: %v", err)
-		zerologLevel = zerolog.ErrorLevel
-	}
-
-	zerolog.SetGlobalLevel(zerologLevel)
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 }

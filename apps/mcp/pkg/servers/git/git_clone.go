@@ -6,6 +6,7 @@ package git
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
@@ -13,8 +14,6 @@ import (
 	"github.com/daytonaio/toolbox_apiclient"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type GitCloneInput struct {
@@ -83,7 +82,7 @@ func (s *DaytonaGitMCPServer) handleGitClone(ctx context.Context, request *mcp.C
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error cloning repository: %v", err)
 	}
 
-	log.Infof("Cloned repository: %s to %s", gitCloneRequest.Url, gitCloneRequest.Path)
+	slog.Info("Cloned repository", "url", gitCloneRequest.Url, "path", gitCloneRequest.Path)
 
 	return &mcp.CallToolResult{IsError: false}, &GitCloneOutput{
 		Message: fmt.Sprintf("Cloned repository: %s to %s", gitCloneRequest.Url, gitCloneRequest.Path),

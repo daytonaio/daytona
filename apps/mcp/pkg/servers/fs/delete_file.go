@@ -6,14 +6,13 @@ package fs
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type DeleteFileInput struct {
@@ -61,7 +60,7 @@ func (s *DaytonaFileSystemMCPServer) handleDeleteFile(ctx context.Context, reque
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error deleting file: %v", err)
 	}
 
-	log.Infof("Deleted file: %s", input.FilePath)
+	slog.Info("Deleted file", "file_path", input.FilePath)
 
 	return &mcp.CallToolResult{
 			IsError: false,

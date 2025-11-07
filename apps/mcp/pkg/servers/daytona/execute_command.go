@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/daytonaio/toolbox_apiclient"
@@ -17,8 +18,6 @@ import (
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type ExecuteCommandInput struct {
@@ -92,7 +91,7 @@ func (s *DaytonaMCPServer) handleExecuteCommand(ctx context.Context, request *mc
 
 	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DAYTONA_MCP_SOURCE, sandbox.Id, proxyUrl, request.Extra.Header)
 
-	log.Infof("Executing command: %s", input.Command)
+	slog.Info("Executing command", "command", input.Command)
 
 	// Build the execute request
 	executeRequest := toolbox_apiclient.NewExecuteRequest(command)
@@ -140,13 +139,13 @@ func (s *DaytonaMCPServer) handleExecuteCommand(ctx context.Context, request *mc
 		logOutput = stdout[:500] + "..."
 	}
 
-	log.Infof("Command completed - exit code: %d, output length: %d", exitCode, outputLen)
+	slog.Info("Command completed", "exit_code", exitCode, "output_length", outputLen)
 
-	log.Debugf("Command output (truncated): %s", logOutput)
+	slog.Debug("Command output (truncated)", "output", logOutput)
 
 	// Check for non-zero exit code
 	if exitCode > 0 {
-		log.Infof("Command exited with non-zero status - exit code: %d", exitCode)
+		slog.Info("Command exited with non-zero status", "exit_code", exitCode)
 	}
 
 	return &mcp.CallToolResult{

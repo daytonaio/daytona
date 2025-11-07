@@ -7,14 +7,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type ListFilesInput struct {
@@ -70,7 +69,7 @@ func (s *DaytonaFileSystemMCPServer) handleListFiles(ctx context.Context, reques
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error marshaling files: %v", err)
 	}
 
-	log.Infof("Listed files in directory: %s", dirPath)
+	slog.Info("Listed files in directory", "path", dirPath)
 
 	return &mcp.CallToolResult{
 			IsError: false,

@@ -6,11 +6,10 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type DestroySandboxInput struct {
@@ -45,14 +44,14 @@ func (s *DaytonaSandboxMCPServer) handleDestroySandbox(ctx context.Context, requ
 				return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("failed to destroy sandbox after %d retries: %v", maxRetries, err)
 			}
 
-			log.Infof("Sandbox destruction failed, retrying: %v", err)
+			slog.Warn("Sandbox destruction failed, retrying", "error", err)
 
 			time.Sleep(retryDelay)
 			retryDelay = retryDelay * 3 / 2 // Exponential backoff
 			continue
 		}
 
-		log.Infof("Destroyed sandbox with ID: %s", input.SandboxId)
+		slog.Info("Destroyed sandbox", "sandbox_id", input.SandboxId)
 
 		return &mcp.CallToolResult{IsError: false}, &DestroySandboxOutput{
 			Message: fmt.Sprintf("Destroyed sandbox with ID %s", input.SandboxId),

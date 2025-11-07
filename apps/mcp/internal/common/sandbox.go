@@ -6,10 +6,9 @@ package common
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/apiclient"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func GetSandbox(ctx context.Context, apiClient *apiclient.APIClient, sandboxId *string) (*apiclient.Sandbox, func(), error) {
@@ -41,7 +40,7 @@ func GetSandbox(ctx context.Context, apiClient *apiclient.APIClient, sandboxId *
 	stop := func() {
 		_, _, err := apiClient.SandboxAPI.StopSandbox(ctx, sbx.Id).Execute()
 		if err != nil {
-			log.Warnf("failed to stop sandbox %s: %v", sbx.Id, err)
+			slog.Warn("Failed to stop sandbox", "sandbox_id", sbx.Id, "error", err)
 		}
 	}
 

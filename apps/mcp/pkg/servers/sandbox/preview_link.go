@@ -6,6 +6,7 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -16,8 +17,6 @@ import (
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type PreviewLinkInput struct {
@@ -68,11 +67,11 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 
 	toolboxApiClient := apiclient.NewToolboxApiClient(constants.DAYTONA_FS_MCP_SOURCE, sandbox.Id, proxyUrl, request.Extra.Header)
 
-	log.Infof("Generating preview link - port: %d", *input.Port)
+	slog.Info("Generating preview link", "port", *input.Port)
 
 	// Check if server is running on specified port
 	if checkServer {
-		log.Infof("Checking if server is running - port: %d", *input.Port)
+		slog.Info("Checking if server is running", "port", *input.Port)
 
 		checkCmd := fmt.Sprintf("curl -s -o /dev/null -w '%%{http_code}' http://localhost:%d --max-time 2 || echo 'error'", *input.Port)
 		result, _, err := toolboxApiClient.ProcessAPI.ExecuteCommand(ctx).Request(*toolbox_apiclient.NewExecuteRequest(checkCmd)).Execute()
@@ -82,7 +81,7 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 
 		response := strings.TrimSpace(result.Result)
 		if response == "error" || strings.HasPrefix(response, "0") {
-			log.Infof("No server detected - port: %d", *input.Port)
+			slog.Info("No server detected", "port", *input.Port)
 
 			// Check what might be using the port
 			psCmd := fmt.Sprintf("ps aux | grep ':%d' | grep -v grep || echo 'No process found'", *input.Port)
@@ -108,7 +107,7 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 		checkCmd := fmt.Sprintf("curl -s -o /dev/null -w '%%{http_code}' %s --max-time 3 || echo 'error'", previewURL.Url)
 		result, _, err := toolboxApiClient.ProcessAPI.ExecuteCommand(ctx).Request(*toolbox_apiclient.NewExecuteRequest(checkCmd)).Execute()
 		if err != nil {
-			log.Errorf("Error checking preview URL: %v", err)
+			slog.Error("Error checking preview URL", "error", err)
 		} else {
 			response := strings.TrimSpace(result.Result)
 			accessible = response != "error" && !strings.HasPrefix(response, "0")
@@ -118,9 +117,9 @@ func (s *DaytonaSandboxMCPServer) handlePreviewLink(ctx context.Context, request
 		}
 	}
 
-	log.Infof("Preview link generated: %s", previewURL.Url)
-	log.Infof("Accessible: %t", accessible)
-	log.Infof("Status code: %s", statusCode)
+	slog.Info("Preview link generated", "url", previewURL.Url)
+	slog.Info("Accessible", "accessible", accessible)
+	slog.Info("Status code", "status_code", statusCode)
 
 	return &mcp.CallToolResult{IsError: false}, &PreviewLinkOutput{
 		PreviewURL: previewURL.Url,

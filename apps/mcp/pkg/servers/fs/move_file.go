@@ -6,14 +6,13 @@ package fs
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type MoveFileInput struct {
@@ -66,7 +65,7 @@ func (s *DaytonaFileSystemMCPServer) handleMoveFile(ctx context.Context, request
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error moving file: %v", err)
 	}
 
-	log.Infof("Moved file from %s to %s", input.SourcePath, input.DestPath)
+	slog.Info("Moved file from", "source", input.SourcePath, "destination", input.DestPath)
 
 	return &mcp.CallToolResult{
 			IsError: false,

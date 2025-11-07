@@ -6,6 +6,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"time"
@@ -19,8 +20,6 @@ import (
 	"github.com/daytonaio/mcp/pkg/servers/sandbox"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type MCPServerConfig struct {
@@ -131,6 +130,6 @@ func (s *MCPServer) Stop() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := s.httpServer.Shutdown(ctx); err != nil {
-		log.Error(err)
+		slog.Error("Failed to shutdown MCP server", "error", err)
 	}
 }

@@ -7,14 +7,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/mcp/internal/apiclient"
 	"github.com/daytonaio/mcp/internal/common"
 	"github.com/daytonaio/mcp/internal/constants"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type FileInfoInput struct {
@@ -68,7 +67,7 @@ func (s *DaytonaFileSystemMCPServer) handleFileInfo(ctx context.Context, request
 		return &mcp.CallToolResult{IsError: true}, nil, fmt.Errorf("error marshaling file info: %v", err)
 	}
 
-	log.Infof("Retrieved file info for: %s", input.FilePath)
+	slog.Info("Retrieved file info for", "file_path", input.FilePath)
 
 	return &mcp.CallToolResult{
 			IsError: false,
