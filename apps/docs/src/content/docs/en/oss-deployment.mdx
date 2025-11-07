@@ -103,90 +103,100 @@ Below is a full list of environment variables with their default values:
 
 ### API Service
 
-| Variable                                   | Type    | Default Value                                        | Description                                 |
-| ------------------------------------------ | ------- | ---------------------------------------------------- | ------------------------------------------- |
-| `PORT`                                     | number  | `3000`                                               | API service port                            |
-| `DB_HOST`                                  | string  | `db`                                                 | PostgreSQL database hostname                |
-| `DB_PORT`                                  | number  | `5432`                                               | PostgreSQL database port                    |
-| `DB_USERNAME`                              | string  | `user`                                               | PostgreSQL database username                |
-| `DB_PASSWORD`                              | string  | `pass`                                               | PostgreSQL database password                |
-| `DB_DATABASE`                              | string  | `daytona`                                            | PostgreSQL database name                    |
-| `DB_TLS_ENABLED`                           | boolean | `false`                                              | Enable TLS for database connection          |
-| `DB_TLS_REJECT_UNAUTHORIZED`               | boolean | `true`                                               | Reject unauthorized TLS certificates        |
-| `REDIS_HOST`                               | string  | `redis`                                              | Redis server hostname                       |
-| `REDIS_PORT`                               | number  | `6379`                                               | Redis server port                           |
-| `OIDC_CLIENT_ID`                           | string  | `daytona`                                            | OIDC client identifier                      |
-| `OIDC_ISSUER_BASE_URL`                     | string  | `http://dex:5556/dex`                                | OIDC issuer base URL                        |
-| `PUBLIC_OIDC_DOMAIN`                       | string  | `http://localhost:5556/dex`                          | Public OIDC domain                          |
-| `OIDC_AUDIENCE`                            | string  | `daytona`                                            | OIDC audience identifier                    |
-| `OIDC_MANAGEMENT_API_ENABLED`              | boolean | (empty)                                              | Enable OIDC management API                  |
-| `OIDC_MANAGEMENT_API_CLIENT_ID`            | string  | (empty)                                              | OIDC management API client ID               |
-| `OIDC_MANAGEMENT_API_CLIENT_SECRET`        | string  | (empty)                                              | OIDC management API client secret           |
-| `OIDC_MANAGEMENT_API_AUDIENCE`             | string  | (empty)                                              | OIDC management API audience                |
-| `DEFAULT_SNAPSHOT`                         | string  | `daytonaio/sandbox:0.4.3`                            | Default sandbox snapshot image              |
-| `DASHBOARD_URL`                            | string  | `http://localhost:3000/dashboard`                    | Dashboard URL                               |
-| `DASHBOARD_BASE_API_URL`                   | string  | `http://localhost:3000`                              | Dashboard base API URL                      |
-| `POSTHOG_API_KEY`                          | string  | `phc_bYtEsdMDrNLydXPD4tufkBrHKgfO2zbycM30LOowYNv`    | PostHog API key for analytics               |
-| `POSTHOG_HOST`                             | string  | `https://d18ag4dodbta3l.cloudfront.net`              | PostHog host URL                            |
-| `POSTHOG_ENVIRONMENT`                      | string  | `local`                                              | PostHog environment identifier              |
-| `TRANSIENT_REGISTRY_URL`                   | string  | `http://registry:6000`                               | Transient registry URL                      |
-| `TRANSIENT_REGISTRY_ADMIN`                 | string  | `admin`                                              | Transient registry admin username           |
-| `TRANSIENT_REGISTRY_PASSWORD`              | string  | `password`                                           | Transient registry admin password           |
-| `TRANSIENT_REGISTRY_PROJECT_ID`            | string  | `daytona`                                            | Transient registry project ID               |
-| `INTERNAL_REGISTRY_URL`                    | string  | `http://registry:6000`                               | Internal registry URL                       |
-| `INTERNAL_REGISTRY_ADMIN`                  | string  | `admin`                                              | Internal registry admin username            |
-| `INTERNAL_REGISTRY_PASSWORD`               | string  | `password`                                           | Internal registry admin password            |
-| `INTERNAL_REGISTRY_PROJECT_ID`             | string  | `daytona`                                            | Internal registry project ID                |
-| `SMTP_HOST`                                | string  | `maildev`                                            | SMTP server hostname                        |
-| `SMTP_PORT`                                | number  | `1025`                                               | SMTP server port                            |
-| `SMTP_USER`                                | string  | (empty)                                              | SMTP username                               |
-| `SMTP_PASSWORD`                            | string  | (empty)                                              | SMTP password                               |
-| `SMTP_SECURE`                              | boolean | (empty)                                              | Enable SMTP secure connection               |
-| `SMTP_EMAIL_FROM`                          | string  | `"Daytona Team <no-reply@daytona.io>"`               | SMTP sender email address                   |
-| `S3_ENDPOINT`                              | string  | `http://minio:9000`                                  | S3-compatible storage endpoint              |
-| `S3_STS_ENDPOINT`                          | string  | `http://minio:9000/minio/v1/assume-role`             | S3 STS endpoint                             |
-| `S3_REGION`                                | string  | `us-east-1`                                          | S3 region                                   |
-| `S3_ACCESS_KEY`                            | string  | `minioadmin`                                         | S3 access key                               |
-| `S3_SECRET_KEY`                            | string  | `minioadmin`                                         | S3 secret key                               |
-| `S3_DEFAULT_BUCKET`                        | string  | `daytona`                                            | S3 default bucket name                      |
-| `S3_ACCOUNT_ID`                            | string  | `/`                                                  | S3 account ID                               |
-| `S3_ROLE_NAME`                             | string  | `/`                                                  | S3 role name                                |
-| `ENVIRONMENT`                              | string  | `dev`                                                | Application environment                     |
-| `MAX_AUTO_ARCHIVE_INTERVAL`                | number  | `43200`                                              | Maximum auto-archive interval (seconds)     |
-| `OTEL_ENABLED`                             | boolean | `true`                                               | Enable OpenTelemetry tracing                |
-| `OTEL_COLLECTOR_URL`                       | string  | `http://jaeger:4318/v1/traces`                       | OpenTelemetry collector URL                 |
-| `MAINTENANCE_MODE`                         | boolean | `false`                                              | Enable maintenance mode                     |
-| `PROXY_DOMAIN`                             | string  | `proxy.localhost:4000`                               | Proxy domain                                |
-| `PROXY_PROTOCOL`                           | string  | `http`                                               | Proxy protocol                              |
-| `PROXY_API_KEY`                            | string  | `super_secret_key`                                   | Proxy API key                               |
-| `PROXY_TEMPLATE_URL`                       | string  | `http://{{PORT}}-{{sandboxId}}.proxy.localhost:4000` | Proxy template URL pattern                  |
-| `PROXY_TOOLBOX_BASE_URL`                   | string  | `{PROXY_PROTOCOL}://{PROXY_DOMAIN}`                  | Proxy base URL for toolbox requests         |
-| `DEFAULT_RUNNER_DOMAIN`                    | string  | `runner:3003`                                        | Default runner domain                       |
-| `DEFAULT_RUNNER_API_URL`                   | string  | `http://runner:3003`                                 | Default runner API URL                      |
-| `DEFAULT_RUNNER_PROXY_URL`                 | string  | `http://runner:3003`                                 | Default runner proxy URL                    |
-| `DEFAULT_RUNNER_API_KEY`                   | string  | `secret_api_token`                                   | Default runner API key                      |
-| `DEFAULT_RUNNER_CPU`                       | number  | `4`                                                  | Default runner CPU allocation               |
-| `DEFAULT_RUNNER_MEMORY`                    | number  | `8`                                                  | Default runner memory allocation (GB)       |
-| `DEFAULT_RUNNER_DISK`                      | number  | `50`                                                 | Default runner disk allocation (GB)         |
-| `DEFAULT_RUNNER_GPU`                       | number  | `0`                                                  | Default runner GPU allocation               |
-| `DEFAULT_RUNNER_GPU_TYPE`                  | string  | `none`                                               | Default runner GPU type                     |
-| `DEFAULT_RUNNER_CAPACITY`                  | number  | `100`                                                | Default runner capacity                     |
-| `DEFAULT_RUNNER_REGION`                    | string  | `us`                                                 | Default runner region                       |
-| `DEFAULT_RUNNER_CLASS`                     | string  | `small`                                              | Default runner class                        |
-| `DEFAULT_ORG_QUOTA_TOTAL_CPU_QUOTA`        | number  | `10000`                                              | Default organization total CPU quota        |
-| `DEFAULT_ORG_QUOTA_TOTAL_MEMORY_QUOTA`     | number  | `10000`                                              | Default organization total memory quota     |
-| `DEFAULT_ORG_QUOTA_TOTAL_DISK_QUOTA`       | number  | `100000`                                             | Default organization total disk quota       |
-| `DEFAULT_ORG_QUOTA_MAX_CPU_PER_SANDBOX`    | number  | `100`                                                | Default organization max CPU per sandbox    |
-| `DEFAULT_ORG_QUOTA_MAX_MEMORY_PER_SANDBOX` | number  | `100`                                                | Default organization max memory per sandbox |
-| `DEFAULT_ORG_QUOTA_MAX_DISK_PER_SANDBOX`   | number  | `1000`                                               | Default organization max disk per sandbox   |
-| `DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA`         | number  | `1000`                                               | Default organization snapshot quota         |
-| `DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE`      | number  | `1000`                                               | Default organization max snapshot size      |
-| `DEFAULT_ORG_QUOTA_VOLUME_QUOTA`           | number  | `10000`                                              | Default organization volume quota           |
-| `SSH_GATEWAY_API_KEY`                      | string  | `ssh_secret_api_token`                               | SSH gateway API key                         |
-| `SSH_GATEWAY_COMMAND`                      | string  | `ssh -p 2222 {{TOKEN}}@localhost`                    | SSH gateway command template                |
-| `RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD` | number  | `10`                                                 | Runner declarative build score threshold    |
-| `RUNNER_AVAILABILITY_SCORE_THRESHOLD`      | number  | `10`                                                 | Runner availability score threshold         |
-| `RUN_MIGRATIONS`                           | boolean | `true`                                               | Enable database migrations on startup       |
+| Variable                                   | Type    | Default Value                                        | Description                                                                                          |
+| ------------------------------------------ | ------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `PORT`                                     | number  | `3000`                                               | API service port                                                                                     |
+| `DB_HOST`                                  | string  | `db`                                                 | PostgreSQL database hostname                                                                         |
+| `DB_PORT`                                  | number  | `5432`                                               | PostgreSQL database port                                                                             |
+| `DB_USERNAME`                              | string  | `user`                                               | PostgreSQL database username                                                                         |
+| `DB_PASSWORD`                              | string  | `pass`                                               | PostgreSQL database password                                                                         |
+| `DB_DATABASE`                              | string  | `daytona`                                            | PostgreSQL database name                                                                             |
+| `DB_TLS_ENABLED`                           | boolean | `false`                                              | Enable TLS for database connection                                                                   |
+| `DB_TLS_REJECT_UNAUTHORIZED`               | boolean | `true`                                               | Reject unauthorized TLS certificates                                                                 |
+| `REDIS_HOST`                               | string  | `redis`                                              | Redis server hostname                                                                                |
+| `REDIS_PORT`                               | number  | `6379`                                               | Redis server port                                                                                    |
+| `OIDC_CLIENT_ID`                           | string  | `daytona`                                            | OIDC client identifier                                                                               |
+| `OIDC_ISSUER_BASE_URL`                     | string  | `http://dex:5556/dex`                                | OIDC issuer base URL                                                                                 |
+| `PUBLIC_OIDC_DOMAIN`                       | string  | `http://localhost:5556/dex`                          | Public OIDC domain                                                                                   |
+| `OIDC_AUDIENCE`                            | string  | `daytona`                                            | OIDC audience identifier                                                                             |
+| `OIDC_MANAGEMENT_API_ENABLED`              | boolean | (empty)                                              | Enable OIDC management API                                                                           |
+| `OIDC_MANAGEMENT_API_CLIENT_ID`            | string  | (empty)                                              | OIDC management API client ID                                                                        |
+| `OIDC_MANAGEMENT_API_CLIENT_SECRET`        | string  | (empty)                                              | OIDC management API client secret                                                                    |
+| `OIDC_MANAGEMENT_API_AUDIENCE`             | string  | (empty)                                              | OIDC management API audience                                                                         |
+| `DEFAULT_SNAPSHOT`                         | string  | `daytonaio/sandbox:0.4.3`                            | Default sandbox snapshot image                                                                       |
+| `DASHBOARD_URL`                            | string  | `http://localhost:3000/dashboard`                    | Dashboard URL                                                                                        |
+| `DASHBOARD_BASE_API_URL`                   | string  | `http://localhost:3000`                              | Dashboard base API URL                                                                               |
+| `POSTHOG_API_KEY`                          | string  | `phc_bYtEsdMDrNLydXPD4tufkBrHKgfO2zbycM30LOowYNv`    | PostHog API key for analytics                                                                        |
+| `POSTHOG_HOST`                             | string  | `https://d18ag4dodbta3l.cloudfront.net`              | PostHog host URL                                                                                     |
+| `POSTHOG_ENVIRONMENT`                      | string  | `local`                                              | PostHog environment identifier                                                                       |
+| `TRANSIENT_REGISTRY_URL`                   | string  | `http://registry:6000`                               | Transient registry URL                                                                               |
+| `TRANSIENT_REGISTRY_ADMIN`                 | string  | `admin`                                              | Transient registry admin username                                                                    |
+| `TRANSIENT_REGISTRY_PASSWORD`              | string  | `password`                                           | Transient registry admin password                                                                    |
+| `TRANSIENT_REGISTRY_PROJECT_ID`            | string  | `daytona`                                            | Transient registry project ID                                                                        |
+| `INTERNAL_REGISTRY_URL`                    | string  | `http://registry:6000`                               | Internal registry URL                                                                                |
+| `INTERNAL_REGISTRY_ADMIN`                  | string  | `admin`                                              | Internal registry admin username                                                                     |
+| `INTERNAL_REGISTRY_PASSWORD`               | string  | `password`                                           | Internal registry admin password                                                                     |
+| `INTERNAL_REGISTRY_PROJECT_ID`             | string  | `daytona`                                            | Internal registry project ID                                                                         |
+| `SMTP_HOST`                                | string  | `maildev`                                            | SMTP server hostname                                                                                 |
+| `SMTP_PORT`                                | number  | `1025`                                               | SMTP server port                                                                                     |
+| `SMTP_USER`                                | string  | (empty)                                              | SMTP username                                                                                        |
+| `SMTP_PASSWORD`                            | string  | (empty)                                              | SMTP password                                                                                        |
+| `SMTP_SECURE`                              | boolean | (empty)                                              | Enable SMTP secure connection                                                                        |
+| `SMTP_EMAIL_FROM`                          | string  | `"Daytona Team <no-reply@daytona.io>"`               | SMTP sender email address                                                                            |
+| `S3_ENDPOINT`                              | string  | `http://minio:9000`                                  | S3-compatible storage endpoint                                                                       |
+| `S3_STS_ENDPOINT`                          | string  | `http://minio:9000/minio/v1/assume-role`             | S3 STS endpoint                                                                                      |
+| `S3_REGION`                                | string  | `us-east-1`                                          | S3 region                                                                                            |
+| `S3_ACCESS_KEY`                            | string  | `minioadmin`                                         | S3 access key                                                                                        |
+| `S3_SECRET_KEY`                            | string  | `minioadmin`                                         | S3 secret key                                                                                        |
+| `S3_DEFAULT_BUCKET`                        | string  | `daytona`                                            | S3 default bucket name                                                                               |
+| `S3_ACCOUNT_ID`                            | string  | `/`                                                  | S3 account ID                                                                                        |
+| `S3_ROLE_NAME`                             | string  | `/`                                                  | S3 role name                                                                                         |
+| `ENVIRONMENT`                              | string  | `dev`                                                | Application environment                                                                              |
+| `MAX_AUTO_ARCHIVE_INTERVAL`                | number  | `43200`                                              | Maximum auto-archive interval (seconds)                                                              |
+| `OTEL_ENABLED`                             | boolean | `true`                                               | Enable OpenTelemetry tracing                                                                         |
+| `OTEL_COLLECTOR_URL`                       | string  | `http://jaeger:4318/v1/traces`                       | OpenTelemetry collector URL                                                                          |
+| `MAINTENANCE_MODE`                         | boolean | `false`                                              | Enable maintenance mode                                                                              |
+| `PROXY_DOMAIN`                             | string  | `proxy.localhost:4000`                               | Proxy domain                                                                                         |
+| `PROXY_PROTOCOL`                           | string  | `http`                                               | Proxy protocol                                                                                       |
+| `PROXY_API_KEY`                            | string  | `super_secret_key`                                   | Proxy API key                                                                                        |
+| `PROXY_TEMPLATE_URL`                       | string  | `http://{{PORT}}-{{sandboxId}}.proxy.localhost:4000` | Proxy template URL pattern                                                                           |
+| `PROXY_TOOLBOX_BASE_URL`                   | string  | `{PROXY_PROTOCOL}://{PROXY_DOMAIN}`                  | Proxy base URL for toolbox requests                                                                  |
+| `DEFAULT_RUNNER_DOMAIN`                    | string  | `runner:3003`                                        | Default runner domain                                                                                |
+| `DEFAULT_RUNNER_API_URL`                   | string  | `http://runner:3003`                                 | Default runner API URL                                                                               |
+| `DEFAULT_RUNNER_PROXY_URL`                 | string  | `http://runner:3003`                                 | Default runner proxy URL                                                                             |
+| `DEFAULT_RUNNER_API_KEY`                   | string  | `secret_api_token`                                   | Default runner API key                                                                               |
+| `DEFAULT_RUNNER_CPU`                       | number  | `4`                                                  | Default runner CPU allocation                                                                        |
+| `DEFAULT_RUNNER_MEMORY`                    | number  | `8`                                                  | Default runner memory allocation (GB)                                                                |
+| `DEFAULT_RUNNER_DISK`                      | number  | `50`                                                 | Default runner disk allocation (GB)                                                                  |
+| `DEFAULT_RUNNER_GPU`                       | number  | `0`                                                  | Default runner GPU allocation                                                                        |
+| `DEFAULT_RUNNER_GPU_TYPE`                  | string  | `none`                                               | Default runner GPU type                                                                              |
+| `DEFAULT_RUNNER_CAPACITY`                  | number  | `100`                                                | Default runner capacity                                                                              |
+| `DEFAULT_RUNNER_REGION`                    | string  | `us`                                                 | Default runner region                                                                                |
+| `DEFAULT_RUNNER_CLASS`                     | string  | `small`                                              | Default runner class                                                                                 |
+| `DEFAULT_ORG_QUOTA_TOTAL_CPU_QUOTA`        | number  | `10000`                                              | Default organization total CPU quota                                                                 |
+| `DEFAULT_ORG_QUOTA_TOTAL_MEMORY_QUOTA`     | number  | `10000`                                              | Default organization total memory quota                                                              |
+| `DEFAULT_ORG_QUOTA_TOTAL_DISK_QUOTA`       | number  | `100000`                                             | Default organization total disk quota                                                                |
+| `DEFAULT_ORG_QUOTA_MAX_CPU_PER_SANDBOX`    | number  | `100`                                                | Default organization max CPU per sandbox                                                             |
+| `DEFAULT_ORG_QUOTA_MAX_MEMORY_PER_SANDBOX` | number  | `100`                                                | Default organization max memory per sandbox                                                          |
+| `DEFAULT_ORG_QUOTA_MAX_DISK_PER_SANDBOX`   | number  | `1000`                                               | Default organization max disk per sandbox                                                            |
+| `DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA`         | number  | `1000`                                               | Default organization snapshot quota                                                                  |
+| `DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE`      | number  | `1000`                                               | Default organization max snapshot size                                                               |
+| `DEFAULT_ORG_QUOTA_VOLUME_QUOTA`           | number  | `10000`                                              | Default organization volume quota                                                                    |
+| `SSH_GATEWAY_API_KEY`                      | string  | `ssh_secret_api_token`                               | SSH gateway API key                                                                                  |
+| `SSH_GATEWAY_COMMAND`                      | string  | `ssh -p 2222 {{TOKEN}}@localhost`                    | SSH gateway command template                                                                         |
+| `RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD` | number  | `10`                                                 | Runner declarative build score threshold                                                             |
+| `RUNNER_AVAILABILITY_SCORE_THRESHOLD`      | number  | `10`                                                 | Runner availability score threshold                                                                  |
+| `RUN_MIGRATIONS`                           | boolean | `true`                                               | Enable database migrations on startup                                                                |
+| `ADMIN_API_KEY`                            | string  | (empty)                                              | Admin API key, auto-generated if empty, used only upon initial setup, not recommended for production |
+| `ADMIN_TOTAL_CPU_QUOTA`                    | number  | `0`                                                  | Admin total CPU quota, used only upon initial setup                                                  |
+| `ADMIN_TOTAL_MEMORY_QUOTA`                 | number  | `0`                                                  | Admin total memory quota, used only upon initial setup                                               |
+| `ADMIN_TOTAL_DISK_QUOTA`                   | number  | `0`                                                  | Admin total disk quota, used only upon initial setup                                                 |
+| `ADMIN_MAX_CPU_PER_SANDBOX`                | number  | `0`                                                  | Admin max CPU per sandbox, used only upon initial setup                                              |
+| `ADMIN_MAX_MEMORY_PER_SANDBOX`             | number  | `0`                                                  | Admin max memory per sandbox, used only upon initial setup                                           |
+| `ADMIN_MAX_DISK_PER_SANDBOX`               | number  | `0`                                                  | Admin max disk per sandbox, used only upon initial setup                                             |
+| `ADMIN_SNAPSHOT_QUOTA`                     | number  | `100`                                                | Admin snapshot quota, used only upon initial setup                                                   |
+| `ADMIN_MAX_SNAPSHOT_SIZE`                  | number  | `100`                                                | Admin max snapshot size, used only upon initial setup                                                |
+| `ADMIN_VOLUME_QUOTA`                       | number  | `0`                                                  | Admin volume quota, used only upon initial setup                                                     |
 
 ### Runner
 

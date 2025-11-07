@@ -49,13 +49,14 @@ export class ApiKeyService {
     name: string,
     permissions: OrganizationResourcePermission[],
     expiresAt?: Date,
+    apiKeyValue?: string,
   ): Promise<{ apiKey: ApiKey; value: string }> {
     const existingKey = await this.apiKeyRepository.findOne({ where: { organizationId, userId, name } })
     if (existingKey) {
       throw new ConflictException('API key with this name already exists')
     }
 
-    const value = this.generateApiKeyValue()
+    const value = apiKeyValue ?? this.generateApiKeyValue()
 
     const apiKey = await this.apiKeyRepository.save({
       organizationId,
