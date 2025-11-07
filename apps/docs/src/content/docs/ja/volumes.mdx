@@ -14,7 +14,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 サンドボックスにボリュームをマウントする前に、先に作成しておく必要があります。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```bash
 volume = daytona.volume.get("my-volume", create=True)
@@ -31,7 +31,7 @@ const volume = await daytona.volume.get('my-volume', true)
 
 ボリュームを作成したら、`CreateSandboxFromSnapshotParams` オブジェクトで指定してサンドボックスにマウントできます:
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 import os
@@ -93,7 +93,7 @@ main()
 
 ボリュームが不要になった場合は削除できます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 volume = daytona.volume.get("my-volume", create=True)

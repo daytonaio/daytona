@@ -23,7 +23,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 
 スナップショットがプルおよび検証され、`Active` 状態になれば使用可能です。使用するカスタムスナップショットを指定するために、`CreateSandboxFromSnapshotParams` オブジェクトを定義します:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
@@ -43,7 +43,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 
 完全な例:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, CreateSandboxFromSnapshotParams
@@ -108,7 +108,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 
 利用可能なリソースと上限は[ダッシュボード](https://app.daytona.io/dashboard/limits)で確認してください。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import (

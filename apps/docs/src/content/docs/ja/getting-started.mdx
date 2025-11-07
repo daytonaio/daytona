@@ -14,7 +14,7 @@ Daytona SDKはDaytonaと連携するための公式[Python](/docs/ja/python-sdk)
 
 Daytona は、Daytona プラットフォームと連携するための公式 Python および TypeScript の SDK を提供しています。お好みの方法で SDK をインストールしてください。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```bash
     pip install daytona
@@ -39,7 +39,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
 
 次のコードを実行して、Daytona のサンドボックスを作成し、コマンドを実行します。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, DaytonaConfig
@@ -103,7 +103,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
   </TabItem>
 </Tabs>
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```bash
     python main.py
@@ -121,7 +121,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
 
 次のスニペットは、シンプルな Flask アプリを含むファイルを Daytona のサンドボックスにアップロードします。Web サーバーはポート `3000` で起動し、提供されたプレビューURLからアクセスできます。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, DaytonaConfig, SessionExecuteRequest
@@ -250,7 +250,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
 
 次のスニペットは、Anthropic API を用いて LLM に接続し、Claude に 25 の階乗を求めるコードの生成を依頼し、そのコードを Daytona のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）内で実行します。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ````python
     import os
@@ -455,7 +455,7 @@ export default nextConfig
 
 [ローカルデバイス上のイメージ](/docs/ja/snapshots#using-a-local-image)を使用する場合、またはコマンドラインインターフェースでサンドボックスを管理したい場合は、次のコマンドで Daytona CLI をインストールしてください:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Mac/Linux">
     ```bash
     brew install daytonaio/cli/daytona
