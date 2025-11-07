@@ -17,9 +17,7 @@ export class WarmPool {
   @Column()
   snapshot: string
 
-  @Column({
-    default: 'us',
-  })
+  @Column()
   target: string
 
   @Column()

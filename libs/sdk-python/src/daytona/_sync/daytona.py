@@ -89,7 +89,7 @@ class Daytona:
         If no config is provided, reads from environment variables:
         - `DAYTONA_API_KEY`: Required API key for authentication
         - `DAYTONA_API_URL`: Required api URL
-        - `DAYTONA_TARGET`: Optional target environment (defaults to 'us')
+        - `DAYTONA_TARGET`: Optional target environment (if not provided, default region for the organization is used)
 
         Args:
             config (Optional[DaytonaConfig]): Object containing api_key, api_url, and target.

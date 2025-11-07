@@ -202,6 +202,7 @@ const configuration = {
     maxSnapshotSize: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE || '20', 10),
     volumeQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_VOLUME_QUOTA || '100', 10),
   },
+  defaultRegion: process.env.DEFAULT_REGION || 'us',
 }
 
 export { configuration }
