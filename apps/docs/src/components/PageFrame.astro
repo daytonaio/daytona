@@ -65,6 +65,13 @@ const { hasSidebar, labels } = Astro.props
     max-height: calc(100vh - 75px);
     position: sticky;
     top: 75px;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 30px,
+      black calc(100% - 30px),
+      transparent 100%
+    );
 
     @media (max-width: 1024px) {
       display: none;
