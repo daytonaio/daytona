@@ -29,6 +29,9 @@ export class Organization {
   })
   telemetryEnabled: boolean
 
+  @Column()
+  defaultRegion: string
+
   @Column({
     type: 'int',
     default: 10,
@@ -152,4 +155,8 @@ export class Organization {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(defaultRegion: string) {
+    this.defaultRegion = defaultRegion
+  }
 }

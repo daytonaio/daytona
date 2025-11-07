@@ -153,7 +153,9 @@ Admin user created with API key: ${value}
   }
 
   private async initializeBackupRegistry(): Promise<void> {
-    const existingRegistry = await this.dockerRegistryService.getAvailableBackupRegistry('us')
+    const existingRegistry = await this.dockerRegistryService.getAvailableBackupRegistry(
+      this.configService.getOrThrow('defaultRegion'),
+    )
     if (existingRegistry) {
       return
     }
