@@ -29,9 +29,7 @@ function useCopyToClipboard({
     navigator.clipboard.writeText(value).then(() => {
       setIsCopied(true)
 
-      if (onCopy) {
-        onCopy()
-      }
+      onCopy?.()
 
       if (timeout !== 0) {
         setTimeout(() => {
