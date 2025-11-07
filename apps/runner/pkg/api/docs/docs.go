@@ -36,6 +36,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/disk/fork/{diskId}": {
+            "post": {
+                "description": "Create a new disk that shares all existing layers of the source disk. Both disks will have independent write layers.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disk"
+                ],
+                "summary": "Fork disk",
+                "operationId": "ForkDisk",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source Disk ID",
+                        "name": "diskId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Fork disk request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ForkDiskDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/disk/{diskId}/delete": {
             "delete": {
                 "description": "Delete a disk from the runner",
@@ -1532,6 +1600,17 @@ const docTemplate = `{
                 "timestamp": {
                     "type": "string",
                     "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "ForkDiskDTO": {
+            "type": "object",
+            "required": [
+                "newDiskId"
+            ],
+            "properties": {
+                "newDiskId": {
+                    "type": "string"
                 }
             }
         },

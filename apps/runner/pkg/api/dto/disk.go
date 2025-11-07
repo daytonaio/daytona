@@ -19,3 +19,7 @@ type DiskInfoDTO struct {
 	InS3         bool   `json:"inS3"`
 	Checksum     string `json:"checksum"`
 } //	@name	DiskInfoDTO
+
+type ForkDiskDTO struct {
+	NewDiskId string `json:"newDiskId" validate:"required"`
+} //	@name	ForkDiskDTO

@@ -26,6 +26,7 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { DiskService } from '../../services/disk.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -39,6 +40,7 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
+    protected readonly diskService: DiskService,
     protected readonly configService: TypedConfigService,
     protected readonly redisLockProvider: RedisLockProvider,
   ) {
@@ -89,6 +91,11 @@ export class SandboxStartAction extends SandboxAction {
           }
 
           await this.sandboxRepository.save(sandboxToUpdate)
+
+          // attach all disks to the sandbox
+          await Promise.allSettled(
+            sandboxToUpdate.disks.map((diskId) => this.diskService.attachToSandbox(diskId, sandboxToUpdate.id, true)),
+          )
           return DONT_SYNC_AGAIN
         }
       }

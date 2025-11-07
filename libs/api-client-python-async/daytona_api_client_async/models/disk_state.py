@@ -39,6 +39,8 @@ class DiskState(str, Enum):
     DELETING = 'deleting'
     DELETED = 'deleted'
     ERROR = 'error'
+    FORKING = 'forking'
+    LOCKED = 'locked'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

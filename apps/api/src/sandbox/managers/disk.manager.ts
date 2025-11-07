@@ -10,7 +10,7 @@ import { Disk } from '../entities/disk.entity'
 import { DiskState } from '../enums/disk-state.enum'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { LessThan } from 'typeorm'
-import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3'
+import { S3Client, ListBucketsCommand, CopyObjectCommand } from '@aws-sdk/client-s3'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -23,6 +23,9 @@ import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-ex
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { OnEvent } from '@nestjs/event-emitter'
+import { DiskEvents } from '../constants/disk-events'
+import { DiskCreatedEvent } from '../events/disk-created.event'
 
 const DISK_STATE_LOCK_KEY = 'disk-state-'
 
@@ -105,13 +108,7 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
 
       const pendingDisks = await this.diskRepository.find({
         where: {
-          state: In([
-            DiskState.PENDING_DELETE,
-            DiskState.PENDING_PUSH,
-            DiskState.PUSHING,
-            DiskState.PENDING_FORK,
-            DiskState.FORKING,
-          ]),
+          state: In([DiskState.PENDING_DELETE, DiskState.PENDING_PUSH, DiskState.PUSHING, DiskState.FORKING]),
         },
       })
 
@@ -121,19 +118,11 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
             return
           }
 
-          // Get lock for this specific disk
-          const diskLockKey = `${DISK_STATE_LOCK_KEY}${disk.id}`
-          const acquired = await this.redisLockProvider.lock(diskLockKey, 30)
-          if (!acquired) {
-            return
-          }
-
           try {
             this.processingDisks.add(disk.id)
             await this.processDiskState(disk)
           } finally {
             this.processingDisks.delete(disk.id)
-            await this.redisLockProvider.unlock(diskLockKey)
           }
         }),
       )
@@ -194,7 +183,12 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
   }
 
   private async processDiskState(disk: Disk): Promise<void> {
+    // Get lock for this specific disk
     const diskLockKey = `${DISK_STATE_LOCK_KEY}${disk.id}`
+    const acquired = await this.redisLockProvider.lock(diskLockKey, 30)
+    if (!acquired) {
+      return
+    }
 
     try {
       switch (disk.state) {
@@ -209,6 +203,9 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
         case DiskState.PENDING_DELETE:
           await this.handlePendingDelete(disk)
           break
+        case DiskState.FORKING:
+          await this.handleForking(disk)
+          break
       }
     } catch (error) {
       this.logger.error(`Error processing disk ${disk.id}:`, error)
@@ -219,6 +216,87 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
       })
     } finally {
       await this.redisLockProvider.unlock(diskLockKey)
+    }
+  }
+
+  // when forking a stored disk, we just need to duplicate the disk in S3
+  private async handleForkingStored(disk: Disk): Promise<void> {
+    const baseDiskPrefix = `disks/${disk.baseDiskId}`
+    const diskFolderPrefix = `disks/${disk.id}`
+    // clone the disk folder from the base disk to the new disk
+    await this.s3Client.send(
+      new CopyObjectCommand({
+        Bucket: this.s3Bucket,
+        CopySource: `${this.s3Bucket}/${baseDiskPrefix}`,
+        Key: diskFolderPrefix,
+      }),
+    )
+
+    // update the disk state to STORED
+    // as the fork operation is complete when the base disk is stored
+    disk.state = DiskState.STORED
+    await this.diskRepository.save(disk)
+  }
+
+  // when forking a detached disk, we need to push the disk to the runner
+  private async handleForkingLocked(disk: Disk): Promise<void> {
+    try {
+      const runner = await this.runnerService.findOne(disk.runnerId)
+      if (!runner) {
+        throw new Error(`Runner ${disk.runnerId} not found for disk ${disk.id}`)
+      }
+
+      // Create runner adapter and initiate disk push
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      const diskInfo = await runnerAdapter.getDiskInfo(disk.baseDiskId)
+      if (!diskInfo) {
+        throw new Error(`Disk info not found for base disk ${disk.baseDiskId}`)
+      }
+
+      await runnerAdapter.forkDisk(disk.baseDiskId, disk.id)
+
+      disk.state = DiskState.DETACHED
+      await this.diskRepository.save(disk)
+
+      const existingDisk = await this.diskRepository.findOne({
+        where: { id: disk.baseDiskId },
+      })
+      if (!existingDisk) {
+        throw new Error(`Forked disk ${disk.id} not found after fork operation`)
+      }
+      existingDisk.state = DiskState.DETACHED
+      await this.diskRepository.save(existingDisk)
+
+      this.logger.debug(`Forked disk ${existingDisk.id} from ${existingDisk.baseDiskId} on runner ${runner.domain}`)
+    } catch (error) {
+      this.logger.error(`Error uploading disk ${disk.id}:`, error)
+      await this.diskRepository.save({
+        ...disk,
+        state: DiskState.ERROR,
+        errorReason: error.message,
+      })
+    }
+  }
+
+  private async handleForking(disk: Disk): Promise<void> {
+    const baseDisk = await this.diskRepository.findOne({
+      where: { id: disk.baseDiskId },
+    })
+    if (!baseDisk) {
+      throw new Error(`Base disk ${disk.baseDiskId} not found for fork ${disk.id}`)
+    }
+
+    switch (baseDisk.state) {
+      case DiskState.STORED:
+        await this.handleForkingStored(disk)
+        break
+      case DiskState.LOCKED:
+        // locked disks are already on the runner
+        // these are disks in detached state that are being forked
+        await this.handleForkingLocked(disk)
+        break
+      default:
+        throw new Error(`Base disk ${disk.baseDiskId} is in invalid state ${baseDisk.state} for fork ${disk.id}`)
     }
   }
 
@@ -401,5 +479,11 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
         errorReason: error.message,
       })
     }
+  }
+
+  @OnEvent(DiskEvents.CREATED)
+  @TrackJobExecution()
+  private async handleSandboxCreatedEvent(event: DiskCreatedEvent) {
+    this.processDiskState(event.disk).catch(this.logger.error)
   }
 }

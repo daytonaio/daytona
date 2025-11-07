@@ -73,6 +73,19 @@ type DisksAPI interface {
 	DetachDiskExecute(r DisksAPIDetachDiskRequest) (*DiskDto, *http.Response, error)
 
 	/*
+		ForkDisk Fork disk
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param diskId ID of the disk
+		@return DisksAPIForkDiskRequest
+	*/
+	ForkDisk(ctx context.Context, diskId string) DisksAPIForkDiskRequest
+
+	// ForkDiskExecute executes the request
+	//  @return DiskDto
+	ForkDiskExecute(r DisksAPIForkDiskRequest) (*DiskDto, *http.Response, error)
+
+	/*
 		GetDisk Get disk details
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -518,6 +531,129 @@ func (a *DisksAPIService) DetachDiskExecute(r DisksAPIDetachDiskRequest) (*DiskD
 	if r.xDaytonaOrganizationID != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type DisksAPIForkDiskRequest struct {
+	ctx                    context.Context
+	ApiService             DisksAPI
+	diskId                 string
+	forkDiskDto            *ForkDiskDto
+	xDaytonaOrganizationID *string
+}
+
+func (r DisksAPIForkDiskRequest) ForkDiskDto(forkDiskDto ForkDiskDto) DisksAPIForkDiskRequest {
+	r.forkDiskDto = &forkDiskDto
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r DisksAPIForkDiskRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) DisksAPIForkDiskRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r DisksAPIForkDiskRequest) Execute() (*DiskDto, *http.Response, error) {
+	return r.ApiService.ForkDiskExecute(r)
+}
+
+/*
+ForkDisk Fork disk
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param diskId ID of the disk
+	@return DisksAPIForkDiskRequest
+*/
+func (a *DisksAPIService) ForkDisk(ctx context.Context, diskId string) DisksAPIForkDiskRequest {
+	return DisksAPIForkDiskRequest{
+		ApiService: a,
+		ctx:        ctx,
+		diskId:     diskId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return DiskDto
+func (a *DisksAPIService) ForkDiskExecute(r DisksAPIForkDiskRequest) (*DiskDto, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DiskDto
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DisksAPIService.ForkDisk")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/disks/{diskId}/fork"
+	localVarPath = strings.Replace(localVarPath, "{"+"diskId"+"}", url.PathEscape(parameterValueToString(r.diskId, "diskId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.forkDiskDto == nil {
+		return localVarReturnValue, nil, reportError("forkDiskDto is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.forkDiskDto
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

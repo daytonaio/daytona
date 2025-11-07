@@ -76,6 +76,9 @@ export class DiskDto {
   updatedAt: string
 
   static fromDisk(disk: Disk): DiskDto {
+    if (!disk.createdAt || !disk.updatedAt) {
+      throw new Error(`Disk ${disk.id} is missing required timestamp fields`)
+    }
     return {
       id: disk.id,
       organizationId: disk.organizationId,
@@ -85,8 +88,8 @@ export class DiskDto {
       runnerId: disk.runnerId,
       sandboxId: disk.sandboxId,
       errorReason: disk.errorReason,
-      createdAt: disk.createdAt?.toISOString(),
-      updatedAt: disk.updatedAt?.toISOString(),
+      createdAt: disk.createdAt.toISOString(),
+      updatedAt: disk.updatedAt.toISOString(),
     }
   }
 }

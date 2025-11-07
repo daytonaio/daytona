@@ -27,6 +27,10 @@ type DiskManager interface {
 
 	// CleanupUnusedLayers removes cached layers with zero references
 	CleanupUnusedLayers(ctx context.Context) (int, error)
+
+	// Fork creates a new disk that shares all existing layers of the source disk
+	// Both disks will have independent write layers for independent operation
+	Fork(ctx context.Context, sourceDiskName, newDiskName string) (Disk, error)
 }
 
 // Disk represents a managed disk volume

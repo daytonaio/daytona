@@ -37,6 +37,8 @@ import type { AttachDiskDto } from '../models'
 import type { CreateDiskDto } from '../models'
 // @ts-ignore
 import type { DiskDto } from '../models'
+// @ts-ignore
+import type { ForkDiskDto } from '../models'
 /**
  * DisksApi - axios parameter creator
  * @export
@@ -227,6 +229,58 @@ export const DisksApiAxiosParamCreator = function (configuration?: Configuration
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Fork disk
+     * @param {string} diskId ID of the disk
+     * @param {ForkDiskDto} forkDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    forkDisk: async (
+      diskId: string,
+      forkDiskDto: ForkDiskDto,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'diskId' is not null or undefined
+      assertParamExists('forkDisk', 'diskId', diskId)
+      // verify required parameter 'forkDiskDto' is not null or undefined
+      assertParamExists('forkDisk', 'forkDiskDto', forkDiskDto)
+      const localVarPath = `/disks/{diskId}/fork`.replace(`{${'diskId'}}`, encodeURIComponent(String(diskId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(forkDiskDto, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -439,6 +493,38 @@ export const DisksApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Fork disk
+     * @param {string} diskId ID of the disk
+     * @param {ForkDiskDto} forkDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async forkDisk(
+      diskId: string,
+      forkDiskDto: ForkDiskDto,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DiskDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.forkDisk(
+        diskId,
+        forkDiskDto,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DisksApi.forkDisk']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Get disk details
      * @param {string} diskId ID of the disk
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -559,6 +645,25 @@ export const DisksApiFactory = function (configuration?: Configuration, basePath
     },
     /**
      *
+     * @summary Fork disk
+     * @param {string} diskId ID of the disk
+     * @param {ForkDiskDto} forkDiskDto
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    forkDisk(
+      diskId: string,
+      forkDiskDto: ForkDiskDto,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<DiskDto> {
+      return localVarFp
+        .forkDisk(diskId, forkDiskDto, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Get disk details
      * @param {string} diskId ID of the disk
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -651,6 +756,27 @@ export class DisksApi extends BaseAPI {
   public detachDisk(diskId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return DisksApiFp(this.configuration)
       .detachDisk(diskId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Fork disk
+   * @param {string} diskId ID of the disk
+   * @param {ForkDiskDto} forkDiskDto
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DisksApi
+   */
+  public forkDisk(
+    diskId: string,
+    forkDiskDto: ForkDiskDto,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return DisksApiFp(this.configuration)
+      .forkDisk(diskId, forkDiskDto, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

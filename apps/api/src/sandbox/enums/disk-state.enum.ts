@@ -16,7 +16,6 @@ export enum DiskState {
   DELETING = 'deleting',
   DELETED = 'deleted',
   ERROR = 'error',
-  PENDING_FORK = 'pending_fork',
   FORKING = 'forking',
   LOCKED = 'locked',
 }

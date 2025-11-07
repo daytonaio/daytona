@@ -31,6 +31,8 @@ export const DiskState = {
   DELETING: 'deleting',
   DELETED: 'deleted',
   ERROR: 'error',
+  FORKING: 'forking',
+  LOCKED: 'locked',
 } as const
 
 export type DiskState = (typeof DiskState)[keyof typeof DiskState]

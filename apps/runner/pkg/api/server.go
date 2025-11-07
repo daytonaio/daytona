@@ -138,6 +138,7 @@ func (a *ApiServer) Start() error {
 		diskController.POST("/:diskId/pull", controllers.PullDisk)
 		diskController.GET("/:diskId/info", controllers.DiskInfo)
 		diskController.DELETE("/:diskId/delete", controllers.DeleteDisk)
+		diskController.POST("/fork/:diskId", controllers.ForkDisk)
 	}
 
 	a.httpServer = &http.Server{

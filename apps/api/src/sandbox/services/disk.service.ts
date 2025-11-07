@@ -16,9 +16,14 @@ import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
-import { OnEvent } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
+import { DiskEvents } from '../constants/disk-events'
+import { DiskCreatedEvent } from '../events/disk-created.event'
+import { DiskAlreadyAttachedError } from '../errors/disk-already-attached.error'
+import { CanNotAttachDiskError } from '../errors/can-not-attach-disk.error'
+import { CanNotDettachDiskError } from '../errors/can-not-detach-disk.error'
 
 @Injectable()
 export class DiskService {
@@ -31,6 +36,7 @@ export class DiskService {
     private readonly sandboxRepository: Repository<Sandbox>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -215,7 +221,7 @@ export class DiskService {
     newDisk.name = name
     newDisk.size = baseDisk.size
     newDisk.organizationId = organization.id
-    newDisk.state = DiskState.PENDING_FORK
+    newDisk.state = DiskState.FORKING
     newDisk.baseDiskId = baseDiskId
 
     try {
@@ -234,6 +240,8 @@ export class DiskService {
 
       const savedDisk = await this.diskRepository.save(newDisk)
       this.logger.debug(`Forked disk ${savedDisk.id} from ${baseDiskId} for organization ${organization.id}`)
+
+      this.eventEmitter.emit(DiskEvents.CREATED, new DiskCreatedEvent(savedDisk))
       return savedDisk
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, pendingDiskCountIncrement)
@@ -253,14 +261,15 @@ export class DiskService {
 
     // Validate disk state
     if (![DiskState.FRESH, DiskState.DETACHED, DiskState.STORED].includes(disk.state)) {
-      throw new BadRequestError(
-        `Disk must be in '${DiskState.DETACHED}', '${DiskState.STORED}' or '${DiskState.FRESH}' state to be attached`,
+      throw new CanNotAttachDiskError(
+        disk.id,
+        `Disk must be in '${DiskState.DETACHED}', '${DiskState.STORED}' or '${DiskState.FRESH}' state to be attached. Current state: ${disk.state}`,
       )
     }
 
     // Check if disk is already attached to another sandbox
     if (disk.sandboxId && disk.sandboxId !== sandboxId) {
-      throw new BadRequestError(`Disk is already attached to sandbox ${disk.sandboxId}`)
+      throw new DiskAlreadyAttachedError(disk.id, sandboxId)
     }
 
     // Find the sandbox
@@ -277,7 +286,8 @@ export class DiskService {
       console.error(
         `Sandbox must be in '${SandboxState.UNKNOWN}' or '${SandboxState.CREATING}' instead of '${sandbox.state}' state to attach a disk`,
       )
-      throw new BadRequestError(
+      throw new CanNotAttachDiskError(
+        disk.id,
         `Sandbox must be in '${SandboxState.UNKNOWN}' or '${SandboxState.CREATING}' state to attach a disk`,
       )
     }
@@ -291,7 +301,7 @@ export class DiskService {
     })
 
     if (existingAttachedDisk) {
-      throw new BadRequestError(`Sandbox already has a disk attached (${existingAttachedDisk.id})`)
+      throw new CanNotAttachDiskError(disk.id, `Sandbox already has a disk attached (${existingAttachedDisk.id})`)
     }
 
     // Attach the disk
@@ -316,7 +326,10 @@ export class DiskService {
 
     // Validate disk state
     if (disk.state !== DiskState.ATTACHED) {
-      throw new BadRequestError(`Disk must be in '${DiskState.ATTACHED}' state to be detached`)
+      throw new CanNotDettachDiskError(
+        disk.id,
+        `Disk must be in '${DiskState.ATTACHED}' state to be detached. Current state: ${disk.state}`,
+      )
     }
 
     // Validate sandbox state if it exists
@@ -325,11 +338,14 @@ export class DiskService {
         where: { id: disk.sandboxId },
       })
 
-      if (sandbox && sandbox.state !== SandboxState.DESTROYED) {
+      if (sandbox && ![SandboxState.DESTROYED, SandboxState.STOPPED].includes(sandbox.state)) {
         console.error(
           `Sandbox must be in '${SandboxState.DESTROYED}' instead of '${sandbox.state}' state to detach a disk`,
         )
-        throw new BadRequestError(`Sandbox must be in '${SandboxState.DESTROYED}' state to detach a disk`)
+        throw new CanNotDettachDiskError(
+          disk.id,
+          `Sandbox must be in '${SandboxState.DESTROYED}' state to detach a disk. Current state: ${sandbox.state}`,
+        )
       }
     }
 
@@ -365,15 +381,23 @@ export class DiskService {
     return savedDisk
   }
 
+  // when a sandbox is stopped or destroyed, detach all disks from the sandbox
   @OnEvent(SandboxEvents.STATE_UPDATED)
-  async handleSandboxDestroyedEvent(event: SandboxStateUpdatedEvent) {
-    if (event.newState !== SandboxState.DESTROYED) {
+  async handleSandboxStoppedAndDestroyedEvent(event: SandboxStateUpdatedEvent) {
+    if (![SandboxState.DESTROYED, SandboxState.STOPPED].includes(event.newState)) {
       return
     }
     const sandbox = event.sandbox
     if (sandbox.disks && sandbox.disks.length > 0) {
       for (const diskId of sandbox.disks) {
-        await this.detachFromSandbox(diskId)
+        try {
+          await this.detachFromSandbox(diskId)
+        } catch (error) {
+          if (error instanceof CanNotDettachDiskError) {
+            continue
+          }
+          throw error
+        }
       }
     }
   }

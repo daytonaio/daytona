@@ -636,9 +636,78 @@ func (c *QCowClient) GetBackingFile(ctx context.Context, imagePath string) (stri
 	return info.BackingFilename, nil
 }
 
+// ValidateBackingChain checks for circular references in the backing file chain
+// Returns an error if a circular reference is detected or chain is too deep
+func (c *QCowClient) ValidateBackingChain(ctx context.Context, imagePath string) error {
+	visited := make(map[string]bool)
+	currentPath := imagePath
+	const maxChainDepth = 1000 // Safety limit to prevent extremely deep chains
+
+	// Get absolute path for comparison
+	absImagePath, err := filepath.Abs(imagePath)
+	if err != nil {
+		absImagePath = imagePath
+	}
+
+	depth := 0
+	for {
+		// Safety check: prevent infinite loops from extremely deep chains
+		if depth >= maxChainDepth {
+			return fmt.Errorf("backing file chain exceeds maximum depth of %d (possible circular reference)", maxChainDepth)
+		}
+		depth++
+
+		// Check if we've seen this file before (circular reference)
+		absCurrentPath, err := filepath.Abs(currentPath)
+		if err != nil {
+			absCurrentPath = currentPath
+		}
+
+		if visited[absCurrentPath] {
+			return fmt.Errorf("circular backing file reference detected: %s references itself in the chain", currentPath)
+		}
+		visited[absCurrentPath] = true
+
+		// Get backing file
+		backingFile, err := c.GetBackingFile(ctx, currentPath)
+		if err != nil {
+			return fmt.Errorf("failed to get backing file for %s: %w", currentPath, err)
+		}
+
+		// If no backing file, we've reached the end of the chain
+		if backingFile == "" {
+			break
+		}
+
+		// Resolve relative paths
+		if !filepath.IsAbs(backingFile) {
+			backingFile = filepath.Join(filepath.Dir(currentPath), backingFile)
+		}
+
+		// Check if backing file points back to the original image
+		absBackingFile, err := filepath.Abs(backingFile)
+		if err != nil {
+			absBackingFile = backingFile
+		}
+
+		if absBackingFile == absImagePath {
+			return fmt.Errorf("circular backing file reference: backing file %s points back to source image %s", backingFile, imagePath)
+		}
+
+		currentPath = backingFile
+	}
+
+	return nil
+}
+
 // Convert converts a QCOW2 image to standalone (no backing file)
 // This collapses all layers into a single image
 func (c *QCowClient) Convert(ctx context.Context, sourcePath, destPath string) error {
+	// Validate backing chain before conversion to detect circular references
+	if err := c.ValidateBackingChain(ctx, sourcePath); err != nil {
+		return fmt.Errorf("invalid backing file chain: %w", err)
+	}
+
 	args := []string{
 		"convert",
 		"-f", "qcow2",

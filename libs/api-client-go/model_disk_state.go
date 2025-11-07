@@ -33,6 +33,8 @@ const (
 	DISKSTATE_DELETING       DiskState = "deleting"
 	DISKSTATE_DELETED        DiskState = "deleted"
 	DISKSTATE_ERROR          DiskState = "error"
+	DISKSTATE_FORKING        DiskState = "forking"
+	DISKSTATE_LOCKED         DiskState = "locked"
 )
 
 // All allowed values of DiskState enum
@@ -49,6 +51,8 @@ var AllowedDiskStateEnumValues = []DiskState{
 	"deleting",
 	"deleted",
 	"error",
+	"forking",
+	"locked",
 }
 
 func (v *DiskState) UnmarshalJSON(src []byte) error {

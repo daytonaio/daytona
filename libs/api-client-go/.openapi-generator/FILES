@@ -62,6 +62,7 @@ model_execute_request.go
 model_execute_response.go
 model_file_info.go
 model_file_status.go
+model_fork_disk_dto.go
 model_git_add_request.go
 model_git_branch_request.go
 model_git_checkout_request.go

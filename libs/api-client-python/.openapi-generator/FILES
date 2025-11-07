@@ -64,6 +64,7 @@ daytona_api_client/models/execute_request.py
 daytona_api_client/models/execute_response.py
 daytona_api_client/models/file_info.py
 daytona_api_client/models/file_status.py
+daytona_api_client/models/fork_disk_dto.py
 daytona_api_client/models/git_add_request.py
 daytona_api_client/models/git_branch_request.py
 daytona_api_client/models/git_checkout_request.py

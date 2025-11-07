@@ -91,6 +91,7 @@ export interface RunnerAdapter {
   pullDisk(diskId: string): Promise<void>
   getDiskInfo(diskId: string): Promise<RunnerDiskInfo>
   deleteDisk(diskId: string): Promise<void>
+  forkDisk(sourceDiskId: string, newDiskId: string): Promise<void>
 }
 
 @Injectable()

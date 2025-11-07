@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DiskDto, DisksApi } from '@daytonaio/api-client'
+import { DiskDto, DisksApi, ForkDiskDto } from '@daytonaio/api-client'
 import { DaytonaNotFoundError } from './errors/DaytonaError'
 
 /**
@@ -97,5 +97,27 @@ export class DiskService {
    */
   async delete(disk: Disk): Promise<void> {
     await this.disksApi.deleteDisk(disk.id)
+  }
+
+  /**
+   * Forks a Disk to create a new disk that shares all existing layers.
+   *
+   * Creates a new disk that shares all existing layers of the source disk.
+   * Both disks will have independent write layers for independent operation.
+   *
+   * @param {Disk} disk - Source disk to fork
+   * @param {string} newDiskName - Name for the new disk (can be any value)
+   * @returns {Promise<Disk>} The newly created forked disk
+   * @throws {Error} If the Disk does not exist or cannot be forked
+   *
+   * @example
+   * const daytona = new Daytona();
+   * const sourceDisk = await daytona.disk.get("source-disk");
+   * const newDisk = await daytona.disk.fork(sourceDisk, "new-disk-name");
+   * console.log(`Forked disk ${newDisk.name} from ${sourceDisk.name}`);
+   */
+  async fork(disk: Disk, newDiskName: string): Promise<Disk> {
+    const response = await this.disksApi.forkDisk(disk.id, { newDiskName })
+    return response.data as Disk
   }
 }

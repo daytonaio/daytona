@@ -1,11 +1,15 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import json
+import sys
+import traceback
 from typing import List
 
-from daytona_api_client_async import CreateDiskDto, DisksApi
+from daytona_api_client_async import CreateDiskDto, DisksApi, ForkDiskDto
 
 from ..common.disk import Disk
+from ..common.errors import DaytonaError
 
 
 class AsyncDiskService:
@@ -48,6 +52,8 @@ class AsyncDiskService:
             ```
         """
         disk_dto = await self.__disks_api.get_disk(disk_id)
+        if disk_dto is None:
+            raise DaytonaError(f"Failed to get disk: API returned no data for disk ID {disk_id}")
         return Disk.from_dto(disk_dto)
 
     async def create(self, name: str, size: int) -> Disk:
@@ -68,6 +74,8 @@ class AsyncDiskService:
             ```
         """
         disk_dto = await self.__disks_api.create_disk(CreateDiskDto(name=name, size=size))
+        if disk_dto is None:
+            raise DaytonaError(f"Failed to create disk: API returned no data for disk name {name}")
         return Disk.from_dto(disk_dto)
 
     async def delete(self, disk: Disk) -> None:
@@ -85,3 +93,54 @@ class AsyncDiskService:
             ```
         """
         await self.__disks_api.delete_disk(disk.id)
+
+    async def fork(self, disk: Disk, new_disk_name: str) -> Disk:
+        """Fork a Disk to create a new disk that shares all existing layers.
+
+        Creates a new disk that shares all existing layers of the source disk.
+        Both disks will have independent write layers for independent operation.
+
+        Args:
+            disk (Disk): Source disk to fork.
+            new_disk_name (str): Name for the new disk (can be any value).
+
+        Returns:
+            Disk: The newly created forked disk.
+
+        Example:
+            ```python
+            daytona = AsyncDaytona()
+            source_disk = await daytona.disk.get("source-disk")
+            new_disk = await daytona.disk.fork(source_disk, "new-disk-name")
+            print(f"Forked disk {new_disk.name} from {source_disk.name}")
+            ```
+        """
+        try:
+            api_response = await self.__disks_api.fork_disk_with_http_info(
+                disk.id, ForkDiskDto(new_disk_name=new_disk_name)
+            )
+
+            if api_response.raw_data:
+                try:
+                    raw_json = api_response.raw_data.decode("utf-8")
+                    print(f"[DEBUG] Raw Response Body: {raw_json}", file=sys.stderr)
+                    try:
+                        json.loads(raw_json)
+                    except json.JSONDecodeError as e:
+                        print(f"[DEBUG] Failed to parse JSON: {e}", file=sys.stderr)
+                except Exception as e:
+                    print(f"[DEBUG] Failed to decode raw_data: {e}", file=sys.stderr)
+                    print(f"[DEBUG] Raw data type: {type(api_response.raw_data)}", file=sys.stderr)
+                    print(
+                        f"[DEBUG] Raw data length: {len(api_response.raw_data) if api_response.raw_data else 0}",
+                        file=sys.stderr,
+                    )
+
+            disk_dto = api_response.data
+            if disk_dto is None:
+                raise DaytonaError("Failed to fork disk: API returned no data")
+            return Disk.from_dto(disk_dto)
+        except Exception as e:
+            print(f"[DEBUG] Exception during fork: {type(e).__name__}: {e}", file=sys.stderr)
+            print(f"[DEBUG] Traceback: {traceback.format_exc()}", file=sys.stderr)
+            raise

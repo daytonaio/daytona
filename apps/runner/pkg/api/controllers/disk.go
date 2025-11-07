@@ -210,3 +210,81 @@ func DeleteDisk(ctx *gin.Context) {
 		"diskId":  diskId,
 	})
 }
+
+// ForkDisk 			godoc
+//
+//	@Summary		Fork disk
+//	@Description	Create a new disk that shares all existing layers of the source disk. Both disks will have independent write layers.
+//	@Produce		json
+//	@Tags			disk
+//	@Param			diskId	path		string			true	"Source Disk ID"
+//	@Param			request	body		dto.ForkDiskDTO	true	"Fork disk request"
+//	@Success		200		{object}	map[string]interface{}
+//	@Failure		400		{object}	map[string]interface{}
+//	@Failure		404		{object}	map[string]interface{}
+//	@Failure		409		{object}	map[string]interface{}
+//	@Failure		500		{object}	map[string]interface{}
+//	@Router			/disk/fork/{diskId} [post]
+//
+//	@id				ForkDisk
+func ForkDisk(ctx *gin.Context) {
+	sourceDiskId := ctx.Param("diskId")
+	if sourceDiskId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "diskId is required"})
+		return
+	}
+
+	var forkDiskDto dto.ForkDiskDTO
+	if err := ctx.ShouldBindJSON(&forkDiskDto); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	newDiskId := forkDiskDto.NewDiskId
+	if newDiskId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "newDiskId is required"})
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	// Validate source disk exists and is not mounted
+	sourceDisk, err := (*runner.SDisk).Open(ctx.Request.Context(), sourceDiskId)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Source disk not found"})
+		return
+	}
+	defer sourceDisk.Close()
+
+	if sourceDisk.IsMounted() {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "Cannot fork mounted disk. Please unmount first"})
+		return
+	}
+
+	// Check if new disk already exists
+	disks, err := (*runner.SDisk).List(ctx.Request.Context())
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	for _, disk := range disks {
+		if disk.Name == newDiskId {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "New disk already exists"})
+			return
+		}
+	}
+
+	// Fork the disk
+	newDisk, err := (*runner.SDisk).Fork(ctx.Request.Context(), sourceDiskId, newDiskId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer newDisk.Close()
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":      "Disk forked successfully",
+		"sourceDiskId": sourceDiskId,
+		"newDiskId":    newDiskId,
+	})
+}

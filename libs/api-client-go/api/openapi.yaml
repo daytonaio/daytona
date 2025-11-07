@@ -6796,6 +6796,48 @@ paths:
       summary: Get disk details
       tags:
         - disks
+  /disks/{diskId}/fork:
+    post:
+      operationId: forkDisk
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the disk
+          explode: false
+          in: path
+          name: diskId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForkDiskDto'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiskDto'
+          description: Disk fork operation has been initiated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Fork disk
+      tags:
+        - disks
   /disks/{diskId}/attach:
     post:
       operationId: attachDisk
@@ -11574,6 +11616,8 @@ components:
         - deleting
         - deleted
         - error
+        - forking
+        - locked
       type: string
     DiskDto:
       example:
@@ -11657,6 +11701,17 @@ components:
       required:
         - name
         - size
+      type: object
+    ForkDiskDto:
+      example:
+        newDiskName: 123e4567-e89b-12d3-a456-426614174000
+      properties:
+        newDiskName:
+          description: Disk ID of the disk forked from the base disk
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+      required:
+        - newDiskName
       type: object
     AttachDiskDto:
       example:

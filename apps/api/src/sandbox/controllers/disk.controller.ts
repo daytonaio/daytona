@@ -32,6 +32,7 @@ import { DiskDto } from '../dto/disk.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { ForkDiskDto } from '../dto/fork-disk.dto'
 
 @ApiTags('disks')
 @Controller('disks')
@@ -133,6 +134,38 @@ export class DiskController {
   })
   async deleteDisk(@Param('diskId') diskId: string): Promise<void> {
     return this.diskService.delete(diskId)
+  }
+
+  @Post(':diskId/fork')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Fork disk',
+    operationId: 'forkDisk',
+  })
+  @ApiParam({
+    name: 'diskId',
+    description: 'ID of the disk',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Disk fork operation has been initiated',
+    type: DiskDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_VOLUMES])
+  @Audit({
+    action: AuditAction.FORK,
+    targetType: AuditTarget.DISK,
+    targetIdFromRequest: (req) => req.params.diskId,
+    requestMetadata: {
+      body: (req: TypedRequest<ForkDiskDto>) => ({
+        newDiskName: req.body?.newDiskName,
+      }),
+    },
+  })
+  async forkDisk(@Param('diskId') diskId: string, @Body() forkDiskDto: ForkDiskDto): Promise<DiskDto> {
+    const newDisk = await this.diskService.fork(diskId, forkDiskDto.newDiskName)
+    return DiskDto.fromDisk(newDisk)
   }
 
   @Post(':diskId/attach')

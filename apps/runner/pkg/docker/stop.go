@@ -72,6 +72,12 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	case <-statusCh:
 		// Container stopped successfully
 		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
+		// Unmount disk after container is stopped
+		if err := d.unmountSandboxDisk(ctx, containerId); err != nil {
+			// Log the error but don't fail sandbox stop
+			// The disk will be remounted when the sandbox is started again
+			log.Warnf("Failed to unmount disk for sandbox %s: %v", containerId, err)
+		}
 		return nil
 	case <-ctx.Done():
 		return ctx.Err()
@@ -79,6 +85,13 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 
 	log.Debugf("Sandbox %s stopped successfully", containerId)
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
+
+	// Unmount disk after container is stopped
+	if err := d.unmountSandboxDisk(ctx, containerId); err != nil {
+		// Log the error but don't fail sandbox stop
+		// The disk will be remounted when the sandbox is started again
+		log.Warnf("Failed to unmount disk for sandbox %s: %v", containerId, err)
+	}
 
 	return nil
 }

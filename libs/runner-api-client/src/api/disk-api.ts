@@ -33,6 +33,8 @@ import {
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
 import type { DiskInfoDTO } from '../models'
+// @ts-ignore
+import type { ForkDiskDTO } from '../models'
 /**
  * DiskApi - axios parameter creator
  * @export
@@ -106,6 +108,50 @@ export const DiskApiAxiosParamCreator = function (configuration?: Configuration)
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Create a new disk that shares all existing layers of the source disk. Both disks will have independent write layers.
+     * @summary Fork disk
+     * @param {string} diskId Source Disk ID
+     * @param {ForkDiskDTO} request Fork disk request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    forkDisk: async (
+      diskId: string,
+      request: ForkDiskDTO,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'diskId' is not null or undefined
+      assertParamExists('forkDisk', 'diskId', diskId)
+      // verify required parameter 'request' is not null or undefined
+      assertParamExists('forkDisk', 'request', request)
+      const localVarPath = `/disk/fork/{diskId}`.replace(`{${'diskId'}}`, encodeURIComponent(String(diskId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication Bearer required
+      await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -239,6 +285,31 @@ export const DiskApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Create a new disk that shares all existing layers of the source disk. Both disks will have independent write layers.
+     * @summary Fork disk
+     * @param {string} diskId Source Disk ID
+     * @param {ForkDiskDTO} request Fork disk request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async forkDisk(
+      diskId: string,
+      request: ForkDiskDTO,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any }>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.forkDisk(diskId, request, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DiskApi.forkDisk']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Pull disk from object storage
      * @summary Pull disk
      * @param {string} diskId Disk ID
@@ -316,6 +387,21 @@ export const DiskApiFactory = function (configuration?: Configuration, basePath?
       return localVarFp.diskInfo(diskId, options).then((request) => request(axios, basePath))
     },
     /**
+     * Create a new disk that shares all existing layers of the source disk. Both disks will have independent write layers.
+     * @summary Fork disk
+     * @param {string} diskId Source Disk ID
+     * @param {ForkDiskDTO} request Fork disk request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    forkDisk(
+      diskId: string,
+      request: ForkDiskDTO,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<{ [key: string]: any }> {
+      return localVarFp.forkDisk(diskId, request, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Pull disk from object storage
      * @summary Pull disk
      * @param {string} diskId Disk ID
@@ -371,6 +457,21 @@ export class DiskApi extends BaseAPI {
   public diskInfo(diskId: string, options?: RawAxiosRequestConfig) {
     return DiskApiFp(this.configuration)
       .diskInfo(diskId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Create a new disk that shares all existing layers of the source disk. Both disks will have independent write layers.
+   * @summary Fork disk
+   * @param {string} diskId Source Disk ID
+   * @param {ForkDiskDTO} request Fork disk request
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DiskApi
+   */
+  public forkDisk(diskId: string, request: ForkDiskDTO, options?: RawAxiosRequestConfig) {
+    return DiskApiFp(this.configuration)
+      .forkDisk(diskId, request, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

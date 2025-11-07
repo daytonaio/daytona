@@ -36,6 +36,13 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		return err
 	}
 
+	// Mount disk before starting container (if not already mounted)
+	if err := d.mountSandboxDisk(ctx, containerId); err != nil {
+		// Log the error but don't fail sandbox start
+		// The disk mount might already be in place or not needed
+		log.Warnf("Failed to mount disk for sandbox %s: %v", containerId, err)
+	}
+
 	if c.State.Running {
 		containerIP, err := getContainerIP(&c)
 		if err != nil {

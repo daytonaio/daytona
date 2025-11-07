@@ -57,6 +57,11 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 		}
 	}
 
+	// Add disk ID to labels if a disk is attached
+	if sandboxDto.DiskId != "" {
+		labels["daytona.disk_id"] = sandboxDto.DiskId
+	}
+
 	return &container.Config{
 		Hostname: sandboxDto.Id,
 		Image:    sandboxDto.Snapshot,

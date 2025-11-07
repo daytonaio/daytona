@@ -349,4 +349,10 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   async deleteDisk(diskId: string): Promise<void> {
     await this.diskApiClient.deleteDisk(diskId)
   }
+
+  async forkDisk(sourceDiskId: string, newDiskId: string): Promise<void> {
+    await this.diskApiClient.forkDisk(sourceDiskId, {
+      newDiskId: newDiskId,
+    })
+  }
 }
