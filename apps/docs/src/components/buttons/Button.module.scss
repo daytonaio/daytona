@@ -13,7 +13,7 @@
   line-height: 1rem;
   font-weight: 500;
   transition-property: all 0.2s ease-in-out;
-  color: var(--text-color);
+  color: var(--foreground-color);
   background-color: var(--block-bg-color);
   border: 1px solid var(--border-color);
 
@@ -24,7 +24,6 @@
 
   &:hover {
     background-color: var(--cta-surface-neutral-primary);
-    color: var(--text-color-hover);
   }
 
   & > svg {

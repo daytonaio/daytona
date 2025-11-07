@@ -26,6 +26,8 @@ body {
   --blue-link: #59acff;
   --system-error: #e74c3c;
   --cta-surface-neutral-primary: #252525;
+
+  --foreground-color: #fafafa;
 }
 
 html[data-theme='light'] body {
@@ -43,4 +45,6 @@ html[data-theme='light'] body {
   --cta-surface-neutral-primary: #dedede;
   --hover-color: #08ae78;
   --secondary-hover-color: #08ae78;
+
+  --foreground-color: #636363;
 }

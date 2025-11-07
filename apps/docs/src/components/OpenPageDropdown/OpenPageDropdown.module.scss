@@ -7,7 +7,7 @@
   border-radius: 0.25rem;
 
   background-color: var(--block-bg-color);
-  color: var(--text-color);
+  color: var(--foreground-color);
 
   font-size: 0.875rem;
   line-height: 1rem;
@@ -18,7 +18,6 @@
   &:hover,
   &[data-state='open'] {
     background-color: var(--cta-surface-neutral-primary);
-    color: var(--text-color-hover);
   }
   cursor: pointer;
 }
@@ -56,6 +55,7 @@
     cursor: pointer;
     user-select: none;
     gap: 0.5rem;
+    color: var(--foreground-color);
 
     & > svg {
       flex-shrink: 0;
@@ -66,12 +66,11 @@
 
     &:focus {
       background-color: var(--cta-surface-neutral-primary);
-      color: var(--text-color-hover);
     }
 
     & > svg:last-child {
       margin-left: auto;
-      opacity: 0.75;
+      opacity: 0.5;
     }
   }
 }
