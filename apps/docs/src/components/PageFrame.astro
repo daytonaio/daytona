@@ -23,6 +23,22 @@ const { hasSidebar, labels } = Astro.props
   </div>
 </div>
 
+<script is:inline>
+  ;(() => {
+    try {
+      if (!matchMedia('(min-width: 50em)').matches) return
+      const scroller = document.getElementById('starlight__sidebar')
+
+      const state = JSON.parse(
+        sessionStorage.getItem('sl-sidebar-state') || '0'
+      )
+      if (!scroller || !state) return
+
+      scroller.scrollTop = state.scroll
+    } catch {}
+  })()
+</script>
+
 <style>
   .grid-template {
     position: relative;

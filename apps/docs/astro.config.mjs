@@ -63,10 +63,6 @@ export default defineConfig({
       ...generateI18nConfig(config),
     }),
   ],
-  i18n: {
-    locales: config.locales,
-    defaultLocale: config.defaultLocale,
-  },
   experimental: { contentLayer: true },
   output: 'hybrid',
   adapter: node({
