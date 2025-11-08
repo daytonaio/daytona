@@ -348,6 +348,140 @@ func (v *disk) Push(ctx context.Context) error {
 
 // pushBaseLayer uploads the base layer (first push of a disk)
 func (v *disk) pushBaseLayer(ctx context.Context, state *DiskState) error {
+	// Check if this disk has layer mappings (e.g., from a fork operation)
+	// If it does, we can upload layers individually and share them across disks
+	diskLayers, err := v.stateDB.GetDiskLayers(v.name)
+	if err != nil {
+		return fmt.Errorf("failed to get disk layers: %w", err)
+	}
+
+	// If we have layer mappings, use layer-aware push for S3 efficiency
+	if len(diskLayers) > 0 {
+		return v.pushLayeredDisk(ctx, state, diskLayers)
+	}
+
+	// Otherwise, use the traditional flatten-and-push approach
+	return v.pushFlattenedDisk(ctx, state)
+}
+
+// pushLayeredDisk uploads a disk with layer structure, sharing layers in S3
+func (v *disk) pushLayeredDisk(ctx context.Context, state *DiskState, diskLayers []*DiskLayerMapping) error {
+	fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Pushing disk '%s' with %d layers\n", v.name, len(diskLayers))
+
+	s3Layers := make([]S3LayerInfo, 0, len(diskLayers))
+	var baseLayerID, topLayerID string
+	var finalChecksum string
+
+	// Process each layer
+	for i, diskLayer := range diskLayers {
+		// Get the cached layer path
+		layerCacheDir := filepath.Join(v.config.DataDir, "layer-cache")
+		layerPath := filepath.Join(layerCacheDir, diskLayer.LayerID+".qcow2")
+
+		// Check if layer file exists
+		if _, err := os.Stat(layerPath); os.IsNotExist(err) {
+			return fmt.Errorf("layer %s not found in cache", diskLayer.LayerID)
+		}
+
+		// Get layer state to get checksum
+		layerState, err := v.stateDB.GetLayer(diskLayer.LayerID)
+		if err != nil || layerState == nil {
+			return fmt.Errorf("failed to get layer state for %s: %w", diskLayer.LayerID, err)
+		}
+
+		// Ensure the layer has a checksum
+		if layerState.Checksum == "" {
+			fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Layer %s missing checksum, computing...\n", diskLayer.LayerID)
+			checksum, err := v.qcow2Client.Checksum(ctx, layerPath)
+			if err != nil {
+				return fmt.Errorf("failed to compute checksum for layer %s: %w", diskLayer.LayerID, err)
+			}
+			layerState.Checksum = checksum
+			if err := v.stateDB.SaveLayer(layerState); err != nil {
+				return fmt.Errorf("failed to update layer checksum for %s: %w", diskLayer.LayerID, err)
+			}
+		}
+
+		// Use checksum-based naming for S3 layers (shared across disks)
+		s3LayerID := fmt.Sprintf("layer-%s", layerState.Checksum[:16])
+
+		// Check if this layer already exists in S3 (by checksum)
+		layerExists := false
+		if err := v.s3Client.CheckLayerExists(ctx, s3LayerID); err == nil {
+			fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Layer %s already in S3 (checksum: %s), skipping upload\n",
+				diskLayer.LayerID, layerState.Checksum[:16])
+			layerExists = true
+		}
+
+		// Upload the layer if it doesn't exist in S3
+		if !layerExists {
+			fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Uploading layer %s to S3 as %s...\n", diskLayer.LayerID, s3LayerID)
+
+			// Flatten the layer before upload to remove backing file references
+			flattenedPath := layerPath + ".flattened"
+			defer os.Remove(flattenedPath)
+
+			if err := v.qcow2Client.Convert(ctx, layerPath, flattenedPath); err != nil {
+				return fmt.Errorf("failed to flatten layer %s: %w", diskLayer.LayerID, err)
+			}
+
+			// Upload the flattened layer with shared name
+			if err := v.s3Client.UploadSharedLayer(ctx, s3LayerID, flattenedPath); err != nil {
+				return fmt.Errorf("failed to upload shared layer %s: %w", diskLayer.LayerID, err)
+			}
+		}
+
+		// Create S3 layer info referencing the shared layer
+		parentID := ""
+		if i > 0 {
+			parentID = s3Layers[i-1].ID
+		}
+
+		layerInfo := S3LayerInfo{
+			ID:          s3LayerID,
+			ParentID:    parentID,
+			Created:     layerState.CachedAt,
+			Size:        layerState.Size,
+			Checksum:    layerState.Checksum,
+			Description: fmt.Sprintf("Shared layer (position %d)", i),
+		}
+		s3Layers = append(s3Layers, layerInfo)
+
+		if i == 0 {
+			baseLayerID = s3LayerID
+		}
+		topLayerID = s3LayerID
+		finalChecksum = layerState.Checksum
+	}
+
+	// Create metadata with shared layer references
+	metadata := S3Metadata{
+		Name:        v.name,
+		SizeGB:      v.sizeGB,
+		Created:     state.CreatedAt,
+		Modified:    time.Now(),
+		Checksum:    finalChecksum,
+		Layers:      s3Layers,
+		BaseLayerID: baseLayerID,
+		TopLayerID:  topLayerID,
+	}
+
+	// Upload metadata
+	if err := v.s3Client.UploadMetadata(ctx, v.name, metadata); err != nil {
+		return fmt.Errorf("failed to upload metadata: %w", err)
+	}
+
+	// Update local state
+	if err := v.stateDB.UpdateS3State(v.name, true, finalChecksum); err != nil {
+		return fmt.Errorf("failed to update S3 state: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Successfully pushed disk '%s' with %d shared layers\n", v.name, len(s3Layers))
+	return nil
+}
+
+// pushFlattenedDisk uploads a disk without layer structure (traditional approach)
+func (v *disk) pushFlattenedDisk(ctx context.Context, state *DiskState) error {
 	// CRITICAL: The base layer must be a standalone image with no backing files
 	// If the working image has a backing file, flatten it first
 	baseImagePath := v.imagePath

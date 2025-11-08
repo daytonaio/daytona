@@ -472,3 +472,18 @@ func (c *S3Client) DeleteLayer(ctx context.Context, diskName, layerID string) er
 
 	return nil
 }
+
+// CheckLayerExists checks if a shared layer exists in S3 (by layer ID/checksum)
+func (c *S3Client) CheckLayerExists(ctx context.Context, layerID string) error {
+	key := c.layerKey("", layerID) + ".tar.gz"
+	_, err := c.s3Client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(c.bucket),
+		Key:    aws.String(key),
+	})
+	return err
+}
+
+// UploadSharedLayer uploads a layer to the shared layers path in S3
+func (c *S3Client) UploadSharedLayer(ctx context.Context, layerID, localPath string) error {
+	return c.UploadLayer(ctx, "", layerID, localPath)
+}
