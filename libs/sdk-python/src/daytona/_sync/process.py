@@ -73,11 +73,13 @@ class Process:
         Returns:
             ExecutionArtifacts: The artifacts from the command execution
         """
-        artifacts = ExecutionArtifacts("", [])
+        
+        stdout_lines = []
+        charts = []
+
         for line in lines:
             if not line.startswith("dtn_artifact_k39fd2:"):
-                artifacts.stdout += line
-                artifacts.stdout += "\n"
+                stdout_lines.append(line)
             else:
                 # Remove the prefix and parse JSON
                 json_str = line.replace("dtn_artifact_k39fd2:", "", 1).strip()
@@ -87,9 +89,9 @@ class Process:
                 # Check if this is chart data
                 if data_type == "chart":
                     chart_data = data.get("value", {})
-                    artifacts.charts.append(parse_chart(**chart_data))
+                    charts.append(parse_chart(**chart_data))
 
-        return artifacts
+        return ExecutionArtifacts(stdout="\n".join(stdout_lines), charts=charts)
 
     @intercept_errors(message_prefix="Failed to execute command: ")
     def exec(
