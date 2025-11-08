@@ -427,10 +427,13 @@ func (m *manager) pullLayeredDisk(ctx context.Context, name string, metadata *S3
 	return nil
 }
 
-// createLayerReference creates a read-only reference to a cached layer
+// createLayerReference creates a QCOW2 overlay that references a cached layer
+// This enables true copy-on-write and layer sharing without duplicating data
 func (m *manager) createLayerReference(ctx context.Context, cachedLayerPath, refPath string) error {
-	// Simply copy for now; could use hard links for efficiency
-	return m.copyFile(cachedLayerPath, refPath)
+	// Create a QCOW2 overlay image that uses the cached layer as backing file
+	// This creates a thin layer that only stores differences from the backing file
+	// The actual data stays in the cache and is shared between all disks using this layer
+	return m.qcow2Client.CreateWithBacking(ctx, cachedLayerPath, refPath, 0)
 }
 
 // copyFile copies a file from src to dst
@@ -1045,23 +1048,21 @@ func (m *manager) Fork(ctx context.Context, sourceDiskName, newDiskName string) 
 		}
 
 		if lastStandaloneIndex >= 0 {
-			// We have a standalone layer - use it directly as the base
+			// We have a standalone layer - create an overlay that references it
+			// This allows layer sharing instead of copying the entire layer
 			// It contains all data from previous layers, so we don't need them
 			basePath := filepath.Join(diskLayersDir, "base.qcow2")
-			if err := m.copyFile(layerPaths[lastStandaloneIndex], basePath); err != nil {
-				return "", fmt.Errorf("failed to copy standalone layer as base: %w", err)
+			if err := m.createLayerReference(ctx, layerPaths[lastStandaloneIndex], basePath); err != nil {
+				return "", fmt.Errorf("failed to create reference to standalone layer: %w", err)
 			}
 			workingLayers = append(workingLayers, basePath)
 
 			// Process any layers after the standalone one (shouldn't happen in fork, but handle it)
 			for i := lastStandaloneIndex + 1; i < len(layerPaths); i++ {
 				deltaPath := filepath.Join(diskLayersDir, fmt.Sprintf("delta-%d.qcow2", i))
-				if err := m.copyFile(layerPaths[i], deltaPath); err != nil {
-					return "", fmt.Errorf("failed to copy delta layer: %w", err)
-				}
-				// Rebase to point to previous layer
-				if err := m.qcow2Client.RebaseUnsafe(ctx, deltaPath, workingLayers[len(workingLayers)-1]); err != nil {
-					return "", fmt.Errorf("failed to rebase delta layer: %w", err)
+				// Create overlay referencing the previous layer in the working chain
+				if err := m.qcow2Client.CreateWithBacking(ctx, workingLayers[len(workingLayers)-1], deltaPath, 0); err != nil {
+					return "", fmt.Errorf("failed to create delta layer overlay: %w", err)
 				}
 				workingLayers = append(workingLayers, deltaPath)
 			}
@@ -1074,15 +1075,25 @@ func (m *manager) Fork(ctx context.Context, sourceDiskName, newDiskName string) 
 			}
 			workingLayers = append(workingLayers, basePath)
 
-			// Delta layers: create with backing chain
+			// Delta layers: create overlays with backing chain
 			for i := 1; i < len(layerPaths); i++ {
 				deltaPath := filepath.Join(diskLayersDir, fmt.Sprintf("delta-%d.qcow2", i))
-				if err := m.copyFile(layerPaths[i], deltaPath); err != nil {
-					return "", fmt.Errorf("failed to copy delta layer: %w", err)
+				// Create overlay that references the cached layer, with the previous working layer as backing
+				// This creates a chain: workingLayer[i-1] <- cachedLayer[i] <- overlay[i]
+				// First create an overlay of the cached layer
+				tempOverlay := deltaPath + ".temp"
+				if err := m.createLayerReference(ctx, layerPaths[i], tempOverlay); err != nil {
+					return "", fmt.Errorf("failed to create delta layer reference: %w", err)
 				}
-				// Rebase to point to previous layer in chain
-				if err := m.qcow2Client.RebaseUnsafe(ctx, deltaPath, workingLayers[len(workingLayers)-1]); err != nil {
+				// Rebase to point to previous layer in the working chain
+				if err := m.qcow2Client.RebaseUnsafe(ctx, tempOverlay, workingLayers[len(workingLayers)-1]); err != nil {
+					os.Remove(tempOverlay)
 					return "", fmt.Errorf("failed to rebase delta layer: %w", err)
+				}
+				// Rename to final path
+				if err := os.Rename(tempOverlay, deltaPath); err != nil {
+					os.Remove(tempOverlay)
+					return "", fmt.Errorf("failed to rename delta layer: %w", err)
 				}
 				workingLayers = append(workingLayers, deltaPath)
 			}
