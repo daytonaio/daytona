@@ -812,7 +812,12 @@ func (c *QCowClient) CreateWithBacking(ctx context.Context, backingFile, newImag
 		"-F", "qcow2", // Backing file format
 		"-b", backingFile, // Backing file path
 		newImagePath,
-		fmt.Sprintf("%dG", sizeGB),
+	}
+
+	// Only specify size if non-zero; otherwise qemu-img will match the backing file size
+	// CRITICAL: Passing "0G" creates a 0-byte overlay, but omitting size inherits from backing file
+	if sizeGB > 0 {
+		args = append(args, fmt.Sprintf("%dG", sizeGB))
 	}
 
 	cmd := exec.CommandContext(ctx, "qemu-img", args...)

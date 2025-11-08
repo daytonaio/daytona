@@ -186,6 +186,56 @@ def main():
     for file in files:
         print(f"  - {file.name} - {file.size} - {file.is_dir}")
 
+    # add a new file to the new sandbox
+    print("\n📋 Adding a new file to the new sandbox with the forked disk...")
+    new_sandbox.fs.upload_file(b"Hello, World!", "/workspace/new-file-2.txt")
+    print(f"✅ Added file: {new_sandbox.name} ({new_sandbox.id}) - State: {new_sandbox.state}")
+
+    # stop the new sandbox
+    print("\n📋 Stopping the new sandbox with the forked disk...")
+    new_sandbox.stop()
+    print(f"✅ Stopped sandbox: {new_sandbox.name} ({new_sandbox.id}) - State: {new_sandbox.state}")
+
+    # wait for the new sandbox to be stopped
+    print("\n⏳ Waiting for the new sandbox to be stopped...")
+    if not wait_for_sandbox_state(new_sandbox, SandboxState.STOPPED, timeout_seconds=60):
+        print("❌ Failed to wait for new sandbox stop")
+        return
+
+    # fork the forked disk
+    print("\n📋 Forking the forked disk...")
+    forked_disk_2 = daytona.disk.fork(forked_disk, f"example-disk-{int(time.time())}-3")
+    print(f"✅ Forked disk: {forked_disk_2.name} ({forked_disk_2.id}) - State: {forked_disk_2.state}")
+
+    # wait for the forked disk to be ready
+    print("\n⏳ Waiting for the forked disk to be ready...")
+    if not wait_for_disk_state(
+        daytona,
+        forked_disk_2.id,
+        [DiskState.FRESH, DiskState.STORED, DiskState.DETACHED, "pending_push"],
+        timeout_seconds=30,
+    ):
+        print("❌ Failed to wait for forked disk to be ready")
+        return
+
+    # create a new sandbox with the forked disk
+    print("\n🏗️ Creating a new sandbox with the forked disk 2...")
+    params = CreateSandboxFromImageParams(
+        image="ubuntu:22.04",
+        sandbox_name=f"example-sandbox-{int(time.time())}-3",
+        disk_id=forked_disk_2.id,
+        language="python",
+    )
+    new_sandbox_2 = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
+    print(f"✅ Created sandbox: {new_sandbox_2.name} ({new_sandbox_2.id}) - State: {new_sandbox_2.state}")
+
+    # list files in the new sandbox
+    print("\n📋 Listing files in the new sandbox with the forked disk 2...")
+    files = new_sandbox_2.fs.list_files("/workspace")
+    print(f"Found {len(files)} files in the sandbox:")
+    for file in files:
+        print(f"  - {file.name} - {file.size} - {file.is_dir}")
+
     sandbox.delete()
 
     # Wait for sandbox to be deleted
@@ -202,18 +252,31 @@ def main():
         print("❌ Failed to wait for second sandbox deletion")
         return
 
+    new_sandbox_2.delete()
+
+    # Wait for the second sandbox 2 to be deleted
+    print("\n⏳ Waiting for the second sandbox 2 to be deleted...")
+    if not wait_for_sandbox_state(new_sandbox_2, SandboxState.DESTROYED, timeout_seconds=60):
+        print("❌ Failed to wait for second sandbox 2 deletion")
+        return
+
     # Wait for the disk to be detached after the second sandbox is deleted
     time.sleep(2)
 
     # Delete the disk
     print("\n🗑️  Deleting the original disk...")
-    daytona.disk.delete(disk)
+    # daytona.disk.delete(disk)
     print(f"✅ Deleted disk: {disk.name}")
 
     # Delete the forked disk
     print("\n🗑️  Deleting the forked disk...")
-    daytona.disk.delete(forked_disk)
+    # daytona.disk.delete(forked_disk)
     print(f"✅ Forked disk: {forked_disk.name}")
+
+    # Delete the forked disk 2
+    print("\n🗑️  Deleting the forked disk 2...")
+    # daytona.disk.delete(forked_disk)
+    print(f"✅ Forked disk 2: {forked_disk_2.name}")
 
     # Final list to confirm deletion
     print("\n📋 Final disk list...")

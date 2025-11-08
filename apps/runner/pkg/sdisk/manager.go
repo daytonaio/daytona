@@ -946,8 +946,8 @@ func (m *manager) Fork(ctx context.Context, sourceDiskName, newDiskName string) 
 		ModifiedAt: now,
 		IsMounted:  false,
 		MountPath:  "",
-		InS3:       sourceState.InS3,
-		Checksum:   "", // Will be set on first push
+		InS3:       false, // CRITICAL: Always false for new forks - they need to be pushed to S3
+		Checksum:   "",    // Will be set on first push
 	}
 
 	// Copy all layer mappings from source disk (including the newly committed layer) and increment ref counts

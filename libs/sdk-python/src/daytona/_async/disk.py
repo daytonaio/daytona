@@ -123,7 +123,6 @@ class AsyncDiskService:
             if api_response.raw_data:
                 try:
                     raw_json = api_response.raw_data.decode("utf-8")
-                    print(f"[DEBUG] Raw Response Body: {raw_json}", file=sys.stderr)
                     try:
                         json.loads(raw_json)
                     except json.JSONDecodeError as e:
