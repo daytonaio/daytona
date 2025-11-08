@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -453,6 +454,10 @@ func (c *QCowClient) Disconnect(ctx context.Context, volumeName string) error {
 	if logFile != nil {
 		fmt.Fprintf(logFile, "\n[DISCONNECT] Client instance %p, volume=%s\n", c, volumeName)
 		fmt.Fprintf(logFile, "[DISCONNECT] nbdDevices map before: %v\n", c.nbdDevices)
+		// Add stack trace to see who called disconnect
+		buf := make([]byte, 4096)
+		n := runtime.Stack(buf, false)
+		fmt.Fprintf(logFile, "[DISCONNECT] Stack trace:\n%s\n", buf[:n])
 		defer logFile.Close()
 	}
 

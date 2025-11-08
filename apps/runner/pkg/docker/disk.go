@@ -80,7 +80,12 @@ func (d *DockerClient) mountSandboxDisk(ctx context.Context, containerId string)
 	if err != nil {
 		return fmt.Errorf("failed to open disk %s: %w", diskId, err)
 	}
-	defer disk.Close()
+	// NOTE: Don't defer disk.Close() here!
+	// The disk needs to remain mounted for the sandbox to use it.
+	// It will be managed by the disk pool and unmounted when:
+	// - The pool evicts it (LRU)
+	// - The disk is explicitly deleted
+	// - The disk is forked (requires exclusive access)
 
 	if !disk.IsMounted() {
 		_, err := disk.Mount(ctx)
