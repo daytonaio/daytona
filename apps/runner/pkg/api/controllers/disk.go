@@ -248,18 +248,15 @@ func ForkDisk(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	// Validate source disk exists and is not mounted
+	// Validate source disk exists
+	// NOTE: We don't check if disk is mounted here because the Fork method
+	// in the disk manager handles unmounting properly (evicting from pool first)
 	sourceDisk, err := (*runner.SDisk).Open(ctx.Request.Context(), sourceDiskId)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Source disk not found"})
 		return
 	}
 	defer sourceDisk.Close()
-
-	if sourceDisk.IsMounted() {
-		ctx.JSON(http.StatusConflict, gin.H{"error": "Cannot fork mounted disk. Please unmount first"})
-		return
-	}
 
 	// Check if new disk already exists
 	disks, err := (*runner.SDisk).List(ctx.Request.Context())

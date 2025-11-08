@@ -132,6 +132,26 @@ func (p *DiskPool) Evict(ctx context.Context, name string) error {
 	return nil
 }
 
+// ForceRemove removes a disk from the pool without unmounting
+// This is useful for clearing stale pool entries where the disk is not actually mounted
+// It also clears the disk's internal mount state to force a fresh mount on next access
+func (p *DiskPool) ForceRemove(name string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	// If disk is in pool, clear its mount state before removing
+	// This ensures pool.Get() will do a fresh mount instead of trusting stale flags
+	if entry, exists := p.mounted[name]; exists {
+		disk := entry.disk
+		disk.mu.Lock()
+		disk.isMounted = false
+		disk.mountPath = ""
+		disk.mu.Unlock()
+	}
+
+	delete(p.mounted, name)
+}
+
 // evictLRU evicts the least recently used disk from the pool
 // Must be called with lock held
 func (p *DiskPool) evictLRU(ctx context.Context) error {

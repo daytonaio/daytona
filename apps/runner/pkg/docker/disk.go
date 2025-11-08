@@ -45,6 +45,16 @@ func (d *DockerClient) unmountSandboxDisk(ctx context.Context, containerId strin
 	defer disk.Close()
 
 	if disk.IsMounted() {
+		// CRITICAL: Sync the disk mount point to flush Docker bind mount writes
+		// Docker's bind mount writes may be buffered and not immediately visible
+		// on the host filesystem. We must sync before unmounting to prevent data loss.
+		if mountPath := disk.MountPath(); mountPath != "" {
+			log.Debugf("Syncing disk mount point %s before unmount", mountPath)
+			if err := disk.Sync(ctx); err != nil {
+				log.Warnf("Failed to sync disk %s before unmount: %v", diskId, err)
+			}
+		}
+
 		if err := disk.Unmount(ctx); err != nil {
 			return fmt.Errorf("failed to unmount disk %s: %w", diskId, err)
 		}

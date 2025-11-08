@@ -6,6 +6,8 @@ package docker
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -103,13 +105,77 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 				return "", err
 			}
 		}
-		if !disk.IsMounted() {
-			_, err := disk.Mount(ctx)
-			if err != nil {
-				return "", err
+		// CRITICAL: ALWAYS force a fresh mount to avoid any stale state issues
+		// DETAILED LOGGING
+		createLog, _ := os.OpenFile("/tmp/create-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if createLog != nil {
+			fmt.Fprintf(createLog, "\n[CREATE] Starting container creation for disk %s\n", sandboxDto.DiskId)
+			defer createLog.Close()
+		}
+
+		// Unmount if currently mounted (clears any stale state)
+		log.Debugf("Force unmounting disk %s to ensure fresh mount", sandboxDto.DiskId)
+		if createLog != nil {
+			fmt.Fprintf(createLog, "[CREATE] Checking if disk is mounted: %v\n", disk.IsMounted())
+		}
+		if disk.IsMounted() {
+			if createLog != nil {
+				fmt.Fprintf(createLog, "[CREATE] Unmounting disk\n")
+			}
+			if err := disk.Unmount(ctx); err != nil {
+				log.Warnf("Failed to unmount disk %s: %v", sandboxDto.DiskId, err)
+				if createLog != nil {
+					fmt.Fprintf(createLog, "[CREATE] ERROR: Unmount failed: %v\n", err)
+				}
 			}
 		}
-		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/disk/:%s/", disk.MountPath(), "/workspace"))
+
+		// Force remove from pool and clear database state
+		d.sdisk.ForceRemoveFromPool(sandboxDto.DiskId)
+		log.Debugf("Cleared pool and database state for disk %s", sandboxDto.DiskId)
+		if createLog != nil {
+			fmt.Fprintf(createLog, "[CREATE] Cleared pool and database state\n")
+		}
+
+		// Now do a fresh mount
+		if createLog != nil {
+			fmt.Fprintf(createLog, "[CREATE] Calling disk.Mount\n")
+		}
+		mountPath, err := disk.Mount(ctx)
+		if err != nil {
+			if createLog != nil {
+				fmt.Fprintf(createLog, "[CREATE] ERROR: Mount failed: %v\n", err)
+			}
+			return "", fmt.Errorf("failed to mount disk %s: %w", sandboxDto.DiskId, err)
+		}
+		log.Debugf("Successfully mounted disk %s at %s", sandboxDto.DiskId, mountPath)
+		if createLog != nil {
+			fmt.Fprintf(createLog, "[CREATE] Mount returned success, mountPath=%s\n", mountPath)
+		}
+
+		// Verify mount actually happened
+		if createLog != nil {
+			fmt.Fprintf(createLog, "[CREATE] Verifying mount in /proc/mounts\n")
+		}
+		verifyCmd := exec.CommandContext(ctx, "mount")
+		if output, err := verifyCmd.CombinedOutput(); err == nil {
+			if !strings.Contains(string(output), mountPath) {
+				if createLog != nil {
+					fmt.Fprintf(createLog, "[CREATE] ERROR: Mount path %s NOT in /proc/mounts!\n", mountPath)
+				}
+				return "", fmt.Errorf("disk mount verification failed: mount path %s not in /proc/mounts", mountPath)
+			}
+			log.Debugf("Verified disk %s is mounted at %s", sandboxDto.DiskId, mountPath)
+			if createLog != nil {
+				fmt.Fprintf(createLog, "[CREATE] SUCCESS: Verified mount in /proc/mounts\n")
+			}
+		}
+
+		// Set up bind mount from the QCOW2 mount point directly to /workspace
+		// No subdirectory needed - mount root contains the workspace files
+		bindMount := fmt.Sprintf("%s:%s", mountPath, "/workspace")
+		log.Debugf("Setting up disk bind mount: %s", bindMount)
+		volumeMountPathBinds = append(volumeMountPathBinds, bindMount)
 	}
 
 	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(ctx, sandboxDto, volumeMountPathBinds)

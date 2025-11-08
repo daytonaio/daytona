@@ -31,6 +31,10 @@ type DiskManager interface {
 	// Fork creates a new disk that shares all existing layers of the source disk
 	// Both disks will have independent write layers for independent operation
 	Fork(ctx context.Context, sourceDiskName, newDiskName string) (Disk, error)
+
+	// ForceRemoveFromPool forcefully removes a disk from the pool without unmounting
+	// This is useful for clearing stale pool entries
+	ForceRemoveFromPool(diskId string)
 }
 
 // Disk represents a managed disk volume
@@ -52,6 +56,9 @@ type Disk interface {
 
 	// MountPath returns the current mount path (empty if not mounted)
 	MountPath() string
+
+	// Sync flushes all buffered writes to the disk
+	Sync(ctx context.Context) error
 
 	// Push uploads the disk to S3
 	Push(ctx context.Context) error

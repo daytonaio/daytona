@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 // disk implements the Disk interface
@@ -88,36 +92,74 @@ func (v *disk) mountInternal(ctx context.Context) (string, error) {
 	v.mu.Lock()
 	defer v.mu.Unlock()
 
+	// DETAILED LOGGING
+	logFile, _ := os.OpenFile("/tmp/mount-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "\n[DISK-MOUNTINTERNAL] Starting mount for disk=%s, imagePath=%s\n", v.name, v.imagePath)
+		fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] isMounted=%v, mountPath=%s\n", v.isMounted, v.mountPath)
+		defer logFile.Close()
+	}
+
 	if v.isMounted {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] Disk already mounted, returning %s\n", v.mountPath)
+		}
 		return v.mountPath, nil
 	}
 
 	// Connect QCOW2 image to NBD device
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] Calling qcow2Client.Connect\n")
+	}
 	device, err := v.qcow2Client.Connect(ctx, v.name, v.imagePath)
 	if err != nil {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] ERROR: Connect failed: %v\n", err)
+		}
 		return "", fmt.Errorf("failed to connect NBD device: %w", err)
 	}
 	v.nbdDevice = device
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] NBD device: %s\n", device)
+	}
 
 	// Create mount path
 	mountPath := filepath.Join(v.config.DataDir, "mounts", v.name)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] Mount path: %s\n", mountPath)
+	}
 
 	// Mount the NBD device
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] Calling qcow2Client.Mount\n")
+	}
 	if err := v.qcow2Client.Mount(ctx, v.name, device, mountPath); err != nil {
 		// Cleanup NBD connection on failure
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] ERROR: Mount failed: %v, disconnecting NBD\n", err)
+		}
 		v.qcow2Client.Disconnect(ctx, v.name)
 		return "", fmt.Errorf("failed to mount disk: %w", err)
 	}
 
 	v.isMounted = true
 	v.mountPath = mountPath
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] Mount succeeded, updating state\n")
+	}
 
 	// Update state in database
 	if err := v.stateDB.UpdateMountState(v.name, true, mountPath); err != nil {
 		// Log error but don't fail the mount
 		fmt.Fprintf(os.Stderr, "warning: failed to update mount state for disk '%s': %v\n", v.name, err)
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] WARNING: failed to update database: %v\n", err)
+		}
 	}
 
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISK-MOUNTINTERNAL] SUCCESS: Disk %s mounted at %s\n", v.name, mountPath)
+	}
 	return mountPath, nil
 }
 
@@ -125,8 +167,39 @@ func (v *disk) Unmount(ctx context.Context) error {
 	v.mu.Lock()
 	defer v.mu.Unlock()
 
-	if !v.isMounted {
+	// DETAILED LOGGING - Find who's calling Unmount
+	unmountLog, _ := os.OpenFile("/tmp/unmount-trace.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if unmountLog != nil {
+		fmt.Fprintf(unmountLog, "\n[UNMOUNT-CALLED] disk=%s, isMounted=%v, mountPath=%s\n", v.name, v.isMounted, v.mountPath)
+		// Print stack trace to see who called this
+		buf := make([]byte, 4096)
+		n := runtime.Stack(buf, false)
+		fmt.Fprintf(unmountLog, "[UNMOUNT-STACK]:\n%s\n", buf[:n])
+		unmountLog.Close()
+	}
+
+	// Check if disk is mounted (using pool-aware check)
+	// For pooled disks, mountPath being set indicates the disk is mounted
+	isActuallyMounted := v.isMounted || (v.pool != nil && v.mountPath != "")
+	if !isActuallyMounted {
 		return nil
+	}
+
+	// Log to debug file
+	logFile, _ := os.OpenFile("/tmp/fork-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISK-UNMOUNT] Starting unmount for disk %s at mountPath=%s\n", v.name, v.mountPath)
+		// List files before unmount
+		if entries, err := os.ReadDir(v.mountPath); err == nil {
+			fmt.Fprintf(logFile, "[DISK-UNMOUNT] Files in mount before unmount:\n")
+			for _, entry := range entries {
+				info, _ := entry.Info()
+				fmt.Fprintf(logFile, "  - %s (size: %d, isDir: %v)\n", entry.Name(), info.Size(), entry.IsDir())
+			}
+		} else {
+			fmt.Fprintf(logFile, "[DISK-UNMOUNT] Failed to list mount: %v\n", err)
+		}
+		logFile.Close()
 	}
 
 	// Unmount the filesystem
@@ -155,6 +228,14 @@ func (v *disk) Unmount(ctx context.Context) error {
 func (v *disk) IsMounted() bool {
 	v.mu.Lock()
 	defer v.mu.Unlock()
+
+	// If pooling is enabled, check if disk is in the pool
+	// The pool manages mounting separately from the disk object's isMounted flag
+	// Use mountPath as a heuristic: if it's set, the disk is mounted via pool
+	if v.pool != nil && v.mountPath != "" {
+		return true
+	}
+
 	return v.isMounted
 }
 
@@ -162,6 +243,78 @@ func (v *disk) MountPath() string {
 	v.mu.Lock()
 	defer v.mu.Unlock()
 	return v.mountPath
+}
+
+func (v *disk) Sync(ctx context.Context) error {
+	v.mu.Lock()
+	mountPath := v.mountPath
+	nbdDevice := v.nbdDevice
+	v.mu.Unlock()
+
+	if mountPath == "" {
+		return fmt.Errorf("disk %s is not mounted", v.name)
+	}
+
+	// Step 1: Sync the filesystem using syncfs (flushes filesystem buffers to NBD device)
+	if f, err := os.Open(mountPath); err == nil {
+		defer f.Close()
+		if err := unix.Syncfs(int(f.Fd())); err != nil {
+			return fmt.Errorf("failed to sync filesystem at %s: %w", mountPath, err)
+		}
+	} else {
+		return fmt.Errorf("failed to open mount path %s: %w", mountPath, err)
+	}
+
+	// Step 2: CRITICAL - Flush NBD device buffers to qemu-nbd
+	// This ensures data is written from the NBD layer to the QCOW2 file
+	syncLog, _ := os.OpenFile("/tmp/sync-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if syncLog != nil {
+		fmt.Fprintf(syncLog, "\n[SYNC] Disk=%s, NBD device=%s\n", v.name, nbdDevice)
+		defer syncLog.Close()
+	}
+
+	if nbdDevice != "" {
+		if f, err := os.OpenFile(nbdDevice, os.O_RDWR, 0); err == nil {
+			if syncLog != nil {
+				fmt.Fprintf(syncLog, "[SYNC] Opened NBD device %s for flushing\n", nbdDevice)
+			}
+			// Issue BLKFLSBUF ioctl to flush NBD buffers
+			// This flushes qemu-nbd's internal cache to the QCOW2 file
+			_, _, errno := unix.Syscall(unix.SYS_IOCTL, f.Fd(), unix.BLKFLSBUF, 0)
+			if syncLog != nil {
+				fmt.Fprintf(syncLog, "[SYNC] BLKFLSBUF ioctl result: errno=%v\n", errno)
+			}
+			f.Sync() // Also call fsync on the device
+			f.Close()
+			if errno != 0 {
+				if syncLog != nil {
+					fmt.Fprintf(syncLog, "[SYNC] ERROR: BLKFLSBUF failed with errno %v\n", errno)
+				}
+				return fmt.Errorf("failed to flush NBD device %s: %v", nbdDevice, errno)
+			}
+			if syncLog != nil {
+				fmt.Fprintf(syncLog, "[SYNC] Successfully flushed NBD device %s\n", nbdDevice)
+			}
+		} else {
+			if syncLog != nil {
+				fmt.Fprintf(syncLog, "[SYNC] ERROR: Failed to open NBD device: %v\n", err)
+			}
+			return fmt.Errorf("failed to open NBD device %s: %w", nbdDevice, err)
+		}
+	} else {
+		if syncLog != nil {
+			fmt.Fprintf(syncLog, "[SYNC] WARNING: No NBD device set for disk %s\n", v.name)
+		}
+	}
+
+	// Step 3: Run system-wide sync as final safety measure
+	syncCmd := exec.CommandContext(ctx, "sync")
+	if err := syncCmd.Run(); err != nil {
+		// Don't fail on sync error, but log it
+		fmt.Fprintf(os.Stderr, "warning: system sync failed: %v\n", err)
+	}
+
+	return nil
 }
 
 func (v *disk) Push(ctx context.Context) error {

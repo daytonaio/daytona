@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 // QCowClient handles QCOW2 operations using qemu-img and qemu-nbd
@@ -159,12 +161,38 @@ func (c *QCowClient) findAvailableNBD(ctx context.Context) (string, error) {
 		maxDevices = 1024
 	}
 
+	// DETAILED LOGGING for NBD allocation
+	logFile, _ := os.OpenFile("/tmp/nbd-alloc-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "\n[FIND-NBD] Starting search, tracked devices: %v\n", c.nbdDevices)
+		defer logFile.Close()
+	}
+
 	// Try devices from nbd0 up to maxDevices
 	for i := 0; i < maxDevices; i++ {
 		device := fmt.Sprintf("/dev/nbd%d", i)
 
 		// Check if device exists
 		if _, err := os.Stat(device); os.IsNotExist(err) {
+			if logFile != nil {
+				fmt.Fprintf(logFile, "[FIND-NBD] %s does not exist, skipping\n", device)
+			}
+			continue
+		}
+
+		// CRITICAL: Check if this device is already tracked in our nbdDevices map
+		// This prevents reusing devices that are in use by other volumes
+		alreadyInUse := false
+		for volName, trackedDevice := range c.nbdDevices {
+			if trackedDevice == device {
+				alreadyInUse = true
+				if logFile != nil {
+					fmt.Fprintf(logFile, "[FIND-NBD] %s is in use by volume %s, skipping\n", device, volName)
+				}
+				break
+			}
+		}
+		if alreadyInUse {
 			continue
 		}
 
@@ -173,9 +201,35 @@ func (c *QCowClient) findAvailableNBD(ctx context.Context) (string, error) {
 		sizeFile := fmt.Sprintf("/sys/block/nbd%d/size", i)
 		if data, err := os.ReadFile(sizeFile); err == nil {
 			size := strings.TrimSpace(string(data))
+			if logFile != nil {
+				fmt.Fprintf(logFile, "[FIND-NBD] %s size=%s\n", device, size)
+			}
 			// Size of "0" means device is not in use
 			if size == "0" {
+				// CRITICAL: Also verify no qemu-nbd process is using this device
+				// This prevents race conditions where the tracking map is stale
+				ctx2, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+				defer cancel()
+				checkCmd := exec.CommandContext(ctx2, "ps", "aux")
+				if output, err := checkCmd.Output(); err == nil {
+					outputStr := string(output)
+					// Check if any qemu-nbd process mentions this device
+					if strings.Contains(outputStr, device) {
+						if logFile != nil {
+							fmt.Fprintf(logFile, "[FIND-NBD] %s appears to be in use by qemu-nbd process, skipping\n", device)
+						}
+						continue
+					}
+				}
+
+				if logFile != nil {
+					fmt.Fprintf(logFile, "[FIND-NBD] SELECTED %s (size=0, not tracked, not in ps)\n", device)
+				}
 				return device, nil
+			}
+		} else {
+			if logFile != nil {
+				fmt.Fprintf(logFile, "[FIND-NBD] %s cannot read size: %v\n", device, err)
 			}
 		}
 	}
@@ -300,39 +354,92 @@ func (c *QCowClient) Connect(ctx context.Context, volumeName, imagePath string) 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	// DETAILED LOGGING
+	logFile, _ := os.OpenFile("/tmp/mount-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "\n[CONNECT] Client instance %p, volume=%s, imagePath=%s\n", c, volumeName, imagePath)
+		fmt.Fprintf(logFile, "[CONNECT] nbdDevices map at entry: %v\n", c.nbdDevices)
+		defer logFile.Close()
+	}
+
 	// Check if already connected
 	if device, exists := c.nbdDevices[volumeName]; exists {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[CONNECT] Volume %s already connected to %s\n", volumeName, device)
+		}
 		return device, nil
 	}
 
 	// Check for and disconnect any stale NBD connections to this image
 	// This handles cases where a previous process crashed or didn't clean up properly
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[CONNECT] Checking for stale NBD connections\n")
+	}
 	if err := c.disconnectStaleNBD(ctx, imagePath); err != nil {
 		fmt.Fprintf(os.Stderr, "warning: error checking for stale NBD connections: %v\n", err)
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[CONNECT] Warning: error checking stale connections: %v\n", err)
+		}
 	}
 
 	// Check and repair the image if needed (after ensuring no processes are using it)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[CONNECT] Running qemu-img check\n")
+	}
 	checkCmd := exec.CommandContext(ctx, "qemu-img", "check", "-r", "all", imagePath)
 	checkOutput, checkErr := checkCmd.CombinedOutput()
 	if checkErr != nil {
 		// Log but continue - qemu-img check returns non-zero even after successful repair
 		fmt.Fprintf(os.Stderr, "info: qemu-img check output: %s\n", string(checkOutput))
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[CONNECT] qemu-img check output: %s\n", string(checkOutput))
+		}
 	}
 
 	// Find available NBD device using our improved detection
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[CONNECT] Finding available NBD device\n")
+		fmt.Fprintf(logFile, "[CONNECT] Currently tracked devices: %v\n", c.nbdDevices)
+	}
 	device, err := c.findAvailableNBD(ctx)
 	if err != nil {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[CONNECT] ERROR: failed to find NBD device: %v\n", err)
+		}
 		return "", err
+	}
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[CONNECT] Found available device: %s\n", device)
 	}
 
 	// Connect the image to the NBD device
-	cmd := exec.CommandContext(ctx, "qemu-nbd", "--connect="+device, imagePath)
+	// Use default caching (writeback) which is handled by our sync calls before unmount
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[CONNECT] Executing: qemu-nbd --cache=writethrough --connect=%s %s\n", device, imagePath)
+	}
+	// CRITICAL: Use --cache=writethrough to ensure writes are flushed to QCOW2 file
+	// writethrough: writes go through host page cache but are immediately flushed to disk
+	// This prevents data loss while maintaining better reliability than cache=none
+	// Default cache mode is "writeback" which keeps writes in memory and can lose data
+	cmd := exec.CommandContext(ctx, "qemu-nbd", "--cache=writethrough", "--connect="+device, imagePath)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[CONNECT] ERROR: qemu-nbd failed: %v, output: %s\n", err, string(output))
+		}
 		return "", fmt.Errorf("failed to connect NBD device %s: %w, output: %s", device, err, string(output))
+	}
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[CONNECT] SUCCESS: Connected %s to %s\n", imagePath, device)
+		fmt.Fprintf(logFile, "[CONNECT] Adding %s -> %s to nbdDevices map\n", volumeName, device)
+		fmt.Fprintf(logFile, "[CONNECT] Map before add: %v\n", c.nbdDevices)
 	}
 
 	c.nbdDevices[volumeName] = device
+
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[CONNECT] Map after add: %v\n", c.nbdDevices)
+	}
 	return device, nil
 }
 
@@ -341,18 +448,56 @@ func (c *QCowClient) Disconnect(ctx context.Context, volumeName string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	// DETAILED LOGGING
+	logFile, _ := os.OpenFile("/tmp/mount-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "\n[DISCONNECT] Client instance %p, volume=%s\n", c, volumeName)
+		fmt.Fprintf(logFile, "[DISCONNECT] nbdDevices map before: %v\n", c.nbdDevices)
+		defer logFile.Close()
+	}
+
 	device, exists := c.nbdDevices[volumeName]
 	if !exists {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[DISCONNECT] Volume %s not in nbdDevices map, already disconnected\n", volumeName)
+		}
 		return nil // Already disconnected
 	}
+
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISCONNECT] Disconnecting device=%s\n", device)
+	}
+
+	// Force flush all pending writes to the device before disconnecting
+	// This is critical to ensure data is written to the QCOW2 image
+
+	// Open the NBD device and issue BLKFLSBUF ioctl to flush qemu-nbd's cache
+	if f, err := os.OpenFile(device, os.O_RDWR, 0); err == nil {
+		// Issue BLKFLSBUF ioctl (0x1261) to flush buffers
+		// This flushes qemu-nbd's internal cache to the QCOW2 file
+		_, _, _ = unix.Syscall(unix.SYS_IOCTL, f.Fd(), unix.BLKFLSBUF, 0)
+		f.Sync() // Also call fsync
+		f.Close()
+	}
+
+	// Run system-wide sync for good measure
+	syncCmd := exec.CommandContext(ctx, "sync")
+	syncCmd.Run() // Ignore errors, best effort
 
 	cmd := exec.CommandContext(ctx, "qemu-nbd", "--disconnect", device)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[DISCONNECT] qemu-nbd --disconnect failed: %v, output: %s\n", err, string(output))
+		}
 		return fmt.Errorf("failed to disconnect NBD device: %w, output: %s", err, string(output))
 	}
 
 	delete(c.nbdDevices, volumeName)
+
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[DISCONNECT] Deleted %s from nbdDevices, map after: %v\n", volumeName, c.nbdDevices)
+	}
 	return nil
 }
 
@@ -361,35 +506,101 @@ func (c *QCowClient) Mount(ctx context.Context, volumeName, device, mountPath st
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	// DETAILED LOGGING
+	logFile, _ := os.OpenFile("/tmp/mount-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "\n[MOUNT] Starting mount operation for volume=%s, device=%s, mountPath=%s\n", volumeName, device, mountPath)
+		defer logFile.Close()
+	}
+
 	// Check if already mounted
 	if _, exists := c.mountedVolumes[volumeName]; exists {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] ERROR: volume %s already mounted in c.mountedVolumes\n", volumeName)
+		}
 		return fmt.Errorf("volume already mounted")
 	}
 
 	// Create mount directory if it doesn't exist
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[MOUNT] Creating mount directory %s\n", mountPath)
+	}
 	if err := os.MkdirAll(mountPath, 0755); err != nil {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] ERROR: failed to create mount directory: %v\n", err)
+		}
 		return fmt.Errorf("failed to create mount directory: %w", err)
 	}
 
+	// Check if device exists
+	if _, err := os.Stat(device); err != nil {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] ERROR: device %s does not exist: %v\n", device, err)
+		}
+		return fmt.Errorf("device %s does not exist: %w", device, err)
+	}
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[MOUNT] Device %s exists\n", device)
+	}
+
 	// Check if device has a filesystem, if not create ext4
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[MOUNT] Checking filesystem on %s\n", device)
+	}
 	cmd := exec.CommandContext(ctx, "blkid", device)
 	if err := cmd.Run(); err != nil {
 		// No filesystem found, create ext4
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] No filesystem found, creating ext4 on %s\n", device)
+		}
 		mkfsCmd := exec.CommandContext(ctx, "mkfs.ext4", "-F", device)
 		output, err := mkfsCmd.CombinedOutput()
 		if err != nil {
+			if logFile != nil {
+				fmt.Fprintf(logFile, "[MOUNT] ERROR: failed to create filesystem: %v, output: %s\n", err, string(output))
+			}
 			return fmt.Errorf("failed to create filesystem: %w, output: %s", err, string(output))
+		}
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] Successfully created ext4 filesystem\n")
+		}
+	} else {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] Filesystem already exists on %s\n", device)
 		}
 	}
 
 	// Mount the device
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[MOUNT] Executing: mount %s %s\n", device, mountPath)
+	}
 	mountCmd := exec.CommandContext(ctx, "mount", device, mountPath)
 	output, err := mountCmd.CombinedOutput()
 	if err != nil {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] ERROR: failed to mount device: %v, output: %s\n", err, string(output))
+		}
 		return fmt.Errorf("failed to mount device: %w, output: %s", err, string(output))
 	}
 
+	// Verify mount succeeded
+	verifyCmd := exec.CommandContext(ctx, "mount")
+	verifyOutput, _ := verifyCmd.CombinedOutput()
+	if strings.Contains(string(verifyOutput), mountPath) {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] SUCCESS: Verified %s is in /proc/mounts\n", mountPath)
+		}
+	} else {
+		if logFile != nil {
+			fmt.Fprintf(logFile, "[MOUNT] WARNING: %s NOT found in /proc/mounts after mount command succeeded!\n", mountPath)
+			fmt.Fprintf(logFile, "[MOUNT] /proc/mounts content:\n%s\n", string(verifyOutput))
+		}
+	}
+
 	c.mountedVolumes[volumeName] = mountPath
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[MOUNT] Added %s to c.mountedVolumes map\n", volumeName)
+	}
 	return nil
 }
 
@@ -401,6 +612,49 @@ func (c *QCowClient) Unmount(ctx context.Context, volumeName string) error {
 	mountPath, exists := c.mountedVolumes[volumeName]
 	if !exists {
 		return nil // Already unmounted
+	}
+
+	// Log to debug file
+	logFile, _ := os.OpenFile("/tmp/fork-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if logFile != nil {
+		fmt.Fprintf(logFile, "[UNMOUNT] Starting unmount for volume=%s, mountPath=%s\n", volumeName, mountPath)
+		logFile.Close()
+	}
+
+	// CRITICAL: Multi-step sync to ensure all writes reach the QCOW2 file
+
+	// Step 1: Sync the filesystem (flushes filesystem buffers to NBD device)
+	if f, err := os.Open(mountPath); err == nil {
+		unix.Syncfs(int(f.Fd())) // Sync just this filesystem
+		f.Close()
+	}
+
+	// Step 2: CRITICAL - Flush NBD device buffers to qemu-nbd
+	// Get the NBD device for this volume
+	if nbdDevice, exists := c.nbdDevices[volumeName]; exists && nbdDevice != "" {
+		if f, err := os.OpenFile(nbdDevice, os.O_RDWR, 0); err == nil {
+			// Issue BLKFLSBUF ioctl to flush NBD buffers to QCOW2 file
+			_, _, _ = unix.Syscall(unix.SYS_IOCTL, f.Fd(), unix.BLKFLSBUF, 0)
+			f.Sync()
+			f.Close()
+			if logFile != nil {
+				logFile, _ = os.OpenFile("/tmp/fork-debug.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+				if logFile != nil {
+					fmt.Fprintf(logFile, "[UNMOUNT] Flushed NBD device %s buffers\n", nbdDevice)
+					logFile.Close()
+				}
+			}
+			// CRITICAL: Give qemu-nbd time to actually write to the QCOW2 file
+			// The ioctl triggers the flush but qemu-nbd may need a moment to complete the write
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+
+	// Step 3: Run system-wide sync as final safety measure
+	syncCmd := exec.CommandContext(ctx, "sync")
+	if err := syncCmd.Run(); err != nil {
+		// Log warning but continue with unmount
+		fmt.Fprintf(os.Stderr, "warning: sync failed before unmounting %s: %v\n", volumeName, err)
 	}
 
 	// Retry parameters
