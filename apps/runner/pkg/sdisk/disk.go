@@ -372,8 +372,9 @@ func (v *disk) pushLayeredDisk(ctx context.Context, state *DiskState, diskLayers
 	var baseLayerID, topLayerID string
 	var finalChecksum string
 
-	// Process each layer
-	for i, diskLayer := range diskLayers {
+	// Process each layer, skipping empty base layers
+	s3LayerIndex := 0
+	for _, diskLayer := range diskLayers {
 		// Get the cached layer path
 		layerCacheDir := filepath.Join(v.config.DataDir, "layer-cache")
 		layerPath := filepath.Join(layerCacheDir, diskLayer.LayerID+".qcow2")
@@ -383,10 +384,19 @@ func (v *disk) pushLayeredDisk(ctx context.Context, state *DiskState, diskLayers
 			return fmt.Errorf("layer %s not found in cache", diskLayer.LayerID)
 		}
 
-		// Get layer state to get checksum
+		// Get layer state to get checksum and size
 		layerState, err := v.stateDB.GetLayer(diskLayer.LayerID)
 		if err != nil || layerState == nil {
 			return fmt.Errorf("failed to get layer state for %s: %w", diskLayer.LayerID, err)
+		}
+
+		// Skip empty base layers (size < 1MB means it's likely an empty base with no user data)
+		// These are created during disk creation but contain no user content
+		const minLayerSize = 1024 * 1024 // 1 MB
+		if layerState.Size < minLayerSize {
+			fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Skipping empty base layer %s (size: %d bytes)\n",
+				diskLayer.LayerID, layerState.Size)
+			continue
 		}
 
 		// Ensure the layer has a checksum
@@ -433,8 +443,8 @@ func (v *disk) pushLayeredDisk(ctx context.Context, state *DiskState, diskLayers
 
 		// Create S3 layer info referencing the shared layer
 		parentID := ""
-		if i > 0 {
-			parentID = s3Layers[i-1].ID
+		if s3LayerIndex > 0 {
+			parentID = s3Layers[s3LayerIndex-1].ID
 		}
 
 		layerInfo := S3LayerInfo{
@@ -443,15 +453,16 @@ func (v *disk) pushLayeredDisk(ctx context.Context, state *DiskState, diskLayers
 			Created:     layerState.CachedAt,
 			Size:        layerState.Size,
 			Checksum:    layerState.Checksum,
-			Description: fmt.Sprintf("Shared layer (position %d)", i),
+			Description: fmt.Sprintf("Shared layer (position %d)", s3LayerIndex),
 		}
 		s3Layers = append(s3Layers, layerInfo)
 
-		if i == 0 {
+		if s3LayerIndex == 0 {
 			baseLayerID = s3LayerID
 		}
 		topLayerID = s3LayerID
 		finalChecksum = layerState.Checksum
+		s3LayerIndex++
 	}
 
 	// Create metadata with shared layer references
