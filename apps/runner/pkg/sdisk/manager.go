@@ -695,31 +695,8 @@ func (m *manager) Fork(ctx context.Context, sourceDiskName, newDiskName string) 
 	fmt.Fprintf(os.Stderr, "[FORK-DEBUG] Source disk imagePath: %s\n", sourceDisk.imagePath)
 	fmt.Fprintf(os.Stderr, "[FORK-DEBUG] Source disk '%s' IsMounted: %v, MountPath: %s\n", sourceDiskName, sourceDisk.IsMounted(), sourceDisk.MountPath())
 
-	// CRITICAL: Wait for any ongoing unmount operations to complete
-	// The sandbox Stop operation runs docker cp and unmount, which might still be in progress
-	// We need to wait for the disk to be fully unmounted before forking
-	fmt.Fprintf(os.Stderr, "[FORK-DEBUG] Waiting for disk to be fully unmounted (max 10 seconds)...\n")
-	if logFile != nil {
-		fmt.Fprintf(logFile, "[FORK-DEBUG] Waiting for disk to be fully unmounted (max 10 seconds)...\n")
-	}
-	for i := 0; i < 20; i++ {
-		if !sourceDisk.IsMounted() {
-			fmt.Fprintf(os.Stderr, "[FORK-DEBUG] Disk is unmounted after %d checks (%.1f seconds)\n", i, float64(i)*0.5)
-			if logFile != nil {
-				fmt.Fprintf(logFile, "[FORK-DEBUG] Disk is unmounted after %d checks (%.1f seconds)\n", i, float64(i)*0.5)
-			}
-			break
-		}
-		if i == 19 {
-			fmt.Fprintf(os.Stderr, "[FORK-DEBUG] WARNING: Disk still mounted after 10 seconds, proceeding anyway\n")
-			if logFile != nil {
-				fmt.Fprintf(logFile, "[FORK-DEBUG] WARNING: Disk still mounted after 10 seconds, proceeding anyway\n")
-			}
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	// Check if disk is in pool (it might be mounted via pool even if disk.IsMounted() is false)
+	// Check if disk is in pool and evict it to ensure proper unmount
+	// The pool manages disk lifecycle and will handle unmounting correctly
 	if m.pool != nil {
 		fmt.Fprintf(os.Stderr, "[FORK-DEBUG] Checking if disk is in pool\n")
 		if logFile != nil {

@@ -261,7 +261,7 @@ def main():
         return
 
     # Wait for the disk to be detached after the second sandbox is deleted
-    time.sleep(2)
+    time.sleep(10)
 
     # Delete the disk
     print("\n🗑️  Deleting the original disk...")
