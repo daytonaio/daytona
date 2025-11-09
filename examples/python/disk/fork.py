@@ -265,17 +265,17 @@ def main():
 
     # Delete the disk
     print("\n🗑️  Deleting the original disk...")
-    # daytona.disk.delete(disk)
+    daytona.disk.delete(disk)
     print(f"✅ Deleted disk: {disk.name}")
 
     # Delete the forked disk
     print("\n🗑️  Deleting the forked disk...")
-    # daytona.disk.delete(forked_disk)
+    daytona.disk.delete(forked_disk)
     print(f"✅ Forked disk: {forked_disk.name}")
 
     # Delete the forked disk 2
     print("\n🗑️  Deleting the forked disk 2...")
-    # daytona.disk.delete(forked_disk)
+    daytona.disk.delete(forked_disk)
     print(f"✅ Forked disk 2: {forked_disk_2.name}")
 
     # Final list to confirm deletion

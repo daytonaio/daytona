@@ -416,13 +416,19 @@ func (c *QCowClient) Connect(ctx context.Context, volumeName, imagePath string) 
 	// Connect the image to the NBD device
 	// Use default caching (writeback) which is handled by our sync calls before unmount
 	if logFile != nil {
-		fmt.Fprintf(logFile, "[CONNECT] Executing: qemu-nbd --cache=writethrough --connect=%s %s\n", device, imagePath)
+		fmt.Fprintf(logFile, "[CONNECT] Executing: qemu-nbd --cache=writethrough --discard=unmap --detect-zeroes=unmap --connect=%s %s\n", device, imagePath)
 	}
-	// CRITICAL: Use --cache=writethrough to ensure writes are flushed to QCOW2 file
-	// writethrough: writes go through host page cache but are immediately flushed to disk
-	// This prevents data loss while maintaining better reliability than cache=none
-	// Default cache mode is "writeback" which keeps writes in memory and can lose data
-	cmd := exec.CommandContext(ctx, "qemu-nbd", "--cache=writethrough", "--connect="+device, imagePath)
+	// CRITICAL FLAGS:
+	// --cache=writethrough: Ensures writes are flushed to QCOW2 file (prevents data loss)
+	// --discard=unmap: Enables TRIM/DISCARD support - fstrim commands will actually free QCOW2 blocks
+	// --detect-zeroes=unmap: Automatically deallocates zero-filled blocks (optimization)
+	// Without --discard=unmap, fstrim commands are silently ignored!
+	cmd := exec.CommandContext(ctx, "qemu-nbd",
+		"--cache=writethrough",
+		"--discard=unmap",
+		"--detect-zeroes=unmap",
+		"--connect="+device,
+		imagePath)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if logFile != nil {

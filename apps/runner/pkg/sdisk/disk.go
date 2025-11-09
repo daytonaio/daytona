@@ -245,6 +245,25 @@ func (v *disk) MountPath() string {
 	return v.mountPath
 }
 
+// trimFilesystem runs fstrim on the mounted filesystem to free unused blocks
+// This is critical for reducing QCOW2 layer sizes before committing/forking
+func (v *disk) trimFilesystem(ctx context.Context, mountPath string) error {
+	if mountPath == "" {
+		return fmt.Errorf("mount path is empty")
+	}
+
+	// Run fstrim on the mounted filesystem
+	// -v for verbose output showing how much space was freed
+	cmd := exec.CommandContext(ctx, "fstrim", "-v", mountPath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("fstrim failed: %w, output: %s", err, string(output))
+	}
+
+	fmt.Fprintf(os.Stderr, "[TRIM] Disk %s freed space: %s", v.name, string(output))
+	return nil
+}
+
 func (v *disk) Sync(ctx context.Context) error {
 	v.mu.Lock()
 	mountPath := v.mountPath
@@ -253,6 +272,14 @@ func (v *disk) Sync(ctx context.Context) error {
 
 	if mountPath == "" {
 		return fmt.Errorf("disk %s is not mounted", v.name)
+	}
+
+	// Step 0: Trim freed filesystem blocks (optimization for QCOW2 layer size)
+	// This sends DISCARD commands to qemu-nbd, which deallocates blocks in the QCOW2 file
+	// Critical for reducing layer sizes before fork/commit operations
+	if err := v.trimFilesystem(ctx, mountPath); err != nil {
+		// Don't fail sync on trim error - it's an optimization, not critical
+		fmt.Fprintf(os.Stderr, "[TRIM] Warning: trim failed for disk %s: %v\n", v.name, err)
 	}
 
 	// Step 1: Sync the filesystem using syncfs (flushes filesystem buffers to NBD device)
