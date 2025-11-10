@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule'
 import { S3Client, CreateBucketCommand, ListBucketsCommand, PutBucketTaggingCommand } from '@aws-sdk/client-s3'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
@@ -30,8 +30,8 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
 
   private readonly logger = new Logger(VolumeManager.name)
   private processingVolumes: Set<string> = new Set()
-  private skipTestConnection: boolean
-  private s3Client: S3Client
+  private skipTestConnection = false
+  private s3Client: S3Client | null = null
 
   constructor(
     @InjectRepository(Volume)
@@ -39,7 +39,12 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
     private readonly configService: TypedConfigService,
     @InjectRedis() private readonly redis: Redis,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {
+    if (!this.configService.get('s3.endpoint')) {
+      return
+    }
+
     const endpoint = this.configService.getOrThrow('s3.endpoint')
     const region = this.configService.getOrThrow('s3.region')
     const accessKeyId = this.configService.getOrThrow('s3.accessKey')
@@ -55,9 +60,15 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
       },
       forcePathStyle: true,
     })
+
+    this.schedulerRegistry.getCronJob('process-pending-volumes').start()
   }
 
   async onModuleInit() {
+    if (!this.s3Client) {
+      return
+    }
+
     if (this.skipTestConnection) {
       this.logger.debug('Skipping S3 connection test')
       return
@@ -86,11 +97,15 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'process-pending-volumes', waitForCompletion: true })
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'process-pending-volumes', waitForCompletion: true, disabled: true })
   @TrackJobExecution()
   @LogExecution('process-pending-volumes')
   @WithInstrumentation()
   async processPendingVolumes() {
+    if (!this.s3Client) {
+      return
+    }
+
     try {
       // Lock the entire process
       const lockKey = 'process-pending-volumes'

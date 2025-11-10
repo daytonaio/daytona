@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { StorageAccessDto } from '../../sandbox/dto/storage-access-dto'
 import axios from 'axios'
@@ -31,6 +31,10 @@ export class ObjectStorageService {
   constructor(private readonly configService: TypedConfigService) {}
 
   async getPushAccess(organizationId: string): Promise<StorageAccessDto> {
+    if (!this.configService.get('s3.endpoint')) {
+      throw new ServiceUnavailableException('Object storage is not configured')
+    }
+
     try {
       const bucket = this.configService.getOrThrow('s3.defaultBucket')
       const s3Config: S3Config = {
