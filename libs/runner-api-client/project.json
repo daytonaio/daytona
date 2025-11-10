@@ -22,7 +22,13 @@
           "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/runner/pkg/api/docs/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/runner-api-client/src"
         ],
         "parallel": false
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "runner"
+        }
+      ]
     },
     "format": {
       "executor": "nx:run-commands",
