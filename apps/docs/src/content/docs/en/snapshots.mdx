@@ -46,7 +46,7 @@ To use a private Docker Hub image, you'll need to [add a Container Registry](/do
 - **Registry URL**: Set this to `docker.io`
 - **Username**: Enter your Docker Hub username (the account with access to the private image)
 - **Password**: Use a [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/) (not your account password)
-- **Create the Snapshot**: Once the registry is added, you can create a Snapshot using the full image path as the image name: `<username>/<image>:<tag>`
+- **Create the Snapshot**: Once the registry is added, you can create a Snapshot using the full image path as the image name: `docker.io/<username>/<image>:<tag>`
 
 ### Using a Local Image
 
@@ -116,21 +116,20 @@ from daytona import (
 daytona = Daytona()
 
 # Create a Snapshot with custom resources
-
 daytona.snapshot.create(
-CreateSnapshotParams(
-name="my-snapshot",
-image=Image.debian_slim("3.12"), # All resource parameters are optional:
-resources=Resources(
-cpu=2,
-memory=4,
-disk=8,
-),
-),
-on_logs=print,
+  CreateSnapshotParams(
+    name="my-snapshot",
+    image=Image.debian_slim("3.12"),
+    # All resource parameters are optional:
+    resources=Resources(
+      cpu=2,
+      memory=4,
+      disk=8,
+    ),
+  ),
+  on_logs=print,
 )
-
-````
+```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript

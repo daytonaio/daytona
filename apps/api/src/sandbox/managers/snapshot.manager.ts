@@ -628,8 +628,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   ): Promise<{ validationSuccess: boolean; errorMessage: string }> {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    const sandbox = new Sandbox()
-    sandbox.id = uuidv4()
+    const id = uuidv4()
+
+    const sandbox = new Sandbox(id)
+    sandbox.id = id
     sandbox.snapshot = snapshot.ref
     sandbox.osUser = 'root' // TODO: instead of root, use the user from the snapshot
     sandbox.disk = snapshot.disk

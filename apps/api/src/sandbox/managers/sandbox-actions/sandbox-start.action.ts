@@ -104,7 +104,10 @@ export class SandboxStartAction extends SandboxAction {
     return DONT_SYNC_AGAIN
   }
 
-  private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+  private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+  ): Promise<SyncState> {
     const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, sandbox.buildInfo.snapshotRef)
     if (snapshotRunner) {
       switch (snapshotRunner.state) {
@@ -134,7 +137,11 @@ export class SandboxStartAction extends SandboxAction {
     return DONT_SYNC_AGAIN
   }
 
-  private async handleUnassignedRunnerSandbox(sandbox: Sandbox, lockCode: LockCode, isBuild = false): Promise<SyncState> {
+  private async handleUnassignedRunnerSandbox(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+    isBuild = false,
+  ): Promise<SyncState> {
     // Get snapshot reference based on whether it's a pull or build operation
     let snapshotRef: string
 
@@ -290,7 +297,10 @@ export class SandboxStartAction extends SandboxAction {
     await this.runnerService.createSnapshotRunnerEntry(runner.id, buildInfo.snapshotRef, state)
   }
 
-  private async handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+  private async handleRunnerSandboxUnknownStateOnDesiredStateStart(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+  ): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
@@ -696,11 +706,11 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
-        region: sandbox.region,
-        sandboxClass: sandbox.class,
-        snapshotRef,
-        excludedRunnerIds: [excludedRunnerId],
-      })
+          region: sandbox.region,
+          sandboxClass: sandbox.class,
+          snapshotRef,
+          excludedRunnerIds: [excludedRunnerId],
+        })
       : []
     if (runnersWithBaseSnapshot.length > 0) {
       availableRunners = runnersWithBaseSnapshot
