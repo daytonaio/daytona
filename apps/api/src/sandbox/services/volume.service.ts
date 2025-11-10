@@ -17,6 +17,7 @@ import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class VolumeService {
@@ -27,6 +28,7 @@ export class VolumeService {
     private readonly volumeRepository: Repository<Volume>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -67,6 +69,10 @@ export class VolumeService {
   }
 
   async create(organization: Organization, createVolumeDto: CreateVolumeDto): Promise<Volume> {
+    if (!this.configService.get('s3.endpoint')) {
+      throw new BadRequestError('Object storage is not configured')
+    }
+
     let pendingVolumeCountIncrement: number | undefined
 
     try {

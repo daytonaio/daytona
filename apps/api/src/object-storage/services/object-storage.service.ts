@@ -31,6 +31,10 @@ export class ObjectStorageService {
   constructor(private readonly configService: TypedConfigService) {}
 
   async getPushAccess(organizationId: string): Promise<StorageAccessDto> {
+    if (!this.configService.get('s3.endpoint')) {
+      throw new BadRequestException('Object storage is not configured')
+    }
+
     try {
       const bucket = this.configService.getOrThrow('s3.defaultBucket')
       const s3Config: S3Config = {
