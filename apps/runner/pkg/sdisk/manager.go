@@ -259,6 +259,7 @@ func (m *manager) Open(ctx context.Context, name string) (Disk, error) {
 	}
 
 	// Create disk object
+	// Always start with unmounted state to avoid trusting stale database state
 	vol := &disk{
 		name:        name,
 		sizeGB:      state.SizeGB,
@@ -268,11 +269,18 @@ func (m *manager) Open(ctx context.Context, name string) (Disk, error) {
 		stateDB:     m.stateDB,
 		config:      m.config,
 		pool:        m.pool,
-		isMounted:   state.IsMounted,
-		mountPath:   state.MountPath,
+		isMounted:   false, // Don't trust database mount state - it could be stale
+		mountPath:   "",    // Clear mount path - will be set on actual mount
 	}
 
 	m.disks[name] = vol
+
+	// Clear stale mount state in database if present
+	if state.IsMounted {
+		if err := m.stateDB.UpdateMountState(name, false, ""); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to clear mount state for disk '%s': %v\n", name, err)
+		}
+	}
 
 	return vol, nil
 }
@@ -611,6 +619,9 @@ func (m *manager) loadDisks() error {
 			continue
 		}
 
+		// CRITICAL FIX: Always start with unmounted state on manager initialization
+		// The database state could be stale if the process crashed or system restarted
+		// The actual NBD device and filesystem mount will not persist across restarts
 		vol := &disk{
 			name:        state.Name,
 			sizeGB:      state.SizeGB,
@@ -620,11 +631,18 @@ func (m *manager) loadDisks() error {
 			stateDB:     m.stateDB,
 			config:      m.config,
 			pool:        m.pool,
-			isMounted:   state.IsMounted,
-			mountPath:   state.MountPath,
+			isMounted:   false, // Always start unmounted on manager initialization
+			mountPath:   "",    // Clear mount path on startup
 		}
 
 		m.disks[state.Name] = vol
+
+		// Clear stale mount state in database to ensure consistency
+		if state.IsMounted {
+			if err := m.stateDB.UpdateMountState(state.Name, false, ""); err != nil {
+				fmt.Fprintf(os.Stderr, "warning: failed to clear mount state for disk '%s': %v\n", state.Name, err)
+			}
+		}
 	}
 
 	return nil

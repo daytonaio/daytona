@@ -375,20 +375,154 @@ func (v *disk) Push(ctx context.Context) error {
 
 // pushBaseLayer uploads the base layer (first push of a disk)
 func (v *disk) pushBaseLayer(ctx context.Context, state *DiskState) error {
+	// CRITICAL: We need to commit the current working image as a layer first
+	// This ensures the data is preserved in the layer cache and can be uploaded
+
 	// Check if this disk has layer mappings (e.g., from a fork operation)
-	// If it does, we can upload layers individually and share them across disks
 	diskLayers, err := v.stateDB.GetDiskLayers(v.name)
 	if err != nil {
 		return fmt.Errorf("failed to get disk layers: %w", err)
 	}
 
-	// If we have layer mappings, use layer-aware push for S3 efficiency
-	if len(diskLayers) > 0 {
-		return v.pushLayeredDisk(ctx, state, diskLayers)
+	// If we DON'T have layer mappings yet, create one for the current working image
+	if len(diskLayers) == 0 {
+		// This is a newly created disk without layer structure yet
+		// We need to commit the working image as a layer first
+		if err := v.commitWorkingImageAsLayer(ctx); err != nil {
+			return fmt.Errorf("failed to commit working image: %w", err)
+		}
+
+		// Now get the updated layer mappings
+		diskLayers, err = v.stateDB.GetDiskLayers(v.name)
+		if err != nil {
+			return fmt.Errorf("failed to get disk layers after commit: %w", err)
+		}
 	}
 
-	// Otherwise, use the traditional flatten-and-push approach
-	return v.pushFlattenedDisk(ctx, state)
+	// Use layer-aware push for ALL disks (not just forked ones)
+	return v.pushLayeredDisk(ctx, state, diskLayers)
+}
+
+// commitWorkingImageAsLayer flattens the current working image and commits it as a new layer
+// This preserves all data and creates proper layer structure for pushing to S3
+func (v *disk) commitWorkingImageAsLayer(ctx context.Context) error {
+	// CRITICAL: Clean up old layer mappings first
+	// Get existing layer mappings to clean up
+	oldLayers, err := v.stateDB.GetDiskLayers(v.name)
+	if err != nil {
+		return fmt.Errorf("failed to get old disk layers: %w", err)
+	}
+
+	// Decrement ref counts for old layers
+	for _, oldLayer := range oldLayers {
+		if err := v.stateDB.DecrementLayerRefCount(oldLayer.LayerID); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to decrement ref count for layer %s: %v\n", oldLayer.LayerID, err)
+		}
+	}
+
+	// Delete old disk-layer mappings
+	if err := v.stateDB.DeleteDiskLayers(v.name); err != nil {
+		return fmt.Errorf("failed to delete old disk-layer mappings: %w", err)
+	}
+
+	// Create layer ID
+	layerID := fmt.Sprintf("layer-%d", time.Now().Unix())
+
+	// Flatten the working image (merge all backing data)
+	flattenedPath := v.imagePath + ".flattened"
+	if err := v.qcow2Client.Convert(ctx, v.imagePath, flattenedPath); err != nil {
+		return fmt.Errorf("failed to flatten working image: %w", err)
+	}
+	defer os.Remove(flattenedPath)
+
+	// Save flattened layer to cache
+	layerCacheDir := filepath.Join(v.config.DataDir, "layer-cache")
+	cachedLayerPath := filepath.Join(layerCacheDir, layerID+".qcow2")
+
+	if err := v.copyFile(flattenedPath, cachedLayerPath); err != nil {
+		return fmt.Errorf("failed to cache layer: %w", err)
+	}
+
+	// Get layer file info
+	fileInfo, err := os.Stat(cachedLayerPath)
+	if err != nil {
+		os.Remove(cachedLayerPath)
+		return fmt.Errorf("failed to get layer file info: %w", err)
+	}
+
+	// Calculate checksum
+	checksum, err := v.qcow2Client.Checksum(ctx, cachedLayerPath)
+	if err != nil {
+		os.Remove(cachedLayerPath)
+		return fmt.Errorf("failed to calculate checksum: %w", err)
+	}
+
+	// Create layer state
+	layerState := &LayerState{
+		ID:       layerID,
+		Checksum: checksum,
+		Size:     fileInfo.Size(),
+		CachedAt: time.Now(),
+		RefCount: 1, // Referenced by this disk
+	}
+
+	if err := v.stateDB.SaveLayer(layerState); err != nil {
+		os.Remove(cachedLayerPath)
+		return fmt.Errorf("failed to save layer state: %w", err)
+	}
+
+	// Create NEW disk-layer mapping (old ones have been deleted)
+	if err := v.stateDB.AddDiskLayerMapping(v.name, layerID, 0); err != nil {
+		os.Remove(cachedLayerPath)
+		v.stateDB.DecrementLayerRefCount(layerID)
+		return fmt.Errorf("failed to add disk-layer mapping: %w", err)
+	}
+
+	// Create new empty working layer BEFORE removing old files
+	diskLayersDir := filepath.Join(v.config.DataDir, "layers", v.name)
+	newWorkingPath := v.imagePath + ".new"
+	if err := v.qcow2Client.CreateWithBacking(ctx, cachedLayerPath, newWorkingPath, int(v.sizeGB)); err != nil {
+		os.Remove(cachedLayerPath)
+		v.stateDB.DecrementLayerRefCount(layerID)
+		v.stateDB.DeleteDiskLayers(v.name)
+		return fmt.Errorf("failed to create new working layer: %w", err)
+	}
+
+	// Replace old working image with new one
+	if err := os.Rename(newWorkingPath, v.imagePath); err != nil {
+		os.Remove(newWorkingPath)
+		os.Remove(cachedLayerPath)
+		v.stateDB.DecrementLayerRefCount(layerID)
+		v.stateDB.DeleteDiskLayers(v.name)
+		return fmt.Errorf("failed to replace working image: %w", err)
+	}
+
+	// Verify the backing file is set correctly
+	verifiedBackingFile, err := v.qcow2Client.GetBackingFile(ctx, v.imagePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[COMMIT] WARNING: Failed to verify backing file: %v\n", err)
+	} else if verifiedBackingFile != cachedLayerPath {
+		fmt.Fprintf(os.Stderr, "[COMMIT] ERROR: Backing file mismatch! Expected: %s, Got: %s\n", cachedLayerPath, verifiedBackingFile)
+		return fmt.Errorf("backing file verification failed: expected %s, got %s", cachedLayerPath, verifiedBackingFile)
+	} else {
+		fmt.Fprintf(os.Stderr, "[COMMIT] Verified backing file: %s\n", verifiedBackingFile)
+	}
+
+	// NOW remove old disk-specific layer directory (after we've replaced the working image)
+	// The new working image doesn't depend on these files
+	os.RemoveAll(diskLayersDir)
+
+	// Recreate the layers directory for future use
+	if err := os.MkdirAll(diskLayersDir, 0755); err != nil {
+		// Non-fatal, just log it
+		fmt.Fprintf(os.Stderr, "warning: failed to recreate layers directory: %v\n", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "[COMMIT] Committed working image as layer %s (size: %d, checksum: %s)\n",
+		layerID, fileInfo.Size(), checksum[:16])
+	fmt.Fprintf(os.Stderr, "[COMMIT] New working image: %s -> backing: %s\n", v.imagePath, cachedLayerPath)
+
+	return nil
 }
 
 // pushLayeredDisk uploads a disk with layer structure, sharing layers in S3
@@ -515,89 +649,6 @@ func (v *disk) pushLayeredDisk(ctx context.Context, state *DiskState, diskLayers
 	}
 
 	fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Successfully pushed disk '%s' with %d shared layers\n", v.name, len(s3Layers))
-	return nil
-}
-
-// pushFlattenedDisk uploads a disk without layer structure (traditional approach)
-func (v *disk) pushFlattenedDisk(ctx context.Context, state *DiskState) error {
-	// CRITICAL: The base layer must be a standalone image with no backing files
-	// If the working image has a backing file, flatten it first
-	baseImagePath := v.imagePath
-	backingFile, err := v.qcow2Client.GetBackingFile(ctx, v.imagePath)
-	if err != nil {
-		return fmt.Errorf("failed to check backing file: %w", err)
-	}
-
-	// If there's a backing file, flatten the image first
-	if backingFile != "" {
-		flattenedPath := v.imagePath + ".flattened"
-		if err := v.qcow2Client.Convert(ctx, v.imagePath, flattenedPath); err != nil {
-			return fmt.Errorf("failed to flatten base image: %w", err)
-		}
-		// Use the flattened image as the base
-		baseImagePath = flattenedPath
-		defer os.Remove(flattenedPath)
-	}
-
-	// Calculate checksum
-	checksum, err := v.qcow2Client.Checksum(ctx, baseImagePath)
-	if err != nil {
-		return fmt.Errorf("failed to calculate checksum: %w", err)
-	}
-
-	// Get file size of the base layer
-	fileInfo, err := os.Stat(baseImagePath)
-	if err != nil {
-		return fmt.Errorf("failed to get file size: %w", err)
-	}
-	actualSize := fileInfo.Size()
-
-	// Generate base layer ID
-	layerID := fmt.Sprintf("base-%s", state.Name)
-
-	// Upload as a layer (using flattened version if it had backing)
-	if err := v.s3Client.UploadLayer(ctx, v.name, layerID, baseImagePath); err != nil {
-		return fmt.Errorf("failed to upload base layer: %w", err)
-	}
-
-	// Create layer info
-	layerInfo := S3LayerInfo{
-		ID:          layerID,
-		ParentID:    "",
-		Created:     time.Now(),
-		Size:        actualSize,
-		Checksum:    checksum,
-		Description: "Base layer",
-	}
-
-	// Create metadata with layer information
-	metadata := S3Metadata{
-		Name:        v.name,
-		SizeGB:      v.sizeGB,
-		Created:     state.CreatedAt,
-		Modified:    time.Now(),
-		Checksum:    checksum,
-		Layers:      []S3LayerInfo{layerInfo},
-		BaseLayerID: layerID,
-		TopLayerID:  layerID,
-	}
-
-	// Upload metadata
-	if err := v.s3Client.UploadMetadata(ctx, v.name, metadata); err != nil {
-		return fmt.Errorf("failed to upload metadata: %w", err)
-	}
-
-	// Update local state
-	if err := v.stateDB.UpdateS3State(v.name, true, checksum); err != nil {
-		return fmt.Errorf("failed to update S3 state: %w", err)
-	}
-
-	// After pushing base layer, create a new empty working layer with base as backing
-	// This way, future writes only go to the new layer (true delta approach)
-	if err := v.createNewWorkingLayer(ctx, layerID); err != nil {
-		return fmt.Errorf("failed to create new working layer: %w", err)
-	}
-
 	return nil
 }
 
