@@ -5,6 +5,7 @@ package docker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -110,7 +111,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	for {
 		select {
 		case <-timeoutCtx.Done():
-			return fmt.Errorf("timeout waiting for container %s to start", containerId)
+			return errors.New("timeout waiting for the sandbox to start - please ensure that your entrypoint is long-running")
 		case <-ticker.C:
 			c, err := d.ContainerInspect(ctx, containerId)
 			if err != nil {
