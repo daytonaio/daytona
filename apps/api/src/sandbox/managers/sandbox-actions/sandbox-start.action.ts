@@ -449,7 +449,7 @@ export class SandboxStartAction extends SandboxAction {
           SandboxState.ERROR,
           lockCode,
           undefined,
-          'Sandbox is in error state on runner while starting',
+          'Sandbox entered error state on runner during startup wait loop',
         )
         break
       }
