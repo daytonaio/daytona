@@ -135,10 +135,8 @@ export class DiskService {
       throw new NotFoundException(`Disk with ID ${diskId} not found`)
     }
 
-    if (![DiskState.DETACHED, DiskState.STORED].includes(disk.state)) {
-      throw new BadRequestError(
-        `Disk must be in '${DiskState.DETACHED}' or '${DiskState.STORED}' state in order to be deleted`,
-      )
+    if (![DiskState.DETACHED, DiskState.STORED, DiskState.PENDING_PUSH, DiskState.PUSHING].includes(disk.state)) {
+      throw new BadRequestError(`Disk is invalid state in order to be deleted: ${disk.state}`)
     }
 
     // Update state to mark as stored (deleted)

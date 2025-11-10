@@ -537,6 +537,12 @@ export class SandboxStartAction extends SandboxAction {
             sandboxToUpdate.daemonVersion = daemonVersion
           }
           await this.sandboxRepository.save(sandboxToUpdate)
+
+          // attach all disks to the sandbox
+          await Promise.allSettled(
+            sandboxToUpdate.disks.map((diskId) => this.diskService.attachToSandbox(diskId, sandboxToUpdate.id, true)),
+          )
+
           return DONT_SYNC_AGAIN
         } else {
           await this.updateSandboxState(sandbox.id, SandboxState.STARTED, lockCode, undefined, undefined, daemonVersion)
@@ -545,6 +551,11 @@ export class SandboxStartAction extends SandboxAction {
           if (sandbox.prevRunnerId) {
             await this.removeSandboxFromPreviousRunner(sandbox)
           }
+
+          // attach all disks to the sandbox
+          await Promise.allSettled(
+            sandbox.disks.map((diskId) => this.diskService.attachToSandbox(diskId, sandbox.id, true)),
+          )
 
           return DONT_SYNC_AGAIN
         }

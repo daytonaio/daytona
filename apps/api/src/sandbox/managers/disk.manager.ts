@@ -114,12 +114,7 @@ export class DiskManager implements OnModuleInit, TrackableJobExecutions, OnAppl
 
       await Promise.all(
         pendingDisks.map(async (disk) => {
-          if (this.processingDisks.has(disk.id)) {
-            return
-          }
-
           try {
-            this.processingDisks.add(disk.id)
             await this.processDiskState(disk)
           } finally {
             this.processingDisks.delete(disk.id)
