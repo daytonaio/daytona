@@ -86,6 +86,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 				log.WithError(err).WithFields(log.Fields{
 					"path":   ctx.Request.URL.Path,
 					"method": ctx.Request.Method,
+					"error":  errorResponse.Message,
 				}).Error("Internal Server Error")
 			} else {
 				log.WithFields(log.Fields{
