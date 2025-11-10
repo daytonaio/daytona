@@ -86,10 +86,7 @@ func (d *DockerClient) retryWithExponentialBackoff(ctx context.Context, operatio
 
 		if attempt < maxRetries-1 {
 			// Calculate exponential backoff delay
-			delay := baseDelay * time.Duration(1<<(attempt-1))
-			if delay > maxDelay {
-				delay = maxDelay
-			}
+			delay := min(baseDelay*time.Duration(1<<attempt), maxDelay)
 
 			log.Warnf("Failed to %s sandbox %s (attempt %d/%d): %v. Retrying in %v...", operationName, containerId, logAttempt, maxRetries, err, delay)
 
