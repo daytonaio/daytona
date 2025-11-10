@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
@@ -70,7 +70,7 @@ export class VolumeService {
 
   async create(organization: Organization, createVolumeDto: CreateVolumeDto): Promise<Volume> {
     if (!this.configService.get('s3.endpoint')) {
-      throw new BadRequestError('Object storage is not configured')
+      throw new ServiceUnavailableException('Object storage is not configured')
     }
 
     let pendingVolumeCountIncrement: number | undefined
