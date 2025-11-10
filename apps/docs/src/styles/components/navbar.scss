@@ -1,18 +1,6 @@
 .navbar {
   background: var(--bg-color);
 
-  @include for-pc-screen-sizes {
-    margin: 0 80px;
-  }
-
-  @include for-laptop-screen-sizes {
-    margin: 0 40px;
-  }
-
-  @include for-mobile-screen-sizes {
-    margin: 0 20px;
-  }
-
   nav {
     border-bottom: var(--border);
   }
@@ -397,6 +385,7 @@
     border-color: var(--block-bg-color);
 
     a {
+      min-width: 100px;
       display: flex;
       gap: 8px;
       align-items: center;

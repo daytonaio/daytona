@@ -15,9 +15,10 @@
   z-index: 10;
 }
 
-.mobile-navigation {
+nav.mobile-navigation {
   @media (max-width: 650px) {
-    padding: 20px 0 !important;
+    margin: 0 -20px;
+    padding: 20px;
   }
 }
 
