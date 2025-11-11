@@ -10,7 +10,7 @@ Daytona（デイトナ）SDKは、サンドボックスインスタンス経由�
 
 Daytona（デイトナ）SDKは、PythonおよびTypeScriptでLSPサーバーを作成する機能を提供します。`path_to_project` の基準パスはデフォルトで現在のサンドボックスユーザーのホーム直下です。たとえば `workspace/project` は `/home/[username]/workspace/project` を指します。先頭を `/` にすることで絶対パスも指定できます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 from daytona import Daytona, LspLanguageId
@@ -53,7 +53,7 @@ const lspServer = await sandbox.createLspServer(
 
 Daytona SDK では、Python および TypeScript の `LspLanguageId` 列挙体を使用して、各種言語向けの LSP サーバーを作成できます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 from daytona import LspLanguageId
@@ -88,7 +88,7 @@ Daytona SDK は、コード解析や編集のための各種 LSP 機能を提供
 
 Daytona SDK では、Python と TypeScript を用いて、ファイル内の特定位置のコード補完候補を取得できます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 completions = lsp_server.completions(

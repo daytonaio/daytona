@@ -48,7 +48,7 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
 これにより、ビルド処理のために自前のコンピュートリソースを使う必要がなくなり、Daytonaのインフラストラクチャにオフロードできます。\
 各バージョンごとに個別のスナップショットを登録・検証する必要もありません。依存関係リストを素早く反復しやすくなり、また、数十〜数百の類似ユースケース/セットアップ向けにわずかに異なるバージョンを用意することもできます。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # Define the dynamic image
@@ -112,7 +112,7 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
 
 このスナップショットはDaytonaダッシュボード上に表示され続け、永続的にキャッシュされるため、再ビルドは不要です。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # スナップショット用の一意の名前を生成
@@ -221,7 +221,7 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
 
 既存の Dockerfile をイメージのベースとして使いたい場合は、次のようにインポートできます。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])

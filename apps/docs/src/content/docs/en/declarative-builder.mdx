@@ -19,7 +19,7 @@ You can create declarative images on-the-fly when creating Sandboxes. This is id
 
 Declarative images are cached for 24 hours, and will be automatically reused when running the same script. Thus, subsequent runs on the same Runner will be almost instantaneous.
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Define a simple declarative image with Python packages
@@ -64,7 +64,7 @@ See: [CreateSandboxFromImageParams (Python SDK)](/docs/python-sdk/sync/daytona#c
 
 For images that will be reused across multiple Sandboxes, create a pre-built Snapshot. This Snapshot will remain visible in the Daytona dashboard and be permanently cached, ensuring instant availability without rebuilding.
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Create a simple Python data science image
@@ -131,7 +131,7 @@ For a complete API reference and method signatures, check the [Python](/docs/pyt
 
 These examples demonstrate how to select and configure base images:
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Create an image from a base
@@ -158,7 +158,7 @@ See: [base (Python SDK)](/docs/python-sdk/common/image#imagebase), [debian_slim 
 
 Use these methods to install Python packages and dependencies:
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Add pip packages
@@ -193,7 +193,7 @@ See: [pip_install (Python SDK)](/docs/python-sdk/common/image#imagepip_install),
 
 These examples show how to add files and directories to your image:
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Add a local file
@@ -220,7 +220,7 @@ See: [add_local_file (Python SDK)](/docs/python-sdk/common/image#imageadd_local_
 
 Configure environment variables and working directories with these methods:
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Set environment variables
@@ -247,7 +247,7 @@ See: [env (Python SDK)](/docs/python-sdk/common/image#imageenv), [workdir (Pytho
 
 Execute commands during build and configure container startup behavior:
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Run shell commands during build
@@ -288,7 +288,7 @@ See: [run_commands (Python SDK)](/docs/python-sdk/common/image#imagerun_commands
 
 Integrate existing Dockerfiles or add custom Dockerfile commands:
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Add custom Dockerfile commands

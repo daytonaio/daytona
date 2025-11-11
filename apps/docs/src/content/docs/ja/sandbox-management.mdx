@@ -30,7 +30,7 @@ Daytona SDK は、デフォルトまたはカスタム構成でサンドボッ�
 
 Daytona SDK には、Python と TypeScript により、デフォルト構成、特定の言語、またはカスタムラベルでサンドボックスを作成するメソッドが用意されています。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, CreateSandboxFromSnapshotParams
@@ -87,7 +87,7 @@ Daytona のサンドボックスは、デフォルトで **1 vCPU**、**1GB RAM*
 
 [ダッシュボード](https://app.daytona.io/dashboard/limits)で利用可能なリソースと上限を確認してください。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
@@ -146,7 +146,7 @@ Daytona のサンドボックスは、セキュリティ強化と接続性管理
 - すべてのネットワークアクセスをブロックするには、`networkBlockAll` を `True` に設定します
 - 特定のアドレスにアクセスを制限するには、`networkAllowList` に最大 5 つの CIDR ブロックをカンマ区切りで設定します
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, CreateSandboxFromSnapshotParams
@@ -198,7 +198,7 @@ Daytona のサンドボックスは、セキュリティ強化と接続性管理
 
 Daytona SDK は、Python と TypeScript で、ID、ルートディレクトリ、状態などサンドボックスに関する情報を取得するためのメソッドを提供します。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # サンドボックス ID を取得
@@ -239,7 +239,7 @@ Daytona SDK は、Python と TypeScript でサンドボックスを停止・起�
 
 停止したサンドボックスは、メモリ状態がクリアされますが、ファイルシステムは保持されます。ディスク使用量のコストのみが発生し、必要に応じて再度起動できます。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxParams(language="python"))
@@ -291,7 +291,7 @@ Daytona SDK は、Python と TypeScript からサンドボックスをアーカ�
 
 サンドボックスはアーカイブ前に停止している必要があり、停止中のサンドボックスと同様の手順で再度起動できます。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # Archive Sandbox
@@ -311,7 +311,7 @@ Daytona SDK は、Python と TypeScript からサンドボックスをアーカ�
 
 Daytona SDK には、Python と TypeScript でサンドボックスを削除するためのメソッドが用意されています。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # サンドボックスを削除
@@ -373,7 +373,7 @@ Daytona のサンドボックスは、ユーザーが指定した間隔に基づ
 
 :::
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
@@ -404,7 +404,7 @@ Daytona のサンドボックスは、ユーザーが指定した間隔に基づ
 
 パラメータが未設定の場合、デフォルトの `7 days` が使用されます。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
@@ -436,7 +436,7 @@ Daytona のサンドボックスは、ユーザーが指定した間隔に基づ
 
 パラメータが未設定の場合、サンドボックスは自動削除されません。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
@@ -473,7 +473,7 @@ Daytona のサンドボックスは、ユーザーが指定した間隔に基づ
 
 デフォルトでは、サンドボックスは15分間操作がないと自動停止します。中断なくサンドボックスを稼働させ続けるには、新しいサンドボックスを作成する際に自動停止間隔を`0`に設定してください。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
