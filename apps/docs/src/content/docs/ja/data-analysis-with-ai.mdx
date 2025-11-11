@@ -27,7 +27,7 @@ Daytona のサンドボックス（Daytonaが管理する隔離された一時�
 
 Daytona SDK と Anthropic SDK をプロジェクトにインストールします:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     `bash pip install daytona anthropic python-dotenv `
   </TabItem>
@@ -65,7 +65,7 @@ ANTHROPIC_API_KEY=sk-ant-***
 
 Daytona のサンドボックスを作成し、データセットをアップロードします:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from dotenv import load_dotenv
@@ -109,7 +109,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
 まず、コード実行とチャート抽出を処理する関数を作成します:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     import base64
@@ -179,7 +179,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 - 具体的な分析リクエスト（製造年別の平均価格の推移）
 - コード生成に関する指示
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from anthropic import Anthropic
@@ -230,7 +230,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
 ここでは、ツール呼び出しを使用してClaudeをDaytonaのサンドボックスに接続します。これにより、Claudeは生成したPythonコードを自動的に実行できます。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     msg = anthropic.messages.create(
@@ -288,7 +288,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
 最後に、Claude のレスポンスを解析し、生成されたコードを Daytona のサンドボックスで実行します:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     for content_block in msg.content:
@@ -335,7 +335,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
 完全なコードを実行して結果を確認します。
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```bash
     python data-analysis.py
@@ -357,7 +357,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
 以下に、すぐに実行できるサンプル一式を示します:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     import base64

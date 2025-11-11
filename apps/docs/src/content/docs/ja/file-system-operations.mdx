@@ -16,7 +16,7 @@ Daytona SDK は、サンドボックス（Daytonaが管理する隔離された�
 
 Daytona SDK は、Python と TypeScript を用いてサンドボックス内のファイルやディレクトリを一覧表示できます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # List files in a directory
@@ -50,7 +50,7 @@ files.forEach(file => {
 
 Daytona SDK は、Python と TypeScript で特定のパーミッションを指定してディレクトリを作成できます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Create with specific permissions
@@ -74,7 +74,7 @@ Daytona SDK は、Python と TypeScript を用いて、サンドボックス内�
 
 単一ファイルをアップロードする場合は、次のように実行します。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Upload a single file
@@ -97,7 +97,7 @@ await sandbox.fs.uploadFile(fileContent, "data.txt")
 
 以下は、1回のメソッド呼び出しで複数ファイルを効率的にアップロードする例です。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Upload multiple files at once
@@ -153,7 +153,7 @@ await sandbox.fs.uploadFiles(files)
 
 次のコマンドは、サンドボックスユーザーのホームディレクトリから `file1.txt` をダウンロードし、その内容を出力します。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 
@@ -182,7 +182,7 @@ console.log('File content:', downloadedFile.toString())
 
 不要になったファイルは、`delete_file` 関数で削除できます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 
@@ -207,7 +207,7 @@ Daytona SDK は、ファイル権限の設定・取得、検索と置換など�
 
 Daytona SDK では、Python と TypeScript から、ファイル権限の設定・取得や、ディレクトリ権限の再帰的な設定が行えます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Set file permissions
@@ -237,7 +237,7 @@ console.log(`Permissions: ${fileInfo.permissions}`)
 
 Daytona SDK では、Python と TypeScript から、ファイル内のテキストの検索および置換を行えます。
 
-<Tabs>
+<Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
 # Search for text in files; if a folder is specified, the search is recursive

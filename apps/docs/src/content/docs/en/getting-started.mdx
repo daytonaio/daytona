@@ -14,7 +14,7 @@ For steps on additional configuration, including setting environment variables a
 
 Daytona provides official Python and TypeScript SDKs for interacting with the Daytona platform. Install the SDK using your preferred method:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```bash
     pip install daytona
@@ -42,7 +42,7 @@ Daytona provides official Python and TypeScript SDKs for interacting with the Da
 
 Run the following code to create a Daytona Sandbox and execute commands:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, DaytonaConfig
@@ -106,7 +106,7 @@ Run the following code to create a Daytona Sandbox and execute commands:
   </TabItem>
 </Tabs>
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```bash
     python main.py
@@ -124,7 +124,7 @@ Run the following code to create a Daytona Sandbox and execute commands:
 
 The following snippet uploads a file containing a simple Flask app to a Daytona Sandbox. The web server runs on port `3000` and is accessible through the provided preview URL:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, DaytonaConfig, SessionExecuteRequest
@@ -253,7 +253,7 @@ You can access the Sandbox [Web Terminal](/docs/en/web-terminal) by printing out
 
 The following snippet connects to an LLM using the Anthropic API and asks Claude to generate code for getting the factorial of 25 and then executes it inside of a Daytona Sandbox:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ````python
     import os
@@ -466,7 +466,7 @@ export default nextConfig
 
 If you want to use [images from your local device](/docs/en/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Mac/Linux">
     ```bash
     brew install daytonaio/cli/daytona

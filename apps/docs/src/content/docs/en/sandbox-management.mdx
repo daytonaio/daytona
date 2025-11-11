@@ -30,7 +30,7 @@ If you want to prolong the auto-stop interval, you can [set the auto-stop interv
 
 The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, custom names, or custom labels using Python and TypeScript.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, CreateSandboxFromSnapshotParams
@@ -105,7 +105,7 @@ Organizations get a maximum Sandbox resource limit of 4 vCPUs, 8GB RAM, and 10GB
 
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
@@ -165,7 +165,7 @@ Ephemeral Sandboxes are Sandboxes that are automatically deleted once they are s
 
 To create an ephemeral Sandbox, set `ephemeral` to `True` when creating a Sandbox:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, CreateSandboxFromSnapshotParams
@@ -212,7 +212,7 @@ Learn more about network limits in the [Network Limits](/docs/en/network-limits)
 
 The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # Get Sandbox ID
@@ -257,7 +257,7 @@ The Daytona SDK provides methods to stop and start Sandboxes using Python and Ty
 
 Stopped Sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxParams(language="python"))
@@ -313,7 +313,7 @@ Starting an archived Sandbox takes more time than starting a stopped Sandbox, de
 
 A Sandbox must be stopped before it can be archived, and can be started again in the same way as a stopped Sandbox.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # Archive Sandbox
@@ -335,7 +335,7 @@ See: [archive (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxarchive), [arch
 
 The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     # Delete Sandbox
@@ -397,7 +397,7 @@ The parameter can either be set to:
 
 If the parameter is not set, the default interval of `15` minutes will be used.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
@@ -428,7 +428,7 @@ The parameter can either be set to:
 
 If the parameter is not set, the default interval of `7 days` days will be used.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
@@ -460,7 +460,7 @@ The parameter can either be set to:
 
 If the parameter is not set, the Sandbox will not be deleted automatically.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
@@ -501,7 +501,7 @@ If the parameter is not set, the Sandbox will not be deleted automatically.
 
 By default, Sandboxes auto-stop after 15 minutes of inactivity. To keep a Sandbox running without interruption, set the auto-stop interval to `0` when creating a new Sandbox:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(

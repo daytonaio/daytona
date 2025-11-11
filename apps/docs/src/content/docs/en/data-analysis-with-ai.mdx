@@ -29,7 +29,7 @@ This example shows how to build an AI-powered data analyst that automatically ge
 
 Install the Daytona SDK and Anthropic SDK to your project:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     `bash pip install daytona anthropic python-dotenv `
   </TabItem>
@@ -67,7 +67,7 @@ Download the file and save it as `dataset.csv` in your project directory.
 
 Now create a Daytona sandbox and upload your dataset:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from dotenv import load_dotenv
@@ -111,7 +111,7 @@ Now we'll create the core functionality that connects Claude with Daytona to ana
 
 First, let's create a function to handle code execution and chart extraction:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     import base64
@@ -181,7 +181,7 @@ Next, we'll create the prompt that tells Claude about our dataset and what analy
 - The specific analysis request (vote average trends over time)
 - Instructions for code generation
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     from anthropic import Anthropic
@@ -232,7 +232,7 @@ Next, we'll create the prompt that tells Claude about our dataset and what analy
 
 Now we'll connect Claude to our Daytona sandbox using tool calling. This allows Claude to automatically execute the Python code it generates:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     msg = anthropic.messages.create(
@@ -290,7 +290,7 @@ Now we'll connect Claude to our Daytona sandbox using tool calling. This allows 
 
 Finally, we'll parse Claude's response and execute any generated code in our Daytona sandbox:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     for content_block in msg.content:
@@ -337,7 +337,7 @@ That's it! The `run_ai_generated_code` function we created automatically handles
 
 Now you can run the complete code to see the results.
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```bash
     python data-analysis.py
@@ -359,7 +359,7 @@ You should see the chart in your project directory that will look similar to thi
 
 Here are the complete, ready-to-run examples:
 
-<Tabs>
+<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     import base64
