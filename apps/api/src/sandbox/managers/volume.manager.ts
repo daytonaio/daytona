@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, OnApplicationShutdown, OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
@@ -25,7 +25,9 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 const VOLUME_STATE_LOCK_KEY = 'volume-state-'
 
 @Injectable()
-export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
+export class VolumeManager
+  implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown, OnApplicationBootstrap
+{
   activeJobs = new Set<string>()
 
   private readonly logger = new Logger(VolumeManager.name)
@@ -60,8 +62,6 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
       },
       forcePathStyle: true,
     })
-
-    this.schedulerRegistry.getCronJob('process-pending-volumes').start()
   }
 
   async onModuleInit() {
@@ -75,6 +75,14 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
     }
 
     await this.testConnection()
+  }
+
+  onApplicationBootstrap() {
+    if (!this.s3Client) {
+      return
+    }
+
+    this.schedulerRegistry.getCronJob('process-pending-volumes').start()
   }
 
   async onApplicationShutdown() {
