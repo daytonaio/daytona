@@ -7,24 +7,9 @@ on:
         description: Version to release (start with "v")
         required: true
         default: 'v0.0.0-dev'
-      pypi_pkg_version:
-        description: 'PyPI package version (default: version)'
-        required: false
-      npm_pkg_version:
-        description: 'NPM package version (default: version)'
-        required: false
-      npm_tag:
-        description: 'NPM tag (default: latest)'
-        required: false
-        default: 'latest'
 
 env:
   VERSION: ${{ inputs.version }}
-  PYPI_PKG_VERSION: ${{ inputs.pypi_pkg_version || inputs.version}}
-  NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
-  NPM_TAG: ${{ inputs.npm_tag }}
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BUILDX_NO_DEFAULT_ATTESTATIONS: 1
   DAYTONA_API_URL: ${{ secrets.DAYTONA_API_URL }}
@@ -76,10 +61,6 @@ jobs:
 
       - name: Project dependencies
         run: |
-          corepack enable
-          python3 -m pip install --upgrade pip
-          python3 -m pip install "poetry==2.1.3"
-          go install github.com/swaggo/swag/cmd/swag@v1.16.4
           yarn install --immutable
           poetry lock
           poetry install
@@ -157,25 +138,6 @@ jobs:
           path: dist/apps/runner-amd64
           retention-days: 1
           overwrite: true
-
-      # Don't publish projects with nx for now
-      # TODO: Add back ASAP
-      # - name: Publish projects
-      #   run: |
-      #     source .venv/bin/activate
-      #     yarn publish
-
-  update-homebrew-tap:
-    needs: publish
-    runs-on: release-runner
-    name: Update Homebrew CLI tap
-    steps:
-      - name: Update version
-        run: |
-          curl -X POST -H "Accept: application/vnd.github.everest-preview+json" \
-          -H "Authorization: token ${{ secrets.GITHUBBOT_TOKEN }}" \
-          https://api.github.com/repos/daytonaio/homebrew-cli/dispatches \
-          -d "{\"event_type\": \"update-version\", \"client_payload\": {\"version\": \"${{ env.VERSION }}\"}}"
 
   # Separately build docker images for AMD64 and ARM64
   docker_build:
