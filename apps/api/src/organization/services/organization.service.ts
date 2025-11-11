@@ -251,7 +251,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     organization.maxSnapshotSize = quota.maxSnapshotSize
     organization.volumeQuota = quota.volumeQuota
 
-    if (!creatorEmailVerified) {
+    if (!creatorEmailVerified && !this.configService.get('skipUserEmailVerification')) {
       organization.suspended = true
       organization.suspendedAt = new Date()
       organization.suspensionReason = 'Please verify your email address'
