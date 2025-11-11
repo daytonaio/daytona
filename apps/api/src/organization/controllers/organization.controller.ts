@@ -42,6 +42,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -56,6 +57,7 @@ export class OrganizationController {
     private readonly organizationInvitationService: OrganizationInvitationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly userService: UserService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   @Get('/invitations')
@@ -189,7 +191,7 @@ export class OrganizationController {
     @Body() createOrganizationDto: CreateOrganizationDto,
   ): Promise<OrganizationDto> {
     const user = await this.userService.findOne(authContext.userId)
-    if (!user.emailVerified) {
+    if (!user.emailVerified && !this.configService.get('skipUserEmailVerification')) {
       throw new ForbiddenException('Please verify your email address')
     }
 

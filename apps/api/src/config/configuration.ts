@@ -215,6 +215,7 @@ const configuration = {
     maxSnapshotSize: parseInt(process.env.ADMIN_MAX_SNAPSHOT_SIZE || '100', 10),
     volumeQuota: parseInt(process.env.ADMIN_VOLUME_QUOTA || '0', 10),
   },
+  skipUserEmailVerification: process.env.SKIP_USER_EMAIL_VERIFICATION === 'true',
 }
 
 export { configuration }
