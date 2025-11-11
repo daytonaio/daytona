@@ -1061,6 +1061,7 @@ multipart = ">=1.0.0,<2.0.0"
 obstore = ">=0.7.0,<0.8.0"
 pydantic = ">=2.4.2,<3.0.0"
 toml = ">=0.10.0,<0.11.0"
+typing-extensions = {version = ">=4.0.0", markers = "python_version < \"3.10\""}
 websockets = ">=15.0.0,<16.0.0"
 
 [package.source]

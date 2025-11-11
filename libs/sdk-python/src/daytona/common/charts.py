@@ -293,18 +293,17 @@ def parse_chart(**kwargs) -> Optional[Chart]:
 
     chart_type = ChartType(kwargs.get("type", ChartType.UNKNOWN))
 
-    match chart_type:
-        case ChartType.LINE:
-            return LineChart(**kwargs)
-        case ChartType.SCATTER:
-            return ScatterChart(**kwargs)
-        case ChartType.BAR:
-            return BarChart(**kwargs)
-        case ChartType.PIE:
-            return PieChart(**kwargs)
-        case ChartType.BOX_AND_WHISKER:
-            return BoxAndWhiskerChart(**kwargs)
-        case ChartType.COMPOSITE_CHART:
-            return CompositeChart(**kwargs)
-        case _:
-            return Chart(**kwargs)
+    if chart_type == ChartType.LINE:
+        return LineChart(**kwargs)
+    if chart_type == ChartType.SCATTER:
+        return ScatterChart(**kwargs)
+    if chart_type == ChartType.BAR:
+        return BarChart(**kwargs)
+    if chart_type == ChartType.PIE:
+        return PieChart(**kwargs)
+    if chart_type == ChartType.BOX_AND_WHISKER:
+        return BoxAndWhiskerChart(**kwargs)
+    if chart_type == ChartType.COMPOSITE_CHART:
+        return CompositeChart(**kwargs)
+
+    return Chart(**kwargs)

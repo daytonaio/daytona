@@ -5,9 +5,15 @@ import asyncio
 import concurrent.futures
 import functools
 import inspect
-from typing import Any, Callable, Optional, ParamSpec, TypeVar
+import sys
+from typing import Any, Callable, Optional, TypeVar
 
 from .._utils.errors import DaytonaError
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 P = ParamSpec("P")
 T = TypeVar("T")

@@ -1,9 +1,15 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import sys
 import warnings
 from enum import Enum, EnumMeta
-from typing import Any, Callable, ParamSpec, Type, TypeVar, cast
+from typing import Any, Callable, Type, TypeVar, cast
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
 
 E = TypeVar("E", bound=Enum)
 P = ParamSpec("P")
