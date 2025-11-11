@@ -1,0 +1,92 @@
+name: SDK and CLI Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (start with "v")
+        required: true
+        default: 'v0.0.0-dev'
+      pypi_pkg_version:
+        description: 'PyPI package version (default: version)'
+        required: false
+      npm_pkg_version:
+        description: 'NPM package version (default: version)'
+        required: false
+      npm_tag:
+        description: 'NPM tag (default: latest)'
+        required: false
+        default: 'latest'
+
+env:
+  VERSION: ${{ inputs.version }}
+  PYPI_PKG_VERSION: ${{ inputs.pypi_pkg_version || inputs.version}}
+  NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
+  NPM_TAG: ${{ inputs.npm_tag }}
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+
+jobs:
+  publish:
+    runs-on: release-runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+
+      - name: System dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          corepack enable
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "poetry==2.1.3"
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Project dependencies
+        run: |
+          yarn install --immutable
+          go work sync
+          poetry lock
+          poetry install
+          go env -w GOFLAGS="-buildvcs=false"
+          poetry env list --full-path
+
+      - name: Publish projects
+        run: |
+          yarn publish
+
+  update-homebrew-tap:
+    needs: publish
+    runs-on: release-runner
+    name: Update Homebrew CLI tap
+    steps:
+      - name: Update version
+        run: |
+          curl -X POST -H "Accept: application/vnd.github.everest-preview+json" \
+          -H "Authorization: token ${{ secrets.GITHUBBOT_TOKEN }}" \
+          https://api.github.com/repos/daytonaio/homebrew-cli/dispatches \
+          -d "{\"event_type\": \"update-version\", \"client_payload\": {\"version\": \"${{ env.VERSION }}\"}}"
