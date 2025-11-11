@@ -3,12 +3,18 @@ title: "エラー"
 hideTitleOnPage: true
 ---
 
-## DaytonaError
+## DaytonaError \{#daytonaerror\}
 
 ```python
 class DaytonaError(Exception)
 ```
 
-Daytona SDKの基底エラー。
+Daytona SDK の基底エラー。
 
+## DaytonaNotFoundError \{#daytonanotfounderror\}
 
+```python
+class DaytonaNotFoundError(DaytonaError)
+```
+
+リソースが見つからない場合のエラーです。
