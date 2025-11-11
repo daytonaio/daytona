@@ -66,8 +66,9 @@ export class BillingApiClient {
     return response.data
   }
 
-  public async redeemCoupon(organizationId: string, couponCode: string): Promise<void> {
-    await this.axiosInstance.post(`/organization/${organizationId}/redeem-coupon/${couponCode}`)
+  public async redeemCoupon(organizationId: string, couponCode: string): Promise<string> {
+    const response = await this.axiosInstance.post(`/organization/${organizationId}/redeem-coupon/${couponCode}`)
+    return response.data?.message || 'Coupon redeemed successfully'
   }
 
   public async getOrganizationTier(organizationId: string): Promise<OrganizationTier> {
