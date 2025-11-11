@@ -1,0 +1,48 @@
+{
+  "name": "space-station-detector",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/space-station-detector/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/space-station-detector"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "space-station-detector:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "space-station-detector:build:development",
+          "hmr": true
+        },
+        "production": {
+          "buildTarget": "space-station-detector:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && prettier --write \"**/*.{ts,tsx,js,jsx,json,css,mjs,html}\" --config ../../.prettierrc"
+      }
+    }
+  }
+}
