@@ -759,7 +759,7 @@ function concatenateUint8Arrays(chunks: Uint8Array[]): Uint8Array {
  */
 function findSubarray(haystack: Uint8Array, needle: Uint8Array, fromIndex = 0): number {
   if (needle.length === 0) return 0
-  if (haystack.length < needle.length || fromIndex < 0 || fromIndex >= haystack.length) return -1
+  if (haystack.length < needle.length || fromIndex < 0 || fromIndex > haystack.length - needle.length) return -1
 
   const limit = haystack.length - needle.length
   for (let i = fromIndex; i <= limit; i++) {
