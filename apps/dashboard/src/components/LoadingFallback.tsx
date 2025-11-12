@@ -60,7 +60,7 @@ const LoadingFallback = () => {
         </SidebarFooter>
       </SidebarComponent>
       <SidebarInset className="overflow-hidden">
-        <div className="fixed top-0 left-0 w-full h-full p-6 bg-background z-[3]">
+        <div className="absolute inset-0 p-6 bg-background z-[3]">
           <div className="flex items-center justify-center h-full flex-col gap-2">
             <Loader2 className="w-8 h-8 animate-spin" />
             <motion.div
