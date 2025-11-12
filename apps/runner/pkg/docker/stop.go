@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
@@ -16,7 +17,7 @@ import (
 
 func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	// Deduce sandbox state first
-	state, err := d.DeduceSandboxState(ctx, containerId)
+	state, err := d.GetSandboxState(ctx, containerId)
 	if err == nil && state == enums.SandboxStateStopped {
 		log.Debugf("Sandbox %s is already stopped", containerId)
 		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
@@ -26,6 +27,9 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopping)
 
 	if err != nil {
+		if common_errors.IsNotFoundError(err) {
+			return err
+		}
 		log.Warnf("Failed to deduce sandbox %s state: %v", containerId, err)
 		log.Warnf("Continuing with stop operation")
 	}
