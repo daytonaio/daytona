@@ -1,0 +1,34 @@
+.button {
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  border-radius: 0.25rem;
+
+  cursor: pointer;
+
+  font-size: 0.875rem;
+  line-height: 1rem;
+  font-weight: 500;
+  transition-property: all 0.2s ease-in-out;
+  color: var(--foreground-color);
+  background-color: var(--block-bg-color);
+  border: 1px solid var(--border-color);
+
+  &.ghost {
+    background-color: transparent;
+    border: 1px solid transparent;
+  }
+
+  &:hover {
+    background-color: var(--cta-surface-neutral-primary);
+  }
+
+  & > svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+}

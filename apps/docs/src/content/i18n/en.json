@@ -1,4 +1,6 @@
 {
+  "header.copyForLlms": "Copy for LLM",
+  "header.viewAsMarkdown": "View as Markdown",
   "footer.needHelp": "Need help?",
   "footer.reachSupport": "Reach support",
   "footer.latestUpdates": "Latest project updates?",
