@@ -277,7 +277,7 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
       }}
     >
       <a href={hit.url} tabIndex="-1" onClick={handleClick}>
-        {([DOCS_INDEX_NAME,CLI_INDEX_NAME, SDK_INDEX_NAME].includes(indexName) || indexName === 'website') && (
+        {([DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME].includes(indexName) || indexName === 'website') && (
           <>
             <h5
               style={{

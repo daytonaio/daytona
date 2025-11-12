@@ -199,8 +199,9 @@ function searchDocs() {
         const directoryName = path.basename(fullPath)
         switch (tag) {
           case 'Documentation':
-            if(SDK_FOLDER_NAMES.includes(directoryName))
+            if (SDK_FOLDER_NAMES.includes(directoryName))
               return
+            break
           case 'SDK':
             // For SDK we traverse all subfolders inside given initial SDK directory
             break
