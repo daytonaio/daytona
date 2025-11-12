@@ -8,24 +8,29 @@ import (
 	"fmt"
 	"strings"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/runner/pkg/models/enums"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 )
 
-func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
+func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
 	if sandboxId == "" {
 		return enums.SandboxStateUnknown, nil
 	}
 
 	container, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
-		if client.IsErrNotFound(err) {
-			return enums.SandboxStateDestroyed, nil
+		if common_errors.IsNotFoundError(err) {
+			return enums.SandboxStateUnknown, err
 		}
-		return enums.SandboxStateError, fmt.Errorf("failed to inspect container: %w", err)
+		return enums.SandboxStateError, err
 	}
 
+	return d.deduceSandboxState(container)
+}
+
+func (d *DockerClient) deduceSandboxState(container types.ContainerJSON) (enums.SandboxState, error) {
 	switch container.State.Status {
 	case "created":
 		return enums.SandboxStateCreating, nil

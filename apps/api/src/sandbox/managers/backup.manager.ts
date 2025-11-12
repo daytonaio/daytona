@@ -348,6 +348,14 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         // If still in progress or any other state, do nothing and wait for next sync
       }
     } catch (error) {
+      if (
+        (error.response?.data?.statusCode === 400 &&
+          error.response?.data?.message.includes('Sandbox already destroyed')) ||
+        error.response?.status === 404
+      ) {
+        await this.updateSandboxBackupState(sandbox.id, BackupState.NONE, 'Sandbox already destroyed')
+        return
+      }
       await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
       throw error
     }
@@ -391,7 +399,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
       //  check if backup is already in progress on the runner
       const runnerSandbox = await runnerAdapter.sandboxInfo(sandbox.id)
-      if (runnerSandbox.backupState?.toUpperCase() === 'IN_PROGRESS') {
+      if (runnerSandbox.backupState === BackupState.IN_PROGRESS) {
         await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
       }
@@ -401,6 +409,10 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
       await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
     } catch (error) {
+      if (error.response?.status === 404) {
+        await this.updateSandboxBackupState(sandbox.id, BackupState.NONE, 'Sandbox not found')
+        return
+      }
       if (error.response?.status === 400 && error.response?.data?.message.includes('A backup is already in progress')) {
         await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
