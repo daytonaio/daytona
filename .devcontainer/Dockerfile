@@ -13,6 +13,11 @@ RUN apt update && export DEBIAN_FRONTEND=noninteractive \
 RUN apt update && export DEBIAN_FRONTEND=noninteractive \
     && apt -y install --no-install-recommends openjdk-11-jdk protobuf-compiler libprotobuf-dev
 
+# Mount-s3 (AWS S3 FUSE driver)
+RUN wget https://s3.amazonaws.com/mountpoint-s3-release/1.20.0/x86_64/mount-s3-1.20.0-x86_64.deb \
+    && apt install -y ./mount-s3-1.20.0-x86_64.deb \
+    && rm -f mount-s3-1.20.0-x86_64.deb
+
 # Telepresence
 RUN curl -fL https://app.getambassador.io/download/tel2oss/releases/download/v2.17.0/telepresence-linux-${TARGETARCH} -o /usr/local/bin/telepresence && \
     chmod a+x /usr/local/bin/telepresence

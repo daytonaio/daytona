@@ -241,6 +241,8 @@ definitions:
     properties:
       mountPath:
         type: string
+      subpath:
+        type: string
       volumeId:
         type: string
     type: object

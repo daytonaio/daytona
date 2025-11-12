@@ -44,9 +44,28 @@ async def main():
         file = await sandbox2.fs.download_file(os.path.join(mount_dir_2, "new-file.txt"))
         print("File:", file)
 
+        # Mount a specific subpath within the volume
+        # This is useful for isolating data or implementing multi-tenancy
+        mount_dir_3 = "/home/daytona/subpath"
+
+        params = CreateSandboxFromSnapshotParams(
+            language="python",
+            volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_3, subpath="users/alice")],
+        )
+        sandbox3 = await daytona.create(params)
+
+        # This sandbox will only see files within the 'users/alice' subpath
+        # Create a file in the subpath
+        subpath_file = os.path.join(mount_dir_3, "alice-file.txt")
+        await sandbox3.fs.upload_file(b"Hello from Alice's subpath!", subpath_file)
+
+        # The file is stored at: volume-root/users/alice/alice-file.txt
+        # but appears at: /home/daytona/subpath/alice-file.txt in the sandbox
+
         # Cleanup
         await daytona.delete(sandbox)
         await daytona.delete(sandbox2)
+        await daytona.delete(sandbox3)
         # daytona.volume.delete(volume)
 
 

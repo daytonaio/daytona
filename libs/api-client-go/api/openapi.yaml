@@ -8399,6 +8399,7 @@ components:
       example:
         mountPath: /data
         volumeId: volume123
+        subpath: users/alice
       properties:
         volumeId:
           description: The ID of the volume
@@ -8407,6 +8408,12 @@ components:
         mountPath:
           description: The mount path for the volume
           example: /data
+          type: string
+        subpath:
+          description: "Optional subpath within the volume to mount. When specified,\
+            \ only this S3 prefix will be accessible. When omitted, the entire volume\
+            \ is mounted."
+          example: users/alice
           type: string
       required:
         - mountPath
@@ -8463,8 +8470,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production
@@ -8658,8 +8667,10 @@ components:
             volumes:
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
             cpu: 2
             env:
               NODE_ENV: production
@@ -8693,8 +8704,10 @@ components:
             volumes:
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
             cpu: 2
             env:
               NODE_ENV: production
@@ -8768,8 +8781,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production
@@ -10969,8 +10984,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production
@@ -11171,8 +11188,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production
