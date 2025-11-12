@@ -13,7 +13,7 @@ import {
   SandboxVolume,
   ConfigApi,
 } from '@daytonaio/api-client'
-import axios, { AxiosError, AxiosInstance } from 'axios'
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
@@ -25,6 +25,7 @@ import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
 import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
+import { context, trace, propagation, SpanStatusCode } from '@opentelemetry/api'
 
 /**
  * Represents a volume mount for a Sandbox.
@@ -596,7 +597,14 @@ export class Daytona {
     return {
       items: response.data.items.map((sandbox) => {
         const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-        return new Sandbox(sandbox, structuredClone(this.clientConfig), this.createAxiosInstance(), this.sandboxApi, this.getCodeToolbox(language), this.getProxyToolboxUrl.bind(this))
+        return new Sandbox(
+          sandbox,
+          structuredClone(this.clientConfig),
+          this.createAxiosInstance(),
+          this.sandboxApi,
+          this.getCodeToolbox(language),
+          this.getProxyToolboxUrl.bind(this),
+        )
       }),
       total: response.data.total,
       page: response.data.page,
@@ -678,6 +686,26 @@ export class Daytona {
       timeout: 24 * 60 * 60 * 1000, // 24 hours
     })
 
+    // Request interceptor: Inject trace context into headers
+    axiosInstance.interceptors.request.use(
+      (requestConfig: InternalAxiosRequestConfig) => {
+        // Get the current active context (which may contain an active span)
+        const currentContext = context.active()
+
+        // Inject trace context into HTTP headers using W3C Trace Context propagation
+        // This adds headers like 'traceparent' and 'tracestate'
+        propagation.inject(currentContext, requestConfig.headers)
+
+        // Store the start time for duration calculation
+        ;(requestConfig as any).metadata = { startTime: Date.now() }
+
+        return requestConfig
+      },
+      (error) => {
+        return Promise.reject(error)
+      },
+    )
+
     axiosInstance.interceptors.response.use(
       (response) => {
         return response
@@ -704,6 +732,60 @@ export class Daytona {
           default:
             throw new DaytonaError(errorMessage)
         }
+      },
+    )
+
+    axiosInstance.interceptors.response.use(
+      (response) => {
+        const startTime = (response.config as any).metadata?.startTime
+        if (startTime) {
+          const duration = Date.now() - startTime
+
+          // Get the active span to add attributes
+          const activeSpan = trace.getActiveSpan()
+          // Only modify the span if it's still recording (not ended)
+          if (activeSpan && activeSpan.isRecording()) {
+            // Add response metadata to the span
+            activeSpan.setAttributes({
+              'http.response.status_code': response.status,
+              'http.response.duration_ms': duration,
+              // 'http.response.size_bytes': JSON.stringify(response.data).length,
+            })
+          }
+        }
+
+        return response
+      },
+      (error) => {
+        const startTime = (error.config as any)?.metadata?.startTime
+        if (startTime) {
+          const duration = Date.now() - startTime
+
+          // Get the active span to record the error
+          const activeSpan = trace.getActiveSpan()
+          // Only modify the span if it's still recording (not ended)
+          if (activeSpan && activeSpan.isRecording()) {
+            activeSpan.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: error.message,
+            })
+
+            activeSpan.setAttributes({
+              'http.response.duration_ms': duration,
+              'error.type': error.name,
+              'error.message': error.message,
+            })
+
+            if (error.response) {
+              activeSpan.setAttribute('http.response.status_code', error.response.status)
+            }
+
+            // Record the exception on the span
+            activeSpan.recordException(error)
+          }
+        }
+
+        return Promise.reject(error)
       },
     )
 
