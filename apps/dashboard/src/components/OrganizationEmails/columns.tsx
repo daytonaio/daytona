@@ -83,7 +83,7 @@ export function getColumns({
         return <SortableHeader column={column} label="Status" />
       },
       cell: ({ row }) => (
-        <div className="max-w-[120px]">
+        <div className="max-w-[120px] flex">
           <Badge
             variant={row.original.verified ? 'default' : 'secondary'}
             className={`flex items-center gap-1 ${
