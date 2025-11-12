@@ -409,9 +409,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         //  edge case where sandbox is deleted while desired state is being processed
         return
       }
-      sandbox.state = SandboxState.ERROR
-      sandbox.errorReason = error.message || String(error)
-      await this.sandboxRepository.save(sandbox)
+      await this.sandboxRepository.update(sandboxId, {
+        state: SandboxState.ERROR,
+        errorReason: error.message || String(error),
+      })
     }
 
     await this.redisLockProvider.unlock(lockKey)

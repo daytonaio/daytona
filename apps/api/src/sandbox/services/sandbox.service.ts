@@ -505,7 +505,36 @@ export class SandboxService {
       )
     }
 
-    const result = await this.sandboxRepository.save(warmPoolSandbox)
+    const updateData: Partial<Sandbox> = {
+      organizationId: warmPoolSandbox.organizationId,
+      createdAt: warmPoolSandbox.createdAt,
+    }
+    if (createSandboxDto.name) {
+      updateData.name = warmPoolSandbox.name
+    }
+    if (createSandboxDto.public !== undefined) {
+      updateData.public = warmPoolSandbox.public
+    }
+    if (createSandboxDto.labels !== undefined) {
+      updateData.labels = warmPoolSandbox.labels
+    }
+    if (createSandboxDto.autoStopInterval !== undefined) {
+      updateData.autoStopInterval = warmPoolSandbox.autoStopInterval
+    }
+    if (createSandboxDto.autoArchiveInterval !== undefined) {
+      updateData.autoArchiveInterval = warmPoolSandbox.autoArchiveInterval
+    }
+    if (createSandboxDto.autoDeleteInterval !== undefined) {
+      updateData.autoDeleteInterval = warmPoolSandbox.autoDeleteInterval
+    }
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      updateData.networkBlockAll = warmPoolSandbox.networkBlockAll
+    }
+    if (createSandboxDto.networkAllowList !== undefined) {
+      updateData.networkAllowList = warmPoolSandbox.networkAllowList
+    }
+    await this.sandboxRepository.update(warmPoolSandbox.id, updateData)
+    const result = await this.sandboxRepository.findOneByOrFail({ id: warmPoolSandbox.id })
 
     // Treat this as a newly started sandbox
     this.eventEmitter.emit(
@@ -1058,10 +1087,9 @@ export class SandboxService {
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.public = isPublic
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandbox.id, { public: isPublic })
 
-    return sandbox
+    return await this.findOneByIdOrName(sandboxIdOrName, organizationId)
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
@@ -1107,10 +1135,9 @@ export class SandboxService {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     // Replace all labels
-    sandbox.labels = labels
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandbox.id, { labels })
 
-    return sandbox
+    return await this.findOneByIdOrName(sandboxIdOrName, organizationId)
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-destroyed-sandboxes' })
@@ -1151,28 +1178,27 @@ export class SandboxService {
   async setAutostopInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoStopInterval = this.resolveAutoStopInterval(interval)
-    await this.sandboxRepository.save(sandbox)
+    const resolvedInterval = this.resolveAutoStopInterval(interval)
+    await this.sandboxRepository.update(sandbox.id, { autoStopInterval: resolvedInterval })
 
-    return sandbox
+    return await this.findOneByIdOrName(sandboxIdOrName, organizationId)
   }
 
   async setAutoArchiveInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
-    await this.sandboxRepository.save(sandbox)
+    const resolvedInterval = this.resolveAutoArchiveInterval(interval)
+    await this.sandboxRepository.update(sandbox.id, { autoArchiveInterval: resolvedInterval })
 
-    return sandbox
+    return await this.findOneByIdOrName(sandboxIdOrName, organizationId)
   }
 
   async setAutoDeleteInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoDeleteInterval = interval
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandbox.id, { autoDeleteInterval: interval })
 
-    return sandbox
+    return await this.findOneByIdOrName(sandboxIdOrName, organizationId)
   }
 
   async updateNetworkSettings(
@@ -1183,15 +1209,18 @@ export class SandboxService {
   ): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
+    const updateData: Partial<Sandbox> = {}
     if (networkBlockAll !== undefined) {
-      sandbox.networkBlockAll = networkBlockAll
+      updateData.networkBlockAll = networkBlockAll
     }
 
     if (networkAllowList !== undefined) {
-      sandbox.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+      updateData.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
     }
 
-    await this.sandboxRepository.save(sandbox)
+    if (Object.keys(updateData).length > 0) {
+      await this.sandboxRepository.update(sandbox.id, updateData)
+    }
 
     // Update network settings on the runner
     if (sandbox.runnerId) {
@@ -1202,7 +1231,7 @@ export class SandboxService {
       }
     }
 
-    return sandbox
+    return await this.findOneByIdOrName(sandboxIdOrName, organizationId)
   }
 
   // used by internal services to update the state of a sandbox to resolve domain and runner state mismatch

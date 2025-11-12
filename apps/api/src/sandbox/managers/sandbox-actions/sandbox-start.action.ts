@@ -81,14 +81,22 @@ export class SandboxStartAction extends SandboxAction {
           sandboxToUpdate.state = SandboxState.STARTED
           sandboxToUpdate.setBackupState(BackupState.NONE)
 
+          let daemonVersion: string | undefined
           try {
-            const daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
-            sandboxToUpdate.daemonVersion = daemonVersion
+            daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
           } catch (error) {
             this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, error)
           }
 
-          await this.sandboxRepository.save(sandboxToUpdate)
+          const updateData: Partial<Sandbox> = {
+            state: SandboxState.STARTED,
+            backupState: sandboxToUpdate.backupState,
+            backupSnapshot: sandboxToUpdate.backupSnapshot,
+          }
+          if (daemonVersion) {
+            updateData.daemonVersion = daemonVersion
+          }
+          await this.sandboxRepository.update(sandboxToUpdate.id, updateData)
           return DONT_SYNC_AGAIN
         }
       }
@@ -417,10 +425,15 @@ export class SandboxStartAction extends SandboxAction {
           })
           sandboxToUpdate.state = SandboxState.STARTED
           sandboxToUpdate.setBackupState(BackupState.NONE)
-          if (daemonVersion) {
-            sandboxToUpdate.daemonVersion = daemonVersion
+          const updateData: Partial<Sandbox> = {
+            state: SandboxState.STARTED,
+            backupState: sandboxToUpdate.backupState,
+            backupSnapshot: sandboxToUpdate.backupSnapshot,
           }
-          await this.sandboxRepository.save(sandboxToUpdate)
+          if (daemonVersion) {
+            updateData.daemonVersion = daemonVersion
+          }
+          await this.sandboxRepository.update(sandboxToUpdate.id, updateData)
           return DONT_SYNC_AGAIN
         } else {
           await this.updateSandboxState(sandbox.id, SandboxState.STARTED, lockCode, undefined, undefined, daemonVersion)

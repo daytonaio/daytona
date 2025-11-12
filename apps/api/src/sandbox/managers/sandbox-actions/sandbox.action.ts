@@ -88,28 +88,30 @@ export abstract class SandboxAction {
       return
     }
 
-    sandbox.state = state
+    const updateData: Partial<Sandbox> = {
+      state: state,
+    }
 
     if (runnerId !== undefined) {
-      sandbox.runnerId = runnerId
+      updateData.runnerId = runnerId
     }
 
     if (errorReason !== undefined) {
-      sandbox.errorReason = errorReason
+      updateData.errorReason = errorReason
     }
 
-    if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {
-      sandbox.errorReason = 'Sandbox is in error state during update'
+    if (state === SandboxState.ERROR && !errorReason) {
+      updateData.errorReason = 'Sandbox is in error state during update'
     }
 
     if (daemonVersion !== undefined) {
-      sandbox.daemonVersion = daemonVersion
+      updateData.daemonVersion = daemonVersion
     }
 
-    if (sandbox.state == SandboxState.DESTROYED) {
-      sandbox.backupState = BackupState.NONE
+    if (state === SandboxState.DESTROYED) {
+      updateData.backupState = BackupState.NONE
     }
 
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandbox.id, updateData)
   }
 }
