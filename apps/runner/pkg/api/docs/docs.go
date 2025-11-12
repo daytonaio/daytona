@@ -1455,6 +1455,9 @@ const docTemplate = `{
                 "mountPath": {
                     "type": "string"
                 },
+                "subpath": {
+                    "type": "string"
+                },
                 "volumeId": {
                     "type": "string"
                 }

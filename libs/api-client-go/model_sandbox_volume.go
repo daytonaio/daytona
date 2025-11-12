@@ -24,7 +24,9 @@ type SandboxVolume struct {
 	// The ID of the volume
 	VolumeId string `json:"volumeId"`
 	// The mount path for the volume
-	MountPath            string `json:"mountPath"`
+	MountPath string `json:"mountPath"`
+	// Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
+	Subpath              *string `json:"subpath,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -97,6 +99,38 @@ func (o *SandboxVolume) SetMountPath(v string) {
 	o.MountPath = v
 }
 
+// GetSubpath returns the Subpath field value if set, zero value otherwise.
+func (o *SandboxVolume) GetSubpath() string {
+	if o == nil || IsNil(o.Subpath) {
+		var ret string
+		return ret
+	}
+	return *o.Subpath
+}
+
+// GetSubpathOk returns a tuple with the Subpath field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SandboxVolume) GetSubpathOk() (*string, bool) {
+	if o == nil || IsNil(o.Subpath) {
+		return nil, false
+	}
+	return o.Subpath, true
+}
+
+// HasSubpath returns a boolean if a field has been set.
+func (o *SandboxVolume) HasSubpath() bool {
+	if o != nil && !IsNil(o.Subpath) {
+		return true
+	}
+
+	return false
+}
+
+// SetSubpath gets a reference to the given string and assigns it to the Subpath field.
+func (o *SandboxVolume) SetSubpath(v string) {
+	o.Subpath = &v
+}
+
 func (o SandboxVolume) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -109,6 +143,9 @@ func (o SandboxVolume) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["volumeId"] = o.VolumeId
 	toSerialize["mountPath"] = o.MountPath
+	if !IsNil(o.Subpath) {
+		toSerialize["subpath"] = o.Subpath
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -155,6 +192,7 @@ func (o *SandboxVolume) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "volumeId")
 		delete(additionalProperties, "mountPath")
+		delete(additionalProperties, "subpath")
 		o.AdditionalProperties = additionalProperties
 	}
 

@@ -30,4 +30,10 @@ export interface SandboxVolume {
    * @memberof SandboxVolume
    */
   mountPath: string
+  /**
+   * Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
+   * @type {string}
+   * @memberof SandboxVolume
+   */
+  subpath?: string
 }
