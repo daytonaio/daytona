@@ -217,10 +217,6 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.sandboxApiClient.destroy(sandboxId)
   }
 
-  async removeDestroyedSandbox(sandboxId: string): Promise<void> {
-    await this.sandboxApiClient.removeDestroyed(sandboxId)
-  }
-
   async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
     const request: CreateBackupDTO = {
       snapshot: backupSnapshotName,

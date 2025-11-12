@@ -13,71 +13,56 @@ import (
 	common_cache "github.com/daytonaio/common-go/pkg/cache"
 )
 
-type StatesCache struct {
-	common_cache.ICache[models.CachedStates]
+type BackupInfoCache struct {
+	common_cache.ICache[models.BackupInfo]
 	cacheRetentionDays int
 }
 
-var statesCache *StatesCache
+var backupInfoCache *BackupInfoCache
 
-func GetStatesCache(cacheRetentionDays int) *StatesCache {
+func GetBackupInfoCache(cacheRetentionDays int) *BackupInfoCache {
 	if cacheRetentionDays <= 0 {
 		cacheRetentionDays = 7
 	}
 
-	if statesCache != nil {
-		if statesCache.cacheRetentionDays != cacheRetentionDays {
-			statesCache.cacheRetentionDays = cacheRetentionDays
+	if backupInfoCache != nil {
+		if backupInfoCache.cacheRetentionDays != cacheRetentionDays {
+			backupInfoCache.cacheRetentionDays = cacheRetentionDays
 		}
 
-		return statesCache
+		return backupInfoCache
 	}
 
-	return &StatesCache{
-		ICache:             common_cache.NewMapCache[models.CachedStates](),
+	return &BackupInfoCache{
+		ICache:             common_cache.NewMapCache[models.BackupInfo](),
 		cacheRetentionDays: cacheRetentionDays,
 	}
 
 }
 
-func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState) {
+func (sc *BackupInfoCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, backupErr error) {
 	// Get existing state or create new one
 	existing, err := sc.Get(ctx, sandboxId)
 	if err != nil {
 		// Key doesn't exist, create new entry
-		existing = &models.CachedStates{}
-	}
-
-	// Update sandbox state
-	existing.SandboxState = state
-
-	// Save back to cache
-	_ = sc.Set(ctx, sandboxId, *existing, sc.getEntryExpiration())
-}
-
-func (sc *StatesCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, backupErr error) {
-	// Get existing state or create new one
-	existing, err := sc.Get(ctx, sandboxId)
-	if err != nil {
-		// Key doesn't exist, create new entry
-		existing = &models.CachedStates{}
+		existing = &models.BackupInfo{}
 	}
 
 	// Update backup state
-	existing.BackupState = state
+	existing.State = state
 
 	// Set error reason if error is provided
 	if backupErr != nil {
 		errMsg := backupErr.Error()
-		existing.BackupErrorReason = &errMsg
+		existing.ErrReason = &errMsg
 	} else {
-		existing.BackupErrorReason = nil
+		existing.ErrReason = nil
 	}
 
 	// Save back to cache
 	_ = sc.Set(ctx, sandboxId, *existing, sc.getEntryExpiration())
 }
 
-func (sc *StatesCache) getEntryExpiration() time.Duration {
+func (sc *BackupInfoCache) getEntryExpiration() time.Duration {
 	return time.Duration(sc.cacheRetentionDays) * 24 * time.Hour
 }

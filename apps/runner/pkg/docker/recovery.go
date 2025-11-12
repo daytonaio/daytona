@@ -10,7 +10,6 @@ import (
 
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/common"
-	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
@@ -123,8 +122,6 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
 		return fmt.Errorf("failed to create new container: %w", err)
 	}
-
-	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateStopped)
 
 	// Copy data directly between overlay2 layers (no need to start container)
 	// The API will trigger the normal start flow through SandboxManager

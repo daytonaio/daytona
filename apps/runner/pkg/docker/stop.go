@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
@@ -16,18 +17,18 @@ import (
 
 func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	// Deduce sandbox state first
-	state, err := d.DeduceSandboxState(ctx, containerId)
-	if err == nil && state == enums.SandboxStateStopped {
-		log.Debugf("Sandbox %s is already stopped", containerId)
-		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
-		return nil
+	state, err := d.GetSandboxState(ctx, containerId)
+	if err != nil {
+		log.Warnf("Failed to get sandbox %s state: %v", containerId, err)
+		if common_errors.IsNotFoundError(err) {
+			return err
+		}
+		log.Warnf("Continuing with stop operation")
 	}
 
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopping)
-
-	if err != nil {
-		log.Warnf("Failed to deduce sandbox %s state: %v", containerId, err)
-		log.Warnf("Continuing with stop operation")
+	if state == enums.SandboxStateStopped {
+		log.Debugf("Sandbox %s is already stopped", containerId)
+		return nil
 	}
 
 	// Cancel a backup if it's already in progress
@@ -50,14 +51,12 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		}
 	case <-statusCh:
 		// Container stopped successfully
-		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 		return nil
 	case <-ctx.Done():
 		return ctx.Err()
 	}
 
 	log.Debugf("Sandbox %s stopped successfully", containerId)
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 
 	return nil
 }
