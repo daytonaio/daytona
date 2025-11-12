@@ -33,7 +33,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 	}()
 
-	state, err := d.DeduceSandboxState(ctx, sandboxDto.Id)
+	state, err := d.GetSandboxState(ctx, sandboxDto.Id)
 	if err != nil && state == enums.SandboxStateError {
 		return "", err
 	}
@@ -98,7 +98,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	containerShortId := c.ID[:12]
-	info, err := d.apiClient.ContainerInspect(context.Background(), sandboxDto.Id)
+	info, err := d.ContainerInspect(context.Background(), sandboxDto.Id)
 	if err != nil {
 		log.Errorf("Failed to inspect container: %v", err)
 	}
