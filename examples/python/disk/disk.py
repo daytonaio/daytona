@@ -84,10 +84,9 @@ def main():
     # Create a sandbox with the disk attached
     print("\n🏗️ Creating a sandbox...")
     params = CreateSandboxFromImageParams(
-        image="ubuntu:22.04",
-        sandbox_name=f"example-sandbox-{int(time.time())}",
+        image="node:22",
+        name=f"disk-example-{int(time.time())}-node-22",
         disk_id=disk.id,
-        language="python",
     )
     sandbox = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
     print(f"✅ Created sandbox: {sandbox.name} ({sandbox.id}) - State: {sandbox.state}")
@@ -107,6 +106,10 @@ def main():
     for file in files:
         print(f"  - {file.name} - {file.size} - {file.is_dir}")
 
+    # sleep for 3 seconds
+    print("Sleeping for 45 seconds...")
+    time.sleep(45)
+
     sandbox.delete()
 
     # Wait sandbox to be deleted
@@ -116,13 +119,16 @@ def main():
         print("❌ Failed to wait for sandbox deletion")
         return
 
+    # sleep for 3 seconds
+    print("Sleeping for 3 seconds...")
+    time.sleep(3)
+
     # Create a new sandbox with the same disk
     print("\n🏗️ Creating a new sandbox with the same disk...")
     params = CreateSandboxFromImageParams(
-        image="ubuntu:22.04",
-        sandbox_name=f"example-sandbox-{int(time.time())}-2",
+        image="node:24",
+        name=f"disk-example-{int(time.time())}-node-24",
         disk_id=disk.id,
-        language="python",
     )
     sandbox = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
     print(f"✅ Created sandbox: {sandbox.name} ({sandbox.id}) - State: {sandbox.state}")
@@ -134,32 +140,32 @@ def main():
     for file in files:
         print(f"  - {file.name} - {file.size} - {file.is_dir}")
 
-    sandbox.delete()
+    # sandbox.delete()
 
-    # Wait for sandbox to be deleted
-    if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
-        print("❌ Failed to wait for sandbox deletion")
-        return
+    # # Wait for sandbox to be deleted
+    # if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
+    #     print("❌ Failed to wait for sandbox deletion")
+    #     return
 
-    # Wait for the second sandbox to be deleted
-    print("\n⏳ Waiting for the second sandbox to be deleted...")
+    # # Wait for the second sandbox to be deleted
+    # print("\n⏳ Waiting for the second sandbox to be deleted...")
 
-    if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
-        print("❌ Failed to wait for second sandbox deletion")
-        return
+    # if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
+    #     print("❌ Failed to wait for second sandbox deletion")
+    #     return
 
-    # Wait for the disk to be detached after the second sandbox is deleted
-    time.sleep(2)
+    # # Wait for the disk to be detached after the second sandbox is deleted
+    # time.sleep(2)
 
-    # Delete the disk
-    print("\n🗑️  Deleting the disk...")
-    daytona.disk.delete(disk)
-    print(f"✅ Deleted disk: {disk.name}")
+    # # Delete the disk
+    # print("\n🗑️  Deleting the disk...")
+    # daytona.disk.delete(disk)
+    # print(f"✅ Deleted disk: {disk.name}")
 
-    # Final list to confirm deletion
-    print("\n📋 Final disk list...")
-    final_disks = daytona.disk.list()
-    print(f"Found {len(final_disks)} disks after cleanup")
+    # # Final list to confirm deletion
+    # print("\n📋 Final disk list...")
+    # final_disks = daytona.disk.list()
+    # print(f"Found {len(final_disks)} disks after cleanup")
 
     print("\n🎉 Disk management example completed successfully!")
 

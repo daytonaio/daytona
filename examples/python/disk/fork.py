@@ -1,6 +1,7 @@
+import asyncio
 import time
 
-from daytona import CreateSandboxFromImageParams, Daytona, DiskState, SandboxState
+from daytona import CreateSandboxFromImageParams, Daytona, DiskState, SandboxState, SessionExecuteRequest
 from daytona.common.errors import DaytonaNotFoundError
 
 
@@ -85,11 +86,13 @@ def wait_for_sandbox_state(sandbox, target_state, timeout_seconds=60, poll_inter
     return sandbox.state == target_state
 
 
-def main():
+async def main():
     daytona = Daytona()
 
     print("🚀 Starting Disk Management Example")
     print("=====================================")
+
+    test_session_timestamp = int(time.time())
 
     # List all existing disks
     print("\n📋 Listing all disks...")
@@ -120,10 +123,9 @@ def main():
     # Create a sandbox with the disk attached
     print("\n🏗️ Creating a sandbox...")
     params = CreateSandboxFromImageParams(
-        image="ubuntu:22.04",
-        sandbox_name=f"example-sandbox-{int(time.time())}",
+        name=f"base-sandbox-{test_session_timestamp}-node-22",
+        image="node:22",
         disk_id=disk.id,
-        language="python",
     )
     sandbox = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
     print(f"✅ Created sandbox: {sandbox.name} ({sandbox.id}) - State: {sandbox.state}")
@@ -133,8 +135,34 @@ def main():
     sandbox.fs.upload_file(b"Hello, World!", "/workspace/new-file.txt")
     print(f"✅ Created file: {sandbox.name} ({sandbox.id}) - State: {sandbox.state}")
 
+    # create react app with async log streaming
+    print("\n📋 Creating a new react app in the sandbox...")
+    session_id = "react-app-session"
+    sandbox.process.create_session(session_id)
+
+    command = sandbox.process.execute_session_command(
+        session_id,
+        SessionExecuteRequest(
+            command="npx create-react-app /workspace/my-app",
+            run_async=True,
+        ),
+    )
+
+    logs_task = asyncio.create_task(
+        sandbox.process.get_session_command_logs_async(
+            session_id,
+            command.cmd_id,
+            lambda log: print(f"[STDOUT]: {log}"),
+            lambda log: print(f"[STDERR]: {log}"),
+        )
+    )
+
+    print("📡 Streaming logs from create-react-app...")
+    await logs_task
+    print(f"✅ Created react app: {sandbox.name} ({sandbox.id}) - State: {sandbox.state}")
+
     print("Sleeping for 3 seconds...")
-    time.sleep(3)
+    await asyncio.sleep(3)
 
     # List files in the sandbox
     print("\n📋 Listing files in the sandbox...")
@@ -153,7 +181,7 @@ def main():
         return
 
     # Fork the disk
-    forked_disk = daytona.disk.fork(disk, f"example-disk-{int(time.time())}-2")
+    forked_disk = daytona.disk.fork(disk, f"forked-disk-{test_session_timestamp}")
 
     # Wait for disk fork to complete
     print("\n⏳ Waiting for forked disk to be ready...")
@@ -171,10 +199,10 @@ def main():
 
     print("\n🏗️ Creating a new sandbox with the forked disk...")
     params = CreateSandboxFromImageParams(
-        image="ubuntu:22.04",
-        sandbox_name=f"example-sandbox-{int(time.time())}-2",
+        # upgrade to node 24
+        image="node:24",
+        name=f"forked-sandbox-{test_session_timestamp}-node-24",
         disk_id=forked_disk.id,
-        language="python",
     )
     new_sandbox = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
     print(f"✅ Created sandbox: {new_sandbox.name} ({new_sandbox.id}) - State: {new_sandbox.state}")
@@ -202,9 +230,13 @@ def main():
         print("❌ Failed to wait for new sandbox stop")
         return
 
+    # sleep for 3 seconds
+    print("Sleeping for 3 seconds...")
+    await asyncio.sleep(3)
+
     # fork the forked disk
     print("\n📋 Forking the forked disk...")
-    forked_disk_2 = daytona.disk.fork(forked_disk, f"example-disk-{int(time.time())}-3")
+    forked_disk_2 = daytona.disk.fork(forked_disk, f"forked-disk-{test_session_timestamp}-2")
     print(f"✅ Forked disk: {forked_disk_2.name} ({forked_disk_2.id}) - State: {forked_disk_2.state}")
 
     # wait for the forked disk to be ready
@@ -221,70 +253,69 @@ def main():
     # create a new sandbox with the forked disk
     print("\n🏗️ Creating a new sandbox with the forked disk 2...")
     params = CreateSandboxFromImageParams(
-        image="ubuntu:22.04",
-        sandbox_name=f"example-sandbox-{int(time.time())}-3",
+        image="node:24",
+        name=f"forked-sandbox-{test_session_timestamp}-2",
         disk_id=forked_disk_2.id,
-        language="python",
     )
     new_sandbox_2 = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
     print(f"✅ Created sandbox: {new_sandbox_2.name} ({new_sandbox_2.id}) - State: {new_sandbox_2.state}")
 
-    # list files in the new sandbox
-    print("\n📋 Listing files in the new sandbox with the forked disk 2...")
-    files = new_sandbox_2.fs.list_files("/workspace")
-    print(f"Found {len(files)} files in the sandbox:")
-    for file in files:
-        print(f"  - {file.name} - {file.size} - {file.is_dir}")
+    # # list files in the new sandbox
+    # print("\n📋 Listing files in the new sandbox with the forked disk 2...")
+    # files = new_sandbox_2.fs.list_files("/workspace")
+    # print(f"Found {len(files)} files in the sandbox:")
+    # for file in files:
+    #     print(f"  - {file.name} - {file.size} - {file.is_dir}")
 
-    sandbox.delete()
+    # sandbox.delete()
 
-    # Wait for sandbox to be deleted
-    if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
-        print("❌ Failed to wait for sandbox deletion")
-        return
+    # # Wait for sandbox to be deleted
+    # if not wait_for_sandbox_state(sandbox, SandboxState.DESTROYED, timeout_seconds=60):
+    #     print("❌ Failed to wait for sandbox deletion")
+    #     return
 
-    new_sandbox.delete()
+    # new_sandbox.delete()
 
-    # Wait for the second sandbox to be deleted
-    print("\n⏳ Waiting for the second sandbox to be deleted...")
+    # # Wait for the second sandbox to be deleted
+    # print("\n⏳ Waiting for the second sandbox to be deleted...")
 
-    if not wait_for_sandbox_state(new_sandbox, SandboxState.DESTROYED, timeout_seconds=60):
-        print("❌ Failed to wait for second sandbox deletion")
-        return
+    # if not wait_for_sandbox_state(new_sandbox, SandboxState.DESTROYED, timeout_seconds=60):
+    #     print("❌ Failed to wait for second sandbox deletion")
+    #     return
 
-    new_sandbox_2.delete()
+    # new_sandbox_2.delete()
 
-    # Wait for the second sandbox 2 to be deleted
-    print("\n⏳ Waiting for the second sandbox 2 to be deleted...")
-    if not wait_for_sandbox_state(new_sandbox_2, SandboxState.DESTROYED, timeout_seconds=60):
-        print("❌ Failed to wait for second sandbox 2 deletion")
-        return
+    # # Wait for the second sandbox 2 to be deleted
+    # print("\n⏳ Waiting for the second sandbox 2 to be deleted...")
+    # if not wait_for_sandbox_state(new_sandbox_2, SandboxState.DESTROYED, timeout_seconds=60):
+    #     print("❌ Failed to wait for second sandbox 2 deletion")
+    #     return
 
-    # Wait for the disk to be detached after the second sandbox is deleted
-    time.sleep(10)
+    # # Wait for the disk to be detached after the second sandbox is deleted
+    # time.sleep(10)
 
-    # Delete the disk
-    print("\n🗑️  Deleting the original disk...")
-    daytona.disk.delete(disk)
-    print(f"✅ Deleted disk: {disk.name}")
+    # # Delete the disk
+    # print("\n🗑️  Deleting the original disk...")
+    # daytona.disk.delete(disk)
+    # print(f"✅ Deleted disk: {disk.name}")
 
-    # Delete the forked disk
-    print("\n🗑️  Deleting the forked disk...")
-    daytona.disk.delete(forked_disk)
-    print(f"✅ Forked disk: {forked_disk.name}")
+    # # Delete the forked disk
+    # print("\n🗑️  Deleting the forked disk...")
+    # daytona.disk.delete(forked_disk)
+    # print(f"✅ Forked disk: {forked_disk.name}")
 
-    # Delete the forked disk 2
-    print("\n🗑️  Deleting the forked disk 2...")
-    daytona.disk.delete(forked_disk)
-    print(f"✅ Forked disk 2: {forked_disk_2.name}")
+    # # Delete the forked disk 2
+    # print("\n🗑️  Deleting the forked disk 2...")
+    # daytona.disk.delete(forked_disk_2)
+    # print(f"✅ Forked disk 2: {forked_disk_2.name}")
 
-    # Final list to confirm deletion
-    print("\n📋 Final disk list...")
-    final_disks = daytona.disk.list()
-    print(f"Found {len(final_disks)} disks after cleanup")
+    # # Final list to confirm deletion
+    # print("\n📋 Final disk list...")
+    # final_disks = daytona.disk.list()
+    # print(f"Found {len(final_disks)} disks after cleanup")
 
     print("\n🎉 Disk management example completed successfully!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

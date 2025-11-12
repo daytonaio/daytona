@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -403,61 +404,171 @@ func (v *disk) pushBaseLayer(ctx context.Context, state *DiskState) error {
 	return v.pushLayeredDisk(ctx, state, diskLayers)
 }
 
-// commitWorkingImageAsLayer flattens the current working image and commits it as a new layer
-// This preserves all data and creates proper layer structure for pushing to S3
+// walkBackingChain walks through the backing file chain and returns layer IDs
+// of all cached layers in the chain (from base to top, excluding the working layer)
+func (v *disk) walkBackingChain(ctx context.Context, imagePath, layerCacheDir string) ([]string, error) {
+	var layerIDs []string
+	currentPath := imagePath
+
+	// Get the first backing file (the working layer's backing)
+	backingFile, err := v.qcow2Client.GetBackingFile(ctx, currentPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get backing file: %w", err)
+	}
+
+	// If no backing file, this is a standalone disk (no layers)
+	if backingFile == "" {
+		return layerIDs, nil
+	}
+
+	// Walk the backing chain
+	currentPath = backingFile
+	visited := make(map[string]bool)
+	maxDepth := 100
+
+	for depth := 0; depth < maxDepth; depth++ {
+		// Prevent circular references
+		absPath, _ := filepath.Abs(currentPath)
+		if visited[absPath] {
+			return nil, fmt.Errorf("circular reference detected in backing chain")
+		}
+		visited[absPath] = true
+
+		// Check if this is a cached layer
+		if strings.HasPrefix(currentPath, layerCacheDir) {
+			// Extract layer ID from the path (e.g., /path/layer-cache/layer-12345.qcow2 -> layer-12345)
+			basename := filepath.Base(currentPath)
+			layerID := strings.TrimSuffix(basename, ".qcow2")
+
+			// Verify the layer exists in the database
+			layerState, err := v.stateDB.GetLayer(layerID)
+			if err != nil || layerState == nil {
+				return nil, fmt.Errorf("cached layer %s not found in database", layerID)
+			}
+
+			// Add to the beginning of the list (we're walking from top to base)
+			layerIDs = append([]string{layerID}, layerIDs...)
+
+			fmt.Fprintf(os.Stderr, "[WALK-CHAIN] Found cached layer: %s (size: %d)\n", layerID, layerState.Size)
+		}
+
+		// Get the next backing file
+		nextBackingFile, err := v.qcow2Client.GetBackingFile(ctx, currentPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get backing file for %s: %w", currentPath, err)
+		}
+
+		// If no more backing files, we've reached the end
+		if nextBackingFile == "" {
+			break
+		}
+
+		// Resolve relative paths
+		if !filepath.IsAbs(nextBackingFile) {
+			nextBackingFile = filepath.Join(filepath.Dir(currentPath), nextBackingFile)
+		}
+
+		currentPath = nextBackingFile
+	}
+
+	return layerIDs, nil
+}
+
+// commitWorkingImageAsLayer preserves the layer structure and commits the working layer as a delta
+// This allows proper layer reuse and deduplication when pushing to S3
 func (v *disk) commitWorkingImageAsLayer(ctx context.Context) error {
-	// CRITICAL: Clean up old layer mappings first
-	// Get existing layer mappings to clean up
+	// Get existing layer mappings (from fork or previous commits)
 	oldLayers, err := v.stateDB.GetDiskLayers(v.name)
 	if err != nil {
 		return fmt.Errorf("failed to get old disk layers: %w", err)
 	}
 
-	// Decrement ref counts for old layers
-	for _, oldLayer := range oldLayers {
-		if err := v.stateDB.DecrementLayerRefCount(oldLayer.LayerID); err != nil {
-			fmt.Fprintf(os.Stderr, "warning: failed to decrement ref count for layer %s: %v\n", oldLayer.LayerID, err)
+	// Get the backing chain to preserve layer structure
+	layerCacheDir := filepath.Join(v.config.DataDir, "layer-cache")
+	backingChain, err := v.walkBackingChain(ctx, v.imagePath, layerCacheDir)
+	if err != nil {
+		return fmt.Errorf("failed to walk backing chain: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "[COMMIT] Found %d existing layer mappings, %d layers in backing chain\n",
+		len(oldLayers), len(backingChain))
+
+	// Check if we already have correct mappings (e.g., from fork)
+	if len(oldLayers) > 0 && len(oldLayers) == len(backingChain) {
+		// Verify mappings match the backing chain
+		mappingsMatch := true
+		for i, oldLayer := range oldLayers {
+			if i >= len(backingChain) || oldLayer.LayerID != backingChain[i] {
+				mappingsMatch = false
+				break
+			}
 		}
+
+		if mappingsMatch {
+			fmt.Fprintf(os.Stderr, "[COMMIT] Layer mappings already correct, only adding new working layer\n")
+			// Don't delete mappings, we'll just add the new working layer
+		} else {
+			// Mappings don't match, clean up and recreate
+			fmt.Fprintf(os.Stderr, "[COMMIT] Layer mappings don't match backing chain, recreating...\n")
+			for _, oldLayer := range oldLayers {
+				if err := v.stateDB.DecrementLayerRefCount(oldLayer.LayerID); err != nil {
+					fmt.Fprintf(os.Stderr, "warning: failed to decrement ref count for layer %s: %v\n", oldLayer.LayerID, err)
+				}
+			}
+			if err := v.stateDB.DeleteDiskLayers(v.name); err != nil {
+				return fmt.Errorf("failed to delete old disk-layer mappings: %w", err)
+			}
+			oldLayers = nil // Mark as needing recreation
+		}
+	} else if len(oldLayers) > 0 {
+		// Have some mappings but count doesn't match backing chain
+		fmt.Fprintf(os.Stderr, "[COMMIT] Layer mapping count mismatch, cleaning up...\n")
+		for _, oldLayer := range oldLayers {
+			if err := v.stateDB.DecrementLayerRefCount(oldLayer.LayerID); err != nil {
+				fmt.Fprintf(os.Stderr, "warning: failed to decrement ref count for layer %s: %v\n", oldLayer.LayerID, err)
+			}
+		}
+		if err := v.stateDB.DeleteDiskLayers(v.name); err != nil {
+			return fmt.Errorf("failed to delete old disk-layer mappings: %w", err)
+		}
+		oldLayers = nil // Mark as needing recreation
 	}
 
-	// Delete old disk-layer mappings
-	if err := v.stateDB.DeleteDiskLayers(v.name); err != nil {
-		return fmt.Errorf("failed to delete old disk-layer mappings: %w", err)
-	}
-
-	// Create layer ID
+	// Create layer ID for the working layer
 	layerID := fmt.Sprintf("layer-%d", time.Now().Unix())
 
-	// Flatten the working image (merge all backing data)
-	flattenedPath := v.imagePath + ".flattened"
-	if err := v.qcow2Client.Convert(ctx, v.imagePath, flattenedPath); err != nil {
-		return fmt.Errorf("failed to flatten working image: %w", err)
-	}
-	defer os.Remove(flattenedPath)
-
-	// Save flattened layer to cache
-	layerCacheDir := filepath.Join(v.config.DataDir, "layer-cache")
+	// Save the working layer (delta only) to cache
+	// This preserves only the changes made in this disk, not the entire flattened data
 	cachedLayerPath := filepath.Join(layerCacheDir, layerID+".qcow2")
 
-	if err := v.copyFile(flattenedPath, cachedLayerPath); err != nil {
-		return fmt.Errorf("failed to cache layer: %w", err)
+	if err := v.copyFile(v.imagePath, cachedLayerPath); err != nil {
+		return fmt.Errorf("failed to cache working layer: %w", err)
 	}
 
-	// Get layer file info
+	// CRITICAL: Remove backing file reference from the cached layer
+	// This makes it a standalone delta-only layer that won't merge backing data when "flattened"
+	// for S3 upload. We use RebaseUnsafe with empty backing file to strip the reference.
+	if err := v.qcow2Client.RebaseUnsafe(ctx, cachedLayerPath, ""); err != nil {
+		os.Remove(cachedLayerPath)
+		return fmt.Errorf("failed to remove backing reference from cached layer: %w", err)
+	}
+	fmt.Fprintf(os.Stderr, "[COMMIT] Removed backing file reference from cached layer %s (now standalone delta)\n", layerID)
+
+	// Get layer file info (delta layer only)
 	fileInfo, err := os.Stat(cachedLayerPath)
 	if err != nil {
 		os.Remove(cachedLayerPath)
 		return fmt.Errorf("failed to get layer file info: %w", err)
 	}
 
-	// Calculate checksum
+	// Calculate checksum of the delta layer
 	checksum, err := v.qcow2Client.Checksum(ctx, cachedLayerPath)
 	if err != nil {
 		os.Remove(cachedLayerPath)
 		return fmt.Errorf("failed to calculate checksum: %w", err)
 	}
 
-	// Create layer state
+	// Create layer state for the working layer
 	layerState := &LayerState{
 		ID:       layerID,
 		Checksum: checksum,
@@ -471,12 +582,36 @@ func (v *disk) commitWorkingImageAsLayer(ctx context.Context) error {
 		return fmt.Errorf("failed to save layer state: %w", err)
 	}
 
-	// Create NEW disk-layer mapping (old ones have been deleted)
-	if err := v.stateDB.AddDiskLayerMapping(v.name, layerID, 0); err != nil {
+	// Create disk-layer mappings if they don't already exist
+	// If oldLayers is nil, we need to recreate all mappings
+	// If oldLayers exists and matches, we only add the new working layer
+	if oldLayers == nil {
+		// Create mappings for ALL layers in the chain (preserving order)
+		fmt.Fprintf(os.Stderr, "[COMMIT] Creating layer mappings for %d backing layers\n", len(backingChain))
+		for i, backingLayerID := range backingChain {
+			if err := v.stateDB.AddDiskLayerMapping(v.name, backingLayerID, i); err != nil {
+				os.Remove(cachedLayerPath)
+				v.stateDB.DecrementLayerRefCount(layerID)
+				return fmt.Errorf("failed to add backing layer mapping for %s: %w", backingLayerID, err)
+			}
+			// Increment ref count for backing layers we're now referencing
+			if err := v.stateDB.IncrementLayerRefCount(backingLayerID); err != nil {
+				fmt.Fprintf(os.Stderr, "warning: failed to increment ref count for layer %s: %v\n", backingLayerID, err)
+			}
+			fmt.Fprintf(os.Stderr, "[COMMIT] Added backing layer mapping: position %d -> %s\n", i, backingLayerID)
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, "[COMMIT] Keeping existing %d layer mappings\n", len(oldLayers))
+	}
+
+	// Add the new working layer as the top layer
+	topPosition := len(backingChain)
+	if err := v.stateDB.AddDiskLayerMapping(v.name, layerID, topPosition); err != nil {
 		os.Remove(cachedLayerPath)
 		v.stateDB.DecrementLayerRefCount(layerID)
-		return fmt.Errorf("failed to add disk-layer mapping: %w", err)
+		return fmt.Errorf("failed to add working layer mapping: %w", err)
 	}
+	fmt.Fprintf(os.Stderr, "[COMMIT] Added working layer mapping: position %d -> %s\n", topPosition, layerID)
 
 	// Create new empty working layer BEFORE removing old files
 	diskLayersDir := filepath.Join(v.config.DataDir, "layers", v.name)
@@ -588,18 +723,15 @@ func (v *disk) pushLayeredDisk(ctx context.Context, state *DiskState, diskLayers
 		if !layerExists {
 			fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Uploading layer %s to S3 as %s...\n", diskLayer.LayerID, s3LayerID)
 
-			// Flatten the layer before upload to remove backing file references
-			flattenedPath := layerPath + ".flattened"
-			defer os.Remove(flattenedPath)
-
-			if err := v.qcow2Client.Convert(ctx, layerPath, flattenedPath); err != nil {
-				return fmt.Errorf("failed to flatten layer %s: %w", diskLayer.LayerID, err)
-			}
-
-			// Upload the flattened layer with shared name
-			if err := v.s3Client.UploadSharedLayer(ctx, s3LayerID, flattenedPath); err != nil {
+			// Upload the cached layer directly (no flattening needed)
+			// The layer already has its backing file reference removed in commitWorkingImageAsLayer,
+			// making it a standalone sparse delta layer that tar will compress efficiently
+			if err := v.s3Client.UploadSharedLayer(ctx, s3LayerID, layerPath); err != nil {
 				return fmt.Errorf("failed to upload shared layer %s: %w", diskLayer.LayerID, err)
 			}
+
+			fmt.Fprintf(os.Stderr, "[PUSH-LAYERED] Successfully uploaded layer %s (size: %d bytes)\n",
+				diskLayer.LayerID, layerState.Size)
 		}
 
 		// Create S3 layer info referencing the shared layer
