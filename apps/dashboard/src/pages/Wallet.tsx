@@ -90,8 +90,7 @@ const Wallet = () => {
     setRedeemCouponError(null)
     setRedeemCouponSuccess(null)
     try {
-      await billingApi.redeemCoupon(selectedOrganization.id, couponCode)
-      setRedeemCouponSuccess('Coupon redeemed successfully')
+      setRedeemCouponSuccess(await billingApi.redeemCoupon(selectedOrganization.id, couponCode))
       setTimeout(() => {
         setRedeemCouponSuccess(null)
       }, 3000)
