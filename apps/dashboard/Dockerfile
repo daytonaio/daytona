@@ -20,6 +20,6 @@ ENV DAYTONA_BASE_API_URL="http://api:3000"
 
 EXPOSE 80
 
-HEALTHCHECK CMD [ "curl", "-f", "http://localhost/" ]
+HEALTHCHECK CMD [ "wget", "-q", "--spider", "http://localhost/" ]
 
 ENTRYPOINT ["/entrypoint.sh"]
