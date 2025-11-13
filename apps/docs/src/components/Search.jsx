@@ -18,6 +18,10 @@ import '../styles/components/search.scss'
 
 const ALGOLIA_APP_ID = import.meta.env.PUBLIC_ALGOLIA_APP_ID || null
 const ALGOLIA_API_KEY = import.meta.env.PUBLIC_ALGOLIA_API_KEY || null
+const DOCS_INDEX_NAME =
+  import.meta.env.PUBLIC_ALGOLIA_DOCS_INDEX_NAME || 'docs_test'
+const CLI_INDEX_NAME = import.meta.env.PUBLIC_ALGOLIA_CLI_INDEX_NAME || 'cli_test'
+const SDK_INDEX_NAME = import.meta.env.PUBLIC_ALGOLIA_SDK_INDEX_NAME || 'sdk_test'
 
 const searchClient =
   ALGOLIA_APP_ID && ALGOLIA_API_KEY
@@ -29,6 +33,7 @@ function SearchContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [debounceQuery, setDebounceQuery] = useState('')
   const [displayHits, setDisplayHits] = useState(false)
+  const [totalHits, setTotalHits] = useState(0)
   const debounceTimeoutRef = useRef(null)
   const searchWrapperRef = useRef(null)
   const t = useGT()
@@ -40,6 +45,7 @@ function SearchContent() {
           setSearchQuery('')
           setDebounceQuery('')
           setDisplayHits(false)
+          setTotalHits(0)
         }
         return !prev
       })
@@ -54,6 +60,7 @@ function SearchContent() {
         setSearchQuery('')
         setDebounceQuery('')
         setDisplayHits(false)
+        setTotalHits(0)
       }
     }
 
@@ -75,6 +82,7 @@ function SearchContent() {
         setSearchQuery('')
         setDebounceQuery('')
         setDisplayHits(false)
+        setTotalHits(0)
       }
     }
 
@@ -103,6 +111,7 @@ function SearchContent() {
     }
 
     debounceTimeoutRef.current = setTimeout(() => {
+      setTotalHits(0)
       setDebounceQuery(searchQuery)
     }, 400)
 
@@ -120,7 +129,7 @@ function SearchContent() {
         className="searchbox-wrapper"
         ref={searchWrapperRef}
       >
-        <InstantSearch indexName="docs" searchClient={searchClient}>
+        <InstantSearch indexName={DOCS_INDEX_NAME} searchClient={searchClient}>
           <div className="search-bar-container">
             <SearchBox
               translations={{
@@ -137,22 +146,36 @@ function SearchContent() {
             {debounceQuery && (
               <>
                 <SearchIndex
-                  indexName="docs"
+                  indexName={DOCS_INDEX_NAME}
                   setDisplayHits={setDisplayHits}
                   setIsSearchVisible={setIsSearchVisible}
+                  setTotalHits={setTotalHits}
+                  debounceQuery={debounceQuery}
                 />
-                <hr style={{ marginBottom: '40px' }} />
                 <SearchIndex
-                  indexName="blogs_test"
+                  indexName={CLI_INDEX_NAME}
                   setDisplayHits={setDisplayHits}
                   setIsSearchVisible={setIsSearchVisible}
+                  setTotalHits={setTotalHits}
+                  debounceQuery={debounceQuery}
                 />
-                <hr style={{ marginBottom: '40px' }} />
                 <SearchIndex
-                  indexName="website"
+                  indexName={SDK_INDEX_NAME}
                   setDisplayHits={setDisplayHits}
                   setIsSearchVisible={setIsSearchVisible}
+                  setTotalHits={setTotalHits}
+                  debounceQuery={debounceQuery}
                 />
+                {totalHits === 0 && (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '20px',
+                    color: 'var(--primary-text-color)',
+                    fontSize: '16px'
+                  }}>
+                    No results found for "<strong>{debounceQuery}</strong>"
+                  </div>
+                )}
               </>
             )}
             <Configure hitsPerPage={10} clickAnalytics getRankingInfo={false} />
@@ -163,9 +186,32 @@ function SearchContent() {
   )
 }
 
-function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible }) {
+function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible, setTotalHits, debounceQuery }) {
   return (
     <Index indexName={indexName}>
+      <ConditionalSearchIndex 
+        indexName={indexName}
+        setDisplayHits={setDisplayHits}
+        setIsSearchVisible={setIsSearchVisible}
+        setTotalHits={setTotalHits}
+        debounceQuery={debounceQuery}
+      />
+    </Index>
+  )
+}
+
+const ConditionalSearchIndexComponent = ({ indexName, setDisplayHits, setIsSearchVisible, nbHits, setTotalHits, debounceQuery }) => {
+  useEffect(() => {
+    setDisplayHits(nbHits > 0)
+    setTotalHits(prev => prev + nbHits)
+  }, [nbHits, setDisplayHits, setTotalHits, debounceQuery])
+
+  if (nbHits === 0) {
+    return null
+  }
+
+  return (
+    <>
       <div data-index={indexName}>
         <div
           className="stats-pagination-wrapper"
@@ -190,9 +236,12 @@ function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible }) {
           )}
         />
       </div>
-    </Index>
+      <hr style={{ marginBottom: '40px' }} />
+    </>
   )
 }
+
+const ConditionalSearchIndex = connectStats(ConditionalSearchIndexComponent)
 
 function Hit({ hit, setIsSearchVisible, indexName }) {
   const handleClick = e => {
@@ -206,7 +255,7 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
     }
 
     const currentUrl = window.location.href
-
+    
     if (currentUrl.includes(hitUrl)) {
       const element = document.querySelector(`[data-slug='${hit.slug}']`)
       if (element) {
@@ -228,7 +277,7 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
       }}
     >
       <a href={hit.url} tabIndex="-1" onClick={handleClick}>
-        {(indexName === 'docs' || indexName === 'website') && (
+        {([DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME].includes(indexName) || indexName === 'website') && (
           <>
             <h5
               style={{
@@ -310,12 +359,16 @@ const CustomStats = ({ nbHits, indexName, setDisplayHits }) => {
 
   const getIndexLabel = () => {
     switch (indexName) {
-      case 'docs':
+      case DOCS_INDEX_NAME:
         return 'Documentation'
       case 'blogs_test':
         return 'Blog'
       case 'website':
         return 'Website'
+      case CLI_INDEX_NAME:
+        return 'CLI'
+      case SDK_INDEX_NAME:
+        return 'SDK'
       default:
         return 'Results'
     }
