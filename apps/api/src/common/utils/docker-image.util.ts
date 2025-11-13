@@ -39,7 +39,8 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
 
   const result: DockerImageInfo = {
     originalName: imageName,
-  } as DockerImageInfo
+    repository: '',
+  }
 
   // Check for digest format first
   let parts: string[] = []
@@ -70,7 +71,7 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
   }
 
   // Check if first part looks like a registry (contains '.' or ':')
-  if (parts.length > 1 && (parts[0].includes('.') || parts[0].includes(':'))) {
+  if (parts.length >= 3) {
     result.registry = parts[0]
     parts.shift() // Remove registry part
   }

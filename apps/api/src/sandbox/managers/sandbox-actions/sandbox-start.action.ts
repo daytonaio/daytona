@@ -25,7 +25,6 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
-import { ToolboxService } from '../../services/toolbox.deprecated.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -35,7 +34,6 @@ export class SandboxStartAction extends SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
-    protected toolboxService: ToolboxService,
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
