@@ -604,7 +604,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       // save snapshotRunner
 
-      const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
+      const internalSnapshotName = `${registry.url.replace(/^(https?:\/\/)/, '')}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
 
       snapshot.internalName = internalSnapshotName
       await this.snapshotRepository.save(snapshot)
