@@ -101,7 +101,10 @@ func BuildSnapshot(ctx *gin.Context) {
 			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to internal registry")))
 			return
 		}
-		tag = fmt.Sprintf("%s/%s/%s", request.Registry.Url, *request.Registry.Project, request.Snapshot)
+		sanitizedURL := strings.TrimPrefix(request.Registry.Url, "http://")
+		sanitizedURL = strings.TrimPrefix(sanitizedURL, "https://")
+
+		tag = fmt.Sprintf("%s/%s/%s", sanitizedURL, *request.Registry.Project, request.Snapshot)
 	}
 
 	err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, tag)
