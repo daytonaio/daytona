@@ -414,8 +414,29 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
+    const originalState = sandboxToUpdate.state
+    const originalRunnerId = sandboxToUpdate.runnerId
+
     sandboxToUpdate.setBackupState(backupState, undefined, undefined, backupErrorReason)
-    await this.sandboxRepository.save(sandboxToUpdate)
+
+    const updateData: Partial<Sandbox> = {
+      backupState: sandboxToUpdate.backupState,
+      backupSnapshot: sandboxToUpdate.backupSnapshot,
+      backupRegistryId: sandboxToUpdate.backupRegistryId,
+      backupErrorReason: sandboxToUpdate.backupErrorReason,
+      lastBackupAt: sandboxToUpdate.lastBackupAt,
+      existingBackupSnapshots: sandboxToUpdate.existingBackupSnapshots,
+    }
+
+    if (sandboxToUpdate.state !== originalState) {
+      updateData.state = sandboxToUpdate.state
+    }
+
+    if (sandboxToUpdate.runnerId !== originalRunnerId) {
+      updateData.runnerId = sandboxToUpdate.runnerId
+    }
+
+    await this.sandboxRepository.update(sandboxId, updateData)
   }
 
   @OnEvent(SandboxEvents.ARCHIVED)
