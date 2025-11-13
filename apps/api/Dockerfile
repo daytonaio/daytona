@@ -120,4 +120,4 @@ ENV RUN_MIGRATIONS=true
 
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:3000/api/config" ]
 
-ENTRYPOINT ["sh", "-c", "dockerd-entrypoint.sh & node dist/apps/api/main.js"]
+ENTRYPOINT ["node", "dist/apps/api/main.js"]
