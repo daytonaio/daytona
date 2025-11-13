@@ -124,10 +124,7 @@ func PullSnapshot(ctx *gin.Context) {
 			}
 
 			ref := "daytona-" + getHashWithoutPrefix(imageInfo.Hash) + ":daytona"
-
-			sanitizedURL := strings.TrimPrefix(request.DestinationRegistry.Url, "http://")
-			sanitizedURL = strings.TrimPrefix(sanitizedURL, "https://")
-			targetRef = fmt.Sprintf("%s/%s/%s", sanitizedURL, *request.DestinationRegistry.Project, ref)
+			targetRef = fmt.Sprintf("%s/%s/%s", request.DestinationRegistry.Url, *request.DestinationRegistry.Project, ref)
 		}
 
 		// Tag the image for the target registry
