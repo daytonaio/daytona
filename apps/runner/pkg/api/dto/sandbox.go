@@ -4,22 +4,23 @@
 package dto
 
 type CreateSandboxDTO struct {
-	Id               string            `json:"id" validate:"required"`
-	FromVolumeId     string            `json:"fromVolumeId,omitempty"`
-	UserId           string            `json:"userId" validate:"required"`
-	Snapshot         string            `json:"snapshot" validate:"required"`
-	OsUser           string            `json:"osUser" validate:"required"`
-	CpuQuota         int64             `json:"cpuQuota" validate:"min=1"`
-	GpuQuota         int64             `json:"gpuQuota" validate:"min=0"`
-	MemoryQuota      int64             `json:"memoryQuota" validate:"min=1"`
-	StorageQuota     int64             `json:"storageQuota" validate:"min=1"`
-	Env              map[string]string `json:"env,omitempty"`
-	Registry         *RegistryDTO      `json:"registry,omitempty"`
-	Entrypoint       []string          `json:"entrypoint,omitempty"`
-	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
-	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
-	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
-	Metadata         map[string]string `json:"metadata,omitempty"`
+	Id                    string            `json:"id" validate:"required"`
+	FromVolumeId          string            `json:"fromVolumeId,omitempty"`
+	UserId                string            `json:"userId" validate:"required"`
+	Snapshot              string            `json:"snapshot" validate:"required"`
+	OsUser                string            `json:"osUser" validate:"required"`
+	CpuQuota              int64             `json:"cpuQuota" validate:"min=1"`
+	GpuQuota              int64             `json:"gpuQuota" validate:"min=0"`
+	MemoryQuota           int64             `json:"memoryQuota" validate:"min=1"`
+	StorageQuota          int64             `json:"storageQuota" validate:"min=1"`
+	StorageExpansionQuota int64             `json:"storageExpansionQuota,omitempty"` // Tracks additional storage added through recovery
+	Env                   map[string]string `json:"env,omitempty"`
+	Registry              *RegistryDTO      `json:"registry,omitempty"`
+	Entrypoint            []string          `json:"entrypoint,omitempty"`
+	Volumes               []VolumeDTO       `json:"volumes,omitempty"`
+	NetworkBlockAll       *bool             `json:"networkBlockAll,omitempty"`
+	NetworkAllowList      *string           `json:"networkAllowList,omitempty"`
+	Metadata              map[string]string `json:"metadata,omitempty"`
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {
@@ -33,3 +34,7 @@ type UpdateNetworkSettingsDTO struct {
 	NetworkAllowList   *string `json:"networkAllowList,omitempty"`
 	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO
+
+type RecoverStorageDTO struct {
+	NewStorageQuota int64 `json:"newStorageQuota" validate:"min=1"` // New total storage quota in GB
+} //	@name	RecoverStorageDTO

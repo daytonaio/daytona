@@ -50,6 +50,12 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 
 	err = d.apiClient.ContainerStart(ctx, containerId, container.StartOptions{})
 	if err != nil {
+		// Check if this is a storage limit error
+		if isStorageLimitError(err) {
+			log.Warnf("Storage limit error detected for container %s: %v", containerId, err)
+			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateError)
+			return fmt.Errorf("no space left on device - storage limit reached. Run recover-storage to expand storage: %w", err)
+		}
 		return err
 	}
 

@@ -377,6 +377,44 @@ type SandboxInfoResponse struct {
 	BackupError *string            `json:"backupError,omitempty"`
 } //	@name	SandboxInfoResponse
 
+// RecoverStorage godoc
+//
+//	@Tags			sandbox
+//	@Summary		Recover sandbox from storage limit
+//	@Description	Recover sandbox from storage limit by expanding storage quota
+//	@Produce		json
+//	@Param			sandboxId	path		string							true	"Sandbox ID"
+//	@Param			recovery	body		dto.RecoverStorageDTO			true	"Recovery parameters"
+//	@Success		200			{string}	string							"Sandbox storage recovered"
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/recover-storage [post]
+//
+//	@id				RecoverStorage
+func RecoverStorage(ctx *gin.Context) {
+	var recoverStorageDto dto.RecoverStorageDTO
+	err := ctx.ShouldBindJSON(&recoverStorageDto)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	sandboxId := ctx.Param("sandboxId")
+
+	runner := runner.GetInstance(nil)
+
+	err = runner.Docker.RecoverFromStorageLimit(ctx.Request.Context(), sandboxId, recoverStorageDto.NewStorageQuota)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "Sandbox storage recovered")
+}
+
 // RemoveDestroyed godoc
 //
 //	@Tags			sandbox

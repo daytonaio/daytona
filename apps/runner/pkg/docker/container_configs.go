@@ -140,8 +140,9 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 
 	filesystem := d.getFilesystem(info)
 	if filesystem == "xfs" {
+		totalStorageQuota := sandboxDto.StorageQuota + sandboxDto.StorageExpansionQuota
 		hostConfig.StorageOpt = map[string]string{
-			"size": fmt.Sprintf("%dG", sandboxDto.StorageQuota),
+			"size": fmt.Sprintf("%dG", totalStorageQuota),
 		}
 	}
 
