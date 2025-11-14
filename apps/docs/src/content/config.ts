@@ -417,6 +417,23 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
+      label: labels['sidebarconfig.integrations'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/langchain-data-analysis', locale),
+          label: labels['sidebarconfig.langchainIntegrations'],
+          disablePagination: true,
+          attrs: {
+            icon: 'langchain.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
       label: labels['sidebarconfig.deployments'],
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
