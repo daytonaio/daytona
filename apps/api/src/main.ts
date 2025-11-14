@@ -38,7 +38,7 @@ const httpsOptions: HttpsOptions = {
 
 async function bootstrap() {
   if (process.env.OTEL_ENABLED === 'true') {
-    await otelSdk.start()
+    otelSdk.start()
   }
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
