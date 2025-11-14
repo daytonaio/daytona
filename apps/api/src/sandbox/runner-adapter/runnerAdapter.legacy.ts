@@ -184,7 +184,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       registry: registry
         ? {
             project: registry.project,
-            url: registry.url,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
             username: registry.username,
             password: registry.password,
           }
@@ -227,7 +227,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     if (registry) {
       request.registry = {
         project: registry.project,
-        url: registry.url,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
         username: registry.username,
         password: registry.password,
       }
@@ -253,7 +253,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     if (registry) {
       request.registry = {
         project: registry.project,
-        url: registry.url,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
         username: registry.username,
         password: registry.password,
       }
@@ -274,7 +274,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     if (registry) {
       request.registry = {
         project: registry.project,
-        url: registry.url,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
         username: registry.username,
         password: registry.password,
       }
