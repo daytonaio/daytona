@@ -77,6 +77,7 @@ jobs:
 
       - name: Publish projects
         run: |
+          source "$(poetry env info --path)/bin/activate"
           yarn publish
 
   update-homebrew-tap:
