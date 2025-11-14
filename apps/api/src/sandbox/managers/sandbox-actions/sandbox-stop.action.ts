@@ -48,10 +48,15 @@ export class SandboxStopAction extends SandboxAction {
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         switch (sandboxInfo.state) {
           case SandboxState.STOPPED: {
-            await this.updateSandboxState(sandbox.id, SandboxState.STOPPED, lockCode)
-            await this.sandboxRepository.update(sandbox.id, {
-              backupState: BackupState.NONE,
-            })
+            await this.updateSandboxState(
+              sandbox.id,
+              SandboxState.STOPPED,
+              lockCode,
+              undefined,
+              undefined,
+              undefined,
+              BackupState.NONE,
+            )
             return DONT_SYNC_AGAIN
           }
           case SandboxState.ERROR: {
