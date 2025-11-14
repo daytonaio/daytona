@@ -50,6 +50,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
   private stopUnusedCronJobs(): void {
     if (this.configService.get('cron.disableAll') || this.configService.get('maintananceMode')) {
+      this.logger.log('Stopping all cron jobs')
       this.stopAllCronJobs()
       return
     }
@@ -86,7 +87,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       const jobs = scopedJobs.get(scope)
       if (jobs) {
         Array.from(jobs.keys()).forEach((job) => {
-          this.logger.error(`Stopping cron job: ${job} due to not being in enabled scopes`)
+          this.logger.log(`Stopping cron job: ${job} due to not being in enabled scopes`)
           this.schedulerRegistry.deleteCronJob(job)
         })
       }
