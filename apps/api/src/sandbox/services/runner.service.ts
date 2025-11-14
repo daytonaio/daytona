@@ -26,6 +26,7 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 @Injectable()
 export class RunnerService {
@@ -194,7 +195,7 @@ export class RunnerService {
     })
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: `${CRON_SCOPES.RUNNERS}:check-runners`, waitForCompletion: true })
   @LogExecution('check-runners')
   @WithInstrumentation()
   private async handleCheckRunners() {
