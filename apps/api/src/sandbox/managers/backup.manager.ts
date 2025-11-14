@@ -33,6 +33,7 @@ import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-ex
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -297,12 +298,17 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       return
     }
 
-    // Get available backup registry
-    const registry = await this.dockerRegistryService.getAvailableBackupRegistry(sandbox.region)
+    let registry: DockerRegistry | null = null
+
+    if (sandbox.backupRegistryId) {
+      registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+    } else {
+      registry = await this.dockerRegistryService.getAvailableBackupRegistry(sandbox.region)
+    }
+
     if (!registry) {
       throw new BadRequestError('No backup registry configured')
     }
-
     // Generate backup snapshot name
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const backupSnapshot = `${registry.url.replace('https://', '').replace('http://', '')}/${registry.project}/backup-${sandbox.id}:${timestamp}`
