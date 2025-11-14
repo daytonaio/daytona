@@ -25,7 +25,16 @@ import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
 import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
+import { WithInstrumentation } from './utils/otel.decorator'
 import { context, trace, propagation, SpanStatusCode } from '@opentelemetry/api'
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base'
+import { ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
+import { resourceFromAttributes } from '@opentelemetry/resources'
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
 
 /**
  * Represents a volume mount for a Sandbox.
@@ -52,6 +61,8 @@ export interface VolumeMount extends SandboxVolume {
  * @property {string} apiUrl - URL of the Daytona API. Defaults to 'https://app.daytona.io/api'
  * if not set here and not set in environment variable DAYTONA_API_URL.
  * @property {string} target - Target location for Sandboxes
+ * @property {boolean} otelEnabled - OpenTelemetry tracing enabled.
+ * If set, all SDK operations will be traced.
  *
  * @example
  * const config: DaytonaConfig = {
@@ -77,6 +88,8 @@ export interface DaytonaConfig {
   serverUrl?: string
   /** Target environment for sandboxes */
   target?: string
+  /** OpenTelemetry tracing enabled */
+  otelEnabled?: boolean
 }
 
 /**
@@ -207,9 +220,14 @@ export type SandboxFilter = {
  * };
  * const daytona = new Daytona(config);
  *
+ * @example
+ * // Disposes daytona and flushes traces when done
+ * await using daytona = new Daytona({
+ *   otelEnabled: true,
+ * });
  * @class
  */
-export class Daytona {
+export class Daytona implements AsyncDisposable {
   private readonly clientConfig: Configuration
   private readonly sandboxApi: SandboxApi
   private readonly objectStorageApi: ObjectStorageApi
@@ -220,6 +238,7 @@ export class Daytona {
   private readonly organizationId?: string
   private readonly apiUrl: string
   private proxyToolboxUrl?: string
+  private otelSdk?: NodeSDK
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -297,6 +316,45 @@ export class Daytona {
       this.objectStorageApi,
     )
     this.clientConfig = configuration
+
+    if (!config?.otelEnabled) {
+      return
+    }
+
+    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO)
+
+    this.otelSdk = new NodeSDK({
+      resource: resourceFromAttributes({
+        [ATTR_SERVICE_VERSION]: packageJson.version,
+      }),
+      instrumentations: [
+        new HttpInstrumentation({
+          requireParentforOutgoingSpans: false,
+        }),
+      ],
+      spanProcessors: [
+        new BatchSpanProcessor(
+          new OTLPTraceExporter({
+            compression: CompressionAlgorithm.GZIP,
+          }),
+        ),
+      ],
+    })
+
+    this.otelSdk.start()
+
+    // Flush and shutdown OTEL on process exit
+    process.on('SIGTERM', async () => {
+      await this.otelSdk?.shutdown()
+    })
+  }
+
+  async [Symbol.asyncDispose](): Promise<void> {
+    if (!this.otelSdk) {
+      return
+    }
+
+    await this.otelSdk.shutdown()
   }
 
   /**
@@ -365,6 +423,7 @@ export class Daytona {
     params?: CreateSandboxFromImageParams,
     options?: { onSnapshotCreateLogs?: (chunk: string) => void; timeout?: number },
   ): Promise<Sandbox>
+  @WithInstrumentation()
   public async create(
     params?: CreateSandboxFromSnapshotParams | CreateSandboxFromImageParams,
     options: { onSnapshotCreateLogs?: (chunk: string) => void; timeout?: number } = { timeout: 60 },
@@ -531,6 +590,7 @@ export class Daytona {
    * const sandbox = await daytona.get('my-sandbox-id-or-name');
    * console.log(`Sandbox state: ${sandbox.state}`);
    */
+  @WithInstrumentation()
   public async get(sandboxIdOrName: string): Promise<Sandbox> {
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
@@ -557,6 +617,7 @@ export class Daytona {
    * const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
    * console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
    */
+  @WithInstrumentation()
   public async findOne(filter: SandboxFilter): Promise<Sandbox> {
     if (filter.idOrName) {
       return this.get(filter.idOrName)
@@ -584,6 +645,7 @@ export class Daytona {
    *     console.log(`${sandbox.id}: ${sandbox.state}`);
    * }
    */
+  @WithInstrumentation()
   public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes> {
     const response = await this.sandboxApi.listSandboxesPaginated(
       undefined,
@@ -624,6 +686,7 @@ export class Daytona {
    * // Wait up to 60 seconds for the sandbox to start
    * await daytona.start(sandbox, 60);
    */
+  @WithInstrumentation()
   public async start(sandbox: Sandbox, timeout?: number) {
     await sandbox.start(timeout)
   }
@@ -638,6 +701,7 @@ export class Daytona {
    * const sandbox = await daytona.get('my-sandbox-id');
    * await daytona.stop(sandbox);
    */
+  @WithInstrumentation()
   public async stop(sandbox: Sandbox) {
     await sandbox.stop()
   }
@@ -653,6 +717,7 @@ export class Daytona {
    * const sandbox = await daytona.get('my-sandbox-id');
    * await daytona.delete(sandbox);
    */
+  @WithInstrumentation()
   public async delete(sandbox: Sandbox, timeout = 60) {
     await sandbox.delete(timeout)
   }
@@ -792,6 +857,7 @@ export class Daytona {
     return axiosInstance
   }
 
+  @WithInstrumentation()
   public async getProxyToolboxUrl(): Promise<string> {
     if (this.proxyToolboxUrl) {
       return this.proxyToolboxUrl

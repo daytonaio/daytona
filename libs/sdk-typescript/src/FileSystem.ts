@@ -22,6 +22,7 @@ import {
   processDownloadFilesResponseWithBusboy,
   processDownloadFilesResponseWithBuffered,
 } from './utils/FileTransfer'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Parameters for setting file permissions in the Sandbox.
@@ -127,6 +128,7 @@ export class FileSystem {
    * // Create a directory with standard permissions
    * await fs.createFolder('app/data', '755');
    */
+  @WithInstrumentation()
   public async createFolder(path: string, mode: string): Promise<void> {
     const response = await this.apiClient.createFolder(path, mode)
     return response.data
@@ -143,6 +145,7 @@ export class FileSystem {
    * // Delete a file
    * await fs.deleteFile('app/temp.log');
    */
+  @WithInstrumentation()
   public async deleteFile(path: string, recursive?: boolean): Promise<void> {
     const response = await this.apiClient.deleteFile(path, recursive)
     return response.data
@@ -178,6 +181,7 @@ export class FileSystem {
    * await fs.downloadFile('tmp/data.json', 'local_file.json');
    */
   public async downloadFile(remotePath: string, localPath: string, timeout?: number): Promise<void>
+  @WithInstrumentation()
   public async downloadFile(src: string, dst?: string | number, timeout: number = 30 * 60): Promise<Buffer | void> {
     const remotePath = src
 
@@ -227,6 +231,7 @@ export class FileSystem {
    *   }
    * });
    */
+  @WithInstrumentation()
   public async downloadFiles(
     files: FileDownloadRequest[],
     timeoutSec: number = 30 * 60,
@@ -289,6 +294,7 @@ export class FileSystem {
    *   console.log(`${match.file}:${match.line}: ${match.content}`);
    * });
    */
+  @WithInstrumentation()
   public async findFiles(path: string, pattern: string): Promise<Array<Match>> {
     const response = await this.apiClient.findInFiles(path, pattern)
     return response.data
@@ -305,6 +311,7 @@ export class FileSystem {
    * const info = await fs.getFileDetails('app/config.json');
    * console.log(`Size: ${info.size}, Modified: ${info.modTime}`);
    */
+  @WithInstrumentation()
   public async getFileDetails(path: string): Promise<FileInfo> {
     const response = await this.apiClient.getFileInfo(path)
     return response.data
@@ -323,6 +330,7 @@ export class FileSystem {
    *   console.log(`${file.name} (${file.size} bytes)`);
    * });
    */
+  @WithInstrumentation()
   public async listFiles(path: string): Promise<FileInfo[]> {
     const response = await this.apiClient.listFiles(path)
     return response.data
@@ -339,6 +347,7 @@ export class FileSystem {
    * // Move a file to a new location
    * await fs.moveFiles('app/temp/data.json', 'app/data/data.json');
    */
+  @WithInstrumentation()
   public async moveFiles(source: string, destination: string): Promise<void> {
     const response = await this.apiClient.moveFile(source, destination)
     return response.data
@@ -360,6 +369,7 @@ export class FileSystem {
    *   '"version": "1.1.0"'
    * );
    */
+  @WithInstrumentation()
   public async replaceInFiles(files: string[], pattern: string, newValue: string): Promise<Array<ReplaceResult>> {
     const replaceRequest: ReplaceRequest = {
       files,
@@ -383,6 +393,7 @@ export class FileSystem {
    * const result = await fs.searchFiles('app', '*.ts');
    * result.files.forEach(file => console.log(file));
    */
+  @WithInstrumentation()
   public async searchFiles(path: string, pattern: string): Promise<SearchFilesResponse> {
     const response = await this.apiClient.searchFiles(path, pattern)
     return response.data
@@ -403,6 +414,7 @@ export class FileSystem {
    *   mode: '755'  // Execute permission for shell script
    * });
    */
+  @WithInstrumentation()
   public async setFilePermissions(path: string, permissions: FilePermissionsParams): Promise<void> {
     const response = await this.apiClient.setFilePermissions(
       path,
@@ -443,6 +455,7 @@ export class FileSystem {
    * await fs.uploadFile('local_file.txt', 'tmp/file.txt');
    */
   public async uploadFile(localPath: string, remotePath: string, timeout?: number): Promise<void>
+  @WithInstrumentation()
   public async uploadFile(src: string | Buffer, dst: string, timeout: number = 30 * 60): Promise<void> {
     await this.uploadFiles([{ source: src, destination: dst }], timeout)
   }
@@ -474,6 +487,7 @@ export class FileSystem {
    * ];
    * await fs.uploadFiles(files);
    */
+  @WithInstrumentation()
   public async uploadFiles(files: FileUpload[], timeout: number = 30 * 60): Promise<void> {
     const isNonStreamingRuntime =
       RUNTIME === Runtime.DENO || RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS

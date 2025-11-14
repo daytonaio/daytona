@@ -4,6 +4,7 @@
  */
 
 import { GitApi, ListBranchResponse, GitStatus } from '@daytonaio/toolbox-api-client'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Response from the git commit.
@@ -39,6 +40,7 @@ export class Git {
    * // Stage whole repository
    * await git.add('workspace/repo', ['.']);
    */
+  @WithInstrumentation()
   public async add(path: string, files: string[]): Promise<void> {
     await this.apiClient.addFiles({
       path,
@@ -56,6 +58,7 @@ export class Git {
    * const response = await git.branches('workspace/repo');
    * console.log(`Branches: ${response.branches}`);
    */
+  @WithInstrumentation()
   public async branches(path: string): Promise<ListBranchResponse> {
     const response = await this.apiClient.listBranches(path)
     return response.data
@@ -71,6 +74,7 @@ export class Git {
    * @example
    * await git.createBranch('workspace/repo', 'new-feature');
    */
+  @WithInstrumentation()
   public async createBranch(path: string, name: string): Promise<void> {
     await this.apiClient.createBranch({
       path,
@@ -89,6 +93,7 @@ export class Git {
    * @example
    * await git.deleteBranch('workspace/repo', 'new-feature');
    */
+  @WithInstrumentation()
   public async deleteBranch(path: string, name: string): Promise<void> {
     await this.apiClient.deleteBranch({
       path,
@@ -107,6 +112,7 @@ export class Git {
    * @example
    * await git.checkoutBranch('workspace/repo', 'new-feature');
    */
+  @WithInstrumentation()
   public async checkoutBranch(path: string, branch: string): Promise<void> {
     await this.apiClient.checkoutBranch({
       path,
@@ -153,6 +159,7 @@ export class Git {
    *   commitId='abc123'
    * );
    */
+  @WithInstrumentation()
   public async clone(
     url: string,
     path: string,
@@ -193,6 +200,7 @@ export class Git {
    * );
    *
    */
+  @WithInstrumentation()
   public async commit(
     path: string,
     message: string,
@@ -232,6 +240,7 @@ export class Git {
    *   'token'
    * );
    */
+  @WithInstrumentation()
   public async push(path: string, username?: string, password?: string): Promise<void> {
     await this.apiClient.pushChanges({
       path,
@@ -260,6 +269,7 @@ export class Git {
    *   'token'
    * );
    */
+  @WithInstrumentation()
   public async pull(path: string, username?: string, password?: string): Promise<void> {
     await this.apiClient.pullChanges({
       path,
@@ -285,6 +295,7 @@ export class Git {
    * console.log(`Commits ahead: ${status.ahead}`);
    * console.log(`Commits behind: ${status.behind}`);
    */
+  @WithInstrumentation()
   public async status(path: string): Promise<GitStatus> {
     const response = await this.apiClient.getStatus(path)
     return response.data
