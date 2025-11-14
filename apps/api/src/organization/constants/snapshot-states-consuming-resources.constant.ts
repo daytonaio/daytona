@@ -6,7 +6,6 @@
 import { SnapshotState } from '../../sandbox/enums/snapshot-state.enum'
 
 export const SNAPSHOT_STATES_CONSUMING_RESOURCES: SnapshotState[] = [
-  SnapshotState.BUILD_PENDING,
   SnapshotState.BUILDING,
   SnapshotState.PENDING,
   SnapshotState.PULLING,

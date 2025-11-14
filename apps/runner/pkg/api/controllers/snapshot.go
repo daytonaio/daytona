@@ -22,11 +22,60 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
+// TagImage godoc
+//
+//	@Tags			snapshots
+//	@Summary		Tag an image
+//	@Description	Tag an existing local image with a new target reference
+//	@Param			request	body		dto.TagImageRequestDTO	true	"Tag image request"
+//	@Success		200		{string}	string					"Image successfully tagged"
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		409		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
+//
+//	@Router			/snapshots/tag [post]
+//
+//	@id				TagImage
+func TagImage(ctx *gin.Context) {
+	var request dto.TagImageRequestDTO
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	exists, err := runner.Docker.ImageExists(ctx.Request.Context(), request.SourceImage, false)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	if !exists {
+		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("source image not found: %s", request.SourceImage)))
+		return
+	}
+
+	if !strings.Contains(request.TargetImage, ":") || strings.HasSuffix(request.TargetImage, ":") {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("targetImage must include a valid tag")))
+		return
+	}
+
+	if err := runner.Docker.TagImage(ctx.Request.Context(), request.SourceImage, request.TargetImage); err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "Image tagged successfully")
+}
+
 // PullSnapshot godoc
 //
 //	@Tags			snapshots
 //	@Summary		Pull a snapshot
-//	@Description	Pull a snapshot from a registry
+//	@Description	Pull a snapshot from a registry and optionally push to another registry
 //	@Param			request	body		dto.PullSnapshotRequestDTO	true	"Pull snapshot"
 //	@Success		200		{string}	string						"Snapshot successfully pulled"
 //	@Failure		400		{object}	common_errors.ErrorResponse
@@ -48,10 +97,49 @@ func PullSnapshot(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
+	// Pull the image using the pull registry (or none for public images)
 	err = runner.Docker.PullImage(ctx.Request.Context(), request.Snapshot, request.Registry)
 	if err != nil {
 		ctx.Error(err)
 		return
+	}
+
+	if request.DestinationRegistry != nil {
+		if request.DestinationRegistry.Project == nil {
+			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to registry")))
+			return
+		}
+
+		var targetRef string
+
+		// If destination ref is provided, use it directly; otherwise build it from the image info
+		if request.DestinationRef != nil {
+			targetRef = *request.DestinationRef
+		} else {
+			// Get image info to retrieve the hash
+			imageInfo, err := runner.Docker.GetImageInfo(ctx.Request.Context(), request.Snapshot)
+			if err != nil {
+				ctx.Error(err)
+				return
+			}
+
+			ref := "daytona-" + getHashWithoutPrefix(imageInfo.Hash) + ":daytona"
+			targetRef = fmt.Sprintf("%s/%s/%s", request.DestinationRegistry.Url, *request.DestinationRegistry.Project, ref)
+		}
+
+		// Tag the image for the target registry
+		err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, targetRef)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+
+		// Push the tagged image
+		err = runner.Docker.PushImage(ctx.Request.Context(), targetRef, request.DestinationRegistry)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
 	}
 
 	ctx.JSON(http.StatusOK, "Snapshot pulled successfully")
@@ -200,7 +288,7 @@ type SnapshotExistsResponse struct {
 //	@Tags			snapshots
 //	@Summary		Get build logs
 //	@Description	Stream build logs
-//	@Param			snapshotRef	query		string	true	"Snapshot ID or snapshot ref without the tag"
+//	@Param			snapshotRef	query		string	true	"Snapshot ref"
 //	@Param			follow		query		boolean	false	"Whether to follow the log output"
 //	@Success		200			{string}	string	"Build logs stream"
 //	@Failure		400			{object}	common_errors.ErrorResponse
@@ -299,4 +387,66 @@ func GetBuildLogs(ctx *gin.Context) {
 
 		time.Sleep(250 * time.Millisecond)
 	}
+}
+
+// GetSnapshotInfo godoc
+//
+//	@Tags			snapshots
+//	@Summary		Get snapshot information
+//	@Description	Get information about a specified snapshot including size and entrypoint
+//	@Produce		json
+//	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
+//	@Success		200			{object}	SnapshotInfoResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/snapshots/info [get]
+//
+//	@id				GetSnapshotInfo
+func GetSnapshotInfo(ctx *gin.Context) {
+	snapshot := ctx.Query("snapshot")
+	if snapshot == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot parameter is required")))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	exists, err := runner.Docker.ImageExists(ctx.Request.Context(), snapshot, false)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	if !exists {
+		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("snapshot not found: %s", snapshot)))
+		return
+	}
+
+	info, err := runner.Docker.GetImageInfo(ctx.Request.Context(), snapshot)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, SnapshotInfoResponse{
+		Name:       snapshot,
+		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024), // Convert bytes to GB
+		Entrypoint: info.Entrypoint,
+		Cmd:        info.Cmd,
+		Hash:       getHashWithoutPrefix(info.Hash),
+	})
+}
+
+type SnapshotInfoResponse struct {
+	Name       string   `json:"name" example:"nginx:latest"`
+	SizeGB     float64  `json:"sizeGB" example:"0.13"`
+	Entrypoint []string `json:"entrypoint,omitempty" example:"[\"nginx\",\"-g\",\"daemon off;\"]"`
+	Cmd        []string `json:"cmd,omitempty" example:"[\"nginx\",\"-g\",\"daemon off;\"]"`
+	Hash       string   `json:"hash,omitempty" example:"a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff"`
+} //	@name	SnapshotInfoResponse
+
+func getHashWithoutPrefix(hash string) string {
+	return strings.TrimPrefix(hash, "sha256:")
 }
