@@ -73,6 +73,8 @@ type Telemetry struct {
 	Logger         *otellog.LoggerProvider
 }
 
+var EXCLUDED_TELEMETRY_PATHS = []string{"/proxy"}
+
 func (s *server) Start() error {
 	docs.SwaggerInfo.Description = "Daytona Daemon API"
 	docs.SwaggerInfo.Title = "Daytona Daemon API"
@@ -88,6 +90,7 @@ func (s *server) Start() error {
 
 	r := gin.New()
 	r.Use(gin.Recovery())
+	noTelemetryRouter := r.Group("/")
 	r.Use(func(ctx *gin.Context) {
 		if s.telemetry.TracerProvider == nil {
 			ctx.Next()
@@ -98,7 +101,9 @@ func (s *server) Start() error {
 		ctx.Next()
 	})
 	r.Use(middlewares.LoggingMiddleware())
+	noTelemetryRouter.Use(middlewares.LoggingMiddleware())
 	r.Use(middlewares.ErrorMiddleware())
+	noTelemetryRouter.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
 
 	// Add swagger UI in development mode
@@ -296,8 +301,7 @@ func (s *server) Start() error {
 		portController.GET("/:port/in-use", portDetector.IsPortInUse)
 	}
 
-	// TODO: DONT OTEL
-	proxyController := r.Group("/proxy")
+	proxyController := noTelemetryRouter.Group("/proxy")
 	{
 		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
 	}
