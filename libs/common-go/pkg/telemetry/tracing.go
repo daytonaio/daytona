@@ -42,7 +42,6 @@ func InitTracer(ctx context.Context, config Config) (*trace.TracerProvider, erro
 	tp := trace.NewTracerProvider(
 		trace.WithBatcher(exporter),
 		trace.WithResource(res),
-		// TODO: DO NOT LEAVE FOR PRODUCTION
 		trace.WithSampler(trace.AlwaysSample()),
 	)
 

@@ -296,6 +296,7 @@ func (s *server) Start() error {
 		portController.GET("/:port/in-use", portDetector.IsPortInUse)
 	}
 
+	// TODO: DONT OTEL
 	proxyController := r.Group("/proxy")
 	{
 		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
