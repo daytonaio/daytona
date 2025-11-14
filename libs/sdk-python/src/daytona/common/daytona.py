@@ -52,6 +52,7 @@ class DaytonaConfig(BaseModel):
             in a future version.
         target (Optional[str]): Target runner location for the Sandbox. Default region for the organization is used
             if not set here or in the environment variable `DAYTONA_TARGET`.
+        otel_enabled (Optional[bool]): OpenTelemetry tracing enabled. If set, all SDK operations will be traced.
 
     Example:
         ```python
@@ -74,6 +75,7 @@ class DaytonaConfig(BaseModel):
     target: Optional[str] = None
     jwt_token: Optional[str] = None
     organization_id: Optional[str] = None
+    otel_enabled: Optional[bool] = None
 
     @model_validator(mode="before")
     @classmethod
