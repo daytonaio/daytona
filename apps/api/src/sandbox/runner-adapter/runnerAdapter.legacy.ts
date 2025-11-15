@@ -193,6 +193,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       volumes: sandbox.volumes?.map((volume) => ({
         volumeId: volume.volumeId,
         mountPath: volume.mountPath,
+        subpath: volume.subpath,
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
