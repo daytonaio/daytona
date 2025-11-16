@@ -8,8 +8,14 @@ import { CheckIcon, ClipboardIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Highlight, themes, type PrismTheme, type Token } from 'prism-react-renderer'
 
-interface CodeBlockProps {
+interface CodeSnippet {
+  label: string
   code: string
+}
+
+interface CodeBlockProps {
+  code?: string
+  snippets?: CodeSnippet[]
   language: string
   showCopy?: boolean
 }
@@ -21,25 +27,49 @@ interface HighlightProps {
   getTokenProps: (props: { token: Token; key: number }) => React.HTMLAttributes<HTMLSpanElement>
 }
 
-const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true }) => {
+const CodeBlock: React.FC<CodeBlockProps> = ({ code, snippets, language, showCopy = true }) => {
   const [copied, setCopied] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
   const { theme } = useTheme()
 
+  const hasMultipleSnippets = snippets && snippets.length > 1
+  const currentCode = snippets ? snippets[activeTab].code : code
+  const displayCode = currentCode ? currentCode.trim() : ''
+
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    if (displayCode) {
+      await navigator.clipboard.writeText(displayCode)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   return (
     <div className="relative rounded-lg">
+      {hasMultipleSnippets && (
+        <div className="flex border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg overflow-x-auto">
+          {snippets!.map((snippet, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveTab(idx)}
+              className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
+                activeTab === idx
+                  ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              {snippet.label}
+            </button>
+          ))}
+        </div>
+      )}
       <Highlight
         theme={(theme === 'dark' ? themes.oneDark : themes.oneLight) as PrismTheme}
-        code={code.trim()}
+        code={displayCode}
         language={language}
       >
         {({ style, tokens, getLineProps, getTokenProps }: HighlightProps) => (
-          <pre className="p-4 rounded-lg overflow-x-auto" style={style}>
+          <pre className={`p-4 overflow-x-auto ${hasMultipleSnippets ? 'rounded-b-lg' : 'rounded-lg'}`} style={style}>
             {tokens.map((line, i) => {
               const props = getLineProps({ line, key: i })
               // @ts-expect-error Workaround for the render error. Key should not be spread into JSX
