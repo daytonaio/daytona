@@ -164,6 +164,7 @@
     "react-error-boundary": "^6.0.0",
     "react-instantsearch": "^7.16.0",
     "react-instantsearch-dom": "^6.40.4",
+    "react-number-format": "^5.4.4",
     "react-oidc-context": "^3.3.0",
     "react-router-dom": "6.29.0",
     "recharts": "^2.15.3",

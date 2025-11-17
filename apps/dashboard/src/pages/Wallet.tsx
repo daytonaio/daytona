@@ -18,6 +18,7 @@ import { useBilling } from '@/hooks/useBilling'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { CheckCircleIcon, CreditCardIcon, InfoIcon, Loader, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
@@ -43,6 +44,12 @@ const Wallet = () => {
   const [redeemCouponSuccess, setRedeemCouponSuccess] = useState<string | null>(null)
   const [organizationEmails, setOrganizationEmails] = useState<OrganizationEmail[]>([])
   const [organizationEmailsLoading, setOrganizationEmailsLoading] = useState(true)
+
+  useEffect(() => {
+    if (wallet?.automaticTopUp) {
+      setAutomaticTopUp(wallet.automaticTopUp)
+    }
+  }, [wallet])
 
   const handleUpdatePaymentMethod = useCallback(async () => {
     if (!selectedOrganization) {
@@ -110,7 +117,7 @@ const Wallet = () => {
 
     if (automaticTopUp?.thresholdAmount !== wallet?.automaticTopUp?.thresholdAmount) {
       if (!wallet?.automaticTopUp) {
-        if (automaticTopUp?.thresholdAmount !== 0) {
+        if ((automaticTopUp?.thresholdAmount || 0) !== 0) {
           return false
         }
       } else {
@@ -120,7 +127,7 @@ const Wallet = () => {
 
     if (automaticTopUp?.targetAmount !== wallet?.automaticTopUp?.targetAmount) {
       if (!wallet?.automaticTopUp) {
-        if (automaticTopUp?.targetAmount !== 0) {
+        if ((automaticTopUp?.targetAmount || 0) !== 0) {
           return false
         }
       } else {
@@ -352,19 +359,24 @@ const Wallet = () => {
                       <InputGroupAddon>
                         <InputGroupText>$</InputGroupText>
                       </InputGroupAddon>
-                      <InputGroupInput
+                      <NumericFormat
+                        customInput={InputGroupInput}
                         placeholder="0.00"
                         id="thresholdAmount"
-                        type="number"
-                        value={automaticTopUp?.thresholdAmount ?? 0}
-                        onChange={(e) => {
+                        inputMode="decimal"
+                        thousandSeparator
+                        decimalScale={2}
+                        value={automaticTopUp?.thresholdAmount ?? ''}
+                        onValueChange={({ floatValue }) => {
+                          const value = floatValue ?? 0
+
                           let targetAmount = automaticTopUp?.targetAmount ?? 0
-                          if (Number(e.target.value) > targetAmount - 10) {
-                            targetAmount = Number(e.target.value) + 10
+                          if (value > targetAmount - 10) {
+                            targetAmount = value + 10
                           }
 
                           setAutomaticTopUp({
-                            thresholdAmount: Number(e.target.value),
+                            thresholdAmount: value,
                             targetAmount,
                           })
                         }}
@@ -381,26 +393,31 @@ const Wallet = () => {
                       <InputGroupAddon>
                         <InputGroupText>$</InputGroupText>
                       </InputGroupAddon>
-                      <InputGroupInput
+                      <NumericFormat
                         placeholder="0.00"
+                        customInput={InputGroupInput}
                         id="targetAmount"
-                        type="number"
-                        value={automaticTopUp?.targetAmount ?? 0}
-                        onBlur={(e) => {
+                        inputMode="decimal"
+                        thousandSeparator
+                        decimalScale={2}
+                        value={automaticTopUp?.targetAmount ?? ''}
+                        onValueChange={({ floatValue }) => {
                           const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                          if (Number(e.target.value) < thresholdAmount) {
+                          setAutomaticTopUp({
+                            thresholdAmount,
+                            targetAmount: floatValue ?? 0,
+                          })
+                        }}
+                        onBlur={() => {
+                          const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
+                          const currentTarget = automaticTopUp?.targetAmount ?? 0
+
+                          if (currentTarget < thresholdAmount) {
                             setAutomaticTopUp({
                               thresholdAmount,
                               targetAmount: thresholdAmount,
                             })
                           }
-                        }}
-                        onChange={(e) => {
-                          const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                          setAutomaticTopUp({
-                            thresholdAmount,
-                            targetAmount: Number(e.target.value),
-                          })
                         }}
                       />
                       <InputGroupAddon align="inline-end">
