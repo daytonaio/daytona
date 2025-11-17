@@ -75,20 +75,22 @@ export class SandboxStartAction extends SandboxAction {
 
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         if (sandboxInfo.state === SandboxState.STARTED) {
-          const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-            id: sandbox.id,
-          })
-          sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.setBackupState(BackupState.NONE)
-
+          let daemonVersion: string | undefined
           try {
-            const daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
-            sandboxToUpdate.daemonVersion = daemonVersion
+            daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
           } catch (error) {
             this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, error)
           }
 
-          await this.sandboxRepository.save(sandboxToUpdate)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.STARTED,
+            lockCode,
+            undefined,
+            undefined,
+            daemonVersion,
+            BackupState.NONE,
+          )
           return DONT_SYNC_AGAIN
         }
       }
@@ -410,17 +412,15 @@ export class SandboxStartAction extends SandboxAction {
 
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          sandbox.setBackupState(BackupState.NONE)
-
-          const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-            id: sandbox.id,
-          })
-          sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.setBackupState(BackupState.NONE)
-          if (daemonVersion) {
-            sandboxToUpdate.daemonVersion = daemonVersion
-          }
-          await this.sandboxRepository.save(sandboxToUpdate)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.STARTED,
+            lockCode,
+            undefined,
+            undefined,
+            daemonVersion,
+            BackupState.NONE,
+          )
           return DONT_SYNC_AGAIN
         } else {
           await this.updateSandboxState(sandbox.id, SandboxState.STARTED, lockCode, undefined, undefined, daemonVersion)
