@@ -53,8 +53,6 @@ export class SandboxArchiveAction extends SandboxAction {
               lockCode,
               undefined,
               'Failed to archive sandbox after 3 retries',
-              undefined,
-              BackupState.PENDING,
             )
             await this.redis.del(archiveErrorRetryKey)
             return DONT_SYNC_AGAIN
@@ -62,7 +60,6 @@ export class SandboxArchiveAction extends SandboxAction {
           await this.redis.setex('archive-error-retry-' + sandbox.id, 720, String(archiveErrorRetryCount + 1))
 
           //  reset the backup state to pending to retry the backup
-
           await this.sandboxRepository.update(sandbox.id, {
             backupState: BackupState.PENDING,
           })
