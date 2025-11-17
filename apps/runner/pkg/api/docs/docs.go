@@ -50,6 +50,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/RunnerInfoResponseDTO"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.Error"
+                        }
                     }
                 }
             }
@@ -1398,6 +1404,9 @@ const docTemplate = `{
                 "currentAllocatedMemoryGiB": {
                     "type": "integer"
                 },
+                "currentCpuLoadAverage": {
+                    "type": "number"
+                },
                 "currentCpuUsagePercentage": {
                     "type": "number"
                 },
@@ -1506,6 +1515,33 @@ const docTemplate = `{
                 "SandboxStateError",
                 "SandboxStateUnknown",
                 "SandboxStatePullingSnapshot"
+            ]
+        },
+        "gin.Error": {
+            "type": "object",
+            "properties": {
+                "err": {},
+                "meta": {},
+                "type": {
+                    "$ref": "#/definitions/gin.ErrorType"
+                }
+            }
+        },
+        "gin.ErrorType": {
+            "type": "integer",
+            "enum": [
+                -9223372036854775808,
+                4611686018427387904,
+                1,
+                2,
+                -1
+            ],
+            "x-enum-varnames": [
+                "ErrorTypeBind",
+                "ErrorTypeRender",
+                "ErrorTypePrivate",
+                "ErrorTypePublic",
+                "ErrorTypeAny"
             ]
         }
     },

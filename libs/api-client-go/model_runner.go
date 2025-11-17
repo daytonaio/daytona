@@ -45,6 +45,8 @@ type Runner struct {
 	Class SandboxClass `json:"class"`
 	// Current CPU usage percentage
 	CurrentCpuUsagePercentage *float32 `json:"currentCpuUsagePercentage,omitempty"`
+	// Current CPU load average
+	CurrentCpuLoadAverage *float32 `json:"currentCpuLoadAverage,omitempty"`
 	// Current RAM usage percentage
 	CurrentMemoryUsagePercentage *float32 `json:"currentMemoryUsagePercentage,omitempty"`
 	// Current disk usage percentage
@@ -406,6 +408,38 @@ func (o *Runner) HasCurrentCpuUsagePercentage() bool {
 // SetCurrentCpuUsagePercentage gets a reference to the given float32 and assigns it to the CurrentCpuUsagePercentage field.
 func (o *Runner) SetCurrentCpuUsagePercentage(v float32) {
 	o.CurrentCpuUsagePercentage = &v
+}
+
+// GetCurrentCpuLoadAverage returns the CurrentCpuLoadAverage field value if set, zero value otherwise.
+func (o *Runner) GetCurrentCpuLoadAverage() float32 {
+	if o == nil || IsNil(o.CurrentCpuLoadAverage) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentCpuLoadAverage
+}
+
+// GetCurrentCpuLoadAverageOk returns a tuple with the CurrentCpuLoadAverage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentCpuLoadAverageOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentCpuLoadAverage) {
+		return nil, false
+	}
+	return o.CurrentCpuLoadAverage, true
+}
+
+// HasCurrentCpuLoadAverage returns a boolean if a field has been set.
+func (o *Runner) HasCurrentCpuLoadAverage() bool {
+	if o != nil && !IsNil(o.CurrentCpuLoadAverage) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentCpuLoadAverage gets a reference to the given float32 and assigns it to the CurrentCpuLoadAverage field.
+func (o *Runner) SetCurrentCpuLoadAverage(v float32) {
+	o.CurrentCpuLoadAverage = &v
 }
 
 // GetCurrentMemoryUsagePercentage returns the CurrentMemoryUsagePercentage field value if set, zero value otherwise.
@@ -832,6 +866,9 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.CurrentCpuUsagePercentage) {
 		toSerialize["currentCpuUsagePercentage"] = o.CurrentCpuUsagePercentage
 	}
+	if !IsNil(o.CurrentCpuLoadAverage) {
+		toSerialize["currentCpuLoadAverage"] = o.CurrentCpuLoadAverage
+	}
 	if !IsNil(o.CurrentMemoryUsagePercentage) {
 		toSerialize["currentMemoryUsagePercentage"] = o.CurrentMemoryUsagePercentage
 	}
@@ -933,6 +970,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "gpuType")
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "currentCpuUsagePercentage")
+		delete(additionalProperties, "currentCpuLoadAverage")
 		delete(additionalProperties, "currentMemoryUsagePercentage")
 		delete(additionalProperties, "currentDiskUsagePercentage")
 		delete(additionalProperties, "currentAllocatedCpu")

@@ -720,9 +720,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         where: {
           state: RunnerState.READY,
           unschedulable: Not(true),
-          availabilityScore: MoreThanOrEqual(
-            this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold'),
-          ),
+          availabilityScore: MoreThanOrEqual(this.configService.getOrThrow('runnerScore.thresholds.declarativeBuild')),
         },
       })
       // Propagate snapshot to one runner so it can be used immediately
