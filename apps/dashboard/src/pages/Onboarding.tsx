@@ -156,6 +156,8 @@ const Onboarding: React.FC = () => {
                         snippets={[
                           { label: 'npm', code: codeExamples.typescript.npm.install },
                           { label: 'pnpm', code: codeExamples.typescript.pnpm.install },
+                          { label: 'yarn', code: codeExamples.typescript.yarn.install },
+                          { label: 'bun', code: codeExamples.typescript.bun.install },
                         ]}
                         language="bash"
                         showCopy
@@ -291,6 +293,8 @@ const Onboarding: React.FC = () => {
                         snippets={[
                           { label: 'npm', code: codeExamples.typescript.npm.run },
                           { label: 'pnpm', code: codeExamples.typescript.pnpm.run },
+                          { label: 'yarn', code: codeExamples.typescript.yarn.run },
+                          { label: 'bun', code: codeExamples.typescript.bun.run },
                         ]}
                         language="bash"
                         showCopy
@@ -339,6 +343,14 @@ const codeExamples = {
     pnpm: {
       install: `pnpm add @daytonaio/sdk`,
       run: `pnpm tsx index.mts`,
+    },
+    yarn: {
+      install: `yarn add @daytonaio/sdk`,
+      run: `yarn tsx index.mts`,
+    },
+    bun: {
+      install: `bun add @daytonaio/sdk`,
+      run: `bunx tsx index.mts`,
     },
     example: `import { Daytona } from '@daytonaio/sdk'
   
