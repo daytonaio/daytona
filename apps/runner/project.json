@@ -48,7 +48,8 @@
         "main": "{projectRoot}/cmd/runner/main.go",
         "outputPath": "dist/apps/runner-amd64",
         "env": {
-          "GOARCH": "amd64"
+          "GOARCH": "amd64",
+          "GOOS": "linux"
         }
       },
       "configurations": {
