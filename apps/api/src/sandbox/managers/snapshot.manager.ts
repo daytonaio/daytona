@@ -651,9 +651,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   async handleSnapshotStatePulling(snapshot: Snapshot) {
     const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
     // Check timeout first
+    // Use updatedAt instead of createdAt because updatedAt reflects when the snapshot
+    // entered PULLING state, giving us the full timeout window from that point
     const timeoutMinutes = 15
     const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
+    const pullingStartTime = snapshot.updatedAt.getTime()
+    if (Date.now() - pullingStartTime > timeoutMs) {
       await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while pulling snapshot')
       return
     }
