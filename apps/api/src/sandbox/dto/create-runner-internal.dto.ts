@@ -17,5 +17,6 @@ export class CreateRunnerInternalDto {
   gpuType: string
   class: SandboxClass
   regionId: string
+  name: string
   version: string
 }

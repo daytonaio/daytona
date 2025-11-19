@@ -128,6 +128,12 @@ export class RunnerDto {
   regionId: string
 
   @ApiProperty({
+    description: 'The name of the runner',
+    example: 'runner1',
+  })
+  name: string
+
+  @ApiProperty({
     description: 'The state of the runner',
     enum: RunnerState,
     enumName: 'RunnerState',
@@ -189,6 +195,7 @@ export class RunnerDto {
       currentSnapshotCount: runner.currentSnapshotCount,
       availabilityScore: runner.availabilityScore,
       regionId: runner.regionId,
+      name: runner.name,
       state: runner.state,
       lastChecked: runner.lastChecked?.toISOString(),
       unschedulable: runner.unschedulable,

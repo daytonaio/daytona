@@ -133,6 +133,7 @@ async function bootstrap() {
         class: configService.getOrThrow('defaultRunner.class'),
         domain: configService.getOrThrow('defaultRunner.domain'),
         version: configService.get('defaultRunner.version') || '0',
+        name: configService.getOrThrow('defaultRunner.name'),
       })
 
       const runnerAdapter = await runnerAdapterFactory.create(runner)

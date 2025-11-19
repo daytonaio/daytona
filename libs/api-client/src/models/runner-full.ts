@@ -140,6 +140,12 @@ export interface RunnerFull {
    */
   regionId: string
   /**
+   * The name of the runner
+   * @type {string}
+   * @memberof RunnerFull
+   */
+  name: string
+  /**
    * The state of the runner
    * @type {RunnerState}
    * @memberof RunnerFull

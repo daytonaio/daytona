@@ -25,6 +25,7 @@ type CreateRunner struct {
 	ApiUrl               string `json:"apiUrl"`
 	ProxyUrl             string `json:"proxyUrl"`
 	RegionId             string `json:"regionId"`
+	Name                 string `json:"name"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -34,12 +35,13 @@ type _CreateRunner CreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateRunner(domain string, apiUrl string, proxyUrl string, regionId string) *CreateRunner {
+func NewCreateRunner(domain string, apiUrl string, proxyUrl string, regionId string, name string) *CreateRunner {
 	this := CreateRunner{}
 	this.Domain = domain
 	this.ApiUrl = apiUrl
 	this.ProxyUrl = proxyUrl
 	this.RegionId = regionId
+	this.Name = name
 	return &this
 }
 
@@ -147,6 +149,30 @@ func (o *CreateRunner) SetRegionId(v string) {
 	o.RegionId = v
 }
 
+// GetName returns the Name field value
+func (o *CreateRunner) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *CreateRunner) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *CreateRunner) SetName(v string) {
+	o.Name = v
+}
+
 func (o CreateRunner) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -161,6 +187,7 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize["apiUrl"] = o.ApiUrl
 	toSerialize["proxyUrl"] = o.ProxyUrl
 	toSerialize["regionId"] = o.RegionId
+	toSerialize["name"] = o.Name
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -178,6 +205,7 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 		"apiUrl",
 		"proxyUrl",
 		"regionId",
+		"name",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -211,6 +239,7 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "apiUrl")
 		delete(additionalProperties, "proxyUrl")
 		delete(additionalProperties, "regionId")
+		delete(additionalProperties, "name")
 		o.AdditionalProperties = additionalProperties
 	}
 

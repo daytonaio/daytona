@@ -237,7 +237,7 @@ const getColumns = ({
     {
       accessorKey: 'id',
       header: 'ID',
-      size: 320,
+      size: 180,
       cell: ({ row }) => (
         <div className="w-full truncate flex items-center gap-2">
           <span className="truncate block text-sm">{row.original.id}</span>
@@ -255,9 +255,29 @@ const getColumns = ({
       ),
     },
     {
+      accessorKey: 'name',
+      header: 'Name',
+      size: 180,
+      cell: ({ row }) => (
+        <div className="w-full truncate flex items-center gap-2">
+          <span className="truncate block text-sm">{row.original.name}</span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              copyToClipboard(row.original.name)
+            }}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Copy Name"
+          >
+            <Copy className="w-3 h-3" />
+          </button>
+        </div>
+      ),
+    },
+    {
       accessorKey: 'regionId',
       header: 'Region',
-      size: 200,
+      size: 180,
       cell: ({ row }) => (
         <div className="w-full truncate flex items-center gap-2">
           <span className="truncate block text-sm">{getRegionName(row.original.regionId, regions)}</span>
@@ -277,7 +297,7 @@ const getColumns = ({
     {
       accessorKey: 'domain',
       header: 'Domain',
-      size: 200,
+      size: 180,
       cell: ({ row }) => (
         <div className="w-full truncate flex items-center gap-2">
           <span className="truncate block text-sm">{row.original.domain}</span>

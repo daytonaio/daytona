@@ -31,8 +31,9 @@ class CreateRunner(BaseModel):
     api_url: StrictStr = Field(alias="apiUrl")
     proxy_url: StrictStr = Field(alias="proxyUrl")
     region_id: StrictStr = Field(alias="regionId")
+    name: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "proxyUrl", "regionId"]
+    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "proxyUrl", "regionId", "name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,7 +96,8 @@ class CreateRunner(BaseModel):
             "domain": obj.get("domain"),
             "apiUrl": obj.get("apiUrl"),
             "proxyUrl": obj.get("proxyUrl"),
-            "regionId": obj.get("regionId")
+            "regionId": obj.get("regionId"),
+            "name": obj.get("name")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

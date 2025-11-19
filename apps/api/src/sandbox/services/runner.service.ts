@@ -3,11 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
-import { Runner } from '../entities/runner.entity'
+import { Runner, RUNNER_NAME_REGEX } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
@@ -72,6 +80,14 @@ export class RunnerService {
     runner: Runner
     token: string
   }> {
+    // Validate runner name
+    if (!RUNNER_NAME_REGEX.test(createRunnerDto.name)) {
+      throw new BadRequestException('Runner name must contain only letters, numbers, underscores, periods, and hyphens')
+    }
+    if (createRunnerDto.name.length < 2 || createRunnerDto.name.length > 255) {
+      throw new BadRequestException('Runner name must be between 3 and 255 characters')
+    }
+
     // Validate region and class
     const region = await this.regionService.findOne(createRunnerDto.regionId, organization?.id)
     if (!region) {
@@ -98,11 +114,27 @@ export class RunnerService {
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
     runner.regionId = createRunnerDto.regionId
+    runner.name = createRunnerDto.name
     runner.class = createRunnerDto.class
     runner.version = createRunnerDto.version
 
-    const savedRunner = await this.runnerRepository.save(runner)
-    return { runner: savedRunner, token }
+    try {
+      const savedRunner = await this.runnerRepository.save(runner)
+      return { runner: savedRunner, token }
+    } catch (error) {
+      if (error.code === '23505') {
+        if (error.detail.includes('domain')) {
+          throw new ConflictException('This domain is already in use')
+        }
+        if (error.detail.includes('name')) {
+          throw new ConflictException(
+            `Runner with name ${createRunnerDto.name} already exists in the region ${region.name}`,
+          )
+        }
+        throw new ConflictException('A runner with these values already exists')
+      }
+      throw error
+    }
   }
 
   async findAll(organizationId?: string, regionName?: string): Promise<Runner[]> {

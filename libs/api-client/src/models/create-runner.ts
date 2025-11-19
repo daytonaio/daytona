@@ -42,4 +42,10 @@ export interface CreateRunner {
    * @memberof CreateRunner
    */
   regionId: string
+  /**
+   *
+   * @type {string}
+   * @memberof CreateRunner
+   */
+  name: string
 }
