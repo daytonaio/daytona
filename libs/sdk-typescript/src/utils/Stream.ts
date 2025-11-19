@@ -47,7 +47,15 @@ export async function processStreamingResponse(
         const stop = await shouldTerminate()
         if (stop) {
           exitCheckStreak++
-          if (!requireConsecutiveTermination || exitCheckStreak > 1) break
+          if (!requireConsecutiveTermination || exitCheckStreak > 1) {
+            try {
+              await reader.cancel()
+            } catch {
+              /* ignore */
+            }
+            readPromise = null
+            break
+          }
         } else {
           exitCheckStreak = 0
         }
@@ -70,7 +78,11 @@ export async function processStreamingResponse(
     if (remaining) {
       onChunk(remaining)
     }
-    await reader.cancel()
+    try {
+      await reader.cancel()
+    } catch {
+      /* ignore */
+    }
   }
 }
 
