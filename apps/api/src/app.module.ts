@@ -79,6 +79,17 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
                 rejectUnauthorized: configService.get('database.tls.rejectUnauthorized'),
               }
             : undefined,
+          cache: {
+            type: 'ioredis',
+            ignoreErrors: true,
+            options: {
+              keyPrefix: 'typeorm:',
+              host: configService.get('redis.host'),
+              port: configService.get('redis.port'),
+              tls: configService.get('redis.tls'),
+              lazyConnect: configService.get('skipConnections'),
+            },
+          },
         }
       },
     }),
