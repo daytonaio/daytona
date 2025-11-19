@@ -287,6 +287,34 @@ class AsyncSandbox(SandboxDto):
         time_elapsed = time.time() - start_time
         await self.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
+    @intercept_errors(message_prefix="Failed to recover sandbox: ")
+    @with_timeout(
+        error_message=lambda self, timeout: (
+            f"Sandbox {self.id} failed to recover within the {timeout} seconds timeout period"
+        )
+    )
+    async def recover(self, timeout: Optional[float] = 60):
+        """Recovers the Sandbox from a recoverable error and waits for it to be ready.
+
+        Args:
+            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+        Raises:
+            DaytonaError: If timeout is negative. If sandbox fails to recover or times out.
+
+        Example:
+            ```python
+            sandbox = daytona.get_current_sandbox("my-sandbox")
+            await sandbox.recover(timeout=40)  # Wait up to 40 seconds
+            print("Sandbox recovered successfully")
+            ```
+        """
+        start_time = time.time()
+        sandbox = await self._sandbox_api.recover_sandbox(self.id, _request_timeout=timeout or None)
+        self.__process_sandbox_dto(sandbox)
+        time_elapsed = time.time() - start_time
+        await self.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
+
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
         error_message=lambda self, timeout: (
