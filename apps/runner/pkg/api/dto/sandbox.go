@@ -35,6 +35,6 @@ type UpdateNetworkSettingsDTO struct {
 	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO
 
-type RecoverStorageDTO struct {
-	NewStorageQuota int64 `json:"newStorageQuota" validate:"min=1"` // New total storage quota in GB
-} //	@name	RecoverStorageDTO
+type RecoverExpandStorageDTO struct {
+	StorageQuota int64 `json:"storageQuota" validate:"min=1"`
+} //	@name	RecoverExpandStorageDTO

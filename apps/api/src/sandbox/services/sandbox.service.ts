@@ -1136,6 +1136,63 @@ export class SandboxService {
     return sandbox
   }
 
+  async recover(sandboxId: string, organization: Organization): Promise<Sandbox> {
+    const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    if (sandbox.state !== SandboxState.ERROR) {
+      throw new BadRequestError('Sandbox must be in error state to recover')
+    }
+
+    if (sandbox.pending) {
+      throw new SandboxError('Sandbox state change in progress')
+    }
+
+    const errorReason = (sandbox.errorReason || '').toLowerCase()
+
+    // Route to appropriate recovery method based on error reason
+    if (errorReason.includes('no space left') || errorReason.includes('storage limit')) {
+      // Call runner to expand storage
+      // If this fails, the sandbox stays in ERROR state
+      await this.recoverExpandStorage(sandboxId)
+
+      sandbox.state = SandboxState.STOPPED
+      sandbox.desiredState = SandboxDesiredState.STOPPED
+      sandbox.errorReason = null
+      await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
+    } else {
+      throw new BadRequestError('No recovery method available for this error type')
+    }
+
+    // Now that sandbox is in STOPPED state, use the normal start flow
+    // This handles quota validation, pending usage, event emission, etc.
+    return await this.start(sandbox.id, organization)
+  }
+
+  private async recoverExpandStorage(sandboxId: string): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
+    }
+    const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
+    }
+
+    const originalDiskGB = sandbox.disk
+
+    this.logger.log(`Expanding storage for sandbox ${sandboxId}: original=${originalDiskGB}GB`)
+
+    // Call runner to expand storage (runner leaves container in STOPPED state)
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    await runnerAdapter.recoverExpandStorage(sandboxId, originalDiskGB)
+  }
+
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 

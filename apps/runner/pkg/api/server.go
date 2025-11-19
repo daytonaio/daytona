@@ -115,7 +115,7 @@ func (a *ApiServer) Start() error {
 		sandboxController.POST("/:sandboxId/stop", controllers.Stop)
 		sandboxController.POST("/:sandboxId/backup", controllers.CreateBackup)
 		sandboxController.POST("/:sandboxId/resize", controllers.Resize)
-		sandboxController.POST("/:sandboxId/recover-storage", controllers.RecoverStorage)
+		sandboxController.POST("/:sandboxId/recover-expand-storage", controllers.RecoverExpandStorage)
 		sandboxController.DELETE("/:sandboxId", controllers.RemoveDestroyed)
 		sandboxController.POST("/:sandboxId/network-settings", controllers.UpdateNetworkSettings)
 

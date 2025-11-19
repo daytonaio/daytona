@@ -360,4 +360,10 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
   }
+
+  async recoverExpandStorage(sandboxId: string, storageQuota: number): Promise<void> {
+    await this.sandboxApiClient.recoverExpandStorage(sandboxId, {
+      storageQuota: storageQuota,
+    })
+  }
 }
