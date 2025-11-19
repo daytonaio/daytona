@@ -67,6 +67,7 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -939,6 +940,47 @@ export class SandboxService {
     }
 
     return sandbox.runnerId || null
+  }
+
+  async getPortPreviewUrl(sandboxIdOrName: string, organizationId: string, port: number): Promise<PortPreviewUrlDto> {
+    if (port < 1 || port > 65535) {
+      throw new BadRequestError('Invalid port')
+    }
+
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
+
+    const where: FindOptionsWhere<Sandbox> = {
+      organizationId: organizationId,
+      state: Not(SandboxState.DESTROYED),
+    }
+
+    const sandbox = await this.sandboxRepository.findOne({
+      where: [
+        {
+          id: sandboxIdOrName,
+          ...where,
+        },
+        {
+          name: sandboxIdOrName,
+          ...where,
+        },
+      ],
+      cache: {
+        id: `sandbox:${sandboxIdOrName}:organization:${organizationId}`,
+        milliseconds: 1000,
+      },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    return {
+      sandboxId: sandbox.id,
+      url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
+      token: sandbox.authToken,
+    }
   }
 
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
