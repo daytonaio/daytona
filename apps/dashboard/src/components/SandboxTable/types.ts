@@ -49,6 +49,7 @@ export interface SandboxTableProps {
   onSortingChange: (sorting: SandboxSorting) => void
   filters: SandboxFilters
   onFiltersChange: (filters: SandboxFilters) => void
+  handleRecover: (id: string) => void
 }
 
 export interface SandboxTableActionsProps {
@@ -64,6 +65,7 @@ export interface SandboxTableActionsProps {
   onOpenWebTerminal: (id: string) => void
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
+  onRecover: (id: string) => void
 }
 
 export interface SandboxTableHeaderProps {

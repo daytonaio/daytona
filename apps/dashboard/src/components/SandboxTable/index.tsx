@@ -63,6 +63,7 @@ export function SandboxTable({
   onSortingChange,
   filters,
   onFiltersChange,
+  handleRecover,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -91,6 +92,7 @@ export function SandboxTable({
     filters,
     onFiltersChange,
     regionsData,
+    handleRecover,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
