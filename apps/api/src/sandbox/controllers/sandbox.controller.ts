@@ -860,26 +860,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
     @Param('port') port: number,
   ): Promise<PortPreviewUrlDto> {
-    if (port < 1 || port > 65535) {
-      throw new BadRequestError('Invalid port')
-    }
-
-    const proxyDomain = this.configService.getOrThrow('proxy.domain')
-    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
-
-    const sandbox = await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
-
-    // Get runner info
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner not found for sandbox ${sandboxIdOrName}`)
-    }
-
-    return {
-      sandboxId: sandbox.id,
-      url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
-      token: sandbox.authToken,
-    }
+    return this.sandboxService.getPortPreviewUrl(sandboxIdOrName, authContext.organizationId, port)
   }
 
   @Get(':sandboxIdOrName/build-logs')
