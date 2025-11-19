@@ -19,6 +19,7 @@ import { AuditLogPublisher } from '../interfaces/audit-publisher.interface'
 import { AuditLogFilter } from '../interfaces/audit-filter.interface'
 import { DistributedLock } from '../../common/decorators/distributed-lock.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 @Injectable()
 export class AuditService implements OnApplicationBootstrap {
@@ -125,7 +126,7 @@ export class AuditService implements OnApplicationBootstrap {
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM, {
-    name: 'cleanup-old-audit-logs',
+    name: `${CRON_SCOPES.AUDIT}:cleanup-old-audit-logs`,
     waitForCompletion: true,
     disabled: true,
   })
@@ -154,7 +155,7 @@ export class AuditService implements OnApplicationBootstrap {
 
   // Resolve dangling audit logs where status code is not set and created at is more than half an hour ago
   @Cron(CronExpression.EVERY_MINUTE, {
-    name: 'resolve-dangling-audit-logs',
+    name: `${CRON_SCOPES.AUDIT}:resolve-dangling-audit-logs`,
     waitForCompletion: true,
   })
   @DistributedLock()
@@ -179,7 +180,7 @@ export class AuditService implements OnApplicationBootstrap {
   }
 
   @Cron(CronExpression.EVERY_SECOND, {
-    name: 'publish-audit-logs',
+    name: `${CRON_SCOPES.AUDIT}:publish-audit-logs`,
     waitForCompletion: true,
     disabled: true,
   })

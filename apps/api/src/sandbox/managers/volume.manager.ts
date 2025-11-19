@@ -21,6 +21,7 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { CRON_SCOPES } from '../../common/constants/cron-scopes'
 
 const VOLUME_STATE_LOCK_KEY = 'volume-state-'
 
@@ -82,7 +83,7 @@ export class VolumeManager
       return
     }
 
-    this.schedulerRegistry.getCronJob('process-pending-volumes').start()
+    this.schedulerRegistry.getCronJob(`${CRON_SCOPES.VOLUMES}:process-pending-volumes`).start()
   }
 
   async onApplicationShutdown() {
@@ -105,7 +106,11 @@ export class VolumeManager
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'process-pending-volumes', waitForCompletion: true, disabled: true })
+  @Cron(CronExpression.EVERY_5_SECONDS, {
+    name: `${CRON_SCOPES.VOLUMES}:process-pending-volumes`,
+    waitForCompletion: true,
+    disabled: true,
+  })
   @TrackJobExecution()
   @LogExecution('process-pending-volumes')
   @WithInstrumentation()

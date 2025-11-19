@@ -82,8 +82,12 @@ const configuration = {
   skipConnections: process.env.SKIP_CONNECTIONS === 'true',
   maxAutoArchiveInterval: parseInt(process.env.MAX_AUTO_ARCHIVE_INTERVAL || '43200', 10),
   maintananceMode: process.env.MAINTENANCE_MODE === 'true',
-  disableCronJobs: process.env.DISABLE_CRON_JOBS === 'true',
   appRole: process.env.APP_ROLE || 'all',
+  cron: {
+    disableAll: process.env.DISABLE_CRON_JOBS === 'true',
+    disabledCronScopes: process.env.DISABLED_CRON_SCOPES ? process.env.DISABLED_CRON_SCOPES.split(',') : [],
+    onlyEnabledCronScopes: process.env.ONLY_ENABLED_CRON_SCOPES ? process.env.ONLY_ENABLED_CRON_SCOPES.split(',') : [],
+  },
   proxy: {
     domain: process.env.PROXY_DOMAIN,
     protocol: process.env.PROXY_PROTOCOL,
