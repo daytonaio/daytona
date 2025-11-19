@@ -104,6 +104,12 @@ export interface CreateSandboxDTO {
    */
   snapshot: string
   /**
+   * Tracks additional storage added through recovery
+   * @type {number}
+   * @memberof CreateSandboxDTO
+   */
+  storageExpansionQuota?: number
+  /**
    *
    * @type {number}
    * @memberof CreateSandboxDTO

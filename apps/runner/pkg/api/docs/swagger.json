@@ -450,6 +450,71 @@
         }
       }
     },
+    "/sandboxes/{sandboxId}/recover-expand-storage": {
+      "post": {
+        "description": "Recover sandbox from storage limit by expanding storage quota",
+        "produces": ["application/json"],
+        "tags": ["sandbox"],
+        "summary": "Recover sandbox from storage limit",
+        "operationId": "RecoverExpandStorage",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Recovery parameters",
+            "name": "recovery",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecoverExpandStorageDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sandbox storage recovered",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/sandboxes/{sandboxId}/resize": {
       "post": {
         "description": "Resize sandbox",
@@ -1299,6 +1364,10 @@
         "snapshot": {
           "type": "string"
         },
+        "storageExpansionQuota": {
+          "description": "Tracks additional storage added through recovery",
+          "type": "integer"
+        },
         "storageQuota": {
           "type": "integer",
           "minimum": 1
@@ -1360,6 +1429,15 @@
         },
         "snapshot": {
           "type": "string"
+        }
+      }
+    },
+    "RecoverExpandStorageDTO": {
+      "type": "object",
+      "properties": {
+        "storageQuota": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
