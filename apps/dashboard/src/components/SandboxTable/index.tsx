@@ -42,7 +42,6 @@ export function SandboxTable({
   snapshotsDataHasMore,
   onChangeSnapshotSearchValue,
   regionsData,
-  regionsDataIsLoading,
   handleStart,
   handleStop,
   handleDelete,
@@ -115,7 +114,6 @@ export function SandboxTable({
       <SandboxTableHeader
         table={table}
         regionOptions={regionOptions}
-        regionsDataIsLoading={regionsDataIsLoading}
         snapshots={snapshots}
         snapshotsDataIsLoading={snapshotsDataIsLoading}
         snapshotsDataHasMore={snapshotsDataHasMore}

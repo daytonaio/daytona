@@ -42,6 +42,9 @@ import { setTimeout } from 'timers/promises'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { RegionQuota } from '../entities/region-quota.entity'
+import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
+import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -60,6 +63,8 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRepository(RegionQuota)
+    private readonly regionQuotaRepository: Repository<RegionQuota>,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -136,26 +141,45 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return this.removeWithEntityManager(this.organizationRepository.manager, organization)
   }
 
-  async updateQuota(
-    organizationId: string,
-    updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
-  ): Promise<Organization> {
+  async updateQuota(organizationId: string, updateDto: UpdateOrganizationQuotaDto): Promise<void> {
     const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    organization.totalCpuQuota = updateOrganizationQuotaDto.totalCpuQuota ?? organization.totalCpuQuota
-    organization.totalMemoryQuota = updateOrganizationQuotaDto.totalMemoryQuota ?? organization.totalMemoryQuota
-    organization.totalDiskQuota = updateOrganizationQuotaDto.totalDiskQuota ?? organization.totalDiskQuota
-    organization.maxCpuPerSandbox = updateOrganizationQuotaDto.maxCpuPerSandbox ?? organization.maxCpuPerSandbox
-    organization.maxMemoryPerSandbox =
-      updateOrganizationQuotaDto.maxMemoryPerSandbox ?? organization.maxMemoryPerSandbox
-    organization.maxDiskPerSandbox = updateOrganizationQuotaDto.maxDiskPerSandbox ?? organization.maxDiskPerSandbox
-    organization.maxSnapshotSize = updateOrganizationQuotaDto.maxSnapshotSize ?? organization.maxSnapshotSize
-    organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota ?? organization.volumeQuota
-    organization.snapshotQuota = updateOrganizationQuotaDto.snapshotQuota ?? organization.snapshotQuota
-    return this.organizationRepository.save(organization)
+    organization.maxCpuPerSandbox = updateDto.maxCpuPerSandbox ?? organization.maxCpuPerSandbox
+    organization.maxMemoryPerSandbox = updateDto.maxMemoryPerSandbox ?? organization.maxMemoryPerSandbox
+    organization.maxDiskPerSandbox = updateDto.maxDiskPerSandbox ?? organization.maxDiskPerSandbox
+    organization.maxSnapshotSize = updateDto.maxSnapshotSize ?? organization.maxSnapshotSize
+    organization.volumeQuota = updateDto.volumeQuota ?? organization.volumeQuota
+    organization.snapshotQuota = updateDto.snapshotQuota ?? organization.snapshotQuota
+
+    await this.organizationRepository.save(organization)
+  }
+
+  async updateRegionQuota(
+    organizationId: string,
+    regionId: string,
+    updateDto: UpdateOrganizationRegionQuotaDto,
+  ): Promise<void> {
+    const regionQuota = await this.getRegionQuota(organizationId, regionId)
+    if (!regionQuota) {
+      throw new NotFoundException('Resource limits not found for this organization in this region')
+    }
+
+    regionQuota.totalCpuQuota = updateDto.totalCpuQuota ?? regionQuota.totalCpuQuota
+    regionQuota.totalMemoryQuota = updateDto.totalMemoryQuota ?? regionQuota.totalMemoryQuota
+    regionQuota.totalDiskQuota = updateDto.totalDiskQuota ?? regionQuota.totalDiskQuota
+
+    await this.regionQuotaRepository.save(regionQuota)
+  }
+
+  async getRegionQuotas(organizationId: string): Promise<RegionQuota[]> {
+    return this.regionQuotaRepository.find({ where: { organizationId } })
+  }
+
+  async getRegionQuota(organizationId: string, regionId: string): Promise<RegionQuota | null> {
+    return this.regionQuotaRepository.findOne({ where: { organizationId, regionId } })
   }
 
   async suspend(
@@ -209,7 +233,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
   private async createWithEntityManager(
     entityManager: EntityManager,
-    createOrganizationDto: CreateOrganizationDto,
+    createOrganizationDto: CreateOrganizationInternalDto,
     createdBy: string,
     creatorEmailVerified: boolean,
     personal = false,
@@ -233,17 +257,14 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ForbiddenException('You have reached the maximum number of created organizations')
     }
 
-    const defaultRegion = this.configService.getOrThrow('defaultRegion')
+    const defaultRegionId = createOrganizationDto.regionId ?? this.configService.getOrThrow('defaultRegion.id')
 
-    let organization = new Organization(defaultRegion)
+    let organization = new Organization(defaultRegionId)
 
     organization.name = createOrganizationDto.name
     organization.createdBy = createdBy
     organization.personal = personal
 
-    organization.totalCpuQuota = quota.totalCpuQuota
-    organization.totalMemoryQuota = quota.totalMemoryQuota
-    organization.totalDiskQuota = quota.totalDiskQuota
     organization.maxCpuPerSandbox = quota.maxCpuPerSandbox
     organization.maxMemoryPerSandbox = quota.maxMemoryPerSandbox
     organization.maxDiskPerSandbox = quota.maxDiskPerSandbox
@@ -268,6 +289,20 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     owner.role = OrganizationMemberRole.OWNER
 
     organization.users = [owner]
+
+    organization.maxCpuPerSandbox = quota.maxCpuPerSandbox
+    organization.maxMemoryPerSandbox = quota.maxMemoryPerSandbox
+    organization.maxDiskPerSandbox = quota.maxDiskPerSandbox
+    organization.snapshotQuota = quota.snapshotQuota
+    organization.maxSnapshotSize = quota.maxSnapshotSize
+    organization.volumeQuota = quota.volumeQuota
+
+    const regionQuota = new RegionQuota()
+    regionQuota.regionId = defaultRegionId
+    regionQuota.totalCpuQuota = quota.totalCpuQuota
+    regionQuota.totalMemoryQuota = quota.totalMemoryQuota
+    regionQuota.totalDiskQuota = quota.totalDiskQuota
+    organization.regionQuotas = [regionQuota]
 
     await entityManager.transaction(async (em) => {
       organization = await em.save(organization)
@@ -432,6 +467,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       payload.entityManager,
       {
         name: 'Personal',
+        regionId: this.configService.getOrThrow('defaultRegion.id'),
       },
       payload.user.id,
       payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,

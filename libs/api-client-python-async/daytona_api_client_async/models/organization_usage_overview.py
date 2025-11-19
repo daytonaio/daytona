@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Union
+from daytona_api_client_async.models.region_usage_overview import RegionUsageOverview
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,18 +28,13 @@ class OrganizationUsageOverview(BaseModel):
     """
     OrganizationUsageOverview
     """ # noqa: E501
-    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
-    total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
-    total_disk_quota: Union[StrictFloat, StrictInt] = Field(alias="totalDiskQuota")
-    current_cpu_usage: Union[StrictFloat, StrictInt] = Field(alias="currentCpuUsage")
-    current_memory_usage: Union[StrictFloat, StrictInt] = Field(alias="currentMemoryUsage")
-    current_disk_usage: Union[StrictFloat, StrictInt] = Field(alias="currentDiskUsage")
+    region_usage: List[RegionUsageOverview] = Field(alias="regionUsage")
     total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(alias="totalSnapshotQuota")
     current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(alias="currentSnapshotUsage")
     total_volume_quota: Union[StrictFloat, StrictInt] = Field(alias="totalVolumeQuota")
     current_volume_usage: Union[StrictFloat, StrictInt] = Field(alias="currentVolumeUsage")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "currentCpuUsage", "currentMemoryUsage", "currentDiskUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
+    __properties: ClassVar[List[str]] = ["regionUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -81,6 +77,13 @@ class OrganizationUsageOverview(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in region_usage (list)
+        _items = []
+        if self.region_usage:
+            for _item_region_usage in self.region_usage:
+                if _item_region_usage:
+                    _items.append(_item_region_usage.to_dict())
+            _dict['regionUsage'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -98,12 +101,7 @@ class OrganizationUsageOverview(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "totalCpuQuota": obj.get("totalCpuQuota"),
-            "totalMemoryQuota": obj.get("totalMemoryQuota"),
-            "totalDiskQuota": obj.get("totalDiskQuota"),
-            "currentCpuUsage": obj.get("currentCpuUsage"),
-            "currentMemoryUsage": obj.get("currentMemoryUsage"),
-            "currentDiskUsage": obj.get("currentDiskUsage"),
+            "regionUsage": [RegionUsageOverview.from_dict(_item) for _item in obj["regionUsage"]] if obj.get("regionUsage") is not None else None,
             "totalSnapshotQuota": obj.get("totalSnapshotQuota"),
             "currentSnapshotUsage": obj.get("currentSnapshotUsage"),
             "totalVolumeQuota": obj.get("totalVolumeQuota"),

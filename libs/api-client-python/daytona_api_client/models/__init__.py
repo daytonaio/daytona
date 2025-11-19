@@ -111,6 +111,7 @@ from daytona_api_client.models.pty_session_info import PtySessionInfo
 from daytona_api_client.models.range import Range
 from daytona_api_client.models.region import Region
 from daytona_api_client.models.region_screenshot_response import RegionScreenshotResponse
+from daytona_api_client.models.region_usage_overview import RegionUsageOverview
 from daytona_api_client.models.registry_push_access_dto import RegistryPushAccessDto
 from daytona_api_client.models.replace_request import ReplaceRequest
 from daytona_api_client.models.replace_result import ReplaceResult
@@ -140,6 +141,7 @@ from daytona_api_client.models.update_docker_registry import UpdateDockerRegistr
 from daytona_api_client.models.update_organization_invitation import UpdateOrganizationInvitation
 from daytona_api_client.models.update_organization_member_access import UpdateOrganizationMemberAccess
 from daytona_api_client.models.update_organization_quota import UpdateOrganizationQuota
+from daytona_api_client.models.update_organization_region_quota import UpdateOrganizationRegionQuota
 from daytona_api_client.models.update_organization_role import UpdateOrganizationRole
 from daytona_api_client.models.update_sandbox_state_dto import UpdateSandboxStateDto
 from daytona_api_client.models.user import User

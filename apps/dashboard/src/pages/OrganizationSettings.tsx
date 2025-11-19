@@ -15,12 +15,14 @@ import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { LeaveOrganizationDialog } from '@/components/Organizations/LeaveOrganizationDialog'
 import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
+import { useRegions } from '@/hooks/useRegions'
 
 const OrganizationSettings: React.FC = () => {
   const { organizationsApi } = useApi()
 
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { getRegionName } = useRegions()
 
   const [loadingDeleteOrganization, setLoadingDeleteOrganization] = useState(false)
   const [loadingLeaveOrganization, setLoadingLeaveOrganization] = useState(false)
@@ -95,7 +97,11 @@ const OrganizationSettings: React.FC = () => {
 
         <div className="space-y-3">
           <Label htmlFor="organization-default-region">Default Region</Label>
-          <Input id="organization-default-region" value={selectedOrganization.defaultRegion} readOnly />
+          <Input
+            id="organization-default-region"
+            value={getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
+            readOnly
+          />
         </div>
 
         {!selectedOrganization.personal && authenticatedUserOrganizationMember !== null && (

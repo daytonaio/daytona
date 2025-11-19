@@ -4,19 +4,9 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsNumber } from 'class-validator'
 
 @ApiSchema({ name: 'UpdateOrganizationQuota' })
 export class UpdateOrganizationQuotaDto {
-  @ApiProperty({ nullable: true })
-  totalCpuQuota?: number
-
-  @ApiProperty({ nullable: true })
-  totalMemoryQuota?: number
-
-  @ApiProperty({ nullable: true })
-  totalDiskQuota?: number
-
   @ApiProperty({ nullable: true })
   maxCpuPerSandbox?: number
 

@@ -43,6 +43,7 @@ import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -183,6 +184,7 @@ export class OrganizationController {
     requestMetadata: {
       body: (req: TypedRequest<CreateOrganizationDto>) => ({
         name: req.body?.name,
+        regionId: req.body?.regionId,
       }),
     },
   })
@@ -292,8 +294,6 @@ export class OrganizationController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Organization details',
-    type: OrganizationDto,
   })
   @ApiParam({
     name: 'organizationId',
@@ -308,9 +308,6 @@ export class OrganizationController {
     targetIdFromRequest: (req) => req.params.organizationId,
     requestMetadata: {
       body: (req: TypedRequest<UpdateOrganizationQuotaDto>) => ({
-        totalCpuQuota: req.body?.totalCpuQuota,
-        totalMemoryQuota: req.body?.totalMemoryQuota,
-        totalDiskQuota: req.body?.totalDiskQuota,
         maxCpuPerSandbox: req.body?.maxCpuPerSandbox,
         maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
         maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
@@ -322,10 +319,52 @@ export class OrganizationController {
   })
   async updateOrganizationQuota(
     @Param('organizationId') organizationId: string,
-    @Body() updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
-  ): Promise<OrganizationDto> {
-    const organization = await this.organizationService.updateQuota(organizationId, updateOrganizationQuotaDto)
-    return OrganizationDto.fromOrganization(organization)
+    @Body() updateDto: UpdateOrganizationQuotaDto,
+  ): Promise<void> {
+    return this.organizationService.updateQuota(organizationId, updateDto)
+  }
+
+  @Patch('/:organizationId/quota/:regionId')
+  @ApiOperation({
+    summary: 'Update organization region quota',
+    operationId: 'updateOrganizationRegionQuota',
+  })
+  @ApiResponse({
+    status: 200,
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'regionId',
+    description: 'ID of the region where the updated quota will be applied',
+    type: 'string',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @Audit({
+    action: AuditAction.UPDATE_QUOTA,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      params: (req) => ({
+        regionId: req.params.regionId,
+      }),
+      body: (req: TypedRequest<UpdateOrganizationRegionQuotaDto>) => ({
+        totalCpuQuota: req.body?.totalCpuQuota,
+        totalMemoryQuota: req.body?.totalMemoryQuota,
+        totalDiskQuota: req.body?.totalDiskQuota,
+      }),
+    },
+  })
+  async updateOrganizationRegionQuota(
+    @Param('organizationId') organizationId: string,
+    @Param('regionId') regionId: string,
+    @Body() updateDto: UpdateOrganizationRegionQuotaDto,
+  ): Promise<void> {
+    return this.organizationService.updateRegionQuota(organizationId, regionId, updateDto)
   }
 
   @Post('/:organizationId/leave')

@@ -7,6 +7,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 import { OrganizationUser } from './organization-user.entity'
 import { OrganizationRole } from './organization-role.entity'
 import { OrganizationInvitation } from './organization-invitation.entity'
+import { RegionQuota } from './region-quota.entity'
 
 @Entity()
 export class Organization {
@@ -30,28 +31,7 @@ export class Organization {
   telemetryEnabled: boolean
 
   @Column()
-  defaultRegion: string
-
-  @Column({
-    type: 'int',
-    default: 10,
-    name: 'total_cpu_quota',
-  })
-  totalCpuQuota: number
-
-  @Column({
-    type: 'int',
-    default: 10,
-    name: 'total_memory_quota',
-  })
-  totalMemoryQuota: number
-
-  @Column({
-    type: 'int',
-    default: 30,
-    name: 'total_disk_quota',
-  })
-  totalDiskQuota: number
+  defaultRegionId: string
 
   @Column({
     type: 'int',
@@ -94,6 +74,12 @@ export class Organization {
     name: 'volume_quota',
   })
   volumeQuota: number
+
+  @OneToMany(() => RegionQuota, (quota) => quota.organization, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  regionQuotas: RegionQuota[]
 
   @OneToMany(() => OrganizationRole, (organizationRole) => organizationRole.organization, {
     cascade: true,
@@ -156,7 +142,7 @@ export class Organization {
   })
   updatedAt: Date
 
-  constructor(defaultRegion: string) {
-    this.defaultRegion = defaultRegion
+  constructor(defaultRegionId: string) {
+    this.defaultRegionId = defaultRegionId
   }
 }

@@ -24,6 +24,7 @@ import { Volume } from '../sandbox/entities/volume.entity'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 import { OrganizationUsageService } from './services/organization-usage.service'
+import { RegionQuota } from './entities/region-quota.entity'
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { OrganizationUsageService } from './services/organization-usage.service'
       Snapshot,
       Volume,
       SnapshotRunner,
+      RegionQuota,
     ]),
   ],
   controllers: [

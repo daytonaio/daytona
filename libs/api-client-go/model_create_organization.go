@@ -22,7 +22,9 @@ var _ MappedNullable = &CreateOrganization{}
 // CreateOrganization struct for CreateOrganization
 type CreateOrganization struct {
 	// The name of organization
-	Name                 string `json:"name"`
+	Name string `json:"name"`
+	// The ID of the default region for the organization
+	RegionId             *string `json:"regionId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -70,6 +72,38 @@ func (o *CreateOrganization) SetName(v string) {
 	o.Name = v
 }
 
+// GetRegionId returns the RegionId field value if set, zero value otherwise.
+func (o *CreateOrganization) GetRegionId() string {
+	if o == nil || IsNil(o.RegionId) {
+		var ret string
+		return ret
+	}
+	return *o.RegionId
+}
+
+// GetRegionIdOk returns a tuple with the RegionId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateOrganization) GetRegionIdOk() (*string, bool) {
+	if o == nil || IsNil(o.RegionId) {
+		return nil, false
+	}
+	return o.RegionId, true
+}
+
+// HasRegionId returns a boolean if a field has been set.
+func (o *CreateOrganization) HasRegionId() bool {
+	if o != nil && !IsNil(o.RegionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegionId gets a reference to the given string and assigns it to the RegionId field.
+func (o *CreateOrganization) SetRegionId(v string) {
+	o.RegionId = &v
+}
+
 func (o CreateOrganization) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -81,6 +115,9 @@ func (o CreateOrganization) MarshalJSON() ([]byte, error) {
 func (o CreateOrganization) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+	if !IsNil(o.RegionId) {
+		toSerialize["regionId"] = o.RegionId
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -125,6 +162,7 @@ func (o *CreateOrganization) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "name")
+		delete(additionalProperties, "regionId")
 		o.AdditionalProperties = additionalProperties
 	}
 

@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
-import { Organization } from '@daytonaio/api-client'
+import { Organization, Region } from '@daytonaio/api-client'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -19,29 +19,39 @@ import {
 import { Input } from '@/components/ui/input'
 import { Link } from 'react-router-dom'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RoutePath } from '@/enums/RoutePath'
 
 interface CreateOrganizationDialogProps {
   open: boolean
   billingApiUrl?: string
+  regions: Region[]
   onOpenChange: (open: boolean) => void
-  onCreateOrganization: (name: string) => Promise<Organization | null>
+  onCreateOrganization: (name: string, regionId?: string) => Promise<Organization | null>
 }
 
 export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> = ({
   open,
   billingApiUrl,
+  regions,
   onOpenChange,
   onCreateOrganization,
 }) => {
   const [name, setName] = useState('')
+  const [regionId, setRegionId] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(false)
   const [createdOrg, setCreatedOrg] = useState<Organization | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
 
+  useEffect(() => {
+    if (regions && regions.length > 0) {
+      setRegionId(regions[0].id)
+    }
+  }, [regions])
+
   const handleCreateOrganization = async () => {
     setLoading(true)
-    const org = await onCreateOrganization(name)
+    const org = await onCreateOrganization(name, regionId)
     if (org) {
       // TODO: Return when we fix the selected org states
       // setCreatedOrg(org)
@@ -115,9 +125,7 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
                     </Link>
                     .
                   </>
-                ) : (
-                  <></>
-                )}
+                ) : null}
               </p>
             </div>
           </div>
@@ -134,6 +142,23 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
               <Label htmlFor="organization-name">Organization Name</Label>
               <Input id="organization-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
             </div>
+            {regions && regions.length > 0 && (
+              <div className="space-y-3">
+                <Label htmlFor="region-select">Region</Label>
+                <Select value={regionId} onValueChange={setRegionId}>
+                  <SelectTrigger className="h-8" id="region-select">
+                    <SelectValue placeholder="Select a region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regions.map((region) => (
+                      <SelectItem key={region.id} value={region.id}>
+                        {region.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </form>
         )}
         <DialogFooter>
