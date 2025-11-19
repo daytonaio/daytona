@@ -20,8 +20,8 @@ import (
 )
 
 // RecoverFromStorageLimit attempts to recover a sandbox from storage limit issues
-// by expanding its storage quota (creating a new one with increased disk size).
-func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId string, newStorageQuotaGB int64) error {
+// by expanding its storage quota by creating new ones with 100MB increments up to 10% of original.
+func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId string, originalStorageQuota float64) error {
 	defer timer.Timer()()
 
 	startTime := time.Now()
@@ -32,12 +32,35 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		}
 	}()
 
-	log.Infof("Starting storage recovery for sandbox %s: new=%dGB", sandboxId, newStorageQuotaGB)
-
 	originalContainer, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
 		common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
 		return fmt.Errorf("failed to inspect container: %w", err)
+	}
+
+	// Get current storage size from StorageOpt
+	currentStorage := float64(0)
+	if originalContainer.HostConfig.StorageOpt != nil {
+		if sizeStr, ok := originalContainer.HostConfig.StorageOpt["size"]; ok {
+			var sizeBytes int64
+			fmt.Sscanf(sizeStr, "%d", &sizeBytes)
+			currentStorage = float64(sizeBytes) / (1024 * 1024 * 1024)
+		}
+	}
+
+	maxExpansion := originalStorageQuota * 0.1 // 10% of original
+	currentExpansion := currentStorage - originalStorageQuota
+	increment := 0.1 // 100MB
+	newExpansion := currentExpansion + increment
+	newStorageQuota := originalStorageQuota + newExpansion
+
+	log.Infof("Storage recovery for sandbox %s: original=%.2fGB, current=%.2fGB, currentExpansion=%.2fGB, increment=%.2fGB, newExpansion=%.2fGB, newTotal=%.2fGB, max=%.2fGB",
+		sandboxId, originalStorageQuota, currentStorage, currentExpansion, increment, newExpansion, newStorageQuota, maxExpansion)
+
+	// Validate expansion limit
+	if newExpansion > maxExpansion {
+		common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
+		return fmt.Errorf("storage cannot be expanded further. Maximum expansion of %.2fGB (10%% of original %.2fGB) has been reached. Please contact support", maxExpansion, originalStorageQuota)
 	}
 
 	var overlayDiffPath string
@@ -101,7 +124,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	filesystem := d.getFilesystem(info)
 
 	if filesystem == "xfs" {
-		newStorageBytes := newStorageQuotaGB * 1024 * 1024 * 1024
+		newStorageBytes := int64(newStorageQuota * 1024 * 1024 * 1024)
 		if newHostConfig.StorageOpt == nil {
 			newHostConfig.StorageOpt = make(map[string]string)
 		}
@@ -140,51 +163,63 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		return fmt.Errorf("failed to create new container: %w", err)
 	}
 
-	log.Info("Starting new container")
-
-	err = d.retryWithExponentialBackoff(
-		ctx,
-		"start",
-		sandboxId,
-		constants.DEFAULT_MAX_RETRIES,
-		constants.DEFAULT_BASE_DELAY,
-		constants.DEFAULT_MAX_DELAY,
-		func() error {
-			return d.apiClient.ContainerStart(ctx, sandboxId, container.StartOptions{})
-		},
-	)
-	if err != nil {
-		log.Errorf("Failed to start new container: %v", err)
-		_ = d.apiClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{Force: true})
-		_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
-		common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
-		return fmt.Errorf("failed to start new container: %w", err)
-	}
-
+	// Start container temporarily to copy data, then stop it
+	// The API will trigger the normal start flow through SandboxManager
 	if overlayDiffPath != "" {
+		log.Info("Starting container temporarily for data copy")
+		err = d.retryWithExponentialBackoff(
+			ctx,
+			"start",
+			sandboxId,
+			constants.DEFAULT_MAX_RETRIES,
+			constants.DEFAULT_BASE_DELAY,
+			constants.DEFAULT_MAX_DELAY,
+			func() error {
+				return d.apiClient.ContainerStart(ctx, sandboxId, container.StartOptions{})
+			},
+		)
+		if err != nil {
+			log.Errorf("Failed to start container for data copy: %v", err)
+			_ = d.apiClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{Force: true})
+			_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
+			common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
+			return fmt.Errorf("failed to start container for data copy: %w", err)
+		}
+
 		log.Info("Copying data from old to new container")
 		err = d.copyOverlayData(ctx, oldName, sandboxId, overlayDiffPath)
 		if err != nil {
 			log.Errorf("Failed to copy data: %v", err)
 			log.Warnf("Old container preserved as %s for manual data recovery", oldName)
-			return nil
+			_ = d.apiClient.ContainerStop(ctx, sandboxId, container.StopOptions{})
+			common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
+			return fmt.Errorf("failed to copy data: %w", err)
 		}
 		log.Debugf("Data copy completed")
+
+		log.Info("Stopping container after data copy")
+		timeout := 2
+		err = d.apiClient.ContainerStop(ctx, sandboxId, container.StopOptions{
+			Signal:  "SIGKILL",
+			Timeout: &timeout,
+		})
+		if err != nil {
+			log.Warnf("Failed to stop container after data copy: %v", err)
+		}
 	} else {
 		log.Warn("Could not determine overlay2 path, skipping data copy")
 	}
 
-	log.Info("Starting and validating recovered sandbox")
-	err = d.Start(ctx, sandboxId, originalContainer.Config.Labels)
+	// Remove old container after successful data copy
+	log.Debugf("Removing old container %s", oldName)
+	err = d.apiClient.ContainerRemove(ctx, oldName, container.RemoveOptions{Force: true})
 	if err != nil {
-		log.Errorf("Failed to start recovered sandbox: %v", err)
-		log.Warnf("Old container preserved as %s for manual recovery", oldName)
-		common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
-		return fmt.Errorf("failed to start recovered sandbox: %w", err)
+		log.Warnf("Failed to remove old container %s: %v", oldName, err)
 	}
 
-	log.Infof("Storage recovery completed for sandbox %s", sandboxId)
-	log.Debugf("Old container preserved as %s", oldName)
+	// Note: Container is now stopped. The API will emit a STARTED event
+	// which will trigger the normal start flow through SandboxManager
+	log.Info("Storage expansion completed - container ready to be started by SandboxManager")
 	common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusSuccess)).Inc()
 
 	return nil
