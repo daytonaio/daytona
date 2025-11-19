@@ -12,7 +12,6 @@ import {
   ReplaceResult,
   SearchFilesResponse,
 } from '@daytonaio/toolbox-api-client'
-import FormData from 'form-data'
 import { FileSystemApi } from '@daytonaio/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
 import { RUNTIME, Runtime } from './utils/Runtime'
@@ -477,7 +476,6 @@ export class FileSystem {
   public async uploadFiles(files: FileUpload[], timeout: number = 30 * 60): Promise<void> {
     const isNonStreamingRuntime =
       RUNTIME === Runtime.DENO || RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS
-    // Use native FormData in Deno
     const FormDataClass = isNonStreamingRuntime
       ? FormData
       : ((await dynamicImport('form-data', 'Uploading files is not supported: ')) as any)
