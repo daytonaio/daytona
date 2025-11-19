@@ -38,24 +38,6 @@ export interface CreateRunner {
   proxyUrl: string
   /**
    *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  cpu: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  memoryGiB: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  diskGiB: number
-  /**
-   *
    * @type {string}
    * @memberof CreateRunner
    */

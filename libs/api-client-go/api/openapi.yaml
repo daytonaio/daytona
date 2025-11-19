@@ -9385,13 +9385,10 @@ components:
       type: object
     CreateRunner:
       example:
-        diskGiB: 1.4658129805029452
         apiUrl: apiUrl
         regionId: regionId
         proxyUrl: proxyUrl
-        memoryGiB: 6.027456183070403
         domain: domain
-        cpu: 0.8008281904610115
       properties:
         domain:
           type: string
@@ -9399,20 +9396,11 @@ components:
           type: string
         proxyUrl:
           type: string
-        cpu:
-          type: number
-        memoryGiB:
-          type: number
-        diskGiB:
-          type: number
         regionId:
           type: string
       required:
         - apiUrl
-        - cpu
-        - diskGiB
         - domain
-        - memoryGiB
         - proxyUrl
         - regionId
       type: object

@@ -21,13 +21,10 @@ var _ MappedNullable = &CreateRunner{}
 
 // CreateRunner struct for CreateRunner
 type CreateRunner struct {
-	Domain               string  `json:"domain"`
-	ApiUrl               string  `json:"apiUrl"`
-	ProxyUrl             string  `json:"proxyUrl"`
-	Cpu                  float32 `json:"cpu"`
-	MemoryGiB            float32 `json:"memoryGiB"`
-	DiskGiB              float32 `json:"diskGiB"`
-	RegionId             string  `json:"regionId"`
+	Domain               string `json:"domain"`
+	ApiUrl               string `json:"apiUrl"`
+	ProxyUrl             string `json:"proxyUrl"`
+	RegionId             string `json:"regionId"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -37,14 +34,11 @@ type _CreateRunner CreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateRunner(domain string, apiUrl string, proxyUrl string, cpu float32, memoryGiB float32, diskGiB float32, regionId string) *CreateRunner {
+func NewCreateRunner(domain string, apiUrl string, proxyUrl string, regionId string) *CreateRunner {
 	this := CreateRunner{}
 	this.Domain = domain
 	this.ApiUrl = apiUrl
 	this.ProxyUrl = proxyUrl
-	this.Cpu = cpu
-	this.MemoryGiB = memoryGiB
-	this.DiskGiB = diskGiB
 	this.RegionId = regionId
 	return &this
 }
@@ -129,78 +123,6 @@ func (o *CreateRunner) SetProxyUrl(v string) {
 	o.ProxyUrl = v
 }
 
-// GetCpu returns the Cpu field value
-func (o *CreateRunner) GetCpu() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.Cpu
-}
-
-// GetCpuOk returns a tuple with the Cpu field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetCpuOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Cpu, true
-}
-
-// SetCpu sets field value
-func (o *CreateRunner) SetCpu(v float32) {
-	o.Cpu = v
-}
-
-// GetMemoryGiB returns the MemoryGiB field value
-func (o *CreateRunner) GetMemoryGiB() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.MemoryGiB
-}
-
-// GetMemoryGiBOk returns a tuple with the MemoryGiB field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetMemoryGiBOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.MemoryGiB, true
-}
-
-// SetMemoryGiB sets field value
-func (o *CreateRunner) SetMemoryGiB(v float32) {
-	o.MemoryGiB = v
-}
-
-// GetDiskGiB returns the DiskGiB field value
-func (o *CreateRunner) GetDiskGiB() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.DiskGiB
-}
-
-// GetDiskGiBOk returns a tuple with the DiskGiB field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetDiskGiBOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.DiskGiB, true
-}
-
-// SetDiskGiB sets field value
-func (o *CreateRunner) SetDiskGiB(v float32) {
-	o.DiskGiB = v
-}
-
 // GetRegionId returns the RegionId field value
 func (o *CreateRunner) GetRegionId() string {
 	if o == nil {
@@ -238,9 +160,6 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize["domain"] = o.Domain
 	toSerialize["apiUrl"] = o.ApiUrl
 	toSerialize["proxyUrl"] = o.ProxyUrl
-	toSerialize["cpu"] = o.Cpu
-	toSerialize["memoryGiB"] = o.MemoryGiB
-	toSerialize["diskGiB"] = o.DiskGiB
 	toSerialize["regionId"] = o.RegionId
 
 	for key, value := range o.AdditionalProperties {
@@ -258,9 +177,6 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 		"domain",
 		"apiUrl",
 		"proxyUrl",
-		"cpu",
-		"memoryGiB",
-		"diskGiB",
 		"regionId",
 	}
 
@@ -294,9 +210,6 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "domain")
 		delete(additionalProperties, "apiUrl")
 		delete(additionalProperties, "proxyUrl")
-		delete(additionalProperties, "cpu")
-		delete(additionalProperties, "memoryGiB")
-		delete(additionalProperties, "diskGiB")
 		delete(additionalProperties, "regionId")
 		o.AdditionalProperties = additionalProperties
 	}

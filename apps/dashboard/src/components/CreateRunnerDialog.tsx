@@ -27,9 +27,6 @@ const DEFAULT_FORM_DATA = {
   domain: '',
   apiUrl: '',
   proxyUrl: '',
-  cpu: 16,
-  memoryGiB: 64,
-  diskGiB: 4000,
   regionId: '',
 }
 
@@ -74,18 +71,6 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
       errors.proxyUrl = 'Proxy URL must start with http:// or https://'
     }
 
-    if (formData.cpu < 16) {
-      errors.cpu = 'vCPU must be at least 16 cores'
-    }
-
-    if (formData.memoryGiB < 64) {
-      errors.memoryGiB = 'Memory must be at least 64 GiB'
-    }
-
-    if (formData.diskGiB < 4000) {
-      errors.diskGiB = 'Disk must be at least 4000 GiB'
-    }
-
     if (!formData.regionId) {
       errors.regionId = 'Region is required'
     }
@@ -105,9 +90,6 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
         domain: formData.domain,
         apiUrl: formData.apiUrl,
         proxyUrl: formData.proxyUrl,
-        cpu: formData.cpu,
-        memoryGiB: formData.memoryGiB,
-        diskGiB: formData.diskGiB,
         regionId: formData.regionId,
       })
       if (runner) {
@@ -270,62 +252,6 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
                 className={formErrors.proxyUrl ? 'border-destructive' : ''}
               />
               {formErrors.proxyUrl && <p className="text-sm text-destructive">{formErrors.proxyUrl}</p>}
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor="cpu">vCPU</Label>
-                <Input
-                  id="cpu"
-                  type="number"
-                  min="1"
-                  value={formData.cpu}
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, cpu: parseInt(e.target.value) || 1 }))
-                    if (formErrors.cpu) {
-                      setFormErrors((prev) => ({ ...prev, cpu: '' }))
-                    }
-                  }}
-                  className={formErrors.cpu ? 'border-destructive' : ''}
-                />
-                {formErrors.cpu && <p className="text-sm text-destructive">{formErrors.cpu}</p>}
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="memoryGiB">Memory (GiB)</Label>
-                <Input
-                  id="memoryGiB"
-                  type="number"
-                  min="1"
-                  value={formData.memoryGiB}
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, memoryGiB: parseInt(e.target.value) || 1 }))
-                    if (formErrors.memoryGiB) {
-                      setFormErrors((prev) => ({ ...prev, memoryGiB: '' }))
-                    }
-                  }}
-                  className={formErrors.memoryGiB ? 'border-destructive' : ''}
-                />
-                {formErrors.memoryGiB && <p className="text-sm text-destructive">{formErrors.memoryGiB}</p>}
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="diskGiB">Disk (GiB)</Label>
-                <Input
-                  id="diskGiB"
-                  type="number"
-                  min="1"
-                  value={formData.diskGiB}
-                  onChange={(e) => {
-                    setFormData((prev) => ({ ...prev, diskGiB: parseInt(e.target.value) || 1 }))
-                    if (formErrors.diskGiB) {
-                      setFormErrors((prev) => ({ ...prev, diskGiB: '' }))
-                    }
-                  }}
-                  className={formErrors.diskGiB ? 'border-destructive' : ''}
-                />
-                {formErrors.diskGiB && <p className="text-sm text-destructive">{formErrors.diskGiB}</p>}
-              </div>
             </div>
           </form>
         )}
