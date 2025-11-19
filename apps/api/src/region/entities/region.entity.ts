@@ -28,6 +28,9 @@ export class Region {
   })
   organizationId?: string
 
+  @Column({ default: false })
+  hidden: boolean
+
   @Column({
     type: 'boolean',
     default: true,

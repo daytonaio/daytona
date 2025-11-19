@@ -11,7 +11,7 @@ export class Migration1763372816235 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Create region table
     await queryRunner.query(
-      `CREATE TABLE "region" ("id" character varying NOT NULL, "name" character varying NOT NULL, "organizationId" uuid, "enforceQuotas" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "region_id_pk" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "region" ("id" character varying NOT NULL, "name" character varying NOT NULL, "organizationId" uuid, "hidden" boolean NOT NULL DEFAULT false, "enforceQuotas" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "region_id_pk" PRIMARY KEY ("id"))`,
     )
 
     await queryRunner.query(

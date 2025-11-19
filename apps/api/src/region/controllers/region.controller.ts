@@ -12,6 +12,7 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationService } from '../../organization/services/organization.service'
 
 @ApiTags('regions')
 @Controller('regions')
@@ -22,7 +23,10 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 export class RegionController {
   private readonly logger = new Logger(RegionController.name)
 
-  constructor(private readonly regionService: RegionService) {}
+  constructor(
+    private readonly regionService: RegionService,
+    private readonly organizationService: OrganizationService,
+  ) {}
 
   @Get()
   @HttpCode(200)
@@ -36,10 +40,17 @@ export class RegionController {
     type: [RegionDto],
   })
   async listRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
-    const regions = [
-      ...(await this.regionService.findAll(null)),
-      ...(await this.regionService.findAll(authContext.organizationId)),
-    ]
+    const [sharedRegions, organizationRegions, regionQuotas] = await Promise.all([
+      this.regionService.findAll(null),
+      this.regionService.findAll(authContext.organizationId),
+      this.organizationService.getRegionQuotas(authContext.organizationId),
+    ])
+
+    const availableSharedRegions = sharedRegions.filter(
+      (region) => !region.hidden || regionQuotas.some((quota) => quota.regionId === region.id),
+    )
+
+    const regions = [...availableSharedRegions, ...organizationRegions]
     return regions.map(RegionDto.fromRegion)
   }
 }
