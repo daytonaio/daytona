@@ -1164,6 +1164,7 @@ export class SandboxService {
 
     const destroyedSandboxs = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
+      cleanupCompleted: true,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
