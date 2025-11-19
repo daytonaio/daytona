@@ -48,6 +48,7 @@ class RunnerFull(BaseModel):
     current_snapshot_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current snapshot count", alias="currentSnapshotCount")
     availability_score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Runner availability score", alias="availabilityScore")
     region_id: StrictStr = Field(description="The region ID of the runner", alias="regionId")
+    name: StrictStr = Field(description="The name of the runner")
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
@@ -56,7 +57,7 @@ class RunnerFull(BaseModel):
     version: StrictStr = Field(description="The version of the runner")
     api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "regionId", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiKey"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "regionId", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiKey"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -135,6 +136,7 @@ class RunnerFull(BaseModel):
             "currentSnapshotCount": obj.get("currentSnapshotCount"),
             "availabilityScore": obj.get("availabilityScore"),
             "regionId": obj.get("regionId"),
+            "name": obj.get("name"),
             "state": obj.get("state"),
             "lastChecked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),

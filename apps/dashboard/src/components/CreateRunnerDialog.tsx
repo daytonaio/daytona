@@ -25,6 +25,7 @@ import { getMaskedToken } from '@/lib/utils'
 
 const DEFAULT_FORM_DATA = {
   domain: '',
+  name: '',
   apiUrl: '',
   proxyUrl: '',
   regionId: '',
@@ -41,7 +42,7 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
   const [loading, setLoading] = useState(false)
 
   const [createdRunner, setCreatedRunner] = useState<CreateRunnerResponse | null>(null)
-  const [isApiKeyRevealed, setIsApiKeyRevealed] = useState(false)
+  const [isTokenRevealed, setIsTokenRevealed] = useState(false)
 
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
@@ -57,6 +58,10 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
 
     if (!formData.domain.trim()) {
       errors.domain = 'Domain is required'
+    }
+
+    if (!formData.name.trim()) {
+      errors.name = 'Name is required'
     }
 
     if (!formData.apiUrl.trim()) {
@@ -88,6 +93,7 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
     try {
       const runner = await onCreateRunner({
         domain: formData.domain,
+        name: formData.name,
         apiUrl: formData.apiUrl,
         proxyUrl: formData.proxyUrl,
         regionId: formData.regionId,
@@ -150,14 +156,14 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
         {createdRunner ? (
           <div className="space-y-6">
             <div className="space-y-3">
-              <Label htmlFor="api-key">API Key</Label>
+              <Label htmlFor="token">Token</Label>
               <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
                 <span
                   className="overflow-x-auto pr-2 cursor-text select-all"
-                  onMouseEnter={() => setIsApiKeyRevealed(true)}
-                  onMouseLeave={() => setIsApiKeyRevealed(false)}
+                  onMouseEnter={() => setIsTokenRevealed(true)}
+                  onMouseLeave={() => setIsTokenRevealed(false)}
                 >
-                  {isApiKeyRevealed ? createdRunner.token : getMaskedToken(createdRunner.token)}
+                  {isTokenRevealed ? createdRunner.token : getMaskedToken(createdRunner.token)}
                 </span>
                 <Copy
                   className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
@@ -165,7 +171,7 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
                 />
               </div>
               <p className="text-sm text-muted-foreground">
-                Save this API key securely. You won't be able to see it again.
+                Save this token securely. You won't be able to see it again.
               </p>
             </div>
           </div>
@@ -218,6 +224,19 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
                 className={formErrors.domain ? 'border-destructive' : ''}
               />
               {formErrors.domain && <p className="text-sm text-destructive">{formErrors.domain}</p>}
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }}
+                placeholder="runner-1"
+              />
+              {formErrors.name && <p className="text-sm text-destructive">{formErrors.name}</p>}
             </div>
 
             <div className="space-y-3">

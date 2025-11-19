@@ -59,6 +59,8 @@ type Runner struct {
 	AvailabilityScore *float32 `json:"availabilityScore,omitempty"`
 	// The region ID of the runner
 	RegionId string `json:"regionId"`
+	// The name of the runner
+	Name string `json:"name"`
 	// The state of the runner
 	State RunnerState `json:"state"`
 	// The last time the runner was checked
@@ -80,7 +82,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, proxyUrl string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, regionId string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, proxyUrl string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, regionId string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
@@ -93,6 +95,7 @@ func NewRunner(id string, domain string, apiUrl string, proxyUrl string, cpu flo
 	this.GpuType = gpuType
 	this.Class = class
 	this.RegionId = regionId
+	this.Name = name
 	this.State = state
 	this.Unschedulable = unschedulable
 	this.CreatedAt = createdAt
@@ -629,6 +632,30 @@ func (o *Runner) SetRegionId(v string) {
 	o.RegionId = v
 }
 
+// GetName returns the Name field value
+func (o *Runner) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *Runner) SetName(v string) {
+	o.Name = v
+}
+
 // GetState returns the State field value
 func (o *Runner) GetState() RunnerState {
 	if o == nil {
@@ -826,6 +853,7 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 		toSerialize["availabilityScore"] = o.AvailabilityScore
 	}
 	toSerialize["regionId"] = o.RegionId
+	toSerialize["name"] = o.Name
 	toSerialize["state"] = o.State
 	if !IsNil(o.LastChecked) {
 		toSerialize["lastChecked"] = o.LastChecked
@@ -858,6 +886,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"gpuType",
 		"class",
 		"regionId",
+		"name",
 		"state",
 		"unschedulable",
 		"createdAt",
@@ -911,6 +940,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "currentSnapshotCount")
 		delete(additionalProperties, "availabilityScore")
 		delete(additionalProperties, "regionId")
+		delete(additionalProperties, "name")
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "lastChecked")
 		delete(additionalProperties, "unschedulable")

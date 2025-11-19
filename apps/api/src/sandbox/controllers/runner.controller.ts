@@ -71,6 +71,7 @@ export class RunnerController {
         apiUrl: req.body?.apiUrl,
         proxyUrl: req.body?.proxyUrl,
         regionId: req.body?.regionId,
+        name: req.body?.name,
       }),
     },
   })
@@ -90,6 +91,7 @@ export class RunnerController {
         memoryGiB: -1,
         diskGiB: -1,
         regionId: createRunnerDto.regionId,
+        name: createRunnerDto.name,
         gpu: 0,
         gpuType: '',
         class: SandboxClass.SMALL,

@@ -23,4 +23,8 @@ export class CreateRunnerDto {
   @IsString()
   @ApiProperty()
   regionId: string
+
+  @IsString()
+  @ApiProperty()
+  name: string
 }
