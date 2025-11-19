@@ -8,8 +8,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
-import { Archive, Copy, Play, Tag, Trash, X } from 'lucide-react'
 import React, { useState } from 'react'
+import { Archive, Copy, Play, Tag, Trash, Wrench, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { ResourceChip } from './ResourceChip'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
@@ -26,6 +26,7 @@ interface SandboxDetailsSheetProps {
   getWebTerminalUrl: (id: string) => Promise<string | null>
   writePermitted: boolean
   deletePermitted: boolean
+  handleRecover: (id: string) => void
 }
 
 const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
@@ -40,6 +41,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   getWebTerminalUrl,
   writePermitted,
   deletePermitted,
+  handleRecover,
 }) => {
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
 
@@ -59,6 +61,11 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   // }, [sandbox?.id, getWebTerminalUrl])
 
   if (!sandbox) return null
+  const isRecoverableStorageError = (reason?: string) => {
+    if (!reason) return false
+    const msg = reason.toLowerCase()
+    return msg.includes('no space left on device') || msg.includes('storage limit')
+  }
 
   const getLastEvent = (sandbox: Sandbox): { date: Date; relativeTimeString: string } => {
     return getRelativeTimeString(sandbox.updatedAt)
@@ -91,14 +98,25 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                     Stop
                   </Button>
                 )}
-                {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
+                {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) &&
+                  !isRecoverableStorageError(sandbox.errorReason) && (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleStart(sandbox.id)}
+                      disabled={sandboxIsLoading[sandbox.id]}
+                    >
+                      <Play className="w-4 h-4" />
+                      Start
+                    </Button>
+                  )}
+                {sandbox.state === SandboxState.ERROR && isRecoverableStorageError(sandbox.errorReason) && (
                   <Button
                     variant="outline"
-                    onClick={() => handleStart(sandbox.id)}
+                    onClick={() => handleRecover(sandbox.id)}
                     disabled={sandboxIsLoading[sandbox.id]}
                   >
-                    <Play className="w-4 h-4" />
-                    Start
+                    <Wrench className="w-4 h-4" />
+                    Recover
                   </Button>
                 )}
                 {/* {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
