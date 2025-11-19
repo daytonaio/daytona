@@ -22,11 +22,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { useConfig } from '@/hooks/useConfig'
+import { useRegions } from '@/hooks/useRegions'
 
 const Limits: React.FC = () => {
   const { user } = useAuth()
   const { billingApi, organizationsApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
+  const { getRegionName } = useRegions()
   const [organizationTier, setOrganizationTier] = useState<OrganizationTier | null>(null)
   const [tiers, setTiers] = useState<Tier[]>([])
   const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
@@ -192,24 +194,20 @@ const Limits: React.FC = () => {
             {usageOverview && usageOverview.regionUsage.length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Region:</span>
-                {usageOverview.regionUsage.length > 1 ? (
-                  <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
-                    <SelectTrigger className="w-auto min-w-12 max-w-48 gap-x-2">
-                      <SelectValue placeholder="Select region" />
-                    </SelectTrigger>
-                    <SelectContent className="min-w-24 max-w-48" align="end">
-                      {usageOverview.regionUsage.map((usage) => (
-                        <SelectItem key={usage.regionId} value={usage.regionId}>
-                          {usage.regionId}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Badge variant="secondary" className="max-w-48 truncate align-left">
-                    {usageOverview.regionUsage[0].regionId}
-                  </Badge>
-                )}
+                <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
+                  <SelectTrigger
+                    className={`w-auto min-w-12 max-w-48 gap-x-2 ${usageOverview.regionUsage.length === 1 ? 'pointer-events-none select-none [&>svg]:hidden min-w-10' : ''}`}
+                  >
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                  <SelectContent className="min-w-24 max-w-48" align="end">
+                    {usageOverview.regionUsage.map((usage) => (
+                      <SelectItem key={usage.regionId} value={usage.regionId}>
+                        {getRegionName(usage.regionId) ?? usage.regionId}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
           </div>
@@ -291,8 +289,22 @@ const Limits: React.FC = () => {
             <CardTitle className="flex items-center mb-2">Increasing your limits</CardTitle>
             {organizationTier && (
               <CardDescription>
-                Your organization is currently in <b>Tier {organizationTier.tier}</b>. Your limits will automatically be
-                increased once you move to the next tier based on the criteria outlined below.
+                Your organization is currently in <b>Tier {organizationTier.tier}</b>.{' '}
+                {selectedOrganization && usageOverview && usageOverview.regionUsage.length > 1 && (
+                  <>
+                    Tier-based compute limits are applied to your default region{' '}
+                    <button
+                      type="button"
+                      className="underline hover:text-primary font-bold"
+                      onClick={() => setSelectedRegionId(selectedOrganization.defaultRegionId)}
+                    >
+                      {getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
+                    </button>
+                    {'. '}
+                  </>
+                )}
+                Your limits will automatically be increased once you move to the next tier based on the criteria
+                outlined below.
                 <br />
                 Note: For the top up requirements, make sure to top up in a single transaction.
               </CardDescription>
