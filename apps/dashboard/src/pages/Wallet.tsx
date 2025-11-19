@@ -3,24 +3,24 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useEffect, useMemo, useState } from 'react'
-import { useCallback } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
-import { ArrowUpRight, CreditCard, Info, Loader2 } from 'lucide-react'
-import { Slider } from '@/components/ui/slider'
-import { toast } from 'sonner'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Tooltip } from '@/components/Tooltip'
-import { useApi } from '@/hooks/useApi'
-import { useAuth } from 'react-oidc-context'
 import { OrganizationEmail } from '@/billing-api'
+import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { OrganizationEmailsTable } from '@/components/OrganizationEmails'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
+import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useApi } from '@/hooks/useApi'
 import { useBilling } from '@/hooks/useBilling'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { CheckCircleIcon, CreditCardIcon, InfoIcon, Loader, TriangleAlertIcon } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { NumericFormat } from 'react-number-format'
+import { useAuth } from 'react-oidc-context'
+import { toast } from 'sonner'
 
 const formatAmount = (amount: number) => {
   return Intl.NumberFormat('en-US', {
@@ -44,6 +44,12 @@ const Wallet = () => {
   const [redeemCouponSuccess, setRedeemCouponSuccess] = useState<string | null>(null)
   const [organizationEmails, setOrganizationEmails] = useState<OrganizationEmail[]>([])
   const [organizationEmailsLoading, setOrganizationEmailsLoading] = useState(true)
+
+  useEffect(() => {
+    if (wallet?.automaticTopUp) {
+      setAutomaticTopUp(wallet.automaticTopUp)
+    }
+  }, [wallet])
 
   const handleUpdatePaymentMethod = useCallback(async () => {
     if (!selectedOrganization) {
@@ -111,7 +117,7 @@ const Wallet = () => {
 
     if (automaticTopUp?.thresholdAmount !== wallet?.automaticTopUp?.thresholdAmount) {
       if (!wallet?.automaticTopUp) {
-        if (automaticTopUp?.thresholdAmount !== 0) {
+        if ((automaticTopUp?.thresholdAmount || 0) !== 0) {
           return false
         }
       } else {
@@ -121,7 +127,7 @@ const Wallet = () => {
 
     if (automaticTopUp?.targetAmount !== wallet?.automaticTopUp?.targetAmount) {
       if (!wallet?.automaticTopUp) {
-        if (automaticTopUp?.targetAmount !== 0) {
+        if ((automaticTopUp?.targetAmount || 0) !== 0) {
           return false
         }
       } else {
@@ -208,233 +214,235 @@ const Wallet = () => {
   }, [fetchOrganizationEmails])
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Wallet</h1>
-      <div className="flex gap-4">
-        <Card className="my-4 h-full">
+    <div className="p-6 max-w-3xl">
+      <h1 className="text-2xl font-bold mb-3">Wallet</h1>
+      {!user?.profile.email_verified && (
+        <Alert variant="destructive">
+          <TriangleAlertIcon />
+          <AlertTitle>Verify your email</AlertTitle>
+          <AlertDescription>
+            {wallet?.balanceCents && wallet.balanceCents > 0 ? (
+              <>
+                Please verify your email address to complete your account setup.
+                <br />A verification email was sent to you.
+              </>
+            ) : (
+              <>
+                Verify your email address to recieve $100 of credits.
+                <br />A verification email was sent to you.
+              </>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!wallet?.creditCardConnected && user?.profile.email_verified && (
+        <Alert variant="warning">
+          <CreditCardIcon />
+          <AlertTitle> Credit card not connected</AlertTitle>
+          <AlertDescription>
+            {selectedOrganization?.personal ? (
+              <>Connect a credit card to receive an additional $100 of credits.</>
+            ) : (
+              <>Please connect your credit card to your account to continue using our service.</>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex flex-col gap-6 mt-4">
+        <Card className="h-full">
           <CardHeader>
-            <CardTitle>Wallet</CardTitle>
+            <CardTitle>Overview</CardTitle>
           </CardHeader>
-          <CardContent className="p-6 w-full h-full">
+          <CardContent className="">
             {walletLoading || !wallet ? (
               <Skeleton className="max-w-sm h-10" />
             ) : (
-              <CardDescription className="flex flex-col justify-between h-full">
-                <div>
-                  <div className="text-2xl font-bold">Balance: {formatAmount(wallet.ongoingBalanceCents)}</div>
-                  <div className="text-xl font-bold my-2">
-                    Spent this month: {formatAmount(wallet.balanceCents - wallet.ongoingBalanceCents)}
+              <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-center justify-between">
+                <div className="flex gap-4 sm:gap-12 items-end sm:flex-row flex-col">
+                  <div className="flex flex-col gap-1">
+                    <div className="">Current balance</div>
+                    <div className="text-xl text-foreground font-semibold">
+                      {formatAmount(wallet.ongoingBalanceCents)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <div className="">Spent this month</div>
+                    <div className="text-xl font-semibold">
+                      {formatAmount(wallet.balanceCents - wallet.ongoingBalanceCents)}
+                    </div>
                   </div>
                 </div>
-                {!user?.profile.email_verified && (
-                  <div className="text-sm text-red-500 max-w-sm">
-                    {wallet?.balanceCents > 0 ? (
-                      <>
-                        Please verify your email address to continue.
-                        <br />A verification email was sent to you.
-                      </>
-                    ) : (
-                      <>
-                        Verify your email address to recieve $100 of credits.
-                        <br />A verification email was sent to you.
-                      </>
-                    )}
-                  </div>
+                {wallet.creditCardConnected && billingPortalUrl && (
+                  <Button variant="default" className="">
+                    Top-up
+                  </Button>
                 )}
-                {!wallet.creditCardConnected && user?.profile.email_verified && (
-                  <div className="text-sm text-red-500">
-                    {selectedOrganization?.personal ? (
-                      <>Connect a credit card to receive an additional $100 of credits.</>
-                    ) : (
-                      <>Please connect your credit card to your account to continue using our service.</>
-                    )}
-                    <div className="mt-2">
-                      <Button variant="secondary" size="icon" className="w-44" onClick={handleUpdatePaymentMethod}>
-                        <CreditCard className="w-20 h-20" />
-                        Connect
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {wallet.creditCardConnected &&
-                  user?.profile.email_verified &&
-                  (billingPortalUrlLoading || !billingPortalUrl ? (
-                    <Skeleton className="max-w-sm h-10" />
-                  ) : (
-                    <div className="mt-2 grid grid-cols-1 gap-2">
-                      <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
-                        <Button variant="secondary" size="icon" className="w-full">
-                          <ArrowUpRight className="w-20 h-20" />
-                          Top up
-                        </Button>
-                      </a>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="w-full p-2"
-                        onClick={handleUpdatePaymentMethod}
-                      >
-                        <CreditCard className="w-20 h-20" />
-                        Update Payment Method
-                      </Button>
-                    </div>
-                  ))}
-              </CardDescription>
+              </div>
             )}
           </CardContent>
+          <CardContent className="border-t border-border">
+            {walletLoading || !wallet || billingPortalUrlLoading || !billingPortalUrl ? (
+              <Skeleton className="max-w-sm h-10" />
+            ) : (
+              <div className="flex gap-4 items-center justify-between">
+                <div className="flex flex-col gap-1 items-start">
+                  <div className="text-sm font-medium">Payment method</div>
+                  {!wallet.creditCardConnected ? (
+                    <div className="text-sm text-muted-foreground">Payment method not connected</div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                      <CheckCircleIcon className="w-4 h-4 shrink-0" /> Credit card connected
+                    </div>
+                  )}
+                </div>
+                {!wallet.creditCardConnected ? (
+                  <Button variant="default" onClick={handleUpdatePaymentMethod}>
+                    Connect
+                  </Button>
+                ) : (
+                  <Button variant="secondary" onClick={handleUpdatePaymentMethod}>
+                    Update
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+
+          {user?.profile.email_verified && !!wallet && (
+            <CardContent className="border-t border-border">
+              <div className="flex gap-4 md:items-center justify-between md:flex-row flex-col">
+                <div className="flex flex-col gap-1 items-start flex-1">
+                  <div className="text-sm font-medium">Redeem coupon</div>
+                  {redeemCouponError ? (
+                    <div className="text-sm text-destructive">{redeemCouponError}</div>
+                  ) : redeemCouponSuccess ? (
+                    <div className="text-sm text-success">{redeemCouponSuccess}</div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Enter a coupon code to redeem your credits.</div>
+                  )}
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Input
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                  />
+                  <Button variant="secondary" className="min-w-[4.5rem]" onClick={handleRedeemCoupon}>
+                    Redeem
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          )}
         </Card>
         {wallet?.creditCardConnected && (
-          <Card className="my-4 w-full max-w-sm">
+          <Card className="w-full">
             <CardHeader>
-              <Tooltip
-                label={
-                  <CardTitle className="flex items-center gap-2">
-                    <Info className="w-4 h-4" />
-                    Automatic Top up
-                  </CardTitle>
-                }
-                side="bottom"
-                content={
-                  <div className="flex flex-col gap-2 max-w-sm">
-                    <div>
-                      <strong>Threshold</strong> is the amount of credit you want to have in your account before they
-                      are automatically topped up.
-                    </div>
-                    <div>
-                      <strong>Target</strong> is the amount of credit you want to have in your account after they are
-                      automatically topped up. The target must always be greater than the threshold by{' '}
-                      <strong>at least $10</strong>.
-                    </div>
-                    <div>Setting both values to 0 will disable automatic top-ups.</div>
-                  </div>
-                }
-              />
+              <CardTitle>Automatic top-up</CardTitle>
+              <CardDescription>
+                Set automatic top-up rules for your wallet.
+                <br />
+                The target amount must be at least $10 higher than the threshold amount.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 w-full">
+            <CardContent>
               {walletLoading || !wallet ? (
                 <Skeleton className="max-w-sm h-10" />
               ) : (
-                <CardDescription>
-                  <div className="flex flex-col gap-6">
-                    <div className="flex justify-between items-end">
-                      <Label>Threshold ($)</Label>
-                      <Input
-                        type="number"
-                        className="w-24"
-                        value={automaticTopUp?.thresholdAmount ?? 0}
-                        onChange={(e) => {
+                <div className="flex sm:flex-row flex-col gap-6">
+                  <div className="flex flex-col gap-2 flex-1">
+                    <Label htmlFor="thresholdAmount">When balance is below</Label>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <InputGroupText>$</InputGroupText>
+                      </InputGroupAddon>
+                      <NumericFormat
+                        customInput={InputGroupInput}
+                        placeholder="0.00"
+                        id="thresholdAmount"
+                        inputMode="decimal"
+                        thousandSeparator
+                        decimalScale={2}
+                        value={automaticTopUp?.thresholdAmount ?? ''}
+                        onValueChange={({ floatValue }) => {
+                          const value = floatValue ?? 0
+
                           let targetAmount = automaticTopUp?.targetAmount ?? 0
-                          if (Number(e.target.value) > targetAmount - 10) {
-                            targetAmount = Number(e.target.value) + 10
+                          if (value > targetAmount - 10) {
+                            targetAmount = value + 10
                           }
 
                           setAutomaticTopUp({
-                            thresholdAmount: Number(e.target.value),
+                            thresholdAmount: value,
                             targetAmount,
                           })
                         }}
                       />
-                    </div>
-                    <Slider
-                      defaultValue={[wallet.automaticTopUp?.thresholdAmount ?? 0]}
-                      max={1000}
-                      min={0}
-                      step={0.5}
-                      className="mb-4"
-                      value={automaticTopUp?.thresholdAmount ? [automaticTopUp.thresholdAmount] : undefined}
-                      onValueChange={(value) => {
-                        let targetAmount = automaticTopUp?.targetAmount ?? 0
-                        if (value[0] > targetAmount - 10) {
-                          targetAmount = value[0] + 10
-                        }
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>USD</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </div>
 
-                        setAutomaticTopUp({
-                          thresholdAmount: value[0],
-                          targetAmount,
-                        })
-                      }}
-                    />
-                    <div className="flex justify-between items-end">
-                      <Label>Target ($)</Label>
-                      <Input
-                        type="number"
-                        className="w-24"
-                        value={automaticTopUp?.targetAmount ?? 0}
-                        onBlur={(e) => {
+                  <div className="flex flex-col gap-2 flex-1">
+                    <Label htmlFor="targetAmount">Bring balance to</Label>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <InputGroupText>$</InputGroupText>
+                      </InputGroupAddon>
+                      <NumericFormat
+                        placeholder="0.00"
+                        customInput={InputGroupInput}
+                        id="targetAmount"
+                        inputMode="decimal"
+                        thousandSeparator
+                        decimalScale={2}
+                        value={automaticTopUp?.targetAmount ?? ''}
+                        onValueChange={({ floatValue }) => {
                           const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                          if (Number(e.target.value) < thresholdAmount) {
+                          setAutomaticTopUp({
+                            thresholdAmount,
+                            targetAmount: floatValue ?? 0,
+                          })
+                        }}
+                        onBlur={() => {
+                          const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
+                          const currentTarget = automaticTopUp?.targetAmount ?? 0
+
+                          if (currentTarget < thresholdAmount) {
                             setAutomaticTopUp({
                               thresholdAmount,
                               targetAmount: thresholdAmount,
                             })
                           }
                         }}
-                        onChange={(e) => {
-                          const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                          setAutomaticTopUp({
-                            thresholdAmount,
-                            targetAmount: Number(e.target.value),
-                          })
-                        }}
                       />
-                    </div>
-                    <Slider
-                      defaultValue={[wallet.automaticTopUp?.targetAmount ?? 0]}
-                      max={1000}
-                      min={0}
-                      step={0.5}
-                      value={automaticTopUp?.targetAmount ? [automaticTopUp.targetAmount] : undefined}
-                      onValueChange={(value) => {
-                        const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                        if (value[0] <= 10 && value[0] < thresholdAmount) {
-                          return
-                        }
-
-                        if (value[0] > 10 && value[0] < thresholdAmount + 10) {
-                          return
-                        }
-
-                        setAutomaticTopUp({
-                          thresholdAmount,
-                          targetAmount: value[0],
-                        })
-                      }}
-                    />
-                    <div>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="w-44 mt-4"
-                        onClick={handleSetAutomaticTopUp}
-                        disabled={saveAutomaticTopUpDisabled}
-                      >
-                        {automaticTopUpLoading ? <Loader2 className="w-20 h-20 animate-spin" /> : 'Save'}
-                      </Button>
-                    </div>
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>USD</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
                   </div>
-                </CardDescription>
+                </div>
               )}
             </CardContent>
-          </Card>
-        )}
-        {user?.profile.email_verified && !!wallet && (
-          <Card className="my-4 w-full max-w-sm h-full">
-            <CardHeader>
-              <CardTitle>Redeem Coupon</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 w-full">
-              <Input placeholder="Coupon Code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
-              <Button
-                variant="secondary"
-                disabled={redeemCouponLoading || !couponCode}
-                className="mt-4 w-20"
-                onClick={handleRedeemCoupon}
-              >
-                {redeemCouponLoading ? <Loader2 className="w-20 h-20 animate-spin" /> : 'Redeem'}
-              </Button>
-              {redeemCouponError && <div className="text-red-500 mt-4">{redeemCouponError}</div>}
-              {redeemCouponSuccess && <div className="text-green-500 mt-4">{redeemCouponSuccess}</div>}
-            </CardContent>
+            <CardFooter className="flex justify-between gap-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <InfoIcon className="w-4 h-4 shrink-0" />{' '}
+                <span className="text-sm ">Setting both values to 0 will disable automatic top-ups.</span>
+              </div>
+              <div className="flex gap-2 items-center ml-auto">
+                <Button
+                  onClick={handleSetAutomaticTopUp}
+                  disabled={saveAutomaticTopUpDisabled || walletLoading || !wallet}
+                  className="min-w-[4.5rem]"
+                >
+                  {automaticTopUpLoading ? <Loader className="w-4 h-4 animate-spin" /> : 'Save'}
+                </Button>
+              </div>
+            </CardFooter>
           </Card>
         )}
       </div>
@@ -443,7 +451,7 @@ const Wallet = () => {
       <div className="mt-8">
         <Card>
           <CardHeader>
-            <CardTitle>Billing Emails</CardTitle>
+            <CardTitle>Billing emails</CardTitle>
             <CardDescription>
               Manage billing emails for your organization which recieve important billing notifications such as invoices
               and credit depletion notices.
