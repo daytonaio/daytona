@@ -9,6 +9,7 @@ import * as crypto from 'crypto'
 import * as pathe from 'pathe'
 import { DaytonaError } from './errors/DaytonaError'
 import { dynamicImport } from './utils/Import'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Configuration for the ObjectStorage class.
@@ -60,6 +61,7 @@ export class ObjectStorage {
    * @param {string} archiveBasePath - The base path to use for the archive.
    * @returns {Promise<string>} The hash of the uploaded file or directory.
    */
+  @WithInstrumentation()
   async upload(path: string, organizationId: string, archiveBasePath: string): Promise<string> {
     const fs = await dynamicImport('fs', '"upload" is not supported: ')
 

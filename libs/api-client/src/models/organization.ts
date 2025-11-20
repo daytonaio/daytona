@@ -132,4 +132,10 @@ export interface Organization {
    * @memberof Organization
    */
   defaultRegion: string
+  /**
+   * Experimental configuration
+   * @type {object}
+   * @memberof Organization
+   */
+  experimentalConfig: object
 }

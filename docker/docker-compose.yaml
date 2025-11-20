@@ -7,6 +7,8 @@ services:
     environment:
       - OTEL_ENABLED=true
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - ENCRYPTION_KEY=supersecretkey
+      - ENCRYPTION_SALT=supersecretsalt
     networks:
       - daytona-network
     restart: always
