@@ -21,16 +21,19 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	TotalCpuQuota        NullableFloat32 `json:"totalCpuQuota"`
-	TotalMemoryQuota     NullableFloat32 `json:"totalMemoryQuota"`
-	TotalDiskQuota       NullableFloat32 `json:"totalDiskQuota"`
-	MaxCpuPerSandbox     NullableFloat32 `json:"maxCpuPerSandbox"`
-	MaxMemoryPerSandbox  NullableFloat32 `json:"maxMemoryPerSandbox"`
-	MaxDiskPerSandbox    NullableFloat32 `json:"maxDiskPerSandbox"`
-	SnapshotQuota        NullableFloat32 `json:"snapshotQuota"`
-	MaxSnapshotSize      NullableFloat32 `json:"maxSnapshotSize"`
-	VolumeQuota          NullableFloat32 `json:"volumeQuota"`
-	AdditionalProperties map[string]interface{}
+	TotalCpuQuota             NullableFloat32 `json:"totalCpuQuota"`
+	TotalMemoryQuota          NullableFloat32 `json:"totalMemoryQuota"`
+	TotalDiskQuota            NullableFloat32 `json:"totalDiskQuota"`
+	MaxCpuPerSandbox          NullableFloat32 `json:"maxCpuPerSandbox"`
+	MaxMemoryPerSandbox       NullableFloat32 `json:"maxMemoryPerSandbox"`
+	MaxDiskPerSandbox         NullableFloat32 `json:"maxDiskPerSandbox"`
+	SnapshotQuota             NullableFloat32 `json:"snapshotQuota"`
+	MaxSnapshotSize           NullableFloat32 `json:"maxSnapshotSize"`
+	VolumeQuota               NullableFloat32 `json:"volumeQuota"`
+	AuthenticatedRateLimit    NullableFloat32 `json:"authenticatedRateLimit"`
+	SandboxCreateRateLimit    NullableFloat32 `json:"sandboxCreateRateLimit"`
+	SandboxLifecycleRateLimit NullableFloat32 `json:"sandboxLifecycleRateLimit"`
+	AdditionalProperties      map[string]interface{}
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -39,7 +42,7 @@ type _UpdateOrganizationQuota UpdateOrganizationQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32) *UpdateOrganizationQuota {
+func NewUpdateOrganizationQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
@@ -50,6 +53,9 @@ func NewUpdateOrganizationQuota(totalCpuQuota NullableFloat32, totalMemoryQuota 
 	this.SnapshotQuota = snapshotQuota
 	this.MaxSnapshotSize = maxSnapshotSize
 	this.VolumeQuota = volumeQuota
+	this.AuthenticatedRateLimit = authenticatedRateLimit
+	this.SandboxCreateRateLimit = sandboxCreateRateLimit
+	this.SandboxLifecycleRateLimit = sandboxLifecycleRateLimit
 	return &this
 }
 
@@ -295,6 +301,84 @@ func (o *UpdateOrganizationQuota) SetVolumeQuota(v float32) {
 	o.VolumeQuota.Set(&v)
 }
 
+// GetAuthenticatedRateLimit returns the AuthenticatedRateLimit field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationQuota) GetAuthenticatedRateLimit() float32 {
+	if o == nil || o.AuthenticatedRateLimit.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.AuthenticatedRateLimit.Get()
+}
+
+// GetAuthenticatedRateLimitOk returns a tuple with the AuthenticatedRateLimit field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationQuota) GetAuthenticatedRateLimitOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.AuthenticatedRateLimit.Get(), o.AuthenticatedRateLimit.IsSet()
+}
+
+// SetAuthenticatedRateLimit sets field value
+func (o *UpdateOrganizationQuota) SetAuthenticatedRateLimit(v float32) {
+	o.AuthenticatedRateLimit.Set(&v)
+}
+
+// GetSandboxCreateRateLimit returns the SandboxCreateRateLimit field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationQuota) GetSandboxCreateRateLimit() float32 {
+	if o == nil || o.SandboxCreateRateLimit.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.SandboxCreateRateLimit.Get()
+}
+
+// GetSandboxCreateRateLimitOk returns a tuple with the SandboxCreateRateLimit field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationQuota) GetSandboxCreateRateLimitOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SandboxCreateRateLimit.Get(), o.SandboxCreateRateLimit.IsSet()
+}
+
+// SetSandboxCreateRateLimit sets field value
+func (o *UpdateOrganizationQuota) SetSandboxCreateRateLimit(v float32) {
+	o.SandboxCreateRateLimit.Set(&v)
+}
+
+// GetSandboxLifecycleRateLimit returns the SandboxLifecycleRateLimit field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationQuota) GetSandboxLifecycleRateLimit() float32 {
+	if o == nil || o.SandboxLifecycleRateLimit.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.SandboxLifecycleRateLimit.Get()
+}
+
+// GetSandboxLifecycleRateLimitOk returns a tuple with the SandboxLifecycleRateLimit field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationQuota) GetSandboxLifecycleRateLimitOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SandboxLifecycleRateLimit.Get(), o.SandboxLifecycleRateLimit.IsSet()
+}
+
+// SetSandboxLifecycleRateLimit sets field value
+func (o *UpdateOrganizationQuota) SetSandboxLifecycleRateLimit(v float32) {
+	o.SandboxLifecycleRateLimit.Set(&v)
+}
+
 func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -314,6 +398,9 @@ func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["snapshotQuota"] = o.SnapshotQuota.Get()
 	toSerialize["maxSnapshotSize"] = o.MaxSnapshotSize.Get()
 	toSerialize["volumeQuota"] = o.VolumeQuota.Get()
+	toSerialize["authenticatedRateLimit"] = o.AuthenticatedRateLimit.Get()
+	toSerialize["sandboxCreateRateLimit"] = o.SandboxCreateRateLimit.Get()
+	toSerialize["sandboxLifecycleRateLimit"] = o.SandboxLifecycleRateLimit.Get()
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -336,6 +423,9 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		"snapshotQuota",
 		"maxSnapshotSize",
 		"volumeQuota",
+		"authenticatedRateLimit",
+		"sandboxCreateRateLimit",
+		"sandboxLifecycleRateLimit",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -374,6 +464,9 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "snapshotQuota")
 		delete(additionalProperties, "maxSnapshotSize")
 		delete(additionalProperties, "volumeQuota")
+		delete(additionalProperties, "authenticatedRateLimit")
+		delete(additionalProperties, "sandboxCreateRateLimit")
+		delete(additionalProperties, "sandboxLifecycleRateLimit")
 		o.AdditionalProperties = additionalProperties
 	}
 
