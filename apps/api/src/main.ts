@@ -187,6 +187,7 @@ async function bootstrap() {
     Logger.log(`🚀 Daytona API is running on: http://${host}:${port}/${globalPrefix}`)
   } else {
     await app.init()
+    app.flushLogs()
   }
 
   if (isWorkerEnabled() && configService.get('kafka.enabled')) {
