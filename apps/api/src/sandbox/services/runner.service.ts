@@ -361,7 +361,7 @@ export class RunnerService {
     return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
   }
 
-  async getSnapshotRunner(runnerId, snapshotRef: string): Promise<SnapshotRunner> {
+  async getSnapshotRunner(runnerId: string, snapshotRef: string): Promise<SnapshotRunner> {
     return this.snapshotRunnerRepository.findOne({
       where: {
         runnerId: runnerId,
