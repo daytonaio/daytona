@@ -45,6 +45,8 @@ ENV REDIS_PORT=6379
 
 ENV TOOLBOX_ONLY_MODE=false
 
+ENV PREVIEW_WARNING_ENABLED=false
+
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:4000/health" ]
 
 ENTRYPOINT ["daytona-proxy"]
