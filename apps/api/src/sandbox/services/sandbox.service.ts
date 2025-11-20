@@ -15,7 +15,6 @@ import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -1266,6 +1265,11 @@ export class SandboxService {
     //  only allow updating the state of started | stopped sandboxes
     if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
       throw new BadRequestError('Sandbox is not in a valid state to be updated')
+    }
+
+    if (sandbox.desiredState == SandboxDesiredState.DESTROYED) {
+      this.logger.debug(`Sandbox ${sandboxId} is already DESTROYED, skipping state update`)
+      return
     }
 
     const oldState = sandbox.state
