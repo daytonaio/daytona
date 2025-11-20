@@ -99,7 +99,7 @@ services:
       - REGISTRY_TITLE=Docker Registry UI
       - DELETE_IMAGES=true
       - SHOW_CONTENT_DIGEST=true
-      - NGINX_PROXY_PASS_URL=http://localhost:6000
+      - NGINX_PROXY_PASS_URL=http://registry:6000
       - SHOW_CATALOG_NB_TAGS=true
       - CATALOG_MIN_BRANCHES=1
       - CATALOG_MAX_BRANCHES=1
@@ -109,7 +109,7 @@ services:
     networks:
       - daytona-network
     ports:
-      - 5100:5100
+      - 5100:80
 
   registry:
     image: registry:2.8.2
