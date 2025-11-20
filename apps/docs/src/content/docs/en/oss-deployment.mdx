@@ -228,21 +228,22 @@ Below is a full list of environment variables with their default values:
 
 ### Proxy
 
-| Variable             | Type    | Default Value               | Description                    |
-| -------------------- | ------- | --------------------------- | ------------------------------ |
-| `DAYTONA_API_URL`    | string  | `http://api:3000/api`       | Daytona API URL                |
-| `PROXY_PORT`         | number  | `4000`                      | Proxy service port             |
-| `PROXY_DOMAIN`       | string  | `proxy.localhost:4000`      | Proxy domain                   |
-| `PROXY_API_KEY`      | string  | `super_secret_key`          | Proxy API authentication key   |
-| `PROXY_PROTOCOL`     | string  | `http`                      | Proxy protocol (http or https) |
-| `OIDC_CLIENT_ID`     | string  | `daytona`                   | OIDC client identifier         |
-| `OIDC_CLIENT_SECRET` | string  | (empty)                     | OIDC client secret             |
-| `OIDC_DOMAIN`        | string  | `http://dex:5556/dex`       | OIDC domain                    |
-| `OIDC_PUBLIC_DOMAIN` | string  | `http://localhost:5556/dex` | OIDC public domain             |
-| `OIDC_AUDIENCE`      | string  | `daytona`                   | OIDC audience identifier       |
-| `REDIS_HOST`         | string  | `redis`                     | Redis server hostname          |
-| `REDIS_PORT`         | number  | `6379`                      | Redis server port              |
-| `TOOLBOX_ONLY_MODE`  | boolean | `false`                     | Allow only toolbox requests    |
+| Variable                  | Type    | Default Value               | Description                    |
+| ------------------------- | ------- | --------------------------- | ------------------------------ |
+| `DAYTONA_API_URL`         | string  | `http://api:3000/api`       | Daytona API URL                |
+| `PROXY_PORT`              | number  | `4000`                      | Proxy service port             |
+| `PROXY_DOMAIN`            | string  | `proxy.localhost:4000`      | Proxy domain                   |
+| `PROXY_API_KEY`           | string  | `super_secret_key`          | Proxy API authentication key   |
+| `PROXY_PROTOCOL`          | string  | `http`                      | Proxy protocol (http or https) |
+| `OIDC_CLIENT_ID`          | string  | `daytona`                   | OIDC client identifier         |
+| `OIDC_CLIENT_SECRET`      | string  | (empty)                     | OIDC client secret             |
+| `OIDC_DOMAIN`             | string  | `http://dex:5556/dex`       | OIDC domain                    |
+| `OIDC_PUBLIC_DOMAIN`      | string  | `http://localhost:5556/dex` | OIDC public domain             |
+| `OIDC_AUDIENCE`           | string  | `daytona`                   | OIDC audience identifier       |
+| `REDIS_HOST`              | string  | `redis`                     | Redis server hostname          |
+| `REDIS_PORT`              | number  | `6379`                      | Redis server port              |
+| `TOOLBOX_ONLY_MODE`       | boolean | `false`                     | Allow only toolbox requests    |
+| `PREVIEW_WARNING_ENABLED` | boolean | `false`                     | Enable browser preview warning |
 
 ## [OPTIONAL] Configure Auth0 for Authentication
 

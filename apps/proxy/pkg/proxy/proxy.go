@@ -129,7 +129,9 @@ func StartProxy(config *config.Config) error {
 		cors.New(corsConfig)(ctx)
 	})
 
-	router.Use(proxy.browserWarningMiddleware())
+	if config.PreviewWarningEnabled {
+		router.Use(proxy.browserWarningMiddleware())
+	}
 
 	router.Any("/*path", func(ctx *gin.Context) {
 		if ctx.Request.Method == "POST" && ctx.Request.URL.Path == ACCEPT_PREVIEW_PAGE_WARNING_PATH {
