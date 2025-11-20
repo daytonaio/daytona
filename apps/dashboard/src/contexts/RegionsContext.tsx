@@ -8,6 +8,7 @@ import { createContext } from 'react'
 
 export interface IRegionsContext {
   regions: Region[]
+  loadingRegions: boolean
   refreshRegions: () => Promise<Region[]>
   getRegionName: (regionId: string) => string | undefined
 }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { Organization, Region } from '@daytonaio/api-client'
 import { Button } from '@/components/ui/button'
@@ -26,40 +26,43 @@ interface CreateOrganizationDialogProps {
   open: boolean
   billingApiUrl?: string
   regions: Region[]
+  loadingRegions: boolean
+  getRegionName: (regionId: string) => string | undefined
   onOpenChange: (open: boolean) => void
-  onCreateOrganization: (name: string, regionId?: string) => Promise<Organization | null>
+  onCreateOrganization: (name: string, defaultRegionId: string) => Promise<Organization | null>
 }
 
 export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> = ({
   open,
   billingApiUrl,
   regions,
+  loadingRegions,
+  getRegionName,
   onOpenChange,
   onCreateOrganization,
 }) => {
   const [name, setName] = useState('')
-  const [regionId, setRegionId] = useState<string | undefined>(undefined)
+  const [defaultRegionId, setDefaultRegionId] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(false)
   const [createdOrg, setCreatedOrg] = useState<Organization | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (regions && regions.length > 0) {
-      setRegionId(regions[0].id)
-    }
-  }, [regions])
-
   const handleCreateOrganization = async () => {
+    if (!name.trim() || !defaultRegionId) {
+      return
+    }
+
     setLoading(true)
-    const org = await onCreateOrganization(name, regionId)
+    const org = await onCreateOrganization(name.trim(), defaultRegionId)
     if (org) {
       // TODO: Return when we fix the selected org states
       // setCreatedOrg(org)
       // setName('')
+      // setDefaultRegionId(undefined)
     } else {
       setLoading(false)
     }
-    setLoading(false)
+    //setLoading(false)
   }
 
   const copyToClipboard = async (text: string, label: string) => {
@@ -79,6 +82,7 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
         onOpenChange(isOpen)
         if (!isOpen) {
           setName('')
+          setDefaultRegionId(undefined)
           setCreatedOrg(null)
           setCopied(null)
         }
@@ -108,6 +112,15 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
               </div>
             </div>
 
+            <div className="space-y-3">
+              <Label htmlFor="organization-default-region">Default Region</Label>
+              <Input
+                id="organization-default-region"
+                value={getRegionName(createdOrg.defaultRegionId) ?? createdOrg.defaultRegionId}
+                readOnly
+              />
+            </div>
+
             <div className="p-3 rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
               <p className="font-medium">Your organization is created.</p>
               <p className="text-sm mt-1">
@@ -129,6 +142,11 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
               </p>
             </div>
           </div>
+        ) : !loadingRegions && regions.length === 0 ? (
+          <div className="p-3 rounded-md bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+            <p className="font-medium">No regions available</p>
+            <p className="text-sm mt-1">Organization cannot be created because no regions are available.</p>
+          </div>
         ) : (
           <form
             id="create-organization-form"
@@ -142,23 +160,21 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
               <Label htmlFor="organization-name">Organization Name</Label>
               <Input id="organization-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
             </div>
-            {regions && regions.length > 0 && (
-              <div className="space-y-3">
-                <Label htmlFor="region-select">Region</Label>
-                <Select value={regionId} onValueChange={setRegionId}>
-                  <SelectTrigger className="h-8" id="region-select">
-                    <SelectValue placeholder="Select a region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {regions.map((region) => (
-                      <SelectItem key={region.id} value={region.id}>
-                        {region.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-3">
+              <Label htmlFor="region-select">Region</Label>
+              <Select value={defaultRegionId} onValueChange={setDefaultRegionId}>
+                <SelectTrigger className="h-8" id="region-select" disabled={loadingRegions} loading={loadingRegions}>
+                  <SelectValue placeholder={loadingRegions ? 'Loading regions...' : 'Select a region'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {regions.map((region) => (
+                    <SelectItem key={region.id} value={region.id}>
+                      {region.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </form>
         )}
         <DialogFooter>
@@ -173,7 +189,12 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
                 Creating...
               </Button>
             ) : (
-              <Button type="submit" form="create-organization-form" variant="default" disabled={!name.trim()}>
+              <Button
+                type="submit"
+                form="create-organization-form"
+                variant="default"
+                disabled={!name.trim() || !defaultRegionId}
+              >
                 Create
               </Button>
             ))}

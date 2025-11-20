@@ -361,6 +361,38 @@ paths:
       summary: Create organization
       tags:
         - organizations
+  /organizations/{organizationId}/default-region:
+    patch:
+      operationId: setOrganizationDefaultRegion
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationDefaultRegion'
+        required: true
+      responses:
+        '204':
+          description: Default region set successfully
+        '409':
+          description: Organization already has a default region set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set default region for organization
+      tags:
+        - organizations
   /organizations/{organizationId}:
     delete:
       operationId: deleteOrganization
@@ -7779,18 +7811,19 @@ components:
       type: object
     CreateOrganization:
       example:
-        regionId: us
+        defaultRegionId: us
         name: My Organization
       properties:
         name:
           description: The name of organization
           example: My Organization
           type: string
-        regionId:
+        defaultRegionId:
           description: The ID of the default region for the organization
           example: us
           type: string
       required:
+        - defaultRegionId
         - name
       type: object
     Organization:
@@ -7855,7 +7888,6 @@ components:
       required:
         - createdAt
         - createdBy
-        - defaultRegionId
         - id
         - name
         - personal
@@ -7866,6 +7898,17 @@ components:
         - suspensionCleanupGracePeriodHours
         - suspensionReason
         - updatedAt
+      type: object
+    UpdateOrganizationDefaultRegion:
+      example:
+        defaultRegionId: us
+      properties:
+        defaultRegionId:
+          description: The ID of the default region for the organization
+          example: us
+          type: string
+      required:
+        - defaultRegionId
       type: object
     RegionUsageOverview:
       example:

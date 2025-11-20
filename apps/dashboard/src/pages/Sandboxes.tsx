@@ -301,7 +301,7 @@ const Sandboxes: React.FC = () => {
 
   // Region Filter
 
-  const { regions: regionsData } = useRegions()
+  const { regions: regionsData, loadingRegions: loadingRegionsData } = useRegions()
 
   // Subscribe to Sandbox Events
 
@@ -808,6 +808,7 @@ const Sandboxes: React.FC = () => {
         snapshotsDataHasMore={snapshotsDataHasMore}
         onChangeSnapshotSearchValue={(name?: string) => handleSnapshotFiltersChange({ name })}
         regionsData={regionsData || []}
+        loadingRegionsData={loadingRegionsData}
         onRowClick={(sandbox: Sandbox) => {
           setSelectedSandbox(sandbox)
           setShowSandboxDetails(true)

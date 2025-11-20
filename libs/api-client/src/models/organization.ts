@@ -95,5 +95,5 @@ export interface Organization {
    * @type {string}
    * @memberof Organization
    */
-  defaultRegionId: string
+  defaultRegionId?: string
 }

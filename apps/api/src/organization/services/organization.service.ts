@@ -10,6 +10,7 @@ import {
   Logger,
   OnModuleInit,
   OnApplicationShutdown,
+  ConflictException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
@@ -231,6 +232,32 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.organizationRepository.save(organization)
   }
 
+  async setDefaultRegion(organizationId: string, defaultRegionId: string): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    if (organization.defaultRegionId) {
+      throw new ConflictException('Organization already has a default region set')
+    }
+
+    // TODO: validate that the region is available for the organization (must be a non-hidden public region)
+
+    organization.defaultRegionId = defaultRegionId
+
+    const defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
+
+    const regionQuota = new RegionQuota()
+    regionQuota.regionId = defaultRegionId
+    regionQuota.totalCpuQuota = defaultOrganizationQuota.totalCpuQuota
+    regionQuota.totalMemoryQuota = defaultOrganizationQuota.totalMemoryQuota
+    regionQuota.totalDiskQuota = defaultOrganizationQuota.totalDiskQuota
+    organization.regionQuotas = [regionQuota]
+
+    await this.organizationRepository.save(organization)
+  }
+
   private async createWithEntityManager(
     entityManager: EntityManager,
     createOrganizationDto: CreateOrganizationInternalDto,
@@ -257,9 +284,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ForbiddenException('You have reached the maximum number of created organizations')
     }
 
-    const defaultRegionId = createOrganizationDto.regionId ?? this.configService.getOrThrow('defaultRegion.id')
-
-    let organization = new Organization(defaultRegionId)
+    let organization = new Organization(createOrganizationDto.defaultRegionId)
 
     organization.name = createOrganizationDto.name
     organization.createdBy = createdBy
@@ -297,12 +322,14 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     organization.maxSnapshotSize = quota.maxSnapshotSize
     organization.volumeQuota = quota.volumeQuota
 
-    const regionQuota = new RegionQuota()
-    regionQuota.regionId = defaultRegionId
-    regionQuota.totalCpuQuota = quota.totalCpuQuota
-    regionQuota.totalMemoryQuota = quota.totalMemoryQuota
-    regionQuota.totalDiskQuota = quota.totalDiskQuota
-    organization.regionQuotas = [regionQuota]
+    if (createOrganizationDto.defaultRegionId) {
+      const regionQuota = new RegionQuota()
+      regionQuota.regionId = createOrganizationDto.defaultRegionId
+      regionQuota.totalCpuQuota = quota.totalCpuQuota
+      regionQuota.totalMemoryQuota = quota.totalMemoryQuota
+      regionQuota.totalDiskQuota = quota.totalDiskQuota
+      organization.regionQuotas = [regionQuota]
+    }
 
     await entityManager.transaction(async (em) => {
       organization = await em.save(organization)
@@ -467,7 +494,6 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       payload.entityManager,
       {
         name: 'Personal',
-        regionId: this.configService.getOrThrow('defaultRegion.id'),
       },
       payload.user.id,
       payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,

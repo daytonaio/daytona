@@ -21,10 +21,9 @@ export class Migration1763372816235 implements MigrationInterface {
       `CREATE UNIQUE INDEX "region_organizationId_name_unique" ON "region" ("organizationId", "name") WHERE "organizationId" IS NOT NULL`,
     )
 
-    // Expand organization table with defaultRegionId column
+    // Expand organization table with defaultRegionId column (make it nullable)
     await queryRunner.query(`ALTER TABLE "organization" ADD "defaultRegionId" character varying NULL`)
     await queryRunner.query(`UPDATE "organization" SET "defaultRegionId" = "defaultRegion"`)
-    await queryRunner.query(`ALTER TABLE "organization" ALTER COLUMN "defaultRegionId" SET NOT NULL`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

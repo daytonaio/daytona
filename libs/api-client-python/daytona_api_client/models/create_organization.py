@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,9 +28,9 @@ class CreateOrganization(BaseModel):
     CreateOrganization
     """ # noqa: E501
     name: StrictStr = Field(description="The name of organization")
-    region_id: Optional[StrictStr] = Field(default=None, description="The ID of the default region for the organization", alias="regionId")
+    default_region_id: StrictStr = Field(description="The ID of the default region for the organization", alias="defaultRegionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "regionId"]
+    __properties: ClassVar[List[str]] = ["name", "defaultRegionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +91,7 @@ class CreateOrganization(BaseModel):
 
         _obj = cls.model_validate({
             "name": obj.get("name"),
-            "regionId": obj.get("regionId")
+            "defaultRegionId": obj.get("defaultRegionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

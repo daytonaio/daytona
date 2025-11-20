@@ -6,17 +6,8 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { IsNotEmpty, IsString } from 'class-validator'
 
-@ApiSchema({ name: 'CreateOrganization' })
-export class CreateOrganizationDto {
-  @ApiProperty({
-    description: 'The name of organization',
-    example: 'My Organization',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  name: string
-
+@ApiSchema({ name: 'UpdateOrganizationDefaultRegion' })
+export class UpdateOrganizationDefaultRegionDto {
   @ApiProperty({
     description: 'The ID of the default region for the organization',
     example: 'us',

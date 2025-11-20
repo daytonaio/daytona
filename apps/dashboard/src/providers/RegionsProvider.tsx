@@ -20,10 +20,12 @@ export function RegionsProvider(props: Props) {
   const { selectedOrganization } = useSelectedOrganization()
 
   const [regions, setRegions] = useState<Region[]>([])
+  const [loadingRegions, setLoadingRegions] = useState(true)
 
   const getRegions = useCallback(async () => {
     if (!selectedOrganization) {
       setRegions([])
+      setLoadingRegions(false)
       return []
     }
     try {
@@ -33,6 +35,8 @@ export function RegionsProvider(props: Props) {
     } catch (error) {
       handleApiError(error, 'Failed to fetch regions')
       throw error
+    } finally {
+      setLoadingRegions(false)
     }
   }, [regionsApi, selectedOrganization])
 
@@ -51,10 +55,11 @@ export function RegionsProvider(props: Props) {
   const contextValue: IRegionsContext = useMemo(() => {
     return {
       regions,
+      loadingRegions,
       refreshRegions: getRegions,
       getRegionName,
     }
-  }, [regions, getRegions, getRegionName])
+  }, [regions, loadingRegions, getRegions, getRegionName])
 
   return <RegionsContext.Provider value={contextValue}>{props.children}</RegionsContext.Provider>
 }

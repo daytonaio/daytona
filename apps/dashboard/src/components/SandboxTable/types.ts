@@ -25,6 +25,7 @@ export interface SandboxTableProps {
   snapshotsDataHasMore?: boolean
   onChangeSnapshotSearchValue: (name?: string) => void
   regionsData: Region[]
+  loadingRegionsData: boolean
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
@@ -68,6 +69,7 @@ export interface SandboxTableActionsProps {
 export interface SandboxTableHeaderProps {
   table: Table<Sandbox>
   regionOptions: FacetedFilterOption[]
+  loadingRegionOptions: boolean
   snapshots: SnapshotDto[]
   snapshotsDataIsLoading: boolean
   snapshotsDataHasMore?: boolean

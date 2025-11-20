@@ -684,6 +684,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_organization_created', props, 'api_organization_creation_failed', {
       organization_id: response.id,
       organization_name: request.name,
+      organization_default_region_id: request.defaultRegionId,
     })
   }
 

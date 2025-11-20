@@ -15,19 +15,13 @@
 /**
  *
  * @export
- * @interface CreateOrganization
+ * @interface UpdateOrganizationDefaultRegion
  */
-export interface CreateOrganization {
-  /**
-   * The name of organization
-   * @type {string}
-   * @memberof CreateOrganization
-   */
-  name: string
+export interface UpdateOrganizationDefaultRegion {
   /**
    * The ID of the default region for the organization
    * @type {string}
-   * @memberof CreateOrganization
+   * @memberof UpdateOrganizationDefaultRegion
    */
   defaultRegionId: string
 }

@@ -16,65 +16,38 @@ import (
 	"fmt"
 )
 
-// checks if the CreateOrganization type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateOrganization{}
+// checks if the UpdateOrganizationDefaultRegion type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UpdateOrganizationDefaultRegion{}
 
-// CreateOrganization struct for CreateOrganization
-type CreateOrganization struct {
-	// The name of organization
-	Name string `json:"name"`
+// UpdateOrganizationDefaultRegion struct for UpdateOrganizationDefaultRegion
+type UpdateOrganizationDefaultRegion struct {
 	// The ID of the default region for the organization
 	DefaultRegionId      string `json:"defaultRegionId"`
 	AdditionalProperties map[string]interface{}
 }
 
-type _CreateOrganization CreateOrganization
+type _UpdateOrganizationDefaultRegion UpdateOrganizationDefaultRegion
 
-// NewCreateOrganization instantiates a new CreateOrganization object
+// NewUpdateOrganizationDefaultRegion instantiates a new UpdateOrganizationDefaultRegion object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateOrganization(name string, defaultRegionId string) *CreateOrganization {
-	this := CreateOrganization{}
-	this.Name = name
+func NewUpdateOrganizationDefaultRegion(defaultRegionId string) *UpdateOrganizationDefaultRegion {
+	this := UpdateOrganizationDefaultRegion{}
 	this.DefaultRegionId = defaultRegionId
 	return &this
 }
 
-// NewCreateOrganizationWithDefaults instantiates a new CreateOrganization object
+// NewUpdateOrganizationDefaultRegionWithDefaults instantiates a new UpdateOrganizationDefaultRegion object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateOrganizationWithDefaults() *CreateOrganization {
-	this := CreateOrganization{}
+func NewUpdateOrganizationDefaultRegionWithDefaults() *UpdateOrganizationDefaultRegion {
+	this := UpdateOrganizationDefaultRegion{}
 	return &this
 }
 
-// GetName returns the Name field value
-func (o *CreateOrganization) GetName() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Name
-}
-
-// GetNameOk returns a tuple with the Name field value
-// and a boolean to check if the value has been set.
-func (o *CreateOrganization) GetNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Name, true
-}
-
-// SetName sets field value
-func (o *CreateOrganization) SetName(v string) {
-	o.Name = v
-}
-
 // GetDefaultRegionId returns the DefaultRegionId field value
-func (o *CreateOrganization) GetDefaultRegionId() string {
+func (o *UpdateOrganizationDefaultRegion) GetDefaultRegionId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -85,7 +58,7 @@ func (o *CreateOrganization) GetDefaultRegionId() string {
 
 // GetDefaultRegionIdOk returns a tuple with the DefaultRegionId field value
 // and a boolean to check if the value has been set.
-func (o *CreateOrganization) GetDefaultRegionIdOk() (*string, bool) {
+func (o *UpdateOrganizationDefaultRegion) GetDefaultRegionIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -93,11 +66,11 @@ func (o *CreateOrganization) GetDefaultRegionIdOk() (*string, bool) {
 }
 
 // SetDefaultRegionId sets field value
-func (o *CreateOrganization) SetDefaultRegionId(v string) {
+func (o *UpdateOrganizationDefaultRegion) SetDefaultRegionId(v string) {
 	o.DefaultRegionId = v
 }
 
-func (o CreateOrganization) MarshalJSON() ([]byte, error) {
+func (o UpdateOrganizationDefaultRegion) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -105,9 +78,8 @@ func (o CreateOrganization) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateOrganization) ToMap() (map[string]interface{}, error) {
+func (o UpdateOrganizationDefaultRegion) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["name"] = o.Name
 	toSerialize["defaultRegionId"] = o.DefaultRegionId
 
 	for key, value := range o.AdditionalProperties {
@@ -117,12 +89,11 @@ func (o CreateOrganization) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *CreateOrganization) UnmarshalJSON(data []byte) (err error) {
+func (o *UpdateOrganizationDefaultRegion) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"name",
 		"defaultRegionId",
 	}
 
@@ -140,20 +111,19 @@ func (o *CreateOrganization) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateOrganization := _CreateOrganization{}
+	varUpdateOrganizationDefaultRegion := _UpdateOrganizationDefaultRegion{}
 
-	err = json.Unmarshal(data, &varCreateOrganization)
+	err = json.Unmarshal(data, &varUpdateOrganizationDefaultRegion)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateOrganization(varCreateOrganization)
+	*o = UpdateOrganizationDefaultRegion(varUpdateOrganizationDefaultRegion)
 
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "name")
 		delete(additionalProperties, "defaultRegionId")
 		o.AdditionalProperties = additionalProperties
 	}
@@ -161,38 +131,38 @@ func (o *CreateOrganization) UnmarshalJSON(data []byte) (err error) {
 	return err
 }
 
-type NullableCreateOrganization struct {
-	value *CreateOrganization
+type NullableUpdateOrganizationDefaultRegion struct {
+	value *UpdateOrganizationDefaultRegion
 	isSet bool
 }
 
-func (v NullableCreateOrganization) Get() *CreateOrganization {
+func (v NullableUpdateOrganizationDefaultRegion) Get() *UpdateOrganizationDefaultRegion {
 	return v.value
 }
 
-func (v *NullableCreateOrganization) Set(val *CreateOrganization) {
+func (v *NullableUpdateOrganizationDefaultRegion) Set(val *UpdateOrganizationDefaultRegion) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateOrganization) IsSet() bool {
+func (v NullableUpdateOrganizationDefaultRegion) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateOrganization) Unset() {
+func (v *NullableUpdateOrganizationDefaultRegion) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateOrganization(val *CreateOrganization) *NullableCreateOrganization {
-	return &NullableCreateOrganization{value: val, isSet: true}
+func NewNullableUpdateOrganizationDefaultRegion(val *UpdateOrganizationDefaultRegion) *NullableUpdateOrganizationDefaultRegion {
+	return &NullableUpdateOrganizationDefaultRegion{value: val, isSet: true}
 }
 
-func (v NullableCreateOrganization) MarshalJSON() ([]byte, error) {
+func (v NullableUpdateOrganizationDefaultRegion) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateOrganization) UnmarshalJSON(src []byte) error {
+func (v *NullableUpdateOrganizationDefaultRegion) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

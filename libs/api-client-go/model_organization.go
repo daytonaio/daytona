@@ -47,7 +47,7 @@ type Organization struct {
 	// Sandbox default network block all
 	SandboxLimitedNetworkEgress bool `json:"sandboxLimitedNetworkEgress"`
 	// Default region ID
-	DefaultRegionId      string `json:"defaultRegionId"`
+	DefaultRegionId      *string `json:"defaultRegionId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -57,7 +57,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, sandboxLimitedNetworkEgress bool, defaultRegionId string) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, sandboxLimitedNetworkEgress bool) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -71,7 +71,6 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.SuspendedUntil = suspendedUntil
 	this.SuspensionCleanupGracePeriodHours = suspensionCleanupGracePeriodHours
 	this.SandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
-	this.DefaultRegionId = defaultRegionId
 	return &this
 }
 
@@ -371,28 +370,36 @@ func (o *Organization) SetSandboxLimitedNetworkEgress(v bool) {
 	o.SandboxLimitedNetworkEgress = v
 }
 
-// GetDefaultRegionId returns the DefaultRegionId field value
+// GetDefaultRegionId returns the DefaultRegionId field value if set, zero value otherwise.
 func (o *Organization) GetDefaultRegionId() string {
-	if o == nil {
+	if o == nil || IsNil(o.DefaultRegionId) {
 		var ret string
 		return ret
 	}
-
-	return o.DefaultRegionId
+	return *o.DefaultRegionId
 }
 
-// GetDefaultRegionIdOk returns a tuple with the DefaultRegionId field value
+// GetDefaultRegionIdOk returns a tuple with the DefaultRegionId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Organization) GetDefaultRegionIdOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.DefaultRegionId) {
 		return nil, false
 	}
-	return &o.DefaultRegionId, true
+	return o.DefaultRegionId, true
 }
 
-// SetDefaultRegionId sets field value
+// HasDefaultRegionId returns a boolean if a field has been set.
+func (o *Organization) HasDefaultRegionId() bool {
+	if o != nil && !IsNil(o.DefaultRegionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetDefaultRegionId gets a reference to the given string and assigns it to the DefaultRegionId field.
 func (o *Organization) SetDefaultRegionId(v string) {
-	o.DefaultRegionId = v
+	o.DefaultRegionId = &v
 }
 
 func (o Organization) MarshalJSON() ([]byte, error) {
@@ -417,7 +424,9 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["suspendedUntil"] = o.SuspendedUntil
 	toSerialize["suspensionCleanupGracePeriodHours"] = o.SuspensionCleanupGracePeriodHours
 	toSerialize["sandboxLimitedNetworkEgress"] = o.SandboxLimitedNetworkEgress
-	toSerialize["defaultRegionId"] = o.DefaultRegionId
+	if !IsNil(o.DefaultRegionId) {
+		toSerialize["defaultRegionId"] = o.DefaultRegionId
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -443,7 +452,6 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"suspendedUntil",
 		"suspensionCleanupGracePeriodHours",
 		"sandboxLimitedNetworkEgress",
-		"defaultRegionId",
 	}
 
 	allProperties := make(map[string]interface{})

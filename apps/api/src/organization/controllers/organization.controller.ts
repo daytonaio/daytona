@@ -9,6 +9,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Patch,
@@ -44,6 +45,7 @@ import { OrganizationUsageService } from '../services/organization-usage.service
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
+import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -184,7 +186,7 @@ export class OrganizationController {
     requestMetadata: {
       body: (req: TypedRequest<CreateOrganizationDto>) => ({
         name: req.body?.name,
-        regionId: req.body?.regionId,
+        defaultRegionId: req.body?.defaultRegionId,
       }),
     },
   })
@@ -199,6 +201,48 @@ export class OrganizationController {
 
     const organization = await this.organizationService.create(createOrganizationDto, authContext.userId, false, true)
     return OrganizationDto.fromOrganization(organization)
+  }
+
+  @Patch('/:organizationId/default-region')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Set default region for organization',
+    operationId: 'setOrganizationDefaultRegion',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Default region set successfully',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Organization already has a default region set',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiBody({
+    type: UpdateOrganizationDefaultRegionDto,
+    required: true,
+  })
+  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateOrganizationDefaultRegionDto>) => ({
+        defaultRegionId: req.body?.defaultRegionId,
+      }),
+    },
+  })
+  async setDefaultRegion(
+    @Param('organizationId') organizationId: string,
+    @Body() updateDto: UpdateOrganizationDefaultRegionDto,
+  ): Promise<void> {
+    return this.organizationService.setDefaultRegion(organizationId, updateDto.defaultRegionId)
   }
 
   @Get()

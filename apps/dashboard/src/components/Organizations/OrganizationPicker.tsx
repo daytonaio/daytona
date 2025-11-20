@@ -27,7 +27,7 @@ export const OrganizationPicker: React.FC = () => {
 
   const { organizations, refreshOrganizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()
-  const { regions } = useRegions()
+  const { regions, loadingRegions, getRegionName } = useRegions()
 
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)
@@ -53,12 +53,12 @@ export const OrganizationPicker: React.FC = () => {
 
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] = useState(false)
 
-  const handleCreateOrganization = async (name: string, regionId?: string) => {
+  const handleCreateOrganization = async (name: string, defaultRegionId: string) => {
     try {
       const organization = (
         await organizationsApi.createOrganization({
           name: name.trim(),
-          regionId,
+          defaultRegionId,
         })
       ).data
       toast.success('Organization created successfully')
@@ -141,6 +141,8 @@ export const OrganizationPicker: React.FC = () => {
         open={showCreateOrganizationDialog}
         onOpenChange={setShowCreateOrganizationDialog}
         regions={regions}
+        loadingRegions={loadingRegions}
+        getRegionName={getRegionName}
         onCreateOrganization={handleCreateOrganization}
       />
     </SidebarMenu>

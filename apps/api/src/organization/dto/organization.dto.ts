@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { Organization } from '../entities/organization.entity'
 
 @ApiSchema({ name: 'Organization' })
@@ -68,10 +68,11 @@ export class OrganizationDto {
   })
   sandboxLimitedNetworkEgress: boolean
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Default region ID',
+    required: false,
   })
-  defaultRegionId: string
+  defaultRegionId?: string
 
   static fromOrganization(organization: Organization): OrganizationDto {
     const dto: OrganizationDto = {

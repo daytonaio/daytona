@@ -18,14 +18,24 @@ import { useBilling } from '@/hooks/useBilling'
 import { RoutePath } from '@/enums/RoutePath'
 import { useNavigate } from 'react-router-dom'
 import { useConfig } from '@/hooks/useConfig'
+import { useApi } from '@/hooks/useApi'
+import { useRegions } from '@/hooks/useRegions'
+import { useOrganizations } from '@/hooks/useOrganizations'
+import { SelectDefaultRegionDialog } from '@/components/Organizations/SelectDefaultRegionDialog'
+import { handleApiError } from '@/lib/error-handling'
+import { toast } from 'sonner'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
+  const [showSelectDefaultRegionDialog, setShowSelectDefaultRegionDialog] = useState(false)
   const { wallet } = useBilling()
   const navigate = useNavigate()
   const location = useLocation()
   const config = useConfig()
+  const { organizationsApi } = useApi()
+  const { regions, loadingRegions } = useRegions()
+  const { refreshOrganizations } = useOrganizations()
 
   useEffect(() => {
     if (
@@ -33,6 +43,12 @@ const Dashboard: React.FC = () => {
       selectedOrganization.suspensionReason === 'Please verify your email address'
     ) {
       setShowVerifyEmailDialog(true)
+    }
+  }, [selectedOrganization])
+
+  useEffect(() => {
+    if (selectedOrganization && !selectedOrganization.defaultRegionId) {
+      setShowSelectDefaultRegionDialog(true)
     }
   }, [selectedOrganization])
 
@@ -79,6 +95,24 @@ const Dashboard: React.FC = () => {
     setIsBannerVisible(false)
   }
 
+  const handleSetDefaultRegion = async (defaultRegionId: string): Promise<boolean> => {
+    if (!selectedOrganization) {
+      return false
+    }
+
+    try {
+      await organizationsApi.setOrganizationDefaultRegion(selectedOrganization.id, {
+        defaultRegionId,
+      })
+      toast.success('Default region set successfully')
+      await refreshOrganizations(selectedOrganization.id)
+      return true
+    } catch (error) {
+      handleApiError(error, 'Failed to set default region')
+      return false
+    }
+  }
+
   return (
     <div className="relative w-full">
       {isBannerVisible && bannerText && (
@@ -97,6 +131,13 @@ const Dashboard: React.FC = () => {
 
         <Toaster />
         <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
+        <SelectDefaultRegionDialog
+          open={showSelectDefaultRegionDialog}
+          onOpenChange={setShowSelectDefaultRegionDialog}
+          regions={regions}
+          loadingRegions={loadingRegions}
+          onSelectDefaultRegion={handleSetDefaultRegion}
+        />
       </SidebarProvider>
     </div>
   )

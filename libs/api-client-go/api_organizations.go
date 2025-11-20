@@ -263,6 +263,18 @@ type OrganizationsAPI interface {
 	ListOrganizationsExecute(r OrganizationsAPIListOrganizationsRequest) ([]Organization, *http.Response, error)
 
 	/*
+		SetOrganizationDefaultRegion Set default region for organization
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId Organization ID
+		@return OrganizationsAPISetOrganizationDefaultRegionRequest
+	*/
+	SetOrganizationDefaultRegion(ctx context.Context, organizationId string) OrganizationsAPISetOrganizationDefaultRegionRequest
+
+	// SetOrganizationDefaultRegionExecute executes the request
+	SetOrganizationDefaultRegionExecute(r OrganizationsAPISetOrganizationDefaultRegionRequest) (*http.Response, error)
+
+	/*
 		SuspendOrganization Suspend organization
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -2262,6 +2274,107 @@ func (a *OrganizationsAPIService) ListOrganizationsExecute(r OrganizationsAPILis
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type OrganizationsAPISetOrganizationDefaultRegionRequest struct {
+	ctx                             context.Context
+	ApiService                      OrganizationsAPI
+	organizationId                  string
+	updateOrganizationDefaultRegion *UpdateOrganizationDefaultRegion
+}
+
+func (r OrganizationsAPISetOrganizationDefaultRegionRequest) UpdateOrganizationDefaultRegion(updateOrganizationDefaultRegion UpdateOrganizationDefaultRegion) OrganizationsAPISetOrganizationDefaultRegionRequest {
+	r.updateOrganizationDefaultRegion = &updateOrganizationDefaultRegion
+	return r
+}
+
+func (r OrganizationsAPISetOrganizationDefaultRegionRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SetOrganizationDefaultRegionExecute(r)
+}
+
+/*
+SetOrganizationDefaultRegion Set default region for organization
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return OrganizationsAPISetOrganizationDefaultRegionRequest
+*/
+func (a *OrganizationsAPIService) SetOrganizationDefaultRegion(ctx context.Context, organizationId string) OrganizationsAPISetOrganizationDefaultRegionRequest {
+	return OrganizationsAPISetOrganizationDefaultRegionRequest{
+		ApiService:     a,
+		ctx:            ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *OrganizationsAPIService) SetOrganizationDefaultRegionExecute(r OrganizationsAPISetOrganizationDefaultRegionRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPatch
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.SetOrganizationDefaultRegion")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/organizations/{organizationId}/default-region"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateOrganizationDefaultRegion == nil {
+		return nil, reportError("updateOrganizationDefaultRegion is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.updateOrganizationDefaultRegion
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type OrganizationsAPISuspendOrganizationRequest struct {

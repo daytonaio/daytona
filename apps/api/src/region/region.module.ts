@@ -10,6 +10,7 @@ import { Region } from './entities/region.entity'
 import { RegionService } from './services/region.service'
 import { OrganizationModule } from '../organization/organization.module'
 
+// TODO: move to org module
 @Module({
   imports: [OrganizationModule, TypeOrmModule.forFeature([Region])],
   controllers: [RegionController],

@@ -51,6 +51,7 @@ const RESOURCE_FILTERS = [
 export function SandboxTableHeader({
   table,
   regionOptions,
+  loadingRegionOptions,
   snapshots,
   snapshotsDataIsLoading,
   snapshotsDataHasMore,
@@ -223,6 +224,7 @@ export function SandboxTableHeader({
                     value={(table.getColumn('region')?.getFilterValue() as string[]) || []}
                     onFilterChange={(value) => table.getColumn('region')?.setFilterValue(value)}
                     options={regionOptions}
+                    isLoading={loadingRegionOptions}
                   />
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -300,6 +302,7 @@ export function SandboxTableHeader({
             value={(table.getColumn('region')?.getFilterValue() as string[]) || []}
             onFilterChange={(value) => table.getColumn('region')?.setFilterValue(value)}
             options={regionOptions}
+            isLoading={loadingRegionOptions}
           />
         )}
 

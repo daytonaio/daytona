@@ -33,7 +33,7 @@ const Limits: React.FC = () => {
   const [tiers, setTiers] = useState<Tier[]>([])
   const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
   const [usageOverview, setUsage] = useState<OrganizationUsageOverview | null>(null)
-  const [selectedRegionId, setSelectedRegionId] = useState<string>('')
+  const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
   const [tierLoading, setTierLoading] = useState(false)
   const config = useConfig()
 
@@ -292,14 +292,19 @@ const Limits: React.FC = () => {
                 Your organization is currently in <b>Tier {organizationTier.tier}</b>.{' '}
                 {selectedOrganization && usageOverview && usageOverview.regionUsage.length > 1 && (
                   <>
-                    Tier-based compute limits are applied to your default region{' '}
-                    <button
-                      type="button"
-                      className="underline hover:text-primary font-bold"
-                      onClick={() => setSelectedRegionId(selectedOrganization.defaultRegionId)}
-                    >
-                      {getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
-                    </button>
+                    Tier-based compute limits are applied to your default region
+                    {selectedOrganization.defaultRegionId && (
+                      <>
+                        {' '}
+                        <button
+                          type="button"
+                          className="underline hover:text-primary font-bold"
+                          onClick={() => setSelectedRegionId(selectedOrganization.defaultRegionId)}
+                        >
+                          {getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
+                        </button>
+                      </>
+                    )}
                     {'. '}
                   </>
                 )}

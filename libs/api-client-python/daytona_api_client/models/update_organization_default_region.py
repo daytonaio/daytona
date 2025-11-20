@@ -18,31 +18,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class Organization(BaseModel):
+class UpdateOrganizationDefaultRegion(BaseModel):
     """
-    Organization
+    UpdateOrganizationDefaultRegion
     """ # noqa: E501
-    id: StrictStr = Field(description="Organization ID")
-    name: StrictStr = Field(description="Organization name")
-    created_by: StrictStr = Field(description="User ID of the organization creator", alias="createdBy")
-    personal: StrictBool = Field(description="Personal organization flag")
-    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
-    updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
-    suspended: StrictBool = Field(description="Suspended flag")
-    suspended_at: datetime = Field(description="Suspended at", alias="suspendedAt")
-    suspension_reason: StrictStr = Field(description="Suspended reason", alias="suspensionReason")
-    suspended_until: datetime = Field(description="Suspended until", alias="suspendedUntil")
-    suspension_cleanup_grace_period_hours: Union[StrictFloat, StrictInt] = Field(description="Suspension cleanup grace period hours", alias="suspensionCleanupGracePeriodHours")
-    sandbox_limited_network_egress: StrictBool = Field(description="Sandbox default network block all", alias="sandboxLimitedNetworkEgress")
-    default_region_id: Optional[StrictStr] = Field(default=None, description="Default region ID", alias="defaultRegionId")
+    default_region_id: StrictStr = Field(description="The ID of the default region for the organization", alias="defaultRegionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "sandboxLimitedNetworkEgress", "defaultRegionId"]
+    __properties: ClassVar[List[str]] = ["defaultRegionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -62,7 +49,7 @@ class Organization(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of Organization from a JSON string"""
+        """Create an instance of UpdateOrganizationDefaultRegion from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -94,7 +81,7 @@ class Organization(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of Organization from a dict"""
+        """Create an instance of UpdateOrganizationDefaultRegion from a dict"""
         if obj is None:
             return None
 
@@ -102,18 +89,6 @@ class Organization(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "createdBy": obj.get("createdBy"),
-            "personal": obj.get("personal"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "suspended": obj.get("suspended"),
-            "suspendedAt": obj.get("suspendedAt"),
-            "suspensionReason": obj.get("suspensionReason"),
-            "suspendedUntil": obj.get("suspendedUntil"),
-            "suspensionCleanupGracePeriodHours": obj.get("suspensionCleanupGracePeriodHours"),
-            "sandboxLimitedNetworkEgress": obj.get("sandboxLimitedNetworkEgress"),
             "defaultRegionId": obj.get("defaultRegionId")
         })
         # store additional fields in additional_properties

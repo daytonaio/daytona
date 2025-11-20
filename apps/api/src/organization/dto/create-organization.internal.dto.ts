@@ -5,5 +5,5 @@
 
 export interface CreateOrganizationInternalDto {
   name: string
-  regionId?: string
+  defaultRegionId?: string
 }

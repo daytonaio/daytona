@@ -68,6 +68,7 @@ import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
+import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -134,7 +135,12 @@ export class SandboxService {
     }
 
     const region = await this.regionService.findOne(regionId)
-    if (!region || !region.enforceQuotas) {
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    // e.g. region belonging to an organization
+    if (!region.enforceQuotas) {
       return {
         pendingCpuIncremented: false,
         pendingMemoryIncremented: false,
@@ -1158,12 +1164,17 @@ export class SandboxService {
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, target?: string): Promise<string> {
+    if (!organization.defaultRegionId) {
+      throw new DefaultRegionRequiredException()
+    }
+
     target = target?.trim()
 
     if (!target) {
       return organization.defaultRegionId
     }
 
+    // prioritize organization regions, and region name as target
     const region =
       (await this.regionService.findOneByName(target, organization.id)) ??
       (await this.regionService.findOne(target, organization.id)) ??

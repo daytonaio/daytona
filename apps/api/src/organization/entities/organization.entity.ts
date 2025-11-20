@@ -30,8 +30,8 @@ export class Organization {
   })
   telemetryEnabled: boolean
 
-  @Column()
-  defaultRegionId: string
+  @Column({ nullable: true })
+  defaultRegionId?: string
 
   @Column({
     type: 'int',
@@ -142,7 +142,9 @@ export class Organization {
   })
   updatedAt: Date
 
-  constructor(defaultRegionId: string) {
-    this.defaultRegionId = defaultRegionId
+  constructor(defaultRegionId?: string) {
+    if (defaultRegionId) {
+      this.defaultRegionId = defaultRegionId
+    }
   }
 }

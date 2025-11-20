@@ -147,6 +147,7 @@ models/ssh-access-dto.ts
 models/ssh-access-validation-dto.ts
 models/storage-access-dto.ts
 models/update-docker-registry.ts
+models/update-organization-default-region.ts
 models/update-organization-invitation.ts
 models/update-organization-member-access.ts
 models/update-organization-quota.ts
