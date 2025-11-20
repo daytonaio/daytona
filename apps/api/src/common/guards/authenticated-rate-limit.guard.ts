@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, Inject, ExecutionContext } from '@nestjs/common'
+import { Injectable, Logger, Inject, ExecutionContext, Optional } from '@nestjs/common'
 import { ThrottlerGuard, ThrottlerRequest, ThrottlerModuleOptions, ThrottlerStorage } from '@nestjs/throttler'
 import { Reflector } from '@nestjs/core'
 import { Request } from 'express'
 import { getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import { OrganizationService } from '../../organization/services/organization.service'
+import { THROTTLER_SCOPE_KEY } from '../decorators/throttler-scope.decorator'
 
 @Injectable()
 export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
@@ -19,6 +21,7 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     storageService: ThrottlerStorage,
     reflector: Reflector,
     @Inject(getRedisConnectionToken('throttler')) private readonly redis: Redis,
+    @Optional() private readonly organizationService?: OrganizationService,
   ) {
     super(options, storageService, reflector)
   }
@@ -56,13 +59,55 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
       return true
     }
 
-    // Check authenticated throttlers - applies to all authenticated routes
-    // Routes can override with @Throttle({ authenticated/sandbox-create/sandbox-lifecycle: { limit, ttl } })
+    // Check authenticated throttlers
     const authenticatedThrottlers = ['authenticated', 'sandbox-create', 'sandbox-lifecycle']
     if (authenticatedThrottlers.includes(throttler.name)) {
       if (isAuthenticated) {
-        // Clear anonymous rate limit on successful authentication
+        // Clear anonymous rate limit on successful authentication (once per request)
+        // Do this BEFORE checking throttler scope so it happens for all authenticated routes
         await this.clearAnonymousRateLimit(request, context)
+
+        // Only 'authenticated' applies to all routes by default
+        // 'sandbox-create' and 'sandbox-lifecycle' only apply if explicitly configured via @SkipThrottle or @Throttle
+        const isDefaultThrottler = throttler.name === 'authenticated'
+
+        if (!isDefaultThrottler) {
+          // Sandbox throttlers (sandbox-create, sandbox-lifecycle) are opt-in only
+          // Check if this route declares this throttler scope via @ThrottlerScope() decorator
+          const scopes = this.reflector.getAllAndOverride<string[]>(THROTTLER_SCOPE_KEY, [
+            context.getHandler(),
+            context.getClass(),
+          ])
+
+          // If the route hasn't declared this throttler in its scope, skip it
+          if (!scopes || !scopes.includes(throttler.name)) {
+            return true
+          }
+        }
+
+        const user = request.user as any
+        const orgId = user?.organizationId
+        if (orgId) {
+          const orgLimits = await this.getCachedOrganizationRateLimits(orgId)
+          if (orgLimits) {
+            const customLimit =
+              throttler.name === 'authenticated'
+                ? orgLimits.authenticated
+                : throttler.name === 'sandbox-create'
+                  ? orgLimits.sandboxCreate
+                  : throttler.name === 'sandbox-lifecycle'
+                    ? orgLimits.sandboxLifecycle
+                    : undefined
+
+            if (customLimit) {
+              const modifiedProps = {
+                ...requestProps,
+                limit: customLimit,
+              }
+              return super.handleRequest(modifiedProps)
+            }
+          }
+        }
         return super.handleRequest(requestProps)
       }
       return true
@@ -113,5 +158,39 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
   private isSystemRole(user: any): boolean {
     // Skip rate limiting for M2M system roles (proxy, runner, ssh-gateway)
     return user?.role === 'ssh-gateway' || user?.role === 'proxy' || user?.role === 'runner'
+  }
+
+  private async getCachedOrganizationRateLimits(
+    organizationId: string,
+  ): Promise<{ authenticated: number | null; sandboxCreate: number | null; sandboxLifecycle: number | null } | null> {
+    // If OrganizationService is not available (e.g., in UserModule), use default rate limits
+    if (!this.organizationService) {
+      return null
+    }
+
+    try {
+      const cacheKey = `organization:rate-limits:${organizationId}`
+      const cachedLimits = await this.redis.get(cacheKey)
+
+      if (cachedLimits) {
+        return JSON.parse(cachedLimits)
+      }
+
+      const organization = await this.organizationService.findOne(organizationId)
+      if (organization) {
+        const limits = {
+          authenticated: organization.authenticatedRateLimit,
+          sandboxCreate: organization.sandboxCreateRateLimit,
+          sandboxLifecycle: organization.sandboxLifecycleRateLimit,
+        }
+        await this.redis.set(cacheKey, JSON.stringify(limits), 'EX', 60)
+        return limits
+      }
+
+      return null
+    } catch (error) {
+      this.logger.error('Error getting cached organization rate limits:', error)
+      return null
+    }
   }
 }

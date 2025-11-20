@@ -95,6 +95,27 @@ export class Organization {
   })
   volumeQuota: number
 
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'authenticated_rate_limit',
+  })
+  authenticatedRateLimit: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'sandbox_create_rate_limit',
+  })
+  sandboxCreateRateLimit: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'sandbox_lifecycle_rate_limit',
+  })
+  sandboxLifecycleRateLimit: number | null
+
   @OneToMany(() => OrganizationRole, (organizationRole) => organizationRole.organization, {
     cascade: true,
     onDelete: 'CASCADE',

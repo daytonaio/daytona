@@ -73,6 +73,7 @@ import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { SkipThrottle } from '@nestjs/throttler'
+import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -80,7 +81,6 @@ import { SkipThrottle } from '@nestjs/throttler'
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
-@SkipThrottle({ 'sandbox-create': true, 'sandbox-lifecycle': true })
 export class SandboxController {
   private readonly logger = new Logger(SandboxController.name)
 
@@ -229,7 +229,8 @@ export class SandboxController {
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
-  @SkipThrottle({ authenticated: true, 'sandbox-create': false })
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-create')
   @ApiOperation({
     summary: 'Create a new sandbox',
     operationId: 'createSandbox',
@@ -374,7 +375,8 @@ export class SandboxController {
   }
 
   @Delete(':sandboxIdOrName')
-  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Delete sandbox',
     operationId: 'deleteSandbox',
@@ -407,7 +409,8 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/start')
   @HttpCode(200)
-  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Start sandbox',
     operationId: 'startSandbox',
@@ -446,7 +449,8 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/stop')
   @HttpCode(200) //  for Daytona Api compatibility
-  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Stop sandbox',
     operationId: 'stopSandbox',
@@ -816,7 +820,8 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/archive')
   @HttpCode(200)
-  @SkipThrottle({ authenticated: true, 'sandbox-lifecycle': false })
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Archive sandbox',
     operationId: 'archiveSandbox',
