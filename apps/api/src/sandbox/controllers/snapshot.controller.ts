@@ -59,6 +59,7 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
+import { SnapshotState } from '../enums/snapshot-state.enum'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
@@ -308,6 +309,12 @@ export class SnapshotController {
     // Check if the snapshot has build info
     if (!snapshot.buildInfo) {
       throw new NotFoundException(`Snapshot ${snapshotId} has no build info`)
+    }
+
+    if (snapshot.state == SnapshotState.ACTIVE) {
+      // Close the connection
+      res.end()
+      return
     }
 
     // Retry until a runner is assigned or timeout after 30 seconds
