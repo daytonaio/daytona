@@ -1,5 +1,7 @@
 ---
 import { comparePaths } from '../utils/navigation'
+import { NavigationCategory } from '../content/config'
+import arrowUpRightIcon from '@assets/sidebar/arrow-up-right.svg?raw'
 
 // Add TypeScript interface declaration for Window
 declare global {
@@ -56,6 +58,7 @@ const { sublist = [], nested, collapse = false } = Astro.props
           <a
             href={entry.href}
             aria-current={entry.isCurrent ? 'page' : undefined}
+            target={entry.external ? '_blank' : undefined}
             class:list={[
               entry.attrs?.class,
               { context: entry.context },
@@ -66,6 +69,11 @@ const { sublist = [], nested, collapse = false } = Astro.props
               <Fragment set:html={getSVG(entry.attrs.icon)} />
             )}
             <span>{entry.label}</span>
+            {entry.external && (
+              <span class="external-icon">
+                <Fragment set:html={arrowUpRightIcon} />
+              </span>
+            )}
           </a>
         ) : entry.type === 'group' ? (
           entry.collapse || (collapse && entry.label?.includes('SDK')) ? (
@@ -106,7 +114,11 @@ const { sublist = [], nested, collapse = false } = Astro.props
               </div>
             </details>
           ) : (
-            <div>
+            <div
+              class:list={[
+                { main: entry.category === NavigationCategory.MAIN },
+              ]}
+            >
               <div class="group-label">
                 <span class="large">{entry.label}</span>
               </div>
@@ -155,12 +167,12 @@ const { sublist = [], nested, collapse = false } = Astro.props
 
   .large {
     font-family: 'Berkeley Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 400;
+    font-size: 0.8125rem;
+    font-weight: 500;
     line-height: 1;
     letter-spacing: -0.12px;
     text-transform: uppercase;
-    color: var(--secondary-text-color);
+    color: var(--primary-text-color);
   }
 
   .sidebar-group {
@@ -207,45 +219,54 @@ const { sublist = [], nested, collapse = false } = Astro.props
     display: flex;
     align-items: center;
     font-family: 'Berkeley Mono', monospace;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 1.4;
     letter-spacing: -0.04rem;
     text-decoration: none;
-    color: var(--primary-text-color);
-    padding: 8px 0;
-    transition: 0.6s;
+    color: var(--secondary-text-color);
+    padding: 4px 0 4px 0px;
+    transition: 0.2s;
 
     > svg {
-      margin-right: 10px;
+      margin-right: 8px;
       width: 16px;
       height: 16px;
+      opacity: 0.5;
 
       path {
-        transition: 0.6s;
-        fill: var(--primary-text-color);
+        transition: 0.2s;
+        fill: currentColor;
       }
     }
   }
 
-  .context {
-    color: var(--secondary-hover-color);
+  .main {
+    padding-bottom: 20px;
+    border-bottom: var(--border);
+  }
+
+  .main a {
+    color: var(--primary-text-color);
+  }
+
+  .main a.context {
+    color: var(--hover-color);
+
     > svg {
-      path {
-        fill: var(--secondary-hover-color);
-      }
+      opacity: 1;
     }
   }
 
-  .active,
   a:focus,
-  a:hover {
+  a:hover:not(.active) {
+    color: var(--primary-text-color);
+  }
+
+  a.active {
     color: var(--hover-color);
     > svg {
-      path {
-        fill: var(--hover-color);
-      }
+      opacity: 1;
     }
   }
 
@@ -253,15 +274,18 @@ const { sublist = [], nested, collapse = false } = Astro.props
   [aria-current='page']:hover,
   [aria-current='page']:focus {
     color: var(--hover-color);
-    > svg {
-      path {
-        fill: var(--hover-color);
-      }
-    }
   }
 
   a > *:not(:last-child),
   .group-label > *:not(:last-child) {
     margin-inline-end: 0.25em;
+  }
+
+  .external-icon {
+    display: flex;
+    height: 8px;
+    width: 8px;
+    margin: 0 8px;
+    opacity: 0.5;
   }
 </style>

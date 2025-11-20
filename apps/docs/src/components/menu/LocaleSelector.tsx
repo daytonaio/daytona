@@ -1,13 +1,11 @@
-import { useLocaleSelector } from 'gt-react'
-import { useEffect, useRef, useState } from 'react'
+import { GTProvider, useLocaleSelector } from 'gt-react'
+import type { ChangeEvent, ComponentProps } from 'react'
+import loadTranslations from 'src/i18n/loadTranslations'
 import { localizePath } from 'src/i18n/utils'
 
-/**
- * Capitalizes the first letter of a language name if applicable.
- * For languages that do not use capitalization, it returns the name unchanged.
- * @param {string} language - The name of the language.
- * @returns {string} The language name with the first letter capitalized if applicable.
- */
+import gtConfig from '../../../gt.config.json'
+import styles from './LocaleSelector.module.scss'
+
 function capitalizeLanguageName(language: string): string {
   if (!language) return ''
   return (
@@ -16,111 +14,66 @@ function capitalizeLanguageName(language: string): string {
   )
 }
 
-/**
- * A component that allows the user to select a locale.
- * @param locales - The locales to display.
- * @param props - The props to pass to the dropdown element.
- * @returns A custom dropdown with the locales.
- */
-export default function LocaleSelector({
+type Props = ComponentProps<'select'>
+
+function LocaleSelector({
   locales: _locales,
   ...props
-}: {
-  locales?: string[]
-  [key: string]: any
-}): React.JSX.Element | null {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  // Get locale selector properties
+}: Props & { locales?: string[] }): React.JSX.Element | null {
   const {
     locale: currentLocale,
     locales,
     getLocaleProperties,
   } = useLocaleSelector(_locales ? _locales : undefined)
 
-  // Get display name
-  const getDisplayName = (locale: string) => {
-    return capitalizeLanguageName(
-      getLocaleProperties(locale).nativeNameWithRegionCode
-    )
+  if (!locales || locales.length === 0 || !currentLocale) {
+    return null
   }
 
-  // Set the locale and redirect to the new URL
-  const setLocale = (locale: string) => {
-    setIsOpen(false)
+  const getDisplayName = (locale: string) =>
+    capitalizeLanguageName(getLocaleProperties(locale).nativeNameWithRegionCode)
+
+  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextLocale = event.target.value
+    if (!nextLocale || nextLocale === currentLocale) return
+
     window.location.href = localizePath(
       window.location.pathname,
-      locale,
+      nextLocale,
       currentLocale
     )
   }
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
-  // If no locales are returned, just render nothing or handle gracefully
-  if (!locales || locales.length === 0) {
-    return null
-  }
-
-  const currentDisplayName = currentLocale ? getDisplayName(currentLocale) : ''
+  const { className, ...restProps } = props
 
   return (
-    <div {...props} className="locale-selector-wrapper" ref={dropdownRef}>
-      <button
-        className="locale-selector"
-        onClick={() => setIsOpen(!isOpen)}
-        type="button"
-      >
-        {currentDisplayName}
-        <svg
-          width="12"
-          height="8"
-          viewBox="0 0 12 8"
-          fill="none"
-          style={{
-            marginLeft: '8px',
-          }}
-        >
-          <path
-            d="M1 1L6 6L11 1"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+    <select
+      className={styles.localeSelector}
+      value={currentLocale}
+      onChange={handleChange}
+    >
+      {locales.map(locale => (
+        <option key={locale} value={locale}>
+          {getDisplayName(locale)}
+        </option>
+      ))}
+    </select>
+  )
+}
 
-      {isOpen && (
-        <div className="locale-dropdown">
-          {locales.map(locale => (
-            <button
-              key={locale}
-              className={`locale-option ${locale === currentLocale ? 'active' : ''}`}
-              onClick={() => setLocale(locale)}
-              type="button"
-            >
-              {getDisplayName(locale)}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+export const LocaleSelect = ({
+  locale,
+  ...props
+}: { locale: string } & Props) => {
+  return (
+    <GTProvider
+      config={gtConfig}
+      loadTranslations={loadTranslations}
+      locale={locale}
+      projectId={import.meta.env.PUBLIC_VITE_GT_PROJECT_ID}
+      devApiKey={import.meta.env.PUBLIC_VITE_GT_API_KEY}
+    >
+      <LocaleSelector {...props} />
+    </GTProvider>
   )
 }

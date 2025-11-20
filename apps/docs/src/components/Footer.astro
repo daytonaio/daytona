@@ -1,9 +1,9 @@
 ---
-import { Image } from 'astro:assets'
 import textArrowIcon from '@assets/icons/text-arrow.svg?raw'
 import Default from '@astrojs/starlight/components/Footer.astro'
+import { major, minor } from 'semver'
 import ThemeSelect from './ThemeSelect.astro'
-import { major, minor, patch } from 'semver'
+import { LocaleSelect } from './menu/LocaleSelector'
 
 const version = import.meta.env.VERSION || '0.0.1'
 const [maj, min] = [major(version), minor(version)]
@@ -40,6 +40,11 @@ const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${releas
         >{Astro.props.labels['footer.readBlog']}</a
       >
     </p>
+    <p>
+      <Fragment set:html={textArrowIcon} />{Astro.props.labels['footer.LLMs']} -
+      <a href="https://www.daytona.io/docs/en/llms.txt">llms.txt</a> &
+      <a href="https://www.daytona.io/docs/en/llms-full.txt">llms-full.txt</a>
+    </p>
   </div>
 
   <div class="docs-footer__container__bottom">
@@ -48,8 +53,10 @@ const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${releas
       <div class="divider"></div>
     </div>
 
-    <ThemeSelect />
-
+    <div class="footer-selects">
+      <LocaleSelect client:load locale={Astro.props.lang} />
+      <ThemeSelect />
+    </div>
     <div class="menu-list">
       <a href="https://www.daytona.io/company/privacy-policy"
         >{Astro.props.labels['footer.privacyPolicy']}</a
@@ -60,3 +67,15 @@ const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${releas
     </div>
   </div>
 </footer>
+
+<style>
+  .footer-selects {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+
+    order: 2;
+    margin-left: auto;
+  }
+</style>

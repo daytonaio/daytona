@@ -1,13 +1,15 @@
 ---
-import { SideNavLinks } from './menu/SideNavLinks'
 import daytonaLogo from '@assets/icons/daytona-logo.svg?raw'
-import daytonaLogoIcon from '@assets/icons/logo-icon.svg?raw'
-import documentationIcon from '@assets/icons/documentation-icon.svg?raw'
 import searchIcon from '@assets/icons/search.svg?raw'
-import Version from '@components/Version.astro'
 import Search from '@components/Search'
-import '../styles/components/search.scss'
+import Version from '@components/Version.astro'
 import gtconfig from '../../gt.config.json'
+import '../styles/components/search.scss'
+import { SideNavLinks } from './menu/SideNavLinks'
+
+const PUBLIC_WEB_URL = (
+  import.meta.env.PUBLIC_WEB_URL || 'https://daytona.io'
+).replace(/\/$/, '')
 
 // Disable search for translations (for now)
 const algoliaEnabled =
@@ -27,38 +29,49 @@ const algoliaEnabled =
         <Fragment set:html={daytonaLogo} />
       </a>
     </div>
-    <div class="logo-divider">
-      <a href={import.meta.env.BASE_URL} class="dotfiles-logo"
-        ><Fragment set:html={documentationIcon} />{
-          Astro.props.labels['header.documentation']
-        }
+    <div class="navbar-links">
+      <a href={import.meta.env.BASE_URL}
+        >{Astro.props.labels['header.documentation']}
+      </a>
+      <a href={`${PUBLIC_WEB_URL}/customers`}
+        >{Astro.props.labels['header.customers']}
+      </a>
+      <a href={`${PUBLIC_WEB_URL}/pricing`}
+        >{Astro.props.labels['header.pricing']}
+      </a>
+      <a href={`${PUBLIC_WEB_URL}/startups`}
+        >{Astro.props.labels['header.startups']}
+      </a>
+      <a href={`${PUBLIC_WEB_URL}/blog`}
+        >{Astro.props.labels['header.blog']}
       </a>
     </div>
     <div class="nav__items_side_menu">
       <a href={import.meta.env.BASE_URL} class="dotfiles-logo">v<Version /> </a>
       {
         algoliaEnabled && (
-          <p id="search-icon" class="search-click">
-            <Fragment set:html={searchIcon} />
-          </p>
+          <button id="search-icon" class="search-click search-click-desktop">
+            <div class="search-label">
+              <Fragment set:html={searchIcon} />
+              Search
+            </div>
+            <kbd>⌘ K</kbd>
+          </button>
         )
       }
       <SideNavLinks client:load locale={Astro.props.lang} />
     </div>
   </nav>
   <nav class="mobile-navigation">
-    <div class="logo-divider blur-section">
+    <div class="blur-section">
       <a
         href="https://www.daytona.io/"
         aria-label="Daytona"
         class="daytona-logo blur-section"
       >
-        <Fragment set:html={daytonaLogoIcon} />
+        <Fragment set:html={daytonaLogo} />
       </a>
     </div>
-    <a href={import.meta.env.BASE_URL} class="dotfiles-logo blur-section"
-      ><Fragment set:html={documentationIcon} />Documentation
-    </a>
     {
       algoliaEnabled && (
         <p id="search-icon-mobile" class="search-click">
@@ -73,3 +86,69 @@ const algoliaEnabled =
   // Skip search for translations (for now)
   algoliaEnabled && <Search client:load locale={Astro.props.lang} />
 }
+
+<style>
+  .navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .navbar-links a {
+    text-transform: uppercase;
+    font-size: 14px;
+    font-family: 'Berkeley Mono', monospace;
+    color: var(--primary-text-color);
+    transition: all 0.2s;
+    font-weight: 400;
+    letter-spacing: -0.01rem;
+    &:hover {
+      color: var(--hover-color);
+    }
+  }
+
+  .search-click-desktop {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    gap: 42px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    padding: 3px 4px 3px 8px;
+    transition: all 0.15s;
+    background-color: transparent;
+    max-width: 250px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .search-click:hover {
+    color: var(--primary-text-color);
+    background-color: var(--block-bg-color);
+  }
+
+  .search-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+
+  .search-click kbd {
+    background-color: var(--block-bg-color);
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+</style>
