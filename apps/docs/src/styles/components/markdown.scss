@@ -61,24 +61,6 @@
     }
   }
 
-  > h2 {
-    position: relative;
-    &:before {
-      content: '#';
-      position: absolute;
-      color: var(--hover-color);
-      font-family: 'Berkeley Mono', monospace;
-      font-weight: 400;
-      letter-spacing: -0.06rem;
-      transform: translate(-100%, 0);
-      left: -12px;
-    }
-    @include for-tablet-screen-sizes {
-      &:before {
-        content: '';
-      }
-    }
-  }
 
   > p {
     @include for-mobile-screen-sizes {
@@ -502,6 +484,7 @@
         background: var(--bg-color);
         border-bottom: 1px solid var(--border-extra);
         color: var(--secondary-text-color);
+        border-radius: 3px;
 
         &:before {
           left: 8px;
@@ -533,6 +516,7 @@
 
     pre {
       border: none;
+      border-radius: 3px !important;
     }
 
     pre > code {
@@ -580,8 +564,20 @@
   > starlight-tabs {
     margin-bottom: 56px;
 
+    &:has(section[role='tabpanel'] > .expressive-code:first-child)
+      .tablist-wrapper
+      ul[role='tablist'] {
+      border-bottom: 1px solid transparent;
+    }
+
+    .tablist-wrapper {
+      margin-bottom: -1px;
+    }
+
     .tablist-wrapper {
       ul[role='tablist'] {
+        width: calc(100% - 5px);
+        margin: 0 auto;
         border-bottom: 1px solid var(--border-extra);
       }
 
