@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, IsNull, Repository } from 'typeorm'
 import { DockerRegistry } from '../entities/docker-registry.entity'
@@ -16,10 +16,29 @@ import {
   IDockerRegistryProvider,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
+import { parseDockerImage } from '../../common/utils/docker-image.util'
+import axios from 'axios'
+import type { AxiosRequestHeaders } from 'axios'
+import { AxiosHeaders } from 'axios'
+
+const AXIOS_TIMEOUT_MS = 3000
+const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
+
+export interface ImageDetails {
+  digest: string
+  sizeGB: number
+  entrypoint: string[]
+  cmd: string[]
+  env: string[]
+  workingDir?: string
+  user?: string
+}
 
 @Injectable()
 @ApiOAuth2(['openid', 'profile', 'email'])
 export class DockerRegistryService {
+  private readonly logger = new Logger(DockerRegistryService.name)
+
   constructor(
     @InjectRepository(DockerRegistry)
     private readonly dockerRegistryRepository: Repository<DockerRegistry>,
@@ -245,23 +264,8 @@ export class DockerRegistryService {
       throw new Error('Registry not found')
     }
 
-    // Parse fully qualified image name
-    // Example: harbor-test.internal.daytona.app/daytona/busybox:1.36.1
-    const [nameWithTag, tag] = imageName.split(':')
-
-    // Remove registry hostname if present
-    const parts = nameWithTag.split('/')
-    let project: string
-    let repository: string
-
-    if (parts.length >= 3 && parts[0].includes('.')) {
-      // Format: hostname/project/repository
-      project = parts[1]
-      repository = parts.slice(2).join('/')
-    } else if (parts.length === 2) {
-      // Format: project/repository
-      ;[project, repository] = parts
-    } else {
+    const parsedImage = parseDockerImage(imageName)
+    if (!parsedImage.project) {
       throw new Error('Invalid image name format. Expected: [registry]/project/repository[:tag]')
     }
 
@@ -272,7 +276,11 @@ export class DockerRegistryService {
           username: registry.username,
           password: registry.password,
         },
-        { project, repository, tag },
+        {
+          project: parsedImage.project,
+          repository: parsedImage.repository,
+          tag: parsedImage.tag,
+        },
       )
     } catch (error) {
       const message = error.response?.data?.message || error.message
@@ -291,5 +299,545 @@ export class DockerRegistryService {
     }
 
     return registry.url.startsWith('http') ? registry.url : `https://${registry.url}`
+  }
+
+  private async findRegistryByImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
+    // Remove docker.io prefix since it's the default registry
+    imageName = imageName.replace(/^docker\.io\//, '')
+
+    // Parse the image to extract potential registry hostname
+    const parsedImage = parseDockerImage(imageName)
+
+    if (parsedImage.registry) {
+      // Image has registry prefix, try to find matching registry in database first
+      const whereCondition = organizationId
+        ? [{ organizationId }, { organizationId: IsNull() }]
+        : [{ organizationId: IsNull() }]
+
+      const registries = await this.dockerRegistryRepository.find({
+        where: whereCondition,
+      })
+
+      // Try to find a registry that matches the image hostname
+      for (const registry of registries) {
+        const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
+        if (imageName.startsWith(strippedUrl)) {
+          return registry
+        }
+      }
+
+      // Not found in database, create temporary registry config for public access
+      return this.createTemporaryRegistryConfig(parsedImage.registry)
+    } else {
+      // Image has no registry prefix (e.g., "alpine:3.21")
+      // Create temporary Docker Hub config
+      return this.createTemporaryRegistryConfig('docker.io')
+    }
+  }
+
+  private createTemporaryRegistryConfig(registryOrigin: string): DockerRegistry {
+    const registry = new DockerRegistry()
+    registry.id = `temp-${registryOrigin}`
+    registry.name = `Temporary ${registryOrigin}`
+    registryOrigin = registryOrigin.replace(/^(https?:\/\/)/, '')
+    if (registryOrigin === 'docker.io') {
+      registry.url = `https://${DOCKER_HUB_REGISTRY}`
+    } else {
+      registry.url = `https://${registryOrigin}`
+    }
+    registry.username = ''
+    registry.password = ''
+    registry.project = ''
+    registry.isDefault = false
+    registry.registryType = RegistryType.INTERNAL
+    return registry
+  }
+
+  private async getDockerHubToken(repository: string): Promise<string | null> {
+    try {
+      const tokenUrl = `https://auth.docker.io/token?service=${DOCKER_HUB_REGISTRY}&scope=repository:${repository}:pull`
+      const response = await axios.get(tokenUrl, { timeout: 10000 })
+      return response.data.token
+    } catch (error) {
+      this.logger.warn(`Failed to get Docker Hub token: ${error.message}`)
+      return null
+    }
+  }
+
+  async checkImageExistsInRegistry(imageName: string, registry: DockerRegistry): Promise<boolean> {
+    try {
+      const parsedImage = parseDockerImage(imageName)
+      if (!parsedImage.project || !parsedImage.tag) {
+        throw new Error('Invalid image name format. Expected: [registry]/project/repository:tag')
+      }
+
+      const registryUrl = this.getRegistryUrl(registry)
+      const apiUrl = `${registryUrl}/v2/${parsedImage.project}/${parsedImage.repository}/manifests/${parsedImage.tag}`
+      const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+
+      const response = await axios({
+        method: 'get',
+        url: apiUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+        },
+        validateStatus: (status) => status < 500,
+        timeout: AXIOS_TIMEOUT_MS,
+      })
+
+      if (response.status === 200) {
+        this.logger.debug(`Image ${imageName} exists in registry`)
+        return true
+      }
+
+      this.logger.debug(`Image ${imageName} does not exist in registry (status: ${response.status})`)
+      return false
+    } catch (error) {
+      this.logger.error(`Error checking if image ${imageName} exists in registry: ${error.message}`)
+      return false
+    }
+  }
+
+  async getImageDetails(image: string, organizationId?: string): Promise<ImageDetails> {
+    try {
+      // Remove docker.io prefix since it's the default registry
+      image = image.replace(/^docker\.io\//, '')
+
+      // Parse the image to extract components
+      const parsedImage = parseDockerImage(image)
+
+      // Find the registry for this image (tries database first, then creates temporary config)
+      const registry = await this.findRegistryByImageName(image, organizationId)
+
+      const registryUrl = this.getRegistryUrl(registry)
+
+      // Build repository path for API calls
+      let repoPath: string
+
+      // Extract hostname from registry URL for comparison
+      const registryHost = registryUrl.replace(/^https?:\/\//, '')
+
+      if (parsedImage.registry && image.startsWith(registryHost + '/')) {
+        // Image includes registry hostname, use project/repo directly
+        if (parsedImage.project) {
+          repoPath = `${parsedImage.project}/${parsedImage.repository}`
+        } else {
+          repoPath = parsedImage.repository
+        }
+      } else {
+        // Image name without registry prefix, use as-is
+        if (parsedImage.project) {
+          repoPath = `${parsedImage.project}/${parsedImage.repository}`
+        } else {
+          repoPath = parsedImage.repository
+        }
+
+        // Special handling for Docker Hub - add library/ prefix for single-name images
+        if (registry.url.includes(DOCKER_HUB_REGISTRY) && !parsedImage.project) {
+          repoPath = `library/${parsedImage.repository}`
+        }
+      }
+
+      // Get the manifest using GET request to retrieve full body
+      const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${parsedImage.tag || 'latest'}`
+
+      // Build headers - handle different auth methods
+      const acceptHeader = [
+        'application/vnd.docker.distribution.manifest.v2+json',
+        'application/vnd.docker.distribution.manifest.list.v2+json',
+        'application/vnd.oci.image.index.v1+json',
+        'application/vnd.oci.image.manifest.v1+json',
+      ].join(', ')
+
+      const baseHeaders = new AxiosHeaders()
+      baseHeaders.set('Accept', acceptHeader)
+
+      let bearerToken: string | null = null
+
+      // Pre-populate auth if we already know how
+      if (registry.username && registry.password) {
+        const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+        baseHeaders.set('Authorization', `Basic ${encodedCredentials}`)
+      } else if (registry.url.includes(DOCKER_HUB_REGISTRY)) {
+        // Get anonymous token for Docker Hub
+        const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
+        bearerToken = await this.getDockerHubToken(dockerHubRepo)
+        if (bearerToken) {
+          baseHeaders.set('Authorization', `Bearer ${bearerToken}`)
+        }
+      }
+
+      const sendWithHeaders = async (url: string, headers: AxiosRequestHeaders | typeof baseHeaders) =>
+        axios({ method: 'get', url, headers, validateStatus: (s) => s < 500, timeout: AXIOS_TIMEOUT_MS })
+
+      let manifestResponse = await sendWithHeaders(manifestUrl, baseHeaders)
+
+      // Handle Bearer challenge (e.g., AWS ECR Public)
+      if (manifestResponse.status === 401 && manifestResponse.headers['www-authenticate']) {
+        const authHeader = String(manifestResponse.headers['www-authenticate'])
+        const challenge = parseWwwAuthenticate(authHeader)
+        if (challenge?.scheme?.toLowerCase() === 'bearer' && challenge.realm) {
+          try {
+            const token = await fetchBearerToken(challenge, {
+              repoPath,
+              registryHost: registryHost,
+            })
+            if (token) {
+              bearerToken = token
+              const headersWithBearer = AxiosHeaders.from(baseHeaders)
+              headersWithBearer.set('Authorization', `Bearer ${token}`)
+              manifestResponse = await sendWithHeaders(manifestUrl, headersWithBearer)
+            }
+          } catch {
+            // fall through to normal error handling
+          }
+        }
+      }
+
+      if (manifestResponse.status >= 300) {
+        throw new Error(`Failed to get manifest for image ${image}: ${manifestResponse.statusText}`)
+      }
+
+      // Extract the digest from headers
+      let digest = manifestResponse.headers['docker-content-digest']
+
+      // If digest not in headers, calculate it from the manifest body
+      if (!digest) {
+        const crypto = require('crypto')
+        const manifestStr = JSON.stringify(manifestResponse.data)
+        digest = 'sha256:' + crypto.createHash('sha256').update(manifestStr).digest('hex')
+      }
+
+      let manifest = manifestResponse.data
+
+      // Handle manifest lists (multi-platform images)
+      if (
+        manifest.mediaType === 'application/vnd.oci.image.index.v1+json' ||
+        manifest.mediaType === 'application/vnd.docker.distribution.manifest.list.v2+json'
+      ) {
+        // Find linux/amd64 platform (only architecture we support)
+        const platformManifest = manifest.manifests?.find(
+          (m: any) => m.platform?.architecture === 'amd64' && m.platform?.os === 'linux',
+        )
+
+        if (!platformManifest) {
+          throw new Error(`No linux/amd64 platform found for image ${image}. Only amd64 architecture is supported.`)
+        }
+
+        // Fetch the actual platform-specific manifest
+        const platformManifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${platformManifest.digest}`
+        const platformHeaders = AxiosHeaders.from(baseHeaders)
+        if (bearerToken) {
+          platformHeaders.set('Authorization', `Bearer ${bearerToken}`)
+        }
+        const platformResponse = await axios({
+          method: 'get',
+          url: platformManifestUrl,
+          headers: platformHeaders,
+          validateStatus: (status) => status < 500,
+          timeout: AXIOS_TIMEOUT_MS,
+        })
+
+        if (platformResponse.status >= 300) {
+          throw new Error(`Failed to get platform manifest for image ${image}: ${platformResponse.statusText}`)
+        }
+
+        manifest = platformResponse.data
+      }
+
+      // Calculate total size from all layers
+      const totalSize = manifest.layers?.reduce((sum: number, layer: any) => sum + (layer.size || 0), 0) || 0
+      const sizeGB = totalSize / (1024 * 1024 * 1024)
+
+      // Get the config blob to extract entrypoint and other details
+      const configDigest = manifest.config?.digest
+      if (!configDigest) {
+        // Return basic info if config is not available
+        return {
+          digest,
+          sizeGB,
+          entrypoint: [],
+          cmd: [],
+          env: [],
+        }
+      }
+
+      const configUrl = `${registryUrl}/v2/${repoPath}/blobs/${configDigest}`
+
+      // Build headers for config request - reuse Bearer token if available
+      const configHeaders = new AxiosHeaders()
+      if (bearerToken) {
+        configHeaders.set('Authorization', `Bearer ${bearerToken}`)
+      } else if (registry.username && registry.password) {
+        const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+        configHeaders.set('Authorization', `Basic ${encodedCredentials}`)
+      } else if (registry.url.includes(DOCKER_HUB_REGISTRY)) {
+        const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
+        const token = await this.getDockerHubToken(dockerHubRepo)
+        if (token) {
+          configHeaders.set('Authorization', `Bearer ${token}`)
+        }
+      }
+
+      const configResponse = await axios({
+        method: 'get',
+        url: configUrl,
+        headers: configHeaders,
+        validateStatus: (status) => status < 500,
+        timeout: AXIOS_TIMEOUT_MS,
+      })
+
+      if (configResponse.status >= 300) {
+        this.logger.warn(`Failed to get config blob for image ${image}: ${configResponse.statusText}`)
+        // Return basic info without config details
+        return {
+          digest,
+          sizeGB,
+          entrypoint: [],
+          cmd: [],
+          env: [],
+        }
+      }
+
+      const config = configResponse.data
+
+      return {
+        digest,
+        sizeGB,
+        entrypoint: config.config?.Entrypoint || [],
+        cmd: config.config?.Cmd || [],
+        env: config.config?.Env || [],
+        workingDir: config.config?.WorkingDir,
+        user: config.config?.User,
+      }
+    } catch (error) {
+      throw new Error(`Failed to get image details for ${image}: ${error.message}`)
+    }
+  }
+
+  private async deleteRepositoryWithPrefix(
+    repository: string,
+    prefix: string,
+    registry: DockerRegistry,
+  ): Promise<void> {
+    const registryUrl = this.getRegistryUrl(registry)
+    const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+    const repoPath = `${registry.project}/${prefix}${repository}`
+
+    try {
+      // Step 1: List all tags in the repository
+      const tagsUrl = `${registryUrl}/v2/${repoPath}/tags/list`
+
+      const tagsResponse = await axios({
+        method: 'get',
+        url: tagsUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+        },
+        validateStatus: (status) => status < 500,
+        timeout: AXIOS_TIMEOUT_MS,
+      })
+
+      if (tagsResponse.status === 404) {
+        return
+      }
+
+      if (tagsResponse.status >= 300) {
+        this.logger.error(`Error listing tags in repository ${repoPath}: ${tagsResponse.statusText}`)
+        throw new Error(`Failed to list tags in repository ${repoPath}: ${tagsResponse.statusText}`)
+      }
+
+      const tags = tagsResponse.data.tags || []
+
+      if (tags.length === 0) {
+        this.logger.debug(`Repository ${repoPath} has no tags to delete`)
+        return
+      }
+
+      if (tags.length > 500) {
+        this.logger.warn(`Repository ${repoPath} has more than 500 tags, skipping cleanup`)
+        return
+      }
+
+      // Step 2: Delete each tag
+      for (const tag of tags) {
+        try {
+          // Get the digest for this tag
+          const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${tag}`
+
+          const manifestResponse = await axios({
+            method: 'head',
+            url: manifestUrl,
+            headers: {
+              Authorization: `Basic ${encodedCredentials}`,
+              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+            },
+            validateStatus: (status) => status < 500,
+            timeout: AXIOS_TIMEOUT_MS,
+          })
+
+          if (manifestResponse.status >= 300) {
+            this.logger.warn(`Couldn't get manifest for tag ${tag}: ${manifestResponse.statusText}`)
+            continue
+          }
+
+          const digest = manifestResponse.headers['docker-content-digest']
+          if (!digest) {
+            this.logger.warn(`Docker content digest not found for tag ${tag}`)
+            continue
+          }
+
+          // Delete the manifest
+          const deleteUrl = `${registryUrl}/v2/${repoPath}/manifests/${digest}`
+
+          const deleteResponse = await axios({
+            method: 'delete',
+            url: deleteUrl,
+            headers: {
+              Authorization: `Basic ${encodedCredentials}`,
+            },
+            validateStatus: (status) => status < 500,
+            timeout: AXIOS_TIMEOUT_MS,
+          })
+
+          if (deleteResponse.status < 300) {
+            this.logger.debug(`Deleted tag ${tag} from repository ${repoPath}`)
+          } else {
+            this.logger.warn(`Failed to delete tag ${tag}: ${deleteResponse.statusText}`)
+          }
+        } catch (error) {
+          this.logger.warn(`Exception when deleting tag ${tag}: ${error.message}`)
+          // Continue with other tags
+        }
+      }
+
+      this.logger.debug(`Repository ${repoPath} cleanup completed`)
+    } catch (error) {
+      this.logger.error(`Exception when deleting repository ${repoPath}: ${error.message}`)
+      throw error
+    }
+  }
+
+  async deleteSandboxRepository(repository: string, registry: DockerRegistry): Promise<void> {
+    try {
+      // Delete both backup and snapshot repositories - necessary due to renaming
+      await this.deleteRepositoryWithPrefix(repository, 'backup-', registry)
+      await this.deleteRepositoryWithPrefix(repository, 'snapshot-', registry)
+    } catch (error) {
+      this.logger.error(`Failed to delete repositories for ${repository}: ${error.message}`)
+      throw error
+    }
+  }
+
+  async deleteBackupImageFromRegistry(imageName: string, registry: DockerRegistry): Promise<void> {
+    const parsedImage = parseDockerImage(imageName)
+    if (!parsedImage.project || !parsedImage.tag) {
+      throw new Error('Invalid image name format. Expected: [registry]/project/repository:tag')
+    }
+
+    const registryUrl = this.getRegistryUrl(registry)
+    const repoPath = `${parsedImage.project}/${parsedImage.repository}`
+
+    // First, get the digest for the tag using the manifests endpoint
+    const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${parsedImage.tag}`
+    const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+
+    try {
+      // Get the digest from the headers
+      const manifestResponse = await axios({
+        method: 'head', // Using HEAD request to only fetch headers
+        url: manifestUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+          Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+        },
+        validateStatus: (status) => status < 500,
+        timeout: AXIOS_TIMEOUT_MS,
+      })
+
+      if (manifestResponse.status >= 300) {
+        this.logger.error(`Error getting manifest for image ${imageName}: ${manifestResponse.statusText}`)
+        throw new Error(`Failed to get manifest for image ${imageName}: ${manifestResponse.statusText}`)
+      }
+
+      // Extract the digest from headers
+      const digest = manifestResponse.headers['docker-content-digest']
+      if (!digest) {
+        throw new Error(`Docker content digest not found for image ${imageName}`)
+      }
+
+      // Now delete the image using the digest
+      const deleteUrl = `${registryUrl}/v2/${repoPath}/manifests/${digest}`
+
+      const deleteResponse = await axios({
+        method: 'delete',
+        url: deleteUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+        },
+        validateStatus: (status) => status < 500,
+        timeout: AXIOS_TIMEOUT_MS,
+      })
+
+      if (deleteResponse.status < 300) {
+        this.logger.debug(`Image ${imageName} removed from the registry`)
+        return
+      }
+
+      this.logger.error(`Error removing image ${imageName} from registry: ${deleteResponse.statusText}`)
+      throw new Error(`Failed to remove image ${imageName} from registry: ${deleteResponse.statusText}`)
+    } catch (error) {
+      this.logger.error(`Exception when deleting image ${imageName}: ${error.message}`)
+      throw error
+    }
+  }
+}
+
+// Parses a WWW-Authenticate header for Bearer challenges
+function parseWwwAuthenticate(header: string): {
+  scheme: string
+  realm?: string
+  service?: string
+  scope?: string
+} | null {
+  if (!header) return null
+  const [schemePart, paramsPart] = header.split(/\s+/, 2)
+  if (!schemePart) return null
+  const scheme = schemePart.trim()
+  const params: Record<string, string> = {}
+  if (paramsPart) {
+    for (const kv of paramsPart.split(',')) {
+      const idx = kv.indexOf('=')
+      if (idx > -1) {
+        const key = kv.slice(0, idx).trim()
+        let value = kv.slice(idx + 1).trim()
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1)
+        }
+        params[key] = value
+      }
+    }
+  }
+  return { scheme, realm: params.realm, service: params.service, scope: params.scope }
+}
+
+// Fetches a Bearer token using the auth challenge parameters (works for Docker Registry and AWS ECR Public)
+async function fetchBearerToken(
+  challenge: { realm?: string; service?: string; scope?: string },
+  ctx: { repoPath: string; registryHost: string },
+): Promise<string | null> {
+  if (!challenge.realm) return null
+  const params = new URLSearchParams()
+  if (challenge.service) params.set('service', challenge.service)
+  // If scope not provided by challenge, construct a default repository:repo:pull
+  const scope = challenge.scope || `repository:${ctx.repoPath}:pull`
+  params.set('scope', scope)
+  try {
+    const url = `${challenge.realm}?${params.toString()}`
+    const resp = await axios.get(url, { timeout: 10000, validateStatus: (s) => s < 500 })
+    if (resp.status >= 300) return null
+    return resp.data?.token || resp.data?.access_token || null
+  } catch {
+    return null
   }
 }

@@ -17,7 +17,6 @@ import { BackupState } from '../enums/backup-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
-import { DockerProvider } from '../docker/docker-provider'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { OnEvent } from '@nestjs/event-emitter'
@@ -48,7 +47,6 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
-    private readonly dockerProvider: DockerProvider,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
   ) {}
@@ -357,7 +355,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
 
     try {
-      await this.dockerProvider.deleteSandboxRepository(sandbox.id, registry)
+      await this.dockerRegistryService.deleteSandboxRepository(sandbox.id, registry)
     } catch (error) {
       this.logger.error(
         `Failed to delete backup repository ${sandbox.id} from registry ${registry.id}:`,
