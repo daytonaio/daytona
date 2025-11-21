@@ -18,10 +18,11 @@ import { AuthContext as IAuthContext } from '../../common/interfaces/auth-contex
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/invitations')
-@UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+@UseGuards(AuthGuard('jwt'), AuthenticatedRateLimitGuard, OrganizationActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class OrganizationInvitationController {

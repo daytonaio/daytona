@@ -8,3 +8,7 @@ class DaytonaError(Exception):
 
 class DaytonaNotFoundError(DaytonaError):
     """Error for when a resource is not found."""
+
+
+class DaytonaRateLimitError(DaytonaError):
+    """Error for when rate limit is exceeded."""

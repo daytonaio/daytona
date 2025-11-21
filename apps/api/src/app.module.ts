@@ -13,9 +13,10 @@ import { AuthModule } from './auth/auth.module'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { ApiKeyModule } from './api-key/api-key.module'
-import { ThrottlerModule } from '@nestjs/throttler'
+import { seconds, ThrottlerModule } from '@nestjs/throttler'
+import { AnonymousRateLimitGuard } from './common/guards/anonymous-rate-limit.guard'
 import { DockerRegistryModule } from './docker-registry/docker-registry.module'
-import { RedisModule } from '@nestjs-modules/ioredis'
+import { RedisModule, getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { ScheduleModule } from '@nestjs/schedule'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { UsageModule } from './usage/usage.module'
@@ -35,6 +36,9 @@ import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
 import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
 import { LoggerModule } from 'nestjs-pino'
 import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util'
+import { Redis } from 'ioredis'
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
+import { APP_GUARD } from '@nestjs/core'
 
 @Module({
   imports: [
@@ -109,12 +113,6 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
         cacheControl: false,
       },
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 1000,
-        limit: 10,
-      },
-    ]),
     RedisModule.forRootAsync({
       inject: [TypedConfigService],
       useFactory: (configService: TypedConfigService) => {
@@ -128,6 +126,47 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
           },
         }
       },
+    }),
+    RedisModule.forRootAsync(
+      {
+        inject: [TypedConfigService],
+        useFactory: (configService: TypedConfigService) => {
+          return {
+            type: 'single',
+            options: {
+              host: configService.getOrThrow('redis.host'),
+              port: configService.getOrThrow('redis.port'),
+              tls: configService.get('redis.tls'),
+              lazyConnect: configService.get('skipConnections'),
+              db: 1,
+            },
+          }
+        },
+      },
+      'throttler',
+    ),
+    ThrottlerModule.forRootAsync({
+      useFactory: async (redis: Redis, configService: TypedConfigService) => {
+        const rateLimit = configService.get('rateLimit')
+        const throttlers = [
+          { name: 'anonymous', config: rateLimit.anonymous },
+          { name: 'authenticated', config: rateLimit.authenticated },
+          { name: 'sandbox-create', config: rateLimit.sandboxCreate },
+          { name: 'sandbox-lifecycle', config: rateLimit.sandboxLifecycle },
+        ]
+          .filter(({ config }) => config.ttl !== undefined && config.limit !== undefined)
+          .map(({ name, config }) => ({
+            name,
+            ttl: seconds(config.ttl),
+            limit: config.limit,
+          }))
+
+        return {
+          throttlers,
+          storage: new ThrottlerStorageRedisService(redis),
+        }
+      },
+      inject: [getRedisConnectionToken('throttler'), TypedConfigService],
     }),
     EventEmitterModule.forRoot({
       maxListeners: 100,
@@ -178,7 +217,13 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
     }),
   ],
   controllers: [],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AnonymousRateLimitGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

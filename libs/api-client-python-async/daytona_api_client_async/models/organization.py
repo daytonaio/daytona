@@ -20,7 +20,7 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -47,8 +47,11 @@ class Organization(BaseModel):
     max_disk_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max disk per sandbox", alias="maxDiskPerSandbox")
     sandbox_limited_network_egress: StrictBool = Field(description="Sandbox default network block all", alias="sandboxLimitedNetworkEgress")
     default_region: StrictStr = Field(description="Default region", alias="defaultRegion")
+    authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Authenticated rate limit per minute", alias="authenticatedRateLimit")
+    sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit per minute", alias="sandboxCreateRateLimit")
+    sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit per minute", alias="sandboxLifecycleRateLimit")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegion"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegion", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,6 +99,21 @@ class Organization(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if authenticated_rate_limit (nullable) is None
+        # and model_fields_set contains the field
+        if self.authenticated_rate_limit is None and "authenticated_rate_limit" in self.model_fields_set:
+            _dict['authenticatedRateLimit'] = None
+
+        # set to None if sandbox_create_rate_limit (nullable) is None
+        # and model_fields_set contains the field
+        if self.sandbox_create_rate_limit is None and "sandbox_create_rate_limit" in self.model_fields_set:
+            _dict['sandboxCreateRateLimit'] = None
+
+        # set to None if sandbox_lifecycle_rate_limit (nullable) is None
+        # and model_fields_set contains the field
+        if self.sandbox_lifecycle_rate_limit is None and "sandbox_lifecycle_rate_limit" in self.model_fields_set:
+            _dict['sandboxLifecycleRateLimit'] = None
+
         return _dict
 
     @classmethod
@@ -126,7 +144,10 @@ class Organization(BaseModel):
             "maxMemoryPerSandbox": obj.get("maxMemoryPerSandbox"),
             "maxDiskPerSandbox": obj.get("maxDiskPerSandbox"),
             "sandboxLimitedNetworkEgress": obj.get("sandboxLimitedNetworkEgress"),
-            "defaultRegion": obj.get("defaultRegion")
+            "defaultRegion": obj.get("defaultRegion"),
+            "authenticatedRateLimit": obj.get("authenticatedRateLimit"),
+            "sandboxCreateRateLimit": obj.get("sandboxCreateRateLimit"),
+            "sandboxLifecycleRateLimit": obj.get("sandboxLifecycleRateLimit")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

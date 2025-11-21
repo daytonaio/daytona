@@ -19,11 +19,12 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { WebhookAppPortalAccessDto } from '../dto/webhook-app-portal-access.dto'
 import { WebhookInitializationStatusDto } from '../dto/webhook-initialization-status.dto'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('webhooks')
 @Controller('webhooks')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationAccessGuard)
+@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationAccessGuard, AuthenticatedRateLimitGuard)
 @ApiBearerAuth()
 export class WebhookController {
   constructor(

@@ -198,7 +198,14 @@ Below is a full list of environment variables with their default values:
 | `ADMIN_MAX_SNAPSHOT_SIZE`                  | number  | `100`                                                | Admin max snapshot size, used only upon initial setup                                                |
 | `ADMIN_VOLUME_QUOTA`                       | number  | `0`                                                  | Admin volume quota, used only upon initial setup                                                     |
 | `SKIP_USER_EMAIL_VERIFICATION`             | boolean | `true`                                               | Skip user email verification process                                                                 |
-
+| `RATE_LIMIT_ANONYMOUS_TTL`                 | number  | (empty)                                              | Anonymous rate limit time-to-live (seconds, empty - rate limit is disabled)                                             |
+| `RATE_LIMIT_ANONYMOUS_LIMIT`               | number  | (empty)                                              | Anonymous rate limit (requests per TTL, empty - rate limit is disabled)                                                |
+| `RATE_LIMIT_AUTHENTICATED_TTL`             | number  | (empty)                                              | Authenticated rate limit time-to-live (seconds, empty - rate limit is disabled)                                         |
+| `RATE_LIMIT_AUTHENTICATED_LIMIT`           | number  | (empty)                                              | Authenticated rate limit (requests per TTL, empty - rate limit is disabled)                                          |
+| `RATE_LIMIT_SANDBOX_CREATE_TTL`            | number  | (empty)                                              | Sandbox create rate limit time-to-live (seconds, empty - rate limit is disabled)                                        |
+| `RATE_LIMIT_SANDBOX_CREATE_LIMIT`          | number  | (empty)                                              | Sandbox create rate limit (requests per TTL, empty - rate limit is disabled)                                           |
+| `RATE_LIMIT_SANDBOX_LIFECYCLE_TTL`         | number  | (empty)                                              | Sandbox lifecycle rate limit time-to-live (seconds, empty - rate limit is disabled)                                     |
+| `RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT`       | number  | (empty)                                              | Sandbox lifecycle rate limit (requests per TTL, empty - rate limit is disabled)                                      |
 ### Runner
 
 | Variable                   | Type    | Default Value                     | Description                           |
