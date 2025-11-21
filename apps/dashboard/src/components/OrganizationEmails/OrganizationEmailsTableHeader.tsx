@@ -126,7 +126,7 @@ export function OrganizationEmailsTableHeader({ table, onAddEmail }: Organizatio
         <Dialog open={addEmailDialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogTrigger asChild>
             <Button className="h-8">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="h-4 w-4" />
               Add Email
             </Button>
           </DialogTrigger>
