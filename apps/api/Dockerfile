@@ -118,6 +118,8 @@ ENV SKIP_USER_EMAIL_VERIFICATION=true
 
 ENV RUN_MIGRATIONS=true
 
+ENV DONT_SERVE_DASHBOARD=false
+
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:3000/api/config" ]
 
 ENTRYPOINT ["node", "dist/apps/api/main.js"]

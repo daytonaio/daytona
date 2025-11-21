@@ -101,12 +101,22 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
         cacheControl: false,
       },
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'dashboard'),
-      exclude: ['/api/*'],
-      renderPath: '/',
-      serveStaticOptions: {
-        cacheControl: false,
+    ServeStaticModule.forRootAsync({
+      inject: [TypedConfigService],
+      useFactory: (configService: TypedConfigService) => {
+        if (configService.get('dontServeDashboard')) {
+          return []
+        }
+        return [
+          {
+            rootPath: join(__dirname, '..', 'dashboard'),
+            exclude: ['/api/*'],
+            renderPath: '/',
+            serveStaticOptions: {
+              cacheControl: false,
+            },
+          },
+        ]
       },
     }),
     ThrottlerModule.forRoot([

@@ -216,6 +216,7 @@ const configuration = {
     volumeQuota: parseInt(process.env.ADMIN_VOLUME_QUOTA || '0', 10),
   },
   skipUserEmailVerification: process.env.SKIP_USER_EMAIL_VERIFICATION === 'true',
+  dontServeDashboard: process.env.DONT_SERVE_DASHBOARD === 'true',
 }
 
 export { configuration }
