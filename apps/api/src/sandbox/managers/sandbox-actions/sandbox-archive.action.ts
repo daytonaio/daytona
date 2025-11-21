@@ -85,14 +85,8 @@ export class SandboxArchiveAction extends SandboxAction {
     try {
       await runnerAdapter.destroySandbox(sandbox.id)
     } catch (error) {
-      //  log errors other than sandbox not found or sandbox already destroyed
-      if (
-        !(
-          (error.response?.data?.statusCode === 400 &&
-            error.response?.data?.message.includes('Sandbox already destroyed')) ||
-          error.response?.status === 404
-        )
-      ) {
+      //  log errors other than sandbox not found
+      if (error.response?.status !== 404) {
         this.logger.error(`Failed to destroy sandbox ${sandbox.id} on runner ${runner.id}:`, error)
         throw error
       }

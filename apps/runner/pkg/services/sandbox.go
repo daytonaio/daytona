@@ -32,12 +32,12 @@ func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId str
 		s.statesCache.SetSandboxState(ctx, sandboxId, sandboxState)
 	}
 
-	if err != nil && (common_errors.IsNotFoundError(err) || sandboxState == enums.SandboxStateDestroyed) {
+	if err != nil {
 		return &models.CachedStates{
 			SandboxState:      enums.SandboxStateUnknown,
 			BackupState:       enums.BackupStateNone,
 			BackupErrorReason: nil,
-		}, common_errors.NewNotFoundError(fmt.Errorf("sandbox %s not found", sandboxId))
+		}, err
 	}
 
 	data, err := s.statesCache.Get(ctx, sandboxId)
@@ -47,6 +47,15 @@ func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId str
 			BackupState:       enums.BackupStateNone,
 			BackupErrorReason: nil,
 		}, err
+	}
+
+	if data.SandboxState == enums.SandboxStateDestroyed {
+		s.statesCache.Delete(ctx, sandboxId)
+		return &models.CachedStates{
+			SandboxState:      enums.SandboxStateUnknown,
+			BackupState:       enums.BackupStateNone,
+			BackupErrorReason: nil,
+		}, common_errors.NewNotFoundError(fmt.Errorf("sandbox %s not found", sandboxId))
 	}
 
 	return data, nil

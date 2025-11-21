@@ -82,12 +82,8 @@ export class SandboxStartAction extends SandboxAction {
         try {
           sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         } catch (error) {
-          if (
-            (error.response?.data?.statusCode === 400 &&
-              error.response?.data?.message.includes('Sandbox already destroyed')) ||
-            error.response?.status === 404
-          ) {
-            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, 'Sandbox not found')
+          if (error.response?.status === 404) {
+            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
             return DONT_SYNC_AGAIN
           }
           throw error
@@ -407,13 +403,7 @@ export class SandboxStartAction extends SandboxAction {
               const runnerAdapter = await this.runnerAdapterFactory.create(runner)
               await runnerAdapter.destroySandbox(sandbox.id)
             } catch (e) {
-              if (
-                !(
-                  (e.response?.data?.statusCode === 400 &&
-                    e.response?.data?.message.includes('Sandbox already destroyed')) ||
-                  e.response?.status === 404
-                )
-              ) {
+              if (e.response?.statusCode !== 404) {
                 this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, e)
               }
             }
@@ -504,12 +494,8 @@ export class SandboxStartAction extends SandboxAction {
     try {
       sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
     } catch (error) {
-      if (
-        (error.response?.data?.statusCode === 400 &&
-          error.response?.data?.message.includes('Sandbox already destroyed')) ||
-        error.response?.status === 404
-      ) {
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, 'Sandbox not found')
+      if (error.response?.status === 404) {
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
         return DONT_SYNC_AGAIN
       }
       throw error
@@ -544,12 +530,8 @@ export class SandboxStartAction extends SandboxAction {
     try {
       sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
     } catch (error) {
-      if (
-        (error.response?.data?.statusCode === 400 &&
-          error.response?.data?.message.includes('Sandbox already destroyed')) ||
-        error.response?.status === 404
-      ) {
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, 'Sandbox not found')
+      if (error.response?.status === 404) {
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
         return DONT_SYNC_AGAIN
       }
       throw error
@@ -829,13 +811,7 @@ export class SandboxStartAction extends SandboxAction {
       // First try to destroy the sandbox
       await runnerAdapter.destroySandbox(sandbox.id)
     } catch (error) {
-      if (
-        !(
-          (error.response?.data?.statusCode === 400 &&
-            error.response?.data?.message.includes('Sandbox already destroyed')) ||
-          error.response?.status === 404
-        )
-      ) {
+      if (error.response?.statusCode !== 404) {
         this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
         throw error
       }

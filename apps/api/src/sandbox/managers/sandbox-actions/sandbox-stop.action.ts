@@ -49,12 +49,8 @@ export class SandboxStopAction extends SandboxAction {
         try {
           sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         } catch (error) {
-          if (
-            (error.response?.data?.statusCode === 400 &&
-              error.response?.data?.message.includes('Sandbox already destroyed')) ||
-            error.response?.status === 404
-          ) {
-            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, 'Sandbox not found')
+          if (error.response?.status === 404) {
+            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
             return DONT_SYNC_AGAIN
           }
           throw error
@@ -91,12 +87,8 @@ export class SandboxStopAction extends SandboxAction {
         try {
           sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         } catch (error) {
-          if (
-            (error.response?.data?.statusCode === 400 &&
-              error.response?.data?.message.includes('Sandbox already destroyed')) ||
-            error.response?.status === 404
-          ) {
-            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, 'Sandbox not found')
+          if (error.response?.status === 404) {
+            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
             return DONT_SYNC_AGAIN
           }
           throw error
