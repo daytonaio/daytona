@@ -10,6 +10,11 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"path"
+
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -21,13 +26,10 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/middlewares"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
+	"github.com/daytonaio/daemon/pkg/toolbox/process/interpreter"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
-	"net"
-	"net/http"
-	"os"
-	"path"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/docs"
 	"github.com/gin-gonic/gin"
@@ -197,6 +199,23 @@ func (s *Server) Start() error {
 			ptyGroup.DELETE("/:sessionId", ptyController.DeletePTYSession)
 			ptyGroup.GET("/:sessionId/connect", ptyController.ConnectPTYSession)
 			ptyGroup.POST("/:sessionId/resize", ptyController.ResizePTYSession)
+		}
+
+		// Interpreter endpoints
+		interpreterController := interpreter.NewInterpreterController(s.WorkDir)
+		// Pre-warm the default interpreter context to reduce latency on first request
+		go func() {
+			_, err := interpreter.GetOrCreateDefaultContext()
+			if err != nil {
+				log.Debugf("Failed to pre-create default interpreter context: %v", err)
+			}
+		}()
+		interpreterGroup := processController.Group("/interpreter")
+		{
+			interpreterGroup.POST("/context", interpreterController.CreateContext)
+			interpreterGroup.GET("/context", interpreterController.ListContexts)
+			interpreterGroup.DELETE("/context/:id", interpreterController.DeleteContext)
+			interpreterGroup.GET("/execute", interpreterController.Execute)
 		}
 	}
 
