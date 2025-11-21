@@ -4,16 +4,6 @@
  */
 
 import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
-import {
-  DEFAULT_RATE_LIMIT_ANONYMOUS_TTL,
-  DEFAULT_RATE_LIMIT_ANONYMOUS_LIMIT,
-  DEFAULT_RATE_LIMIT_AUTHENTICATED_TTL,
-  DEFAULT_RATE_LIMIT_AUTHENTICATED_LIMIT,
-  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT,
-  DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL,
-  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT,
-  DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL,
-} from './defaults'
 
 const configuration = {
   production: process.env.NODE_ENV === 'production',
@@ -190,20 +180,32 @@ const configuration = {
   },
   rateLimit: {
     anonymous: {
-      ttl: parseInt(process.env.RATE_LIMIT_ANONYMOUS_TTL || DEFAULT_RATE_LIMIT_ANONYMOUS_TTL, 10),
-      limit: parseInt(process.env.RATE_LIMIT_ANONYMOUS_LIMIT || DEFAULT_RATE_LIMIT_ANONYMOUS_LIMIT, 10),
+      ttl: process.env.RATE_LIMIT_ANONYMOUS_TTL ? parseInt(process.env.RATE_LIMIT_ANONYMOUS_TTL, 10) : undefined,
+      limit: process.env.RATE_LIMIT_ANONYMOUS_LIMIT ? parseInt(process.env.RATE_LIMIT_ANONYMOUS_LIMIT, 10) : undefined,
     },
     authenticated: {
-      ttl: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_TTL || DEFAULT_RATE_LIMIT_AUTHENTICATED_TTL, 10),
-      limit: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_LIMIT || DEFAULT_RATE_LIMIT_AUTHENTICATED_LIMIT, 10),
+      ttl: process.env.RATE_LIMIT_AUTHENTICATED_TTL
+        ? parseInt(process.env.RATE_LIMIT_AUTHENTICATED_TTL, 10)
+        : undefined,
+      limit: process.env.RATE_LIMIT_AUTHENTICATED_LIMIT
+        ? parseInt(process.env.RATE_LIMIT_AUTHENTICATED_LIMIT, 10)
+        : undefined,
     },
     sandboxCreate: {
-      ttl: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_TTL, 10),
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_CREATE_LIMIT, 10),
+      ttl: process.env.RATE_LIMIT_SANDBOX_CREATE_TTL
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL, 10)
+        : undefined,
+      limit: process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT, 10)
+        : undefined,
     },
     sandboxLifecycle: {
-      ttl: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10),
-      limit: parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT || DEFAULT_RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10),
+      ttl: process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10)
+        : undefined,
+      limit: process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10)
+        : undefined,
     },
   },
   log: {

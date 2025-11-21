@@ -147,29 +147,22 @@ import { APP_GUARD } from '@nestjs/core'
     ),
     ThrottlerModule.forRootAsync({
       useFactory: async (redis: Redis, configService: TypedConfigService) => {
+        const rateLimit = configService.get('rateLimit')
+        const throttlers = [
+          { name: 'anonymous', config: rateLimit.anonymous },
+          { name: 'authenticated', config: rateLimit.authenticated },
+          { name: 'sandbox-create', config: rateLimit.sandboxCreate },
+          { name: 'sandbox-lifecycle', config: rateLimit.sandboxLifecycle },
+        ]
+          .filter(({ config }) => config.ttl !== undefined && config.limit !== undefined)
+          .map(({ name, config }) => ({
+            name,
+            ttl: seconds(config.ttl),
+            limit: config.limit,
+          }))
+
         return {
-          throttlers: [
-            {
-              name: 'anonymous',
-              ttl: seconds(configService.get('rateLimit.anonymous.ttl')),
-              limit: configService.get('rateLimit.anonymous.limit'),
-            },
-            {
-              name: 'authenticated',
-              ttl: seconds(configService.get('rateLimit.authenticated.ttl')),
-              limit: configService.get('rateLimit.authenticated.limit'),
-            },
-            {
-              name: 'sandbox-create',
-              ttl: seconds(configService.get('rateLimit.sandboxCreate.ttl')),
-              limit: configService.get('rateLimit.sandboxCreate.limit'),
-            },
-            {
-              name: 'sandbox-lifecycle',
-              ttl: seconds(configService.get('rateLimit.sandboxLifecycle.ttl')),
-              limit: configService.get('rateLimit.sandboxLifecycle.limit'),
-            },
-          ],
+          throttlers,
           storage: new ThrottlerStorageRedisService(redis),
         }
       },
