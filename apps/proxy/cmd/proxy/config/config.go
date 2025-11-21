@@ -16,6 +16,7 @@ type Config struct {
 	ProxyDomain           string       `envconfig:"PROXY_DOMAIN" validate:"required"`
 	ProxyProtocol         string       `envconfig:"PROXY_PROTOCOL" validate:"required"`
 	ProxyApiKey           string       `envconfig:"PROXY_API_KEY" validate:"required"`
+	CookieDomain          *string      `envconfig:"COOKIE_DOMAIN"`
 	TLSCertFile           string       `envconfig:"TLS_CERT_FILE"`
 	TLSKeyFile            string       `envconfig:"TLS_KEY_FILE"`
 	EnableTLS             bool         `envconfig:"ENABLE_TLS"`
