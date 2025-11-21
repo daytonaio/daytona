@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useApi } from '@/hooks/useApi'
 import { useBilling } from '@/hooks/useBilling'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { CheckCircleIcon, CreditCardIcon, InfoIcon, Loader, TriangleAlertIcon } from 'lucide-react'
+import { ArrowUpRight, CheckCircleIcon, CreditCardIcon, InfoIcon, Loader, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -275,8 +275,11 @@ const Wallet = () => {
                   </div>
                 </div>
                 {wallet.creditCardConnected && billingPortalUrl && (
-                  <Button variant="default" className="">
-                    Top-up
+                  <Button variant="default" asChild className="flex items-center gap-2">
+                    <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
+                      Top-up
+                      <ArrowUpRight className="w-20 h-20" />
+                    </a>
                   </Button>
                 )}
               </div>
