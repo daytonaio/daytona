@@ -23,6 +23,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
+import { useNavigate } from 'react-router-dom'
+import { RoutePath } from '@/enums/RoutePath'
 
 const Limits: React.FC = () => {
   const { user } = useAuth()
@@ -36,6 +38,13 @@ const Limits: React.FC = () => {
   const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
   const [tierLoading, setTierLoading] = useState(false)
   const config = useConfig()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (selectedOrganization && !selectedOrganization.defaultRegionId) {
+      navigate(RoutePath.SETTINGS)
+    }
+  }, [navigate, selectedOrganization])
 
   const fetchOrganizationTier = useCallback(async () => {
     if (!config.billingApiUrl) {
