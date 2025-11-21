@@ -29,9 +29,21 @@ type DockerClientConfig struct {
 	ComputerUsePluginPath  string
 	NetRulesManager        *netrules.NetRulesManager
 	ResourceLimitsDisabled bool
+	DaemonStartTimeoutSec  int
+	SandboxStartTimeoutSec int
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
+	if config.DaemonStartTimeoutSec <= 0 {
+		log.Warnf("Invalid DaemonStartTimeoutSec value: %d. Using default value: 60 seconds", config.DaemonStartTimeoutSec)
+		config.DaemonStartTimeoutSec = 60
+	}
+
+	if config.SandboxStartTimeoutSec <= 0 {
+		log.Warnf("Invalid SandboxStartTimeoutSec value: %d. Using default value: 30 seconds", config.SandboxStartTimeoutSec)
+		config.SandboxStartTimeoutSec = 30
+	}
+
 	return &DockerClient{
 		apiClient:              config.ApiClient,
 		statesCache:            config.StatesCache,
@@ -45,6 +57,8 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		computerUsePluginPath:  config.ComputerUsePluginPath,
 		netRulesManager:        config.NetRulesManager,
 		resourceLimitsDisabled: config.ResourceLimitsDisabled,
+		daemonStartTimeoutSec:  config.DaemonStartTimeoutSec,
+		sandboxStartTimeoutSec: config.SandboxStartTimeoutSec,
 	}
 }
 
@@ -66,6 +80,8 @@ type DockerClient struct {
 	computerUsePluginPath  string
 	netRulesManager        *netrules.NetRulesManager
 	resourceLimitsDisabled bool
+	daemonStartTimeoutSec  int
+	sandboxStartTimeoutSec int
 }
 
 // retryWithExponentialBackoff executes a function with exponential backoff retry logic
