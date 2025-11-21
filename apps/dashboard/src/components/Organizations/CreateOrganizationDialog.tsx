@@ -59,10 +59,10 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
       // setCreatedOrg(org)
       // setName('')
       // setDefaultRegionId(undefined)
+      // setLoading(false)
     } else {
       setLoading(false)
     }
-    //setLoading(false)
   }
 
   const copyToClipboard = async (text: string, label: string) => {
