@@ -110,6 +110,7 @@ func (a *ApiServer) Start() error {
 	{
 		sandboxController.POST("", controllers.Create)
 		sandboxController.GET("/:sandboxId", controllers.Info)
+		sandboxController.GET("/:sandboxId/logs", controllers.Logs)
 		sandboxController.POST("/:sandboxId/destroy", controllers.Destroy)
 		sandboxController.POST("/:sandboxId/start", controllers.Start)
 		sandboxController.POST("/:sandboxId/stop", controllers.Stop)

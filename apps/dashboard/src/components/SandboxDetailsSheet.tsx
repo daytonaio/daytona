@@ -9,9 +9,14 @@ import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxSta
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getRelativeTimeString } from '@/lib/utils'
-import { Archive, Camera, X, GitFork, Trash, Play, Tag, Copy } from 'lucide-react'
+import { cn, getRelativeTimeString } from '@/lib/utils'
+import { Archive, X, Trash, Play, Tag, Copy } from 'lucide-react'
 import { toast } from 'sonner'
+import SandboxLogs from './SandboxLogs'
+
+const MIN_SHEET_WIDTH = 560
+const MAX_SHEET_WIDTH = 1200
+const DEFAULT_SHEET_WIDTH = 800
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -41,6 +46,14 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   deletePermitted,
 }) => {
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
+  const [sheetWidth, setSheetWidth] = useState(DEFAULT_SHEET_WIDTH)
+  const [isResizing, setIsResizing] = useState(false)
+
+  useEffect(() => {
+    if (!sandbox?.id) {
+      setTerminalUrl(null)
+    }
+  }, [sandbox?.id])
 
   // TODO: uncomment when we enable the terminal tab
   // useEffect(() => {
@@ -56,6 +69,32 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
 
   //   getTerminalUrl()
   // }, [sandbox?.id, getWebTerminalUrl])
+
+  useEffect(() => {
+    if (!isResizing) return
+
+    const handleMouseMove = (event: MouseEvent) => {
+      event.preventDefault()
+      const viewportWidth = window.innerWidth
+      const nextWidth = Math.min(Math.max(viewportWidth - event.clientX, MIN_SHEET_WIDTH), MAX_SHEET_WIDTH)
+      setSheetWidth(nextWidth)
+    }
+
+    const stopResizing = () => setIsResizing(false)
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', stopResizing)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', stopResizing)
+    }
+  }, [isResizing])
+
+  const handleResizeStart = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsResizing(true)
+  }
 
   if (!sandbox) return null
 
@@ -75,32 +114,48 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-dvw sm:w-[800px] p-0 flex flex-col gap-0 [&>button]:hidden">
-        <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
-          <SheetTitle className="text-2xl font-medium">Sandbox Details</SheetTitle>
-          <div className="flex gap-2 items-center">
-            {writePermitted && (
-              <>
-                {sandbox.state === SandboxState.STARTED && (
-                  <Button
-                    variant="outline"
-                    onClick={() => handleStop(sandbox.id)}
-                    disabled={sandboxIsLoading[sandbox.id]}
-                  >
-                    Stop
-                  </Button>
-                )}
-                {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
-                  <Button
-                    variant="outline"
-                    onClick={() => handleStart(sandbox.id)}
-                    disabled={sandboxIsLoading[sandbox.id]}
-                  >
-                    <Play className="w-4 h-4" />
-                    Start
-                  </Button>
-                )}
-                {/* {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
+      <SheetContent
+        className="p-0 flex flex-col gap-0 [&>button]:hidden"
+        style={{ width: `${sheetWidth}px`, maxWidth: '100vw' }}
+      >
+        <div className="relative h-full flex flex-col gap-0">
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize sandbox panel"
+            onMouseDown={handleResizeStart}
+            className={cn(
+              'absolute left-0 top-0 h-full w-2 cursor-ew-resize',
+              'transition-colors',
+              isResizing ? 'bg-primary/40' : 'bg-transparent hover:bg-primary/20',
+            )}
+          />
+
+          <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
+            <SheetTitle className="text-2xl font-medium">Sandbox Details</SheetTitle>
+            <div className="flex gap-2 items-center">
+              {writePermitted && (
+                <>
+                  {sandbox.state === SandboxState.STARTED && (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleStop(sandbox.id)}
+                      disabled={sandboxIsLoading[sandbox.id]}
+                    >
+                      Stop
+                    </Button>
+                  )}
+                  {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleStart(sandbox.id)}
+                      disabled={sandboxIsLoading[sandbox.id]}
+                    >
+                      <Play className="w-4 h-4" />
+                      Start
+                    </Button>
+                  )}
+                  {/* {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
                   <Button
                     variant="outline"
                     onClick={() => handleFork(sandbox.id)}
@@ -120,156 +175,162 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                     Snapshot
                   </Button>
                 )} */}
-                {sandbox.state === SandboxState.STOPPED && (
-                  <Button
-                    variant="outline"
-                    className="w-8 h-8"
-                    onClick={() => handleArchive(sandbox.id)}
-                    disabled={sandboxIsLoading[sandbox.id]}
-                  >
-                    <Archive className="w-4 h-4" />
-                  </Button>
-                )}
-              </>
-            )}
-            {deletePermitted && (
+                  {sandbox.state === SandboxState.STOPPED && (
+                    <Button
+                      variant="outline"
+                      className="w-8 h-8"
+                      onClick={() => handleArchive(sandbox.id)}
+                      disabled={sandboxIsLoading[sandbox.id]}
+                    >
+                      <Archive className="w-4 h-4" />
+                    </Button>
+                  )}
+                </>
+              )}
+              {deletePermitted && (
+                <Button
+                  variant="outline"
+                  className="w-8 h-8"
+                  onClick={() => handleDelete(sandbox.id)}
+                  disabled={sandboxIsLoading[sandbox.id]}
+                >
+                  <Trash className="w-4 h-4" />
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className="w-8 h-8"
-                onClick={() => handleDelete(sandbox.id)}
+                onClick={() => onOpenChange(false)}
                 disabled={sandboxIsLoading[sandbox.id]}
               >
-                <Trash className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </Button>
-            )}
-            <Button
-              variant="outline"
-              className="w-8 h-8"
-              onClick={() => onOpenChange(false)}
-              disabled={sandboxIsLoading[sandbox.id]}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </SheetHeader>
-
-        <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
-          {/* TODO: Add terminal tab */}
-          {/* <TabsList className="px-4 w-full flex-shrink-0">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="terminal">Terminal</TabsTrigger>
-          </TabsList> */}
-          <TabsContent value="overview" className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-sm text-muted-foreground">Name</h3>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{sandbox.name}</p>
-                  <button
-                    onClick={() => copyToClipboard(sandbox.name)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Copy name"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm text-muted-foreground">UUID</h3>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{sandbox.id}</p>
-                  <button
-                    onClick={() => copyToClipboard(sandbox.id)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Copy UUID"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
             </div>
+          </SheetHeader>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div>
-                <h3 className="text-sm text-muted-foreground">State</h3>
-                <div className="mt-1 text-sm">
-                  <SandboxStateComponent state={sandbox.state} errorReason={sandbox.errorReason} />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm text-muted-foreground">Snapshot</h3>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{sandbox.snapshot || '-'}</p>
-                  {sandbox.snapshot && (
+          <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
+            <TabsList className="px-4 w-full flex-shrink-0">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="logs">Logs</TabsTrigger>
+              {/* TODO: Add terminal tab */}
+              {/* <TabsTrigger value="terminal">Terminal</TabsTrigger> */}
+            </TabsList>
+            <TabsContent value="overview" className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm text-muted-foreground">Name</h3>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{sandbox.name}</p>
                     <button
-                      onClick={() => copyToClipboard(sandbox.snapshot || '')}
+                      onClick={() => copyToClipboard(sandbox.name)}
                       className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Copy snapshot"
+                      aria-label="Copy name"
                     >
                       <Copy className="w-3 h-3" />
                     </button>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm text-muted-foreground">UUID</h3>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{sandbox.id}</p>
+                    <button
+                      onClick={() => copyToClipboard(sandbox.id)}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Copy UUID"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                  <h3 className="text-sm text-muted-foreground">State</h3>
+                  <div className="mt-1 text-sm">
+                    <SandboxStateComponent state={sandbox.state} errorReason={sandbox.errorReason} />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm text-muted-foreground">Snapshot</h3>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{sandbox.snapshot || '-'}</p>
+                    {sandbox.snapshot && (
+                      <button
+                        onClick={() => copyToClipboard(sandbox.snapshot || '')}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="Copy snapshot"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm text-muted-foreground">Region</h3>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{sandbox.target}</p>
+                    <button
+                      onClick={() => copyToClipboard(sandbox.target)}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Copy region"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm text-muted-foreground">Last used</h3>
+                  <p className="mt-1 text-sm font-medium">{getLastEvent(sandbox).relativeTimeString}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <h3 className="text-sm text-muted-foreground">Resources</h3>
+                  <div className="mt-1 text-sm font-medium flex items-center gap-1">
+                    <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
+                      {sandbox.cpu} vCPU
+                    </div>
+                    <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
+                      {sandbox.memory} GiB
+                    </div>
+                    <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
+                      {sandbox.disk} GiB
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">Labels</h3>
+                <div className="mt-3 space-y-4">
+                  {Object.entries(sandbox.labels ?? {}).length > 0 ? (
+                    Object.entries(sandbox.labels ?? {}).map(([key, value]) => (
+                      <div key={key} className="text-sm">
+                        <div>{key}</div>
+                        <div className="font-medium p-2 bg-muted rounded-md mt-1 border border-border">{value}</div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex flex-col border border-border rounded-md items-center justify-center gap-2 text-muted-foreground w-full min-h-40">
+                      <Tag className="w-4 h-4" />
+                      <span className="text-sm">No labels found</span>
+                    </div>
                   )}
                 </div>
               </div>
-              <div>
-                <h3 className="text-sm text-muted-foreground">Region</h3>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{sandbox.target}</p>
-                  <button
-                    onClick={() => copyToClipboard(sandbox.target)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Copy region"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-sm text-muted-foreground">Last used</h3>
-                <p className="mt-1 text-sm font-medium">{getLastEvent(sandbox).relativeTimeString}</p>
-              </div>
-            </div>
+            </TabsContent>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <h3 className="text-sm text-muted-foreground">Resources</h3>
-                <div className="mt-1 text-sm font-medium flex items-center gap-1">
-                  <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
-                    {sandbox.cpu} vCPU
-                  </div>
-                  <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
-                    {sandbox.memory} GiB
-                  </div>
-                  <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
-                    {sandbox.disk} GiB
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-medium">Labels</h3>
-              <div className="mt-3 space-y-4">
-                {Object.entries(sandbox.labels ?? {}).length > 0 ? (
-                  Object.entries(sandbox.labels ?? {}).map(([key, value]) => (
-                    <div key={key} className="text-sm">
-                      <div>{key}</div>
-                      <div className="font-medium p-2 bg-muted rounded-md mt-1 border border-border">{value}</div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex flex-col border border-border rounded-md items-center justify-center gap-2 text-muted-foreground w-full min-h-40">
-                    <Tag className="w-4 h-4" />
-                    <span className="text-sm">No labels found</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
+            <TabsContent value="logs" className="flex-1 p-6 min-h-0 flex overflow-hidden">
+              <SandboxLogs sandboxId={sandbox.id} sandboxState={sandbox.state} />
+            </TabsContent>
 
-          <TabsContent value="terminal" className="p-4">
-            <iframe title="Terminal" src={terminalUrl || undefined} className="w-full h-full"></iframe>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="terminal" className="p-4">
+              <iframe title="Terminal" src={terminalUrl || undefined} className="w-full h-full"></iframe>
+            </TabsContent>
+          </Tabs>
+        </div>
       </SheetContent>
     </Sheet>
   )
