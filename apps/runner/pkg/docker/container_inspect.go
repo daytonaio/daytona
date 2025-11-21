@@ -5,10 +5,23 @@ package docker
 
 import (
 	"context"
+	"fmt"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
 )
 
 func (d *DockerClient) ContainerInspect(ctx context.Context, containerId string) (types.ContainerJSON, error) {
-	return d.apiClient.ContainerInspect(ctx, containerId)
+	container, err := d.apiClient.ContainerInspect(ctx, containerId)
+	if err != nil {
+		errWrapped := fmt.Errorf("failed to inspect sandbox container %s: %w", containerId, err)
+
+		if client.IsErrNotFound(err) {
+			return types.ContainerJSON{}, common_errors.NewNotFoundError(errWrapped)
+		}
+
+		return types.ContainerJSON{}, errWrapped
+	}
+	return container, nil
 }
