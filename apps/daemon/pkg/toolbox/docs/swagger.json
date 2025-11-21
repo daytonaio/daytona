@@ -1586,6 +1586,143 @@
         }
       }
     },
+    "/process/interpreter/context": {
+      "get": {
+        "description": "Returns information about all user-created interpreter contexts (excludes default context)",
+        "produces": ["application/json"],
+        "tags": ["interpreter"],
+        "summary": "List all user-created interpreter contexts",
+        "operationId": "ListInterpreterContexts",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListContextsResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new isolated interpreter context with optional working directory and language",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["interpreter"],
+        "summary": "Create a new interpreter context",
+        "operationId": "CreateInterpreterContext",
+        "parameters": [
+          {
+            "description": "Context configuration",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateContextRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/InterpreterContext"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/process/interpreter/context/{id}": {
+      "delete": {
+        "description": "Deletes an interpreter context and shuts down its worker process",
+        "produces": ["application/json"],
+        "tags": ["interpreter"],
+        "summary": "Delete an interpreter context",
+        "operationId": "DeleteInterpreterContext",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Context ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/process/interpreter/execute": {
+      "get": {
+        "description": "Executes code in a specified context (or default context if not specified) via WebSocket streaming",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["interpreter"],
+        "summary": "Execute code in an interpreter context",
+        "operationId": "ExecuteInterpreterCode",
+        "responses": {
+          "101": {
+            "description": "Switching Protocols",
+            "schema": {
+              "type": "string"
+            },
+            "headers": {
+              "Connection": {
+                "type": "string",
+                "description": "Upgrade"
+              },
+              "Upgrade": {
+                "type": "string",
+                "description": "websocket"
+              }
+            }
+          }
+        }
+      }
+    },
     "/process/pty": {
       "get": {
         "description": "Get a list of all active pseudo-terminal sessions",
@@ -2101,6 +2238,17 @@
         }
       }
     },
+    "CreateContextRequest": {
+      "type": "object",
+      "properties": {
+        "cwd": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        }
+      }
+    },
     "CreateSessionRequest": {
       "type": "object",
       "required": ["sessionId"],
@@ -2390,6 +2538,26 @@
         }
       }
     },
+    "InterpreterContext": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "cwd": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string"
+        }
+      }
+    },
     "IsPortInUseResponse": {
       "type": "object",
       "properties": {
@@ -2442,6 +2610,17 @@
           "type": "array",
           "items": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "ListContextsResponse": {
+      "type": "object",
+      "properties": {
+        "contexts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InterpreterContext"
           }
         }
       }

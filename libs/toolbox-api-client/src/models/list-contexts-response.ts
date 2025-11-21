@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona Daemon API
  * Daytona Daemon API
@@ -12,16 +12,20 @@
  * Do not edit the class manually.
  */
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { InterpreterContext } from './interpreter-context'
+
 /**
  *
  * @export
- * @interface FileDownloadRequest
+ * @interface ListContextsResponse
  */
-export interface FileDownloadRequest {
+export interface ListContextsResponse {
   /**
    *
-   * @type {Array<string>}
-   * @memberof FileDownloadRequest
+   * @type {Array<InterpreterContext>}
+   * @memberof ListContextsResponse
    */
-  paths: Array<string>
+  contexts?: Array<InterpreterContext>
 }

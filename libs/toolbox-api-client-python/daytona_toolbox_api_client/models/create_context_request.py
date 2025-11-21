@@ -22,13 +22,14 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ProjectDirResponse(BaseModel):
+class CreateContextRequest(BaseModel):
     """
-    ProjectDirResponse
+    CreateContextRequest
     """ # noqa: E501
-    dir: Optional[StrictStr] = None
+    cwd: Optional[StrictStr] = None
+    language: Optional[StrictStr] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["dir"]
+    __properties: ClassVar[List[str]] = ["cwd", "language"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,7 +49,7 @@ class ProjectDirResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ProjectDirResponse from a JSON string"""
+        """Create an instance of CreateContextRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -80,7 +81,7 @@ class ProjectDirResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ProjectDirResponse from a dict"""
+        """Create an instance of CreateContextRequest from a dict"""
         if obj is None:
             return None
 
@@ -88,7 +89,8 @@ class ProjectDirResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "dir": obj.get("dir")
+            "cwd": obj.get("cwd"),
+            "language": obj.get("language")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
