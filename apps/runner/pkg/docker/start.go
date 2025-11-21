@@ -7,8 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
-	"net/url"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
@@ -17,8 +15,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
@@ -72,13 +68,16 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		return err
 	}
 
-	processesCtx := context.Background()
-	go func() {
-		if err := d.startDaytonaDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
-			log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
-		}
-	}()
+	if !d.useDaemonEntrypoint {
+		processesCtx := context.Background()
+		go func() {
+			if err := d.startDaytonaDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
+				log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
+			}
+		}()
+	}
 
+	// If daemonEntrypoint is enabled, daemon is started as part of the container entrypoint; otherwise, it's started separately above. In either case, we wait for it here.
 	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
 	if err != nil {
 		return err
@@ -121,35 +120,6 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 			if c.State.Running {
 				return nil
 			}
-		}
-	}
-}
-
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration) error {
-	defer timer.Timer()()
-
-	// Build the target URL
-	targetURL := fmt.Sprintf("http://%s:2280/version", containerIP)
-	target, err := url.Parse(targetURL)
-	if err != nil {
-		return common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
-	}
-
-	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	for {
-		select {
-		case <-timeoutCtx.Done():
-			return fmt.Errorf("timeout waiting for daemon to start")
-		default:
-			conn, err := net.DialTimeout("tcp", target.Host, 1*time.Second)
-			if err != nil {
-				time.Sleep(5 * time.Millisecond)
-				continue
-			}
-			conn.Close()
-			return nil
 		}
 	}
 }
