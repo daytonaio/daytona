@@ -17,18 +17,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict
+from typing import Any, ClassVar, Dict, List, Optional
+from daytona_toolbox_api_client_async.models.interpreter_context import InterpreterContext
 from typing import Optional, Set
 from typing_extensions import Self
 
-class FileDownloadRequest(BaseModel):
+class ListContextsResponse(BaseModel):
     """
-    FileDownloadRequest
+    ListContextsResponse
     """ # noqa: E501
-    paths: List[StrictStr]
+    contexts: Optional[List[InterpreterContext]] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["paths"]
+    __properties: ClassVar[List[str]] = ["contexts"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,7 +49,7 @@ class FileDownloadRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of FileDownloadRequest from a JSON string"""
+        """Create an instance of ListContextsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,6 +72,13 @@ class FileDownloadRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in contexts (list)
+        _items = []
+        if self.contexts:
+            for _item_contexts in self.contexts:
+                if _item_contexts:
+                    _items.append(_item_contexts.to_dict())
+            _dict['contexts'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -80,7 +88,7 @@ class FileDownloadRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of FileDownloadRequest from a dict"""
+        """Create an instance of ListContextsResponse from a dict"""
         if obj is None:
             return None
 
@@ -88,7 +96,7 @@ class FileDownloadRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "paths": obj.get("paths")
+            "contexts": [InterpreterContext.from_dict(_item) for _item in obj["contexts"]] if obj.get("contexts") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
