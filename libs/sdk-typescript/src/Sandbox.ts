@@ -16,7 +16,15 @@ import {
   SshAccessDto,
   SshAccessValidationDto,
 } from '@daytonaio/api-client'
-import { FileSystemApi, GitApi, ProcessApi, LspApi, InfoApi, ComputerUseApi } from '@daytonaio/toolbox-api-client'
+import {
+  FileSystemApi,
+  GitApi,
+  ProcessApi,
+  LspApi,
+  InfoApi,
+  ComputerUseApi,
+  InterpreterApi,
+} from '@daytonaio/toolbox-api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
 import { CodeRunParams, Process } from './Process'
@@ -24,6 +32,7 @@ import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { ComputerUse } from './ComputerUse'
 import { AxiosInstance } from 'axios'
+import { CodeInterpreter } from './CodeInterpreter'
 
 const TOOLBOX_URL_PLACEHOLDER = 'dtn-placeholder'
 
@@ -42,6 +51,8 @@ export interface SandboxCodeToolbox {
  * @property {FileSystem} fs - File system operations interface
  * @property {Git} git - Git operations interface
  * @property {Process} process - Process execution interface
+ * @property {CodeInterpreter} codeInterpreter - Stateful interpreter interface for executing code.
+ *   Currently supports only Python. For other languages, use the `process.codeRun` method.
  * @property {ComputerUse} computerUse - Computer use operations interface for desktop automation
  * @property {string} id - Unique identifier for the Sandbox
  * @property {string} organizationId - Organization ID of the Sandbox
@@ -76,6 +87,7 @@ export class Sandbox implements SandboxDto {
   public readonly git: Git
   public readonly process: Process
   public readonly computerUse: ComputerUse
+  public readonly codeInterpreter: CodeInterpreter
 
   public id!: string
   public name!: string
@@ -136,6 +148,8 @@ export class Sandbox implements SandboxDto {
     })
 
     // Initialize Services
+    const getPreviewToken = async () => (await this.getPreviewLink(1)).token
+
     this.fs = new FileSystem(
       this.clientConfig,
       new FileSystemApi(this.clientConfig, '', this.axiosInstance),
@@ -146,7 +160,13 @@ export class Sandbox implements SandboxDto {
       this.clientConfig,
       this.codeToolbox,
       new ProcessApi(this.clientConfig, '', this.axiosInstance),
-      async () => (await this.getPreviewLink(1)).token,
+      getPreviewToken,
+      this.ensureToolboxUrl.bind(this),
+    )
+    this.codeInterpreter = new CodeInterpreter(
+      this.clientConfig,
+      new InterpreterApi(this.clientConfig, '', this.axiosInstance),
+      getPreviewToken,
       this.ensureToolboxUrl.bind(this),
     )
     this.computerUse = new ComputerUse(new ComputerUseApi(this.clientConfig, '', this.axiosInstance))
