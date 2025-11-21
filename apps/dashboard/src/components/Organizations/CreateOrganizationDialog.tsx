@@ -112,14 +112,16 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="organization-default-region">Default Region</Label>
-              <Input
-                id="organization-default-region"
-                value={getRegionName(createdOrg.defaultRegionId) ?? createdOrg.defaultRegionId}
-                readOnly
-              />
-            </div>
+            {createdOrg.defaultRegionId && (
+              <div className="space-y-3">
+                <Label htmlFor="organization-default-region">Default Region</Label>
+                <Input
+                  id="organization-default-region"
+                  value={getRegionName(createdOrg.defaultRegionId) ?? createdOrg.defaultRegionId}
+                  readOnly
+                />
+              </div>
+            )}
 
             <div className="p-3 rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
               <p className="font-medium">Your organization is created.</p>

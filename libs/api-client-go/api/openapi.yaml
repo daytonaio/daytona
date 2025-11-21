@@ -1053,6 +1053,44 @@ paths:
       summary: Cancel organization invitation
       tags:
         - organizations
+  /regions:
+    get:
+      operationId: listRegions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Include shared regions
+          explode: true
+          in: query
+          name: includeShared
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Region'
+                type: array
+          description: List of all regions
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all regions
+      tags:
+        - regions
   /users/me:
     get:
       operationId: getAuthenticatedUser
@@ -6937,36 +6975,6 @@ paths:
       summary: Set default registry
       tags:
         - docker-registry
-  /regions:
-    get:
-      operationId: listRegions
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Region'
-                type: array
-          description: List of all regions
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: List all regions
-      tags:
-        - regions
   /webhooks/organizations/{organizationId}/app-portal-access:
     post:
       operationId: WebhookController_getAppPortalAccess
@@ -8303,6 +8311,42 @@ components:
       required:
         - assignedRoleIds
         - role
+      type: object
+    Region:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        name: us-east-1
+        id: '123456789012'
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        id:
+          description: Region ID
+          example: '123456789012'
+          type: string
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - name
+        - organizationId
+        - updatedAt
       type: object
     UserPublicKey:
       example:
@@ -11603,42 +11647,6 @@ components:
         - name
         - url
         - username
-      type: object
-    Region:
-      example:
-        organizationId: 123e4567-e89b-12d3-a456-426614174000
-        createdAt: 2023-01-01T00:00:00.000Z
-        name: us-east-1
-        id: '123456789012'
-        updatedAt: 2023-01-01T00:00:00.000Z
-      properties:
-        id:
-          description: Region ID
-          example: '123456789012'
-          type: string
-        name:
-          description: Region name
-          example: us-east-1
-          type: string
-        organizationId:
-          description: Organization ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          nullable: true
-          type: string
-        createdAt:
-          description: Creation timestamp
-          example: 2023-01-01T00:00:00.000Z
-          type: string
-        updatedAt:
-          description: Last update timestamp
-          example: 2023-01-01T00:00:00.000Z
-          type: string
-      required:
-        - createdAt
-        - id
-        - name
-        - organizationId
-        - updatedAt
       type: object
     WebhookAppPortalAccess:
       example:

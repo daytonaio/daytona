@@ -41,11 +41,18 @@ type RegionsAPIListRegionsRequest struct {
 	ctx                    context.Context
 	ApiService             RegionsAPI
 	xDaytonaOrganizationID *string
+	includeShared          *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r RegionsAPIListRegionsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIListRegionsRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Include shared regions
+func (r RegionsAPIListRegionsRequest) IncludeShared(includeShared bool) RegionsAPIListRegionsRequest {
+	r.includeShared = &includeShared
 	return r
 }
 
@@ -88,6 +95,9 @@ func (a *RegionsAPIService) ListRegionsExecute(r RegionsAPIListRegionsRequest) (
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.includeShared != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeShared", r.includeShared, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

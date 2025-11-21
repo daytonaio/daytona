@@ -29,7 +29,7 @@ export function RegionsProvider(props: Props) {
       return []
     }
     try {
-      const regions = (await regionsApi.listRegions(selectedOrganization.id)).data
+      const regions = (await regionsApi.listRegions(selectedOrganization.id, true)).data
       setRegions(regions)
       return regions
     } catch (error) {

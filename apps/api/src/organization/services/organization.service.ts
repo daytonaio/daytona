@@ -46,6 +46,7 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RegionQuota } from '../entities/region-quota.entity'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
+import { RegionService } from '../../region/services/region.service'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -66,6 +67,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly redisLockProvider: RedisLockProvider,
     @InjectRepository(RegionQuota)
     private readonly regionQuotaRepository: Repository<RegionQuota>,
+    private readonly regionService: RegionService,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -242,7 +244,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ConflictException('Organization already has a default region set')
     }
 
-    // TODO: validate that the region is available for the organization (must be a non-hidden public region)
+    // validate region exists and is available for this organization
+    const region = await this.regionService.findOne(defaultRegionId)
+    if (!region || region.hidden || (region.organizationId && region.organizationId !== organizationId)) {
+      throw new NotFoundException('Region not found')
+    }
 
     organization.defaultRegionId = defaultRegionId
 
