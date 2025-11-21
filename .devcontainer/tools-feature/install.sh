@@ -4,7 +4,7 @@
 
 set -e
 
-echo "Installing Python packages and Go tools..."
+echo "Installing Go tools..."
 
 USERNAME="${USERNAME:-"${_REMOTE_USER:-"automatic"}"}"
 
@@ -33,15 +33,6 @@ export GOCACHE=/tmp/gotools/cache
 sudo -E -u "${USERNAME}" bash -c '
 export PATH=$GOROOT/bin:$PATH
 export HOME=/home/${USER}
-
-# Install pip packages
-if [ -n "$PIPPACKAGES" ]; then
-    echo "Installing pip packages: $PIPPACKAGES"
-    IFS=',' read -ra PACKAGES <<< "${PIPPACKAGES}"
-    pip3 install --no-cache-dir "${PACKAGES[@]}"
-else
-    echo "No pip packages specified. Skipping."
-fi
 
 # Install Go tools
 if [ -n "$GOTOOLS" ]; then
