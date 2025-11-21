@@ -33,6 +33,7 @@ import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
+import { SandboxService } from '../services/sandbox.service'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -43,6 +44,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   constructor(
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxService: SandboxService,
     private readonly runnerService: RunnerService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly dockerRegistryService: DockerRegistryService,
@@ -210,7 +212,13 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
                 await this.redis.setex(errorRetryKey, 300, '1')
               } else if (parseInt(errorRetryCount) > 10) {
                 this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
-                await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
+                await this.sandboxService.updateSandboxBackupState(
+                  sandbox.id,
+                  BackupState.ERROR,
+                  undefined,
+                  undefined,
+                  fromAxiosError(error).message,
+                )
               } else {
                 await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
               }
@@ -311,8 +319,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const backupSnapshot = `${registry.url.replace('https://', '').replace('http://', '')}/${registry.project}/backup-${sandbox.id}:${timestamp}`
 
-    sandbox.setBackupState(BackupState.PENDING, backupSnapshot, registry.id)
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.PENDING, backupSnapshot, registry.id)
   }
 
   private async checkBackupProgress(sandbox: Sandbox): Promise<void> {
@@ -325,28 +332,35 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
       switch (sandboxInfo.backupState) {
         case BackupState.COMPLETED: {
-          sandbox.setBackupState(BackupState.COMPLETED)
-          const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-            id: sandbox.id,
-          })
-          sandboxToUpdate.setBackupState(BackupState.COMPLETED)
-          await this.sandboxRepository.save(sandboxToUpdate)
+          await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.COMPLETED)
           break
         }
         case BackupState.ERROR: {
-          await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, sandboxInfo.backupErrorReason)
+          await this.sandboxService.updateSandboxBackupState(
+            sandbox.id,
+            BackupState.ERROR,
+            undefined,
+            undefined,
+            sandboxInfo.backupErrorReason,
+          )
           break
         }
         // If backup state is none, retry the backup process by setting the backup state to pending
         // This can happen if the runner is restarted or the operation is cancelled
         case BackupState.NONE: {
-          await this.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
+          await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
           break
         }
         // If still in progress or any other state, do nothing and wait for next sync
       }
     } catch (error) {
-      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
+      await this.sandboxService.updateSandboxBackupState(
+        sandbox.id,
+        BackupState.ERROR,
+        undefined,
+        undefined,
+        fromAxiosError(error).message,
+      )
       throw error
     }
   }
@@ -390,36 +404,30 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       //  check if backup is already in progress on the runner
       const runnerSandbox = await runnerAdapter.sandboxInfo(sandbox.id)
       if (runnerSandbox.backupState?.toUpperCase() === 'IN_PROGRESS') {
-        await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
+        await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
       }
 
       // Initiate backup on runner
       await runnerAdapter.createBackup(sandbox, sandbox.backupSnapshot, registry)
 
-      await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
+      await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
     } catch (error) {
       if (error.response?.status === 400 && error.response?.data?.message.includes('A backup is already in progress')) {
-        await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
+        await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
       }
-      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
+      await this.sandboxService.updateSandboxBackupState(
+        sandbox.id,
+        BackupState.ERROR,
+        undefined,
+        undefined,
+        fromAxiosError(error).message,
+      )
       throw error
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
-  }
-
-  private async updateSandboxBackupState(
-    sandboxId: string,
-    backupState: BackupState,
-    backupErrorReason?: string | null,
-  ): Promise<void> {
-    const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-      id: sandboxId,
-    })
-    sandboxToUpdate.setBackupState(backupState, undefined, undefined, backupErrorReason)
-    await this.sandboxRepository.save(sandboxToUpdate)
   }
 
   @OnEvent(SandboxEvents.ARCHIVED)
