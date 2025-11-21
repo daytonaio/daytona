@@ -18,6 +18,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var DESTROYED_STATES []enums.SandboxState = []enums.SandboxState{
+	enums.SandboxStateDestroyed,
+	enums.SandboxStateDestroying,
+}
+
 func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 	startTime := time.Now()
 	defer func() {
@@ -44,7 +49,7 @@ func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 
 	// Ignore err because we want to destroy the container even if it exited
 	state, _ := d.deduceSandboxState(ct)
-	if slices.Contains([]enums.SandboxState{enums.SandboxStateDestroyed, enums.SandboxStateDestroying}, state) {
+	if slices.Contains(DESTROYED_STATES, state) {
 		log.Debugf("Sandbox %s is already destroyed or destroying", sandboxId)
 		d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroyed)
 		return nil
