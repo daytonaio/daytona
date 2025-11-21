@@ -342,6 +342,8 @@ await daytona.stop(sandbox);
 
 Supported programming languages for code execution
 
+Python is used as the default sandbox language when no language is explicitly specified.
+
 **Enum Members**:
 
 - `JAVASCRIPT` ("javascript")
@@ -360,7 +362,7 @@ Base parameters for creating a new Sandbox.
 - `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
 - `ephemeral?` _boolean_ - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
 - `labels?` _Record\<string, string\>_ - Sandbox labels
-- `language?` _string_ - Programming language for direct code execution
+- `language?` _string_ - Programming language for direct code execution. Defaults to "python" if not specified.
 - `name?` _string_
 - `networkAllowList?` _string_ - Comma-separated list of allowed CIDR network addresses for the Sandbox
 - `networkBlockAll?` _boolean_ - Whether to block all network access for the Sandbox
@@ -480,6 +482,8 @@ Represents a volume mount for a Sandbox.
 
 - `mountPath` _string_ - Path on the Sandbox to mount the Volume
     
+- `subpath?` _string_ - Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
+    - _Inherited from_: `SandboxVolume.subpath`
 - `volumeId` _string_ - ID of the Volume to mount
     
 

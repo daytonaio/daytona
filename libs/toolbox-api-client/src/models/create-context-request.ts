@@ -15,13 +15,19 @@
 /**
  *
  * @export
- * @interface ProjectDirResponse
+ * @interface CreateContextRequest
  */
-export interface ProjectDirResponse {
+export interface CreateContextRequest {
   /**
    *
    * @type {string}
-   * @memberof ProjectDirResponse
+   * @memberof CreateContextRequest
    */
-  dir?: string
+  cwd?: string
+  /**
+   *
+   * @type {string}
+   * @memberof CreateContextRequest
+   */
+  language?: string
 }

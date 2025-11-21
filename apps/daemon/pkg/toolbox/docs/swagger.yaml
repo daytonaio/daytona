@@ -73,6 +73,13 @@ definitions:
           $ref: '#/definitions/ProcessStatus'
         type: object
     type: object
+  CreateContextRequest:
+    properties:
+      cwd:
+        type: string
+      language:
+        type: string
+    type: object
   CreateSessionRequest:
     properties:
       sessionId:
@@ -303,6 +310,19 @@ definitions:
       - currentBranch
       - fileStatus
     type: object
+  InterpreterContext:
+    properties:
+      active:
+        type: boolean
+      createdAt:
+        type: string
+      cwd:
+        type: string
+      id:
+        type: string
+      language:
+        type: string
+    type: object
   IsPortInUseResponse:
     properties:
       isInUse:
@@ -340,6 +360,13 @@ definitions:
         type: array
     required:
       - branches
+    type: object
+  ListContextsResponse:
+    properties:
+      contexts:
+        items:
+          $ref: '#/definitions/InterpreterContext'
+        type: array
     type: object
   LspCompletionParams:
     properties:
@@ -2004,6 +2031,114 @@ paths:
       summary: Execute a command
       tags:
         - process
+  /process/interpreter/context:
+    get:
+      description: Returns information about all user-created interpreter contexts
+        (excludes default context)
+      operationId: ListInterpreterContexts
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ListContextsResponse'
+      summary: List all user-created interpreter contexts
+      tags:
+        - interpreter
+    post:
+      consumes:
+        - application/json
+      description: Creates a new isolated interpreter context with optional working
+        directory and language
+      operationId: CreateInterpreterContext
+      parameters:
+        - description: Context configuration
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/CreateContextRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InterpreterContext'
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new interpreter context
+      tags:
+        - interpreter
+  /process/interpreter/context/{id}:
+    delete:
+      description: Deletes an interpreter context and shuts down its worker process
+      operationId: DeleteInterpreterContext
+      parameters:
+        - description: Context ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an interpreter context
+      tags:
+        - interpreter
+  /process/interpreter/execute:
+    get:
+      consumes:
+        - application/json
+      description: Executes code in a specified context (or default context if not
+        specified) via WebSocket streaming
+      operationId: ExecuteInterpreterCode
+      produces:
+        - application/json
+      responses:
+        '101':
+          description: Switching Protocols
+          headers:
+            Connection:
+              description: Upgrade
+              type: string
+            Upgrade:
+              description: websocket
+              type: string
+          schema:
+            type: string
+      summary: Execute code in an interpreter context
+      tags:
+        - interpreter
   /process/pty:
     get:
       description: Get a list of all active pseudo-terminal sessions

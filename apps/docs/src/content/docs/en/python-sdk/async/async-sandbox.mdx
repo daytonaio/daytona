@@ -17,6 +17,8 @@ Represents a Daytona Sandbox.
 - `git` _AsyncGit_ - Git operations interface.
 - `process` _AsyncProcess_ - Process execution interface.
 - `computer_use` _AsyncComputerUse_ - Computer use operations interface for desktop automation.
+- `code_interpreter` _AsyncCodeInterpreter_ - Stateful interpreter interface for executing code.
+  Currently supports only Python. For other languages, use the `process.code_run` interface.
 - `id` _str_ - Unique identifier for the Sandbox.
 - `name` _str_ - Name of the Sandbox.
 - `organization_id` _str_ - Organization ID of the Sandbox.
