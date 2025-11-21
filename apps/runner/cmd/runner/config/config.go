@@ -14,23 +14,31 @@ import (
 )
 
 type Config struct {
-	ServerUrl              string `envconfig:"SERVER_URL" validate:"required"`
-	ApiToken               string `envconfig:"API_TOKEN" validate:"required"`
-	ApiPort                int    `envconfig:"API_PORT"`
-	TLSCertFile            string `envconfig:"TLS_CERT_FILE"`
-	TLSKeyFile             string `envconfig:"TLS_KEY_FILE"`
-	EnableTLS              bool   `envconfig:"ENABLE_TLS"`
-	CacheRetentionDays     int    `envconfig:"CACHE_RETENTION_DAYS"`
-	Environment            string `envconfig:"ENVIRONMENT"`
-	ContainerRuntime       string `envconfig:"CONTAINER_RUNTIME"`
-	ContainerNetwork       string `envconfig:"CONTAINER_NETWORK"`
-	LogFilePath            string `envconfig:"LOG_FILE_PATH"`
-	AWSRegion              string `envconfig:"AWS_REGION"`
-	AWSEndpointUrl         string `envconfig:"AWS_ENDPOINT_URL"`
-	AWSAccessKeyId         string `envconfig:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey     string `envconfig:"AWS_SECRET_ACCESS_KEY"`
-	AWSDefaultBucket       string `envconfig:"AWS_DEFAULT_BUCKET"`
-	ResourceLimitsDisabled bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
+	ServerUrl                          string `envconfig:"SERVER_URL" validate:"required"`
+	RunnerDomain                       string `envconfig:"RUNNER_DOMAIN" validate:"required"`
+	ApiToken                           string `envconfig:"API_TOKEN" validate:"required"`
+	ApiPort                            int    `envconfig:"API_PORT"`
+	TLSCertFile                        string `envconfig:"TLS_CERT_FILE"`
+	TLSKeyFile                         string `envconfig:"TLS_KEY_FILE"`
+	EnableTLS                          bool   `envconfig:"ENABLE_TLS"`
+	CacheRetentionDays                 int    `envconfig:"CACHE_RETENTION_DAYS"`
+	Environment                        string `envconfig:"ENVIRONMENT"`
+	ContainerRuntime                   string `envconfig:"CONTAINER_RUNTIME"`
+	ContainerNetwork                   string `envconfig:"CONTAINER_NETWORK"`
+	LogFilePath                        string `envconfig:"LOG_FILE_PATH"`
+	AWSRegion                          string `envconfig:"AWS_REGION"`
+	AWSEndpointUrl                     string `envconfig:"AWS_ENDPOINT_URL"`
+	AWSAccessKeyId                     string `envconfig:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey                 string `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AWSDefaultBucket                   string `envconfig:"AWS_DEFAULT_BUCKET"`
+	ResourceLimitsDisabled             bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
+	GarbageCollectorDryRun             bool   `envconfig:"GARBAGE_COLLECTOR_DRY_RUN" default:"true"`
+	GarbageCollectorExcludeSandboxes   string `envconfig:"GARBAGE_COLLECTOR_EXCLUDE_SANDBOXES"`
+	GarbageCollectorExcludeSnapshots   string `envconfig:"GARBAGE_COLLECTOR_EXCLUDE_SNAPSHOTS"`
+	GarbageCollectorExcludeAge         string `envconfig:"GARBAGE_COLLECTOR_EXCLUDE_AGE" default:"24h"`
+	GarbageCollectorInterval           string `envconfig:"GARBAGE_COLLECTOR_INTERVAL" default:"12h"`
+	GarbageCollectorThresholdSandboxes int    `envconfig:"GARBAGE_COLLECTOR_THRESHOLD_SANDBOXES" default:"0"`
+	GarbageCollectorThresholdSnapshots int    `envconfig:"GARBAGE_COLLECTOR_THRESHOLD_SNAPSHOTS" default:"0"`
 }
 
 var DEFAULT_API_PORT int = 8080
