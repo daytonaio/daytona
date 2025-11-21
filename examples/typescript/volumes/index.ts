@@ -40,9 +40,27 @@ async function main() {
   const file = await sandbox1.fs.downloadFile(newFile)
   console.log('File:', file.toString())
 
+  // Mount a specific subpath within the volume
+  // This is useful for isolating data or implementing multi-tenancy
+  const mountDir3 = '/home/daytona/subpath'
+
+  const sandbox3 = await daytona.create({
+    language: 'typescript',
+    volumes: [{ volumeId: volume.id, mountPath: mountDir3, subpath: 'users/alice' }],
+  })
+
+  // This sandbox will only see files within the 'users/alice' subpath
+  // Create a file in the subpath
+  const subpathFile = path.join(mountDir3, 'alice-file.txt')
+  await sandbox3.fs.uploadFile(Buffer.from("Hello from Alice's subpath!"), subpathFile)
+
+  // The file is stored at: volume-root/users/alice/alice-file.txt
+  // but appears at: /home/daytona/subpath/alice-file.txt in the sandbox
+
   // Cleanup
   await daytona.delete(sandbox1)
   await daytona.delete(sandbox2)
+  await daytona.delete(sandbox3)
   // await daytona.volume.delete(volume)
 }
 

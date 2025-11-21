@@ -59,6 +59,14 @@ params = CreateSandboxFromSnapshotParams(
     volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
 )
 sandbox = daytona.create(params)
+
+# Mount a specific subpath within the volume
+# This is useful for isolating data or implementing multi-tenancy
+params = CreateSandboxFromSnapshotParams(
+    language="python",
+    volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1, subpath="users/alice")],
+)
+sandbox2 = daytona.create(params)
 ```
 
 </TabItem>
@@ -78,6 +86,13 @@ const mountDir1 = '/home/daytona/volume'
 const sandbox1 = await daytona.create({
   language: 'typescript',
   volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
+})
+
+// Mount a specific subpath within the volume
+// This is useful for isolating data or implementing multi-tenancy
+const sandbox2 = await daytona.create({
+  language: 'typescript',
+  volumes: [{ volumeId: volume.id, mountPath: mountDir, subpath: 'users/alice' }],
 })
 ```
 

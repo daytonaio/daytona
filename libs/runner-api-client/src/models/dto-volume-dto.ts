@@ -29,5 +29,11 @@ export interface DtoVolumeDTO {
    * @type {string}
    * @memberof DtoVolumeDTO
    */
+  subpath?: string
+  /**
+   *
+   * @type {string}
+   * @memberof DtoVolumeDTO
+   */
   volumeId?: string
 }
