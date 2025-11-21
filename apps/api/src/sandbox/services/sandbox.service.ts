@@ -1456,4 +1456,42 @@ export class SandboxService {
 
     return result.map((row) => row.region)
   }
+
+  async updateSandboxBackupState(
+    sandboxId: string,
+    backupState: BackupState,
+    backupSnapshot?: string | null,
+    backupRegistryId?: string | null,
+    backupErrorReason?: string | null,
+  ): Promise<void> {
+    const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
+      id: sandboxId,
+    })
+    const originalState = sandboxToUpdate.state
+    const originalRunnerId = sandboxToUpdate.runnerId
+
+    sandboxToUpdate.setBackupState(backupState, backupSnapshot, backupRegistryId, backupErrorReason)
+
+    const updateData: Partial<Sandbox> = {
+      backupState: sandboxToUpdate.backupState,
+      backupSnapshot: sandboxToUpdate.backupSnapshot,
+      backupRegistryId: sandboxToUpdate.backupRegistryId,
+      backupErrorReason: sandboxToUpdate.backupErrorReason,
+      lastBackupAt: sandboxToUpdate.lastBackupAt,
+      existingBackupSnapshots: sandboxToUpdate.existingBackupSnapshots,
+    }
+
+    if (sandboxToUpdate.state !== originalState) {
+      updateData.state = sandboxToUpdate.state
+    }
+
+    if (sandboxToUpdate.runnerId !== originalRunnerId) {
+      updateData.runnerId = sandboxToUpdate.runnerId
+    }
+
+    const updateResult = await this.sandboxRepository.update(sandboxId, updateData)
+    if (!updateResult.affected) {
+      throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
+    }
+  }
 }
