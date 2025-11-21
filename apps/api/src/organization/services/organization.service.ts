@@ -500,6 +500,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       payload.entityManager,
       {
         name: 'Personal',
+        defaultRegionId: payload.personalOrganizationDefaultRegionId,
       },
       payload.user.id,
       payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,

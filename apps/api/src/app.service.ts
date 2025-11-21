@@ -150,6 +150,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
         maxSnapshotSize: this.configService.getOrThrow('admin.maxSnapshotSize'),
         volumeQuota: this.configService.getOrThrow('admin.volumeQuota'),
       },
+      personalOrganizationDefaultRegionId: this.configService.getOrThrow('defaultRegion.id'),
       role: SystemRole.ADMIN,
     })
     const personalOrg = await this.organizationService.findPersonal(user.id)
