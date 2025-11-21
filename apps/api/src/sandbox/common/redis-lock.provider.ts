@@ -36,6 +36,11 @@ export class RedisLockProvider {
     await this.redis.del(key)
   }
 
+  async locked(key: string): Promise<boolean> {
+    const exists = await this.redis.exists(key)
+    return exists === 1
+  }
+
   async waitForLock(key: string, ttl: number): Promise<void> {
     while (true) {
       const acquired = await this.lock(key, ttl)
