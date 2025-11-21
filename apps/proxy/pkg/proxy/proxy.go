@@ -58,6 +58,9 @@ func StartProxy(config *config.Config) error {
 
 	proxy.secureCookie = securecookie.New([]byte(config.ProxyApiKey), nil)
 	cookieDomain := config.ProxyDomain
+	if config.CookieDomain != nil {
+		cookieDomain = *config.CookieDomain
+	}
 	cookieDomain = strings.Split(cookieDomain, ":")[0]
 	cookieDomain = fmt.Sprintf(".%s", cookieDomain)
 	proxy.cookieDomain = cookieDomain
