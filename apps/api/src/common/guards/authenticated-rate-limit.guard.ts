@@ -136,15 +136,8 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
       const blockKey = `${keyPrefix}{${anonymousKey}:${anonymousThrottlerName}}:blocked`
 
       // Delete the specific keys for this IP and context
-      const deletedKeys = []
-      if (await this.redis.exists(hitKey)) {
-        await this.redis.del(hitKey)
-        deletedKeys.push(hitKey)
-      }
-      if (await this.redis.exists(blockKey)) {
-        await this.redis.del(blockKey)
-        deletedKeys.push(blockKey)
-      }
+      await this.redis.del(hitKey)
+      await this.redis.del(blockKey)
     } catch (error) {
       this.logger.warn('Failed to clear anonymous rate limit:', error)
       // Don't throw - rate limiting should not break authentication
