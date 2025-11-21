@@ -278,7 +278,7 @@ const Wallet = () => {
                   <Button variant="default" asChild className="flex items-center gap-2">
                     <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
                       Top-up
-                      <ArrowUpRight className="w-20 h-20" />
+                      <ArrowUpRight />
                     </a>
                   </Button>
                 )}
