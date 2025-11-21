@@ -15,6 +15,8 @@ Base error for Daytona SDK.
 ### Extended by
 
 - `DaytonaNotFoundError`
+- `DaytonaRateLimitError`
+- `DaytonaTimeoutError`
 
 ### Constructors
 
@@ -100,4 +102,100 @@ new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFo
 **Returns**:
 
 - `DaytonaNotFoundError`
+
+***
+
+
+## DaytonaRateLimitError
+
+Error thrown when rate limit is exceeded.
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaRateLimitError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaRateLimitError(message?: string): DaytonaRateLimitError
+```
+
+**Parameters**:
+
+- `message?` _string_
+
+
+**Returns**:
+
+- `DaytonaRateLimitError`
+
+#### new DaytonaRateLimitError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaRateLimitError(message?: string, options?: ErrorOptions): DaytonaRateLimitError
+```
+
+**Parameters**:
+
+- `message?` _string_
+- `options?` _ErrorOptions_
+
+
+**Returns**:
+
+- `DaytonaRateLimitError`
+
+***
+
+
+## DaytonaTimeoutError
+
+Error thrown when a timeout occurs.
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaTimeoutError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaTimeoutError(message?: string): DaytonaTimeoutError
+```
+
+**Parameters**:
+
+- `message?` _string_
+
+
+**Returns**:
+
+- `DaytonaTimeoutError`
+
+#### new DaytonaTimeoutError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaTimeoutError(message?: string, options?: ErrorOptions): DaytonaTimeoutError
+```
+
+**Parameters**:
+
+- `message?` _string_
+- `options?` _ErrorOptions_
+
+
+**Returns**:
+
+- `DaytonaTimeoutError`
 
