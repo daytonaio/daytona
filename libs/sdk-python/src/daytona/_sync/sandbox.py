@@ -13,7 +13,16 @@ from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import SandboxApi, SandboxState, SshAccessDto, SshAccessValidationDto
-from daytona_toolbox_api_client import ApiClient, ComputerUseApi, FileSystemApi, GitApi, InfoApi, LspApi, ProcessApi
+from daytona_toolbox_api_client import (
+    ApiClient,
+    ComputerUseApi,
+    FileSystemApi,
+    GitApi,
+    InfoApi,
+    InterpreterApi,
+    LspApi,
+    ProcessApi,
+)
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
@@ -21,6 +30,7 @@ from .._utils.errors import intercept_errors
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError, DaytonaNotFoundError
 from ..common.protocols import SandboxCodeToolbox
+from .code_interpreter import CodeInterpreter
 from .computer_use import ComputerUse
 from .filesystem import FileSystem
 from .git import Git
@@ -36,6 +46,8 @@ class Sandbox(SandboxDto):
         git (Git): Git operations interface.
         process (Process): Process execution interface.
         computer_use (ComputerUse): Computer use operations interface for desktop automation.
+        code_interpreter (CodeInterpreter): Stateful interpreter interface for executing code.
+            Currently supports only Python. For other languages, use the `process.code_run` interface.
         id (str): Unique identifier for the Sandbox.
         name (str): Name of the Sandbox.
         organization_id (str): Organization ID of the Sandbox.
@@ -68,6 +80,7 @@ class Sandbox(SandboxDto):
     _git: Git = PrivateAttr()
     _process: Process = PrivateAttr()
     _computer_use: ComputerUse = PrivateAttr()
+    _code_interpreter: CodeInterpreter = PrivateAttr()
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -101,6 +114,7 @@ class Sandbox(SandboxDto):
         self._git = Git(GitApi(toolbox_api))
         self._process = Process(code_toolbox, ProcessApi(toolbox_api), self.__ensure_toolbox_url)
         self._computer_use = ComputerUse(ComputerUseApi(toolbox_api))
+        self._code_interpreter = CodeInterpreter(InterpreterApi(toolbox_api), self.__ensure_toolbox_url)
         self._info_api = InfoApi(toolbox_api)
 
         og_call_toolbox_api = self._toolbox_api.call_api
@@ -134,6 +148,10 @@ class Sandbox(SandboxDto):
     @property
     def computer_use(self) -> ComputerUse:
         return self._computer_use
+
+    @property
+    def code_interpreter(self) -> CodeInterpreter:
+        return self._code_interpreter
 
     @intercept_errors(message_prefix="Failed to refresh sandbox data: ")
     def refresh_data(self) -> None:
