@@ -47,6 +47,7 @@ import { RegionQuota } from '../entities/region-quota.entity'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { RegionService } from '../../region/services/region.service'
+import { Region } from '../../region/entities/region.entity'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -244,22 +245,20 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ConflictException('Organization already has a default region set')
     }
 
-    // validate region exists and is available for this organization
-    const region = await this.regionService.findOne(defaultRegionId)
-    if (!region || region.hidden || (region.organizationId && region.organizationId !== organizationId)) {
-      throw new NotFoundException('Region not found')
-    }
-
+    const defaultRegion = await this.validateOrganizationDefaultRegion(defaultRegionId, organizationId)
     organization.defaultRegionId = defaultRegionId
 
-    const defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
-
-    const regionQuota = new RegionQuota()
-    regionQuota.regionId = defaultRegionId
-    regionQuota.totalCpuQuota = defaultOrganizationQuota.totalCpuQuota
-    regionQuota.totalMemoryQuota = defaultOrganizationQuota.totalMemoryQuota
-    regionQuota.totalDiskQuota = defaultOrganizationQuota.totalDiskQuota
-    organization.regionQuotas = [regionQuota]
+    if (defaultRegion.enforceQuotas) {
+      const defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
+      const regionQuota = new RegionQuota(
+        organization.id,
+        defaultRegionId,
+        defaultOrganizationQuota.totalCpuQuota,
+        defaultOrganizationQuota.totalMemoryQuota,
+        defaultOrganizationQuota.totalDiskQuota,
+      )
+      organization.regionQuotas = [regionQuota]
+    }
 
     await this.organizationRepository.save(organization)
   }
@@ -329,12 +328,18 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     organization.volumeQuota = quota.volumeQuota
 
     if (createOrganizationDto.defaultRegionId) {
-      const regionQuota = new RegionQuota()
-      regionQuota.regionId = createOrganizationDto.defaultRegionId
-      regionQuota.totalCpuQuota = quota.totalCpuQuota
-      regionQuota.totalMemoryQuota = quota.totalMemoryQuota
-      regionQuota.totalDiskQuota = quota.totalDiskQuota
-      organization.regionQuotas = [regionQuota]
+      const defaultRegion = await this.validateOrganizationDefaultRegion(createOrganizationDto.defaultRegionId)
+
+      if (defaultRegion.enforceQuotas) {
+        const regionQuota = new RegionQuota(
+          organization.id,
+          createOrganizationDto.defaultRegionId,
+          quota.totalCpuQuota,
+          quota.totalMemoryQuota,
+          quota.totalDiskQuota,
+        )
+        organization.regionQuotas = [regionQuota]
+      }
     }
 
     await entityManager.transaction(async (em) => {
@@ -378,6 +383,22 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
 
     return organization
+  }
+
+  /**
+   * @param organizationId - Optional when validating during organization creation.
+   * @throws NotFoundException - If the region is not found or not available for the organization
+   */
+  async validateOrganizationDefaultRegion(defaultRegionId: string, organizationId?: string): Promise<Region> {
+    const region = await this.regionService.findOne(defaultRegionId)
+    if (!region || region.hidden) {
+      throw new NotFoundException('Region not found')
+    }
+    if (organizationId && region.organizationId && region.organizationId !== organizationId) {
+      throw new NotFoundException('Region not found')
+    }
+
+    return region
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'stop-suspended-organization-sandboxes' })

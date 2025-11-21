@@ -50,4 +50,18 @@ export class RegionQuota {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(
+    organizationId: string,
+    regionId: string,
+    totalCpuQuota: number,
+    totalMemoryQuota: number,
+    totalDiskQuota: number,
+  ) {
+    this.organizationId = organizationId
+    this.regionId = regionId
+    this.totalCpuQuota = totalCpuQuota
+    this.totalMemoryQuota = totalMemoryQuota
+    this.totalDiskQuota = totalDiskQuota
+  }
 }
