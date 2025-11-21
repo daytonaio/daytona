@@ -5,6 +5,22 @@
 import WebSocket from 'isomorphic-ws'
 import { STDOUT_PREFIX_BYTES, STDERR_PREFIX_BYTES, MAX_PREFIX_LEN } from '../Process'
 
+function isStreamTerminationError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false
+
+  const e = err as any
+
+  // Typical Undici / fetch termination cases
+  if (e.name === 'AbortError') return true
+  if (typeof e.message === 'string' && /terminated/i.test(e.message)) return true
+  if (e.code === 'UND_ERR_SOCKET') return true
+
+  // Look into nested causes, Undici often nests errors
+  if (e.cause) return isStreamTerminationError(e.cause)
+
+  return false
+}
+
 /**
  * Process a streaming response from fetch(), where getStream() returns a Fetch Response.
  *
@@ -71,6 +87,10 @@ export async function processStreamingResponse(
         onChunk(decoder.decode(result, { stream: true }))
         exitCheckStreak = 0
       }
+    }
+  } catch (err) {
+    if (!isStreamTerminationError(err)) {
+      throw err
     }
   } finally {
     // Flush any remaining buffered bytes from the decoder
