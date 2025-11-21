@@ -1444,7 +1444,7 @@ export class SandboxService {
     }
 
     const updateResult = await this.sandboxRepository.update(sandboxId, updateData)
-    if (!updateResult.affected || updateResult.affected === 0) {
+    if (!updateResult.affected) {
       throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
     }
   }
