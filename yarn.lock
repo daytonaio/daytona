@@ -6709,6 +6709,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nest-lab/throttler-storage-redis@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@nest-lab/throttler-storage-redis@npm:1.1.0"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  peerDependencies:
+    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@nestjs/core": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@nestjs/throttler": ">=6.0.0"
+    ioredis: ">=5.0.0"
+    reflect-metadata: ^0.2.1
+  peerDependenciesMeta:
+    "@nestjs/common":
+      optional: false
+    "@nestjs/core":
+      optional: false
+    "@nestjs/throttler":
+      optional: false
+    ioredis:
+      optional: false
+    reflect-metadata:
+      optional: false
+  checksum: 10c0/91ed1e6b9dbf55a3cba0459c8637f8524cbfddadccd147e42700c0482d15b81b9d791e1e1b1dfadeb9bb2d2aeb30ee0838297107d9f4072151eed72014824bf0
+  languageName: node
+  linkType: hard
+
 "@nestjs-modules/ioredis@npm:^2.0.2":
   version: 2.0.2
   resolution: "@nestjs-modules/ioredis@npm:2.0.2"
@@ -18154,6 +18180,7 @@ __metadata:
     "@eslint/js": "npm:^9.8.0"
     "@esm2cjs/cacheable-lookup": "npm:^7.0.0"
     "@iarna/toml": "npm:^2.2.5"
+    "@nest-lab/throttler-storage-redis": "npm:^1.1.0"
     "@nestjs-modules/ioredis": "npm:^2.0.2"
     "@nestjs/axios": "npm:^4.0.0"
     "@nestjs/cache-manager": "npm:^3.0.0"

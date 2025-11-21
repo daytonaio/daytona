@@ -7758,11 +7758,14 @@ components:
       example:
         totalCpuQuota: 6.027456183070403
         suspensionReason: suspensionReason
+        sandboxLifecycleRateLimit: 2.027123023002322
         suspendedAt: 2000-01-23T04:56:07.000+00:00
         defaultRegion: defaultRegion
         personal: true
         suspensionCleanupGracePeriodHours: 0.8008281904610115
+        authenticatedRateLimit: 9.301444243932576
         suspended: true
+        sandboxCreateRateLimit: 3.616076749251911
         createdAt: 2000-01-23T04:56:07.000+00:00
         maxCpuPerSandbox: 5.637376656633329
         sandboxLimitedNetworkEgress: true
@@ -7837,7 +7840,20 @@ components:
         defaultRegion:
           description: Default region
           type: string
+        authenticatedRateLimit:
+          description: Authenticated rate limit per minute
+          nullable: true
+          type: number
+        sandboxCreateRateLimit:
+          description: Sandbox create rate limit per minute
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimit:
+          description: Sandbox lifecycle rate limit per minute
+          nullable: true
+          type: number
       required:
+        - authenticatedRateLimit
         - createdAt
         - createdBy
         - defaultRegion
@@ -7847,6 +7863,8 @@ components:
         - maxMemoryPerSandbox
         - name
         - personal
+        - sandboxCreateRateLimit
+        - sandboxLifecycleRateLimit
         - sandboxLimitedNetworkEgress
         - suspended
         - suspendedAt
@@ -7909,11 +7927,14 @@ components:
         totalCpuQuota: 0.8008281904610115
         maxCpuPerSandbox: 5.962133916683182
         maxDiskPerSandbox: 2.3021358869347655
+        sandboxLifecycleRateLimit: 7.386281948385884
         maxMemoryPerSandbox: 5.637376656633329
         volumeQuota: 3.616076749251911
         totalMemoryQuota: 6.027456183070403
         maxSnapshotSize: 9.301444243932576
+        authenticatedRateLimit: 2.027123023002322
         totalDiskQuota: 1.4658129805029452
+        sandboxCreateRateLimit: 4.145608029883936
       properties:
         totalCpuQuota:
           nullable: true
@@ -7942,11 +7963,23 @@ components:
         volumeQuota:
           nullable: true
           type: number
+        authenticatedRateLimit:
+          nullable: true
+          type: number
+        sandboxCreateRateLimit:
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimit:
+          nullable: true
+          type: number
       required:
+        - authenticatedRateLimit
         - maxCpuPerSandbox
         - maxDiskPerSandbox
         - maxMemoryPerSandbox
         - maxSnapshotSize
+        - sandboxCreateRateLimit
+        - sandboxLifecycleRateLimit
         - snapshotQuota
         - totalCpuQuota
         - totalDiskQuota

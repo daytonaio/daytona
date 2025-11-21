@@ -10,6 +10,7 @@ import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth 
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrganizationService } from '../../organization/services/organization.service'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('preview')
 @Controller('preview')
@@ -124,7 +125,7 @@ export class PreviewController {
     description: 'User access status to the sandbox',
     type: Boolean,
   })
-  @UseGuards(CombinedAuthGuard)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard)
   @ApiOAuth2(['openid', 'profile', 'email'])
   @ApiBearerAuth()
   async hasSandboxAccess(@Req() req: Request, @Param('sandboxId') sandboxId: string): Promise<boolean> {

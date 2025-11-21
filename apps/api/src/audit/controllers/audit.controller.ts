@@ -16,10 +16,11 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { ListAuditLogsQueryDto } from '../dto/list-audit-logs-query.dto'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('audit')
 @Controller('audit')
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class AuditController {

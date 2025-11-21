@@ -47,6 +47,7 @@
     "@dotenvx/dotenvx": "^1.25.1",
     "@esm2cjs/cacheable-lookup": "^7.0.0",
     "@iarna/toml": "^2.2.5",
+    "@nest-lab/throttler-storage-redis": "^1.1.0",
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/cache-manager": "^3.0.0",

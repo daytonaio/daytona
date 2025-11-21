@@ -132,4 +132,22 @@ export interface Organization {
    * @memberof Organization
    */
   defaultRegion: string
+  /**
+   * Authenticated rate limit per minute
+   * @type {number}
+   * @memberof Organization
+   */
+  authenticatedRateLimit: number | null
+  /**
+   * Sandbox create rate limit per minute
+   * @type {number}
+   * @memberof Organization
+   */
+  sandboxCreateRateLimit: number | null
+  /**
+   * Sandbox lifecycle rate limit per minute
+   * @type {number}
+   * @memberof Organization
+   */
+  sandboxLifecycleRateLimit: number | null
 }
