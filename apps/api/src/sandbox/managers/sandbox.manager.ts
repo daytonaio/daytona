@@ -248,11 +248,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states-streaming' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   @TrackJobExecution()
   @WithInstrumentation()
-  @LogExecution('sync-states-streaming')
-  async syncStates_streaming(): Promise<void> {
+  @LogExecution('sync-states')
+  async syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
     const oneHour = 60 * 60 // seconds
     if (!(await this.redisLockProvider.lock(globalLockKey, oneHour))) {
