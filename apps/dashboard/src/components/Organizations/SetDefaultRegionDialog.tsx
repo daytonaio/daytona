@@ -18,31 +18,31 @@ import {
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-interface SelectDefaultRegionDialogProps {
+interface SetDefaultRegionDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   regions: Region[]
   loadingRegions: boolean
-  onSelectDefaultRegion: (defaultRegionId: string) => Promise<boolean>
+  onSetDefaultRegion: (defaultRegionId: string) => Promise<boolean>
 }
 
-export const SelectDefaultRegionDialog: React.FC<SelectDefaultRegionDialogProps> = ({
+export const SetDefaultRegionDialog: React.FC<SetDefaultRegionDialogProps> = ({
   open,
   onOpenChange,
   regions,
   loadingRegions,
-  onSelectDefaultRegion,
+  onSetDefaultRegion,
 }) => {
   const [defaultRegionId, setDefaultRegionId] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(false)
 
-  const handleSelectDefaultRegion = async () => {
+  const handleSetDefaultRegion = async () => {
     if (!defaultRegionId) {
       return
     }
 
     setLoading(true)
-    const success = await onSelectDefaultRegion(defaultRegionId)
+    const success = await onSetDefaultRegion(defaultRegionId)
     // TODO: Return when we fix the selected org states
     // if (success) {
     //   onOpenChange(false)
@@ -62,7 +62,7 @@ export const SelectDefaultRegionDialog: React.FC<SelectDefaultRegionDialogProps>
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Select Default Region</DialogTitle>
+          <DialogTitle>Set Default Region</DialogTitle>
           <DialogDescription>
             Your organization needs a default region to create sandboxes and manage resources.
           </DialogDescription>
@@ -78,7 +78,7 @@ export const SelectDefaultRegionDialog: React.FC<SelectDefaultRegionDialogProps>
             className="space-y-6 overflow-y-auto px-1 pb-1"
             onSubmit={async (e) => {
               e.preventDefault()
-              await handleSelectDefaultRegion()
+              await handleSetDefaultRegion()
             }}
           >
             <div className="space-y-3">
