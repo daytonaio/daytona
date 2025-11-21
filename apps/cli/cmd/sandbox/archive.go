@@ -31,7 +31,7 @@ var ArchiveCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s archived", sandboxIdOrNameArg))
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s marked for archival", sandboxIdOrNameArg))
 		return nil
 	},
 }
