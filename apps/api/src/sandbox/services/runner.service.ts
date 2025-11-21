@@ -252,7 +252,7 @@ export class RunnerService {
                   timeoutId = setTimeout(() => {
                     abortController.abort()
                     reject(new Error('Health check timeout'))
-                  }, 3000)
+                  }, 9000)
                 }),
               ])
 
@@ -266,7 +266,7 @@ export class RunnerService {
               }
 
               if (e.message === 'Health check timeout') {
-                this.logger.error(`Runner ${runner.id} health check timed out after 3 seconds`)
+                this.logger.error(`Runner ${runner.id} health check timed out after 9 seconds`)
               } else if (e.code === 'ECONNREFUSED') {
                 this.logger.error(`Runner ${runner.id} not reachable`)
               } else if (e.name === 'AbortError') {
