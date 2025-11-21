@@ -44,8 +44,13 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		volumeMutex.Lock()
 		defer volumeMutex.Unlock()
 
+		subpathStr := ""
+		if vol.Subpath != nil {
+			subpathStr = *vol.Subpath
+		}
+
 		if d.isDirectoryMounted(runnerVolumeMountPath) {
-			log.Infof("volume %s (subpath: %s) is already mounted to %s", volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
+			log.Infof("volume %s (subpath: %s) is already mounted to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
 			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 			continue
 		}
@@ -55,15 +60,15 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			return nil, fmt.Errorf("failed to create mount directory %s: %s", runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounting S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
+		log.Infof("mounting S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
 
 		cmd := d.getMountCmd(ctx, volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
 		err = cmd.Run()
 		if err != nil {
-			return nil, fmt.Errorf("failed to mount S3 volume %s (subpath: %s) to %s: %s", volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath, err)
+			return nil, fmt.Errorf("failed to mount S3 volume %s (subpath: %s) to %s: %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounted S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
+		log.Infof("mounted S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
 
 		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 	}
@@ -71,12 +76,12 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 	return volumeMountPathBinds, nil
 }
 
-func (d *DockerClient) getRunnerVolumeMountPath(volumeId, subpath string) string {
+func (d *DockerClient) getRunnerVolumeMountPath(volumeId string, subpath *string) string {
 	// If subpath is provided, create a unique mount point for this volume+subpath combination
 	mountDirName := volumeId
-	if subpath != "" {
+	if subpath != nil && *subpath != "" {
 		// Create a short hash of the subpath to keep the path reasonable
-		hash := md5.Sum([]byte(subpath))
+		hash := md5.Sum([]byte(*subpath))
 		hashStr := hex.EncodeToString(hash[:])[:8]
 		mountDirName = fmt.Sprintf("%s-%s", volumeId, hashStr)
 	}
@@ -89,11 +94,11 @@ func (d *DockerClient) getRunnerVolumeMountPath(volumeId, subpath string) string
 	return volumePath
 }
 
-func (d *DockerClient) getVolumeKey(volumeId, subpath string) string {
-	if subpath == "" {
+func (d *DockerClient) getVolumeKey(volumeId string, subpath *string) string {
+	if subpath == nil || *subpath == "" {
 		return volumeId
 	}
-	return fmt.Sprintf("%s:%s", volumeId, subpath)
+	return fmt.Sprintf("%s:%s", volumeId, *subpath)
 }
 
 func (d *DockerClient) isDirectoryMounted(path string) bool {
@@ -103,12 +108,12 @@ func (d *DockerClient) isDirectoryMounted(path string) bool {
 	return err == nil
 }
 
-func (d *DockerClient) getMountCmd(ctx context.Context, volume, subpath, path string) *exec.Cmd {
+func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
 	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
 
-	if subpath != "" {
+	if subpath != nil && *subpath != "" {
 		// Ensure subpath ends with /
-		prefix := subpath
+		prefix := *subpath
 		if !strings.HasSuffix(prefix, "/") {
 			prefix = prefix + "/"
 		}
