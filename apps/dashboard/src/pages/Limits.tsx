@@ -303,16 +303,10 @@ const Limits: React.FC = () => {
                   <>
                     Tier-based compute limits are applied to your default region
                     {selectedOrganization.defaultRegionId && (
-                      <>
+                      <b>
                         {' '}
-                        <button
-                          type="button"
-                          className="underline hover:text-primary font-bold"
-                          onClick={() => setSelectedRegionId(selectedOrganization.defaultRegionId)}
-                        >
-                          {getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
-                        </button>
-                      </>
+                        {getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
+                      </b>
                     )}
                     {'. '}
                   </>
