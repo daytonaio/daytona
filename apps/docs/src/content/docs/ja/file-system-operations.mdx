@@ -4,283 +4,344 @@ title: ファイルシステム操作
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona（サンドボックスという隔離されたクラウド開発環境を作成・管理するプラットフォーム）のSDKは、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内の`fs`モジュールを通じて、充実したファイルシステム操作機能を提供します。本ガイドでは、利用可能なすべてのファイルシステム操作とベストプラクティスについて説明します。
+DaytonaのTS SDK / Python SDKは、サンドボックス内の`fs`モジュールを通じて、充実したファイルシステム操作を提供します。本ガイドでは、利用可能なすべてのファイルシステム操作とベストプラクティスを解説します。
 
-## 基本操作
+## 基本操作 \{#basic-operations\}
 
-Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内のファイルシステムとやり取りする機能を提供します。ファイルの一覧表示、ディレクトリ作成、ファイルの読み書きなど、さまざまな操作を実行できます。
+Daytona SDK では、サンドボックス内のファイルシステムを操作するための機能を提供しています。ファイル一覧の取得、ディレクトリの作成、ファイルの読み書きなど、さまざまな操作を実行できます。
 
-簡潔さのため、ファイル操作はデフォルトでサンドボックスユーザーのホームディレクトリ直下で行われる前提です。例えば、`workspace` は `/home/[username]/workspace` を意味します。先頭にスラッシュ `/` を付けた絶対パスを作業ディレクトリとして指定することも可能です。
+ファイル操作は、サンドボックスユーザーのホームディレクトリで作業していることを前提としています（例: `workspace` は `/home/[username]/workspace` を指します）。絶対パスを指定する場合は、先頭に `/` を付けてください。
 
-### ファイルとディレクトリの一覧表示
+### ファイルとディレクトリの一覧 \{#listing-files-and-directories\}
 
-Daytona SDK は、Python と TypeScript を用いてサンドボックス内のファイルやディレクトリを一覧表示できます。
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# List files in a directory
-files = sandbox.fs.list_files("workspace")
-
-for file in files:
-    print(f"Name: {file.name}")
-    print(f"Is directory: {file.is_dir}")
-    print(f"Size: {file.size}")
-    print(f"Modified: {file.mod_time}")
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// List files in a directory
-const files = await sandbox.fs.listFiles("workspace")
-
-files.forEach(file => {
-    console.log(`Name: ${file.name}`)
-    console.log(`Is directory: ${file.isDir}`)
-    console.log(`Size: ${file.size}`)
-    console.log(`Modified: ${file.modTime}`)
-})
-```
-
-</TabItem>
-</Tabs>
-
-### ディレクトリの作成
-
-Daytona SDK は、Python と TypeScript で特定のパーミッションを指定してディレクトリを作成できます。
+Daytona SDK では、Python と TypeScript を使用してサンドボックス内のファイルやディレクトリを一覧できます。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Create with specific permissions
-sandbox.fs.create_folder("workspace/new-dir", "755")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Create with specific permissions
-await sandbox.fs.createFolder("workspace/new-dir", "755")
-```
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ディレクトリ内のファイルを一覧
+    files = sandbox.fs.list_files("workspace")
 
-</TabItem>
+    for file in files:
+        print(f"Name: {file.name}")
+        print(f"Is directory: {file.is_dir}")
+        print(f"Size: {file.size}")
+        print(f"Modified: {file.mod_time}")
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ディレクトリ内のファイルを一覧
+    const files = await sandbox.fs.listFiles("workspace")
+
+    files.forEach(file => {
+        console.log(`Name: ${file.name}`)
+        console.log(`Is directory: ${file.isDir}`)
+        console.log(`Size: ${file.size}`)
+        console.log(`Modified: ${file.modTime}`)
+    })
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルのアップロード
+参照: [list&#95;files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemlist_files), [listFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#listfiles)
 
-Daytona SDK は、Python と TypeScript を用いて、サンドボックス内でのファイルの読み取り、書き込み、アップロード、ダウンロード、削除を行うための機能を提供します。
+### ディレクトリの作成 \{#creating-directories\}
 
-#### 単一ファイルのアップロード
-
-単一ファイルをアップロードする場合は、次のように実行します。
+Daytona SDK では、Python と TypeScript を使用して特定の権限を指定してディレクトリを作成できます。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Upload a single file
-with open("local_file.txt", "rb") as f:
-    content = f.read()
-sandbox.fs.upload_file(content, "remote_file.txt")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Upload a single file
-const fileContent = Buffer.from('Hello, World!')
-await sandbox.fs.uploadFile(fileContent, "data.txt")
-```
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 権限を指定して作成
+    sandbox.fs.create_folder("workspace/new-dir", "755")
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 権限を指定して作成
+    await sandbox.fs.createFolder("workspace/new-dir", "755")
+    ```
+  </TabItem>
 </Tabs>
 
-#### 複数ファイルのアップロード
+参照: [create&#95;folder (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemcreate_folder), [createFolder (TypeScript SDK)](/docs/typescript-sdk/file-system/#createfolder)
 
-以下は、1回のメソッド呼び出しで複数ファイルを効率的にアップロードする例です。
+### ファイルのアップロード \{#uploading-files\}
+
+Daytona SDK は、Python と TypeScript を用いてサンドボックス内のファイルを読み取り、書き込み、アップロード、ダウンロード、削除できる機能を提供します。
+
+#### 単一ファイルのアップロード \{#uploading-a-single-file\}
+
+以下は、単一のファイルをアップロードする例です:
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Upload multiple files at once
-files_to_upload = []
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 単一のファイルをアップロード
+    with open("local_file.txt", "rb") as f:
+        content = f.read()
+    sandbox.fs.upload_file(content, "remote_file.txt")
+    ```
+  </TabItem>
 
-with open("file1.txt", "rb") as f1:
-    files_to_upload.append(FileUpload(
-        source=f1.read(),
-        destination="data/file1.txt",
-    ))
-
-with open("file2.txt", "rb") as f2:
-    files_to_upload.append(FileUpload(
-        source=f2.read(),
-        destination="data/file2.txt",
-    ))
-
-with open("settings.json", "rb") as f3:
-    files_to_upload.append(FileUpload(
-        source=f3.read(),
-        destination="config/settings.json",
-    ))
-
-sandbox.fs.upload_files(files_to_upload)
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Upload multiple files at once
-const files = [
-    {
-        source: Buffer.from('Content of file 1'),
-        destination: 'data/file1.txt',
-    },
-    {
-        source: Buffer.from('Content of file 2'),
-        destination: 'data/file2.txt',
-    },
-    {
-        source: Buffer.from('{"key": "value"}'),
-        destination: 'config/settings.json',
-    }
-]
-
-await sandbox.fs.uploadFiles(files)
-```
-
-</TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 単一のファイルをアップロード
+    const fileContent = Buffer.from('Hello, World!')
+    await sandbox.fs.uploadFile(fileContent, "data.txt")
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルのダウンロード
+参考: [upload&#95;file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_file), [uploadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfile)
 
-次のコマンドは、サンドボックスユーザーのホームディレクトリから `file1.txt` をダウンロードし、その内容を出力します。
+#### 複数ファイルのアップロード \{#uploading-multiple-files\}
+
+次の例は、1回のメソッド呼び出しで複数のファイルを効率的にアップロードする方法を示します。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 複数のファイルを一度にアップロードする
+    files_to_upload = []
 
-content = sandbox.fs.download_file("file1.txt")
+    with open("file1.txt", "rb") as f1:
+        files_to_upload.append(FileUpload(
+            source=f1.read(),
+            destination="data/file1.txt",
+        ))
 
-with open("local_file.txt", "wb") as f:
-    f.write(content)
+    with open("file2.txt", "rb") as f2:
+        files_to_upload.append(FileUpload(
+            source=f2.read(),
+            destination="data/file2.txt",
+        ))
 
-print(content.decode('utf-8'))
+    with open("settings.json", "rb") as f3:
+        files_to_upload.append(FileUpload(
+            source=f3.read(),
+            destination="config/settings.json",
+        ))
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
+    sandbox.fs.upload_files(files_to_upload)
 
-const downloadedFile = await sandbox.fs.downloadFile("file1.txt")
+    ```
+  </TabItem>
 
-console.log('File content:', downloadedFile.toString())
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 複数のファイルを一度にアップロードする
+    const files = [
+        {
+            source: Buffer.from('Content of file 1'),
+            destination: 'data/file1.txt',
+        },
+        {
+            source: Buffer.from('Content of file 2'),
+            destination: 'data/file2.txt',
+        },
+        {
+            source: Buffer.from('{"key": "value"}'),
+            destination: 'config/settings.json',
+        }
+    ]
 
-```
-
-</TabItem>
+    await sandbox.fs.uploadFiles(files)
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルの削除
+参照: [upload&#95;files（Python SDK）](/docs/python-sdk/sync/file-system/#filesystemupload_files)、[uploadFiles（TypeScript SDK）](/docs/typescript-sdk/file-system/#uploadfiles)
 
-不要になったファイルは、`delete_file` 関数で削除できます。
+### ファイルをダウンロードする \{#downloading-files\}
+
+#### 単一ファイルのダウンロード \{#downloading-a-single-file\}
+
+次のコマンドは、サンドボックスの作業ディレクトリから `file1.txt` を1件ダウンロードし、その内容を出力します:
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
+  <TabItem label="Python" icon="seti:python">
+    ```python
 
-sandbox.fs.delete_file("workspace/file.txt")
+    content = sandbox.fs.download_file("file1.txt")
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
+    with open("local_file.txt", "wb") as f:
+        f.write(content)
 
-await sandbox.fs.deleteFile("workspace/file.txt")
-```
+    print(content.decode('utf-8'))
 
-</TabItem>
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+
+    const downloadedFile = await sandbox.fs.downloadFile("file1.txt")
+
+    console.log('File content:', downloadedFile.toString())
+
+    ```
+  </TabItem>
 </Tabs>
 
-## 高度な操作
+参照: [download&#95;file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_file), [downloadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfile)
 
-Daytona SDK は、ファイル権限の設定・取得、検索と置換などの高度なファイルシステム操作を提供します。
+#### 複数ファイルのダウンロード \{#downloading-multiple-files\}
 
-### ファイル権限
-
-Daytona SDK では、Python と TypeScript から、ファイル権限の設定・取得や、ディレクトリ権限の再帰的な設定が行えます。
+次の例では、単一のメソッド呼び出しで複数のファイルを効率的にダウンロードする方法を示します。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Set file permissions
-sandbox.fs.set_file_permissions("workspace/file.txt", "644")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 複数ファイルをまとめてダウンロード
+    files_to_download = [
+        FileDownloadRequest(source="data/file1.txt"), # 保存先なし - メモリにダウンロード
+        FileDownloadRequest(source="data/file2.txt", destination="local_file2.txt"), # ローカルファイルにダウンロード
+    ]
 
-# Get file permissions
+    results = sandbox.fs.download_files(files_to_download)
 
-file_info = sandbox.fs.get_file_info("workspace/file.txt")
-print(f"Permissions: {file_info.permissions}")
+    for result in results:
+        if result.error:
+            print(f"Error downloading {result.source}: {result.error}")
+        elif result.result:
+            print(f"Downloaded {result.source} to {result.result}")
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Set file permissions
-await sandbox.fs.setFilePermissions("workspace/file.txt", { mode: "644" })
+    ```
+  </TabItem>
 
-// Get file permissions
-const fileInfo = await sandbox.fs.getFileDetails("workspace/file.txt")
-console.log(`Permissions: ${fileInfo.permissions}`)
-```
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 複数ファイルをまとめてダウンロード
+    const files = [
+        { source: "data/file1.txt" }, // 保存先なし - メモリにダウンロード
+        { source: "data/file2.txt", destination: "local_file2.txt" }, // ローカルファイルにダウンロード
+    ]
 
-</TabItem>
+    const results = await sandbox.fs.downloadFiles(files)
+
+    results.forEach(result => {
+        if (result.error) {
+            console.error(`Error downloading ${result.source}: ${result.error}`)
+        } else if (result.result) {
+            console.log(`Downloaded ${result.source} to ${result.result}`)
+        }
+    })
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルの検索と置換
+参照: [download&#95;files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_files), [downloadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfiles)
 
-Daytona SDK では、Python と TypeScript から、ファイル内のテキストの検索および置換を行えます。
+### ファイルの削除 \{#deleting-files\}
+
+次の例は、ファイルを削除する方法を示します。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Search for text in files; if a folder is specified, the search is recursive
-results = sandbox.fs.find_files(
-    path="workspace/src",
-    pattern="text-of-interest"
-)
-for match in results:
-    print(f"Absolute file path: {match.file}")
-    print(f"Line number: {match.line}")
-    print(f"Line content: {match.content}")
-    print("\n")
+  <TabItem label="Python" icon="seti:python">
+    ```python
 
-# Replace text in files
+    sandbox.fs.delete_file("workspace/file.txt")
 
-sandbox.fs.replace_in_files(
-    files=["workspace/file1.txt", "workspace/file2.txt"],
-    pattern="old_text",
-    new_value="new_text"
-)
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Search for text in files; if a folder is specified, the search is recursive
-const results = await sandbox.fs.findFiles({
-    path="workspace/src",
-    pattern: "text-of-interest"
-})
-results.forEach(match => {
-    console.log('Absolute file path:', match.file)
-    console.log('Line number:', match.line)
-    console.log('Line content:', match.content)
-})
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
 
-// Replace text in files
-await sandbox.fs.replaceInFiles(
-    ["workspace/file1.txt", "workspace/file2.txt"],
-    "old_text",
-    "new_text"
-)
-```
-
-</TabItem>
+    await sandbox.fs.deleteFile("workspace/file.txt")
+    ```
+  </TabItem>
 </Tabs>
+
+参照: [delete&#95;file（Python SDK）](/docs/python-sdk/sync/file-system/#filesystemdelete_file)、[deleteFile（TypeScript SDK）](/docs/typescript-sdk/file-system/#deletefile)
+
+## 高度な操作 \{#advanced-operations\}
+
+Daytona SDK は、ファイルのアクセス権や検索・置換など、より高度なファイルシステム操作を提供します。
+
+### ファイル権限 \{#file-permissions\}
+
+Daytona SDK では、Python と TypeScript を用いて、ファイル権限の設定・取得や、ディレクトリ権限の再帰的な設定を行うための機能を提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ファイル権限を設定
+    sandbox.fs.set_file_permissions("workspace/file.txt", "644")
+
+    # ファイル権限を取得
+    file_info = sandbox.fs.get_file_info("workspace/file.txt")
+    print(f"Permissions: {file_info.permissions}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ファイル権限を設定
+    await sandbox.fs.setFilePermissions("workspace/file.txt", { mode: "644" })
+
+    // ファイル権限を取得
+    const fileInfo = await sandbox.fs.getFileDetails("workspace/file.txt")
+    console.log(`Permissions: ${fileInfo.permissions}`)
+    ```
+  </TabItem>
+</Tabs>
+
+参照: [set&#95;file&#95;permissions (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemset_file_permissions), [setFilePermissions (TypeScript SDK)](/docs/typescript-sdk/file-system/#setfilepermissions)
+
+### ファイルの検索と置換 \{#file-search-and-replace\}
+
+Daytona SDK は、Python と TypeScript でファイル内のテキスト検索および置換を行う機能を提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ファイル内のテキストを検索します。フォルダを指定した場合、再帰的に検索されます
+    results = sandbox.fs.find_files(
+        path="workspace/src",
+        pattern="text-of-interest"
+    )
+    for match in results:
+        print(f"Absolute file path: {match.file}")
+        print(f"Line number: {match.line}")
+        print(f"Line content: {match.content}")
+        print("\n")
+
+    # ファイル内のテキストを置換します
+    sandbox.fs.replace_in_files(
+        files=["workspace/file1.txt", "workspace/file2.txt"],
+        pattern="old_text",
+        new_value="new_text"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ファイル内のテキストを検索します。フォルダを指定した場合、再帰的に検索されます
+    const results = await sandbox.fs.findFiles({
+        path: "workspace/src",
+        pattern: "text-of-interest"
+    })
+    results.forEach(match => {
+        console.log('Absolute file path:', match.file)
+        console.log('Line number:', match.line)
+        console.log('Line content:', match.content)
+    })
+
+    // ファイル内のテキストを置換します
+    await sandbox.fs.replaceInFiles(
+        ["workspace/file1.txt", "workspace/file2.txt"],
+        "old_text",
+        "new_text"
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+参照: [find&#95;files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemfind_files)、[replace&#95;in&#95;files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemreplace_in_files)、[findFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#findfiles)、[replaceInFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#replaceinfiles)
