@@ -41,8 +41,6 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
 
-export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
-
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
   activeJobs = new Set<string>()
@@ -254,8 +252,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @LogExecution('sync-states')
   async syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
-    const oneHour = 60 * 60 // seconds
-    if (!(await this.redisLockProvider.lock(globalLockKey, oneHour))) {
+    const lockTtl = 10 * 60 // seconds (10 min)
+    if (!(await this.redisLockProvider.lock(globalLockKey, lockTtl))) {
       return
     }
 
@@ -284,7 +282,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             }
 
             const lockKey = getStateChangeLockKey(row.sandbox_id)
-            if (await this.redisLockProvider.locked(lockKey)) {
+            if (await this.redisLockProvider.isLocked(lockKey)) {
               // Sandbox is already being processed, skip it
               return
             }
@@ -369,11 +367,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       },
       take: 100,
       order: {
-        lastActivityAt: 'ASC',
+        updatedAt: 'ASC',
       },
     })
 
-    await Promise.all(
+    await Promise.allSettled(
       sandboxes.map(async (sandbox) => {
         await this.syncInstanceState(sandbox.id)
       }),
