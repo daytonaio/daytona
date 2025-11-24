@@ -1,6 +1,6 @@
 module github.com/daytonaio/daemon
 
-go 1.23.0
+go 1.25.4
 
 // v0.5.0 breaks tailscale-connected docker clients so we need to pin it to v0.4.0
 replace github.com/docker/go-connections => github.com/docker/go-connections v0.4.0
@@ -30,8 +30,8 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.4
-	golang.org/x/crypto v0.39.0
-	golang.org/x/sys v0.35.0
+	golang.org/x/crypto v0.45.0
+	golang.org/x/sys v0.38.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -95,9 +95,9 @@ require (
 	go.opentelemetry.io/otel v1.34.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.34.0 // indirect
 	golang.org/x/arch v0.16.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
-	golang.org/x/tools v0.34.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/tools v0.38.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/grpc v1.69.4 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect

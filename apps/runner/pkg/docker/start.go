@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
@@ -37,9 +37,9 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	}
 
 	if c.State.Running {
-		containerIP, err := getContainerIP(&c)
-		if err != nil {
-			return err
+		containerIP := common.GetContainerIpAddress(ctx, c)
+		if containerIP == "" {
+			return errors.New("sandbox IP not found? Is the sandbox started?")
 		}
 
 		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
@@ -67,9 +67,9 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		return err
 	}
 
-	containerIP, err := getContainerIP(&c)
-	if err != nil {
-		return err
+	containerIP := common.GetContainerIpAddress(ctx, c)
+	if containerIP == "" {
+		return errors.New("sandbox IP not found? Is the sandbox started?")
 	}
 
 	processesCtx := context.Background()
@@ -152,11 +152,4 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 			return nil
 		}
 	}
-}
-
-func getContainerIP(container *types.ContainerJSON) (string, error) {
-	for _, network := range container.NetworkSettings.Networks {
-		return network.IPAddress, nil
-	}
-	return "", fmt.Errorf("no IP address found. Is the Sandbox started?")
 }

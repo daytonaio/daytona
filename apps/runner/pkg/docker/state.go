@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/containerd/errdefs"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 )
 
 func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
@@ -20,7 +20,7 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 
 	container, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
-		if client.IsErrNotFound(err) {
+		if errdefs.IsNotFound(err) {
 			return enums.SandboxStateDestroyed, nil
 		}
 		return enums.SandboxStateError, fmt.Errorf("failed to inspect container: %w", err)
