@@ -52,7 +52,7 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 		}
 	}
 
-	workDir := ""
+	workingDir := ""
 	cmd := []string{}
 	entrypoint := sandboxDto.Entrypoint
 	if d.useDaemonEntrypoint {
@@ -63,11 +63,11 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 		}
 
 		if image.Config.WorkingDir != "" {
-			workDir = image.Config.WorkingDir
+			workingDir = image.Config.WorkingDir
 		}
 
-		// if workdir is empty, append flag env var to envVars
-		if workDir == "" {
+		// if workingDir is empty, append flag env var to envVars
+		if workingDir == "" {
 			envVars = append(envVars, fmt.Sprintf("%s=true", common_daemon.UserHomeAsWorkDirEnvVar))
 		}
 
@@ -78,7 +78,7 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 	return &container.Config{
 		Hostname:     sandboxDto.Id,
 		Image:        sandboxDto.Snapshot,
-		WorkingDir:   workDir,
+		WorkingDir:   workingDir,
 		Env:          envVars,
 		Entrypoint:   entrypoint,
 		Cmd:          cmd,

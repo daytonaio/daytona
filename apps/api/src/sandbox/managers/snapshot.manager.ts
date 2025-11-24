@@ -1023,7 +1023,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         }
       }
 
-      if (snapshotInfoResponse.cmd?.length > 0) {
+      if (snapshotInfoResponse.cmd?.length > 0 && Array.isArray(snapshotInfoResponse.cmd)) {
         entrypoint = entrypoint.concat(snapshotInfoResponse.cmd)
       }
 
