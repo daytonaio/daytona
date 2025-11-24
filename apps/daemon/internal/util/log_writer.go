@@ -18,15 +18,27 @@ type PrefixedWriter struct {
 
 func (pw *PrefixedWriter) Write(p []byte) (n int, err error) {
 	scanner := bufio.NewScanner(bytes.NewReader(p))
+	start := 0
 	for scanner.Scan() {
 		line := scanner.Text()
+		// Find the end of the current line in p
+		// Scanner strips the line ending, so we need to find it
+		lineBytes := []byte(line)
+		lineLen := len(lineBytes)
+		// Find the end of the line in p, including the line ending
+		end := start + lineLen
+		// Advance end to include the line ending(s)
+		for end < len(p) && (p[end] == '\n' || p[end] == '\r') {
+			end++
+		}
 		_, err := fmt.Fprintf(pw.Writer, "%s%s\n", pw.Prefix, line)
 		if err != nil {
-			return 0, err
+			return end, err
 		}
+		start = end
 	}
 	if err := scanner.Err(); err != nil {
-		return 0, err
+		return start, err
 	}
 	return len(p), nil
 }
