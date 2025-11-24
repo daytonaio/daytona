@@ -4,7 +4,6 @@
 package util
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -14,31 +13,33 @@ import (
 type PrefixedWriter struct {
 	Prefix string
 	Writer io.Writer
+	buf    bytes.Buffer // buffer to store partial lines between writes
 }
 
 func (pw *PrefixedWriter) Write(p []byte) (n int, err error) {
-	scanner := bufio.NewScanner(bytes.NewReader(p))
-	start := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		// Find the end of the current line in p
-		// Scanner strips the line ending, so we need to find it
-		lineBytes := []byte(line)
-		lineLen := len(lineBytes)
-		// Find the end of the line in p, including the line ending
-		end := start + lineLen
-		// Advance end to include the line ending(s)
-		for end < len(p) && (p[end] == '\n' || p[end] == '\r') {
-			end++
-		}
-		_, err := fmt.Fprintf(pw.Writer, "%s%s\n", pw.Prefix, line)
-		if err != nil {
-			return end, err
-		}
-		start = end
+	// Prepend any buffered partial line to the new input
+	var data []byte
+	if pw.buf.Len() > 0 {
+		data = append(pw.buf.Bytes(), p...)
+		pw.buf.Reset()
+	} else {
+		data = p
 	}
-	if err := scanner.Err(); err != nil {
-		return start, err
+	// Process complete lines
+	start := 0
+	for i, b := range data {
+		if b == '\n' {
+			line := data[start:i]
+			_, err := fmt.Fprintf(pw.Writer, "%s%s\n", pw.Prefix, line)
+			if err != nil {
+				return 0, err
+			}
+			start = i + 1
+		}
+	}
+	// Buffer any remaining partial line
+	if start < len(data) {
+		pw.buf.Write(data[start:])
 	}
 	return len(p), nil
 }
