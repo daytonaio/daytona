@@ -83,8 +83,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   @WithInstrumentation()
   async syncRunnerSnapshots() {
     const lockKey = 'sync-runner-snapshots-lock'
-    const oneHour = 60 * 60 // seconds
-    if (!(await this.redisLockProvider.lock(lockKey, oneHour))) {
+    const lockTtl = 10 * 60 // seconds (10 min)
+    if (!(await this.redisLockProvider.lock(lockKey, lockTtl))) {
       return
     }
 
