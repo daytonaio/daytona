@@ -45,6 +45,7 @@ import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
 import { SshAccess } from './entities/ssh-access.entity'
 import { SandboxRepository } from './repositories/sandbox.repository'
+import { ProxyCacheInvalidationService } from './services/proxy-cache-invalidation.service'
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { SandboxRepository } from './repositories/sandbox.repository'
     RunnerService,
     ToolboxService,
     SnapshotService,
+    ProxyCacheInvalidationService,
     SnapshotManager,
     SandboxSubscriber,
     RedisLockProvider,
