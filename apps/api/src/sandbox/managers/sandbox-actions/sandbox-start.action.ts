@@ -539,7 +539,6 @@ export class SandboxStartAction extends SandboxAction {
         break
       }
       case SandboxState.STARTING:
-        this.logger.warn(`Timeout while starting sandbox ${sandbox.id} last activity at ${sandbox.lastActivityAt}`)
         if (await this.checkTimeoutError(sandbox, 5, 'Timeout while starting sandbox')) {
           return DONT_SYNC_AGAIN
         }
