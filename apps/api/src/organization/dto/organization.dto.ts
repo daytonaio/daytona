@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { Organization } from '../entities/organization.entity'
 
 @ApiSchema({ name: 'Organization' })
@@ -64,21 +64,6 @@ export class OrganizationDto {
   suspensionCleanupGracePeriodHours?: number
 
   @ApiProperty({
-    description: 'Total CPU quota',
-  })
-  totalCpuQuota: number
-
-  @ApiProperty({
-    description: 'Total memory quota',
-  })
-  totalMemoryQuota: number
-
-  @ApiProperty({
-    description: 'Total disk quota',
-  })
-  totalDiskQuota: number
-
-  @ApiProperty({
     description: 'Max CPU per sandbox',
   })
   maxCpuPerSandbox: number
@@ -98,10 +83,11 @@ export class OrganizationDto {
   })
   sandboxLimitedNetworkEgress: boolean
 
-  @ApiProperty({
-    description: 'Default region',
+  @ApiPropertyOptional({
+    description: 'Default region ID',
+    required: false,
   })
-  defaultRegion: string
+  defaultRegionId?: string
 
   @ApiProperty({
     description: 'Authenticated rate limit per minute',
@@ -134,14 +120,11 @@ export class OrganizationDto {
       suspendedAt: organization.suspendedAt,
       suspendedUntil: organization.suspendedUntil,
       suspensionCleanupGracePeriodHours: organization.suspensionCleanupGracePeriodHours,
-      totalCpuQuota: organization.totalCpuQuota,
-      totalMemoryQuota: organization.totalMemoryQuota,
-      totalDiskQuota: organization.totalDiskQuota,
       maxCpuPerSandbox: organization.maxCpuPerSandbox,
       maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
-      defaultRegion: organization.defaultRegion,
+      defaultRegionId: organization.defaultRegionId,
       authenticatedRateLimit: organization.authenticatedRateLimit,
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
       sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,

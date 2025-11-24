@@ -15,7 +15,6 @@ import { MetricsInterceptor } from './interceptors/metrics.interceptor'
 import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface'
 import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
-import { RunnerService } from './sandbox/services/runner.service'
 import { getOpenApiConfig } from './openapi.config'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 import { join } from 'node:path'
@@ -27,7 +26,6 @@ import { Partitioners } from 'kafkajs'
 import { isApiEnabled, isWorkerEnabled } from './common/utils/app-mode'
 import cluster from 'node:cluster'
 import { Logger as PinoLogger, LoggerErrorInterceptor } from 'nestjs-pino'
-import { RunnerAdapterFactory } from './sandbox/runner-adapter/runnerAdapter'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -112,45 +110,6 @@ async function bootstrap() {
       },
     },
   })
-
-  // Auto create runners only in local development environment
-  if (configService.get('defaultRunner.domain')) {
-    const runnerService = app.get(RunnerService)
-    const runnerAdapterFactory = app.get(RunnerAdapterFactory)
-    const runners = await runnerService.findAll()
-    if (!runners.find((runner) => runner.domain === configService.getOrThrow('defaultRunner.domain'))) {
-      Logger.log(`Creating default runner: ${configService.getOrThrow('defaultRunner.domain')}`)
-      const runner = await runnerService.create({
-        apiUrl: configService.getOrThrow('defaultRunner.apiUrl'),
-        proxyUrl: configService.getOrThrow('defaultRunner.proxyUrl'),
-        apiKey: configService.getOrThrow('defaultRunner.apiKey'),
-        cpu: configService.getOrThrow('defaultRunner.cpu'),
-        memoryGiB: configService.getOrThrow('defaultRunner.memory'),
-        diskGiB: configService.getOrThrow('defaultRunner.disk'),
-        gpu: configService.getOrThrow('defaultRunner.gpu'),
-        gpuType: configService.getOrThrow('defaultRunner.gpuType'),
-        region: configService.getOrThrow('defaultRunner.region'),
-        class: configService.getOrThrow('defaultRunner.class'),
-        domain: configService.getOrThrow('defaultRunner.domain'),
-        version: configService.get('defaultRunner.version') || '0',
-      })
-
-      const runnerAdapter = await runnerAdapterFactory.create(runner)
-
-      // Wait until the runner is healthy
-      Logger.log(`Waiting for runner ${runner.domain} to be healthy...`)
-      for (let i = 0; i < 30; i++) {
-        try {
-          await runnerAdapter.healthCheck()
-          Logger.log(`Runner ${runner.domain} is healthy`)
-          break
-        } catch {
-          // ignore
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-      }
-    }
-  }
 
   // Replace dashboard api url before serving
   if (configService.get('production')) {

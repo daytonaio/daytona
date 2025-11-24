@@ -158,7 +158,6 @@ const configuration = {
     disk: parseInt(process.env.DEFAULT_RUNNER_DISK || '50', 10),
     gpu: parseInt(process.env.DEFAULT_RUNNER_GPU || '0', 10),
     gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
-    region: process.env.DEFAULT_RUNNER_REGION,
     class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
     version: process.env.DEFAULT_RUNNER_VERSION || '0',
   },
@@ -228,7 +227,11 @@ const configuration = {
     maxSnapshotSize: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE || '20', 10),
     volumeQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_VOLUME_QUOTA || '100', 10),
   },
-  defaultRegion: process.env.DEFAULT_REGION || 'us',
+  defaultRegion: {
+    id: process.env.DEFAULT_REGION_ID || 'us',
+    name: process.env.DEFAULT_REGION_NAME || 'us',
+    enforceQuotas: process.env.DEFAULT_REGION_ENFORCE_QUOTAS === 'true',
+  },
   admin: {
     apiKey: process.env.ADMIN_API_KEY,
     totalCpuQuota: parseInt(process.env.ADMIN_TOTAL_CPU_QUOTA || '0', 10),

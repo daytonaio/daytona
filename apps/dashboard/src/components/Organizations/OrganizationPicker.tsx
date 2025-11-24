@@ -20,12 +20,14 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { CreateOrganizationDialog } from './CreateOrganizationDialog'
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenu } from '@/components/ui/sidebar'
 import { handleApiError } from '@/lib/error-handling'
+import { useRegions } from '@/hooks/useRegions'
 
 export const OrganizationPicker: React.FC = () => {
   const { organizationsApi } = useApi()
 
   const { organizations, refreshOrganizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()
+  const { regions, loadingRegions, getRegionName } = useRegions()
 
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)
@@ -51,11 +53,12 @@ export const OrganizationPicker: React.FC = () => {
 
   const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] = useState(false)
 
-  const handleCreateOrganization = async (name: string) => {
+  const handleCreateOrganization = async (name: string, defaultRegionId: string) => {
     try {
       const organization = (
         await organizationsApi.createOrganization({
           name: name.trim(),
+          defaultRegionId,
         })
       ).data
       toast.success('Organization created successfully')
@@ -137,6 +140,9 @@ export const OrganizationPicker: React.FC = () => {
       <CreateOrganizationDialog
         open={showCreateOrganizationDialog}
         onOpenChange={setShowCreateOrganizationDialog}
+        regions={regions}
+        loadingRegions={loadingRegions}
+        getRegionName={getRegionName}
         onCreateOrganization={handleCreateOrganization}
       />
     </SidebarMenu>

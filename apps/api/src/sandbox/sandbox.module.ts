@@ -46,12 +46,14 @@ import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive
 import { SshAccess } from './entities/ssh-access.entity'
 import { SandboxRepository } from './repositories/sandbox.repository'
 import { ProxyCacheInvalidationService } from './services/proxy-cache-invalidation.service'
+import { RegionModule } from '../region/region.module'
 
 @Module({
   imports: [
     UserModule,
     DockerRegistryModule,
     OrganizationModule,
+    RegionModule,
     TypeOrmModule.forFeature([
       Sandbox,
       Runner,
@@ -108,6 +110,7 @@ import { ProxyCacheInvalidationService } from './services/proxy-cache-invalidati
     VolumeService,
     VolumeManager,
     SandboxRepository,
+    RunnerAdapterFactory,
   ],
 })
 export class SandboxModule {}
