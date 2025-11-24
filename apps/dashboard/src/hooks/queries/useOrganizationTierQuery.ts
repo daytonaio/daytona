@@ -6,14 +6,16 @@
 import type { OrganizationTier } from '@/billing-api'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
+import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
 export const useOrganizationTierQuery = ({ organizationId }: { organizationId: string }) => {
   const { billingApi } = useApi()
+  const config = useConfig()
 
   return useQuery<OrganizationTier | null>({
     queryKey: queryKeys.organization.tier(organizationId),
     queryFn: () => billingApi.getOrganizationTier(organizationId),
-    enabled: !!organizationId && !!import.meta.env.VITE_BILLING_API_URL,
+    enabled: !!organizationId && !!config.billingApiUrl,
   })
 }

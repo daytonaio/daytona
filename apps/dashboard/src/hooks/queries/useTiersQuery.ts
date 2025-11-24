@@ -6,14 +6,16 @@
 import type { Tier } from '@/billing-api'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
+import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
 export const useTiersQuery = () => {
   const { billingApi } = useApi()
+  const config = useConfig()
 
   return useQuery<Tier[]>({
     queryKey: queryKeys.billing.tiers(),
     queryFn: () => billingApi.listTiers(),
-    enabled: !!import.meta.env.VITE_BILLING_API_URL,
+    enabled: !!config.billingApiUrl,
   })
 }
