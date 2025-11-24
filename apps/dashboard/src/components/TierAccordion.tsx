@@ -107,7 +107,7 @@ export function TierAccordion({
                 )}
               >
                 <div className="flex items-start flex-col gap-2 mr-4">
-                  <span className="text-xs uppercase font-mono text-muted-foreground/70">Resources:</span>
+                  <span className="text-xs uppercase font-mono text-muted-foreground">Resources:</span>
                   <TierLimitsIndicator limit={tier.tierLimit} />
                 </div>
 
@@ -117,12 +117,12 @@ export function TierAccordion({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pr-8 gap-y-5">
                   {features && (
                     <div className="flex flex-col gap-2">
-                      <span className="text-xs uppercase font-mono text-muted-foreground/70">Additional Features:</span>
+                      <span className="text-xs uppercase font-mono text-muted-foreground">Additional Features:</span>
                       {features}
                     </div>
                   )}
                   <div className="flex flex-col gap-2">
-                    <span className="text-xs uppercase font-mono text-muted-foreground/70">Requirements:</span>
+                    <span className="text-xs uppercase font-mono text-muted-foreground">Requirements:</span>
                     <AdditionalTierRequirements
                       tier={tier}
                       emailVerified={emailVerified}

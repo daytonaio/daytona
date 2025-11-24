@@ -14,8 +14,8 @@ export function UsageOverview({ usageOverview }: { usageOverview: OrganizationUs
     <div className="flex gap-4 flex-col">
       <div className="flex flex-col gap-1">
         <div className="w-full flex justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <CpuIcon size={16} className="opacity-50" /> Compute
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <CpuIcon size={16} /> Compute
           </div>
           <UsageLabel current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} unit="vCPU" />
         </div>
@@ -23,8 +23,8 @@ export function UsageOverview({ usageOverview }: { usageOverview: OrganizationUs
       </div>
       <div className="flex flex-col gap-1">
         <div className="w-full flex justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <MemoryStickIcon size={16} className="opacity-50" /> Memory
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <MemoryStickIcon size={16} /> Memory
           </div>
           <UsageLabel current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} unit="GiB" />
         </div>
@@ -32,8 +32,8 @@ export function UsageOverview({ usageOverview }: { usageOverview: OrganizationUs
       </div>
       <div className="flex flex-col gap-1">
         <div className="w-full flex justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <HardDriveIcon size={16} className="opacity-50" /> Storage
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <HardDriveIcon size={16} /> Storage
           </div>
           <UsageLabel current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} unit="GiB" />
         </div>
@@ -45,7 +45,7 @@ export function UsageOverview({ usageOverview }: { usageOverview: OrganizationUs
 
 export function UsageOverviewSkeleton() {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <Skeleton className="h-9 w-full" />
       <Skeleton className="h-9 w-full" />
       <Skeleton className="h-9 w-full" />
@@ -59,9 +59,9 @@ const UsageLabel = ({ current, total, unit }: { current: number; total: number; 
 
   return (
     <div className="flex items-center gap-1">
-      {isHighUsage && <AlertTriangle className="w-4 h-4 text-red-500" />}
+      {isHighUsage && <AlertTriangle className="w-4 h-4 text-red-500 mr-1" />}
       <span
-        className={cn('font-mono', {
+        className={cn('text-sm font-mono', {
           'text-destructive': isHighUsage,
         })}
       >

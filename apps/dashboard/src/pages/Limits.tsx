@@ -128,7 +128,7 @@ const Limits: React.FC = () => {
         <>
           <Card className="my-4">
             <CardHeader>
-              <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap">
+              <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap items-center">
                 <div className="flex items-center gap-2">
                   Current Usage{' '}
                   {organizationTier && (
