@@ -7,14 +7,14 @@ import { TierAccordion, TierAccordionSkeleton } from '@/components/TierAccordion
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { UsageOverviewIndicator } from '@/components/UsageOverviewIndicator'
+import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
 import { useDowngradeTierMutation } from '@/hooks/mutations/useDowngradeTierMutation'
 import { useUpgradeTierMutation } from '@/hooks/mutations/useUpgradeTierMutation'
 import { useOrganizationTierQuery } from '@/hooks/queries/useOrganizationTierQuery'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useOrganizationWalletQuery } from '@/hooks/queries/useOrganizationWalletQuery'
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
+import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { RefreshCcw } from 'lucide-react'
@@ -22,7 +22,6 @@ import React, { useCallback, useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 import { UserProfileIdentity } from './LinkedAccounts'
-import { useConfig } from '@/hooks/useConfig'
 
 const Limits: React.FC = () => {
   const { user } = useAuth()
@@ -91,33 +90,6 @@ const Limits: React.FC = () => {
     )
   }, [user])
 
-  // const nextTierLabel = useMemo(() => {
-  //   if (!organizationTier) {
-  //     return null
-  //   }
-
-  //   const nextTier = tiers?.find((t) => t.tier === organizationTier.tier + 1)
-  //   if (nextTier) {
-  //     return `Tier ${nextTier.tier}`
-  //   }
-
-  //   return 'Custom Tier'
-  // }, [organizationTier, tiers])
-
-  // const hasHitLimit = useMemo(() => {
-  //     if (!usageOverview) {
-  //       return false
-  //     }
-
-  //     return pastUsage.some((u) => {
-  //       return (
-  //         u.peakCpuUsage >= usageOverview.totalCpuQuota ||
-  //         u.peakMemUsage >= usageOverview.totalMemoryQuota ||
-  //         u.peakDiskUsage >= usageOverview.totalDiskQuota
-  //       )
-  //     })
-  //   }, [pastUsage, usageOverview])
-
   const isLoading = organizationTierQuery.isLoading || tiersQuery.isLoading || walletQuery.isLoading
   const isError =
     organizationTierQuery.isError || tiersQuery.isError || usageOverviewQuery.isError || walletQuery.isError
@@ -130,7 +102,7 @@ const Limits: React.FC = () => {
   }
 
   return (
-    <div className="px-6 py-2">
+    <div className="px-6 py-2 max-w-3xl p-5">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Limits</h1>
       </div>
@@ -160,34 +132,19 @@ const Limits: React.FC = () => {
                     Tier {organizationTier?.tier}
                   </Badge>
                 </div>
-                {usageOverviewQuery.isLoading ? (
-                  <Skeleton className="h-6 w-32" />
-                ) : (
-                  usageOverview && <UsageOverviewIndicator usage={usageOverview} isLive />
-                )}
               </CardTitle>
+              <CardDescription>
+                Limits help us mitigate misuse and manage infrastructure resources. <br /> Ensuring fair and stable
+                access to sandboxes and compute capacity across all users.
+              </CardDescription>
             </CardHeader>
-
-            {/* todo: implement past usage api */}
-            {/* <div className="border border-border" />
-          <CardContent>
-            <LimitUsageChart
-              title={
-                <div className="py-6">
-                  <CardTitle className="flex justify-between gap-4">Peak Usage</CardTitle>
-                </div>
-              }
-              pastUsage={pastUsage}
-              currentUsage={usageOverview}
-            />
-            {!!(hasHitLimit && nextTierLabel) && (
-              <div className="text-sm text-muted-foreground mt-4">
-                <TriangleAlertIcon className="inline-block h-4 align-middle text-yellow-600" />
-                You hit your resource limit on one or more days this month. To ensure stable performance, upgrade to{' '}
-                <span className="text-foreground">{nextTierLabel}</span>.
-              </div>
-            )}
-          </CardContent> */}
+            <CardContent>
+              {usageOverviewQuery.isLoading ? (
+                <UsageOverviewSkeleton />
+              ) : (
+                usageOverview && <UsageOverview usageOverview={usageOverview} />
+              )}
+            </CardContent>
           </Card>
 
           {config.billingApiUrl && (
@@ -203,7 +160,7 @@ const Limits: React.FC = () => {
                   </div>
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0 mt-4">
                 {isLoading ? (
                   <TierAccordionSkeleton />
                 ) : (

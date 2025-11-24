@@ -6,10 +6,9 @@
 import { OrganizationTier, Tier, TierLimit } from '@/billing-api'
 import { RoutePath } from '@/enums/RoutePath'
 import { cn } from '@/lib/utils'
-import { CheckIcon, ExternalLinkIcon, Info, Loader2, MinusIcon } from 'lucide-react'
+import { CheckIcon, CpuIcon, ExternalLinkIcon, HardDriveIcon, Loader2, MemoryStickIcon } from 'lucide-react'
 import React, { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Tooltip } from './Tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
@@ -55,55 +54,73 @@ export function TierAccordion({
                 organizationTier.largestSuccessfulPaymentDate.getTime() >
                   Date.now() - 1000 * 60 * 60 * 24 * tier.topUpIntervalDays))
 
-          const isLessThanCurrentTier = organizationTier && tier.tier < organizationTier.tier
+          const isGreaterThanCurrentTier = organizationTier && tier.tier > organizationTier.tier
+
           const features = tierFeatures ? tierFeatures[tier.tier] : null
 
+          const canUpgrade = canUpgradeToTier(
+            organizationTier ?? null,
+            tier,
+            creditCardLinked,
+            githubConnected,
+            phoneVerified,
+          )
+
           return (
-            <AccordionItem value={String(tier.tier)} key={tier.tier}>
+            <AccordionItem
+              value={String(tier.tier)}
+              key={tier.tier}
+              className={cn('border-b-0 relative border-t border-border py-5 px-4')}
+            >
+              <div className="grid items-center gap-2 w-full mb-4">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className={cn('font-semibold text-lg', {
+                      'text-green-500': isCurrentTier,
+                    })}
+                  >
+                    Tier {tier.tier}
+                  </span>
+                  {isCurrentTier && (
+                    <Badge variant="outline" className="font-mono uppercase">
+                      Current
+                    </Badge>
+                  )}
+                  {organizationTier && (
+                    <div className="flex items-center gap-1 ml-auto">
+                      <TierActionButton
+                        tier={tier.tier}
+                        currentTier={organizationTier?.tier ?? 0}
+                        canUpgrade={canUpgrade}
+                        tierLoading={tierLoading}
+                        tierExpiresAt={organizationTier?.expiresAt}
+                        onUpgrade={onUpgrade}
+                        onDowngrade={onDowngrade}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
               <AccordionTrigger
-                className={cn('w-full text-left hover:no-underline items-start lg:items-center', {
-                  '[&:not([data-state=open])]:opacity-40': isLessThanCurrentTier,
-                })}
+                className={cn(
+                  'w-full text-left hover:no-underline items-end p-0 text-muted-foreground hover:text-foreground',
+                )}
               >
-                <div className="grid items-center gap-2 md:grid-cols-[3fr_7fr] lg:grid-cols-2 w-full pr-3 grid-cols-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span
-                      className={cn('font-mono uppercase', {
-                        'text-green-500': isCurrentTier,
-                      })}
-                    >
-                      Tier {tier.tier}
-                    </span>
-                    {isCurrentTier && (
-                      <Badge variant="outline" className="font-mono uppercase">
-                        Current
-                      </Badge>
-                    )}
-                    {organizationTier && (
-                      <div className="flex items-center gap-1">
-                        <TierActionButton
-                          tier={tier.tier}
-                          currentTier={organizationTier?.tier ?? 0}
-                          canUpgrade={canUpgradeToTier(
-                            organizationTier,
-                            tier,
-                            creditCardLinked,
-                            githubConnected,
-                            phoneVerified,
-                          )}
-                          tierLoading={tierLoading}
-                          tierExpiresAt={organizationTier?.expiresAt}
-                          onUpgrade={onUpgrade}
-                          onDowngrade={onDowngrade}
-                        />
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-start flex-col gap-2 mr-4">
+                  <span className="text-xs uppercase font-mono text-muted-foreground/70">Resources:</span>
                   <TierLimitsIndicator limit={tier.tierLimit} />
                 </div>
+
+                <div className="ml-auto mr-2 text-sm">Details</div>
               </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid md:grid-cols-[3fr_7fr] grid-cols-2 lg:grid-cols-2 gap-2 pr-8">
+              <AccordionContent className="border-t border-border border-dashed pt-4 pb-0 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pr-8 gap-y-5">
+                  {features && (
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs uppercase font-mono text-muted-foreground/70">Additional Features:</span>
+                      {features}
+                    </div>
+                  )}
                   <div className="flex flex-col gap-2">
                     <span className="text-xs uppercase font-mono text-muted-foreground/70">Requirements:</span>
                     <AdditionalTierRequirements
@@ -137,55 +154,69 @@ export function TierAccordion({
                         )}
                       </div>
                     )}
-                  </div>
-
-                  {features && (
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs uppercase font-mono text-muted-foreground/70">Additional Features:</span>
-                      {features}
+                    <div className="">
+                      {isGreaterThanCurrentTier && !canUpgrade && (
+                        <div className="text-xs text-muted-foreground">
+                          Please complete all requirements to upgrade.
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
           )
         })}
       </Accordion>
-      <div className="flex items-end justify-between pr-8 py-4">
+      <div className="justify-between grid grid-cols-2 items-center border-t border-border px-4 py-5 gap-2">
         <span
-          className={cn('font-mono uppercase', {
+          className={cn({
             'text-green-500': organizationTier?.tier && organizationTier.tier >= 3,
           })}
         >
           Custom
         </span>
 
-        <Button variant="secondary" asChild>
+        <Button variant="secondary" asChild className="w-fit justify-self-end">
           <a href="mailto:sales@daytona.io?subject=Custom%20Tier%20Inquiry&body=Hi%20Daytona%20Team%2C%0A%0AI%27m%20interested%20in%20a%20custom%20plan%20and%20would%20like%20to%20learn%20more%20about%20your%20options.%0A%0AHere%27s%20some%20context%3A%0A%0A-%20Your%20use%20case%3A%20%0A-%20Current%20technology%3A%20%0A-%20Requirements%3A%20%0A-%20Typical%20sandbox%20size%3A%20%0A-%20Peak%20concurrent%20sandboxes%3A%20%0A%0AThanks.">
             Contact Sales
           </a>
         </Button>
+        <span className="text-sm text-muted-foreground col-[2] row-[2] justify-self-end">
+          Tier 3 or higher required.
+        </span>
       </div>
     </>
   )
 }
 
-export function TierAccordionSkeleton() {
+export function TierAccordionItemSkeleton() {
   return (
     <div className="w-full flex flex-col gap-4">
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-4 w-1/2" />
       <Skeleton className="h-12 w-full" />
     </div>
   )
 }
 
-function TierLimitResource({ label, value }: { label: string; value: number | string }) {
+export function TierAccordionSkeleton() {
   return (
-    <div className="flex items-center font-mono px-3 py-2 gap-2">
-      <div className="text-sm text-muted-foreground">{label}</div>{' '}
+    <div className="w-full flex flex-col gap-5">
+      <TierAccordionItemSkeleton />
+      <TierAccordionItemSkeleton />
+      <TierAccordionItemSkeleton />
+      <TierAccordionItemSkeleton />
+    </div>
+  )
+}
+
+function TierLimitResource({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
+  return (
+    <div className="flex items-end font-mono gap-2 flex-wrap justify-end">
+      <div className="flex items-center gap-1">
+        {icon}
+        <div className="text-sm text-muted-foreground">{label}</div>{' '}
+      </div>
       <div className="text-sm text-foreground">{value}</div>
     </div>
   )
@@ -203,23 +234,40 @@ function TierLimitsIndicator({
   return (
     <div
       className={cn(
-        'flex items-center text-sm text-muted-foreground rounded-md border border-border font-mono [&>*]:border-l [&>*]:border-border [&>*:first-child]:border-0 [&>*]:flex-1',
+        'flex sm:items-center text-sm text-muted-foreground font-mono sm:flex-row flex-col items-start sm:gap-5 gap-2',
         className,
       )}
     >
-      <TierLimitResource label="vCPU" value={limit.concurrentCPU} />
-      <TierLimitResource label="RAM" value={`${limit.concurrentRAMGiB} GiB`} />
-      <TierLimitResource label="DISK" value={`${limit.concurrentDiskGiB} GiB`} />
+      <TierLimitResource label="vCPU" value={limit.concurrentCPU} icon={<CpuIcon strokeWidth={1.5} size={16} />} />
+      <TierLimitResource
+        label="RAM"
+        value={`${limit.concurrentRAMGiB} GiB`}
+        icon={<MemoryStickIcon strokeWidth={1.5} size={16} />}
+      />
+      <TierLimitResource
+        label="DISK"
+        value={`${limit.concurrentDiskGiB} GiB`}
+        icon={<HardDriveIcon strokeWidth={1.5} size={16} />}
+      />
       {children}
     </div>
   )
 }
 
-function getIcon(checked: boolean, label: string) {
-  if (checked) {
-    return <CheckIcon size={18} className="inline align-text-bottom mr-2" aria-label={label} />
-  }
-  return <MinusIcon size={18} className="inline align-text-bottom mr-2" aria-label={label} />
+function RequirementIcon({ checked, label }: { checked: boolean; label: string }) {
+  return (
+    <div
+      className={cn(
+        'flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center border border-muted-foreground/50',
+        {
+          'bg-muted/50 text-foreground': checked,
+          'text-transparent': !checked,
+        },
+      )}
+    >
+      <CheckIcon size={10} aria-label={label} />
+    </div>
+  )
 }
 
 function getDollarAmount(cents: number) {
@@ -294,50 +342,45 @@ function TierActionButton({
 
   if (tier === currentTier) {
     if (!tierExpiresAt) {
-      return <div></div>
+      return (
+        <Button variant="secondary" disabled>
+          Current
+        </Button>
+      )
     }
 
     return (
-      <div>
-        Expires on{' '}
+      <div className="text-sm text-foreground">
+        Tier expires on{' '}
         {tierExpiresAt.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
         })}
+        .
       </div>
     )
   }
 
   if (tier === currentTier + 1) {
     return (
-      <>
-        <Button
-          variant="ghost"
-          onClick={() => {
-            setTierActionLoading(true)
-            onUpgrade(tier).finally(() => setTierActionLoading(false))
-          }}
-          disabled={!canUpgrade || tierActionLoading}
-        >
-          {tierActionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Upgrade
-        </Button>
-        <Tooltip
-          label={
-            <button>
-              <Info size={16} className="text-muted-foreground" />
-            </button>
-          }
-          content={<div className="max-w-80">Complete all requirements to upgrade.</div>}
-        />
-      </>
+      <Button
+        variant="default"
+        onClick={() => {
+          setTierActionLoading(true)
+          onUpgrade(tier).finally(() => setTierActionLoading(false))
+        }}
+        disabled={tierActionLoading || !canUpgrade}
+      >
+        {tierActionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+        Upgrade
+      </Button>
     )
   }
 
   if (tier === currentTier - 1) {
     return (
       <Button
-        variant="ghost"
+        variant="secondary"
         onClick={() => {
           setTierActionLoading(true)
           onDowngrade(tier).finally(() => setTierActionLoading(false))
@@ -368,15 +411,7 @@ function AdditionalTierRequirements({ tier, ...props }: AdditionalTierRequiremen
   }
 
   if (tier.tier === 1) {
-    return (
-      <div
-        className={cn('text-muted-foreground', {
-          'text-foreground': props.emailVerified,
-        })}
-      >
-        {getIcon(props.emailVerified, 'Email verification')}Email verification
-      </div>
-    )
+    return <TierRequirementItem checked={props.emailVerified} label="Email verification" />
   }
 
   if (tier.tier === 2) {
@@ -419,18 +454,34 @@ interface TierRequirementItemProps {
   externalLink?: boolean
 }
 
-function TierRequirementItem({ checked, label, link }: TierRequirementItemProps) {
+function TierRequirementItem({ checked, label, link, externalLink }: TierRequirementItemProps) {
   const content = (
-    <>
-      {getIcon(checked, label)}
-      {label}
-      {!checked && link && <ExternalLinkIcon size={16} className="inline align-text-bottom ml-1" aria-label={label} />}
-    </>
+    <span className="flex items-center gap-2">
+      <RequirementIcon checked={checked} label={label} />
+      <span
+        className={cn({
+          'text-muted-foreground line-through': checked,
+          'text-foreground': !checked,
+          'hover:underline': !checked && link,
+        })}
+      >
+        {label}
+      </span>
+      {!checked && externalLink && (
+        <ExternalLinkIcon size={16} className="inline align-text-bottom" aria-label={label} />
+      )}
+    </span>
   )
 
   if (!checked && link) {
     return (
-      <div className={cn(checked ? 'text-foreground' : 'text-muted-foreground')}>
+      <div
+        className={cn({
+          'text-foreground': checked,
+          'text-muted-foreground': !checked,
+          'hover:underline': !checked && link,
+        })}
+      >
         <Link to={link}>{content}</Link>
       </div>
     )
