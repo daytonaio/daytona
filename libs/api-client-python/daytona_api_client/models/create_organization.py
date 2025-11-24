@@ -28,8 +28,9 @@ class CreateOrganization(BaseModel):
     CreateOrganization
     """ # noqa: E501
     name: StrictStr = Field(description="The name of organization")
+    default_region_id: StrictStr = Field(description="The ID of the default region for the organization", alias="defaultRegionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["name", "defaultRegionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,7 +90,8 @@ class CreateOrganization(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "defaultRegionId": obj.get("defaultRegionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -804,13 +804,13 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
       }
 
-      const defaultRegion = organization.defaultRegion
-      if (!defaultRegion) {
+      const defaultRegionId = organization.defaultRegionId
+      if (!defaultRegionId) {
         throw new Error('Default region not found for organization')
       }
 
       initialRunner = await this.runnerService.getRandomAvailableRunner({
-        regions: [defaultRegion],
+        regions: [defaultRegionId],
         excludedRunnerIds: excludedRunnerIds,
       })
     } catch (error) {

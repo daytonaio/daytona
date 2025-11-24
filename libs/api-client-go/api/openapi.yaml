@@ -361,6 +361,36 @@ paths:
       summary: Create organization
       tags:
         - organizations
+  /organizations/{organizationId}/default-region:
+    patch:
+      operationId: setOrganizationDefaultRegion
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationDefaultRegion'
+        required: true
+      responses:
+        '204':
+          description: Default region set successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set default region for organization
+      tags:
+        - organizations
   /organizations/{organizationId}:
     delete:
       operationId: deleteOrganization
@@ -459,12 +489,8 @@ paths:
               $ref: '#/components/schemas/UpdateOrganizationQuota'
         required: true
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'
-          description: Organization details
+        '204':
+          description: Organization quota updated successfully
       security:
         - bearer: []
         - oauth2:
@@ -472,6 +498,44 @@ paths:
             - profile
             - email
       summary: Update organization quota
+      tags:
+        - organizations
+  /organizations/{organizationId}/quota/{regionId}:
+    patch:
+      operationId: updateOrganizationRegionQuota
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: ID of the region where the updated quota will be applied
+          explode: false
+          in: path
+          name: regionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationRegionQuota'
+        required: true
+      responses:
+        '204':
+          description: Region quota updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update organization region quota
       tags:
         - organizations
   /organizations/{organizationId}/leave:
@@ -987,6 +1051,44 @@ paths:
       summary: Cancel organization invitation
       tags:
         - organizations
+  /regions:
+    get:
+      operationId: listRegions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Include shared regions
+          explode: true
+          in: query
+          name: includeShared
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Region'
+                type: array
+          description: List of all regions
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all regions
+      tags:
+        - regions
   /users/me:
     get:
       operationId: getAuthenticatedUser
@@ -1508,36 +1610,6 @@ paths:
             - profile
             - email
       summary: List all sandboxes paginated
-      tags:
-        - sandbox
-  /sandbox/regions:
-    get:
-      operationId: getSandboxRegions
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Region'
-                type: array
-          description: List of regions where sandboxes have been created
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: List all regions where sandboxes have been created
       tags:
         - sandbox
   /sandbox/for-runner:
@@ -7776,38 +7848,41 @@ components:
       type: object
     CreateOrganization:
       example:
+        defaultRegionId: us
         name: My Organization
       properties:
         name:
           description: The name of organization
           example: My Organization
           type: string
+        defaultRegionId:
+          description: The ID of the default region for the organization
+          example: us
+          type: string
       required:
+        - defaultRegionId
         - name
       type: object
     Organization:
       example:
-        totalCpuQuota: 6.027456183070403
+        defaultRegionId: defaultRegionId
         suspensionReason: suspensionReason
-        sandboxLifecycleRateLimit: 2.027123023002322
+        sandboxLifecycleRateLimit: 7.061401241503109
         suspendedAt: 2000-01-23T04:56:07.000+00:00
-        defaultRegion: defaultRegion
         personal: true
         suspensionCleanupGracePeriodHours: 0.8008281904610115
-        authenticatedRateLimit: 9.301444243932576
+        authenticatedRateLimit: 5.637376656633329
         suspended: true
-        sandboxCreateRateLimit: 3.616076749251911
+        sandboxCreateRateLimit: 2.3021358869347655
         createdAt: 2000-01-23T04:56:07.000+00:00
-        maxCpuPerSandbox: 5.637376656633329
+        maxCpuPerSandbox: 6.027456183070403
         sandboxLimitedNetworkEgress: true
         suspendedUntil: 2000-01-23T04:56:07.000+00:00
-        maxDiskPerSandbox: 7.061401241503109
+        maxDiskPerSandbox: 5.962133916683182
         createdBy: createdBy
         name: name
-        maxMemoryPerSandbox: 2.3021358869347655
+        maxMemoryPerSandbox: 1.4658129805029452
         id: id
-        totalMemoryQuota: 1.4658129805029452
-        totalDiskQuota: 5.962133916683182
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -7847,15 +7922,6 @@ components:
         suspensionCleanupGracePeriodHours:
           description: Suspension cleanup grace period hours
           type: number
-        totalCpuQuota:
-          description: Total CPU quota
-          type: number
-        totalMemoryQuota:
-          description: Total memory quota
-          type: number
-        totalDiskQuota:
-          description: Total disk quota
-          type: number
         maxCpuPerSandbox:
           description: Max CPU per sandbox
           type: number
@@ -7868,8 +7934,8 @@ components:
         sandboxLimitedNetworkEgress:
           description: Sandbox default network block all
           type: boolean
-        defaultRegion:
-          description: Default region
+        defaultRegionId:
+          description: Default region ID
           type: string
         authenticatedRateLimit:
           description: Authenticated rate limit per minute
@@ -7887,7 +7953,6 @@ components:
         - authenticatedRateLimit
         - createdAt
         - createdBy
-        - defaultRegion
         - id
         - maxCpuPerSandbox
         - maxDiskPerSandbox
@@ -7902,36 +7967,78 @@ components:
         - suspendedUntil
         - suspensionCleanupGracePeriodHours
         - suspensionReason
-        - totalCpuQuota
-        - totalDiskQuota
-        - totalMemoryQuota
         - updatedAt
       type: object
-    OrganizationUsageOverview:
+    UpdateOrganizationDefaultRegion:
+      example:
+        defaultRegionId: us
+      properties:
+        defaultRegionId:
+          description: The ID of the default region for the organization
+          example: us
+          type: string
+      required:
+        - defaultRegionId
+      type: object
+    RegionUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
-        totalSnapshotQuota: 7.061401241503109
+        regionId: regionId
         currentDiskUsage: 2.3021358869347655
-        currentVolumeUsage: 2.027123023002322
-        currentMemoryUsage: 5.637376656633329
-        currentCpuUsage: 5.962133916683182
-        totalVolumeQuota: 3.616076749251911
-        currentSnapshotUsage: 9.301444243932576
-        totalMemoryQuota: 6.027456183070403
-        totalDiskQuota: 1.4658129805029452
+        currentMemoryUsage: 5.962133916683182
+        currentCpuUsage: 6.027456183070403
+        totalMemoryQuota: 1.4658129805029452
+        totalDiskQuota: 5.637376656633329
       properties:
+        regionId:
+          type: string
         totalCpuQuota:
-          type: number
-        totalMemoryQuota:
-          type: number
-        totalDiskQuota:
           type: number
         currentCpuUsage:
           type: number
+        totalMemoryQuota:
+          type: number
         currentMemoryUsage:
+          type: number
+        totalDiskQuota:
           type: number
         currentDiskUsage:
           type: number
+      required:
+        - currentCpuUsage
+        - currentDiskUsage
+        - currentMemoryUsage
+        - regionId
+        - totalCpuQuota
+        - totalDiskQuota
+        - totalMemoryQuota
+      type: object
+    OrganizationUsageOverview:
+      example:
+        totalSnapshotQuota: 7.061401241503109
+        currentVolumeUsage: 2.027123023002322
+        totalVolumeQuota: 3.616076749251911
+        currentSnapshotUsage: 9.301444243932576
+        regionUsage:
+          - totalCpuQuota: 0.8008281904610115
+            regionId: regionId
+            currentDiskUsage: 2.3021358869347655
+            currentMemoryUsage: 5.962133916683182
+            currentCpuUsage: 6.027456183070403
+            totalMemoryQuota: 1.4658129805029452
+            totalDiskQuota: 5.637376656633329
+          - totalCpuQuota: 0.8008281904610115
+            regionId: regionId
+            currentDiskUsage: 2.3021358869347655
+            currentMemoryUsage: 5.962133916683182
+            currentCpuUsage: 6.027456183070403
+            totalMemoryQuota: 1.4658129805029452
+            totalDiskQuota: 5.637376656633329
+      properties:
+        regionUsage:
+          items:
+            $ref: '#/components/schemas/RegionUsageOverview'
+          type: array
         totalSnapshotQuota:
           type: number
         currentSnapshotUsage:
@@ -7941,41 +8048,24 @@ components:
         currentVolumeUsage:
           type: number
       required:
-        - currentCpuUsage
-        - currentDiskUsage
-        - currentMemoryUsage
         - currentSnapshotUsage
         - currentVolumeUsage
-        - totalCpuQuota
-        - totalDiskQuota
-        - totalMemoryQuota
+        - regionUsage
         - totalSnapshotQuota
         - totalVolumeQuota
       type: object
     UpdateOrganizationQuota:
       example:
-        snapshotQuota: 7.061401241503109
-        totalCpuQuota: 0.8008281904610115
-        maxCpuPerSandbox: 5.962133916683182
-        maxDiskPerSandbox: 2.3021358869347655
-        sandboxLifecycleRateLimit: 7.386281948385884
-        maxMemoryPerSandbox: 5.637376656633329
-        volumeQuota: 3.616076749251911
-        totalMemoryQuota: 6.027456183070403
-        maxSnapshotSize: 9.301444243932576
-        authenticatedRateLimit: 2.027123023002322
-        totalDiskQuota: 1.4658129805029452
-        sandboxCreateRateLimit: 4.145608029883936
+        snapshotQuota: 5.962133916683182
+        maxCpuPerSandbox: 0.8008281904610115
+        maxDiskPerSandbox: 1.4658129805029452
+        sandboxLifecycleRateLimit: 3.616076749251911
+        maxMemoryPerSandbox: 6.027456183070403
+        volumeQuota: 2.3021358869347655
+        maxSnapshotSize: 5.637376656633329
+        authenticatedRateLimit: 7.061401241503109
+        sandboxCreateRateLimit: 9.301444243932576
       properties:
-        totalCpuQuota:
-          nullable: true
-          type: number
-        totalMemoryQuota:
-          nullable: true
-          type: number
-        totalDiskQuota:
-          nullable: true
-          type: number
         maxCpuPerSandbox:
           nullable: true
           type: number
@@ -8012,10 +8102,27 @@ components:
         - sandboxCreateRateLimit
         - sandboxLifecycleRateLimit
         - snapshotQuota
+        - volumeQuota
+      type: object
+    UpdateOrganizationRegionQuota:
+      example:
+        totalCpuQuota: 0.8008281904610115
+        totalMemoryQuota: 6.027456183070403
+        totalDiskQuota: 1.4658129805029452
+      properties:
+        totalCpuQuota:
+          nullable: true
+          type: number
+        totalMemoryQuota:
+          nullable: true
+          type: number
+        totalDiskQuota:
+          nullable: true
+          type: number
+      required:
         - totalCpuQuota
         - totalDiskQuota
         - totalMemoryQuota
-        - volumeQuota
       type: object
     OrganizationSuspension:
       example:
@@ -8282,6 +8389,42 @@ components:
         - assignedRoleIds
         - role
       type: object
+    Region:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        name: us-east-1
+        id: '123456789012'
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        id:
+          description: Region ID
+          example: '123456789012'
+          type: string
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - name
+        - organizationId
+        - updatedAt
+      type: object
     UserPublicKey:
       example:
         name: name
@@ -8370,6 +8513,7 @@ components:
         emailVerified: true
         role: admin
         name: name
+        personalOrganizationDefaultRegionId: personalOrganizationDefaultRegionId
         id: id
         personalOrganizationQuota:
           snapshotQuota: 7.061401241503109
@@ -8391,6 +8535,8 @@ components:
           type: string
         personalOrganizationQuota:
           $ref: '#/components/schemas/CreateOrganizationQuota'
+        personalOrganizationDefaultRegionId:
+          type: string
         role:
           enum:
             - admin
@@ -8803,17 +8949,6 @@ components:
         - page
         - total
         - totalPages
-      type: object
-    Region:
-      example:
-        name: us
-      properties:
-        name:
-          description: Region name
-          example: us
-          type: string
-      required:
-        - name
       type: object
     CreateBuildInfo:
       properties:

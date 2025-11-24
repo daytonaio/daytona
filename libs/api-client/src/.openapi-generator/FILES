@@ -9,6 +9,7 @@ api/health-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
 api/preview-api.ts
+api/regions-api.ts
 api/runners-api.ts
 api/sandbox-api.ts
 api/snapshots-api.ts
@@ -120,6 +121,7 @@ models/range.ts
 models/rate-limit-config.ts
 models/rate-limit-entry.ts
 models/region-screenshot-response.ts
+models/region-usage-overview.ts
 models/region.ts
 models/registry-push-access-dto.ts
 models/replace-request.ts
@@ -147,9 +149,11 @@ models/ssh-access-dto.ts
 models/ssh-access-validation-dto.ts
 models/storage-access-dto.ts
 models/update-docker-registry.ts
+models/update-organization-default-region.ts
 models/update-organization-invitation.ts
 models/update-organization-member-access.ts
 models/update-organization-quota.ts
+models/update-organization-region-quota.ts
 models/update-organization-role.ts
 models/update-sandbox-state-dto.ts
 models/user-home-dir-response.ts

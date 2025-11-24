@@ -9,6 +9,7 @@ daytona_api_client_async/api/health_api.py
 daytona_api_client_async/api/object_storage_api.py
 daytona_api_client_async/api/organizations_api.py
 daytona_api_client_async/api/preview_api.py
+daytona_api_client_async/api/regions_api.py
 daytona_api_client_async/api/runners_api.py
 daytona_api_client_async/api/sandbox_api.py
 daytona_api_client_async/api/snapshots_api.py
@@ -120,6 +121,7 @@ daytona_api_client_async/models/rate_limit_config.py
 daytona_api_client_async/models/rate_limit_entry.py
 daytona_api_client_async/models/region.py
 daytona_api_client_async/models/region_screenshot_response.py
+daytona_api_client_async/models/region_usage_overview.py
 daytona_api_client_async/models/registry_push_access_dto.py
 daytona_api_client_async/models/replace_request.py
 daytona_api_client_async/models/replace_result.py
@@ -146,9 +148,11 @@ daytona_api_client_async/models/ssh_access_dto.py
 daytona_api_client_async/models/ssh_access_validation_dto.py
 daytona_api_client_async/models/storage_access_dto.py
 daytona_api_client_async/models/update_docker_registry.py
+daytona_api_client_async/models/update_organization_default_region.py
 daytona_api_client_async/models/update_organization_invitation.py
 daytona_api_client_async/models/update_organization_member_access.py
 daytona_api_client_async/models/update_organization_quota.py
+daytona_api_client_async/models/update_organization_region_quota.py
 daytona_api_client_async/models/update_organization_role.py
 daytona_api_client_async/models/update_sandbox_state_dto.py
 daytona_api_client_async/models/user.py

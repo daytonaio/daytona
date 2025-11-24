@@ -8,6 +8,7 @@ api_health.go
 api_object_storage.go
 api_organizations.go
 api_preview.go
+api_regions.go
 api_runners.go
 api_sandbox.go
 api_snapshots.go
@@ -118,6 +119,7 @@ model_rate_limit_config.go
 model_rate_limit_entry.go
 model_region.go
 model_region_screenshot_response.go
+model_region_usage_overview.go
 model_registry_push_access_dto.go
 model_replace_request.go
 model_replace_result.go
@@ -144,9 +146,11 @@ model_ssh_access_dto.go
 model_ssh_access_validation_dto.go
 model_storage_access_dto.go
 model_update_docker_registry.go
+model_update_organization_default_region.go
 model_update_organization_invitation.go
 model_update_organization_member_access.go
 model_update_organization_quota.go
+model_update_organization_region_quota.go
 model_update_organization_role.go
 model_update_sandbox_state_dto.go
 model_user.go

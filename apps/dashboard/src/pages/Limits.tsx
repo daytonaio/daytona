@@ -3,30 +3,44 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import type { RegionUsageOverview } from '@daytonaio/api-client'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
 import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
+import { RoutePath } from '@/enums/RoutePath'
 import { useOrganizationTierQuery } from '@/hooks/queries/useOrganizationTierQuery'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useOrganizationWalletQuery } from '@/hooks/queries/useOrganizationWalletQuery'
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
+import { useNavigate } from 'react-router-dom'
 import { UserProfileIdentity } from './LinkedAccounts'
 
 export default function Limits() {
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
+  const { getRegionName } = useRegions()
+  const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
   const config = useConfig()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (selectedOrganization && !selectedOrganization.defaultRegionId) {
+      navigate(RoutePath.SETTINGS)
+    }
+  }, [navigate, selectedOrganization])
 
   const { data: organizationTier, ...organizationTierQuery } = useOrganizationTierQuery({
     organizationId: selectedOrganization?.id || '',
@@ -47,6 +61,12 @@ export default function Limits() {
     },
   )
 
+  useEffect(() => {
+    if (usageOverview && usageOverview.regionUsage.length > 0 && !selectedRegionId) {
+      setSelectedRegionId(usageOverview.regionUsage[0].regionId)
+    }
+  }, [usageOverview, selectedRegionId])
+
   const githubConnected = useMemo(() => {
     if (!user?.profile?.identities) {
       return false
@@ -55,6 +75,13 @@ export default function Limits() {
       (identity: UserProfileIdentity) => identity.provider === 'github',
     )
   }, [user])
+
+  const currentRegionUsageOverview = useMemo<RegionUsageOverview | null>(() => {
+    if (!usageOverview || !selectedRegionId) {
+      return null
+    }
+    return usageOverview.regionUsage.find((usage) => usage.regionId === selectedRegionId) || null
+  }, [usageOverview, selectedRegionId])
 
   const isLoading = organizationTierQuery.isLoading || tiersQuery.isLoading || walletQuery.isLoading
   const isError =
@@ -91,16 +118,37 @@ export default function Limits() {
           <>
             <Card>
               <CardHeader className="p-4">
-                <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap items-center">
-                  <div className="flex items-center gap-2">
-                    Current Usage{' '}
-                    {organizationTier && (
-                      <Badge variant="outline" className="font-mono uppercase">
-                        Tier {organizationTier.tier}
-                      </Badge>
-                    )}
-                  </div>
-                </CardTitle>
+                <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                  <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap items-center">
+                    <div className="flex items-center gap-2">
+                      Current Usage{' '}
+                      {organizationTier && (
+                        <Badge variant="outline" className="font-mono uppercase">
+                          Tier {organizationTier.tier}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardTitle>
+                  {usageOverview && usageOverview.regionUsage.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Region:</span>
+                      <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
+                        <SelectTrigger
+                          className={`w-auto min-w-12 max-w-48 gap-x-2 ${usageOverview.regionUsage.length === 1 ? 'pointer-events-none select-none [&>svg]:hidden min-w-10' : ''}`}
+                        >
+                          <SelectValue placeholder="Select region" />
+                        </SelectTrigger>
+                        <SelectContent className="min-w-24 max-w-48" align="end">
+                          {usageOverview.regionUsage.map((usage) => (
+                            <SelectItem key={usage.regionId} value={usage.regionId}>
+                              {getRegionName(usage.regionId) ?? usage.regionId}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
                 <CardDescription>
                   Limits help us mitigate misuse and manage infrastructure resources. <br /> Ensuring fair and stable
                   access to sandboxes and compute capacity across all users.
@@ -110,7 +158,8 @@ export default function Limits() {
                 {usageOverviewQuery.isLoading ? (
                   <UsageOverviewSkeleton />
                 ) : (
-                  usageOverview && (
+                  usageOverview &&
+                  currentRegionUsageOverview && (
                     <div className="p-4 border-t border-border flex flex-col gap-2">
                       <div className="flex items-center gap-4">
                         <div className="text-sm font-medium">Resources</div>
@@ -120,7 +169,7 @@ export default function Limits() {
                           lastUpdatedAt={usageOverviewQuery.dataUpdatedAt || 0}
                         />
                       </div>
-                      <UsageOverview usageOverview={usageOverview} />
+                      <UsageOverview usageOverview={currentRegionUsageOverview} />
                     </div>
                   )
                 )}

@@ -32,10 +32,11 @@ class CreateUser(BaseModel):
     name: StrictStr
     email: Optional[StrictStr] = None
     personal_organization_quota: Optional[CreateOrganizationQuota] = Field(default=None, alias="personalOrganizationQuota")
+    personal_organization_default_region_id: Optional[StrictStr] = Field(default=None, alias="personalOrganizationDefaultRegionId")
     role: Optional[StrictStr] = None
     email_verified: Optional[StrictBool] = Field(default=None, alias="emailVerified")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "email", "personalOrganizationQuota", "role", "emailVerified"]
+    __properties: ClassVar[List[str]] = ["id", "name", "email", "personalOrganizationQuota", "personalOrganizationDefaultRegionId", "role", "emailVerified"]
 
     @field_validator('role')
     def role_validate_enum(cls, value):
@@ -112,6 +113,7 @@ class CreateUser(BaseModel):
             "name": obj.get("name"),
             "email": obj.get("email"),
             "personalOrganizationQuota": CreateOrganizationQuota.from_dict(obj["personalOrganizationQuota"]) if obj.get("personalOrganizationQuota") is not None else None,
+            "personalOrganizationDefaultRegionId": obj.get("personalOrganizationDefaultRegionId"),
             "role": obj.get("role"),
             "emailVerified": obj.get("emailVerified")
         })
