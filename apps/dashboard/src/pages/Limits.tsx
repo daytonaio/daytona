@@ -131,19 +131,19 @@ const Limits: React.FC = () => {
               <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap">
                 <div className="flex items-center gap-2">
                   Current Usage{' '}
-                  <Badge variant="outline" className="font-mono uppercase">
-                    Tier {organizationTier?.tier}
-                  </Badge>
-                </div>
-                <div>
-                  {usageOverview && (
-                    <LiveIndicator
-                      isUpdating={usageOverviewQuery.isFetching}
-                      intervalMs={10_000}
-                      lastUpdatedAt={usageOverviewQuery.dataUpdatedAt || 0}
-                    />
+                  {organizationTier && (
+                    <Badge variant="outline" className="font-mono uppercase">
+                      Tier {organizationTier.tier}
+                    </Badge>
                   )}
                 </div>
+                {usageOverview && (
+                  <LiveIndicator
+                    isUpdating={usageOverviewQuery.isFetching}
+                    intervalMs={10_000}
+                    lastUpdatedAt={usageOverviewQuery.dataUpdatedAt || 0}
+                  />
+                )}
               </CardTitle>
               <CardDescription>
                 Limits help us mitigate misuse and manage infrastructure resources. <br /> Ensuring fair and stable
