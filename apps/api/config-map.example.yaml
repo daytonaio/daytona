@@ -1,0 +1,67 @@
+# Example configuration file for Daytona API
+# Environment variables take precedence over values in this file
+# The config map can be yaml or json
+# To use this file, set the CONFIG_MAP_PATH environment variable to point to it
+
+port: 3000
+appUrl: https://api.example.com
+
+database:
+  host: db
+  port: 5432
+  username: daytona
+  password: password
+  database: daytona
+  tls:
+    enabled: false
+    rejectUnauthorized: true
+
+redis:
+  host: redis
+  port: 6379
+  tls: false
+
+smtp:
+  host: smtp.example.com
+  port: 587
+  user: noreply@example.com
+  password: smtp-password
+  secure: false
+  from: noreply@example.com
+
+s3:
+  endpoint: https://s3.amazonaws.com
+  region: us-east-1
+  accessKey: your-access-key
+  secretKey: your-secret-key
+  defaultBucket: daytona-bucket
+
+defaultRunner:
+  domain: runner.example.com
+  apiKey: runner-api-key
+  proxyUrl: https://proxy.example.com
+  apiUrl: https://api.runner.example.com
+  cpu: 4
+  memory: 8
+  disk: 50
+  gpu: 0
+  region: us
+  version: '0'
+
+log:
+  level: info
+  console:
+    disabled: false
+  requests:
+    enabled: true
+
+defaultOrganizationQuota:
+  totalCpuQuota: 10
+  totalMemoryQuota: 10
+  totalDiskQuota: 30
+  maxCpuPerSandbox: 4
+  maxMemoryPerSandbox: 8
+  maxDiskPerSandbox: 10
+  snapshotQuota: 100
+  maxSnapshotSize: 20
+  volumeQuota: 100
