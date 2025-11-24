@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import { cn } from '@/lib/utils'
 import { OrganizationUsageOverview } from '@daytonaio/api-client'
 import { AlertTriangle, CpuIcon, HardDriveIcon, MemoryStickIcon } from 'lucide-react'
