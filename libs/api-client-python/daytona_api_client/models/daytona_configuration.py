@@ -42,7 +42,7 @@ class DaytonaConfiguration(BaseModel):
     default_snapshot: StrictStr = Field(description="Default snapshot for sandboxes", alias="defaultSnapshot")
     dashboard_url: StrictStr = Field(description="Dashboard URL", alias="dashboardUrl")
     max_auto_archive_interval: Union[StrictFloat, StrictInt] = Field(description="Maximum auto-archive interval in minutes", alias="maxAutoArchiveInterval")
-    maintanance_mode: StrictBool = Field(description="Whether maintenance mode is enabled", alias="maintananceMode")
+    maintenance_mode: StrictBool = Field(description="Whether maintenance mode is enabled", alias="maintenanceMode")
     environment: StrictStr = Field(description="Current environment")
     billing_api_url: Optional[StrictStr] = Field(default=None, description="Billing API URL", alias="billingApiUrl")
     ssh_gateway_command: Optional[StrictStr] = Field(default=None, description="SSH Gateway command", alias="sshGatewayCommand")
@@ -141,7 +141,7 @@ class DaytonaConfiguration(BaseModel):
             "defaultSnapshot": obj.get("defaultSnapshot"),
             "dashboardUrl": obj.get("dashboardUrl"),
             "maxAutoArchiveInterval": obj.get("maxAutoArchiveInterval"),
-            "maintananceMode": obj.get("maintananceMode"),
+            "maintenanceMode": obj.get("maintenanceMode"),
             "environment": obj.get("environment"),
             "billingApiUrl": obj.get("billingApiUrl"),
             "sshGatewayCommand": obj.get("sshGatewayCommand"),

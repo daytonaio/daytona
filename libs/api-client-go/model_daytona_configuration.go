@@ -44,7 +44,7 @@ type DaytonaConfiguration struct {
 	// Maximum auto-archive interval in minutes
 	MaxAutoArchiveInterval float32 `json:"maxAutoArchiveInterval"`
 	// Whether maintenance mode is enabled
-	MaintananceMode bool `json:"maintananceMode"`
+	MaintenanceMode bool `json:"maintenanceMode"`
 	// Current environment
 	Environment string `json:"environment"`
 	// Billing API URL
@@ -64,7 +64,7 @@ type _DaytonaConfiguration DaytonaConfiguration
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDaytonaConfiguration(version string, oidc OidcConfig, linkedAccountsEnabled bool, announcements map[string]Announcement, proxyTemplateUrl string, proxyToolboxUrl string, defaultSnapshot string, dashboardUrl string, maxAutoArchiveInterval float32, maintananceMode bool, environment string) *DaytonaConfiguration {
+func NewDaytonaConfiguration(version string, oidc OidcConfig, linkedAccountsEnabled bool, announcements map[string]Announcement, proxyTemplateUrl string, proxyToolboxUrl string, defaultSnapshot string, dashboardUrl string, maxAutoArchiveInterval float32, maintenanceMode bool, environment string) *DaytonaConfiguration {
 	this := DaytonaConfiguration{}
 	this.Version = version
 	this.Oidc = oidc
@@ -75,7 +75,7 @@ func NewDaytonaConfiguration(version string, oidc OidcConfig, linkedAccountsEnab
 	this.DefaultSnapshot = defaultSnapshot
 	this.DashboardUrl = dashboardUrl
 	this.MaxAutoArchiveInterval = maxAutoArchiveInterval
-	this.MaintananceMode = maintananceMode
+	this.MaintenanceMode = maintenanceMode
 	this.Environment = environment
 	return &this
 }
@@ -368,28 +368,28 @@ func (o *DaytonaConfiguration) SetMaxAutoArchiveInterval(v float32) {
 	o.MaxAutoArchiveInterval = v
 }
 
-// GetMaintananceMode returns the MaintananceMode field value
-func (o *DaytonaConfiguration) GetMaintananceMode() bool {
+// GetMaintenanceMode returns the MaintenanceMode field value
+func (o *DaytonaConfiguration) GetMaintenanceMode() bool {
 	if o == nil {
 		var ret bool
 		return ret
 	}
 
-	return o.MaintananceMode
+	return o.MaintenanceMode
 }
 
-// GetMaintananceModeOk returns a tuple with the MaintananceMode field value
+// GetMaintenanceModeOk returns a tuple with the MaintenanceMode field value
 // and a boolean to check if the value has been set.
-func (o *DaytonaConfiguration) GetMaintananceModeOk() (*bool, bool) {
+func (o *DaytonaConfiguration) GetMaintenanceModeOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MaintananceMode, true
+	return &o.MaintenanceMode, true
 }
 
-// SetMaintananceMode sets field value
-func (o *DaytonaConfiguration) SetMaintananceMode(v bool) {
-	o.MaintananceMode = v
+// SetMaintenanceMode sets field value
+func (o *DaytonaConfiguration) SetMaintenanceMode(v bool) {
+	o.MaintenanceMode = v
 }
 
 // GetEnvironment returns the Environment field value
@@ -569,7 +569,7 @@ func (o DaytonaConfiguration) ToMap() (map[string]interface{}, error) {
 	toSerialize["defaultSnapshot"] = o.DefaultSnapshot
 	toSerialize["dashboardUrl"] = o.DashboardUrl
 	toSerialize["maxAutoArchiveInterval"] = o.MaxAutoArchiveInterval
-	toSerialize["maintananceMode"] = o.MaintananceMode
+	toSerialize["maintenanceMode"] = o.MaintenanceMode
 	toSerialize["environment"] = o.Environment
 	if !IsNil(o.BillingApiUrl) {
 		toSerialize["billingApiUrl"] = o.BillingApiUrl
@@ -605,7 +605,7 @@ func (o *DaytonaConfiguration) UnmarshalJSON(data []byte) (err error) {
 		"defaultSnapshot",
 		"dashboardUrl",
 		"maxAutoArchiveInterval",
-		"maintananceMode",
+		"maintenanceMode",
 		"environment",
 	}
 
@@ -647,7 +647,7 @@ func (o *DaytonaConfiguration) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "defaultSnapshot")
 		delete(additionalProperties, "dashboardUrl")
 		delete(additionalProperties, "maxAutoArchiveInterval")
-		delete(additionalProperties, "maintananceMode")
+		delete(additionalProperties, "maintenanceMode")
 		delete(additionalProperties, "environment")
 		delete(additionalProperties, "billingApiUrl")
 		delete(additionalProperties, "sshGatewayCommand")

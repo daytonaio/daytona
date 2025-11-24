@@ -108,7 +108,7 @@ const configuration = {
   },
   skipConnections: getBoolConfig('SKIP_CONNECTIONS', 'skipConnections'),
   maxAutoArchiveInterval: getIntConfig('MAX_AUTO_ARCHIVE_INTERVAL', 'maxAutoArchiveInterval', '43200'),
-  maintananceMode: getBoolConfig('MAINTENANCE_MODE', 'maintananceMode'),
+  maintenanceMode: getBoolConfig('MAINTENANCE_MODE', 'maintenanceMode'),
   disableCronJobs: getBoolConfig('DISABLE_CRON_JOBS', 'disableCronJobs'),
   appRole: getConfig('APP_ROLE', 'appRole', 'all'),
   proxy: {
