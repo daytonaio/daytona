@@ -49,7 +49,9 @@ func main() {
 		cmd.Stdout = &util.PrefixedWriter{Prefix: "[ENTRYPOINT] ", Writer: os.Stdout}
 		cmd.Stderr = &util.PrefixedWriter{Prefix: "[ENTRYPOINT] ", Writer: os.Stderr}
 
-		// Start command and wait for it in background to prevent zombie process
+		// Start the command and wait for it in a background goroutine.
+		// This ensures the child process is properly reaped (preventing zombies)
+		// while allowing the daemon to continue initialization without blocking.
 		err := cmd.Start()
 		if err != nil {
 			log.Errorf("failed to start command: %v", err)

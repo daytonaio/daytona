@@ -17,7 +17,7 @@ import (
 )
 
 func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
-	containerConfig, err := d.getContainerCreateConfig(sandboxDto)
+	containerConfig, err := d.getContainerCreateConfig(ctx, sandboxDto)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -31,7 +31,7 @@ func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.C
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
-func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO) (*container.Config, error) {
+func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (*container.Config, error) {
 	envVars := []string{
 		"DAYTONA_SANDBOX_ID=" + sandboxDto.Id,
 		"DAYTONA_SANDBOX_SNAPSHOT=" + sandboxDto.Snapshot,
@@ -57,7 +57,7 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 	entrypoint := sandboxDto.Entrypoint
 	if d.useDaemonEntrypoint {
 		// Inspect image
-		image, _, err := d.apiClient.ImageInspectWithRaw(context.Background(), sandboxDto.Snapshot)
+		image, _, err := d.apiClient.ImageInspectWithRaw(ctx, sandboxDto.Snapshot)
 		if err != nil {
 			return nil, err
 		}

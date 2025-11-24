@@ -1012,17 +1012,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     if (!snapshot.entrypoint) {
       let entrypoint: string[] = []
       if (snapshotInfoResponse.entrypoint) {
-        switch (true) {
-          case typeof snapshotInfoResponse.entrypoint === 'string' && snapshotInfoResponse.entrypoint !== '':
-            entrypoint = [snapshotInfoResponse.entrypoint]
-            break
-          case Array.isArray(snapshotInfoResponse.entrypoint):
-            entrypoint = snapshotInfoResponse.entrypoint
-            break
-          default:
-            this.logger.warn(
-              `Unexpected entrypoint type for snapshot ${snapshot.id}: ${typeof snapshotInfoResponse.entrypoint}`,
-            )
+        if (typeof snapshotInfoResponse.entrypoint === 'string' && snapshotInfoResponse.entrypoint !== '') {
+          entrypoint = [snapshotInfoResponse.entrypoint]
+        } else if (Array.isArray(snapshotInfoResponse.entrypoint)) {
+          entrypoint = snapshotInfoResponse.entrypoint
+        } else {
+          this.logger.warn(
+            `Unexpected entrypoint type for snapshot ${snapshot.id}: ${typeof snapshotInfoResponse.entrypoint}`,
+          )
         }
       }
 
