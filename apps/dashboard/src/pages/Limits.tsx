@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { LiveIndicator } from '@/components/LiveIndicator'
 import { TierAccordion, TierAccordionSkeleton } from '@/components/TierAccordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,7 @@ import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
 import React, { useCallback, useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
@@ -40,6 +42,7 @@ const Limits: React.FC = () => {
       organizationId: selectedOrganization?.id || '',
     },
     {
+      placeholderData: keepPreviousData,
       refetchInterval: 10_000,
       refetchIntervalInBackground: true,
       staleTime: 0,
@@ -125,12 +128,21 @@ const Limits: React.FC = () => {
         <>
           <Card className="my-4">
             <CardHeader>
-              <CardTitle className="flex justify-between gap-4 md:flex-row flex-col flex-wrap">
+              <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap">
                 <div className="flex items-center gap-2">
                   Current Usage{' '}
                   <Badge variant="outline" className="font-mono uppercase">
                     Tier {organizationTier?.tier}
                   </Badge>
+                </div>
+                <div>
+                  {usageOverview && (
+                    <LiveIndicator
+                      isUpdating={usageOverviewQuery.isFetching}
+                      intervalMs={10_000}
+                      lastUpdatedAt={usageOverviewQuery.dataUpdatedAt || 0}
+                    />
+                  )}
                 </div>
               </CardTitle>
               <CardDescription>
