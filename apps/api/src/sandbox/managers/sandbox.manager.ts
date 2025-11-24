@@ -375,7 +375,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     await Promise.all(
       sandboxes.map(async (sandbox) => {
-        this.syncInstanceState(sandbox.id)
+        await this.syncInstanceState(sandbox.id)
       }),
     )
     await this.redisLockProvider.unlock(lockKey)
