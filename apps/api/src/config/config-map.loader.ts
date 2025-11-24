@@ -87,5 +87,6 @@ export function getConfigValue(envVar: string, configMapPath: string, configMap:
   }
 
   // Fall back to config map
-  return getNestedValue(configMap, configMapPath)
+  const configValue = getNestedValue(configMap, configMapPath)
+  return configValue === undefined || configValue === null ? undefined : String(configValue)
 }

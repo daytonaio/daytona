@@ -99,7 +99,7 @@ export interface DaytonaConfiguration {
    * @type {boolean}
    * @memberof DaytonaConfiguration
    */
-  maintananceMode: boolean
+  maintenanceMode: boolean
   /**
    * Current environment
    * @type {string}
