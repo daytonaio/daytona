@@ -246,7 +246,7 @@ const configuration = {
     validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),
     userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
   },
-  runnerHealthTimeout: parseInt(process.env.RUNNER_HEALTH_TIMEOUT || '3', 10),
+  runnerHealthTimeout: parseInt(process.env.RUNNER_HEALTH_TIMEOUT_SECONDS || '3', 10),
 }
 
 export { configuration }

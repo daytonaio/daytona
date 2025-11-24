@@ -231,7 +231,7 @@ export class RunnerService {
             const abortController = new AbortController()
             let timeoutId: NodeJS.Timeout | null = null
 
-            const runnerHealthTimeout = this.configService.get('runnerHealthTimeout')
+            const runnerHealthTimeoutSeconds = this.configService.get('runnerHealthTimeout')
 
             try {
               await Promise.race([
@@ -254,7 +254,7 @@ export class RunnerService {
                   timeoutId = setTimeout(() => {
                     abortController.abort()
                     reject(new Error('Health check timeout'))
-                  }, runnerHealthTimeout * 1000)
+                  }, runnerHealthTimeoutSeconds * 1000)
                 }),
               ])
 
@@ -268,7 +268,9 @@ export class RunnerService {
               }
 
               if (e.message === 'Health check timeout') {
-                this.logger.error(`Runner ${runner.id} health check timed out after ${runnerHealthTimeout} seconds`)
+                this.logger.error(
+                  `Runner ${runner.id} health check timed out after ${runnerHealthTimeoutSeconds} seconds`,
+                )
               } else if (e.code === 'ECONNREFUSED') {
                 this.logger.error(`Runner ${runner.id} not reachable`)
               } else if (e.name === 'AbortError') {
