@@ -19,6 +19,7 @@ import { AuditLogPublisher } from '../interfaces/audit-publisher.interface'
 import { AuditLogFilter } from '../interfaces/audit-filter.interface'
 import { DistributedLock } from '../../common/decorators/distributed-lock.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 @Injectable()
 export class AuditService implements OnApplicationBootstrap {
@@ -130,6 +131,7 @@ export class AuditService implements OnApplicationBootstrap {
     disabled: true,
   })
   @DistributedLock()
+  @LogExecution('cleanup-old-audit-logs')
   async cleanupOldAuditLogs(): Promise<void> {
     try {
       const retentionDays = this.configService.get('audit.retentionDays')
@@ -159,6 +161,7 @@ export class AuditService implements OnApplicationBootstrap {
   })
   @DistributedLock()
   @WithInstrumentation()
+  @LogExecution('resolve-dangling-audit-logs')
   async resolveDanglingLogs() {
     const danglingLogs = await this.auditLogRepository.find({
       where: {
@@ -183,6 +186,7 @@ export class AuditService implements OnApplicationBootstrap {
     waitForCompletion: true,
     disabled: true,
   })
+  @LogExecution('publish-audit-logs')
   @DistributedLock()
   @WithInstrumentation()
   async publishAuditLogs() {
