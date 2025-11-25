@@ -1,0 +1,21 @@
+.localeSelector {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  border: none;
+  border-right: 6px solid var(--block-bg-color);
+  border-left: 4px solid var(--block-bg-color);
+  border-radius: 0.25rem;
+  background-color: var(--block-bg-color);
+  color: var(--foreground-color);
+  font-size: 0.875rem;
+  line-height: 1rem;
+  font-weight: 500;
+  user-select: none;
+  box-shadow: 0 0 0 1px var(--border-color);
+  padding-right: 4px;
+
+  &:focus-visible {
+    outline: 1px solid initial;
+  }
+}

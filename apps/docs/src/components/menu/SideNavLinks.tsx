@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import loadTranslations from 'src/i18n/loadTranslations'
 
 import gtConfig from '../../../gt.config.json'
-import LocaleSelector from './LocaleSelector'
 
 const GITHUB_STARS_FORMATTER = new Intl.NumberFormat('en-US', {
   notation: 'compact',
@@ -36,16 +35,15 @@ const SideNavLinksContent = () => {
       <T>
         <div className="nav-item call">
           <a
-            href="https://www.daytona.io/contact"
+            href="https://app.daytona.io"
             target="_blank"
             className="nav__link"
             rel="noreferrer"
           >
-            Get a Demo
+            Sign in
           </a>
         </div>
       </T>
-      <LocaleSelector className="nav-item" />
 
       <div className="nav-item github">
         <a
