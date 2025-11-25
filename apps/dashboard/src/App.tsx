@@ -13,7 +13,6 @@ import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
 import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
 import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
@@ -31,6 +30,8 @@ import {
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
+import { useConfig } from './hooks/useConfig'
+import { addPylonWidget } from './lib/pylon-widget'
 import AccountSettings from './pages/AccountSettings'
 import AuditLogs from './pages/AuditLogs'
 import Dashboard from './pages/Dashboard'
@@ -48,19 +49,7 @@ import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
 import { BillingProvider } from './providers/BillingProvider'
-import { useConfig } from './hooks/useConfig'
-import { addPylonWidget } from './lib/pylon-widget'
 import { QueryProvider } from './providers/QueryProvider'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-    },
-  },
-})
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
