@@ -31,7 +31,7 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 
 	log.Infof("Creating backup for container %s...", containerId)
 
-	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
+	d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
 
 	go func() {
 		ctx, cancel := context.WithCancel(context.Background())
@@ -49,28 +49,28 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 		err := d.commitContainer(ctx, containerId, backupDto.Snapshot)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
-				d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+				d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
 				log.Infof("Backup for container %s canceled", containerId)
 				return
 			}
 			log.Errorf("Error committing container %s: %v", containerId, err)
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 			return
 		}
 
 		err = d.PushImage(ctx, backupDto.Snapshot, &backupDto.Registry)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
-				d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+				d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
 				log.Infof("Backup for container %s canceled", containerId)
 				return
 			}
 			log.Errorf("Error pushing image %s: %v", backupDto.Snapshot, err)
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 			return
 		}
 
-		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
+		d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
 
 		log.Infof("Backup (%s) for container %s created successfully", backupDto.Snapshot, containerId)
 

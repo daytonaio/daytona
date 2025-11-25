@@ -355,7 +355,13 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       }
     } catch (error) {
       if (error.response?.status === 404) {
-        await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.NONE, undefined, undefined, fromAxiosError(error).message)
+        await this.sandboxService.updateSandboxBackupState(
+          sandbox.id,
+          BackupState.NONE,
+          undefined,
+          undefined,
+          fromAxiosError(error).message,
+        )
         return
       }
 
@@ -419,7 +425,13 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
     } catch (error) {
       if (error.response?.status === 404) {
-        await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.NONE, error)
+        await this.sandboxService.updateSandboxBackupState(
+          sandbox.id,
+          BackupState.NONE,
+          undefined,
+          undefined,
+          fromAxiosError(error),
+        )
         return
       }
       if (error.response?.status === 400 && error.response?.data?.message.includes('A backup is already in progress')) {

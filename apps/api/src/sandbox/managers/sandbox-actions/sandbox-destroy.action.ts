@@ -27,6 +27,7 @@ export class SandboxDestroyAction extends SandboxAction {
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+    // Only return early if already destroyed; allow ARCHIVED sandboxes to be destroyed
     if (sandbox.state === SandboxState.DESTROYED) {
       return DONT_SYNC_AGAIN
     }

@@ -44,11 +44,6 @@ func Create(ctx *gin.Context) {
 
 	containerId, err := runner.Docker.Create(ctx.Request.Context(), createSandboxDto)
 	if err != nil {
-		if common_errors.IsNotFoundError(err) {
-			runner.StatesCache.SetSandboxState(ctx, createSandboxDto.Id, enums.SandboxStateUnknown)
-		} else {
-			runner.StatesCache.SetSandboxState(ctx, createSandboxDto.Id, enums.SandboxStateError)
-		}
 		common.ContainerOperationCount.WithLabelValues("create", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
 		return
@@ -82,7 +77,6 @@ func Destroy(ctx *gin.Context) {
 
 	err := runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("destroy", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
 		return
@@ -124,7 +118,7 @@ func CreateBackup(ctx *gin.Context) {
 
 	err = runner.Docker.StartBackupCreate(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
-		runner.StatesCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
+		runner.BackupInfoCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
 		ctx.Error(err)
 		return
 	}
@@ -163,7 +157,6 @@ func Resize(ctx *gin.Context) {
 
 	err = runner.Docker.Resize(ctx.Request.Context(), sandboxId, resizeDto)
 	if err != nil {
-		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
 		return
 	}
@@ -309,11 +302,6 @@ func Start(ctx *gin.Context) {
 
 	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
 	if err != nil {
-		if common_errors.IsNotFoundError(err) {
-			runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateUnknown)
-		} else {
-			runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
-		}
 		ctx.Error(err)
 		return
 	}
@@ -344,11 +332,6 @@ func Stop(ctx *gin.Context) {
 
 	err := runner.Docker.Stop(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		if common_errors.IsNotFoundError(err) {
-			runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateUnknown)
-		} else {
-			runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
-		}
 		ctx.Error(err)
 		return
 	}
@@ -377,7 +360,7 @@ func Info(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	info, err := runner.SandboxService.GetSandboxStatesInfo(ctx.Request.Context(), sandboxId)
+	info, err := runner.SandboxService.GetSandboxInfo(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		ctx.Error(err)
 		return

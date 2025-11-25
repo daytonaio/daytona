@@ -41,7 +41,6 @@ func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 	ct, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
 		if common_errors.IsNotFoundError(err) {
-			d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroyed)
 			return nil
 		}
 		return err
@@ -51,11 +50,8 @@ func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 	state, _ := d.deduceSandboxState(ct)
 	if slices.Contains(DESTROYED_STATES, state) {
 		log.Debugf("Sandbox %s is already destroyed or destroying", sandboxId)
-		d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroyed)
 		return nil
 	}
-
-	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroying)
 
 	if state == enums.SandboxStateStopped {
 		err = d.apiClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{
@@ -71,12 +67,10 @@ func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 				}
 			}()
 
-			d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroyed)
 			return nil
 		}
 
 		if err != nil && errdefs.IsNotFound(err) {
-			d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroyed)
 			// not returning not found error here because not found indicates it is already destroyed
 			return nil
 		}
@@ -102,7 +96,6 @@ func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 	if err != nil {
 		// Handle NotFound error case
 		if errdefs.IsNotFound(err) {
-			d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroyed)
 			// not returning not found error here because not found indicates it is already destroyed
 			return nil
 		}
@@ -116,8 +109,6 @@ func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 			log.Errorf("Failed to delete sandbox network settings: %v", err)
 		}
 	}()
-
-	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateDestroyed)
 
 	return nil
 }

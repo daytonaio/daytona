@@ -20,17 +20,14 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	state, err := d.GetSandboxState(ctx, containerId)
 	if err == nil && state == enums.SandboxStateStopped {
 		log.Debugf("Sandbox %s is already stopped", containerId)
-		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 		return nil
 	}
 
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopping)
-
 	if err != nil {
+		log.Warnf("Failed to get sandbox %s state: %v", containerId, err)
 		if common_errors.IsNotFoundError(err) {
 			return err
 		}
-		log.Warnf("Failed to deduce sandbox %s state: %v", containerId, err)
 		log.Warnf("Continuing with stop operation")
 	}
 
@@ -75,14 +72,12 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		}
 	case <-statusCh:
 		// Container stopped successfully
-		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 		return nil
 	case <-ctx.Done():
 		return ctx.Err()
 	}
 
 	log.Debugf("Sandbox %s stopped successfully", containerId)
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 
 	return nil
 }

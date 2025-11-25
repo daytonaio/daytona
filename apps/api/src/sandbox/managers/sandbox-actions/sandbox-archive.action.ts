@@ -36,6 +36,8 @@ export class SandboxArchiveAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
+    // Only proceed with archiving if the sandbox is in STOPPED or ARCHIVING state.
+    // For all other states, do not proceed with archiving.
     if (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING) {
       return DONT_SYNC_AGAIN
     }

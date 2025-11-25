@@ -13,7 +13,6 @@ import (
 
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/pkg/common"
-	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
@@ -23,7 +22,6 @@ import (
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
 	defer timer.Timer()()
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
 	// Cancel a backup if it's already in progress
 	backup_context, ok := backup_context_map.Get(containerId)
@@ -47,7 +45,6 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 			return err
 		}
 
-		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
 		return nil
 	}
 
@@ -83,8 +80,6 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	if err != nil {
 		return err
 	}
-
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
 
 	if metadata["limitNetworkEgress"] == "true" {
 		go func() {
