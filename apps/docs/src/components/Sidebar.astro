@@ -36,12 +36,16 @@ const PUBLIC_WEB_URL = (
 
 <style>
   .navbar-links {
-    display: flex;
+    display: none;
     align-items: flex-start;
     flex-direction: column;
     gap: 16px;
     border-top: 1px solid var(--border-color);
     padding-top: 20px;
+
+    @media (max-width: 1024px) {
+      display: flex;
+    }
   }
 
   .navbar-links a {
