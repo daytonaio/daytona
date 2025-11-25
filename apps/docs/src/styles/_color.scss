@@ -28,6 +28,9 @@ body {
   --cta-surface-neutral-primary: #252525;
 
   --foreground-color: #fafafa;
+
+  --selection-bg-color: #2fcc712b;
+  --selection-text-color: #2fcc71;
 }
 
 html[data-theme='light'] body {
@@ -47,4 +50,6 @@ html[data-theme='light'] body {
   --secondary-hover-color: #08ae78;
 
   --foreground-color: #636363;
+
+  --selection-text-color: #058157;
 }

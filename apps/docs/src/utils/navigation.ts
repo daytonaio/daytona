@@ -23,6 +23,7 @@ export interface NavigationLink extends NavigationItem {
     icon?: string
     [key: string]: any
   }
+  external?: boolean
 }
 
 export interface MainNavigationLink extends NavigationLink {

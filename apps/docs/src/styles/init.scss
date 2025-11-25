@@ -39,3 +39,8 @@ pre > code {
   text-wrap: wrap !important;
   white-space: pre-wrap;
 }
+
+::selection {
+  background-color: var(--selection-bg-color);
+  color: var(--selection-text-color);
+}
