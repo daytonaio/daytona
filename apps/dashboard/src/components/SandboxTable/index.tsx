@@ -163,15 +163,12 @@ export function SandboxTable({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
-                className={`${
-                  sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED
-                    ? 'opacity-80 pointer-events-none'
-                    : '[&:hover>*:nth-child(2)]:underline'
-                } ${
-                  sandboxStateIsTransitioning[row.original.id]
-                    ? 'bg-muted transition-colors duration-300 animate-pulse'
-                    : 'transition-colors duration-300'
-                } ${onRowClick ? 'cursor-pointer' : ''}`}
+                className={cn('group/table-row transition-all', {
+                  'opacity-80 pointer-events-none':
+                    sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED,
+                  'bg-muted animate-pulse': sandboxStateIsTransitioning[row.original.id],
+                  'cursor-pointer': onRowClick,
+                })}
                 onClick={() => onRowClick?.(row.original)}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -182,7 +179,9 @@ export function SandboxTable({
                         e.stopPropagation()
                       }
                     }}
-                    className="border-b border-border"
+                    className={cn('border-b border-border', {
+                      'group-hover/table-row:underline': cell.column.id === 'name',
+                    })}
                     style={{
                       width: `${cell.column.getSize()}px`,
                     }}
