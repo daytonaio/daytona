@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Logo, LogoText } from '@/assets/Logo'
+import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
+import {
+  Sidebar as SidebarComponent,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
+import { useTheme } from '@/contexts/ThemeContext'
+import { RoutePath } from '@/enums/RoutePath'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
+import { useWebhooks } from '@/hooks/useWebhooks'
+import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { addHours, formatRelative } from 'date-fns'
 import {
   BookOpen,
   Box,
@@ -26,36 +48,13 @@ import {
   TriangleAlert,
   Users,
 } from 'lucide-react'
-import {
-  Sidebar as SidebarComponent,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
-import { useTheme } from '@/contexts/ThemeContext'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { useAuth } from 'react-oidc-context'
-import { Button } from './ui/button'
-import { useNavigate, useLocation } from 'react-router-dom'
 import { useMemo } from 'react'
-import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
-import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { useAuth } from 'react-oidc-context'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
-import { Tooltip, TooltipContent } from './ui/tooltip'
-import { TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { addHours, formatRelative } from 'date-fns'
-import { RoutePath } from '@/enums/RoutePath'
-import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
-import { Logo, LogoText } from '@/assets/Logo'
-import { useWebhooks } from '@/hooks/useWebhooks'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -190,11 +189,18 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             <SidebarMenu>
               {sidebarItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
-                    <button onClick={() => (item.onClick ? item.onClick() : navigate(item.path))} className="text-sm">
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </button>
+                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
+                    {item.onClick ? (
+                      <button onClick={() => item.onClick?.()}>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </button>
+                    ) : (
+                      <Link to={item.path}>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -207,11 +213,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             <SidebarMenu>
               {billingItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
-                    <button onClick={() => navigate(item.path)} className="text-sm">
+                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
+                    <Link to={item.path}>
                       {item.icon}
                       <span>{item.label}</span>
-                    </button>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -330,38 +336,32 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
                 <DropdownMenuItem asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full cursor-pointer justify-start"
-                    onClick={() => navigate(RoutePath.ACCOUNT_SETTINGS)}
-                  >
-                    <Settings className="w-4 h-4" />
-                    Account Settings
+                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
+                    <Link to={RoutePath.ACCOUNT_SETTINGS}>
+                      <Settings className="w-4 h-4" />
+                      Account Settings
+                    </Link>
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full cursor-pointer justify-start"
-                    onClick={() => navigate(RoutePath.USER_INVITATIONS)}
-                  >
-                    <Mail className="w-4 h-4" />
-                    Invitations
-                    {organizationInvitationsCount > 0 && (
-                      <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
-                        {organizationInvitationsCount}
-                      </span>
-                    )}
+                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
+                    <Link to={RoutePath.USER_INVITATIONS}>
+                      <Mail className="w-4 h-4" />
+                      Invitations
+                      {organizationInvitationsCount > 0 && (
+                        <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
+                          {organizationInvitationsCount}
+                        </span>
+                      )}
+                    </Link>
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full cursor-pointer justify-start"
-                    onClick={() => navigate(RoutePath.ONBOARDING)}
-                  >
-                    <ListChecks className="w-4 h-4" />
-                    Onboarding
+                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
+                    <Link to={RoutePath.ONBOARDING}>
+                      <ListChecks className="w-4 h-4" />
+                      Onboarding
+                    </Link>
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
