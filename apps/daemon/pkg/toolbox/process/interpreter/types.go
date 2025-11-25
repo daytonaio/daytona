@@ -75,18 +75,18 @@ type ExecuteRequest struct {
 
 // ListContextsResponse represents the response when listing contexts
 type ListContextsResponse struct {
-	Contexts []ContextInfo `json:"contexts"`
+	Contexts []ContextInfo `json:"contexts" binding:"required"`
 } // @name ListContextsResponse
 
 // Context types
 
 // ContextInfo contains metadata about an interpreter context
 type ContextInfo struct {
-	ID        string    `json:"id"`
-	Cwd       string    `json:"cwd"`
-	CreatedAt time.Time `json:"createdAt"`
-	Active    bool      `json:"active"`
-	Language  string    `json:"language"`
+	ID        string    `json:"id" binding:"required"`
+	Cwd       string    `json:"cwd" binding:"required"`
+	CreatedAt time.Time `json:"createdAt" binding:"required"`
+	Active    bool      `json:"active" binding:"required"`
+	Language  string    `json:"language" binding:"required"`
 } // @name InterpreterContext
 
 // Context represents an active interpreter context with operational methods
@@ -119,19 +119,19 @@ type Context struct {
 
 // CommandExecution tracks a single code execution
 type CommandExecution struct {
-	ID        string     `json:"id"`
-	Code      string     `json:"code"`
-	Status    string     `json:"status"` // "running", "ok", "error", "interrupted", "exit", "timeout"
+	ID        string     `json:"id" binding:"required"`
+	Code      string     `json:"code" binding:"required"`
+	Status    string     `json:"status" binding:"required"` // "running", "ok", "error", "interrupted", "exit", "timeout"
 	Error     *Error     `json:"error,omitempty"`
-	StartedAt time.Time  `json:"startedAt"`
+	StartedAt time.Time  `json:"startedAt" binding:"required"`
 	EndedAt   *time.Time `json:"endedAt,omitempty"`
 }
 
 // Error represents a structured error from code execution
 type Error struct {
-	Name      string `json:"name"`
-	Value     string `json:"value"`
-	Traceback string `json:"traceback,omitempty"`
+	Name      string `json:"name" binding:"required"`
+	Value     string `json:"value" binding:"required"`
+	Traceback string `json:"traceback" binding:"required"`
 }
 
 // Internal types
@@ -147,18 +147,18 @@ type wsClient struct {
 
 // OutputMessage represents output sent to WebSocket clients
 type OutputMessage struct {
-	Type      string `json:"type"`
-	Text      string `json:"text,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Value     string `json:"value,omitempty"`
-	Traceback string `json:"traceback,omitempty"`
+	Type      string `json:"type" binding:"required"`
+	Text      string `json:"text" binding:"required"`
+	Name      string `json:"name" binding:"required"`
+	Value     string `json:"value" binding:"required"`
+	Traceback string `json:"traceback" binding:"required"`
 }
 
 // WorkerCommand represents a command sent to the language worker
 type WorkerCommand struct {
-	ID   string            `json:"id"`
-	Code string            `json:"code,omitempty"`
-	Envs map[string]string `json:"envs,omitempty"`
+	ID   string            `json:"id" binding:"required"`
+	Code string            `json:"code" binding:"required"`
+	Envs map[string]string `json:"envs" binding:"required"`
 }
 
 // execJob represents one queued execution

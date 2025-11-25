@@ -2962,6 +2962,13 @@ const docTemplate = `{
         },
         "InterpreterContext": {
             "type": "object",
+            "required": [
+                "active",
+                "createdAt",
+                "cwd",
+                "id",
+                "language"
+            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3040,6 +3047,9 @@ const docTemplate = `{
         },
         "ListContextsResponse": {
             "type": "object",
+            "required": [
+                "contexts"
+            ],
             "properties": {
                 "contexts": {
                     "type": "array",

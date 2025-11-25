@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from daytona_toolbox_api_client_async.models.interpreter_context import InterpreterContext
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,7 +27,7 @@ class ListContextsResponse(BaseModel):
     """
     ListContextsResponse
     """ # noqa: E501
-    contexts: Optional[List[InterpreterContext]] = None
+    contexts: List[InterpreterContext]
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["contexts"]
 

@@ -13,10 +13,18 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
 )
 
 func NewInterpreterController(workDir string) *Controller {
 	InitManager(workDir)
+	// Pre-warm the default interpreter context to reduce latency on first request
+	go func() {
+		_, err := GetOrCreateDefaultContext()
+		if err != nil {
+			log.Debugf("Failed to pre-create default interpreter context: %v", err)
+		}
+	}()
 	return &Controller{workDir: workDir}
 }
 
@@ -94,26 +102,26 @@ func (c *Controller) Execute(ctx *gin.Context) {
 
 	_, payload, err := ws.ReadMessage()
 	if err != nil {
-		writeWSError(ws, "ProtocolError", "failed to read first message", websocket.CloseProtocolError)
+		writeWSError(ws, "failed to read first message", websocket.CloseProtocolError)
 		return
 	}
 
 	var req ExecuteRequest
 	err = json.Unmarshal(payload, &req)
 	if err != nil {
-		writeWSError(ws, "ProtocolError", "invalid JSON payload", websocket.CloseProtocolError)
+		writeWSError(ws, "invalid JSON payload", websocket.CloseProtocolError)
 		return
 	}
 
 	if req.Code == "" {
-		writeWSError(ws, "ValidationError", "code is required", websocket.ClosePolicyViolation)
+		writeWSError(ws, "code is required", websocket.ClosePolicyViolation)
 		return
 	}
 
 	timeout := 10 * time.Minute
 	if req.Timeout != nil {
 		if *req.Timeout < 0 {
-			writeWSError(ws, "ValidationError", "timeout must be greater than or equal to 0", websocket.ClosePolicyViolation)
+			writeWSError(ws, "timeout must be greater than or equal to 0", websocket.ClosePolicyViolation)
 			return
 		}
 		if *req.Timeout == 0 {
@@ -128,20 +136,20 @@ func (c *Controller) Execute(ctx *gin.Context) {
 	if req.ContextID == nil {
 		iCtx, err = GetOrCreateDefaultContext()
 		if err != nil {
-			writeWSError(ws, "ContextError", "failed to get default context: "+err.Error(), websocket.CloseInternalServerErr)
+			writeWSError(ws, "failed to get default context: "+err.Error(), websocket.CloseInternalServerErr)
 			return
 		}
 	} else {
 		iCtx, err = GetContext(*req.ContextID)
 		if err != nil {
-			writeWSError(ws, "ContextError", "context not found: "+*req.ContextID, websocket.ClosePolicyViolation)
+			writeWSError(ws, "context not found: "+*req.ContextID, websocket.ClosePolicyViolation)
 			return
 		}
 	}
 
 	contextInfo := iCtx.Info()
 	if !contextInfo.Active {
-		writeWSError(ws, "ContextError", "context is not active", websocket.ClosePolicyViolation)
+		writeWSError(ws, "context is not active", websocket.ClosePolicyViolation)
 		return
 	}
 
@@ -154,7 +162,7 @@ func (c *Controller) Execute(ctx *gin.Context) {
 }
 
 // writeWSError sends an error message to the WebSocket and closes the connection
-func writeWSError(ws *websocket.Conn, name, value string, closeCode int) {
+func writeWSError(ws *websocket.Conn, value string, closeCode int) {
 	closeMessage := websocket.FormatCloseMessage(closeCode, value)
 	_ = ws.WriteControl(websocket.CloseMessage, closeMessage, time.Now().Add(writeWait))
 	_ = ws.Close()
