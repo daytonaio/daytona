@@ -322,6 +322,12 @@ definitions:
         type: string
       language:
         type: string
+    required:
+      - active
+      - createdAt
+      - cwd
+      - id
+      - language
     type: object
   IsPortInUseResponse:
     properties:
@@ -367,6 +373,8 @@ definitions:
         items:
           $ref: '#/definitions/InterpreterContext'
         type: array
+    required:
+      - contexts
     type: object
   LspCompletionParams:
     properties:

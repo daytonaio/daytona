@@ -27,5 +27,5 @@ export interface ListContextsResponse {
    * @type {Array<InterpreterContext>}
    * @memberof ListContextsResponse
    */
-  contexts?: Array<InterpreterContext>
+  contexts: Array<InterpreterContext>
 }

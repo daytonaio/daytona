@@ -203,13 +203,6 @@ func (s *Server) Start() error {
 
 		// Interpreter endpoints
 		interpreterController := interpreter.NewInterpreterController(s.WorkDir)
-		// Pre-warm the default interpreter context to reduce latency on first request
-		go func() {
-			_, err := interpreter.GetOrCreateDefaultContext()
-			if err != nil {
-				log.Debugf("Failed to pre-create default interpreter context: %v", err)
-			}
-		}()
 		interpreterGroup := processController.Group("/interpreter")
 		{
 			interpreterGroup.POST("/context", interpreterController.CreateContext)

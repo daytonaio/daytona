@@ -420,7 +420,14 @@ func (c *Context) shutdown() {
 	cancel := c.cancel
 	cmd := c.cmd
 	done := c.done
+	queue := c.queue
 	c.mu.Unlock()
+
+	// Close the queue to exit processQueue goroutine and prevent new jobs
+	if queue != nil {
+		close(queue)
+		c.queue = nil
+	}
 
 	// Send SIGTERM to trigger immediate graceful shutdown (not queued)
 	if cmd != nil && cmd.Process != nil {

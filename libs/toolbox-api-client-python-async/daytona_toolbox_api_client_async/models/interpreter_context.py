@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,11 +26,11 @@ class InterpreterContext(BaseModel):
     """
     InterpreterContext
     """ # noqa: E501
-    active: Optional[StrictBool] = None
-    created_at: Optional[StrictStr] = Field(default=None, alias="createdAt")
-    cwd: Optional[StrictStr] = None
-    id: Optional[StrictStr] = None
-    language: Optional[StrictStr] = None
+    active: StrictBool
+    created_at: StrictStr = Field(alias="createdAt")
+    cwd: StrictStr
+    id: StrictStr
+    language: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["active", "createdAt", "cwd", "id", "language"]
 
