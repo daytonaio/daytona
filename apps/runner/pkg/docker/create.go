@@ -5,8 +5,6 @@ package docker
 
 import (
 	"context"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/containerd/errdefs"
@@ -18,8 +16,6 @@ import (
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	log "github.com/sirupsen/logrus"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, error) {
@@ -54,18 +50,12 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	ctx = context.WithValue(ctx, constants.ID_KEY, sandboxDto.Id)
-	err = d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry)
+	err = d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry, false)
 	if err != nil {
 		return "", err
 	}
 
 	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
-
-	err = d.validateImageArchitecture(ctx, sandboxDto.Snapshot)
-	if err != nil {
-		log.Errorf("ERROR: %s.\n", err.Error())
-		return "", err
-	}
 
 	volumeMountPathBinds := make([]string, 0)
 	if sandboxDto.Volumes != nil {
@@ -130,27 +120,4 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	return c.ID, nil
-}
-
-func (p *DockerClient) validateImageArchitecture(ctx context.Context, image string) error {
-	defer timer.Timer()()
-
-	inspect, err := p.apiClient.ImageInspect(ctx, image)
-	if err != nil {
-		if errdefs.IsNotFound(err) {
-			return err
-		}
-		return fmt.Errorf("failed to inspect image: %w", err)
-	}
-
-	arch := strings.ToLower(inspect.Architecture)
-	validArchs := []string{"amd64", "x86_64"}
-
-	for _, validArch := range validArchs {
-		if arch == validArch {
-			return nil
-		}
-	}
-
-	return common_errors.NewConflictError(fmt.Errorf("image %s architecture (%s) is not x64 compatible", image, inspect.Architecture))
 }
