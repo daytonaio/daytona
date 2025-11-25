@@ -65,6 +65,7 @@ export interface RunnerAdapter {
   buildSnapshot(
     buildInfo: BuildInfo,
     organizationId?: string,
+    sourceRegistry?: DockerRegistry,
     registry?: DockerRegistry,
     pushToInternalRegistry?: boolean,
   ): Promise<void>

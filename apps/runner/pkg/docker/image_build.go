@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/runner/pkg/storage"
 
 	"github.com/docker/docker/api/types/build"
+	docker_registry "github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
@@ -141,6 +142,17 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	buildContext := io.NopCloser(buildContextTar)
 
+	authConfigs := make(map[string]docker_registry.AuthConfig, 2)
+
+	if buildImageDto.SourceRegistry != nil {
+		authConfig := docker_registry.AuthConfig{
+			Username: buildImageDto.SourceRegistry.Username,
+			Password: buildImageDto.SourceRegistry.Password,
+		}
+		authConfigs["https://"+buildImageDto.SourceRegistry.Url] = authConfig
+		authConfigs["http://"+buildImageDto.SourceRegistry.Url] = authConfig
+	}
+
 	resp, err := d.apiClient.ImageBuild(ctx, buildContext, build.ImageBuildOptions{
 		Tags:        []string{buildImageDto.Snapshot},
 		Dockerfile:  "Dockerfile",
@@ -148,6 +160,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		ForceRemove: true,
 		PullParent:  true,
 		Platform:    "linux/amd64", // Force AMD64 architecture
+		AuthConfigs: authConfigs,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to build image: %w", err)

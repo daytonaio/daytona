@@ -239,6 +239,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   async buildSnapshot(
     buildInfo: BuildInfo,
     organizationId?: string,
+    sourceRegistry?: DockerRegistry,
     registry?: DockerRegistry,
     pushToInternalRegistry?: boolean,
   ): Promise<void> {
@@ -248,6 +249,15 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       organizationId: organizationId,
       context: buildInfo.contextHashes,
       pushToInternalRegistry: pushToInternalRegistry,
+    }
+
+    if (sourceRegistry) {
+      request.sourceRegistry = {
+        project: sourceRegistry.project,
+        url: sourceRegistry.url.replace(/^(https?:\/\/)/, ''),
+        username: sourceRegistry.username,
+        password: sourceRegistry.password,
+      }
     }
 
     if (registry) {

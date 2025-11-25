@@ -12,6 +12,7 @@ type PullSnapshotRequestDTO struct {
 
 type BuildSnapshotRequestDTO struct {
 	Snapshot               string       `json:"snapshot,omitempty"` // Snapshot ID and tag or the build's hash
+	SourceRegistry         *RegistryDTO `json:"sourceRegistry,omitempty"`
 	Registry               *RegistryDTO `json:"registry,omitempty"`
 	Dockerfile             string       `json:"dockerfile" validate:"required"`
 	OrganizationId         string       `json:"organizationId" validate:"required"`

@@ -58,4 +58,10 @@ export interface BuildSnapshotRequestDTO {
    * @memberof BuildSnapshotRequestDTO
    */
   snapshot?: string
+  /**
+   *
+   * @type {RegistryDTO}
+   * @memberof BuildSnapshotRequestDTO
+   */
+  sourceRegistry?: RegistryDTO
 }

@@ -1304,6 +1304,9 @@ const docTemplate = `{
                 "snapshot": {
                     "description": "Snapshot ID and tag or the build's hash",
                     "type": "string"
+                },
+                "sourceRegistry": {
+                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },

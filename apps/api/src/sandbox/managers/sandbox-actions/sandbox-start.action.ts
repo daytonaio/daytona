@@ -259,7 +259,8 @@ export class SandboxStartAction extends SandboxAction {
 
     while (retries < 10) {
       try {
-        await runnerAdapter.buildSnapshot(buildInfo, organizationId)
+        const sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
+        await runnerAdapter.buildSnapshot(buildInfo, organizationId, sourceRegistry)
         break
       } catch (err) {
         if (err.code !== 'ECONNRESET') {

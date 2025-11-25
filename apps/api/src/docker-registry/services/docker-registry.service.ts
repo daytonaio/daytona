@@ -23,6 +23,7 @@ import { AxiosHeaders } from 'axios'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
+const DOCKER_HUB_REGISTRY_ENDPOINT = 'index.docker.io/v1/'
 
 export interface ImageDetails {
   digest: string
@@ -150,6 +151,17 @@ export class DockerRegistryService {
   async getDefaultTransientRegistry(): Promise<DockerRegistry | null> {
     return this.dockerRegistryRepository.findOne({
       where: { isDefault: true, registryType: RegistryType.TRANSIENT },
+    })
+  }
+
+  async getDefaultDockerHubRegistry(): Promise<DockerRegistry | null> {
+    return this.dockerRegistryRepository.findOne({
+      where: {
+        organizationId: IsNull(),
+        registryType: RegistryType.INTERNAL,
+        url: DOCKER_HUB_REGISTRY_ENDPOINT,
+        project: '',
+      },
     })
   }
 
