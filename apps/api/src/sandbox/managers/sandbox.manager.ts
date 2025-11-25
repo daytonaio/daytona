@@ -39,6 +39,7 @@ import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
+import { BackupState } from '../enums/backup-state.enum'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -156,7 +157,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         order: {
           lastBackupAt: 'ASC',
         },
-        take: 100,
+        take: 200,
       })
 
       await Promise.all(
@@ -251,7 +252,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @LogExecution('sync-states')
   async syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
-    if (!(await this.redisLockProvider.lock(globalLockKey, 30))) {
+    const lockTtl = 10 * 60 // seconds (10 min)
+    if (!(await this.redisLockProvider.lock(globalLockKey, lockTtl))) {
       return
     }
 
@@ -268,14 +270,20 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       const stream = await queryBuilder.stream()
       let processedCount = 0
-      const maxProcessPerRun = 100
+      const maxProcessPerRun = 1000
       const pendingProcesses: Promise<void>[] = []
 
       try {
         await new Promise<void>((resolve, reject) => {
-          stream.on('data', (row: any) => {
+          stream.on('data', async (row: any) => {
             if (processedCount >= maxProcessPerRun) {
               resolve()
+              return
+            }
+
+            const lockKey = getStateChangeLockKey(row.sandbox_id)
+            if (await this.redisLockProvider.isLocked(lockKey)) {
+              // Sandbox is already being processed, skip it
               return
             }
 
@@ -287,7 +295,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             // Limit concurrent processing to avoid overwhelming the system
             if (pendingProcesses.length >= 10) {
               stream.pause()
-              Promise.all(pendingProcesses.splice(0, pendingProcesses.length))
+              Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
                 .then(() => stream.resume())
                 .catch(reject)
             }
@@ -337,6 +345,35 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     await Promise.all(
       sandboxes.map(async (sandbox) => {
         this.syncInstanceState(sandbox.id)
+      }),
+    )
+    await this.redisLockProvider.unlock(lockKey)
+  }
+
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-completed-states' })
+  @TrackJobExecution()
+  @LogExecution('sync-archived-completed-states')
+  async syncArchivedCompletedStates(): Promise<void> {
+    const lockKey = 'sync-archived-completed-states'
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
+      return
+    }
+
+    const sandboxes = await this.sandboxRepository.find({
+      where: {
+        state: In([SandboxState.ARCHIVING, SandboxState.STOPPED]),
+        desiredState: SandboxDesiredState.ARCHIVED,
+        backupState: BackupState.COMPLETED,
+      },
+      take: 100,
+      order: {
+        updatedAt: 'ASC',
+      },
+    })
+
+    await Promise.allSettled(
+      sandboxes.map(async (sandbox) => {
+        await this.syncInstanceState(sandbox.id)
       }),
     )
     await this.redisLockProvider.unlock(lockKey)
