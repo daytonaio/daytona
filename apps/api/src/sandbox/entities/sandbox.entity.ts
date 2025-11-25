@@ -333,4 +333,12 @@ export class Sandbox {
       this.pending = false
     }
   }
+
+  @BeforeUpdate()
+  handleDestroyedState() {
+    if (this.state === SandboxState.DESTROYED) {
+      this.runnerId = null
+      this.backupState = BackupState.NONE
+    }
+  }
 }
