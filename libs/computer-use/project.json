@@ -6,29 +6,39 @@
   "tags": [],
   "targets": {
     "build": {
+      "executor": "nx:noop",
+      "dependsOn": ["build-amd64", "build-arm64"]
+    },
+    "build-amd64": {
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/main.go",
-        "outputPath": "dist/libs/computer-use"
-      },
-      "configurations": {
-        "production": {}
-      },
-      "dependsOn": ["build-amd64"],
-      "outputs": ["{workspaceRoot}/dist/libs/computer-use"],
-      "cache": true
-    },
-    "build-amd64": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "./hack/computer-use/build-computer-use-amd64.sh"
-      },
-      "configurations": {
-        "production": {
-          "command": "if [ -n \"$SKIP_COMPUTER_USE_BUILD\" ]; then echo 'Skipping computer-use build'; else ./hack/computer-use/build-computer-use-amd64.sh; fi"
+        "outputPath": "dist/libs/computer-use-amd64",
+        "env": {
+          "CGO_ENABLED": "1",
+          "GOARCH": "amd64",
+          "GOOS": "linux",
+          "CC": "x86_64-linux-gnu-gcc",
+          "CXX": "x86_64-linux-gnu-g++",
+          "PKG_CONFIG_PATH": "/usr/lib/x86_64-linux-gnu/pkgconfig"
         }
       },
-      "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64"],
+      "cache": true
+    },
+    "build-arm64": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/main.go",
+        "outputPath": "dist/libs/computer-use-arm64",
+        "env": {
+          "CGO_ENABLED": "1",
+          "GOARCH": "arm64",
+          "GOOS": "linux",
+          "CC": "aarch64-linux-gnu-gcc",
+          "CXX": "aarch64-linux-gnu-g++",
+          "PKG_CONFIG_PATH": "/usr/lib/aarch64-linux-gnu/pkgconfig"
+        }
+      },
       "cache": true
     },
     "format": {
