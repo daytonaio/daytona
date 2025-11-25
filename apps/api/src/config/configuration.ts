@@ -122,9 +122,7 @@ const configuration = {
   },
   audit: {
     toolboxRequestsEnabled: getBoolConfig('AUDIT_TOOLBOX_REQUESTS_ENABLED', 'audit.toolboxRequestsEnabled'),
-    retentionDays: getConfig('AUDIT_LOG_RETENTION_DAYS', 'audit.retentionDays')
-      ? parseInt(getConfig('AUDIT_LOG_RETENTION_DAYS', 'audit.retentionDays'), 10)
-      : undefined,
+    retentionDays: getIntConfig('AUDIT_LOG_RETENTION_DAYS', 'audit.retentionDays'),
     consoleLogEnabled: getBoolConfig('AUDIT_CONSOLE_LOG_ENABLED', 'audit.consoleLogEnabled'),
     publish: {
       enabled: getBoolConfig('AUDIT_PUBLISH_ENABLED', 'audit.publish.enabled'),
