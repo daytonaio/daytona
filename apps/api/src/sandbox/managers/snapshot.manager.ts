@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, LessThan, MoreThanOrEqual, Not, Repository } from 'typeorm'
+import { FindOptionsWhere, In, LessThan, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -83,7 +83,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   @WithInstrumentation()
   async syncRunnerSnapshots() {
     const lockKey = 'sync-runner-snapshots-lock'
-    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
+    const lockTtl = 10 * 60 // seconds (10 min)
+    if (!(await this.redisLockProvider.lock(lockKey, lockTtl))) {
       return
     }
 
@@ -106,13 +107,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     await this.redis.set('sync-runner-snapshots-skip', Number(skip) + snapshots.length)
 
-    await Promise.all(
+    const results = await Promise.allSettled(
       snapshots.map((snapshot) => {
-        this.propagateSnapshotToRunners(snapshot.ref).catch((err) => {
-          this.logger.error(`Error propagating snapshot ${snapshot.id} to runners: ${err}`)
-        })
+        return this.propagateSnapshotToRunners(snapshot)
       }),
     )
+
+    // Log all promise errors
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        this.logger.error(`Error propagating snapshot to runners: ${fromAxiosError(result.reason)}`)
+      }
+    })
 
     await this.redisLockProvider.unlock(lockKey)
   }
@@ -203,20 +209,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  async propagateSnapshotToRunners(ref: string) {
+  async propagateSnapshotToRunners(snapshot: Snapshot) {
+    const where: FindOptionsWhere<Runner> = {
+      state: RunnerState.READY,
+      unschedulable: Not(true),
+    }
     //  todo: remove try catch block and implement error handling
     try {
-      const runners = await this.runnerRepository.find({
-        where: {
-          state: RunnerState.READY,
-          unschedulable: false,
-        },
-      })
+      const runners = await this.runnerRepository.find({ where })
 
       //  get all runners that have the snapshot in their base image
       const snapshotRunners = await this.snapshotRunnerRepository.find({
         where: {
-          snapshotRef: ref,
+          snapshotRef: snapshot.ref,
           state: In([SnapshotRunnerState.READY, SnapshotRunnerState.PULLING_SNAPSHOT]),
         },
       })
@@ -239,7 +244,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       //  limit the number of runners to propagate to
       const runnersToPropagateTo = unallocatedRunners.slice(0, propagateLimit)
 
-      let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(ref)
+      let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshot.ref)
 
       // If no registry found by image name, use the default internal registry
       if (!dockerRegistry) {
@@ -251,12 +256,16 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       const results = await Promise.allSettled(
         runnersToPropagateTo.map(async (runner) => {
-          const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, ref)
+          const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
 
           try {
             if (!snapshotRunner) {
-              await this.runnerService.createSnapshotRunnerEntry(runner.id, ref, SnapshotRunnerState.PULLING_SNAPSHOT)
-              await this.pullSnapshotRunnerWithRetries(runner, ref, dockerRegistry)
+              await this.runnerService.createSnapshotRunnerEntry(
+                runner.id,
+                snapshot.ref,
+                SnapshotRunnerState.PULLING_SNAPSHOT,
+              )
+              await this.pullSnapshotRunnerWithRetries(runner, snapshot.ref, dockerRegistry)
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
               await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
             }
@@ -386,7 +395,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-state', waitForCompletion: true })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-state' })
   @TrackJobExecution()
   @LogExecution('check-snapshot-state')
   @WithInstrumentation()
