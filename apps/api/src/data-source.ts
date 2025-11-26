@@ -23,6 +23,7 @@ const AppDataSource = new DataSource({
   logging: process.env.DB_LOGGING === 'true',
   namingStrategy: new CustomNamingStrategy(),
   entities: [join(__dirname, '**/*.entity.ts')],
+  entitySkipConstructor: true,
 })
 
 export default AppDataSource

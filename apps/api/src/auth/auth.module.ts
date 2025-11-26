@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs'
 import { UserService } from '../user/user.service'
 import { TypedConfigModule } from '../config/typed-config.module'
 import { catchError, map } from 'rxjs/operators'
+import { RegionModule } from '../region/region.module'
 @Module({
   imports: [
     PassportModule.register({
@@ -28,6 +29,7 @@ import { catchError, map } from 'rxjs/operators'
     UserModule,
     ApiKeyModule,
     SandboxModule,
+    RegionModule,
     HttpModule,
   ],
   providers: [

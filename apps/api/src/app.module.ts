@@ -75,6 +75,7 @@ import { RegionModule } from './region/region.module'
           password: configService.getOrThrow('database.password'),
           database: configService.getOrThrow('database.database'),
           autoLoadEntities: true,
+          entitySkipConstructor: true,
           migrations: [join(__dirname, 'migrations/**/*{.ts,.js}')],
           migrationsRun: configService.get('runMigrations') || !configService.getOrThrow('production'),
           namingStrategy: new CustomNamingStrategy(),

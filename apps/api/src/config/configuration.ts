@@ -143,6 +143,7 @@ const configuration = {
     apiKey: process.env.SSH_GATEWAY_API_KEY,
     command: process.env.SSH_GATEWAY_COMMAND,
     publicKey: process.env.SSH_GATEWAY_PUBLIC_KEY,
+    url: process.env.SSH_GATEWAY_URL,
   },
   organizationSandboxDefaultLimitedNetworkEgress:
     process.env.ORGANIZATION_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS === 'true',

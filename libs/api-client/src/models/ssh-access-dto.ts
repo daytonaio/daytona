@@ -54,4 +54,10 @@ export interface SshAccessDto {
    * @memberof SshAccessDto
    */
   updatedAt: Date
+  /**
+   * SSH command to connect to the sandbox
+   * @type {string}
+   * @memberof SshAccessDto
+   */
+  sshCommand: string
 }
