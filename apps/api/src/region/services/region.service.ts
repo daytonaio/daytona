@@ -31,7 +31,7 @@ export class RegionService {
 
   /**
    * @param createRegionDto - The region details.
-   * @param organizationId - The ID of the organization, or null for non-organization regions.
+   * @param organizationId - The ID of the organization, or null for shared regions.
    * @throws {BadRequestException} If the region name is invalid.
    * @throws {ConflictException} If the region with the same ID already exists or region with the same name already exists in the organization.
    */
@@ -63,7 +63,7 @@ export class RegionService {
 
   /**
    * @param id - The ID of the region.
-   * @param organizationId - The ID of the organization, or null for non-organization regions, or undefined to skip organization check.
+   * @param organizationId - The ID of the organization, or null for shared regions, or undefined to skip organization check.
    * @returns The region if found, or null otherwise.
    */
   async findOne(id: string, organizationId?: string | null): Promise<Region | null> {
@@ -87,7 +87,7 @@ export class RegionService {
 
   /**
    * @param name - The name of the region.
-   * @param organizationId - The organization ID, or null for non-organization regions.
+   * @param organizationId - The organization ID, or null for shared regions.
    * @returns The region if found, or null otherwise.
    */
   async findOneByName(name: string, organizationId: string | null): Promise<Region | null> {
@@ -123,7 +123,7 @@ export class RegionService {
   }
 
   /**
-   * @param organizationId - The organization ID of the regions to find, or null for non-organization regions.
+   * @param organizationId - The organization ID of the regions to find, or null for shared regions.
    * @returns The regions found ordered by name ascending.
    */
   async findAll(organizationId: string | null): Promise<Region[]> {
