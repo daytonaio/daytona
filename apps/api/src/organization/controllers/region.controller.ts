@@ -51,8 +51,8 @@ import { RegionAccessGuard } from '../../region/guards/region-access.guard'
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
-export class RegionController {
-  private readonly logger = new Logger(RegionController.name)
+export class OrganizationRegionController {
+  private readonly logger = new Logger(OrganizationRegionController.name)
 
   constructor(
     private readonly regionService: RegionService,

@@ -25,7 +25,7 @@ import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 import { OrganizationUsageService } from './services/organization-usage.service'
 import { RegionModule } from '../region/region.module'
-import { RegionController } from './controllers/region.controller'
+import { OrganizationRegionController } from './controllers/region.controller'
 
 @Module({
   imports: [
@@ -47,7 +47,7 @@ import { RegionController } from './controllers/region.controller'
     OrganizationRoleController,
     OrganizationUserController,
     OrganizationInvitationController,
-    RegionController,
+    OrganizationRegionController,
   ],
   providers: [
     OrganizationService,
