@@ -16,8 +16,10 @@ definitions:
       snapshot:
         description: Snapshot ID and tag or the build's hash
         type: string
-      sourceRegistry:
-        $ref: '#/definitions/RegistryDTO'
+      sourceRegistries:
+        items:
+          $ref: '#/definitions/RegistryDTO'
+        type: array
     required:
       - dockerfile
       - organizationId

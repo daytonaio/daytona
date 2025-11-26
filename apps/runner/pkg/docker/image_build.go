@@ -144,13 +144,15 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	authConfigs := make(map[string]docker_registry.AuthConfig, 2)
 
-	if buildImageDto.SourceRegistry != nil {
-		authConfig := docker_registry.AuthConfig{
-			Username: buildImageDto.SourceRegistry.Username,
-			Password: buildImageDto.SourceRegistry.Password,
+	if buildImageDto.SourceRegistries != nil {
+		for _, sourceRegistry := range buildImageDto.SourceRegistries {
+			authConfig := docker_registry.AuthConfig{
+				Username: sourceRegistry.Username,
+				Password: sourceRegistry.Password,
+			}
+			authConfigs["https://"+sourceRegistry.Url] = authConfig
+			authConfigs["http://"+sourceRegistry.Url] = authConfig
 		}
-		authConfigs["https://"+buildImageDto.SourceRegistry.Url] = authConfig
-		authConfigs["http://"+buildImageDto.SourceRegistry.Url] = authConfig
 	}
 
 	resp, err := d.apiClient.ImageBuild(ctx, buildContext, build.ImageBuildOptions{

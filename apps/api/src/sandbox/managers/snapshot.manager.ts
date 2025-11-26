@@ -750,7 +750,13 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       registry.url = registry.url.replace(/^(https?:\/\/)/, '')
-      await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId, sourceRegistry, registry, true)
+      await runnerAdapter.buildSnapshot(
+        snapshot.buildInfo,
+        snapshot.organizationId,
+        sourceRegistry ? [sourceRegistry] : undefined,
+        registry,
+        true,
+      )
     } catch (err) {
       if (err.code === 'ECONNRESET') {
         // Connection reset, retry later
