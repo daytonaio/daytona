@@ -469,6 +469,23 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
+      label: labels['sidebarconfig.experimental'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/experimental/otel-collection', locale),
+          label: labels['sidebarconfig.otelCollection'],
+          disablePagination: true,
+          attrs: {
+            icon: 'telemetry.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
       label: labels['sidebarconfig.tsSdkReference'],
       homePageHref: localizePath('/docs/typescript-sdk', locale),
       category: NavigationCategory.TYPESCRIPT_SDK,
