@@ -220,7 +220,7 @@ export class Daytona {
   private readonly jwtToken?: string
   private readonly organizationId?: string
   private readonly apiUrl: string
-  private proxyToolboxUrl?: string
+  private readonly toolboxProxyCache = new Map<string, string>()
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -726,12 +726,15 @@ export class Daytona {
     return axiosInstance
   }
 
-  public async getProxyToolboxUrl(): Promise<string> {
-    if (this.proxyToolboxUrl) {
-      return this.proxyToolboxUrl
+  public async getProxyToolboxUrl(sandboxId: string): Promise<string> {
+    if (this.toolboxProxyCache.has(sandboxId)) {
+      return this.toolboxProxyCache.get(sandboxId)!
     }
 
-    this.proxyToolboxUrl = (await this.configApi.configControllerGetConfig()).data.proxyToolboxUrl
-    return this.proxyToolboxUrl
+    const response = await this.sandboxApi.getToolboxProxyUrl(sandboxId)
+
+    this.toolboxProxyCache.set(sandboxId, response.data.url)
+
+    return response.data.url
   }
 }

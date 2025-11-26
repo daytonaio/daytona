@@ -43,7 +43,13 @@ export class SshAccessDto {
   })
   updatedAt: Date
 
-  static fromSshAccess(sshAccess: SshAccess): SshAccessDto {
+  @ApiProperty({
+    description: 'SSH command to connect to the sandbox',
+    example: 'ssh -p 2222 token@localhost',
+  })
+  sshCommand: string
+
+  static fromSshAccess(sshAccess: SshAccess, sshGatewayUrl: string): SshAccessDto {
     const dto = new SshAccessDto()
     dto.id = sshAccess.id
     dto.sandboxId = sshAccess.sandboxId
@@ -51,6 +57,9 @@ export class SshAccessDto {
     dto.expiresAt = sshAccess.expiresAt
     dto.createdAt = sshAccess.createdAt
     dto.updatedAt = sshAccess.updatedAt
+    const port = sshGatewayUrl.indexOf(':') !== -1 ? sshGatewayUrl.split(':')[2] : '22'
+    dto.sshCommand = `ssh -p ${port} ${sshAccess.token}@${sshGatewayUrl.split('//')[1].split(':')[0]}`
+
     return dto
   }
 }

@@ -32,10 +32,22 @@ interface DataTableProps {
   loading: boolean
   isLoadingRegion: (region: Region) => boolean
   deletePermitted: boolean
+  writePermitted: boolean
   onDelete: (region: Region) => void
+  onRegenerateProxyApiKey: (region: Region) => void
+  onRegenerateSshGatewayApiKey: (region: Region) => void
 }
 
-export function RegionTable({ data, loading, isLoadingRegion, deletePermitted, onDelete }: DataTableProps) {
+export function RegionTable({
+  data,
+  loading,
+  isLoadingRegion,
+  deletePermitted,
+  writePermitted,
+  onDelete,
+  onRegenerateProxyApiKey,
+  onRegenerateSshGatewayApiKey,
+}: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
 
@@ -49,7 +61,15 @@ export function RegionTable({ data, loading, isLoadingRegion, deletePermitted, o
     }
   }
 
-  const columns = getColumns({ onDelete, isLoadingRegion, deletePermitted, copyToClipboard })
+  const columns = getColumns({
+    onDelete,
+    isLoadingRegion,
+    deletePermitted,
+    writePermitted,
+    copyToClipboard,
+    onRegenerateProxyApiKey,
+    onRegenerateSshGatewayApiKey,
+  })
   const table = useReactTable({
     data,
     columns,
@@ -157,12 +177,18 @@ const getColumns = ({
   onDelete,
   isLoadingRegion,
   deletePermitted,
+  writePermitted,
   copyToClipboard,
+  onRegenerateProxyApiKey,
+  onRegenerateSshGatewayApiKey,
 }: {
   onDelete: (region: Region) => void
   isLoadingRegion: (region: Region) => boolean
   deletePermitted: boolean
+  writePermitted: boolean
   copyToClipboard: (text: string) => Promise<void>
+  onRegenerateProxyApiKey: (region: Region) => void
+  onRegenerateSshGatewayApiKey: (region: Region) => void
 }): ColumnDef<Region>[] => {
   const columns: ColumnDef<Region>[] = [
     {
@@ -239,11 +265,12 @@ const getColumns = ({
       return null
     },
     cell: ({ row }) => {
-      if (row.original.regionType !== RegionType.CUSTOM || !deletePermitted) {
+      if (row.original.regionType !== RegionType.CUSTOM || !deletePermitted || !writePermitted) {
         return <div className="flex justify-end h-8 w-8" />
       }
 
       const isLoading = isLoadingRegion(row.original)
+      const region = row.original
 
       return (
         <div className="flex justify-end">
@@ -254,6 +281,24 @@ const getColumns = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {writePermitted && region.proxyUrl && (
+                <DropdownMenuItem
+                  onClick={() => onRegenerateProxyApiKey(row.original)}
+                  className="cursor-pointer"
+                  disabled={isLoading}
+                >
+                  Regenerate Proxy API Key
+                </DropdownMenuItem>
+              )}
+              {writePermitted && region.sshGatewayUrl && (
+                <DropdownMenuItem
+                  onClick={() => onRegenerateSshGatewayApiKey(row.original)}
+                  className="cursor-pointer"
+                  disabled={isLoading}
+                >
+                  Regenerate SSH Gateway API Key
+                </DropdownMenuItem>
+              )}
               {deletePermitted && (
                 <DropdownMenuItem
                   onClick={() => onDelete(row.original)}

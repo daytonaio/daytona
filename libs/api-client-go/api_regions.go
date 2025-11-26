@@ -31,8 +31,8 @@ type RegionsAPI interface {
 	CreateRegion(ctx context.Context) RegionsAPICreateRegionRequest
 
 	// CreateRegionExecute executes the request
-	//  @return Region
-	CreateRegionExecute(r RegionsAPICreateRegionRequest) (*Region, *http.Response, error)
+	//  @return CreateRegionResponse
+	CreateRegionExecute(r RegionsAPICreateRegionRequest) (*CreateRegionResponse, *http.Response, error)
 
 	/*
 		DeleteRegion Delete a region
@@ -70,6 +70,32 @@ type RegionsAPI interface {
 	// ListRegionsExecute executes the request
 	//  @return []Region
 	ListRegionsExecute(r RegionsAPIListRegionsRequest) ([]Region, *http.Response, error)
+
+	/*
+		RegenerateProxyApiKey Regenerate proxy API key for a region
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Region ID
+		@return RegionsAPIRegenerateProxyApiKeyRequest
+	*/
+	RegenerateProxyApiKey(ctx context.Context, id string) RegionsAPIRegenerateProxyApiKeyRequest
+
+	// RegenerateProxyApiKeyExecute executes the request
+	//  @return RegenerateApiKeyResponse
+	RegenerateProxyApiKeyExecute(r RegionsAPIRegenerateProxyApiKeyRequest) (*RegenerateApiKeyResponse, *http.Response, error)
+
+	/*
+		RegenerateSshGatewayApiKey Regenerate SSH gateway API key for a region
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Region ID
+		@return RegionsAPIRegenerateSshGatewayApiKeyRequest
+	*/
+	RegenerateSshGatewayApiKey(ctx context.Context, id string) RegionsAPIRegenerateSshGatewayApiKeyRequest
+
+	// RegenerateSshGatewayApiKeyExecute executes the request
+	//  @return RegenerateApiKeyResponse
+	RegenerateSshGatewayApiKeyExecute(r RegionsAPIRegenerateSshGatewayApiKeyRequest) (*RegenerateApiKeyResponse, *http.Response, error)
 }
 
 // RegionsAPIService RegionsAPI service
@@ -93,7 +119,7 @@ func (r RegionsAPICreateRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizati
 	return r
 }
 
-func (r RegionsAPICreateRegionRequest) Execute() (*Region, *http.Response, error) {
+func (r RegionsAPICreateRegionRequest) Execute() (*CreateRegionResponse, *http.Response, error) {
 	return r.ApiService.CreateRegionExecute(r)
 }
 
@@ -112,13 +138,13 @@ func (a *RegionsAPIService) CreateRegion(ctx context.Context) RegionsAPICreateRe
 
 // Execute executes the request
 //
-//	@return Region
-func (a *RegionsAPIService) CreateRegionExecute(r RegionsAPICreateRegionRequest) (*Region, *http.Response, error) {
+//	@return CreateRegionResponse
+func (a *RegionsAPIService) CreateRegionExecute(r RegionsAPICreateRegionRequest) (*CreateRegionResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Region
+		localVarReturnValue *CreateRegionResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.CreateRegion")
@@ -452,6 +478,230 @@ func (a *RegionsAPIService) ListRegionsExecute(r RegionsAPIListRegionsRequest) (
 	}
 
 	localVarPath := localBasePath + "/regions"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type RegionsAPIRegenerateProxyApiKeyRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r RegionsAPIRegenerateProxyApiKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIRegenerateProxyApiKeyRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPIRegenerateProxyApiKeyRequest) Execute() (*RegenerateApiKeyResponse, *http.Response, error) {
+	return r.ApiService.RegenerateProxyApiKeyExecute(r)
+}
+
+/*
+RegenerateProxyApiKey Regenerate proxy API key for a region
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Region ID
+	@return RegionsAPIRegenerateProxyApiKeyRequest
+*/
+func (a *RegionsAPIService) RegenerateProxyApiKey(ctx context.Context, id string) RegionsAPIRegenerateProxyApiKeyRequest {
+	return RegionsAPIRegenerateProxyApiKeyRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return RegenerateApiKeyResponse
+func (a *RegionsAPIService) RegenerateProxyApiKeyExecute(r RegionsAPIRegenerateProxyApiKeyRequest) (*RegenerateApiKeyResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RegenerateApiKeyResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.RegenerateProxyApiKey")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/regions/{id}/regenerate-proxy-api-key"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type RegionsAPIRegenerateSshGatewayApiKeyRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r RegionsAPIRegenerateSshGatewayApiKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIRegenerateSshGatewayApiKeyRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPIRegenerateSshGatewayApiKeyRequest) Execute() (*RegenerateApiKeyResponse, *http.Response, error) {
+	return r.ApiService.RegenerateSshGatewayApiKeyExecute(r)
+}
+
+/*
+RegenerateSshGatewayApiKey Regenerate SSH gateway API key for a region
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Region ID
+	@return RegionsAPIRegenerateSshGatewayApiKeyRequest
+*/
+func (a *RegionsAPIService) RegenerateSshGatewayApiKey(ctx context.Context, id string) RegionsAPIRegenerateSshGatewayApiKeyRequest {
+	return RegionsAPIRegenerateSshGatewayApiKeyRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return RegenerateApiKeyResponse
+func (a *RegionsAPIService) RegenerateSshGatewayApiKeyExecute(r RegionsAPIRegenerateSshGatewayApiKeyRequest) (*RegenerateApiKeyResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RegenerateApiKeyResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.RegenerateSshGatewayApiKey")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/regions/{id}/regenerate-ssh-gateway-api-key"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

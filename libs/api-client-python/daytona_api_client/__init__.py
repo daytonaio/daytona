@@ -71,6 +71,7 @@ from daytona_api_client.models.create_organization_invitation import CreateOrgan
 from daytona_api_client.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client.models.create_organization_role import CreateOrganizationRole
 from daytona_api_client.models.create_region import CreateRegion
+from daytona_api_client.models.create_region_response import CreateRegionResponse
 from daytona_api_client.models.create_runner import CreateRunner
 from daytona_api_client.models.create_runner_response import CreateRunnerResponse
 from daytona_api_client.models.create_sandbox import CreateSandbox
@@ -146,6 +147,7 @@ from daytona_api_client.models.pty_session_info import PtySessionInfo
 from daytona_api_client.models.range import Range
 from daytona_api_client.models.rate_limit_config import RateLimitConfig
 from daytona_api_client.models.rate_limit_entry import RateLimitEntry
+from daytona_api_client.models.regenerate_api_key_response import RegenerateApiKeyResponse
 from daytona_api_client.models.region import Region
 from daytona_api_client.models.region_quota import RegionQuota
 from daytona_api_client.models.region_screenshot_response import RegionScreenshotResponse
@@ -177,6 +179,7 @@ from daytona_api_client.models.snapshot_state import SnapshotState
 from daytona_api_client.models.ssh_access_dto import SshAccessDto
 from daytona_api_client.models.ssh_access_validation_dto import SshAccessValidationDto
 from daytona_api_client.models.storage_access_dto import StorageAccessDto
+from daytona_api_client.models.toolbox_proxy_url import ToolboxProxyUrl
 from daytona_api_client.models.update_docker_registry import UpdateDockerRegistry
 from daytona_api_client.models.update_organization_default_region import UpdateOrganizationDefaultRegion
 from daytona_api_client.models.update_organization_invitation import UpdateOrganizationInvitation
