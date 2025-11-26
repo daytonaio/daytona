@@ -34,10 +34,9 @@ const DEFAULT_FORM_DATA = {
 interface CreateRunnerDialogProps {
   regions: Region[]
   onCreateRunner: (data: CreateRunner) => Promise<CreateRunnerResponse | null>
-  writePermitted: boolean
 }
 
-export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions, onCreateRunner, writePermitted }) => {
+export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions, onCreateRunner }) => {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -121,7 +120,7 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
     }
   }
 
-  if (!writePermitted || regions.length === 0) {
+  if (regions.length === 0) {
     return null
   }
 

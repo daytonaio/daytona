@@ -204,7 +204,7 @@ const Runners: React.FC = () => {
     <div className="px-6 py-2">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Runners</h1>
-        <CreateRunnerDialog regions={regions} onCreateRunner={handleCreateRunner} writePermitted={writePermitted} />
+        {writePermitted && <CreateRunnerDialog regions={regions} onCreateRunner={handleCreateRunner} />}
       </div>
 
       <RunnerTable
