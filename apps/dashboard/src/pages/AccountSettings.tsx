@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
+import { useApi } from '@/hooks/useApi'
+import { handleApiError } from '@/lib/error-handling'
+import { CheckCircleIcon } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { useApi } from '@/hooks/useApi'
 import LinkedAccounts from './LinkedAccounts'
-import { handleApiError } from '@/lib/error-handling'
-import { Button } from '@/components/ui/button'
-import { Loader2 } from 'lucide-react'
 
 const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedAccountsEnabled }) => {
   const { userApi } = useApi()
@@ -39,42 +41,42 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
     }
   }, [userApi, signinSilent])
 
+  const isPhoneVerified = user?.profile.phone_verified
+
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-medium">Account Settings</h1>
-      </div>
+    <div className="p-6 max-w-3xl">
+      <h1 className="text-2xl font-medium">Settings</h1>
 
-      {linkedAccountsEnabled && <LinkedAccounts />}
-
-      <div className="mt-8">
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-xl font-medium">Phone Verification</h1>
-        </div>
-
-        {user?.profile.phone_verified ? (
-          <div className="p-4 border rounded-lg bg-green-50 border-green-200 max-w-xs">
-            <p className="text-sm text-green-700">
-              {user?.profile.phone_name ? <span>{user?.profile.phone_name as string}</span> : 'Phone number verified'}
-            </p>
-          </div>
-        ) : (
-          <div className="p-4 border rounded-lg max-w-xs">
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">Verify your phone number to increase account limits.</p>
-              <Button onClick={handleEnrollInSmsMfa} disabled={enrollInSmsMfaLoading} className="w-full sm:w-auto">
-                {enrollInSmsMfaLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Setting up verification...
-                  </>
-                ) : (
-                  'Verify Phone Number'
-                )}
-              </Button>
+      <div className="flex flex-col gap-6 mt-4">
+        {linkedAccountsEnabled && <LinkedAccounts />}
+        <Card>
+          <CardHeader>
+            <CardTitle>Verification</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 mt-5">
+            <div className="p-4 border-t border-border flex items-center justify-between gap-2">
+              <div className="flex flex-col gap-1">
+                <div>Phone Verification</div>
+                <div>
+                  {isPhoneVerified ? (
+                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                      <CheckCircleIcon className="w-4 h-4 shrink-0" /> Phone number verified
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      Verify your phone number to increase account limits.
+                    </div>
+                  )}
+                </div>
+              </div>
+              {!isPhoneVerified && (
+                <Button onClick={handleEnrollInSmsMfa} disabled={enrollInSmsMfaLoading}>
+                  {enrollInSmsMfaLoading && <Spinner />} Verify
+                </Button>
+              )}
             </div>
-          </div>
-        )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
