@@ -527,7 +527,7 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to refresh sandbox activity: ")
     async def refresh_activity(self) -> None:
-        """Refreshes the sandbox activity to prevent it from being auto-stopped.
+        """Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
 
         This method updates the sandbox's last activity timestamp without changing its state.
         It is useful for keeping long-running sessions alive while there is still user activity.
