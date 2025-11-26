@@ -64,7 +64,7 @@ import {
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
-import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
+import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 
@@ -1375,7 +1375,13 @@ export class SandboxService {
     try {
       validateMountPaths(volumes)
     } catch (error) {
-      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume mount paths')
+      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume mount configuration')
+    }
+
+    try {
+      validateSubpaths(volumes)
+    } catch (error) {
+      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume subpath configuration')
     }
 
     return volumes
