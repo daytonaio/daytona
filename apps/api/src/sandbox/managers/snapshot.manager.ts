@@ -814,16 +814,24 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
-    const snapshot = await this.snapshotRepository.findOneOrFail({
-      where: {
+    const partialUpdate: Partial<Snapshot> = {
+      state,
+    }
+
+    if (errorReason !== undefined) {
+      partialUpdate.errorReason = errorReason
+    }
+
+    const result = await this.snapshotRepository.update(
+      {
         id: snapshotId,
       },
-    })
-    snapshot.state = state
-    if (errorReason) {
-      snapshot.errorReason = errorReason
+      partialUpdate,
+    )
+
+    if (!result.affected) {
+      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
     }
-    await this.snapshotRepository.save(snapshot)
   }
 
   @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup-old-buildinfo-snapshot-runners' })
