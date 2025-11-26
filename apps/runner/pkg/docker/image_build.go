@@ -142,9 +142,10 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	buildContext := io.NopCloser(buildContextTar)
 
-	authConfigs := make(map[string]docker_registry.AuthConfig, 2)
+	var authConfigs map[string]docker_registry.AuthConfig = nil
 
 	if buildImageDto.SourceRegistries != nil {
+		authConfigs = make(map[string]docker_registry.AuthConfig, len(buildImageDto.SourceRegistries)*2)
 		for _, sourceRegistry := range buildImageDto.SourceRegistries {
 			authConfig := docker_registry.AuthConfig{
 				Username: sourceRegistry.Username,
