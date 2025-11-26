@@ -8070,24 +8070,27 @@ components:
       type: object
     Organization:
       example:
+        totalCpuQuota: 6.027456183070403
         defaultRegionId: defaultRegionId
         suspensionReason: suspensionReason
-        sandboxLifecycleRateLimit: 7.061401241503109
+        sandboxLifecycleRateLimit: 2.027123023002322
         suspendedAt: 2000-01-23T04:56:07.000+00:00
         personal: true
         suspensionCleanupGracePeriodHours: 0.8008281904610115
-        authenticatedRateLimit: 5.637376656633329
+        authenticatedRateLimit: 9.301444243932576
         suspended: true
-        sandboxCreateRateLimit: 2.3021358869347655
+        sandboxCreateRateLimit: 3.616076749251911
         createdAt: 2000-01-23T04:56:07.000+00:00
-        maxCpuPerSandbox: 6.027456183070403
+        maxCpuPerSandbox: 5.637376656633329
         sandboxLimitedNetworkEgress: true
         suspendedUntil: 2000-01-23T04:56:07.000+00:00
-        maxDiskPerSandbox: 5.962133916683182
+        maxDiskPerSandbox: 7.061401241503109
         createdBy: createdBy
         name: name
-        maxMemoryPerSandbox: 1.4658129805029452
+        maxMemoryPerSandbox: 2.3021358869347655
         id: id
+        totalMemoryQuota: 1.4658129805029452
+        totalDiskQuota: 5.962133916683182
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -8126,6 +8129,15 @@ components:
           type: string
         suspensionCleanupGracePeriodHours:
           description: Suspension cleanup grace period hours
+          type: number
+        totalCpuQuota:
+          description: Total CPU quota
+          type: number
+        totalMemoryQuota:
+          description: Total memory quota
+          type: number
+        totalDiskQuota:
+          description: Total disk quota
           type: number
         maxCpuPerSandbox:
           description: Max CPU per sandbox
@@ -8172,6 +8184,9 @@ components:
         - suspendedUntil
         - suspensionCleanupGracePeriodHours
         - suspensionReason
+        - totalCpuQuota
+        - totalDiskQuota
+        - totalMemoryQuota
         - updatedAt
       type: object
     UpdateOrganizationDefaultRegion:

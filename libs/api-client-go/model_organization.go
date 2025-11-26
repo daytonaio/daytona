@@ -44,6 +44,12 @@ type Organization struct {
 	SuspendedUntil time.Time `json:"suspendedUntil"`
 	// Suspension cleanup grace period hours
 	SuspensionCleanupGracePeriodHours float32 `json:"suspensionCleanupGracePeriodHours"`
+	// Total CPU quota
+	TotalCpuQuota float32 `json:"totalCpuQuota"`
+	// Total memory quota
+	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
+	// Total disk quota
+	TotalDiskQuota float32 `json:"totalDiskQuota"`
 	// Max CPU per sandbox
 	MaxCpuPerSandbox float32 `json:"maxCpuPerSandbox"`
 	// Max memory per sandbox
@@ -69,7 +75,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -82,6 +88,9 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.SuspensionReason = suspensionReason
 	this.SuspendedUntil = suspendedUntil
 	this.SuspensionCleanupGracePeriodHours = suspensionCleanupGracePeriodHours
+	this.TotalCpuQuota = totalCpuQuota
+	this.TotalMemoryQuota = totalMemoryQuota
+	this.TotalDiskQuota = totalDiskQuota
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
@@ -364,6 +373,78 @@ func (o *Organization) SetSuspensionCleanupGracePeriodHours(v float32) {
 	o.SuspensionCleanupGracePeriodHours = v
 }
 
+// GetTotalCpuQuota returns the TotalCpuQuota field value
+func (o *Organization) GetTotalCpuQuota() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.TotalCpuQuota
+}
+
+// GetTotalCpuQuotaOk returns a tuple with the TotalCpuQuota field value
+// and a boolean to check if the value has been set.
+func (o *Organization) GetTotalCpuQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TotalCpuQuota, true
+}
+
+// SetTotalCpuQuota sets field value
+func (o *Organization) SetTotalCpuQuota(v float32) {
+	o.TotalCpuQuota = v
+}
+
+// GetTotalMemoryQuota returns the TotalMemoryQuota field value
+func (o *Organization) GetTotalMemoryQuota() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.TotalMemoryQuota
+}
+
+// GetTotalMemoryQuotaOk returns a tuple with the TotalMemoryQuota field value
+// and a boolean to check if the value has been set.
+func (o *Organization) GetTotalMemoryQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TotalMemoryQuota, true
+}
+
+// SetTotalMemoryQuota sets field value
+func (o *Organization) SetTotalMemoryQuota(v float32) {
+	o.TotalMemoryQuota = v
+}
+
+// GetTotalDiskQuota returns the TotalDiskQuota field value
+func (o *Organization) GetTotalDiskQuota() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.TotalDiskQuota
+}
+
+// GetTotalDiskQuotaOk returns a tuple with the TotalDiskQuota field value
+// and a boolean to check if the value has been set.
+func (o *Organization) GetTotalDiskQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TotalDiskQuota, true
+}
+
+// SetTotalDiskQuota sets field value
+func (o *Organization) SetTotalDiskQuota(v float32) {
+	o.TotalDiskQuota = v
+}
+
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value
 func (o *Organization) GetMaxCpuPerSandbox() float32 {
 	if o == nil {
@@ -591,6 +672,9 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["suspensionReason"] = o.SuspensionReason
 	toSerialize["suspendedUntil"] = o.SuspendedUntil
 	toSerialize["suspensionCleanupGracePeriodHours"] = o.SuspensionCleanupGracePeriodHours
+	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
+	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
+	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
@@ -625,6 +709,9 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"suspensionReason",
 		"suspendedUntil",
 		"suspensionCleanupGracePeriodHours",
+		"totalCpuQuota",
+		"totalMemoryQuota",
+		"totalDiskQuota",
 		"maxCpuPerSandbox",
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
@@ -672,6 +759,9 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "suspensionReason")
 		delete(additionalProperties, "suspendedUntil")
 		delete(additionalProperties, "suspensionCleanupGracePeriodHours")
+		delete(additionalProperties, "totalCpuQuota")
+		delete(additionalProperties, "totalMemoryQuota")
+		delete(additionalProperties, "totalDiskQuota")
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
