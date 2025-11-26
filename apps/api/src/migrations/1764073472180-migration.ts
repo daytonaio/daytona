@@ -19,7 +19,7 @@ export class Migration1764073472180 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "organization" ADD "defaultRegion" character varying NULL`)
     await queryRunner.query(`UPDATE "organization" SET "defaultRegion" = "defaultRegionId"`)
     await queryRunner.query(
-      `ALTER TABLE "organization" ALTER COLUMN "defaultRegion" SET DEFAULT ${configuration.defaultRegion.id}`,
+      `ALTER TABLE "organization" ALTER COLUMN "defaultRegion" SET DEFAULT '${configuration.defaultRegion.id}'`,
     )
     await queryRunner.query(`ALTER TABLE "organization" ALTER COLUMN "defaultRegion" SET NOT NULL`)
   }

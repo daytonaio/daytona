@@ -29,7 +29,7 @@ export class Migration1764073472179 implements MigrationInterface {
 
     // Add default value for required defaultRegion column before dropping it in the contract migration
     await queryRunner.query(
-      `ALTER TABLE "organization" ALTER COLUMN "defaultRegion" SET DEFAULT ${configuration.defaultRegion.id}`,
+      `ALTER TABLE "organization" ALTER COLUMN "defaultRegion" SET DEFAULT '${configuration.defaultRegion.id}'`,
     )
 
     // update api key permission enum
