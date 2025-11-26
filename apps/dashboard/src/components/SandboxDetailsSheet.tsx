@@ -6,7 +6,7 @@
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { getRelativeTimeString } from '@/lib/utils'
+import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
 import { Archive, Copy, Play, Tag, Trash, X } from 'lucide-react'
 import React, { useState } from 'react'
@@ -225,9 +225,15 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   </button>
                 </div>
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <h3 className="text-sm text-muted-foreground">Last used</h3>
                 <p className="mt-1 text-sm font-medium">{getLastEvent(sandbox).relativeTimeString}</p>
+              </div>
+              <div>
+                <h3 className="text-sm text-muted-foreground">Created at</h3>
+                <p className="mt-1 text-sm font-medium">{formatTimestamp(sandbox.createdAt)}</p>
               </div>
             </div>
 
