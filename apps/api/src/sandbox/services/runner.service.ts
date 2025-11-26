@@ -62,18 +62,6 @@ export class RunnerService {
     return `dtn_${crypto.randomBytes(32).toString('hex')}`
   }
 
-  public generateRunnerTokenHash(value: string): string {
-    return crypto.createHash('sha256').update(value).digest('hex')
-  }
-
-  private getTokenPrefix(token: string): string {
-    return token.substring(0, 3)
-  }
-
-  private getTokenSuffix(token: string): string {
-    return token.slice(-3)
-  }
-
   async create(
     createRunnerDto: CreateRunnerInternalDto,
     organization?: Organization,
