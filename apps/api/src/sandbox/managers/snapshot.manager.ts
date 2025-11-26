@@ -576,6 +576,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       ? snapshot.buildInfo.snapshotRef
       : this.getInitialRunnerSnapshotTag(snapshot)
 
+    const exists = await runnerAdapter.snapshotExists(initialImageRefOnRunner)
+    if (!exists) {
+      return DONT_SYNC_AGAIN
+    }
+
     const snapshotInfoResponse = await runnerAdapter.getSnapshotInfo(initialImageRefOnRunner)
 
     // Process snapshot info in case it had failed or it's a build snapshot
@@ -690,6 +695,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async processPullOnInitialRunner(snapshot: Snapshot, runner: Runner) {
+    // Check for timeout - allow up to 30 minutes
+    const timeoutMinutes = 30
+    const timeoutMs = timeoutMinutes * 60 * 1000
+    if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
+      await this.updateSnapshotState(
+        snapshot.id,
+        SnapshotState.ERROR,
+        'Timeout processing snapshot pull on initial runner',
+      )
+      return DONT_SYNC_AGAIN
+    }
+
     let sourceRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
       snapshot.imageName,
       snapshot.organizationId,
@@ -712,6 +729,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       // Tag image to org and creation timestamp for future use
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+      const exists = await runnerAdapter.snapshotExists(snapshot.imageName)
+      if (!exists) {
+        return DONT_SYNC_AGAIN
+      }
 
       await runnerAdapter.tagImage(snapshot.imageName, this.getInitialRunnerSnapshotTag(snapshot))
 
