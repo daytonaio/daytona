@@ -38,8 +38,6 @@ import type { PaginatedSandboxes } from '../models'
 // @ts-ignore
 import type { PortPreviewUrl } from '../models'
 // @ts-ignore
-import type { Region } from '../models'
-// @ts-ignore
 import type { Sandbox } from '../models'
 // @ts-ignore
 import type { SandboxLabels } from '../models'
@@ -462,47 +460,6 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary List all regions where sandboxes have been created
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSandboxRegions: async (
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/sandbox/regions`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
      * @summary Get sandboxes for the authenticated runner
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [states] Comma-separated list of sandbox states to filter by
@@ -625,7 +582,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {Array<string>} [regionIds] List of regions IDs to filter by
      * @param {number} [minCpu] Minimum CPU
      * @param {number} [maxCpu] Maximum CPU
      * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -649,7 +606,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
-      regions?: Array<string>,
+      regionIds?: Array<string>,
       minCpu?: number,
       maxCpu?: number,
       minMemoryGiB?: number,
@@ -712,8 +669,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
         localVarQueryParameter['snapshots'] = snapshots
       }
 
-      if (regions) {
-        localVarQueryParameter['regions'] = regions
+      if (regionIds) {
+        localVarQueryParameter['regionIds'] = regionIds
       }
 
       if (minCpu !== undefined) {
@@ -1587,29 +1544,6 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary List all regions where sandboxes have been created
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getSandboxRegions(
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Region>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxRegions(xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['SandboxApi.getSandboxRegions']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
      * @summary Get sandboxes for the authenticated runner
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [states] Comma-separated list of sandbox states to filter by
@@ -1687,7 +1621,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {Array<string>} [regionIds] List of regions IDs to filter by
      * @param {number} [minCpu] Minimum CPU
      * @param {number} [maxCpu] Maximum CPU
      * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -1711,7 +1645,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
-      regions?: Array<string>,
+      regionIds?: Array<string>,
       minCpu?: number,
       maxCpu?: number,
       minMemoryGiB?: number,
@@ -1734,7 +1668,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         includeErroredDeleted,
         states,
         snapshots,
-        regions,
+        regionIds,
         minCpu,
         maxCpu,
         minMemoryGiB,
@@ -2254,16 +2188,6 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
-     * @summary List all regions where sandboxes have been created
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSandboxRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Region>> {
-      return localVarFp.getSandboxRegions(xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
      * @summary Get sandboxes for the authenticated runner
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [states] Comma-separated list of sandbox states to filter by
@@ -2314,7 +2238,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {Array<string>} [regionIds] List of regions IDs to filter by
      * @param {number} [minCpu] Minimum CPU
      * @param {number} [maxCpu] Maximum CPU
      * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -2338,7 +2262,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
-      regions?: Array<string>,
+      regionIds?: Array<string>,
       minCpu?: number,
       maxCpu?: number,
       minMemoryGiB?: number,
@@ -2362,7 +2286,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
           includeErroredDeleted,
           states,
           snapshots,
-          regions,
+          regionIds,
           minCpu,
           maxCpu,
           minMemoryGiB,
@@ -2734,20 +2658,6 @@ export class SandboxApi extends BaseAPI {
 
   /**
    *
-   * @summary List all regions where sandboxes have been created
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof SandboxApi
-   */
-  public getSandboxRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return SandboxApiFp(this.configuration)
-      .getSandboxRegions(xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   *
    * @summary Get sandboxes for the authenticated runner
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {string} [states] Comma-separated list of sandbox states to filter by
@@ -2802,7 +2712,7 @@ export class SandboxApi extends BaseAPI {
    * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
    * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
    * @param {Array<string>} [snapshots] List of snapshot names to filter by
-   * @param {Array<string>} [regions] List of regions to filter by
+   * @param {Array<string>} [regionIds] List of regions IDs to filter by
    * @param {number} [minCpu] Minimum CPU
    * @param {number} [maxCpu] Maximum CPU
    * @param {number} [minMemoryGiB] Minimum memory in GiB
@@ -2827,7 +2737,7 @@ export class SandboxApi extends BaseAPI {
     includeErroredDeleted?: boolean,
     states?: Array<ListSandboxesPaginatedStatesEnum>,
     snapshots?: Array<string>,
-    regions?: Array<string>,
+    regionIds?: Array<string>,
     minCpu?: number,
     maxCpu?: number,
     minMemoryGiB?: number,
@@ -2851,7 +2761,7 @@ export class SandboxApi extends BaseAPI {
         includeErroredDeleted,
         states,
         snapshots,
-        regions,
+        regionIds,
         minCpu,
         maxCpu,
         minMemoryGiB,

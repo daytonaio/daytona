@@ -164,14 +164,13 @@ Below is a full list of environment variables with their default values:
 | `DEFAULT_RUNNER_DOMAIN`                    | string  | `runner:3003`                                        | Default runner domain                                                                                |
 | `DEFAULT_RUNNER_API_URL`                   | string  | `http://runner:3003`                                 | Default runner API URL                                                                               |
 | `DEFAULT_RUNNER_PROXY_URL`                 | string  | `http://runner:3003`                                 | Default runner proxy URL                                                                             |
-| `DEFAULT_RUNNER_API_KEY`                   | string  | `secret_api_token`                                   | Default runner API key                                                                               |
+| `DEFAULT_RUNNER_API_KEY`                   | string  | `secret_api_token`                                 | Default runner API key                                                                             |
 | `DEFAULT_RUNNER_CPU`                       | number  | `4`                                                  | Default runner CPU allocation                                                                        |
 | `DEFAULT_RUNNER_MEMORY`                    | number  | `8`                                                  | Default runner memory allocation (GB)                                                                |
 | `DEFAULT_RUNNER_DISK`                      | number  | `50`                                                 | Default runner disk allocation (GB)                                                                  |
 | `DEFAULT_RUNNER_GPU`                       | number  | `0`                                                  | Default runner GPU allocation                                                                        |
 | `DEFAULT_RUNNER_GPU_TYPE`                  | string  | `none`                                               | Default runner GPU type                                                                              |
-| `DEFAULT_RUNNER_CAPACITY`                  | number  | `100`                                                | Default runner capacity                                                                              |
-| `DEFAULT_RUNNER_REGION`                    | string  | `us`                                                 | Default runner region                                                                                |
+| `DEFAULT_RUNNER_CAPACITY`                  | number  | `100`                                                | Default runner capacity                                                                              |                                                                    |
 | `DEFAULT_RUNNER_CLASS`                     | string  | `small`                                              | Default runner class                                                                                 |
 | `DEFAULT_ORG_QUOTA_TOTAL_CPU_QUOTA`        | number  | `10000`                                              | Default organization total CPU quota                                                                 |
 | `DEFAULT_ORG_QUOTA_TOTAL_MEMORY_QUOTA`     | number  | `10000`                                              | Default organization total memory quota                                                              |
@@ -207,6 +206,9 @@ Below is a full list of environment variables with their default values:
 | `RATE_LIMIT_SANDBOX_CREATE_LIMIT`          | number  | (empty)                                              | Sandbox create rate limit (requests per TTL, empty - rate limit is disabled)                                           |
 | `RATE_LIMIT_SANDBOX_LIFECYCLE_TTL`         | number  | (empty)                                              | Sandbox lifecycle rate limit time-to-live (seconds, empty - rate limit is disabled)                                     |
 | `RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT`       | number  | (empty)                                              | Sandbox lifecycle rate limit (requests per TTL, empty - rate limit is disabled)                                      |
+| `DEFAULT_REGION_ID`                        | string  | `us`                                                 | Default region ID                                                                                    |
+| `DEFAULT_REGION_NAME`                      | string  | `us`                                                 | Default region name                                                                                  |
+
 ### Runner
 
 | Variable                   | Type    | Default Value                     | Description                           |

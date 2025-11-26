@@ -37,6 +37,7 @@ import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { RegionService } from '../../region/services/region.service'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -67,6 +68,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
     private readonly configService: TypedConfigService,
+    private readonly regionService: RegionService,
   ) {}
 
   async onApplicationShutdown() {
@@ -771,13 +773,13 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
       }
 
-      const defaultRegion = organization.defaultRegion
-      if (!defaultRegion) {
+      const defaultRegionId = organization.defaultRegionId
+      if (!defaultRegionId) {
         throw new Error('Default region not found for organization')
       }
 
       initialRunner = await this.runnerService.getRandomAvailableRunner({
-        region: defaultRegion,
+        region: defaultRegionId,
         excludedRunnerIds: excludedRunnerIds,
       })
     } catch (error) {

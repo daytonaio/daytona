@@ -68,12 +68,12 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
-import { RegionDto } from '../dto/region.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { SkipThrottle } from '@nestjs/throttler'
 import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
+import { RegionService } from '../../region/services/region.service'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -89,6 +89,7 @@ export class SandboxController {
     private readonly sandboxService: SandboxService,
     private readonly configService: TypedConfigService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly regionService: RegionService,
   ) {}
 
   @Get()
@@ -161,7 +162,7 @@ export class SandboxController {
       includeErroredDeleted: includeErroredDestroyed,
       states,
       snapshots,
-      regions,
+      regionIds,
       minCpu,
       maxCpu,
       minMemoryGiB,
@@ -185,7 +186,7 @@ export class SandboxController {
         includeErroredDestroyed,
         states,
         snapshots,
-        regions,
+        regionIds,
         minCpu,
         maxCpu,
         minMemoryGiB,
@@ -209,21 +210,6 @@ export class SandboxController {
       page: result.page,
       totalPages: result.totalPages,
     }
-  }
-
-  @Get('regions')
-  @ApiOperation({
-    summary: 'List all regions where sandboxes have been created',
-    operationId: 'getSandboxRegions',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of regions where sandboxes have been created',
-    type: [RegionDto],
-  })
-  async getSandboxRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
-    const regions = await this.sandboxService.getDistinctRegions(authContext.organizationId)
-    return regions.map((region) => ({ name: region }))
   }
 
   @Post()

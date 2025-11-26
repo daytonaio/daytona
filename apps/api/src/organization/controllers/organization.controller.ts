@@ -9,6 +9,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Patch,
@@ -44,6 +45,7 @@ import { OrganizationUsageService } from '../services/organization-usage.service
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -184,6 +186,7 @@ export class OrganizationController {
     requestMetadata: {
       body: (req: TypedRequest<CreateOrganizationDto>) => ({
         name: req.body?.name,
+        defaultRegionId: req.body?.defaultRegionId,
       }),
     },
   })
@@ -198,6 +201,44 @@ export class OrganizationController {
 
     const organization = await this.organizationService.create(createOrganizationDto, authContext.userId, false, true)
     return OrganizationDto.fromOrganization(organization)
+  }
+
+  @Patch('/:organizationId/default-region')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Set default region for organization',
+    operationId: 'setOrganizationDefaultRegion',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Default region set successfully',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiBody({
+    type: UpdateOrganizationDefaultRegionDto,
+    required: true,
+  })
+  @UseGuards(AuthGuard('jwt'), AuthenticatedRateLimitGuard, OrganizationActionGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateOrganizationDefaultRegionDto>) => ({
+        defaultRegionId: req.body?.defaultRegionId,
+      }),
+    },
+  })
+  async setDefaultRegion(
+    @Param('organizationId') organizationId: string,
+    @Body() updateDto: UpdateOrganizationDefaultRegionDto,
+  ): Promise<void> {
+    return this.organizationService.setDefaultRegion(organizationId, updateDto.defaultRegionId)
   }
 
   @Get()
@@ -287,14 +328,14 @@ export class OrganizationController {
   }
 
   @Patch('/:organizationId/quota')
+  @HttpCode(204)
   @ApiOperation({
     summary: 'Update organization quota',
     operationId: 'updateOrganizationQuota',
   })
   @ApiResponse({
-    status: 200,
-    description: 'Organization details',
-    type: OrganizationDto,
+    status: 204,
+    description: 'Organization quota updated successfully',
   })
   @ApiParam({
     name: 'organizationId',
@@ -323,10 +364,9 @@ export class OrganizationController {
   })
   async updateOrganizationQuota(
     @Param('organizationId') organizationId: string,
-    @Body() updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
-  ): Promise<OrganizationDto> {
-    const organization = await this.organizationService.updateQuota(organizationId, updateOrganizationQuotaDto)
-    return OrganizationDto.fromOrganization(organization)
+    @Body() updateDto: UpdateOrganizationQuotaDto,
+  ): Promise<void> {
+    await this.organizationService.updateQuota(organizationId, updateDto)
   }
 
   @Post('/:organizationId/leave')

@@ -20,7 +20,7 @@ export interface SandboxFilters {
   includeErroredDeleted?: boolean
   states?: ListSandboxesPaginatedStatesEnum[]
   snapshots?: string[]
-  regions?: string[]
+  regionIds?: string[]
   minCpu?: number
   maxCpu?: number
   minMemoryGiB?: number
@@ -88,7 +88,7 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         filters.includeErroredDeleted,
         filters.states,
         filters.snapshots,
-        filters.regions,
+        filters.regionIds,
         filters.minCpu,
         filters.maxCpu,
         filters.minMemoryGiB,

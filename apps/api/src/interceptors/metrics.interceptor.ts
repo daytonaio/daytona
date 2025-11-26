@@ -34,6 +34,7 @@ import { VolumeDto } from '../sandbox/dto/volume.dto'
 import { CreateWorkspaceDto } from '../sandbox/dto/create-workspace.deprecated.dto'
 import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
 import { TypedConfigService } from '../config/typed-config.service'
+import { UpdateOrganizationDefaultRegionDto } from '../organization/dto/update-organization-default-region.dto'
 
 type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
@@ -271,6 +272,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'PATCH':
         switch (request.route.path) {
+          case '/api/organizations/:organizationId/default-region':
+            this.captureSetOrganizationDefaultRegion(props, request.params.organizationId, request.body)
+            break
           case '/api/organizations/:organizationId/quota':
             this.captureUpdateOrganizationQuota(props, request.params.organizationId, request.body)
             break
@@ -675,12 +679,24 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_organization_created', props, 'api_organization_creation_failed', {
       organization_id: response.id,
       organization_name: request.name,
+      organization_default_region_id: request.defaultRegionId,
     })
   }
 
   private captureLeaveOrganization(props: CommonCaptureProps, organizationId: string) {
     this.capture('api_organization_left', props, 'api_organization_leave_failed', {
       organization_id: organizationId,
+    })
+  }
+
+  private captureSetOrganizationDefaultRegion(
+    props: CommonCaptureProps,
+    organizationId: string,
+    request: UpdateOrganizationDefaultRegionDto,
+  ) {
+    this.capture('api_organization_default_region_set', props, 'api_organization_default_region_set_failed', {
+      organization_id: organizationId,
+      organization_default_region_id: request.defaultRegionId,
     })
   }
 

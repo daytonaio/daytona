@@ -10,6 +10,7 @@ import {
   Logger,
   OnModuleInit,
   OnApplicationShutdown,
+  ConflictException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
@@ -42,6 +43,9 @@ import { setTimeout } from 'timers/promises'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
+import { RegionService } from '../../region/services/region.service'
+import { Region } from '../../region/entities/region.entity'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -60,6 +64,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly regionService: RegionService,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -136,32 +141,27 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return this.removeWithEntityManager(this.organizationRepository.manager, organization)
   }
 
-  async updateQuota(
-    organizationId: string,
-    updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
-  ): Promise<Organization> {
+  async updateQuota(organizationId: string, updateDto: UpdateOrganizationQuotaDto): Promise<void> {
     const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    organization.totalCpuQuota = updateOrganizationQuotaDto.totalCpuQuota ?? organization.totalCpuQuota
-    organization.totalMemoryQuota = updateOrganizationQuotaDto.totalMemoryQuota ?? organization.totalMemoryQuota
-    organization.totalDiskQuota = updateOrganizationQuotaDto.totalDiskQuota ?? organization.totalDiskQuota
-    organization.maxCpuPerSandbox = updateOrganizationQuotaDto.maxCpuPerSandbox ?? organization.maxCpuPerSandbox
-    organization.maxMemoryPerSandbox =
-      updateOrganizationQuotaDto.maxMemoryPerSandbox ?? organization.maxMemoryPerSandbox
-    organization.maxDiskPerSandbox = updateOrganizationQuotaDto.maxDiskPerSandbox ?? organization.maxDiskPerSandbox
-    organization.maxSnapshotSize = updateOrganizationQuotaDto.maxSnapshotSize ?? organization.maxSnapshotSize
-    organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota ?? organization.volumeQuota
-    organization.snapshotQuota = updateOrganizationQuotaDto.snapshotQuota ?? organization.snapshotQuota
-    organization.authenticatedRateLimit =
-      updateOrganizationQuotaDto.authenticatedRateLimit ?? organization.authenticatedRateLimit
-    organization.sandboxCreateRateLimit =
-      updateOrganizationQuotaDto.sandboxCreateRateLimit ?? organization.sandboxCreateRateLimit
+    organization.totalCpuQuota = updateDto.totalCpuQuota ?? organization.totalCpuQuota
+    organization.totalMemoryQuota = updateDto.totalMemoryQuota ?? organization.totalMemoryQuota
+    organization.totalDiskQuota = updateDto.totalDiskQuota ?? organization.totalDiskQuota
+    organization.maxCpuPerSandbox = updateDto.maxCpuPerSandbox ?? organization.maxCpuPerSandbox
+    organization.maxMemoryPerSandbox = updateDto.maxMemoryPerSandbox ?? organization.maxMemoryPerSandbox
+    organization.maxDiskPerSandbox = updateDto.maxDiskPerSandbox ?? organization.maxDiskPerSandbox
+    organization.maxSnapshotSize = updateDto.maxSnapshotSize ?? organization.maxSnapshotSize
+    organization.volumeQuota = updateDto.volumeQuota ?? organization.volumeQuota
+    organization.snapshotQuota = updateDto.snapshotQuota ?? organization.snapshotQuota
+    organization.authenticatedRateLimit = updateDto.authenticatedRateLimit ?? organization.authenticatedRateLimit
+    organization.sandboxCreateRateLimit = updateDto.sandboxCreateRateLimit ?? organization.sandboxCreateRateLimit
     organization.sandboxLifecycleRateLimit =
-      updateOrganizationQuotaDto.sandboxLifecycleRateLimit ?? organization.sandboxLifecycleRateLimit
-    return this.organizationRepository.save(organization)
+      updateDto.sandboxLifecycleRateLimit ?? organization.sandboxLifecycleRateLimit
+
+    await this.organizationRepository.save(organization)
   }
 
   async suspend(
@@ -213,9 +213,31 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.organizationRepository.save(organization)
   }
 
+  /**
+   * @param organizationId - The ID of the organization.
+   * @param defaultRegionId - The ID of the region to set as the default region.
+   * @throws {NotFoundException} If the organization is not found.
+   * @throws {ConflictException} If the organization already has a default region set.
+   */
+  async setDefaultRegion(organizationId: string, defaultRegionId: string): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    if (organization.defaultRegionId) {
+      throw new ConflictException('Organization already has a default region set')
+    }
+
+    await this.validateOrganizationDefaultRegion(defaultRegionId, organizationId)
+    organization.defaultRegionId = defaultRegionId
+
+    await this.organizationRepository.save(organization)
+  }
+
   private async createWithEntityManager(
     entityManager: EntityManager,
-    createOrganizationDto: CreateOrganizationDto,
+    createOrganizationDto: CreateOrganizationInternalDto,
     createdBy: string,
     creatorEmailVerified: boolean,
     personal = false,
@@ -239,9 +261,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ForbiddenException('You have reached the maximum number of created organizations')
     }
 
-    const defaultRegion = this.configService.getOrThrow('defaultRegion')
-
-    let organization = new Organization(defaultRegion)
+    let organization = new Organization(createOrganizationDto.defaultRegionId)
 
     organization.name = createOrganizationDto.name
     organization.createdBy = createdBy
@@ -274,6 +294,10 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     owner.role = OrganizationMemberRole.OWNER
 
     organization.users = [owner]
+
+    if (createOrganizationDto.defaultRegionId) {
+      await this.validateOrganizationDefaultRegion(createOrganizationDto.defaultRegionId)
+    }
 
     await entityManager.transaction(async (em) => {
       organization = await em.save(organization)
@@ -316,6 +340,22 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     }
 
     return organization
+  }
+
+  /**
+   * @param organizationId - Optional when validating during organization creation.
+   * @throws NotFoundException - If the region is not found or not available to the organization
+   */
+  async validateOrganizationDefaultRegion(defaultRegionId: string, organizationId?: string): Promise<Region> {
+    const region = await this.regionService.findOne(defaultRegionId)
+    if (!region || region.hidden) {
+      throw new NotFoundException('Region not found')
+    }
+    if (organizationId && region.organizationId && region.organizationId !== organizationId) {
+      throw new NotFoundException('Region not found')
+    }
+
+    return region
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'stop-suspended-organization-sandboxes' })
@@ -438,6 +478,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       payload.entityManager,
       {
         name: 'Personal',
+        defaultRegionId: payload.personalOrganizationDefaultRegionId,
       },
       payload.user.id,
       payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,
