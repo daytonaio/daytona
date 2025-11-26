@@ -809,7 +809,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       initialRunner = await this.runnerService.getRandomAvailableRunner({
-        region: [defaultRegion],
+        regions: [defaultRegion],
         excludedRunnerIds: excludedRunnerIds,
       })
     } catch (error) {
