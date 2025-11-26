@@ -11,7 +11,7 @@ import (
 
 func (d *DockerClient) TagImage(ctx context.Context, sourceImage string, targetImage string) error {
 	if d.logWriter != nil {
-		d.logWriter.Write([]byte(fmt.Sprintf("Tagging image %s as %s...\n", sourceImage, targetImage)))
+		fmt.Fprintf(d.logWriter, "Tagging image %s as %s...\n", sourceImage, targetImage)
 	}
 
 	// Extract repository and tag from targetImage
@@ -35,7 +35,7 @@ func (d *DockerClient) TagImage(ctx context.Context, sourceImage string, targetI
 	}
 
 	if d.logWriter != nil {
-		d.logWriter.Write([]byte(fmt.Sprintf("Image tagged successfully: %s → %s\n", sourceImage, targetImage)))
+		fmt.Fprintf(d.logWriter, "Image tagged successfully: %s → %s\n", sourceImage, targetImage)
 	}
 
 	return nil

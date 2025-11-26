@@ -12,7 +12,6 @@ import (
 	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models/enums"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
 )
@@ -172,7 +171,7 @@ func (s *SandboxSyncService) StartSyncProcess(ctx context.Context) {
 	}()
 }
 
-func (s *SandboxSyncService) extractSandboxId(container types.Container) string {
+func (s *SandboxSyncService) extractSandboxId(container container.Summary) string {
 	if len(container.Names) > 0 && len(container.Names[0]) > 1 {
 		name := container.Names[0][1:] // Remove leading "/"
 		return name

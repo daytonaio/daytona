@@ -6,8 +6,8 @@ package docker
 import (
 	"context"
 
+	"github.com/containerd/errdefs"
 	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/errdefs"
 
 	log "github.com/sirupsen/logrus"
 )

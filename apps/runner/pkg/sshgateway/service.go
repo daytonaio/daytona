@@ -11,8 +11,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/docker"
-	"github.com/docker/docker/api/types"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 )
@@ -268,23 +268,15 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 	}
 
 	// Get container IP address
-	containerIP, err := s.getContainerIP(&container)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get container IP for %s: %w", sandboxId, err)
+	containerIP := common.GetContainerIpAddress(context.Background(), container)
+	if containerIP == "" {
+		return nil, fmt.Errorf("sandbox IP not found for %s", sandboxId)
 	}
 
 	return &SandboxDetails{
 		User:     "daytona",
 		Hostname: containerIP,
 	}, nil
-}
-
-// getContainerIP extracts the IP address from a container
-func (s *Service) getContainerIP(container *types.ContainerJSON) (string, error) {
-	for _, network := range container.NetworkSettings.Networks {
-		return network.IPAddress, nil
-	}
-	return "", fmt.Errorf("no IP address found. Is the Sandbox started?")
 }
 
 // SandboxDetails contains information about a sandbox

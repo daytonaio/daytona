@@ -202,20 +202,22 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	}
 	containerShortId := info.ID[:12]
 
+	ipAddress := common.GetContainerIpAddress(ctx, info)
+
 	// Return error if container does not have an IP address
-	if info.NetworkSettings.IPAddress == "" {
+	if ipAddress == "" {
 		ctx.Error(common_errors.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
 		return
 	}
 
 	if updateNetworkSettingsDto.NetworkBlockAll != nil && *updateNetworkSettingsDto.NetworkBlockAll {
-		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, "")
+		err = runner.NetRulesManager.SetNetworkRules(containerShortId, ipAddress, "")
 		if err != nil {
 			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 	} else if updateNetworkSettingsDto.NetworkAllowList != nil {
-		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, *updateNetworkSettingsDto.NetworkAllowList)
+		err = runner.NetRulesManager.SetNetworkRules(containerShortId, ipAddress, *updateNetworkSettingsDto.NetworkAllowList)
 		if err != nil {
 			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
@@ -223,7 +225,7 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	}
 
 	if updateNetworkSettingsDto.NetworkLimitEgress != nil && *updateNetworkSettingsDto.NetworkLimitEgress {
-		err = runner.NetRulesManager.SetNetworkLimiter(containerShortId, info.NetworkSettings.IPAddress)
+		err = runner.NetRulesManager.SetNetworkLimiter(containerShortId, ipAddress)
 		if err != nil {
 			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return

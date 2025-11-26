@@ -6,9 +6,9 @@ package docker
 import (
 	"context"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) ContainerInspect(ctx context.Context, containerId string) (types.ContainerJSON, error) {
+func (d *DockerClient) ContainerInspect(ctx context.Context, containerId string) (container.InspectResponse, error) {
 	return d.apiClient.ContainerInspect(ctx, containerId)
 }

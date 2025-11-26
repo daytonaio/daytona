@@ -238,7 +238,7 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 			log.Printf("Global request: %s", req.Type)
 			// For now, just discard requests
 			if req.WantReply {
-				req.Reply(false, []byte("not implemented"))
+				req.Reply(false, []byte("not implemented")) // nolint:errcheck
 			}
 		}
 	}()
@@ -292,9 +292,9 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 			if req.WantReply {
 				if err != nil {
 					log.Printf("Failed to send request to runner: %v", err)
-					req.Reply(false, []byte(err.Error()))
+					req.Reply(false, []byte(err.Error())) // nolint:errcheck
 				} else {
-					req.Reply(ok, nil)
+					req.Reply(ok, nil) // nolint:errcheck
 				}
 			}
 		}
@@ -312,9 +312,9 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 			if req.WantReply {
 				if err != nil {
 					log.Printf("Failed to send request to client: %v", err)
-					req.Reply(false, []byte(err.Error()))
+					req.Reply(false, []byte(err.Error())) // nolint:errcheck
 				} else {
-					req.Reply(ok, nil)
+					req.Reply(ok, nil) // nolint:errcheck
 				}
 			}
 		}
