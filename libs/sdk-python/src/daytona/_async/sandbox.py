@@ -525,6 +525,20 @@ class AsyncSandbox(SandboxDto):
         """
         return (await self._sandbox_api.validate_ssh_access(token)).data
 
+    @intercept_errors(message_prefix="Failed to refresh sandbox activity: ")
+    async def refresh_activity(self) -> None:
+        """Refreshes the sandbox activity to prevent it from being auto-stopped.
+
+        This method updates the sandbox's last activity timestamp without changing its state.
+        It is useful for keeping long-running sessions alive while there is still user activity.
+
+        Example:
+            ```python
+            await sandbox.refresh_activity()
+            ```
+        """
+        await self._sandbox_api.update_last_activity(self.id)
+
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id = sandbox_dto.id
         self.name = sandbox_dto.name
