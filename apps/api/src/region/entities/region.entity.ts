@@ -41,15 +41,45 @@ export class Region {
   })
   updatedAt: Date
 
-  constructor(name: string, id?: string, organizationId?: string) {
-    this.name = name
-    if (id) {
-      this.id = id
+  @Column({ nullable: true })
+  proxyUrl: string | null
+
+  @Column({ nullable: true })
+  toolboxProxyUrl: string | null
+
+  @Column({ nullable: true })
+  proxyApiKeyHash: string | null
+
+  @Column({ nullable: true })
+  sshGatewayUrl: string | null
+
+  @Column({ nullable: true })
+  sshGatewayApiKeyHash: string | null
+
+  constructor(params: {
+    name: string
+    id?: string
+    organizationId?: string | null
+    proxyUrl?: string | null
+    toolboxProxyUrl?: string | null
+    sshGatewayUrl?: string | null
+    proxyApiKeyHash?: string | null
+    sshGatewayApiKeyHash?: string | null
+  }) {
+    this.name = params.name
+    if (params.id) {
+      this.id = params.id
     } else {
       this.id = nanoid(12)
     }
-    if (organizationId) {
-      this.organizationId = organizationId
+    if (params.organizationId) {
+      this.organizationId = params.organizationId
     }
+
+    this.proxyUrl = params.proxyUrl ?? null
+    this.toolboxProxyUrl = params.toolboxProxyUrl ?? params.proxyUrl ?? null
+    this.sshGatewayUrl = params.sshGatewayUrl ?? null
+    this.proxyApiKeyHash = params.proxyApiKeyHash ?? null
+    this.sshGatewayApiKeyHash = params.sshGatewayApiKeyHash ?? null
   }
 }

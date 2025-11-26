@@ -83,7 +83,7 @@ class AsyncSandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         code_toolbox: SandboxCodeToolbox,
-        get_toolbox_base_url: Callable[[], Awaitable[str]],
+        get_toolbox_base_url: Callable[[str], Awaitable[str]],
     ):
         """Initialize a new Sandbox instance.
 
@@ -566,7 +566,7 @@ class AsyncSandbox(SandboxDto):
         """Ensures the toolbox API URL for the sandbox is initialized."""
         if self._toolbox_api.configuration.host != "":
             return
-        self._toolbox_api.configuration.host = await self._get_toolbox_base_url()
+        self._toolbox_api.configuration.host = await self._get_toolbox_base_url(self.id)
         if not self._toolbox_api.configuration.host.endswith("/"):
             self._toolbox_api.configuration.host += "/"
         self._toolbox_api.configuration.host += self.id

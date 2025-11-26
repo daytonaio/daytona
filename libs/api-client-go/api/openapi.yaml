@@ -1073,7 +1073,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Region'
+                $ref: '#/components/schemas/CreateRegionResponse'
           description: The region has been successfully created.
       security:
         - bearer: []
@@ -1185,6 +1185,78 @@ paths:
             - profile
             - email
       summary: Get region by ID
+      tags:
+        - regions
+  /regions/{id}/regenerate-proxy-api-key:
+    post:
+      operationId: regenerateProxyApiKey
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegenerateApiKeyResponse'
+          description: The proxy API key has been successfully regenerated.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Regenerate proxy API key for a region
+      tags:
+        - regions
+  /regions/{id}/regenerate-ssh-gateway-api-key:
+    post:
+      operationId: regenerateSshGatewayApiKey
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegenerateApiKeyResponse'
+          description: The SSH gateway API key has been successfully regenerated.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Regenerate SSH gateway API key for a region
       tags:
         - regions
   /users/me:
@@ -2475,6 +2547,42 @@ paths:
             - profile
             - email
       summary: Validate SSH access for sandbox
+      tags:
+        - sandbox
+  /sandbox/{sandboxId}/toolbox-proxy-url:
+    get:
+      operationId: getToolboxProxyUrl
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolboxProxyUrl'
+          description: Toolbox proxy URL for the specified sandbox
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get toolbox proxy URL for a sandbox
       tags:
         - sandbox
   /runners:
@@ -8576,7 +8684,9 @@ components:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
         createdAt: 2023-01-01T00:00:00.000Z
+        proxyUrl: https://proxy.example.com
         name: us-east-1
+        sshGatewayUrl: http://ssh-gateway.example.com
         id: '123456789012'
         updatedAt: 2023-01-01T00:00:00.000Z
       properties:
@@ -8601,6 +8711,16 @@ components:
           description: Last update timestamp
           example: 2023-01-01T00:00:00.000Z
           type: string
+        proxyUrl:
+          description: Proxy URL for the region
+          example: https://proxy.example.com
+          nullable: true
+          type: string
+        sshGatewayUrl:
+          description: SSH Gateway URL for the region
+          example: http://ssh-gateway.example.com
+          nullable: true
+          type: string
       required:
         - createdAt
         - id
@@ -8610,14 +8730,60 @@ components:
       type: object
     CreateRegion:
       example:
+        proxyUrl: https://proxy.example.com
         name: us-east-1
+        sshGatewayUrl: ssh://ssh-gateway.example.com
       properties:
         name:
           description: Region name
           example: us-east-1
           type: string
+        proxyUrl:
+          description: Proxy URL for the region
+          example: https://proxy.example.com
+          nullable: true
+          type: string
+        sshGatewayUrl:
+          description: SSH Gateway URL for the region
+          example: ssh://ssh-gateway.example.com
+          nullable: true
+          type: string
       required:
         - name
+      type: object
+    CreateRegionResponse:
+      example:
+        proxyApiKey: proxy-api-key-xyz
+        id: region_12345
+        sshGatewayApiKey: ssh-gateway-api-key-abc
+      properties:
+        id:
+          description: ID of the created region
+          example: region_12345
+          type: string
+        proxyApiKey:
+          description: Proxy API key for the region
+          example: proxy-api-key-xyz
+          nullable: true
+          type: string
+        sshGatewayApiKey:
+          description: SSH Gateway API key for the region
+          example: ssh-gateway-api-key-abc
+          nullable: true
+          type: string
+      required:
+        - id
+      type: object
+    RegenerateApiKeyResponse:
+      example:
+        apiKey: api-key-xyz123
+      properties:
+        apiKey:
+          description: The newly generated API key
+          example: api-key-xyz123
+          type: string
+      required:
+        - apiKey
       type: object
     UserPublicKey:
       example:
@@ -9344,6 +9510,7 @@ components:
     SshAccessDto:
       example:
         createdAt: 2025-01-01T11:00:00Z
+        sshCommand: ssh -p 2222 token@localhost
         sandboxId: 123e4567-e89b-12d3-a456-426614174000
         id: 123e4567-e89b-12d3-a456-426614174000
         expiresAt: 2025-01-01T12:00:00Z
@@ -9377,11 +9544,16 @@ components:
           example: 2025-01-01T11:00:00Z
           format: date-time
           type: string
+        sshCommand:
+          description: SSH command to connect to the sandbox
+          example: ssh -p 2222 token@localhost
+          type: string
       required:
         - createdAt
         - expiresAt
         - id
         - sandboxId
+        - sshCommand
         - token
         - updatedAt
       type: object
@@ -9401,6 +9573,17 @@ components:
       required:
         - sandboxId
         - valid
+      type: object
+    ToolboxProxyUrl:
+      example:
+        url: https://proxy.app.daytona.io/toolbox
+      properties:
+        url:
+          description: The toolbox proxy URL for the sandbox
+          example: https://proxy.app.daytona.io/toolbox
+          type: string
+      required:
+        - url
       type: object
     CreateRunner:
       example:

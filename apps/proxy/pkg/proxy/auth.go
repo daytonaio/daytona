@@ -42,25 +42,19 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxId string) (err error, did
 			if err == nil && cookieSandboxId != "" {
 				decodedValue := ""
 				err = p.secureCookie.Decode(SANDBOX_AUTH_COOKIE_NAME+sandboxId, cookieSandboxId, &decodedValue)
-				if err != nil {
-					return errors.New("sandbox not found"), false
-				}
-
-				if decodedValue != sandboxId {
-					return errors.New("sandbox not found"), false
-				} else {
+				if err == nil && decodedValue == sandboxId {
 					return nil, false
 				}
-			} else {
-				authUrl, err := p.getAuthUrl(ctx, sandboxId)
-				if err != nil {
-					return fmt.Errorf("failed to get auth URL: %w", err), false
-				}
-
-				ctx.Redirect(http.StatusTemporaryRedirect, authUrl)
-
-				return errors.New("auth key is required"), true
 			}
+
+			authUrl, err := p.getAuthUrl(ctx, sandboxId)
+			if err != nil {
+				return fmt.Errorf("failed to get auth URL: %w", err), false
+			}
+
+			ctx.Redirect(http.StatusTemporaryRedirect, authUrl)
+
+			return errors.New("auth key is required"), true
 		}
 	}
 

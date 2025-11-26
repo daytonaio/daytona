@@ -218,7 +218,7 @@ export class Daytona {
   private readonly jwtToken?: string
   private readonly organizationId?: string
   private readonly apiUrl: string
-  private proxyToolboxUrl?: string
+  private readonly toolboxProxyCache = new Map<string, string>()
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -596,7 +596,14 @@ export class Daytona {
     return {
       items: response.data.items.map((sandbox) => {
         const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-        return new Sandbox(sandbox, structuredClone(this.clientConfig), this.createAxiosInstance(), this.sandboxApi, this.getCodeToolbox(language), this.getProxyToolboxUrl.bind(this))
+        return new Sandbox(
+          sandbox,
+          structuredClone(this.clientConfig),
+          this.createAxiosInstance(),
+          this.sandboxApi,
+          this.getCodeToolbox(language),
+          this.getProxyToolboxUrl.bind(this),
+        )
       }),
       total: response.data.total,
       page: response.data.page,
@@ -691,7 +698,7 @@ export class Daytona {
         } else {
           errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
         }
-        
+
         if (typeof errorMessage === 'object') {
           try {
             errorMessage = JSON.stringify(errorMessage)
@@ -714,12 +721,15 @@ export class Daytona {
     return axiosInstance
   }
 
-  public async getProxyToolboxUrl(): Promise<string> {
-    if (this.proxyToolboxUrl) {
-      return this.proxyToolboxUrl
+  public async getProxyToolboxUrl(sandboxId: string): Promise<string> {
+    if (this.toolboxProxyCache.has(sandboxId)) {
+      return this.toolboxProxyCache.get(sandboxId)!
     }
 
-    this.proxyToolboxUrl = (await this.configApi.configControllerGetConfig()).data.proxyToolboxUrl
-    return this.proxyToolboxUrl
+    const response = await this.sandboxApi.getToolboxProxyUrl(sandboxId)
+
+    this.toolboxProxyCache.set(sandboxId, response.data.url)
+
+    return response.data.url
   }
 }

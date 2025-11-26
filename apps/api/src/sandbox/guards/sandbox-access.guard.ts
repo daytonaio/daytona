@@ -10,6 +10,11 @@ import { isRunnerContext, RunnerContext } from '../../common/interfaces/runner-c
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
 import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
+import { isRegionProxyContext, RegionProxyContext } from '../../common/interfaces/region-proxy.interface'
+import {
+  isRegionSSHGatewayContext,
+  RegionSSHGatewayContext,
+} from '../../common/interfaces/region-ssh-gateway.interface'
 
 @Injectable()
 export class SandboxAccessGuard implements CanActivate {
@@ -32,6 +37,24 @@ export class SandboxAccessGuard implements CanActivate {
           const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxIdOrName)
           if (sandboxRunnerId !== runnerContext.runnerId) {
             throw new ForbiddenException('Runner ID does not match sandbox runner ID')
+          }
+          break
+        }
+        case isRegionProxyContext(authContext): {
+          // For region proxy authentication, verify that the runner's region ID matches the proxy's region ID
+          const regionProxyContext = authContext as RegionProxyContext
+          const sandboxRegionId = await this.sandboxService.getRegionId(sandboxIdOrName)
+          if (sandboxRegionId !== regionProxyContext.regionId) {
+            throw new ForbiddenException('Sandbox region ID does not match region proxy region ID')
+          }
+          break
+        }
+        case isRegionSSHGatewayContext(authContext): {
+          // For region SSH gateway authentication, verify that the runner's region ID matches the SSH gateway's region ID
+          const regionSSHGatewayContext = authContext as RegionSSHGatewayContext
+          const sandboxRegionId = await this.sandboxService.getRegionId(sandboxIdOrName)
+          if (sandboxRegionId !== regionSSHGatewayContext.regionId) {
+            throw new ForbiddenException('Sandbox region ID does not match region SSH gateway region ID')
           }
           break
         }

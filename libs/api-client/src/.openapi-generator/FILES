@@ -45,6 +45,7 @@ models/create-organization-invitation.ts
 models/create-organization-quota.ts
 models/create-organization-role.ts
 models/create-organization.ts
+models/create-region-response.ts
 models/create-region.ts
 models/create-runner-response.ts
 models/create-runner.ts
@@ -120,6 +121,7 @@ models/pty-list-response.ts
 models/pty-resize-request.ts
 models/pty-session-info.ts
 models/range.ts
+models/regenerate-api-key-response.ts
 models/region-screenshot-response.ts
 models/region.ts
 models/registry-push-access-dto.ts
@@ -148,6 +150,7 @@ models/snapshot-state.ts
 models/ssh-access-dto.ts
 models/ssh-access-validation-dto.ts
 models/storage-access-dto.ts
+models/toolbox-proxy-url.ts
 models/update-docker-registry.ts
 models/update-organization-default-region.ts
 models/update-organization-invitation.ts

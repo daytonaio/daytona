@@ -6,4 +6,6 @@
 export class CreateRegionInternalDto {
   id?: string
   name: string
+  proxyUrl?: string | null
+  sshGatewayUrl?: string | null
 }

@@ -39,11 +39,12 @@ import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { CreateRegionDto } from '../../region/dto/create-region.dto'
+import { CreateRegionDto, CreateRegionResponseDto } from '../../region/dto/create-region.dto'
 import { RegionDto } from '../../region/dto/region.dto'
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionAccessGuard } from '../../region/guards/region-access.guard'
+import { RegenerateApiKeyResponseDto } from '../../region/dto/regenerate-api-key.dto'
 
 @ApiTags('regions')
 @Controller('regions')
@@ -105,7 +106,7 @@ export class RegionController {
   @ApiResponse({
     status: 201,
     description: 'The region has been successfully created.',
-    type: RegionDto,
+    type: CreateRegionResponseDto,
   })
   @Audit({
     action: AuditAction.CREATE,
@@ -121,9 +122,8 @@ export class RegionController {
   async createRegion(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createRegionDto: CreateRegionDto,
-  ): Promise<RegionDto> {
-    const region = await this.regionService.create(createRegionDto, authContext.organizationId)
-    return RegionDto.fromRegion(region)
+  ): Promise<CreateRegionResponseDto> {
+    return await this.regionService.create(createRegionDto, authContext.organizationId)
   }
 
   @Get('/by-name/:name')
@@ -201,5 +201,63 @@ export class RegionController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGIONS])
   async deleteRegion(@Param('id') id: string): Promise<void> {
     await this.regionService.delete(id)
+  }
+
+  @Post(':id/regenerate-proxy-api-key')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Regenerate proxy API key for a region',
+    operationId: 'regenerateProxyApiKey',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The proxy API key has been successfully regenerated.',
+    type: RegenerateApiKeyResponseDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Region ID',
+    type: String,
+  })
+  @Audit({
+    action: AuditAction.REGENERATE_PROXY_API_KEY,
+    targetType: AuditTarget.REGION,
+    targetIdFromRequest: (req) => req.params.id,
+  })
+  @UseGuards(RegionAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  async regenerateProxyApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
+    const apiKey = await this.regionService.regenerateProxyApiKey(id)
+    return new RegenerateApiKeyResponseDto(apiKey)
+  }
+
+  @Post(':id/regenerate-ssh-gateway-api-key')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Regenerate SSH gateway API key for a region',
+    operationId: 'regenerateSshGatewayApiKey',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The SSH gateway API key has been successfully regenerated.',
+    type: RegenerateApiKeyResponseDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Region ID',
+    type: String,
+  })
+  @Audit({
+    action: AuditAction.REGENERATE_SSH_GATEWAY_API_KEY,
+    targetType: AuditTarget.REGION,
+    targetIdFromRequest: (req) => req.params.id,
+  })
+  @UseGuards(RegionAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  async regenerateSshGatewayApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
+    const apiKey = await this.regionService.regenerateSshGatewayApiKey(id)
+    return new RegenerateApiKeyResponseDto(apiKey)
   }
 }

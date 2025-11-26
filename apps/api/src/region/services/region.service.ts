@@ -17,6 +17,8 @@ import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
 import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
 import { Runner } from '../../sandbox/entities/runner.entity'
+import { CreateRegionResponseDto } from '../dto/create-region.dto'
+import { generateApiKeyHash, generateApiKeyValue } from '../../common/utils/api-key'
 
 @Injectable()
 export class RegionService {
@@ -35,7 +37,10 @@ export class RegionService {
    * @throws {BadRequestException} If the region name is invalid.
    * @throws {ConflictException} If the region with the same ID already exists or region with the same name already exists in the organization.
    */
-  async create(createRegionDto: CreateRegionInternalDto, organizationId: string | null): Promise<Region> {
+  async create(
+    createRegionDto: CreateRegionInternalDto,
+    organizationId: string | null,
+  ): Promise<CreateRegionResponseDto> {
     if (!REGION_NAME_REGEX.test(createRegionDto.name)) {
       throw new BadRequestException('Region name must contain only letters, numbers, underscores, periods, and hyphens')
     }
@@ -51,8 +56,22 @@ export class RegionService {
     }
 
     try {
-      const region = new Region(createRegionDto.name, createRegionDto.id, organizationId)
-      return await this.regionRepository.save(region)
+      const proxyApiKey = createRegionDto.proxyUrl ? generateApiKeyValue() : undefined
+      const sshGatewayApiKey = createRegionDto.sshGatewayUrl ? generateApiKeyValue() : undefined
+
+      const region = new Region({
+        name: createRegionDto.name,
+        id: createRegionDto.id,
+        organizationId,
+        proxyUrl: createRegionDto.proxyUrl,
+        sshGatewayUrl: createRegionDto.sshGatewayUrl,
+        proxyApiKeyHash: proxyApiKey ? generateApiKeyHash(proxyApiKey) : null,
+        sshGatewayApiKeyHash: sshGatewayApiKey ? generateApiKeyHash(sshGatewayApiKey) : null,
+      })
+
+      await this.regionRepository.save(region)
+
+      return new CreateRegionResponseDto({ id: region.id, proxyApiKey, sshGatewayApiKey })
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Region with name ${createRegionDto.name} already exists`)
@@ -66,8 +85,8 @@ export class RegionService {
    * @param organizationId - The ID of the organization, or null for non-organization regions, or undefined to skip organization check.
    * @returns The region if found, or null otherwise.
    */
-  async findOne(id: string, organizationId?: string | null): Promise<Region | null> {
-    const region = await this.regionRepository.findOne({
+  async findOne(id: string, organizationId?: string | null, cache = false): Promise<Region | null> {
+    return await this.regionRepository.findOne({
       where: {
         id,
         ...(organizationId === undefined
@@ -76,13 +95,13 @@ export class RegionService {
             ? { organizationId: IsNull() }
             : { organizationId }),
       },
+      cache: cache
+        ? {
+            id: `region:${id}:organization:${organizationId ?? 'null'}`,
+            milliseconds: 30000,
+          }
+        : undefined,
     })
-
-    if (!region) {
-      return null
-    }
-
-    return region
   }
 
   /**
@@ -91,15 +110,29 @@ export class RegionService {
    * @returns The region if found, or null otherwise.
    */
   async findOneByName(name: string, organizationId: string | null): Promise<Region | null> {
-    const region = await this.regionRepository.findOne({
+    return await this.regionRepository.findOne({
       where: [{ name, organizationId: organizationId ?? IsNull() }],
     })
+  }
 
-    if (!region) {
-      return null
-    }
+  /**
+   * @param proxyApiKey - The proxy API key.
+   * @returns The region if found, or null otherwise.
+   */
+  async findOneByProxyApiKey(proxyApiKey: string): Promise<Region | null> {
+    return await this.regionRepository.findOne({
+      where: { proxyApiKeyHash: generateApiKeyHash(proxyApiKey) },
+    })
+  }
 
-    return region
+  /**
+   * @param sshGatewayApiKey - The SSH gateway API key.
+   * @returns The region if found, or null otherwise.
+   */
+  async findOneBySshGatewayApiKey(sshGatewayApiKey: string): Promise<Region | null> {
+    return await this.regionRepository.findOne({
+      where: { sshGatewayApiKeyHash: generateApiKeyHash(sshGatewayApiKey) },
+    })
   }
 
   /**
@@ -162,5 +195,55 @@ export class RegionService {
     }
 
     await this.regionRepository.remove(region)
+  }
+
+  /**
+   * @param regionId - The ID of the region.
+   * @throws {NotFoundException} If the region is not found.
+   * @throws {BadRequestException} If the region does not have a proxy URL configured.
+   * @returns The newly generated proxy API key.
+   */
+  async regenerateProxyApiKey(regionId: string): Promise<string> {
+    const region = await this.findOne(regionId)
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    if (!region.proxyUrl) {
+      throw new BadRequestException('Region does not have a proxy URL configured')
+    }
+
+    const newApiKey = generateApiKeyValue()
+    region.proxyApiKeyHash = generateApiKeyHash(newApiKey)
+
+    await this.regionRepository.save(region)
+
+    return newApiKey
+  }
+
+  /**
+   * @param regionId - The ID of the region.
+   * @throws {NotFoundException} If the region is not found.
+   * @throws {BadRequestException} If the region does not have an SSH gateway URL configured.
+   * @returns The newly generated SSH gateway API key.
+   */
+  async regenerateSshGatewayApiKey(regionId: string): Promise<string> {
+    const region = await this.findOne(regionId)
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    if (!region.sshGatewayUrl) {
+      throw new BadRequestException('Region does not have an SSH gateway URL configured')
+    }
+
+    const newApiKey = generateApiKeyValue()
+    region.sshGatewayApiKeyHash = generateApiKeyHash(newApiKey)
+
+    await this.regionRepository.save(region)
+
+    return newApiKey
   }
 }
