@@ -56,16 +56,16 @@ Request rate limits are applied based on your tier, authentication status, and t
 
 Rate limits control how many API requests you can make within a specific time window. Understanding these limits helps you build robust applications that handle rate limiting gracefully and avoid service interruptions.
 
-| Tier   | Authenticated Requests (per 60s) | Sandbox Creation (per 60s) | Sandbox Lifecycle (per 60s) |
-|--------|----------------------------------|----------------------------|-----------------------------|
-| Tier 1 | 10,000                           | 300                        | 10,000                      |
-| Tier 2 | 20,000                           | 400                        | 20,000                      |
-| Tier 3 | 40,000                           | 500                        | 40,000                      |
-| Tier 4 | 50,000                           | 600                        | 50,000                      |
-| Custom | Custom limits                    | Custom limits              | Custom limits               |
+| Tier   | General Requests (per 60s) | Sandbox Creation (per 60s) | Sandbox Lifecycle (per 60s) |
+|--------|----------------------------|----------------------------|-----------------------------|
+| Tier 1 | 10,000                     | 300                        | 10,000                      |
+| Tier 2 | 20,000                     | 400                        | 20,000                      |
+| Tier 3 | 40,000                     | 500                        | 40,000                      |
+| Tier 4 | 50,000                     | 600                        | 50,000                      |
+| Custom | Custom limits              | Custom limits              | Custom limits               |
 
 
-### Authenticated Requests
+### General API Requests
 
 This is the general rate limit for authenticated API requests that don't fall under sandbox creation or lifecycle operations. This includes:
 
@@ -77,7 +77,7 @@ This is the general rate limit for authenticated API requests that don't fall un
 - Viewing audit logs
 - And other read/management operations
 
-Rate limits for authenticated requests are tracked per organization.
+Rate limits for general authenticated requests are tracked per organization.
 
 ---
 
