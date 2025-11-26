@@ -1,0 +1,32 @@
+import { CpuIcon, HardDriveIcon, MemoryStickIcon } from 'lucide-react'
+
+interface Props {
+  resource: 'cpu' | 'memory' | 'disk'
+  value: number
+  unit?: string
+  icon?: React.ReactNode
+}
+
+const resourceUnits = {
+  cpu: 'vCPU',
+  memory: 'GiB',
+  disk: 'GiB',
+}
+
+const resourceIcons = {
+  cpu: CpuIcon,
+  memory: MemoryStickIcon,
+  disk: HardDriveIcon,
+}
+
+export function ResourceChip({ resource, value, unit, icon }: Props) {
+  const resourceUnit = unit ?? resourceUnits[resource]
+  const ResourceIcon = resourceIcons[resource]
+
+  return (
+    <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2 py-[2px] text-sm">
+      {icon === null ? null : (icon ?? <ResourceIcon className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />)} {value}{' '}
+      {resourceUnit}
+    </div>
+  )
+}
