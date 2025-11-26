@@ -73,7 +73,6 @@ import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { SkipThrottle } from '@nestjs/throttler'
 import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
-import { RegionService } from '../../region/services/region.service'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -89,7 +88,6 @@ export class SandboxController {
     private readonly sandboxService: SandboxService,
     private readonly configService: TypedConfigService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly regionService: RegionService,
   ) {}
 
   @Get()
