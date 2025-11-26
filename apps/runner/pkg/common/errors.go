@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/containerd/errdefs"
 	"github.com/daytonaio/runner/internal/util"
-	"github.com/docker/docker/errdefs"
 	"github.com/gin-gonic/gin"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -35,7 +35,7 @@ func HandlePossibleDockerError(ctx *gin.Context, err error) common_errors.ErrorR
 			Path:       ctx.Request.URL.Path,
 			Method:     ctx.Request.Method,
 		}
-	} else if errdefs.IsInvalidParameter(err) {
+	} else if errdefs.IsInvalidArgument(err) {
 		return common_errors.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    fmt.Sprintf("bad request: %s", err.Error()),
@@ -44,7 +44,7 @@ func HandlePossibleDockerError(ctx *gin.Context, err error) common_errors.ErrorR
 			Path:       ctx.Request.URL.Path,
 			Method:     ctx.Request.Method,
 		}
-	} else if errdefs.IsSystem(err) {
+	} else if errdefs.IsInternal(err) {
 		if strings.Contains(err.Error(), "unable to find user") {
 			return common_errors.ErrorResponse{
 				StatusCode: http.StatusBadRequest,

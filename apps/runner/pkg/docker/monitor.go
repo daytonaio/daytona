@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/filters"
@@ -140,7 +141,7 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 			return
 		}
 		shortContainerID := containerID[:12]
-		err = dm.netRulesManager.AssignNetworkRules(shortContainerID, ct.NetworkSettings.IPAddress)
+		err = dm.netRulesManager.AssignNetworkRules(shortContainerID, common.GetContainerIpAddress(dm.ctx, ct))
 		if err != nil {
 			log.Errorf("Error assigning network rules: %v", err)
 		}
@@ -217,6 +218,8 @@ func (dm *DockerMonitor) reconcileNetworkRules(table string, chain string) {
 			continue
 		}
 
+		ipAddress := common.GetContainerIpAddress(dm.ctx, container)
+
 		// Check if the container IP matches the rule's source IP
 		// Handle CIDR notation by extracting just the IP part
 		ruleIP := sourceIP
@@ -224,9 +227,9 @@ func (dm *DockerMonitor) reconcileNetworkRules(table string, chain string) {
 			ruleIP = strings.Split(sourceIP, "/")[0]
 		}
 
-		if container.NetworkSettings.IPAddress != ruleIP {
+		if ipAddress != ruleIP {
 			log.Warnf("IP mismatch for container %s: rule has %s, container has %s",
-				containerID, ruleIP, container.NetworkSettings.IPAddress)
+				containerID, ruleIP, ipAddress)
 
 			// Delete only this specific mismatched rule
 			if err := dm.netRulesManager.DeleteChainRule(table, chain, rule); err != nil {

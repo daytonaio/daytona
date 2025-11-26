@@ -16,7 +16,7 @@ type ImageInfo struct {
 }
 
 func (d *DockerClient) GetImageInfo(ctx context.Context, imageName string) (*ImageInfo, error) {
-	inspect, _, err := d.apiClient.ImageInspectWithRaw(ctx, imageName)
+	inspect, err := d.apiClient.ImageInspect(ctx, imageName)
 	if err != nil {
 		return nil, err
 	}

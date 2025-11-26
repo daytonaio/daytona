@@ -42,9 +42,9 @@ jobs:
           go-version-file: go.work
           cache: false
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          version: v2.6.2
           working-directory: ${{ matrix.working-directory }}
           args: --timeout=5m ./...
       - name: format
@@ -69,9 +69,9 @@ jobs:
           go fmt ./...
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          version: v2.6.2
           working-directory: libs/computer-use
           args: --timeout=5m ./...
 

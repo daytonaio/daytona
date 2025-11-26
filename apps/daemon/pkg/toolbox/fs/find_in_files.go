@@ -34,7 +34,7 @@ func FindInFiles(c *gin.Context) {
 		return
 	}
 
-	var matches []Match = make([]Match, 0)
+	var matches = make([]Match, 0)
 	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return filepath.SkipDir

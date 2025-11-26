@@ -42,7 +42,7 @@ func ListFiles(c *gin.Context) {
 		return
 	}
 
-	var fileInfos []FileInfo = make([]FileInfo, 0)
+	var fileInfos = make([]FileInfo, 0)
 	for _, file := range files {
 		info, err := getFileInfo(filepath.Join(path, file.Name()))
 		if err != nil {
