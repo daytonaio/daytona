@@ -342,11 +342,11 @@ const codeExamples = {
     },
     pnpm: {
       install: `pnpm add @daytonaio/sdk`,
-      run: `pnpm tsx index.mts`,
+      run: `pnpm dlx tsx index.mts`,
     },
     yarn: {
       install: `yarn add @daytonaio/sdk`,
-      run: `yarn tsx index.mts`,
+      run: `npx tsx index.mts`,
     },
     bun: {
       install: `bun add @daytonaio/sdk`,
