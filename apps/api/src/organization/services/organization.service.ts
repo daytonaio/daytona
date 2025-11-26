@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
-import { CreateOrganizationDto } from '../dto/create-organization.dto'
+import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
@@ -43,7 +43,6 @@ import { setTimeout } from 'timers/promises'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
-import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 
@@ -85,7 +84,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   async create(
-    createOrganizationDto: CreateOrganizationDto,
+    createOrganizationDto: CreateOrganizationInternalDto,
     createdBy: string,
     personal = false,
     creatorEmailVerified = false,
@@ -141,25 +140,28 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return this.removeWithEntityManager(this.organizationRepository.manager, organization)
   }
 
-  async updateQuota(organizationId: string, updateDto: UpdateOrganizationQuotaDto): Promise<void> {
+  async updateQuota(organizationId: string, updateOrganizationQuotaDto: UpdateOrganizationQuotaDto): Promise<void> {
     const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    organization.totalCpuQuota = updateDto.totalCpuQuota ?? organization.totalCpuQuota
-    organization.totalMemoryQuota = updateDto.totalMemoryQuota ?? organization.totalMemoryQuota
-    organization.totalDiskQuota = updateDto.totalDiskQuota ?? organization.totalDiskQuota
-    organization.maxCpuPerSandbox = updateDto.maxCpuPerSandbox ?? organization.maxCpuPerSandbox
-    organization.maxMemoryPerSandbox = updateDto.maxMemoryPerSandbox ?? organization.maxMemoryPerSandbox
-    organization.maxDiskPerSandbox = updateDto.maxDiskPerSandbox ?? organization.maxDiskPerSandbox
-    organization.maxSnapshotSize = updateDto.maxSnapshotSize ?? organization.maxSnapshotSize
-    organization.volumeQuota = updateDto.volumeQuota ?? organization.volumeQuota
-    organization.snapshotQuota = updateDto.snapshotQuota ?? organization.snapshotQuota
-    organization.authenticatedRateLimit = updateDto.authenticatedRateLimit ?? organization.authenticatedRateLimit
-    organization.sandboxCreateRateLimit = updateDto.sandboxCreateRateLimit ?? organization.sandboxCreateRateLimit
+    organization.totalCpuQuota = updateOrganizationQuotaDto.totalCpuQuota ?? organization.totalCpuQuota
+    organization.totalMemoryQuota = updateOrganizationQuotaDto.totalMemoryQuota ?? organization.totalMemoryQuota
+    organization.totalDiskQuota = updateOrganizationQuotaDto.totalDiskQuota ?? organization.totalDiskQuota
+    organization.maxCpuPerSandbox = updateOrganizationQuotaDto.maxCpuPerSandbox ?? organization.maxCpuPerSandbox
+    organization.maxMemoryPerSandbox =
+      updateOrganizationQuotaDto.maxMemoryPerSandbox ?? organization.maxMemoryPerSandbox
+    organization.maxDiskPerSandbox = updateOrganizationQuotaDto.maxDiskPerSandbox ?? organization.maxDiskPerSandbox
+    organization.maxSnapshotSize = updateOrganizationQuotaDto.maxSnapshotSize ?? organization.maxSnapshotSize
+    organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota ?? organization.volumeQuota
+    organization.snapshotQuota = updateOrganizationQuotaDto.snapshotQuota ?? organization.snapshotQuota
+    organization.authenticatedRateLimit =
+      updateOrganizationQuotaDto.authenticatedRateLimit ?? organization.authenticatedRateLimit
+    organization.sandboxCreateRateLimit =
+      updateOrganizationQuotaDto.sandboxCreateRateLimit ?? organization.sandboxCreateRateLimit
     organization.sandboxLifecycleRateLimit =
-      updateDto.sandboxLifecycleRateLimit ?? organization.sandboxLifecycleRateLimit
+      updateOrganizationQuotaDto.sandboxLifecycleRateLimit ?? organization.sandboxLifecycleRateLimit
 
     await this.organizationRepository.save(organization)
   }
@@ -261,6 +263,10 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ForbiddenException('You have reached the maximum number of created organizations')
     }
 
+    if (createOrganizationDto.defaultRegionId) {
+      await this.validateOrganizationDefaultRegion(createOrganizationDto.defaultRegionId)
+    }
+
     let organization = new Organization(createOrganizationDto.defaultRegionId)
 
     organization.name = createOrganizationDto.name
@@ -294,10 +300,6 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     owner.role = OrganizationMemberRole.OWNER
 
     organization.users = [owner]
-
-    if (createOrganizationDto.defaultRegionId) {
-      await this.validateOrganizationDefaultRegion(createOrganizationDto.defaultRegionId)
-    }
 
     await entityManager.transaction(async (em) => {
       organization = await em.save(organization)
