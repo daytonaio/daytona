@@ -3,21 +3,23 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Loader2, ShieldCheck } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useAuth } from 'react-oidc-context'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { AccountProviderIcon } from '@/components/AccountProviderIcon'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useApi } from '@/hooks/useApi'
-import { handleApiError } from '@/lib/error-handling'
-import { useLocation } from 'react-router-dom'
-import { AccountProviderIcon } from '@/components/AccountProviderIcon'
-import { AccountProvider as AccountProviderApi } from '@daytonaio/api-client'
-import { UserManager } from 'oidc-client-ts'
 import { useConfig } from '@/hooks/useConfig'
+import { handleApiError } from '@/lib/error-handling'
+import { AccountProvider as AccountProviderApi } from '@daytonaio/api-client'
+import { ShieldCheck } from 'lucide-react'
+import { UserManager } from 'oidc-client-ts'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuth } from 'react-oidc-context'
+import { useLocation } from 'react-router-dom'
+import { toast } from 'sonner'
 
 export interface UserProfileIdentity {
   provider: string
@@ -161,63 +163,41 @@ const LinkedAccounts: React.FC = () => {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-xl font-medium">Linked Accounts</h1>
-      </div>
-
+    <Card>
+      <CardHeader>
+        <CardTitle>Linked Accounts</CardTitle>
+        <CardDescription>Link your accounts to your Daytona account for a seamless login.</CardDescription>
+      </CardHeader>
       {loadingProviders ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <CardContent className="flex flex-col gap-5">
           {[...Array(2)].map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="h-5 w-5 bg-muted rounded"></div>
-                  <div className="h-5 w-24 bg-muted rounded"></div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-4 w-full bg-muted rounded"></div>
-                  <div className="h-4 w-3/4 bg-muted rounded"></div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <div className="h-9 w-full bg-muted rounded"></div>
-              </CardFooter>
-            </Card>
+            <ProviderSkeleton key={index} />
           ))}
-        </div>
+        </CardContent>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <CardContent className="p-0 mt-5">
           {accountProviders.map((provider) => (
-            <Card key={provider.name}>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <AccountProviderIcon provider={provider.name} className="h-5 w-5" />
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-3">
-                      <CardTitle className="text-lg">{provider.displayName}</CardTitle>
-                      {provider.isPrimary && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge variant="outline" className="gap-1 text-xs">
-                                <ShieldCheck className="h-3 w-3" />
-                                Primary
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Primary accounts cannot be unlinked</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-                  </div>
+            <div className="flex items-center gap-3 p-4 border-t border-border justify-between">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <AccountProviderIcon provider={provider.name} className="h-4 w-4" />
+                  <div>{provider.displayName}</div>
+                  {provider.isPrimary && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="outline" className="gap-1 text-xs">
+                            <ShieldCheck className="h-3 w-3" />
+                            Primary
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Primary accounts cannot be unlinked</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
-              </CardHeader>
-              <CardContent>
                 <p className="text-sm text-muted-foreground">
                   {provider.isLinked
                     ? provider.isPrimary
@@ -225,37 +205,38 @@ const LinkedAccounts: React.FC = () => {
                       : `Your ${provider.displayName} account is linked as a secondary login method.`
                     : `Link your ${provider.displayName} account for a seamless login.`}
                 </p>
-              </CardContent>
-              <CardFooter>
-                {provider.isLinked ? (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleUnlinkAccount(provider)}
-                    disabled={processingProviderActions[provider.name] || provider.isPrimary}
-                  >
-                    {processingProviderActions[provider.name] ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    Unlink
-                  </Button>
-                ) : (
-                  <Button
-                    className="w-full"
-                    onClick={() => handleLinkAccount(provider)}
-                    disabled={processingProviderActions[provider.name]}
-                  >
-                    {processingProviderActions[provider.name] ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    Link Account
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
+              </div>
+              {provider.isLinked ? (
+                <Button
+                  variant="outline"
+                  onClick={() => handleUnlinkAccount(provider)}
+                  disabled={processingProviderActions[provider.name] || provider.isPrimary}
+                >
+                  {processingProviderActions[provider.name] && <Spinner />}
+                  Unlink
+                </Button>
+              ) : (
+                <Button onClick={() => handleLinkAccount(provider)} disabled={processingProviderActions[provider.name]}>
+                  {processingProviderActions[provider.name] && <Spinner />}
+                  Link Account
+                </Button>
+              )}
+            </div>
           ))}
-        </div>
+        </CardContent>
       )}
+    </Card>
+  )
+}
+
+const ProviderSkeleton = () => {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <Skeleton className="w-5 h-5" />
+        <Skeleton className="w-24 h-5" />
+      </div>
+      <Skeleton className="w-full h-5" />
     </div>
   )
 }
