@@ -28,9 +28,9 @@ class CreateRunnerResponse(BaseModel):
     CreateRunnerResponse
     """ # noqa: E501
     id: StrictStr = Field(description="The ID of the runner")
-    token: StrictStr = Field(description="The token for the runner")
+    api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "token"]
+    __properties: ClassVar[List[str]] = ["id", "apiKey"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +91,7 @@ class CreateRunnerResponse(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
-            "token": obj.get("token")
+            "apiKey": obj.get("apiKey")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

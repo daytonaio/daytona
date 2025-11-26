@@ -163,11 +163,11 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
                   onMouseEnter={() => setIsTokenRevealed(true)}
                   onMouseLeave={() => setIsTokenRevealed(false)}
                 >
-                  {isTokenRevealed ? createdRunner.token : getMaskedToken(createdRunner.token)}
+                  {isTokenRevealed ? createdRunner.apiKey : getMaskedToken(createdRunner.apiKey)}
                 </span>
                 <Copy
                   className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={() => copyToClipboard(createdRunner.token)}
+                  onClick={() => copyToClipboard(createdRunner.apiKey)}
                 />
               </div>
               <p className="text-sm text-muted-foreground">

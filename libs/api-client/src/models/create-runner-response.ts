@@ -25,9 +25,9 @@ export interface CreateRunnerResponse {
    */
   id: string
   /**
-   * The token for the runner
+   * The API key for the runner
    * @type {string}
    * @memberof CreateRunnerResponse
    */
-  token: string
+  apiKey: string
 }

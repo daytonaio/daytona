@@ -15,15 +15,15 @@ export class CreateRunnerResponseDto {
   id: string
 
   @ApiProperty({
-    description: 'The token for the runner',
+    description: 'The API key for the runner',
     example: 'dtn_1234567890',
   })
-  token: string
+  apiKey: string
 
-  static fromRunner(runner: Runner, token: string): CreateRunnerResponseDto {
+  static fromRunner(runner: Runner, apiKey: string): CreateRunnerResponseDto {
     return {
       id: runner.id,
-      token,
+      apiKey,
     }
   }
 }

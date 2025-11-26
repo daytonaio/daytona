@@ -11,7 +11,7 @@ import { RunnerDto } from './runner.dto'
 export class RunnerFullDto extends RunnerDto {
   @ApiProperty({
     description: 'The API key for the runner',
-    example: 'api-key-123',
+    example: 'dtn_1234567890',
   })
   apiKey: string
 

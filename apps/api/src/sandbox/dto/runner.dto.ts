@@ -122,10 +122,10 @@ export class RunnerDto {
   availabilityScore: number
 
   @ApiProperty({
-    description: 'The region ID of the runner',
-    example: '123456789012',
+    description: 'The region of the runner',
+    example: 'us',
   })
-  regionId: string
+  region: string
 
   @ApiProperty({
     description: 'The name of the runner',
@@ -194,7 +194,7 @@ export class RunnerDto {
       currentAllocatedDiskGiB: runner.currentAllocatedDiskGiB,
       currentSnapshotCount: runner.currentSnapshotCount,
       availabilityScore: runner.availabilityScore,
-      regionId: runner.region,
+      region: runner.region,
       name: runner.name,
       state: runner.state,
       lastChecked: runner.lastChecked?.toISOString(),

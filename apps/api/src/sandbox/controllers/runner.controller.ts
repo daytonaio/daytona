@@ -41,7 +41,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { CreateRunnerResponseDto } from '../dto/create-runner-response.dto'
-import { RunnerFullDto } from '../dto/runner.full.dto'
+import { RunnerFullDto } from '../dto/runner-full.dto'
 
 @ApiTags('runners')
 @Controller('runners')

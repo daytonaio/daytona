@@ -9444,20 +9444,20 @@ components:
       type: object
     CreateRunnerResponse:
       example:
+        apiKey: dtn_1234567890
         id: runner123
-        token: dtn_1234567890
       properties:
         id:
           description: The ID of the runner
           example: runner123
           type: string
-        token:
-          description: The token for the runner
+        apiKey:
+          description: The API key for the runner
           example: dtn_1234567890
           type: string
       required:
+        - apiKey
         - id
-        - token
       type: object
     SandboxClass:
       description: The class of the runner
@@ -9499,9 +9499,9 @@ components:
         currentSnapshotCount: 12
         version: '0'
         disk: 100
-        regionId: '123456789012'
         domain: runner1.example.com
         name: runner1
+        region: us
         lastChecked: 2024-10-01T12:00:00Z
       properties:
         id:
@@ -9576,9 +9576,9 @@ components:
           description: Runner availability score
           example: 85
           type: number
-        regionId:
-          description: The region ID of the runner
-          example: '123456789012'
+        region:
+          description: The region of the runner
+          example: us
           type: string
         name:
           description: The name of the runner
@@ -9622,7 +9622,7 @@ components:
         - memory
         - name
         - proxyUrl
-        - regionId
+        - region
         - state
         - unschedulable
         - updatedAt
@@ -9632,7 +9632,7 @@ components:
       example:
         memory: 16
         currentMemoryUsagePercentage: 68.2
-        apiKey: api-key-123
+        apiKey: dtn_1234567890
         availabilityScore: 85
         currentDiskUsagePercentage: 33.8
         currentCpuUsagePercentage: 45.6
@@ -9653,9 +9653,9 @@ components:
         currentSnapshotCount: 12
         version: '0'
         disk: 100
-        regionId: '123456789012'
         domain: runner1.example.com
         name: runner1
+        region: us
         lastChecked: 2024-10-01T12:00:00Z
       properties:
         id:
@@ -9730,9 +9730,9 @@ components:
           description: Runner availability score
           example: 85
           type: number
-        regionId:
-          description: The region ID of the runner
-          example: '123456789012'
+        region:
+          description: The region of the runner
+          example: us
           type: string
         name:
           description: The name of the runner
@@ -9765,7 +9765,7 @@ components:
           type: string
         apiKey:
           description: The API key for the runner
-          example: api-key-123
+          example: dtn_1234567890
           type: string
       required:
         - apiKey
@@ -9781,7 +9781,7 @@ components:
         - memory
         - name
         - proxyUrl
-        - regionId
+        - region
         - state
         - unschedulable
         - updatedAt

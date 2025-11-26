@@ -134,11 +134,11 @@ export interface RunnerFull {
    */
   availabilityScore?: number
   /**
-   * The region ID of the runner
+   * The region of the runner
    * @type {string}
    * @memberof RunnerFull
    */
-  regionId: string
+  region: string
   /**
    * The name of the runner
    * @type {string}
