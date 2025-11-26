@@ -690,10 +690,13 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async processPullOnInitialRunner(snapshot: Snapshot, runner: Runner) {
-    const sourceRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
+    let sourceRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
       snapshot.imageName,
       snapshot.organizationId,
     )
+    if (!sourceRegistry) {
+      sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
+    }
     const destinationRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
     // Using image name for pull instead of the ref
@@ -741,12 +744,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     // todo: split dockerfile by FROM's and pass all docker registry creds to the building process
 
     try {
+      const sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       registry.url = registry.url.replace(/^(https?:\/\/)/, '')
-      await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId, registry, true)
+      await runnerAdapter.buildSnapshot(
+        snapshot.buildInfo,
+        snapshot.organizationId,
+        sourceRegistry ? [sourceRegistry] : undefined,
+        registry,
+        true,
+      )
     } catch (err) {
       if (err.code === 'ECONNRESET') {
         // Connection reset, retry later

@@ -58,4 +58,10 @@ export interface BuildSnapshotRequestDTO {
    * @memberof BuildSnapshotRequestDTO
    */
   snapshot?: string
+  /**
+   *
+   * @type {Array<RegistryDTO>}
+   * @memberof BuildSnapshotRequestDTO
+   */
+  sourceRegistries?: Array<RegistryDTO>
 }
