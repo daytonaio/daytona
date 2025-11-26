@@ -56,7 +56,7 @@ export class ApiKeyService {
       throw new ConflictException('API key with this name already exists')
     }
 
-    const value = apiKeyValue ?? this.generateApiKeyValue()
+    const value = apiKeyValue || this.generateApiKeyValue()
 
     const apiKey = await this.apiKeyRepository.save({
       organizationId,
