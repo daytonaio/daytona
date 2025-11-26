@@ -93,20 +93,26 @@ export class NotificationService {
   async handleRunnerCreated(event: RunnerCreatedEvent) {
     const dto = RunnerDto.fromRunner(event.runner)
     const organizationId = await this.regionService.getOrganizationId(event.runner.region)
-    this.notificationGateway.emitRunnerCreated(dto, organizationId)
+    if (organizationId !== undefined) {
+      this.notificationGateway.emitRunnerCreated(dto, organizationId)
+    }
   }
 
   @OnEvent(RunnerEvents.STATE_UPDATED)
   async handleRunnerStateUpdated(event: RunnerStateUpdatedEvent) {
     const dto = RunnerDto.fromRunner(event.runner)
     const organizationId = await this.regionService.getOrganizationId(event.runner.region)
-    this.notificationGateway.emitRunnerStateUpdated(dto, organizationId, event.oldState, event.newState)
+    if (organizationId !== undefined) {
+      this.notificationGateway.emitRunnerStateUpdated(dto, organizationId, event.oldState, event.newState)
+    }
   }
 
   @OnEvent(RunnerEvents.UNSCHEDULABLE_UPDATED)
   async handleRunnerUnschedulableUpdated(event: RunnerUnschedulableUpdatedEvent) {
     const dto = RunnerDto.fromRunner(event.runner)
     const organizationId = await this.regionService.getOrganizationId(event.runner.region)
-    this.notificationGateway.emitRunnerUnschedulableUpdated(dto, organizationId)
+    if (organizationId !== undefined) {
+      this.notificationGateway.emitRunnerUnschedulableUpdated(dto, organizationId)
+    }
   }
 }
