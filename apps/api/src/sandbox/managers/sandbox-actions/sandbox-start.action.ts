@@ -254,12 +254,12 @@ export class SandboxStartAction extends SandboxAction {
   // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result
   async buildOnRunner(buildInfo: BuildInfo, runner: Runner, organizationId: string) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    const sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
 
     let retries = 0
 
     while (retries < 10) {
       try {
-        const sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
         await runnerAdapter.buildSnapshot(buildInfo, organizationId, sourceRegistry ? [sourceRegistry] : undefined)
         break
       } catch (err) {
