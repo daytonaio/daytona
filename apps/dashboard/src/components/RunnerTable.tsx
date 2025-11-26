@@ -84,7 +84,7 @@ export function RunnerTable({
     globalFilterFn: (row, columnId, filterValue) => {
       const runner = row.original as Runner
       const searchValue = filterValue.toLowerCase()
-      const regionName = getRegionName(runner.regionId) ?? runner.regionId
+      const regionName = getRegionName(runner.region) ?? runner.region
       return runner.id.toLowerCase().includes(searchValue) || regionName.toLowerCase().includes(searchValue)
     },
     state: {
@@ -282,13 +282,11 @@ const getColumns = ({
       size: 180,
       cell: ({ row }) => (
         <div className="w-full truncate flex items-center gap-2">
-          <span className="truncate block text-sm">
-            {getRegionName(row.original.regionId) ?? row.original.regionId}
-          </span>
+          <span className="truncate block text-sm">{getRegionName(row.original.region) ?? row.original.region}</span>
           <button
             onClick={(e) => {
               e.stopPropagation()
-              copyToClipboard(getRegionName(row.original.regionId) ?? row.original.regionId)
+              copyToClipboard(getRegionName(row.original.region) ?? row.original.region)
             }}
             className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Copy Region"
