@@ -11,6 +11,7 @@ import (
 	"io"
 	"strings"
 
+	cerrdefs "github.com/containerd/containerd/errdefs"
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/internal/util"
@@ -19,7 +20,6 @@ import (
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
-	"github.com/docker/docker/errdefs"
 	"github.com/docker/docker/pkg/jsonmessage"
 
 	log "github.com/sirupsen/logrus"
@@ -110,7 +110,7 @@ func (p *DockerClient) validateImageArchitecture(ctx context.Context, image stri
 
 	inspect, err := p.apiClient.ImageInspect(ctx, image)
 	if err != nil {
-		if errdefs.IsNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			return err
 		}
 		return fmt.Errorf("failed to inspect image: %w", err)
