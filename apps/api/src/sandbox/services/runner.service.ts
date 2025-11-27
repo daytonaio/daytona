@@ -149,8 +149,8 @@ export class RunnerService {
       runnerFilter.id = Not(In(excludedRunnerIds))
     }
 
-    if (params.region !== undefined) {
-      runnerFilter.region = params.region
+    if (params.regions?.length) {
+      runnerFilter.region = In(params.regions)
     }
 
     if (params.sandboxClass !== undefined) {
@@ -594,7 +594,7 @@ export class RunnerService {
 }
 
 export class GetRunnerParams {
-  region?: string
+  regions?: string[]
   sandboxClass?: SandboxClass
   snapshotRef?: string
   excludedRunnerIds?: string[]
