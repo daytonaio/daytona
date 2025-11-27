@@ -57,6 +57,8 @@ type Workspace struct {
 	DesiredState *SandboxDesiredState `json:"desiredState,omitempty"`
 	// The error reason of the sandbox
 	ErrorReason *string `json:"errorReason,omitempty"`
+	// Whether the sandbox error is recoverable. Computed from errorReason.
+	IsRecoverable *bool `json:"isRecoverable,omitempty"`
 	// The state of the backup
 	BackupState *string `json:"backupState,omitempty"`
 	// The creation timestamp of the last backup
@@ -595,6 +597,38 @@ func (o *Workspace) SetErrorReason(v string) {
 	o.ErrorReason = &v
 }
 
+// GetIsRecoverable returns the IsRecoverable field value if set, zero value otherwise.
+func (o *Workspace) GetIsRecoverable() bool {
+	if o == nil || IsNil(o.IsRecoverable) {
+		var ret bool
+		return ret
+	}
+	return *o.IsRecoverable
+}
+
+// GetIsRecoverableOk returns a tuple with the IsRecoverable field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetIsRecoverableOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsRecoverable) {
+		return nil, false
+	}
+	return o.IsRecoverable, true
+}
+
+// HasIsRecoverable returns a boolean if a field has been set.
+func (o *Workspace) HasIsRecoverable() bool {
+	if o != nil && !IsNil(o.IsRecoverable) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsRecoverable gets a reference to the given bool and assigns it to the IsRecoverable field.
+func (o *Workspace) SetIsRecoverable(v bool) {
+	o.IsRecoverable = &v
+}
+
 // GetBackupState returns the BackupState field value if set, zero value otherwise.
 func (o *Workspace) GetBackupState() string {
 	if o == nil || IsNil(o.BackupState) {
@@ -1116,6 +1150,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ErrorReason) {
 		toSerialize["errorReason"] = o.ErrorReason
 	}
+	if !IsNil(o.IsRecoverable) {
+		toSerialize["isRecoverable"] = o.IsRecoverable
+	}
 	if !IsNil(o.BackupState) {
 		toSerialize["backupState"] = o.BackupState
 	}
@@ -1234,6 +1271,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "desiredState")
 		delete(additionalProperties, "errorReason")
+		delete(additionalProperties, "isRecoverable")
 		delete(additionalProperties, "backupState")
 		delete(additionalProperties, "backupCreatedAt")
 		delete(additionalProperties, "autoStopInterval")

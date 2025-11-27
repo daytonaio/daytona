@@ -8783,6 +8783,7 @@ components:
         target: local
         disk: 10
         name: MySandbox
+        isRecoverable: true
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -8869,6 +8870,10 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
+        isRecoverable:
+          description: Whether the sandbox error is recoverable. Computed from errorReason.
+          example: true
+          type: boolean
         backupState:
           description: The state of the backup
           enum:
@@ -8980,6 +8985,7 @@ components:
             target: local
             disk: 10
             name: MySandbox
+            isRecoverable: true
             backupState: None
             user: daytona
             autoArchiveInterval: 10080
@@ -9017,6 +9023,7 @@ components:
             target: local
             disk: 10
             name: MySandbox
+            isRecoverable: true
             backupState: None
             user: daytona
             autoArchiveInterval: 10080
@@ -11279,6 +11286,7 @@ components:
         target: local
         disk: 10
         name: MySandbox
+        isRecoverable: true
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -11365,6 +11373,10 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
+        isRecoverable:
+          description: Whether the sandbox error is recoverable. Computed from errorReason.
+          example: true
+          type: boolean
         backupState:
           description: The state of the backup
           enum:
