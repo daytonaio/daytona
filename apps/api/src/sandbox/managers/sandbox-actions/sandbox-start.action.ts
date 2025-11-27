@@ -108,6 +108,21 @@ export class SandboxStartAction extends SandboxAction {
     sandbox: Sandbox,
     lockCode: LockCode,
   ): Promise<SyncState> {
+    // Check for timeout - allow up to 60 minutes since the last sandbox update
+    const timeoutMinutes = 60
+    const timeoutMs = timeoutMinutes * 60 * 1000
+
+    if (sandbox.updatedAt && Date.now() - sandbox.updatedAt.getTime() > timeoutMs) {
+      await this.updateSandboxState(
+        sandbox.id,
+        SandboxState.ERROR,
+        lockCode,
+        undefined,
+        'Timeout while building snapshot on runner',
+      )
+      return DONT_SYNC_AGAIN
+    }
+
     const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, sandbox.buildInfo.snapshotRef)
     if (snapshotRunner) {
       switch (snapshotRunner.state) {
