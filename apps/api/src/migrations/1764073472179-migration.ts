@@ -53,6 +53,11 @@ export class Migration1764073472179 implements MigrationInterface {
       `ALTER TABLE "organization_role" ALTER COLUMN "permissions" TYPE "public"."organization_role_permissions_enum"[] USING "permissions"::"text"::"public"."organization_role_permissions_enum"[]`,
     )
     await queryRunner.query(`DROP TYPE "public"."organization_role_permissions_enum_old"`)
+
+    // create new index for runner
+    await queryRunner.query(
+      `CREATE INDEX "runner_state_unschedulable_region_index" ON "runner" ("state", "unschedulable", "region") `,
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -83,5 +88,8 @@ export class Migration1764073472179 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TYPE "public"."organization_role_permissions_enum_old" RENAME TO "organization_role_permissions_enum"`,
     )
+
+    // drop new index for runner
+    await queryRunner.query(`DROP INDEX "public"."runner_state_unschedulable_region_index"`)
   }
 }
