@@ -15,7 +15,6 @@ import {
 } from '../ui/dropdown-menu'
 import { SandboxTableActionsProps } from './types'
 import { useMemo } from 'react'
-import { isRecoverableError } from '@/lib/sandbox-recovery-errors'
 
 export function SandboxTableActions({
   sandbox,
@@ -56,7 +55,7 @@ export function SandboxTableActions({
           onClick: () => onStart(sandbox.id),
           disabled: isLoading,
         })
-      } else if (sandbox.state === SandboxState.ERROR && isRecoverableError(sandbox.errorReason)) {
+      } else if (sandbox.state === SandboxState.ERROR && sandbox.isRecoverable) {
         items.push({
           key: 'recover',
           label: 'Recover',
@@ -133,7 +132,7 @@ export function SandboxTableActions({
           e.stopPropagation()
           if (sandbox.state === SandboxState.STARTED) {
             onStop(sandbox.id)
-          } else if (sandbox.state === SandboxState.ERROR && isRecoverableError(sandbox.errorReason)) {
+          } else if (sandbox.state === SandboxState.ERROR && sandbox.isRecoverable) {
             onRecover(sandbox.id)
           } else {
             onStart(sandbox.id)
@@ -144,7 +143,7 @@ export function SandboxTableActions({
           <Square className="w-4 h-4" />
         ) : sandbox.state === SandboxState.STOPPING || sandbox.state === SandboxState.STARTING ? (
           <Loader2 className="w-4 h-4 animate-spin" />
-        ) : sandbox.state === SandboxState.ERROR && isRecoverableError(sandbox.errorReason) ? (
+        ) : sandbox.state === SandboxState.ERROR && sandbox.isRecoverable ? (
           <Wrench className="w-4 h-4" />
         ) : (
           <Play className="w-4 h-4" />

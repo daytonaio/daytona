@@ -69,6 +69,7 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
+import { detectRecoveryType, RecoveryType } from '../utils/recovery-error.util'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -1150,21 +1151,27 @@ export class SandboxService {
       throw new SandboxError('Sandbox state change in progress')
     }
 
-    const errorReason = (sandbox.errorReason || '').toLowerCase()
+    // Use centralized recovery detection
+    const recoveryType = detectRecoveryType(sandbox.errorReason)
 
-    // Route to appropriate recovery method based on error reason
-    if (errorReason.includes('no space left') || errorReason.includes('storage limit')) {
-      // Call runner to expand storage
-      // If this fails, the sandbox stays in ERROR state
-      await this.recoverExpandStorage(sandboxId)
-
-      sandbox.state = SandboxState.STOPPED
-      sandbox.desiredState = SandboxDesiredState.STOPPED
-      sandbox.errorReason = null
-      await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
-    } else {
-      throw new BadRequestError('No recovery method available for this error type')
+    if (!recoveryType) {
+      throw new BadRequestError('This error is not recoverable. Please check logs or contact support.')
     }
+
+    // Execute recovery based on type
+    switch (recoveryType) {
+      case RecoveryType.STORAGE_EXPANSION:
+        await this.recoverExpandStorage(sandboxId)
+        break
+      default:
+        throw new Error(`Unknown recovery type: ${recoveryType}`)
+    }
+
+    // Clear error state
+    sandbox.state = SandboxState.STOPPED
+    sandbox.desiredState = SandboxDesiredState.STOPPED
+    sandbox.errorReason = null
+    await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
 
     // Now that sandbox is in STOPPED state, use the normal start flow
     // This handles quota validation, pending usage, event emission, etc.

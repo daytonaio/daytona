@@ -7,16 +7,15 @@ import { SandboxState as SandboxStateType } from '@daytonaio/api-client'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { getStateLabel } from './constants'
 import { STATE_ICONS } from './state-icons'
-import { isRecoverableError } from '@/lib/sandbox-recovery-errors'
 
 interface SandboxStateProps {
   state?: SandboxStateType
   errorReason?: string
+  isRecoverable?: boolean
 }
 
-export function SandboxState({ state, errorReason }: SandboxStateProps) {
+export function SandboxState({ state, errorReason, isRecoverable }: SandboxStateProps) {
   if (!state) return null
-  const isRecoverable = isRecoverableError(errorReason)
   const stateIcon = isRecoverable
     ? STATE_ICONS['RECOVERY']
     : STATE_ICONS[state] || STATE_ICONS[SandboxStateType.UNKNOWN]
