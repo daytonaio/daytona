@@ -349,7 +349,6 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 				_, err := g.apiClient.SandboxAPI.UpdateLastActivity(keepAliveContext, sandboxId).Execute()
 				if err != nil {
 					log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
-					return
 				}
 			case <-keepAliveContext.Done():
 				return
