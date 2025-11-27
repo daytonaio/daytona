@@ -61,11 +61,6 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   // }, [sandbox?.id, getWebTerminalUrl])
 
   if (!sandbox) return null
-  const isRecoverableStorageError = (reason?: string) => {
-    if (!reason) return false
-    const msg = reason.toLowerCase()
-    return msg.includes('no space left on device') || msg.includes('storage limit')
-  }
 
   const getLastEvent = (sandbox: Sandbox): { date: Date; relativeTimeString: string } => {
     return getRelativeTimeString(sandbox.updatedAt)
@@ -99,7 +94,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   </Button>
                 )}
                 {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) &&
-                  !isRecoverableStorageError(sandbox.errorReason) && (
+                  !sandbox.isRecoverable && (
                     <Button
                       variant="outline"
                       onClick={() => handleStart(sandbox.id)}
@@ -109,7 +104,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                       Start
                     </Button>
                   )}
-                {sandbox.state === SandboxState.ERROR && isRecoverableStorageError(sandbox.errorReason) && (
+                {sandbox.state === SandboxState.ERROR && sandbox.isRecoverable && (
                   <Button
                     variant="outline"
                     onClick={() => handleRecover(sandbox.id)}
@@ -212,7 +207,11 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               <div>
                 <h3 className="text-sm text-muted-foreground">State</h3>
                 <div className="mt-1 text-sm">
-                  <SandboxStateComponent state={sandbox.state} errorReason={sandbox.errorReason} />
+                  <SandboxStateComponent
+                    state={sandbox.state}
+                    errorReason={sandbox.errorReason}
+                    isRecoverable={sandbox.isRecoverable}
+                  />
                 </div>
               </div>
               <div>

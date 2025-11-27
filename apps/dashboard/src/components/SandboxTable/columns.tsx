@@ -158,7 +158,11 @@ export function getColumns({
       },
       cell: ({ row }) => (
         <div className="w-full truncate">
-          <SandboxStateComponent state={row.original.state} errorReason={row.original.errorReason} />
+          <SandboxStateComponent
+            state={row.original.state}
+            errorReason={row.original.errorReason}
+            isRecoverable={row.original.isRecoverable}
+          />
         </div>
       ),
       accessorKey: 'state',
