@@ -19,7 +19,7 @@ RUN SKIP_COMPUTER_USE_BUILD=true yarn nx build runner --configuration=production
 
 FROM docker:28.2.2-dind-alpine3.22 AS runner
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl rsync
 
 WORKDIR /usr/local/bin
 
