@@ -8932,6 +8932,7 @@ components:
       type: object
     UpdateSandboxStateDto:
       example:
+        errorReason: Failed to pull snapshot image
         state: started
       properties:
         state:
@@ -8954,6 +8955,10 @@ components:
             - archived
             - archiving
           example: started
+          type: string
+        errorReason:
+          description: Optional error message when reporting an error state
+          example: Failed to pull snapshot image
           type: string
       required:
         - state

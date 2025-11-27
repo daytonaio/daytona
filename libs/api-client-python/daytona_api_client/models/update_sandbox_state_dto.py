@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,8 +28,9 @@ class UpdateSandboxStateDto(BaseModel):
     UpdateSandboxStateDto
     """ # noqa: E501
     state: StrictStr = Field(description="The new state for the sandbox")
+    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", alias="errorReason")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["state"]
+    __properties: ClassVar[List[str]] = ["state", "errorReason"]
 
     @field_validator('state')
     def state_validate_enum(cls, value):
@@ -96,7 +97,8 @@ class UpdateSandboxStateDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "state": obj.get("state")
+            "state": obj.get("state"),
+            "errorReason": obj.get("errorReason")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
