@@ -12,7 +12,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -22,6 +21,8 @@ import (
 
 	"github.com/daytonaio/apiclient"
 	"golang.org/x/crypto/ssh"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -325,6 +326,33 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 		_, err := io.Copy(runnerChannel, clientChannel)
 		if err != nil {
 			log.Printf("Client to runner copy error: %v", err)
+		}
+	}()
+
+	keepAliveContext, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	// Keep sandbox alive while connection is open
+	go func() {
+		// Update immediately upon starting
+		_, err := g.apiClient.SandboxAPI.UpdateLastActivity(keepAliveContext, sandboxId).Execute()
+		if err != nil {
+			log.Warnf("failed to update last activity for sandbox %s (will retry): %v", sandboxId, err)
+		}
+
+		// Then every 45 seconds
+		ticker := time.NewTicker(45 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				_, err := g.apiClient.SandboxAPI.UpdateLastActivity(keepAliveContext, sandboxId).Execute()
+				if err != nil {
+					log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
+				}
+			case <-keepAliveContext.Done():
+				return
+			}
 		}
 	}()
 
