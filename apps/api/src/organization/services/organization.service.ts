@@ -266,7 +266,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
         this.defaultOrganizationQuota.totalMemoryQuota,
         this.defaultOrganizationQuota.totalDiskQuota,
       )
-      organization.regionQuotas = [...organization.regionQuotas, regionQuota]
+      if (organization.regionQuotas) {
+        organization.regionQuotas = [...organization.regionQuotas, regionQuota]
+      } else {
+        organization.regionQuotas = [regionQuota]
+      }
     }
 
     await this.organizationRepository.save(organization)
