@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState } from 'react'
-import { Sandbox, SandboxState } from '@daytonaio/api-client'
-import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getRelativeTimeString } from '@/lib/utils'
-import { Archive, Camera, X, GitFork, Trash, Play, Tag, Copy } from 'lucide-react'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
+import { Sandbox, SandboxState } from '@daytonaio/api-client'
+import { Archive, Copy, Play, Tag, Trash, X } from 'lucide-react'
+import React, { useState } from 'react'
 import { toast } from 'sonner'
+import { ResourceChip } from './ResourceChip'
+import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -224,9 +225,15 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   </button>
                 </div>
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <h3 className="text-sm text-muted-foreground">Last used</h3>
                 <p className="mt-1 text-sm font-medium">{getLastEvent(sandbox).relativeTimeString}</p>
+              </div>
+              <div>
+                <h3 className="text-sm text-muted-foreground">Created at</h3>
+                <p className="mt-1 text-sm font-medium">{formatTimestamp(sandbox.createdAt)}</p>
               </div>
             </div>
 
@@ -234,15 +241,9 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               <div>
                 <h3 className="text-sm text-muted-foreground">Resources</h3>
                 <div className="mt-1 text-sm font-medium flex items-center gap-1">
-                  <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
-                    {sandbox.cpu} vCPU
-                  </div>
-                  <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
-                    {sandbox.memory} GiB
-                  </div>
-                  <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2">
-                    {sandbox.disk} GiB
-                  </div>
+                  <ResourceChip resource="cpu" value={sandbox.cpu} />
+                  <ResourceChip resource="memory" value={sandbox.memory} />
+                  <ResourceChip resource="disk" value={sandbox.disk} />
                 </div>
               </div>
             </div>
