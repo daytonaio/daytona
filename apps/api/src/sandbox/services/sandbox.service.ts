@@ -258,7 +258,7 @@ export class SandboxService {
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.region,
+      regions: [sandbox.region],
       sandboxClass: sandbox.class,
       snapshotRef: snapshot.ref,
     })
@@ -380,7 +380,7 @@ export class SandboxService {
       }
 
       const runner = await this.runnerService.getRandomAvailableRunner({
-        region,
+        regions: [region],
         sandboxClass,
         snapshotRef: snapshot.ref,
       })
@@ -613,7 +613,7 @@ export class SandboxService {
 
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
-          region: sandbox.region,
+          regions: [sandbox.region],
           sandboxClass: sandbox.class,
           snapshotRef: sandbox.buildInfo.snapshotRef,
         })
