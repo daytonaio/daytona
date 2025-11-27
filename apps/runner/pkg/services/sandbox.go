@@ -10,6 +10,8 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/models/enums"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type SandboxService struct {
@@ -26,9 +28,11 @@ func NewSandboxService(statesCache *cache.StatesCache, docker *docker.DockerClie
 
 func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId string) *models.CachedStates {
 	sandboxState, err := s.docker.DeduceSandboxState(ctx, sandboxId)
-	if err == nil {
-		s.statesCache.SetSandboxState(ctx, sandboxId, sandboxState)
+	if err != nil {
+		log.Warnf("Failed to deduce sandbox %s state: %v", sandboxId, err)
 	}
+
+	s.statesCache.SetSandboxState(ctx, sandboxId, sandboxState)
 
 	data, err := s.statesCache.Get(ctx, sandboxId)
 	if err != nil {
