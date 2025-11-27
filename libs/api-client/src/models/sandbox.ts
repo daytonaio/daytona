@@ -140,6 +140,12 @@ export interface Sandbox {
    */
   errorReason?: string
   /**
+   * Whether the sandbox error is recoverable. Computed from errorReason.
+   * @type {boolean}
+   * @memberof Sandbox
+   */
+  isRecoverable?: boolean
+  /**
    * The state of the backup
    * @type {string}
    * @memberof Sandbox
