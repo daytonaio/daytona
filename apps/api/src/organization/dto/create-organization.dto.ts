@@ -16,4 +16,13 @@ export class CreateOrganizationDto {
   @IsString()
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    description: 'The ID of the default region for the organization',
+    example: 'us',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  defaultRegionId: string
 }

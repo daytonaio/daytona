@@ -7,7 +7,6 @@ import { Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common'
 import { WebSocketGateway, WebSocketServer, OnGatewayInit } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 import { createAdapter } from '@socket.io/redis-adapter'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
@@ -21,6 +20,9 @@ import { VolumeEvents } from '../../sandbox/constants/volume-events'
 import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeState } from '../../sandbox/enums/volume-state.enum'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
+import { RunnerDto } from '../../sandbox/dto/runner.dto'
+import { RunnerState } from '../../sandbox/enums/runner-state.enum'
+import { RunnerEvents } from '../../sandbox/constants/runner-events'
 
 @WebSocketGateway({
   path: '/api/socket.io/',
@@ -34,7 +36,6 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
 
   constructor(
     private readonly jwtStrategy: JwtStrategy,
-    private readonly organizationService: OrganizationService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
@@ -115,5 +116,31 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
 
   emitVolumeLastUsedAtUpdated(volume: VolumeDto) {
     this.server.to(volume.organizationId).emit(VolumeEvents.LAST_USED_AT_UPDATED, volume)
+  }
+
+  emitRunnerCreated(runner: RunnerDto, organizationId: string | null) {
+    if (!organizationId) {
+      return
+    }
+    this.server.to(organizationId).emit(RunnerEvents.CREATED, runner)
+  }
+
+  emitRunnerStateUpdated(
+    runner: RunnerDto,
+    organizationId: string | null,
+    oldState: RunnerState,
+    newState: RunnerState,
+  ) {
+    if (!organizationId) {
+      return
+    }
+    this.server.to(organizationId).emit(RunnerEvents.STATE_UPDATED, { runner, oldState, newState })
+  }
+
+  emitRunnerUnschedulableUpdated(runner: RunnerDto, organizationId: string | null) {
+    if (!organizationId) {
+      return
+    }
+    this.server.to(organizationId).emit(RunnerEvents.UNSCHEDULABLE_UPDATED, runner)
   }
 }

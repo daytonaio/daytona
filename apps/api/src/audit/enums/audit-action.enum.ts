@@ -12,6 +12,7 @@ export enum AuditAction {
   SET_DEFAULT = 'set_default',
   UPDATE_ACCESS = 'update_access',
   UPDATE_QUOTA = 'update_quota',
+  UPDATE_REGION_QUOTA = 'update_region_quota',
   SUSPEND = 'suspend',
   UNSUSPEND = 'unsuspend',
   ACCEPT = 'accept',

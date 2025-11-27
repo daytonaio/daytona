@@ -50,6 +50,9 @@ import { BillingProvider } from './providers/BillingProvider'
 import { useConfig } from './hooks/useConfig'
 import { addPylonWidget } from './lib/pylon-widget'
 import { QueryProvider } from './providers/QueryProvider'
+import { RegionsProvider } from './providers/RegionsProvider'
+import Regions from './pages/Regions'
+import Runners from './pages/Runners'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -135,13 +138,15 @@ function App() {
                 <ApiProvider>
                   <OrganizationsProvider>
                     <SelectedOrganizationProvider>
-                      <BillingProvider>
-                        <UserOrganizationInvitationsProvider>
-                          <NotificationSocketProvider>
-                            <Dashboard />
-                          </NotificationSocketProvider>
-                        </UserOrganizationInvitationsProvider>
-                      </BillingProvider>
+                      <RegionsProvider>
+                        <BillingProvider>
+                          <UserOrganizationInvitationsProvider>
+                            <NotificationSocketProvider>
+                              <Dashboard />
+                            </NotificationSocketProvider>
+                          </UserOrganizationInvitationsProvider>
+                        </BillingProvider>
+                      </RegionsProvider>
                     </SelectedOrganizationProvider>
                   </OrganizationsProvider>
                 </ApiProvider>
@@ -228,6 +233,26 @@ function App() {
             }
           />
           <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
+          <Route
+            path={getRouteSubPath(RoutePath.REGIONS)}
+            element={
+              <RequiredPermissionsOrganizationPageWrapper
+                requiredPermissions={[OrganizationRolePermissionsEnum.READ_REGIONS]}
+              >
+                <Regions />
+              </RequiredPermissionsOrganizationPageWrapper>
+            }
+          />
+          <Route
+            path={getRouteSubPath(RoutePath.RUNNERS)}
+            element={
+              <RequiredPermissionsOrganizationPageWrapper
+                requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
+              >
+                <Runners />
+              </RequiredPermissionsOrganizationPageWrapper>
+            }
+          />
           <Route
             path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
             element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}

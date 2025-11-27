@@ -24,10 +24,13 @@ import { Volume } from '../sandbox/entities/volume.entity'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 import { OrganizationUsageService } from './services/organization-usage.service'
+import { RegionModule } from '../region/region.module'
+import { OrganizationRegionController } from './controllers/region.controller'
 
 @Module({
   imports: [
     UserModule,
+    RegionModule,
     TypeOrmModule.forFeature([
       Organization,
       OrganizationRole,
@@ -44,6 +47,7 @@ import { OrganizationUsageService } from './services/organization-usage.service'
     OrganizationRoleController,
     OrganizationUserController,
     OrganizationInvitationController,
+    OrganizationRegionController,
   ],
   providers: [
     OrganizationService,

@@ -26,6 +26,7 @@ export interface SandboxTableProps {
   onChangeSnapshotSearchValue: (name?: string) => void
   regionsData: Region[]
   regionsDataIsLoading: boolean
+  getRegionName: (regionId: string) => string | undefined
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
@@ -145,7 +146,7 @@ export const convertTableFiltersToApiFilters = (columnFilters: ColumnFiltersStat
       case 'region':
       case 'target':
         if (Array.isArray(filter.value) && filter.value.length > 0) {
-          filters.regions = filter.value as string[]
+          filters.regionIds = filter.value as string[]
         }
         break
       case 'labels':
@@ -253,8 +254,8 @@ export const convertApiFiltersToTableFilters = (filters: SandboxFilters): Column
     columnFilters.push({ id: 'snapshot', value: filters.snapshots })
   }
 
-  if (filters.regions && filters.regions.length > 0) {
-    columnFilters.push({ id: 'region', value: filters.regions })
+  if (filters.regionIds && filters.regionIds.length > 0) {
+    columnFilters.push({ id: 'region', value: filters.regionIds })
   }
 
   if (filters.labels && Object.keys(filters.labels).length > 0) {

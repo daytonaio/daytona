@@ -37,6 +37,8 @@ import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { RegionService } from '../../region/services/region.service'
+import { Region } from '../../region/entities/region.entity'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -67,6 +69,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
     private readonly configService: TypedConfigService,
+    private readonly regionService: RegionService,
   ) {}
 
   async onApplicationShutdown() {
@@ -216,33 +219,82 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
     //  todo: remove try catch block and implement error handling
     try {
-      const runners = await this.runnerRepository.find({ where })
+      //  get all regions to propagate to
+      const sharedRegions = await this.regionService.findAll(null)
+      const sharedRegionIds = sharedRegions.map((region) => region.id)
 
-      //  get all runners that have the snapshot in their base image
-      const snapshotRunners = await this.snapshotRunnerRepository.find({
+      let organizationRegions: Region[] = []
+      let organizationRegionIds: string[] = []
+
+      if (snapshot.organizationId) {
+        organizationRegions = await this.regionService.findAll(snapshot.organizationId)
+        organizationRegionIds = organizationRegions.map((region) => region.id)
+      }
+
+      const regionIds = [...sharedRegionIds, ...organizationRegionIds]
+
+      //  get all runners in the regions to propagate to
+      const runners = await this.runnerRepository.find({
+        where: {
+          ...where,
+          region: In(regionIds),
+        },
+      })
+
+      const sharedRunners = runners.filter((runner) => sharedRegionIds.includes(runner.region))
+      const sharedRunnerIds = sharedRunners.map((runner) => runner.id)
+
+      const organizationRunners = runners.filter((runner) => organizationRegionIds.includes(runner.region))
+      const organizationRunnerIds = organizationRunners.map((runner) => runner.id)
+
+      //  get all runners where the snapshot is already propagated to (or in progress)
+      const sharedSnapshotRunners = await this.snapshotRunnerRepository.find({
         where: {
           snapshotRef: snapshot.ref,
           state: In([SnapshotRunnerState.READY, SnapshotRunnerState.PULLING_SNAPSHOT]),
+          runnerId: In(sharedRunnerIds),
         },
       })
-      //  filter duplicate snapshot runner records
-      const snapshotRunnersDistinctRunnersIds = [
-        ...new Set(snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)),
-      ]
+      const sharedSnapshotRunnersDistinctRunnersIds = new Set(
+        sharedSnapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId),
+      )
 
-      const propagateLimit = Math.ceil(runners.length / 3) - snapshotRunnersDistinctRunnersIds.length
+      const organizationSnapshotRunners = await this.snapshotRunnerRepository.find({
+        where: {
+          snapshotRef: snapshot.ref,
+          state: In([SnapshotRunnerState.READY, SnapshotRunnerState.PULLING_SNAPSHOT]),
+          runnerId: In(organizationRunnerIds),
+        },
+      })
+      const organizationSnapshotRunnersDistinctRunnersIds = new Set(
+        organizationSnapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId),
+      )
 
-      if (propagateLimit <= 0) {
+      //  get all runners where the snapshot is not propagated to
+      const unallocatedSharedRunners = sharedRunners.filter(
+        (runner) => !sharedSnapshotRunnersDistinctRunnersIds.has(runner.id),
+      )
+      const unallocatedOrganizationRunners = organizationRunners.filter(
+        (runner) => !organizationSnapshotRunnersDistinctRunnersIds.has(runner.id),
+      )
+
+      const runnersToPropagateTo: Runner[] = []
+
+      // propagate the snapshot to all organization runners
+      runnersToPropagateTo.push(...unallocatedOrganizationRunners)
+
+      // respect the propagation limit for shared runners
+      const sharedRunnersPropagateLimit = Math.max(
+        0,
+        Math.ceil(sharedRunners.length / 3) - sharedSnapshotRunnersDistinctRunnersIds.size,
+      )
+      runnersToPropagateTo.push(
+        ...unallocatedSharedRunners.sort(() => Math.random() - 0.5).slice(0, sharedRunnersPropagateLimit),
+      )
+
+      if (runnersToPropagateTo.length === 0) {
         return
       }
-
-      const unallocatedRunners = runners.filter(
-        (runner) => !snapshotRunnersDistinctRunnersIds.some((snapshotRunnerId) => snapshotRunnerId === runner.id),
-      )
-      //  shuffle the runners to propagate to
-      unallocatedRunners.sort(() => Math.random() - 0.5)
-      //  limit the number of runners to propagate to
-      const runnersToPropagateTo = unallocatedRunners.slice(0, propagateLimit)
 
       let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshot.ref)
 
@@ -771,13 +823,13 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
       }
 
-      const defaultRegion = organization.defaultRegion
-      if (!defaultRegion) {
+      const defaultRegionId = organization.defaultRegionId
+      if (!defaultRegionId) {
         throw new Error('Default region not found for organization')
       }
 
       initialRunner = await this.runnerService.getRandomAvailableRunner({
-        region: defaultRegion,
+        region: defaultRegionId,
         excludedRunnerIds: excludedRunnerIds,
       })
     } catch (error) {

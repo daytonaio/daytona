@@ -35,6 +35,7 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
 import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
+import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -129,6 +130,10 @@ export class SnapshotService {
   }
 
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
+    if (!organization.defaultRegionId) {
+      throw new DefaultRegionRequiredException()
+    }
+
     let pendingSnapshotCountIncrement: number | undefined
 
     if (!createSnapshotDto.imageName) {
@@ -235,6 +240,10 @@ export class SnapshotService {
   }
 
   async createFromBuildInfo(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
+    if (!organization.defaultRegionId) {
+      throw new DefaultRegionRequiredException()
+    }
+
     let pendingSnapshotCountIncrement: number | undefined
     let entrypoint: string[] | undefined = undefined
 

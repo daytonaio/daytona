@@ -26,6 +26,7 @@ from daytona_api_client_async.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client_async.api.object_storage_api import ObjectStorageApi
 from daytona_api_client_async.api.organizations_api import OrganizationsApi
 from daytona_api_client_async.api.preview_api import PreviewApi
+from daytona_api_client_async.api.regions_api import RegionsApi
 from daytona_api_client_async.api.runners_api import RunnersApi
 from daytona_api_client_async.api.sandbox_api import SandboxApi
 from daytona_api_client_async.api.snapshots_api import SnapshotsApi
@@ -69,7 +70,9 @@ from daytona_api_client_async.models.create_organization import CreateOrganizati
 from daytona_api_client_async.models.create_organization_invitation import CreateOrganizationInvitation
 from daytona_api_client_async.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client_async.models.create_organization_role import CreateOrganizationRole
+from daytona_api_client_async.models.create_region import CreateRegion
 from daytona_api_client_async.models.create_runner import CreateRunner
+from daytona_api_client_async.models.create_runner_response import CreateRunnerResponse
 from daytona_api_client_async.models.create_sandbox import CreateSandbox
 from daytona_api_client_async.models.create_session_request import CreateSessionRequest
 from daytona_api_client_async.models.create_snapshot import CreateSnapshot
@@ -147,6 +150,7 @@ from daytona_api_client_async.models.registry_push_access_dto import RegistryPus
 from daytona_api_client_async.models.replace_request import ReplaceRequest
 from daytona_api_client_async.models.replace_result import ReplaceResult
 from daytona_api_client_async.models.runner import Runner
+from daytona_api_client_async.models.runner_full import RunnerFull
 from daytona_api_client_async.models.runner_snapshot_dto import RunnerSnapshotDto
 from daytona_api_client_async.models.runner_state import RunnerState
 from daytona_api_client_async.models.sandbox import Sandbox
@@ -169,6 +173,7 @@ from daytona_api_client_async.models.ssh_access_dto import SshAccessDto
 from daytona_api_client_async.models.ssh_access_validation_dto import SshAccessValidationDto
 from daytona_api_client_async.models.storage_access_dto import StorageAccessDto
 from daytona_api_client_async.models.update_docker_registry import UpdateDockerRegistry
+from daytona_api_client_async.models.update_organization_default_region import UpdateOrganizationDefaultRegion
 from daytona_api_client_async.models.update_organization_invitation import UpdateOrganizationInvitation
 from daytona_api_client_async.models.update_organization_member_access import UpdateOrganizationMemberAccess
 from daytona_api_client_async.models.update_organization_quota import UpdateOrganizationQuota

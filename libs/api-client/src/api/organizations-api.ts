@@ -52,6 +52,8 @@ import type { OrganizationUsageOverview } from '../models'
 // @ts-ignore
 import type { OrganizationUser } from '../models'
 // @ts-ignore
+import type { UpdateOrganizationDefaultRegion } from '../models'
+// @ts-ignore
 import type { UpdateOrganizationInvitation } from '../models'
 // @ts-ignore
 import type { UpdateOrganizationMemberAccess } from '../models'
@@ -871,6 +873,64 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Set default region for organization
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    setOrganizationDefaultRegion: async (
+      organizationId: string,
+      updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('setOrganizationDefaultRegion', 'organizationId', organizationId)
+      // verify required parameter 'updateOrganizationDefaultRegion' is not null or undefined
+      assertParamExists(
+        'setOrganizationDefaultRegion',
+        'updateOrganizationDefaultRegion',
+        updateOrganizationDefaultRegion,
+      )
+      const localVarPath = `/organizations/{organizationId}/default-region`.replace(
+        `{${'organizationId'}}`,
+        encodeURIComponent(String(organizationId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        updateOrganizationDefaultRegion,
+        localVarRequestOptions,
+        configuration,
+      )
 
       return {
         url: toPathString(localVarUrlObj),
@@ -1725,6 +1785,35 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Set default region for organization
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async setOrganizationDefaultRegion(
+      organizationId: string,
+      updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.setOrganizationDefaultRegion(
+        organizationId,
+        updateOrganizationDefaultRegion,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.setOrganizationDefaultRegion']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Suspend organization
      * @param {string} organizationId Organization ID
      * @param {OrganizationSuspension} [organizationSuspension]
@@ -1851,7 +1940,7 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
       organizationId: string,
       updateOrganizationQuota: UpdateOrganizationQuota,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationQuota(
         organizationId,
         updateOrganizationQuota,
@@ -2194,6 +2283,23 @@ export const OrganizationsApiFactory = function (
     },
     /**
      *
+     * @summary Set default region for organization
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    setOrganizationDefaultRegion(
+      organizationId: string,
+      updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Suspend organization
      * @param {string} organizationId Organization ID
      * @param {OrganizationSuspension} [organizationSuspension]
@@ -2269,7 +2375,7 @@ export const OrganizationsApiFactory = function (
       organizationId: string,
       updateOrganizationQuota: UpdateOrganizationQuota,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Organization> {
+    ): AxiosPromise<void> {
       return localVarFp
         .updateOrganizationQuota(organizationId, updateOrganizationQuota, options)
         .then((request) => request(axios, basePath))
@@ -2597,6 +2703,25 @@ export class OrganizationsApi extends BaseAPI {
   public listOrganizations(options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
       .listOrganizations(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Set default region for organization
+   * @param {string} organizationId Organization ID
+   * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public setOrganizationDefaultRegion(
+    organizationId: string,
+    updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return OrganizationsApiFp(this.configuration)
+      .setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

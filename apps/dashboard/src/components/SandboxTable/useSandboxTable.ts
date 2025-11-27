@@ -49,6 +49,7 @@ interface UseSandboxTableProps {
   filters: SandboxFilters
   onFiltersChange: (filters: SandboxFilters) => void
   regionsData: Region[]
+  getRegionName: (regionId: string) => string | undefined
 }
 
 export function useSandboxTable({
@@ -72,6 +73,7 @@ export function useSandboxTable({
   filters,
   onFiltersChange,
   regionsData,
+  getRegionName,
 }: UseSandboxTableProps) {
   // Column visibility state management with persistence
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
@@ -96,8 +98,8 @@ export function useSandboxTable({
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
     return regionsData.map((region) => ({
-      label: region.name,
-      value: region.name,
+      label: `${region.name}${region.organizationId ? ` (${region.id})` : ''}`,
+      value: region.id,
     }))
   }, [regionsData])
 
@@ -115,6 +117,7 @@ export function useSandboxTable({
         deletePermitted,
         handleCreateSshAccess,
         handleRevokeSshAccess,
+        getRegionName,
       }),
     [
       handleStart,
@@ -128,6 +131,7 @@ export function useSandboxTable({
       deletePermitted,
       handleCreateSshAccess,
       handleRevokeSshAccess,
+      getRegionName,
     ],
   )
 

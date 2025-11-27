@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { Organization } from '../entities/organization.entity'
 
 @ApiSchema({ name: 'Organization' })
@@ -98,10 +98,11 @@ export class OrganizationDto {
   })
   sandboxLimitedNetworkEgress: boolean
 
-  @ApiProperty({
-    description: 'Default region',
+  @ApiPropertyOptional({
+    description: 'Default region ID',
+    required: false,
   })
-  defaultRegion: string
+  defaultRegionId?: string
 
   @ApiProperty({
     description: 'Authenticated rate limit per minute',
@@ -141,7 +142,7 @@ export class OrganizationDto {
       maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
-      defaultRegion: organization.defaultRegion,
+      defaultRegionId: organization.defaultRegionId,
       authenticatedRateLimit: organization.authenticatedRateLimit,
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
       sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,

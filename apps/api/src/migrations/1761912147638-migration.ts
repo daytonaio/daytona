@@ -11,7 +11,7 @@ export class Migration1761912147638 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "organization" ADD "defaultRegion" character varying NULL`)
-    await queryRunner.query(`UPDATE "organization" SET "defaultRegion" = '${configuration.defaultRegion}'`)
+    await queryRunner.query(`UPDATE "organization" SET "defaultRegion" = '${configuration.defaultRegion.id}'`)
     await queryRunner.query(`ALTER TABLE "organization" ALTER COLUMN "defaultRegion" SET NOT NULL`)
 
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "region" DROP DEFAULT`)

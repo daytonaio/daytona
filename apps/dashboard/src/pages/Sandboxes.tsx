@@ -44,7 +44,7 @@ import {
   useSandboxes,
   DEFAULT_SANDBOX_SORTING,
 } from '@/hooks/useSandboxes'
-import { getRegionsQueryKey, useRegions } from '@/hooks/useRegions'
+import { useRegions } from '@/hooks/useRegions'
 import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshots } from '@/hooks/useSnapshots'
 
 const Sandboxes: React.FC = () => {
@@ -301,27 +301,7 @@ const Sandboxes: React.FC = () => {
 
   // Region Filter
 
-  const regionsQueryKey = getRegionsQueryKey(selectedOrganization?.id)
-
-  const { data: regionsData, isLoading: regionsDataIsLoading, error: regionsDataError } = useRegions(regionsQueryKey)
-
-  useEffect(() => {
-    if (regionsDataError) {
-      handleApiError(regionsDataError, 'Failed to fetch sandboxes regions')
-    }
-  }, [regionsDataError])
-
-  /**
-   * Marks all regions queries for this organization as stale.
-   *
-   * Useful when a sandbox is created, potentially in a completely new region.
-   *
-   */
-  const markAllRegionsQueriesAsStale = useCallback(async () => {
-    queryClient.invalidateQueries({
-      queryKey: regionsQueryKey,
-    })
-  }, [queryClient, regionsQueryKey])
+  const { regions: regionsData, loadingRegions: regionsDataIsLoading, getRegionName } = useRegions()
 
   // Subscribe to Sandbox Events
 
@@ -335,7 +315,6 @@ const Sandboxes: React.FC = () => {
       const shouldRefetchActiveQueries = isFirstPage && isDefaultFilters && isDefaultSorting
 
       markAllSandboxQueriesAsStale(shouldRefetchActiveQueries)
-      markAllRegionsQueriesAsStale()
     }
 
     const handleSandboxStateUpdatedEvent = (data: {
@@ -399,7 +378,6 @@ const Sandboxes: React.FC = () => {
     }
   }, [
     filters,
-    markAllRegionsQueriesAsStale,
     markAllSandboxQueriesAsStale,
     notificationSocket,
     paginationParams.pageIndex,
@@ -831,6 +809,7 @@ const Sandboxes: React.FC = () => {
         onChangeSnapshotSearchValue={(name?: string) => handleSnapshotFiltersChange({ name })}
         regionsData={regionsData || []}
         regionsDataIsLoading={regionsDataIsLoading}
+        getRegionName={getRegionName}
         onRowClick={(sandbox: Sandbox) => {
           setSelectedSandbox(sandbox)
           setShowSandboxDetails(true)

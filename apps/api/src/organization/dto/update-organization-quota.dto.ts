@@ -4,7 +4,6 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsNumber } from 'class-validator'
 
 @ApiSchema({ name: 'UpdateOrganizationQuota' })
 export class UpdateOrganizationQuotaDto {
