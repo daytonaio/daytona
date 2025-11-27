@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React from 'react'
+import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox, SandboxDesiredState } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
+import React from 'react'
+import { EllipsisWithTooltip } from '../EllipsisWithTooltip'
 import { Checkbox } from '../ui/checkbox'
-import { getRelativeTimeString } from '@/lib/utils'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 
 interface SortableHeaderProps {
   column: any
@@ -172,7 +173,7 @@ export function getColumns({
         return (
           <div className="w-full truncate">
             {row.original.snapshot ? (
-              <div className="truncate">{row.original.snapshot}</div>
+              <EllipsisWithTooltip>{row.original.snapshot}</EllipsisWithTooltip>
             ) : (
               <div className="truncate text-muted-foreground/50">-</div>
             )}
@@ -275,6 +276,23 @@ export function getColumns({
         return (
           <div className="w-full truncate">
             <span className="truncate block">{lastEvent.relativeTimeString}</span>
+          </div>
+        )
+      },
+    },
+    {
+      id: 'createdAt',
+      size: 200,
+      enableSorting: true,
+      enableHiding: false,
+      header: ({ column }) => {
+        return <SortableHeader column={column} label="Created At" />
+      },
+      cell: ({ row }) => {
+        const timestamp = formatTimestamp(row.original.createdAt)
+        return (
+          <div className="w-full truncate">
+            <span className="truncate block">{timestamp}</span>
           </div>
         )
       },
