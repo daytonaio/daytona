@@ -50,7 +50,9 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	ctx = context.WithValue(ctx, constants.ID_KEY, sandboxDto.Id)
-	err = d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry, false)
+
+	// TODO: change the validation bool to false once stable
+	err = d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry, true)
 	if err != nil {
 		return "", err
 	}
