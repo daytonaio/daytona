@@ -80,6 +80,8 @@ export interface RunnerAdapter {
   getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>
   getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string>
 
+  getSandboxLogs(sandboxId: string, timestamps?: boolean): Promise<string>
+
   getSandboxDaemonVersion(sandboxId: string): Promise<string>
 
   updateNetworkSettings(

@@ -4,13 +4,17 @@
 package controllers
 
 import (
+	"bufio"
 	"errors"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
+	"github.com/docker/docker/api/types/container"
 	"github.com/gin-gonic/gin"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
@@ -407,4 +411,126 @@ func RemoveDestroyed(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "Sandbox removed")
+}
+
+// Logs 			godoc
+//
+//	@Tags			sandbox
+//	@Summary		Get sandbox logs
+//	@Description	Get the entire log output of a sandbox container
+//	@Produce		text/plain
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Param			timestamps	query		boolean	false	"Whether to include timestamps in the logs"
+//	@Success		200			{string}	string	"Container logs"
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/logs [get]
+//
+//	@id				Logs
+func Logs(ctx *gin.Context) {
+	sandboxId := ctx.Param("sandboxId")
+
+	includeTimestamps := ctx.Query("timestamps") == "true"
+
+	runner := runner.GetInstance(nil)
+
+	// Get container logs using Docker API
+	logs, err := runner.Docker.ApiClient().ContainerLogs(ctx.Request.Context(), sandboxId, container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Timestamps: includeTimestamps,
+		Tail:       "1000",
+	})
+	if err != nil {
+		ctx.Error(common_errors.NewNotFoundError(errors.New("container not found or logs unavailable")))
+		return
+	}
+	defer logs.Close()
+
+	ctx.Header("Content-Type", "text/plain")
+
+	// Process and normalize logs before sending
+	normalizedLogs := normalizeLogs(logs)
+	_, err = ctx.Writer.Write([]byte(normalizedLogs))
+	if err != nil {
+		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+		return
+	}
+}
+
+func normalizeLogs(logs io.ReadCloser) string {
+	var result strings.Builder
+	scanner := bufio.NewScanner(logs)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Handle Docker log format - Docker logs have 8-byte headers
+		// First byte indicates stream (1=stdout, 2=stderr), next 3 bytes are unused, last 4 bytes are size
+		if len(line) >= 8 {
+			// Check if this looks like a Docker log header
+			if line[0] == 1 || line[0] == 2 {
+				// Skip the 8-byte header and process the actual log content
+				if len(line) > 8 {
+					line = line[8:]
+				} else {
+					continue // Skip lines that are just headers
+				}
+			}
+		}
+
+		// Split on embedded newlines and process each part
+		parts := strings.Split(line, "\n")
+		for i, part := range parts {
+			// Skip empty parts
+			if strings.TrimSpace(part) == "" {
+				continue
+			}
+
+			// Normalize whitespace - replace tabs with spaces and normalize indentation
+			normalized := normalizeWhitespace(part)
+			if normalized != "" {
+				result.WriteString(normalized)
+				result.WriteString("\n")
+			}
+
+			// Add newline between parts (except for the last part)
+			if i < len(parts)-1 && strings.TrimSpace(part) != "" {
+				result.WriteString("\n")
+			}
+		}
+	}
+
+	return result.String()
+}
+
+func normalizeWhitespace(line string) string {
+	// Replace all tabs with spaces first
+	line = strings.ReplaceAll(line, "\t", "    ")
+
+	// Remove excessive leading whitespace but preserve some indentation
+	trimmed := strings.TrimLeft(line, " ")
+	if trimmed == "" {
+		return ""
+	}
+
+	// Count leading spaces in the original line
+	leadingSpaces := len(line) - len(strings.TrimLeft(line, " "))
+
+	// Normalize to 2-space indentation levels (max 6 levels = 12 spaces)
+	indentLevel := leadingSpaces / 2
+	if indentLevel > 6 {
+		indentLevel = 6 // Cap at 6 levels to prevent excessive indentation
+	}
+
+	// Build the normalized line
+	var result strings.Builder
+	if indentLevel > 0 {
+		result.WriteString(strings.Repeat("  ", indentLevel))
+	}
+	result.WriteString(trimmed)
+
+	return result.String()
 }
