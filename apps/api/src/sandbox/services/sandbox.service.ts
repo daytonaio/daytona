@@ -1248,7 +1248,7 @@ export class SandboxService {
 
   // used by internal services to update the state of a sandbox to resolve domain and runner state mismatch
   // notably, when a sandbox instance stops or errors on the runner, the domain state needs to be updated to reflect the actual state
-  async updateState(sandboxId: string, newState: SandboxState): Promise<void> {
+  async updateState(sandboxId: string, newState: SandboxState, errorReason?: string): Promise<void> {
     const sandbox = await this.sandboxRepository.findOne({
       where: { id: sandboxId },
     })
@@ -1275,6 +1275,9 @@ export class SandboxService {
     const oldState = sandbox.state
     const oldDesiredState = sandbox.desiredState
     sandbox.state = newState
+    if (errorReason !== undefined) {
+      sandbox.errorReason = errorReason
+    }
     //  we need to update the desired state to match the new state
     const desiredState = this.getExpectedDesiredStateForState(newState)
     if (desiredState) {

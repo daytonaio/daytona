@@ -22,7 +22,9 @@ var _ MappedNullable = &UpdateSandboxStateDto{}
 // UpdateSandboxStateDto struct for UpdateSandboxStateDto
 type UpdateSandboxStateDto struct {
 	// The new state for the sandbox
-	State                string `json:"state"`
+	State string `json:"state"`
+	// Optional error message when reporting an error state
+	ErrorReason          *string `json:"errorReason,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -70,6 +72,38 @@ func (o *UpdateSandboxStateDto) SetState(v string) {
 	o.State = v
 }
 
+// GetErrorReason returns the ErrorReason field value if set, zero value otherwise.
+func (o *UpdateSandboxStateDto) GetErrorReason() string {
+	if o == nil || IsNil(o.ErrorReason) {
+		var ret string
+		return ret
+	}
+	return *o.ErrorReason
+}
+
+// GetErrorReasonOk returns a tuple with the ErrorReason field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateSandboxStateDto) GetErrorReasonOk() (*string, bool) {
+	if o == nil || IsNil(o.ErrorReason) {
+		return nil, false
+	}
+	return o.ErrorReason, true
+}
+
+// HasErrorReason returns a boolean if a field has been set.
+func (o *UpdateSandboxStateDto) HasErrorReason() bool {
+	if o != nil && !IsNil(o.ErrorReason) {
+		return true
+	}
+
+	return false
+}
+
+// SetErrorReason gets a reference to the given string and assigns it to the ErrorReason field.
+func (o *UpdateSandboxStateDto) SetErrorReason(v string) {
+	o.ErrorReason = &v
+}
+
 func (o UpdateSandboxStateDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -81,6 +115,9 @@ func (o UpdateSandboxStateDto) MarshalJSON() ([]byte, error) {
 func (o UpdateSandboxStateDto) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["state"] = o.State
+	if !IsNil(o.ErrorReason) {
+		toSerialize["errorReason"] = o.ErrorReason
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -125,6 +162,7 @@ func (o *UpdateSandboxStateDto) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "state")
+		delete(additionalProperties, "errorReason")
 		o.AdditionalProperties = additionalProperties
 	}
 
