@@ -4,7 +4,7 @@
  */
 
 import { ApiExtraModels, ApiProperty, ApiPropertyOptional, ApiSchema, getSchemaPath } from '@nestjs/swagger'
-import { IsString, IsBoolean, IsNumber, IsOptional } from 'class-validator'
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
 import { TypedConfigService } from '../typed-config.service'
 
 @ApiSchema({ name: 'Announcement' })
@@ -40,6 +40,49 @@ export class PosthogConfig {
   })
   @IsString()
   host: string
+}
+
+@ApiSchema({ name: 'RateLimitEntry' })
+export class RateLimitEntry {
+  @ApiPropertyOptional({
+    description: 'Rate limit TTL in seconds',
+    example: 60,
+  })
+  @IsNumber()
+  @IsOptional()
+  ttl?: number
+
+  @ApiPropertyOptional({
+    description: 'Rate limit max requests',
+    example: 100,
+  })
+  @IsNumber()
+  @IsOptional()
+  limit?: number
+}
+
+@ApiSchema({ name: 'RateLimitConfig' })
+export class RateLimitConfig {
+  @ApiPropertyOptional({
+    description: 'Authenticated rate limit',
+    type: RateLimitEntry,
+  })
+  @IsOptional()
+  authenticated?: RateLimitEntry
+
+  @ApiPropertyOptional({
+    description: 'Sandbox create rate limit',
+    type: RateLimitEntry,
+  })
+  @IsOptional()
+  sandboxCreate?: RateLimitEntry
+
+  @ApiPropertyOptional({
+    description: 'Sandbox lifecycle rate limit',
+    type: RateLimitEntry,
+  })
+  @IsOptional()
+  sandboxLifecycle?: RateLimitEntry
 }
 
 @ApiSchema({ name: 'OidcConfig' })
@@ -184,6 +227,13 @@ export class ConfigurationDto {
   @IsString()
   sshGatewayPublicKey?: string
 
+  @ApiPropertyOptional({
+    description: 'Rate limit configuration',
+    type: RateLimitConfig,
+  })
+  @IsOptional()
+  rateLimit?: RateLimitConfig
+
   constructor(configService: TypedConfigService) {
     this.version = configService.getOrThrow('version')
 
@@ -219,5 +269,20 @@ export class ConfigurationDto {
     }
     // TODO: announcements
     this.announcements = {}
+
+    this.rateLimit = {
+      authenticated: {
+        ttl: configService.get('rateLimit.authenticated.ttl'),
+        limit: configService.get('rateLimit.authenticated.limit'),
+      },
+      sandboxCreate: {
+        ttl: configService.get('rateLimit.sandboxCreate.ttl'),
+        limit: configService.get('rateLimit.sandboxCreate.limit'),
+      },
+      sandboxLifecycle: {
+        ttl: configService.get('rateLimit.sandboxLifecycle.ttl'),
+        limit: configService.get('rateLimit.sandboxLifecycle.limit'),
+      },
+    }
   }
 }

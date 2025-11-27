@@ -141,6 +141,8 @@ from daytona_api_client.models.pty_list_response import PtyListResponse
 from daytona_api_client.models.pty_resize_request import PtyResizeRequest
 from daytona_api_client.models.pty_session_info import PtySessionInfo
 from daytona_api_client.models.range import Range
+from daytona_api_client.models.rate_limit_config import RateLimitConfig
+from daytona_api_client.models.rate_limit_entry import RateLimitEntry
 from daytona_api_client.models.region import Region
 from daytona_api_client.models.region_screenshot_response import RegionScreenshotResponse
 from daytona_api_client.models.registry_push_access_dto import RegistryPushAccessDto
