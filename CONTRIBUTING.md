@@ -58,8 +58,80 @@ We look forward to working with you to improve Daytona and make development envi
 Follow the following steps to ensure your contribution goes smoothly.
 
 1. Read and follow the steps outlined in the [Daytona Contributing Policy](README.md#contributing).
-1. Configure your development environment by either following the guide below.
+1. Configure your development environment by following the setup guide below.
 1. [Fork](https://help.github.com/articles/working-with-forks/) the GitHub Repository allowing you to make the changes in your own copy of the repository.
+
+### Development Environment Setup
+
+#### Prerequisites
+
+- **Node.js**: Version 22.12.0+ (we recommend using the version specified in `.nvmrc`)
+- **Go**: Version 1.23.4+
+- **Docker & Docker Compose**: For running services locally
+- **Git**: For version control
+
+#### Windows Development Setup
+
+1. **Install Prerequisites:**
+   ```powershell
+   # Install Node.js (or use nvm-windows)
+   # Download from https://nodejs.org/
+   
+   # Install Go
+   # Download from https://golang.org/dl/
+   
+   # Install Docker Desktop
+   # Download from https://www.docker.com/products/docker-desktop/
+   ```
+
+2. **Enable Corepack (for Yarn):**
+   ```powershell
+   corepack enable
+   ```
+
+3. **Clone and Setup:**
+   ```powershell
+   git clone https://github.com/YOUR-USERNAME/daytona.git
+   cd daytona
+   
+   # Copy environment template
+   cp .env.example .env
+   
+   # Install dependencies
+   yarn install
+   ```
+
+4. **Start Development Services:**
+   ```powershell
+   # Start all services
+   docker-compose up -d
+   
+   # Or start specific services
+   yarn serve
+   ```
+
+#### Common Windows Issues
+
+- **Line Endings**: Git should auto-handle line endings via `.gitattributes`
+- **PowerShell Execution Policy**: You may need to run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+- **Yarn Version**: Ensure you're using Yarn 4.6.0 via corepack, not global yarn
+
+#### Verification
+
+After setup, verify everything works:
+
+```powershell
+# Check versions
+node --version  # Should be 22.12.0+
+go version      # Should be 1.23.4+
+yarn --version  # Should be 4.6.0
+
+# Run linting (if dependencies are installed)
+yarn lint
+
+# Run build
+yarn build
+```
 1. Create a [GitHub issue](https://github.com/daytonaio/daytona/issues) if one doesn't exist already.
 1. [Prepare your changes](/PREPARING_YOUR_CHANGES.md) and ensure your commits are descriptive. The document contains an optional commit template, if desired.
 1. Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](/PREPARING_YOUR_CHANGES.md).

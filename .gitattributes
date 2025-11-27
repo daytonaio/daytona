@@ -1,3 +1,15 @@
+# Line ending normalization
+* text=auto
+
+# Force Unix line endings for shell scripts and configs
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+Dockerfile* text eol=lf
+
+# Windows line endings for Windows-specific files
+*.bat text eol=crlf
+*.cmd text eol=crlf
 
 libs/api-client/** linguist-generated=true
 libs/api-client-go/** linguist-generated=true
