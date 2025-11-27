@@ -55,6 +55,15 @@ sandbox = daytona.create(params)
 # サンドボックスを削除しても、ボリュームは保持されます
 sandbox.delete()
 
+# ボリューム内の特定のサブパスをマウントします
+# これは、データの分離やマルチテナントの実装に役立ちます
+params = CreateSandboxFromSnapshotParams(
+    language="python",
+    volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1, subpath="users/alice")],
+)
+sandbox2 = daytona.create(params)
+
+sandbox2.delete()
 ```
 
 </TabItem>
@@ -80,6 +89,15 @@ async function main() {
   // サンドボックスの利用が終わったら、削除できます
   // サンドボックスを削除しても、ボリュームは保持されます
   await sandbox1.delete()
+
+  // ボリューム内の特定のサブパスをマウントします
+  // これは、データの分離やマルチテナントの実装に役立ちます
+  const sandbox2 = await daytona.create({
+    language: 'typescript',
+    volumes: [{ volumeId: volume.id, mountPath: mountDir1, subpath: 'users/alice' }],
+  })
+
+  await sandbox2.delete()
 }
 
 main()

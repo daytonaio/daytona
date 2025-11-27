@@ -52,3 +52,48 @@ export function validateMountPaths(volumes: SandboxVolume[]): void {
     throw new Error(errors.join(', '))
   }
 }
+
+/**
+ * Validates subpaths for sandbox volumes to ensure they are safe S3 key prefixes
+ * @param volumes - Array of SandboxVolume objects to validate
+ * @throws Error with descriptive message if any subpath is invalid
+ */
+export function validateSubpaths(volumes: SandboxVolume[]): void {
+  const errors: string[] = []
+
+  for (const volume of volumes) {
+    const subpath = volume.subpath
+
+    // Empty/undefined subpath is valid (means mount entire volume)
+    if (!subpath) {
+      continue
+    }
+
+    if (typeof subpath !== 'string') {
+      errors.push(`Invalid subpath ${subpath} (must be a string)`)
+      continue
+    }
+
+    // S3 keys should not start with /
+    if (subpath.startsWith('/')) {
+      errors.push(`Invalid subpath "${subpath}" (S3 key prefixes cannot start with /)`)
+      continue
+    }
+
+    // Prevent path traversal
+    if (subpath.includes('..')) {
+      errors.push(`Invalid subpath "${subpath}" (cannot contain .. for security)`)
+      continue
+    }
+
+    // No consecutive slashes
+    if (subpath.includes('//')) {
+      errors.push(`Invalid subpath "${subpath}" (cannot contain consecutive slashes)`)
+      continue
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join(', '))
+  }
+}
