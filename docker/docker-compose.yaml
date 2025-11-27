@@ -65,7 +65,12 @@ services:
     networks:
       - daytona-network
     volumes:
-      - db_data:/var/lib/postgresql/18/docker
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d daytona"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4:9.2.0
@@ -90,6 +95,11 @@ services:
     image: redis:latest
     networks:
       - daytona-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   registry-ui:
     image: joxit/docker-registry-ui:main
@@ -148,7 +158,13 @@ services:
     networks:
       - daytona-network
     ports:
+      - 9000:9000
       - 9001:9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   jaeger:
     image: jaegertracing/all-in-one:1.67.0

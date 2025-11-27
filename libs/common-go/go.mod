@@ -1,6 +1,6 @@
 module github.com/daytonaio/common-go
 
-go 1.25.4
+go 1.23.4
 
 require (
 	github.com/gin-gonic/gin v1.10.1
