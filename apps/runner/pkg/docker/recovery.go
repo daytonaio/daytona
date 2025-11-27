@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -163,51 +164,44 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		return fmt.Errorf("failed to create new container: %w", err)
 	}
 
-	// Start container temporarily to copy data, then stop it
+	// Copy data directly between overlay2 layers (no need to start container)
 	// The API will trigger the normal start flow through SandboxManager
 	if overlayDiffPath != "" {
-		log.Info("Starting container temporarily for data copy")
-		err = d.retryWithExponentialBackoff(
-			ctx,
-			"start",
-			sandboxId,
-			constants.DEFAULT_MAX_RETRIES,
-			constants.DEFAULT_BASE_DELAY,
-			constants.DEFAULT_MAX_DELAY,
-			func() error {
-				return d.apiClient.ContainerStart(ctx, sandboxId, container.StartOptions{})
-			},
-		)
+		// Get the new container's overlay2 UpperDir
+		newContainer, err := d.ContainerInspect(ctx, sandboxId)
 		if err != nil {
-			log.Errorf("Failed to start container for data copy: %v", err)
+			log.Errorf("Failed to inspect new container: %v", err)
 			_ = d.apiClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{Force: true})
 			_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
 			common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
-			return fmt.Errorf("failed to start container for data copy: %w", err)
+			return fmt.Errorf("failed to inspect new container: %w", err)
 		}
 
-		log.Info("Copying data from old to new container")
-		err = d.copyOverlayData(ctx, oldName, sandboxId, overlayDiffPath)
-		if err != nil {
-			log.Errorf("Failed to copy data: %v", err)
-			log.Warnf("Old container preserved as %s for manual data recovery", oldName)
-			_ = d.apiClient.ContainerStop(ctx, sandboxId, container.StopOptions{})
-			common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
-			return fmt.Errorf("failed to copy data: %w", err)
+		var newUpperDir string
+		if newContainer.GraphDriver.Name == "overlay2" {
+			if upperDir, ok := newContainer.GraphDriver.Data["UpperDir"]; ok {
+				newUpperDir = upperDir
+				log.Debugf("New container overlay2 UpperDir: %s", newUpperDir)
+			}
 		}
-		log.Debugf("Data copy completed")
 
-		log.Info("Stopping container after data copy")
-		timeout := 2
-		err = d.apiClient.ContainerStop(ctx, sandboxId, container.StopOptions{
-			Signal:  "SIGKILL",
-			Timeout: &timeout,
-		})
-		if err != nil {
-			log.Warnf("Failed to stop container after data copy: %v", err)
+		if newUpperDir == "" {
+			log.Warn("Could not determine new container overlay2 path, skipping data copy")
+		} else {
+			log.Info("Copying data directly between overlay2 layers using rsync")
+			err = d.copyOverlayData(ctx, overlayDiffPath, newUpperDir)
+			if err != nil {
+				log.Errorf("Failed to copy data: %v", err)
+				log.Warnf("Old container preserved as %s for manual data recovery", oldName)
+				_ = d.apiClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{Force: true})
+				_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
+				common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
+				return fmt.Errorf("failed to copy data: %w", err)
+			}
+			log.Debugf("Data copy completed")
 		}
 	} else {
-		log.Warn("Could not determine overlay2 path, skipping data copy")
+		log.Warn("Could not determine old container overlay2 path, skipping data copy")
 	}
 
 	// Remove old container after successful data copy
@@ -225,46 +219,41 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	return nil
 }
 
-// copyOverlayData copies the upper layer from the old container to the new container using tar
-func (d *DockerClient) copyOverlayData(ctx context.Context, oldName, newName, overlayPath string) error {
-	log.Debugf("Copying overlay data from %s", overlayPath)
+// copyOverlayData copies the upper layer from old to new container overlay2 directories using rsync
+// This preserves all file attributes, permissions, ownership, ACLs, and extended attributes
+func (d *DockerClient) copyOverlayData(ctx context.Context, srcPath, destPath string) error {
+	log.Debugf("Copying overlay data from %s to %s", srcPath, destPath)
 
 	copyCtx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer cancel()
 
-	// tar to create archive from source, pipe to docker exec to extract in container
-	tarCmd := exec.CommandContext(copyCtx, "tar", "-C", overlayPath, "-cf", "-", ".")
-	dockerCmd := exec.CommandContext(copyCtx, "docker", "exec", "-i", newName, "tar", "-C", "/", "-xf", "-")
+	// Use rsync with -aAX flags:
+	// -a = archive mode (preserves permissions, ownership, timestamps, symlinks, devices)
+	// -A = preserve ACLs
+	// -X = preserve extended attributes (xattrs)
+	// Trailing slashes ensure we copy contents, not the directory itself
+	src := filepath.Clean(srcPath) + "/"
+	dest := filepath.Clean(destPath) + "/"
+	rsyncCmd := exec.CommandContext(copyCtx, "rsync", "-aAX", src, dest)
 
-	pipe, err := tarCmd.StdoutPipe()
-	if err != nil {
-		return fmt.Errorf("failed to create pipe: %w", err)
-	}
-	dockerCmd.Stdin = pipe
+	var rsyncOut strings.Builder
+	var rsyncErr strings.Builder
+	rsyncCmd.Stdout = &rsyncOut
+	rsyncCmd.Stderr = &rsyncErr
 
-	var dockerErr strings.Builder
-	dockerCmd.Stderr = &dockerErr
-
-	if err := dockerCmd.Start(); err != nil {
-		return fmt.Errorf("failed to start docker exec: %w", err)
-	}
-
-	if err := tarCmd.Start(); err != nil {
-		return fmt.Errorf("failed to start tar: %w", err)
-	}
-
-	if err := tarCmd.Wait(); err != nil {
-		return fmt.Errorf("tar failed: %w", err)
-	}
-
-	if err := dockerCmd.Wait(); err != nil {
-		if errMsg := dockerErr.String(); errMsg != "" {
-			log.Errorf("docker exec stderr: %s", errMsg)
+	log.Debug("Starting rsync...")
+	if err := rsyncCmd.Run(); err != nil {
+		if errMsg := rsyncErr.String(); errMsg != "" {
+			log.Errorf("rsync stderr: %s", errMsg)
 		}
-		return fmt.Errorf("docker exec failed: %w", err)
+		return fmt.Errorf("rsync failed: %w", err)
 	}
 
-	log.Info("Successfully copied overlay data")
+	if outMsg := rsyncOut.String(); outMsg != "" {
+		log.Debugf("rsync output: %s", outMsg)
+	}
+
+	log.Info("Successfully copied overlay data with rsync")
 	return nil
 }
 
