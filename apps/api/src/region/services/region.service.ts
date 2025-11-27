@@ -53,26 +53,14 @@ export class RegionService {
 
   /**
    * @param id - The ID of the region.
-   * @param organizationId - The ID of the organization, or null for non-organization regions, or undefined to skip organization check.
    * @returns The region if found, or null otherwise.
    */
-  async findOne(id: string, organizationId?: string | null): Promise<Region | null> {
-    const region = await this.regionRepository.findOne({
+  async findOne(id: string): Promise<Region | null> {
+    return await this.regionRepository.findOne({
       where: {
         id,
-        ...(organizationId === undefined
-          ? {}
-          : organizationId === null
-            ? { organizationId: IsNull() }
-            : { organizationId }),
       },
     })
-
-    if (!region) {
-      return null
-    }
-
-    return region
   }
 
   /**
@@ -81,15 +69,9 @@ export class RegionService {
    * @returns The region if found, or null otherwise.
    */
   async findOneByName(name: string, organizationId: string | null): Promise<Region | null> {
-    const region = await this.regionRepository.findOne({
+    return await this.regionRepository.findOne({
       where: [{ name, organizationId: organizationId ?? IsNull() }],
     })
-
-    if (!region) {
-      return null
-    }
-
-    return region
   }
 
   /**

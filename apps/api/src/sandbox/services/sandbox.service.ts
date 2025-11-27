@@ -1174,12 +1174,10 @@ export class SandboxService {
       return organization.defaultRegionId
     }
 
-    // give priority to organization regions, and region name as target
     const region =
       (await this.regionService.findOneByName(regionIdOrName, organization.id)) ??
-      (await this.regionService.findOne(regionIdOrName, organization.id)) ??
       (await this.regionService.findOneByName(regionIdOrName, null)) ??
-      (await this.regionService.findOne(regionIdOrName, null))
+      (await this.regionService.findOne(regionIdOrName))
 
     if (!region) {
       throw new NotFoundException('Region not found')
