@@ -81,6 +81,7 @@ jobs:
           yarn publish
 
   update-homebrew-tap:
+    if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish
     runs-on: release-runner
     name: Update Homebrew CLI tap
