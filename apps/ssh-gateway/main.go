@@ -336,8 +336,7 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 		// Update immediately upon starting
 		_, err := g.apiClient.SandboxAPI.UpdateLastActivity(keepAliveContext, sandboxId).Execute()
 		if err != nil {
-			log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
-			return
+			log.Warnf("failed to update last activity for sandbox %s (will retry): %v", sandboxId, err)
 		}
 
 		// Then every 45 seconds
