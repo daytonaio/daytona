@@ -74,6 +74,7 @@ import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { SkipThrottle } from '@nestjs/throttler'
 import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
+import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -634,7 +635,7 @@ export class SandboxController {
     status: 201,
     description: 'Last activity has been updated',
   })
-  @UseGuards(OrGuard([SandboxAccessGuard, ProxyGuard]))
+  @UseGuards(OrGuard([SandboxAccessGuard, ProxyGuard, SshGatewayGuard]))
   async updateLastActivity(@Param('sandboxId') sandboxId: string): Promise<void> {
     await this.sandboxService.updateLastActivityAt(sandboxId, new Date())
   }
