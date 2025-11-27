@@ -1,6 +1,6 @@
 module github.com/daytonaio/computer-use
 
-go 1.24.0
+go 1.23.4
 
 require (
 	github.com/go-vgo/robotgo v0.110.8

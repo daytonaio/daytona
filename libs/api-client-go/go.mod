@@ -1,6 +1,6 @@
 module github.com/daytonaio/apiclient
 
-go 1.18
+go 1.23.4
 
 require (
 )
