@@ -17,7 +17,7 @@ import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
 
-import { OnEvent } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
@@ -40,6 +40,11 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
+import { AuditService } from '../../audit/services/audit.service'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { AuditActorId, AuditSource, AuditSourceType } from '../../audit/constants/audit-actor.constant'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -55,7 +60,55 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly configService: TypedConfigService,
+    private readonly auditService: AuditService,
   ) {}
+
+  protected getStateChangeLockKey(id: string): string {
+    return `sandbox:${id}:state-change`
+  }
+
+  private async createSystemAuditLog(
+    sandboxId: string,
+    action: AuditAction,
+    reason: string,
+    source: AuditSourceType = AuditSource.SYSTEM,
+    runnerId?: string,
+    additionalMetadata?: Record<string, any>,
+  ): Promise<void> {
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: { id: sandboxId },
+        select: ['id', 'organizationId', 'runnerId'],
+      })
+
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found, skipping audit log`)
+        return
+      }
+
+      const actorId =
+        source === AuditSource.RUNNER ? runnerId || sandbox.runnerId || AuditActorId.SYSTEM : AuditActorId.SYSTEM
+
+      await this.auditService.createLog({
+        actorId,
+        actorEmail: '',
+        organizationId: sandbox.organizationId,
+        action,
+        targetType: AuditTarget.SANDBOX,
+        targetId: sandboxId,
+        statusCode: 200,
+        source,
+        metadata: {
+          reason,
+          ...additionalMetadata,
+        },
+      })
+    } catch (auditError) {
+      this.logger.error(`Failed to create audit log for ${reason} of sandbox ${sandboxId}:`, auditError)
+    }
+  }
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish
@@ -119,6 +172,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+                const action =
+                  sandbox.desiredState === SandboxDesiredState.STOPPED ? AuditAction.STOP : AuditAction.DELETE
+                const reason =
+                  sandbox.desiredState === SandboxDesiredState.STOPPED ? 'auto-stop' : 'auto-stop-ephemeral'
+                await this.createSystemAuditLog(sandbox.id, action, reason, AuditSource.SYSTEM)
+
                 this.syncInstanceState(sandbox.id)
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
@@ -171,6 +231,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           try {
             sandbox.desiredState = SandboxDesiredState.ARCHIVED
             await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+            await this.createSystemAuditLog(sandbox.id, AuditAction.ARCHIVE, 'auto-archive')
+
             this.syncInstanceState(sandbox.id)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
@@ -231,6 +294,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 sandbox.pending = true
                 sandbox.desiredState = SandboxDesiredState.DESTROYED
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+                await this.createSystemAuditLog(sandbox.id, AuditAction.DELETE, 'auto-delete')
+
                 this.syncInstanceState(sandbox.id)
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
