@@ -24,6 +24,12 @@ export interface UpdateSandboxStateDto {
    * @memberof UpdateSandboxStateDto
    */
   state: UpdateSandboxStateDtoStateEnum
+  /**
+   * Optional error message when reporting an error state
+   * @type {string}
+   * @memberof UpdateSandboxStateDto
+   */
+  errorReason?: string
 }
 
 export const UpdateSandboxStateDtoStateEnum = {
