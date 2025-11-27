@@ -132,12 +132,10 @@ export class RegionService {
    * @throws {NotFoundException} If the region is not found.
    */
   async delete(id: string): Promise<void> {
-    const region = await this.findOne(id)
+    const result = await this.regionRepository.delete(id)
 
-    if (!region) {
+    if (!result.affected) {
       throw new NotFoundException('Region not found')
     }
-
-    await this.regionRepository.remove(region)
   }
 }
