@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/containerd/errdefs"
+	cerrdefs "github.com/containerd/containerd/errdefs"
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
@@ -36,7 +36,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 
 	ct, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
-		if errdefs.IsNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 			return nil
 		}
@@ -71,7 +71,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 			return nil
 		}
 
-		if err != nil && errdefs.IsNotFound(err) {
+		if err != nil && cerrdefs.IsNotFound(err) {
 			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 			return nil
 		}
@@ -96,7 +96,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	)
 	if err != nil {
 		// Handle NotFound error case
-		if errdefs.IsNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 			return nil
 		}
@@ -143,7 +143,7 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 	)
 	if err != nil {
 		// Handle NotFound error case
-		if errdefs.IsNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			return nil
 		}
 		return err

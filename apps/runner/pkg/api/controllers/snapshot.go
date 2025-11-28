@@ -98,7 +98,7 @@ func PullSnapshot(ctx *gin.Context) {
 	runner := runner.GetInstance(nil)
 
 	// Pull the image using the pull registry (or none for public images)
-	err = runner.Docker.PullImage(ctx.Request.Context(), request.Snapshot, request.Registry)
+	err = runner.Docker.PullImage(ctx.Request.Context(), request.Snapshot, request.Registry, true)
 	if err != nil {
 		ctx.Error(err)
 		return

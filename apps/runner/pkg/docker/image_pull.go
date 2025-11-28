@@ -7,9 +7,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
+	cerrdefs "github.com/containerd/containerd/errdefs"
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/internal/util"
@@ -21,9 +23,11 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 
 	log "github.com/sirupsen/logrus"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) error {
+func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO, validateArchitecture bool) error {
 	defer timer.Timer()()
 
 	tag := "latest"
@@ -39,6 +43,10 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		}
 
 		if exists {
+			if validateArchitecture {
+				return d.validateImageArchitecture(ctx, imageName)
+			}
+
 			return nil
 		}
 	}
@@ -66,6 +74,13 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		return err
 	}
 
+	if validateArchitecture {
+		if err = d.validateImageArchitecture(ctx, imageName); err != nil {
+			log.Errorf("ERROR: %s.\n", err.Error())
+			return err
+		}
+	}
+
 	log.Infof("Image %s pulled successfully", imageName)
 
 	return nil
@@ -88,4 +103,27 @@ func getRegistryAuth(reg *dto.RegistryDTO) string {
 	}
 
 	return base64.URLEncoding.EncodeToString(encodedJSON)
+}
+
+func (p *DockerClient) validateImageArchitecture(ctx context.Context, image string) error {
+	defer timer.Timer()()
+
+	inspect, err := p.apiClient.ImageInspect(ctx, image)
+	if err != nil {
+		if cerrdefs.IsNotFound(err) {
+			return err
+		}
+		return fmt.Errorf("failed to inspect image: %w", err)
+	}
+
+	arch := strings.ToLower(inspect.Architecture)
+	validArchs := []string{"amd64", "x86_64"}
+
+	for _, validArch := range validArchs {
+		if arch == validArch {
+			return nil
+		}
+	}
+
+	return common_errors.NewConflictError(fmt.Errorf("image %s architecture (%s) is not x64 compatible", image, inspect.Architecture))
 }
