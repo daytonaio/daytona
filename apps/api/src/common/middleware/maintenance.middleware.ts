@@ -12,7 +12,7 @@ export class MaintenanceMiddleware implements NestMiddleware {
   constructor(private readonly configService: TypedConfigService) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-    const isMaintenanceMode = this.configService.get('maintananceMode')
+    const isMaintenanceMode = this.configService.get('maintenanceMode')
 
     if (isMaintenanceMode) {
       throw new HttpException(
