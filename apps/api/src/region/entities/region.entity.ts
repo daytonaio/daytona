@@ -26,7 +26,7 @@ export class Region {
     type: 'uuid',
     nullable: true,
   })
-  organizationId?: string
+  organizationId: string | null
 
   @Column({ default: false })
   hidden: boolean

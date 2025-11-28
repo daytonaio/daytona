@@ -26,7 +26,7 @@ type Region struct {
 	// Region name
 	Name string `json:"name"`
 	// Organization ID
-	OrganizationId NullableString `json:"organizationId"`
+	OrganizationId NullableString `json:"organizationId,omitempty"`
 	// Creation timestamp
 	CreatedAt string `json:"createdAt"`
 	// Last update timestamp
@@ -40,11 +40,10 @@ type _Region Region
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegion(id string, name string, organizationId NullableString, createdAt string, updatedAt string) *Region {
+func NewRegion(id string, name string, createdAt string, updatedAt string) *Region {
 	this := Region{}
 	this.Id = id
 	this.Name = name
-	this.OrganizationId = organizationId
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	return &this
@@ -106,18 +105,16 @@ func (o *Region) SetName(v string) {
 	o.Name = v
 }
 
-// GetOrganizationId returns the OrganizationId field value
-// If the value is explicit nil, the zero value for string will be returned
+// GetOrganizationId returns the OrganizationId field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *Region) GetOrganizationId() string {
-	if o == nil || o.OrganizationId.Get() == nil {
+	if o == nil || IsNil(o.OrganizationId.Get()) {
 		var ret string
 		return ret
 	}
-
 	return *o.OrganizationId.Get()
 }
 
-// GetOrganizationIdOk returns a tuple with the OrganizationId field value
+// GetOrganizationIdOk returns a tuple with the OrganizationId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Region) GetOrganizationIdOk() (*string, bool) {
@@ -127,9 +124,28 @@ func (o *Region) GetOrganizationIdOk() (*string, bool) {
 	return o.OrganizationId.Get(), o.OrganizationId.IsSet()
 }
 
-// SetOrganizationId sets field value
+// HasOrganizationId returns a boolean if a field has been set.
+func (o *Region) HasOrganizationId() bool {
+	if o != nil && o.OrganizationId.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetOrganizationId gets a reference to the given NullableString and assigns it to the OrganizationId field.
 func (o *Region) SetOrganizationId(v string) {
 	o.OrganizationId.Set(&v)
+}
+
+// SetOrganizationIdNil sets the value for OrganizationId to be an explicit nil
+func (o *Region) SetOrganizationIdNil() {
+	o.OrganizationId.Set(nil)
+}
+
+// UnsetOrganizationId ensures that no value is present for OrganizationId, not even an explicit nil
+func (o *Region) UnsetOrganizationId() {
+	o.OrganizationId.Unset()
 }
 
 // GetCreatedAt returns the CreatedAt field value
@@ -192,7 +208,9 @@ func (o Region) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
-	toSerialize["organizationId"] = o.OrganizationId.Get()
+	if o.OrganizationId.IsSet() {
+		toSerialize["organizationId"] = o.OrganizationId.Get()
+	}
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 
@@ -210,7 +228,6 @@ func (o *Region) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"id",
 		"name",
-		"organizationId",
 		"createdAt",
 		"updatedAt",
 	}

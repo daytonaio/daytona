@@ -8391,7 +8391,6 @@ components:
         - createdAt
         - id
         - name
-        - organizationId
         - updatedAt
       type: object
     UserPublicKey:
