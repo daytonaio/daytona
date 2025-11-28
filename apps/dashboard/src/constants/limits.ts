@@ -3,10 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-/**
- * External URLs for Daytona resources
- */
-
 export const TIER_REQUIREMENTS: Record<number, string[]> = {
   1: ['Email verification'],
   2: ['Credit card linked', 'GitHub connected', 'Top up $25 (one time)'],
