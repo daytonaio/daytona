@@ -35,7 +35,7 @@ export interface Region {
    * @type {string}
    * @memberof Region
    */
-  organizationId: string | null
+  organizationId?: string | null
   /**
    * Creation timestamp
    * @type {string}

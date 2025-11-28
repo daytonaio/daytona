@@ -24,8 +24,9 @@ export class RegionDto {
     description: 'Organization ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
     nullable: true,
+    required: false,
   })
-  organizationId?: string
+  organizationId: string | null
 
   @ApiProperty({
     description: 'Creation timestamp',

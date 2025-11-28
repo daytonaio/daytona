@@ -29,7 +29,7 @@ class Region(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="Region ID")
     name: StrictStr = Field(description="Region name")
-    organization_id: Optional[StrictStr] = Field(description="Organization ID", alias="organizationId")
+    organization_id: Optional[StrictStr] = Field(default=None, description="Organization ID", alias="organizationId")
     created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
     updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
