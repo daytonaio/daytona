@@ -34,6 +34,8 @@ import { VolumeDto } from '../sandbox/dto/volume.dto'
 import { CreateWorkspaceDto } from '../sandbox/dto/create-workspace.deprecated.dto'
 import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
 import { TypedConfigService } from '../config/typed-config.service'
+import { UpdateOrganizationRegionQuotaDto } from '../organization/dto/update-organization-region-quota.dto'
+import { UpdateOrganizationDefaultRegionDto } from '../organization/dto/update-organization-default-region.dto'
 
 type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
@@ -271,8 +273,19 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'PATCH':
         switch (request.route.path) {
+          case '/api/organizations/:organizationId/default-region':
+            this.captureSetOrganizationDefaultRegion(props, request.params.organizationId, request.body)
+            break
           case '/api/organizations/:organizationId/quota':
             this.captureUpdateOrganizationQuota(props, request.params.organizationId, request.body)
+            break
+          case '/api/organizations/:organizationId/quota/:regionId':
+            this.captureUpdateOrganizationRegionQuota(
+              props,
+              request.params.organizationId,
+              request.params.regionId,
+              request.body,
+            )
             break
         }
         break
@@ -675,12 +688,24 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_organization_created', props, 'api_organization_creation_failed', {
       organization_id: response.id,
       organization_name: request.name,
+      organization_default_region_id: request.defaultRegionId,
     })
   }
 
   private captureLeaveOrganization(props: CommonCaptureProps, organizationId: string) {
     this.capture('api_organization_left', props, 'api_organization_leave_failed', {
       organization_id: organizationId,
+    })
+  }
+
+  private captureSetOrganizationDefaultRegion(
+    props: CommonCaptureProps,
+    organizationId: string,
+    request: UpdateOrganizationDefaultRegionDto,
+  ) {
+    this.capture('api_organization_default_region_set', props, 'api_organization_default_region_set_failed', {
+      organization_id: organizationId,
+      organization_default_region_id: request.defaultRegionId,
     })
   }
 
@@ -691,15 +716,27 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
   ) {
     this.capture('api_organization_quota_updated', props, 'api_organization_quota_update_failed', {
       organization_id: organizationId,
-      organization_total_cpu_quota: request.totalCpuQuota,
-      organization_total_memory_quota_mb: request.totalMemoryQuota ? request.totalMemoryQuota * 1024 : null,
-      organization_total_disk_quota_gb: request.totalDiskQuota,
       organization_max_cpu_per_sandbox: request.maxCpuPerSandbox,
       organization_max_memory_per_sandbox_mb: request.maxMemoryPerSandbox ? request.maxMemoryPerSandbox * 1024 : null,
       organization_max_disk_per_sandbox_gb: request.maxDiskPerSandbox,
       organization_snapshot_quota: request.snapshotQuota,
       organization_max_snapshot_size_mb: request.maxSnapshotSize ? request.maxSnapshotSize * 1024 : null,
       organization_volume_quota: request.volumeQuota,
+    })
+  }
+
+  private captureUpdateOrganizationRegionQuota(
+    props: CommonCaptureProps,
+    organizationId: string,
+    regionId: string,
+    request: UpdateOrganizationRegionQuotaDto,
+  ) {
+    this.capture('api_organization_region_quota_updated', props, 'api_organization_region_quota_update_failed', {
+      organization_id: organizationId,
+      organization_region_id: regionId,
+      organization_region_total_cpu_quota: request.totalCpuQuota,
+      organization_region_total_memory_quota_mb: request.totalMemoryQuota ? request.totalMemoryQuota * 1024 : null,
+      organization_region_total_disk_quota_gb: request.totalDiskQuota,
     })
   }
 

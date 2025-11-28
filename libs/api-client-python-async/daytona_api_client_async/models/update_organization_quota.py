@@ -27,9 +27,6 @@ class UpdateOrganizationQuota(BaseModel):
     """
     UpdateOrganizationQuota
     """ # noqa: E501
-    total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalCpuQuota")
-    total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalMemoryQuota")
-    total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalDiskQuota")
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxDiskPerSandbox")
@@ -40,7 +37,7 @@ class UpdateOrganizationQuota(BaseModel):
     sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(alias="sandboxCreateRateLimit")
     sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(alias="sandboxLifecycleRateLimit")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
+    __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -87,21 +84,6 @@ class UpdateOrganizationQuota(BaseModel):
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
-
-        # set to None if total_cpu_quota (nullable) is None
-        # and model_fields_set contains the field
-        if self.total_cpu_quota is None and "total_cpu_quota" in self.model_fields_set:
-            _dict['totalCpuQuota'] = None
-
-        # set to None if total_memory_quota (nullable) is None
-        # and model_fields_set contains the field
-        if self.total_memory_quota is None and "total_memory_quota" in self.model_fields_set:
-            _dict['totalMemoryQuota'] = None
-
-        # set to None if total_disk_quota (nullable) is None
-        # and model_fields_set contains the field
-        if self.total_disk_quota is None and "total_disk_quota" in self.model_fields_set:
-            _dict['totalDiskQuota'] = None
 
         # set to None if max_cpu_per_sandbox (nullable) is None
         # and model_fields_set contains the field
@@ -160,9 +142,6 @@ class UpdateOrganizationQuota(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "totalCpuQuota": obj.get("totalCpuQuota"),
-            "totalMemoryQuota": obj.get("totalMemoryQuota"),
-            "totalDiskQuota": obj.get("totalDiskQuota"),
             "maxCpuPerSandbox": obj.get("maxCpuPerSandbox"),
             "maxMemoryPerSandbox": obj.get("maxMemoryPerSandbox"),
             "maxDiskPerSandbox": obj.get("maxDiskPerSandbox"),

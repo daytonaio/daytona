@@ -44,12 +44,6 @@ type Organization struct {
 	SuspendedUntil time.Time `json:"suspendedUntil"`
 	// Suspension cleanup grace period hours
 	SuspensionCleanupGracePeriodHours float32 `json:"suspensionCleanupGracePeriodHours"`
-	// Total CPU quota
-	TotalCpuQuota float32 `json:"totalCpuQuota"`
-	// Total memory quota
-	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
-	// Total disk quota
-	TotalDiskQuota float32 `json:"totalDiskQuota"`
 	// Max CPU per sandbox
 	MaxCpuPerSandbox float32 `json:"maxCpuPerSandbox"`
 	// Max memory per sandbox
@@ -58,8 +52,8 @@ type Organization struct {
 	MaxDiskPerSandbox float32 `json:"maxDiskPerSandbox"`
 	// Sandbox default network block all
 	SandboxLimitedNetworkEgress bool `json:"sandboxLimitedNetworkEgress"`
-	// Default region
-	DefaultRegion string `json:"defaultRegion"`
+	// Default region ID
+	DefaultRegionId *string `json:"defaultRegionId,omitempty"`
 	// Authenticated rate limit per minute
 	AuthenticatedRateLimit NullableFloat32 `json:"authenticatedRateLimit"`
 	// Sandbox create rate limit per minute
@@ -75,7 +69,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, defaultRegion string, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -88,14 +82,10 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.SuspensionReason = suspensionReason
 	this.SuspendedUntil = suspendedUntil
 	this.SuspensionCleanupGracePeriodHours = suspensionCleanupGracePeriodHours
-	this.TotalCpuQuota = totalCpuQuota
-	this.TotalMemoryQuota = totalMemoryQuota
-	this.TotalDiskQuota = totalDiskQuota
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
 	this.SandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
-	this.DefaultRegion = defaultRegion
 	this.AuthenticatedRateLimit = authenticatedRateLimit
 	this.SandboxCreateRateLimit = sandboxCreateRateLimit
 	this.SandboxLifecycleRateLimit = sandboxLifecycleRateLimit
@@ -374,78 +364,6 @@ func (o *Organization) SetSuspensionCleanupGracePeriodHours(v float32) {
 	o.SuspensionCleanupGracePeriodHours = v
 }
 
-// GetTotalCpuQuota returns the TotalCpuQuota field value
-func (o *Organization) GetTotalCpuQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalCpuQuota
-}
-
-// GetTotalCpuQuotaOk returns a tuple with the TotalCpuQuota field value
-// and a boolean to check if the value has been set.
-func (o *Organization) GetTotalCpuQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalCpuQuota, true
-}
-
-// SetTotalCpuQuota sets field value
-func (o *Organization) SetTotalCpuQuota(v float32) {
-	o.TotalCpuQuota = v
-}
-
-// GetTotalMemoryQuota returns the TotalMemoryQuota field value
-func (o *Organization) GetTotalMemoryQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalMemoryQuota
-}
-
-// GetTotalMemoryQuotaOk returns a tuple with the TotalMemoryQuota field value
-// and a boolean to check if the value has been set.
-func (o *Organization) GetTotalMemoryQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalMemoryQuota, true
-}
-
-// SetTotalMemoryQuota sets field value
-func (o *Organization) SetTotalMemoryQuota(v float32) {
-	o.TotalMemoryQuota = v
-}
-
-// GetTotalDiskQuota returns the TotalDiskQuota field value
-func (o *Organization) GetTotalDiskQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalDiskQuota
-}
-
-// GetTotalDiskQuotaOk returns a tuple with the TotalDiskQuota field value
-// and a boolean to check if the value has been set.
-func (o *Organization) GetTotalDiskQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalDiskQuota, true
-}
-
-// SetTotalDiskQuota sets field value
-func (o *Organization) SetTotalDiskQuota(v float32) {
-	o.TotalDiskQuota = v
-}
-
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value
 func (o *Organization) GetMaxCpuPerSandbox() float32 {
 	if o == nil {
@@ -542,28 +460,36 @@ func (o *Organization) SetSandboxLimitedNetworkEgress(v bool) {
 	o.SandboxLimitedNetworkEgress = v
 }
 
-// GetDefaultRegion returns the DefaultRegion field value
-func (o *Organization) GetDefaultRegion() string {
-	if o == nil {
+// GetDefaultRegionId returns the DefaultRegionId field value if set, zero value otherwise.
+func (o *Organization) GetDefaultRegionId() string {
+	if o == nil || IsNil(o.DefaultRegionId) {
 		var ret string
 		return ret
 	}
-
-	return o.DefaultRegion
+	return *o.DefaultRegionId
 }
 
-// GetDefaultRegionOk returns a tuple with the DefaultRegion field value
+// GetDefaultRegionIdOk returns a tuple with the DefaultRegionId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Organization) GetDefaultRegionOk() (*string, bool) {
-	if o == nil {
+func (o *Organization) GetDefaultRegionIdOk() (*string, bool) {
+	if o == nil || IsNil(o.DefaultRegionId) {
 		return nil, false
 	}
-	return &o.DefaultRegion, true
+	return o.DefaultRegionId, true
 }
 
-// SetDefaultRegion sets field value
-func (o *Organization) SetDefaultRegion(v string) {
-	o.DefaultRegion = v
+// HasDefaultRegionId returns a boolean if a field has been set.
+func (o *Organization) HasDefaultRegionId() bool {
+	if o != nil && !IsNil(o.DefaultRegionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetDefaultRegionId gets a reference to the given string and assigns it to the DefaultRegionId field.
+func (o *Organization) SetDefaultRegionId(v string) {
+	o.DefaultRegionId = &v
 }
 
 // GetAuthenticatedRateLimit returns the AuthenticatedRateLimit field value
@@ -665,14 +591,13 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["suspensionReason"] = o.SuspensionReason
 	toSerialize["suspendedUntil"] = o.SuspendedUntil
 	toSerialize["suspensionCleanupGracePeriodHours"] = o.SuspensionCleanupGracePeriodHours
-	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
-	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
-	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
 	toSerialize["sandboxLimitedNetworkEgress"] = o.SandboxLimitedNetworkEgress
-	toSerialize["defaultRegion"] = o.DefaultRegion
+	if !IsNil(o.DefaultRegionId) {
+		toSerialize["defaultRegionId"] = o.DefaultRegionId
+	}
 	toSerialize["authenticatedRateLimit"] = o.AuthenticatedRateLimit.Get()
 	toSerialize["sandboxCreateRateLimit"] = o.SandboxCreateRateLimit.Get()
 	toSerialize["sandboxLifecycleRateLimit"] = o.SandboxLifecycleRateLimit.Get()
@@ -700,14 +625,10 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"suspensionReason",
 		"suspendedUntil",
 		"suspensionCleanupGracePeriodHours",
-		"totalCpuQuota",
-		"totalMemoryQuota",
-		"totalDiskQuota",
 		"maxCpuPerSandbox",
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
 		"sandboxLimitedNetworkEgress",
-		"defaultRegion",
 		"authenticatedRateLimit",
 		"sandboxCreateRateLimit",
 		"sandboxLifecycleRateLimit",
@@ -751,14 +672,11 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "suspensionReason")
 		delete(additionalProperties, "suspendedUntil")
 		delete(additionalProperties, "suspensionCleanupGracePeriodHours")
-		delete(additionalProperties, "totalCpuQuota")
-		delete(additionalProperties, "totalMemoryQuota")
-		delete(additionalProperties, "totalDiskQuota")
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
 		delete(additionalProperties, "sandboxLimitedNetworkEgress")
-		delete(additionalProperties, "defaultRegion")
+		delete(additionalProperties, "defaultRegionId")
 		delete(additionalProperties, "authenticatedRateLimit")
 		delete(additionalProperties, "sandboxCreateRateLimit")
 		delete(additionalProperties, "sandboxLifecycleRateLimit")

@@ -23,24 +23,6 @@ export interface UpdateOrganizationQuota {
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  totalCpuQuota: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  totalMemoryQuota: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  totalDiskQuota: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
   maxCpuPerSandbox: number | null
   /**
    *

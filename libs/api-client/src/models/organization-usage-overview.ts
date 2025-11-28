@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,6 +12,10 @@
  * Do not edit the class manually.
  */
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RegionUsageOverview } from './region-usage-overview'
+
 /**
  *
  * @export
@@ -20,40 +24,10 @@
 export interface OrganizationUsageOverview {
   /**
    *
-   * @type {number}
+   * @type {Array<RegionUsageOverview>}
    * @memberof OrganizationUsageOverview
    */
-  totalCpuQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof OrganizationUsageOverview
-   */
-  totalMemoryQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof OrganizationUsageOverview
-   */
-  totalDiskQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof OrganizationUsageOverview
-   */
-  currentCpuUsage: number
-  /**
-   *
-   * @type {number}
-   * @memberof OrganizationUsageOverview
-   */
-  currentMemoryUsage: number
-  /**
-   *
-   * @type {number}
-   * @memberof OrganizationUsageOverview
-   */
-  currentDiskUsage: number
+  regionUsage: Array<RegionUsageOverview>
   /**
    *
    * @type {number}

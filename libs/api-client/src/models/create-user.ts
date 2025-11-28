@@ -51,6 +51,12 @@ export interface CreateUser {
    * @type {string}
    * @memberof CreateUser
    */
+  personalOrganizationDefaultRegionId?: string
+  /**
+   *
+   * @type {string}
+   * @memberof CreateUser
+   */
   role?: CreateUserRoleEnum
   /**
    *

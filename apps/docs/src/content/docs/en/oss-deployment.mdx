@@ -171,7 +171,6 @@ Below is a full list of environment variables with their default values:
 | `DEFAULT_RUNNER_GPU`                       | number  | `0`                                                  | Default runner GPU allocation                                                                        |
 | `DEFAULT_RUNNER_GPU_TYPE`                  | string  | `none`                                               | Default runner GPU type                                                                              |
 | `DEFAULT_RUNNER_CAPACITY`                  | number  | `100`                                                | Default runner capacity                                                                              |
-| `DEFAULT_RUNNER_REGION`                    | string  | `us`                                                 | Default runner region                                                                                |
 | `DEFAULT_RUNNER_CLASS`                     | string  | `small`                                              | Default runner class                                                                                 |
 | `DEFAULT_ORG_QUOTA_TOTAL_CPU_QUOTA`        | number  | `10000`                                              | Default organization total CPU quota                                                                 |
 | `DEFAULT_ORG_QUOTA_TOTAL_MEMORY_QUOTA`     | number  | `10000`                                              | Default organization total memory quota                                                              |
@@ -207,6 +206,10 @@ Below is a full list of environment variables with their default values:
 | `RATE_LIMIT_SANDBOX_CREATE_LIMIT`          | number  | (empty)                                              | Sandbox create rate limit (requests per TTL, empty - rate limit is disabled)                                           |
 | `RATE_LIMIT_SANDBOX_LIFECYCLE_TTL`         | number  | (empty)                                              | Sandbox lifecycle rate limit time-to-live (seconds, empty - rate limit is disabled)                                     |
 | `RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT`       | number  | (empty)                                              | Sandbox lifecycle rate limit (requests per TTL, empty - rate limit is disabled)                                      |
+| `DEFAULT_REGION_ID`                        | string  | `us`                                                 | Default region ID                                                                                    |
+| `DEFAULT_REGION_NAME`                      | string  | `us`                                                 | Default region name                                                                                  |
+| `DEFAULT_REGION_ENFORCE_QUOTAS`            | boolean | `false`                                              | Enable region-based resource limits for default region                                               |
+
 ### Runner
 
 | Variable                   | Type    | Default Value                     | Description                           |

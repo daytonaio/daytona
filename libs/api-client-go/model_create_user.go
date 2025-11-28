@@ -21,13 +21,14 @@ var _ MappedNullable = &CreateUser{}
 
 // CreateUser struct for CreateUser
 type CreateUser struct {
-	Id                        string                   `json:"id"`
-	Name                      string                   `json:"name"`
-	Email                     *string                  `json:"email,omitempty"`
-	PersonalOrganizationQuota *CreateOrganizationQuota `json:"personalOrganizationQuota,omitempty"`
-	Role                      *string                  `json:"role,omitempty"`
-	EmailVerified             *bool                    `json:"emailVerified,omitempty"`
-	AdditionalProperties      map[string]interface{}
+	Id                                  string                   `json:"id"`
+	Name                                string                   `json:"name"`
+	Email                               *string                  `json:"email,omitempty"`
+	PersonalOrganizationQuota           *CreateOrganizationQuota `json:"personalOrganizationQuota,omitempty"`
+	PersonalOrganizationDefaultRegionId *string                  `json:"personalOrganizationDefaultRegionId,omitempty"`
+	Role                                *string                  `json:"role,omitempty"`
+	EmailVerified                       *bool                    `json:"emailVerified,omitempty"`
+	AdditionalProperties                map[string]interface{}
 }
 
 type _CreateUser CreateUser
@@ -163,6 +164,38 @@ func (o *CreateUser) SetPersonalOrganizationQuota(v CreateOrganizationQuota) {
 	o.PersonalOrganizationQuota = &v
 }
 
+// GetPersonalOrganizationDefaultRegionId returns the PersonalOrganizationDefaultRegionId field value if set, zero value otherwise.
+func (o *CreateUser) GetPersonalOrganizationDefaultRegionId() string {
+	if o == nil || IsNil(o.PersonalOrganizationDefaultRegionId) {
+		var ret string
+		return ret
+	}
+	return *o.PersonalOrganizationDefaultRegionId
+}
+
+// GetPersonalOrganizationDefaultRegionIdOk returns a tuple with the PersonalOrganizationDefaultRegionId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateUser) GetPersonalOrganizationDefaultRegionIdOk() (*string, bool) {
+	if o == nil || IsNil(o.PersonalOrganizationDefaultRegionId) {
+		return nil, false
+	}
+	return o.PersonalOrganizationDefaultRegionId, true
+}
+
+// HasPersonalOrganizationDefaultRegionId returns a boolean if a field has been set.
+func (o *CreateUser) HasPersonalOrganizationDefaultRegionId() bool {
+	if o != nil && !IsNil(o.PersonalOrganizationDefaultRegionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetPersonalOrganizationDefaultRegionId gets a reference to the given string and assigns it to the PersonalOrganizationDefaultRegionId field.
+func (o *CreateUser) SetPersonalOrganizationDefaultRegionId(v string) {
+	o.PersonalOrganizationDefaultRegionId = &v
+}
+
 // GetRole returns the Role field value if set, zero value otherwise.
 func (o *CreateUser) GetRole() string {
 	if o == nil || IsNil(o.Role) {
@@ -245,6 +278,9 @@ func (o CreateUser) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.PersonalOrganizationQuota) {
 		toSerialize["personalOrganizationQuota"] = o.PersonalOrganizationQuota
 	}
+	if !IsNil(o.PersonalOrganizationDefaultRegionId) {
+		toSerialize["personalOrganizationDefaultRegionId"] = o.PersonalOrganizationDefaultRegionId
+	}
 	if !IsNil(o.Role) {
 		toSerialize["role"] = o.Role
 	}
@@ -299,6 +335,7 @@ func (o *CreateUser) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "email")
 		delete(additionalProperties, "personalOrganizationQuota")
+		delete(additionalProperties, "personalOrganizationDefaultRegionId")
 		delete(additionalProperties, "role")
 		delete(additionalProperties, "emailVerified")
 		o.AdditionalProperties = additionalProperties

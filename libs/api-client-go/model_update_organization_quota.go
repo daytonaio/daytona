@@ -21,9 +21,6 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	TotalCpuQuota             NullableFloat32 `json:"totalCpuQuota"`
-	TotalMemoryQuota          NullableFloat32 `json:"totalMemoryQuota"`
-	TotalDiskQuota            NullableFloat32 `json:"totalDiskQuota"`
 	MaxCpuPerSandbox          NullableFloat32 `json:"maxCpuPerSandbox"`
 	MaxMemoryPerSandbox       NullableFloat32 `json:"maxMemoryPerSandbox"`
 	MaxDiskPerSandbox         NullableFloat32 `json:"maxDiskPerSandbox"`
@@ -42,11 +39,8 @@ type _UpdateOrganizationQuota UpdateOrganizationQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *UpdateOrganizationQuota {
+func NewUpdateOrganizationQuota(maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
-	this.TotalCpuQuota = totalCpuQuota
-	this.TotalMemoryQuota = totalMemoryQuota
-	this.TotalDiskQuota = totalDiskQuota
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
@@ -65,84 +59,6 @@ func NewUpdateOrganizationQuota(totalCpuQuota NullableFloat32, totalMemoryQuota 
 func NewUpdateOrganizationQuotaWithDefaults() *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
 	return &this
-}
-
-// GetTotalCpuQuota returns the TotalCpuQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
-func (o *UpdateOrganizationQuota) GetTotalCpuQuota() float32 {
-	if o == nil || o.TotalCpuQuota.Get() == nil {
-		var ret float32
-		return ret
-	}
-
-	return *o.TotalCpuQuota.Get()
-}
-
-// GetTotalCpuQuotaOk returns a tuple with the TotalCpuQuota field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UpdateOrganizationQuota) GetTotalCpuQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.TotalCpuQuota.Get(), o.TotalCpuQuota.IsSet()
-}
-
-// SetTotalCpuQuota sets field value
-func (o *UpdateOrganizationQuota) SetTotalCpuQuota(v float32) {
-	o.TotalCpuQuota.Set(&v)
-}
-
-// GetTotalMemoryQuota returns the TotalMemoryQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
-func (o *UpdateOrganizationQuota) GetTotalMemoryQuota() float32 {
-	if o == nil || o.TotalMemoryQuota.Get() == nil {
-		var ret float32
-		return ret
-	}
-
-	return *o.TotalMemoryQuota.Get()
-}
-
-// GetTotalMemoryQuotaOk returns a tuple with the TotalMemoryQuota field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UpdateOrganizationQuota) GetTotalMemoryQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.TotalMemoryQuota.Get(), o.TotalMemoryQuota.IsSet()
-}
-
-// SetTotalMemoryQuota sets field value
-func (o *UpdateOrganizationQuota) SetTotalMemoryQuota(v float32) {
-	o.TotalMemoryQuota.Set(&v)
-}
-
-// GetTotalDiskQuota returns the TotalDiskQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
-func (o *UpdateOrganizationQuota) GetTotalDiskQuota() float32 {
-	if o == nil || o.TotalDiskQuota.Get() == nil {
-		var ret float32
-		return ret
-	}
-
-	return *o.TotalDiskQuota.Get()
-}
-
-// GetTotalDiskQuotaOk returns a tuple with the TotalDiskQuota field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UpdateOrganizationQuota) GetTotalDiskQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.TotalDiskQuota.Get(), o.TotalDiskQuota.IsSet()
-}
-
-// SetTotalDiskQuota sets field value
-func (o *UpdateOrganizationQuota) SetTotalDiskQuota(v float32) {
-	o.TotalDiskQuota.Set(&v)
 }
 
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value
@@ -389,9 +305,6 @@ func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
 
 func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["totalCpuQuota"] = o.TotalCpuQuota.Get()
-	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota.Get()
-	toSerialize["totalDiskQuota"] = o.TotalDiskQuota.Get()
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox.Get()
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox.Get()
@@ -414,9 +327,6 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"totalCpuQuota",
-		"totalMemoryQuota",
-		"totalDiskQuota",
 		"maxCpuPerSandbox",
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
@@ -455,9 +365,6 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "totalCpuQuota")
-		delete(additionalProperties, "totalMemoryQuota")
-		delete(additionalProperties, "totalDiskQuota")
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")

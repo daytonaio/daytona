@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,9 +27,13 @@ class Region(BaseModel):
     """
     Region
     """ # noqa: E501
+    id: StrictStr = Field(description="Region ID")
     name: StrictStr = Field(description="Region name")
+    organization_id: Optional[StrictStr] = Field(default=None, description="Organization ID", alias="organizationId")
+    created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
+    updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -77,6 +81,11 @@ class Region(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if organization_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.organization_id is None and "organization_id" in self.model_fields_set:
+            _dict['organizationId'] = None
+
         return _dict
 
     @classmethod
@@ -89,7 +98,11 @@ class Region(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "id": obj.get("id"),
+            "name": obj.get("name"),
+            "organizationId": obj.get("organizationId"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

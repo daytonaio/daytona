@@ -21,16 +21,11 @@ var _ MappedNullable = &OrganizationUsageOverview{}
 
 // OrganizationUsageOverview struct for OrganizationUsageOverview
 type OrganizationUsageOverview struct {
-	TotalCpuQuota        float32 `json:"totalCpuQuota"`
-	TotalMemoryQuota     float32 `json:"totalMemoryQuota"`
-	TotalDiskQuota       float32 `json:"totalDiskQuota"`
-	CurrentCpuUsage      float32 `json:"currentCpuUsage"`
-	CurrentMemoryUsage   float32 `json:"currentMemoryUsage"`
-	CurrentDiskUsage     float32 `json:"currentDiskUsage"`
-	TotalSnapshotQuota   float32 `json:"totalSnapshotQuota"`
-	CurrentSnapshotUsage float32 `json:"currentSnapshotUsage"`
-	TotalVolumeQuota     float32 `json:"totalVolumeQuota"`
-	CurrentVolumeUsage   float32 `json:"currentVolumeUsage"`
+	RegionUsage          []RegionUsageOverview `json:"regionUsage"`
+	TotalSnapshotQuota   float32               `json:"totalSnapshotQuota"`
+	CurrentSnapshotUsage float32               `json:"currentSnapshotUsage"`
+	TotalVolumeQuota     float32               `json:"totalVolumeQuota"`
+	CurrentVolumeUsage   float32               `json:"currentVolumeUsage"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -40,14 +35,9 @@ type _OrganizationUsageOverview OrganizationUsageOverview
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganizationUsageOverview(totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, currentCpuUsage float32, currentMemoryUsage float32, currentDiskUsage float32, totalSnapshotQuota float32, currentSnapshotUsage float32, totalVolumeQuota float32, currentVolumeUsage float32) *OrganizationUsageOverview {
+func NewOrganizationUsageOverview(regionUsage []RegionUsageOverview, totalSnapshotQuota float32, currentSnapshotUsage float32, totalVolumeQuota float32, currentVolumeUsage float32) *OrganizationUsageOverview {
 	this := OrganizationUsageOverview{}
-	this.TotalCpuQuota = totalCpuQuota
-	this.TotalMemoryQuota = totalMemoryQuota
-	this.TotalDiskQuota = totalDiskQuota
-	this.CurrentCpuUsage = currentCpuUsage
-	this.CurrentMemoryUsage = currentMemoryUsage
-	this.CurrentDiskUsage = currentDiskUsage
+	this.RegionUsage = regionUsage
 	this.TotalSnapshotQuota = totalSnapshotQuota
 	this.CurrentSnapshotUsage = currentSnapshotUsage
 	this.TotalVolumeQuota = totalVolumeQuota
@@ -63,148 +53,28 @@ func NewOrganizationUsageOverviewWithDefaults() *OrganizationUsageOverview {
 	return &this
 }
 
-// GetTotalCpuQuota returns the TotalCpuQuota field value
-func (o *OrganizationUsageOverview) GetTotalCpuQuota() float32 {
+// GetRegionUsage returns the RegionUsage field value
+func (o *OrganizationUsageOverview) GetRegionUsage() []RegionUsageOverview {
 	if o == nil {
-		var ret float32
+		var ret []RegionUsageOverview
 		return ret
 	}
 
-	return o.TotalCpuQuota
+	return o.RegionUsage
 }
 
-// GetTotalCpuQuotaOk returns a tuple with the TotalCpuQuota field value
+// GetRegionUsageOk returns a tuple with the RegionUsage field value
 // and a boolean to check if the value has been set.
-func (o *OrganizationUsageOverview) GetTotalCpuQuotaOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetRegionUsageOk() ([]RegionUsageOverview, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.TotalCpuQuota, true
+	return o.RegionUsage, true
 }
 
-// SetTotalCpuQuota sets field value
-func (o *OrganizationUsageOverview) SetTotalCpuQuota(v float32) {
-	o.TotalCpuQuota = v
-}
-
-// GetTotalMemoryQuota returns the TotalMemoryQuota field value
-func (o *OrganizationUsageOverview) GetTotalMemoryQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalMemoryQuota
-}
-
-// GetTotalMemoryQuotaOk returns a tuple with the TotalMemoryQuota field value
-// and a boolean to check if the value has been set.
-func (o *OrganizationUsageOverview) GetTotalMemoryQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalMemoryQuota, true
-}
-
-// SetTotalMemoryQuota sets field value
-func (o *OrganizationUsageOverview) SetTotalMemoryQuota(v float32) {
-	o.TotalMemoryQuota = v
-}
-
-// GetTotalDiskQuota returns the TotalDiskQuota field value
-func (o *OrganizationUsageOverview) GetTotalDiskQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalDiskQuota
-}
-
-// GetTotalDiskQuotaOk returns a tuple with the TotalDiskQuota field value
-// and a boolean to check if the value has been set.
-func (o *OrganizationUsageOverview) GetTotalDiskQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalDiskQuota, true
-}
-
-// SetTotalDiskQuota sets field value
-func (o *OrganizationUsageOverview) SetTotalDiskQuota(v float32) {
-	o.TotalDiskQuota = v
-}
-
-// GetCurrentCpuUsage returns the CurrentCpuUsage field value
-func (o *OrganizationUsageOverview) GetCurrentCpuUsage() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.CurrentCpuUsage
-}
-
-// GetCurrentCpuUsageOk returns a tuple with the CurrentCpuUsage field value
-// and a boolean to check if the value has been set.
-func (o *OrganizationUsageOverview) GetCurrentCpuUsageOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.CurrentCpuUsage, true
-}
-
-// SetCurrentCpuUsage sets field value
-func (o *OrganizationUsageOverview) SetCurrentCpuUsage(v float32) {
-	o.CurrentCpuUsage = v
-}
-
-// GetCurrentMemoryUsage returns the CurrentMemoryUsage field value
-func (o *OrganizationUsageOverview) GetCurrentMemoryUsage() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.CurrentMemoryUsage
-}
-
-// GetCurrentMemoryUsageOk returns a tuple with the CurrentMemoryUsage field value
-// and a boolean to check if the value has been set.
-func (o *OrganizationUsageOverview) GetCurrentMemoryUsageOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.CurrentMemoryUsage, true
-}
-
-// SetCurrentMemoryUsage sets field value
-func (o *OrganizationUsageOverview) SetCurrentMemoryUsage(v float32) {
-	o.CurrentMemoryUsage = v
-}
-
-// GetCurrentDiskUsage returns the CurrentDiskUsage field value
-func (o *OrganizationUsageOverview) GetCurrentDiskUsage() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.CurrentDiskUsage
-}
-
-// GetCurrentDiskUsageOk returns a tuple with the CurrentDiskUsage field value
-// and a boolean to check if the value has been set.
-func (o *OrganizationUsageOverview) GetCurrentDiskUsageOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.CurrentDiskUsage, true
-}
-
-// SetCurrentDiskUsage sets field value
-func (o *OrganizationUsageOverview) SetCurrentDiskUsage(v float32) {
-	o.CurrentDiskUsage = v
+// SetRegionUsage sets field value
+func (o *OrganizationUsageOverview) SetRegionUsage(v []RegionUsageOverview) {
+	o.RegionUsage = v
 }
 
 // GetTotalSnapshotQuota returns the TotalSnapshotQuota field value
@@ -313,12 +183,7 @@ func (o OrganizationUsageOverview) MarshalJSON() ([]byte, error) {
 
 func (o OrganizationUsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
-	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
-	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
-	toSerialize["currentCpuUsage"] = o.CurrentCpuUsage
-	toSerialize["currentMemoryUsage"] = o.CurrentMemoryUsage
-	toSerialize["currentDiskUsage"] = o.CurrentDiskUsage
+	toSerialize["regionUsage"] = o.RegionUsage
 	toSerialize["totalSnapshotQuota"] = o.TotalSnapshotQuota
 	toSerialize["currentSnapshotUsage"] = o.CurrentSnapshotUsage
 	toSerialize["totalVolumeQuota"] = o.TotalVolumeQuota
@@ -336,12 +201,7 @@ func (o *OrganizationUsageOverview) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"totalCpuQuota",
-		"totalMemoryQuota",
-		"totalDiskQuota",
-		"currentCpuUsage",
-		"currentMemoryUsage",
-		"currentDiskUsage",
+		"regionUsage",
 		"totalSnapshotQuota",
 		"currentSnapshotUsage",
 		"totalVolumeQuota",
@@ -375,12 +235,7 @@ func (o *OrganizationUsageOverview) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "totalCpuQuota")
-		delete(additionalProperties, "totalMemoryQuota")
-		delete(additionalProperties, "totalDiskQuota")
-		delete(additionalProperties, "currentCpuUsage")
-		delete(additionalProperties, "currentMemoryUsage")
-		delete(additionalProperties, "currentDiskUsage")
+		delete(additionalProperties, "regionUsage")
 		delete(additionalProperties, "totalSnapshotQuota")
 		delete(additionalProperties, "currentSnapshotUsage")
 		delete(additionalProperties, "totalVolumeQuota")

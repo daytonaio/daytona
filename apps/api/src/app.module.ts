@@ -39,6 +39,7 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
 import { Redis } from 'ioredis'
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { APP_GUARD } from '@nestjs/core'
+import { RegionModule } from './region/region.module'
 
 @Module({
   imports: [
@@ -180,6 +181,7 @@ import { APP_GUARD } from '@nestjs/core'
     UsageModule,
     AnalyticsModule,
     OrganizationModule,
+    RegionModule,
     EmailModule.forRootAsync({
       inject: [TypedConfigService],
       useFactory: (configService: TypedConfigService) => {

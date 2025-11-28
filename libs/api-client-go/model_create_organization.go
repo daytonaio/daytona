@@ -22,7 +22,9 @@ var _ MappedNullable = &CreateOrganization{}
 // CreateOrganization struct for CreateOrganization
 type CreateOrganization struct {
 	// The name of organization
-	Name                 string `json:"name"`
+	Name string `json:"name"`
+	// The ID of the default region for the organization
+	DefaultRegionId      string `json:"defaultRegionId"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -32,9 +34,10 @@ type _CreateOrganization CreateOrganization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateOrganization(name string) *CreateOrganization {
+func NewCreateOrganization(name string, defaultRegionId string) *CreateOrganization {
 	this := CreateOrganization{}
 	this.Name = name
+	this.DefaultRegionId = defaultRegionId
 	return &this
 }
 
@@ -70,6 +73,30 @@ func (o *CreateOrganization) SetName(v string) {
 	o.Name = v
 }
 
+// GetDefaultRegionId returns the DefaultRegionId field value
+func (o *CreateOrganization) GetDefaultRegionId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.DefaultRegionId
+}
+
+// GetDefaultRegionIdOk returns a tuple with the DefaultRegionId field value
+// and a boolean to check if the value has been set.
+func (o *CreateOrganization) GetDefaultRegionIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.DefaultRegionId, true
+}
+
+// SetDefaultRegionId sets field value
+func (o *CreateOrganization) SetDefaultRegionId(v string) {
+	o.DefaultRegionId = v
+}
+
 func (o CreateOrganization) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -81,6 +108,7 @@ func (o CreateOrganization) MarshalJSON() ([]byte, error) {
 func (o CreateOrganization) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+	toSerialize["defaultRegionId"] = o.DefaultRegionId
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -95,6 +123,7 @@ func (o *CreateOrganization) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"name",
+		"defaultRegionId",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -125,6 +154,7 @@ func (o *CreateOrganization) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "name")
+		delete(additionalProperties, "defaultRegionId")
 		o.AdditionalProperties = additionalProperties
 	}
 
