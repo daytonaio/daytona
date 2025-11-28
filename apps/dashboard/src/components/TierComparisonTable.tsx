@@ -14,10 +14,18 @@ export function TierComparisonTableSkeleton() {
   )
 }
 
-export function TierComparisonTable({ tiers, currentTier }: { tiers: Tier[]; currentTier?: OrganizationTier | null }) {
+export function TierComparisonTable({
+  tiers,
+  currentTier,
+  className,
+}: {
+  tiers: Tier[]
+  currentTier?: OrganizationTier | null
+  className?: string
+}) {
   return (
     <ComparisonTable
-      className="border-l-0 border-r-0 rounded-none"
+      className={className}
       headerLabel="Tier"
       columns={[
         'Compute (vCPU)',

@@ -169,7 +169,11 @@ export default function Limits() {
                     {isLoading ? (
                       <TierComparisonTableSkeleton />
                     ) : (
-                      <TierComparisonTable tiers={tiers || []} currentTier={organizationTier} />
+                      <TierComparisonTable
+                        className="border-l-0 border-r-0 rounded-none only:mb-4"
+                        tiers={tiers || []}
+                        currentTier={organizationTier}
+                      />
                     )}
                   </CardContent>
                 </Card>
