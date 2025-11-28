@@ -16,22 +16,22 @@ export const TIER_RATE_LIMITS: Record<
 > = {
   1: {
     authenticatedRateLimit: 10_000,
-    sandboxCreateRateLimit: 500,
+    sandboxCreateRateLimit: 300,
     sandboxLifecycleRateLimit: 10_000,
   },
   2: {
     authenticatedRateLimit: 20_000,
-    sandboxCreateRateLimit: 1000,
+    sandboxCreateRateLimit: 400,
     sandboxLifecycleRateLimit: 20_000,
   },
   3: {
     authenticatedRateLimit: 40_000,
-    sandboxCreateRateLimit: 2000,
+    sandboxCreateRateLimit: 500,
     sandboxLifecycleRateLimit: 40_000,
   },
   4: {
     authenticatedRateLimit: 50_000,
-    sandboxCreateRateLimit: 4000,
+    sandboxCreateRateLimit: 600,
     sandboxLifecycleRateLimit: 50_000,
   },
 }
