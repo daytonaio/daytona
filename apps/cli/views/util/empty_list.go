@@ -34,3 +34,10 @@ func NotifyEmptyVolumeList(tip bool) {
 		common.RenderTip("Use 'daytona volume create' to create a volume.")
 	}
 }
+
+func NotifyEmptyProfileList(tip bool) {
+	common.RenderInfoMessageBold("No profiles found")
+	if tip {
+		common.RenderTip("Use 'daytona profile add' to add a profile.")
+	}
+}
