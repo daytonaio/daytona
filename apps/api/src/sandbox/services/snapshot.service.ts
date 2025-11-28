@@ -680,9 +680,9 @@ export class SnapshotService {
   async getRegionsForSnapshotPropagation(organizationId: string): Promise<Region[]> {
     return await this.regionRepository
       .createQueryBuilder('region')
-      .where('region.organizationId = :organizationId', { organizationId })
+      .where('region."organizationId" = :organizationId', { organizationId })
       .orWhere(
-        'region.organizationId IS NULL AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq.regionId = region.id AND rq.organizationId = :organizationId)',
+        'region."organizationId" IS NULL AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
         { organizationId },
       )
       .getMany()
