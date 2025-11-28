@@ -5,36 +5,35 @@
 
 import { cn } from '@/lib/utils'
 import { OrganizationUsageOverview } from '@daytonaio/api-client'
-import { AlertTriangle, CpuIcon, HardDriveIcon, MemoryStickIcon } from 'lucide-react'
 import QuotaLine from './QuotaLine'
 import { Skeleton } from './ui/skeleton'
 
-export function UsageOverview({ usageOverview }: { usageOverview: OrganizationUsageOverview }) {
+export function UsageOverview({
+  usageOverview,
+  className,
+}: {
+  usageOverview: OrganizationUsageOverview
+  className?: string
+}) {
   return (
-    <div className="flex gap-4 flex-col">
+    <div className={cn('flex gap-4 [&>*]:flex-1 flex-col lg:flex-row', className)}>
       <div className="flex flex-col gap-1">
-        <div className="w-full flex justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <CpuIcon size={16} /> Compute
-          </div>
+        <div className="w-full flex justify-between gap-2">
+          <div className="text-muted-foreground text-xs">Compute</div>
           <UsageLabel current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} unit="vCPU" />
         </div>
         <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
       </div>
       <div className="flex flex-col gap-1">
-        <div className="w-full flex justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <MemoryStickIcon size={16} /> Memory
-          </div>
+        <div className="w-full flex justify-between gap-2">
+          <div className="text-muted-foreground text-xs">Memory</div>
           <UsageLabel current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} unit="GiB" />
         </div>
         <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
       </div>
       <div className="flex flex-col gap-1">
-        <div className="w-full flex justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <HardDriveIcon size={16} /> Storage
-          </div>
+        <div className="w-full flex justify-between gap-2">
+          <div className="text-muted-foreground text-xs">Storage</div>
           <UsageLabel current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} unit="GiB" />
         </div>
         <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
@@ -45,10 +44,10 @@ export function UsageOverview({ usageOverview }: { usageOverview: OrganizationUs
 
 export function UsageOverviewSkeleton() {
   return (
-    <div className="flex flex-col gap-3">
-      <Skeleton className="h-9 w-full" />
-      <Skeleton className="h-9 w-full" />
-      <Skeleton className="h-9 w-full" />
+    <div className="flex flex-col gap-3 p-4 lg:flex-row">
+      <Skeleton className="h-8 w-full" />
+      <Skeleton className="h-8 w-full" />
+      <Skeleton className="h-8 w-full" />
     </div>
   )
 }
@@ -58,15 +57,12 @@ const UsageLabel = ({ current, total, unit }: { current: number; total: number; 
   const isHighUsage = percentage > 90
 
   return (
-    <div className="flex items-center gap-1">
-      {isHighUsage && <AlertTriangle className="w-4 h-4 text-red-500 mr-1" />}
-      <span
-        className={cn('text-sm font-mono', {
-          'text-destructive': isHighUsage,
-        })}
-      >
-        {current} <span className="opacity-50">/</span> {total} {unit}
-      </span>
-    </div>
+    <span
+      className={cn('text-xs text-nowrap', {
+        'text-destructive': isHighUsage,
+      })}
+    >
+      {current} <span className="opacity-50">/</span> {total} {unit}
+    </span>
   )
 }

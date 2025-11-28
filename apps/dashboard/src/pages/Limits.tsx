@@ -4,28 +4,26 @@
  */
 
 import { LiveIndicator } from '@/components/LiveIndicator'
-import { TierAccordion, TierAccordionSkeleton } from '@/components/TierAccordion'
+import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
+import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
-import { useDowngradeTierMutation } from '@/hooks/mutations/useDowngradeTierMutation'
-import { useUpgradeTierMutation } from '@/hooks/mutations/useUpgradeTierMutation'
 import { useOrganizationTierQuery } from '@/hooks/queries/useOrganizationTierQuery'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useOrganizationWalletQuery } from '@/hooks/queries/useOrganizationWalletQuery'
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { handleApiError } from '@/lib/error-handling'
+import { cn } from '@/lib/utils'
 import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
-import React, { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { toast } from 'sonner'
 import { UserProfileIdentity } from './LinkedAccounts'
 
-const Limits: React.FC = () => {
+export default function Limits() {
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
   const config = useConfig()
@@ -47,41 +45,6 @@ const Limits: React.FC = () => {
       refetchIntervalInBackground: true,
       staleTime: 0,
     },
-  )
-
-  const downgradeTier = useDowngradeTierMutation()
-  const upgradeTier = useUpgradeTierMutation()
-
-  const handleUpgradeTier = useCallback(
-    async (tier: number) => {
-      if (!selectedOrganization) {
-        return
-      }
-
-      try {
-        await upgradeTier.mutateAsync({ organizationId: selectedOrganization.id, tier })
-        toast.success('Tier upgraded successfully')
-      } catch (error) {
-        handleApiError(error, 'Failed to upgrade organization tier')
-      }
-    },
-    [upgradeTier, selectedOrganization],
-  )
-
-  const handleDowngradeTier = useCallback(
-    async (tier: number) => {
-      if (!selectedOrganization) {
-        return
-      }
-
-      try {
-        await downgradeTier.mutateAsync({ organizationId: selectedOrganization.id, tier })
-        toast.success('Tier downgraded successfully')
-      } catch (error) {
-        handleApiError(error, 'Failed to downgrade organization tier')
-      }
-    },
-    [downgradeTier, selectedOrganization],
   )
 
   const githubConnected = useMemo(() => {
@@ -110,91 +73,152 @@ const Limits: React.FC = () => {
         <h1 className="text-2xl font-medium">Limits</h1>
       </div>
 
-      {/* todo: more granular error handling */}
-      {isError ? (
-        <Card className="my-4">
-          <CardHeader>
-            <CardTitle className="text-center">Oops, something went wrong</CardTitle>
-          </CardHeader>
-          <CardContent className="flex justify-between items-center flex-col gap-3">
-            <div>There was an error loading your limits.</div>
-            <Button variant="outline" onClick={handleRetry}>
-              <RefreshCcw className="mr-2 h-4 w-4" />
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <Card className="my-4">
+      <div className="flex flex-col gap-6">
+        {isError ? (
+          <Card>
             <CardHeader>
-              <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap items-center">
-                <div className="flex items-center gap-2">
-                  Current Usage{' '}
-                  {organizationTier && (
-                    <Badge variant="outline" className="font-mono uppercase">
-                      Tier {organizationTier.tier}
-                    </Badge>
-                  )}
-                </div>
-                {usageOverview && (
-                  <LiveIndicator
-                    isUpdating={usageOverviewQuery.isFetching}
-                    intervalMs={10_000}
-                    lastUpdatedAt={usageOverviewQuery.dataUpdatedAt || 0}
-                  />
-                )}
-              </CardTitle>
-              <CardDescription>
-                Limits help us mitigate misuse and manage infrastructure resources. <br /> Ensuring fair and stable
-                access to sandboxes and compute capacity across all users.
-              </CardDescription>
+              <CardTitle className="text-center">Oops, something went wrong</CardTitle>
             </CardHeader>
-            <CardContent>
-              {usageOverviewQuery.isLoading ? (
-                <UsageOverviewSkeleton />
-              ) : (
-                usageOverview && <UsageOverview usageOverview={usageOverview} />
-              )}
+            <CardContent className="flex justify-between items-center flex-col gap-3">
+              <div>There was an error loading your limits.</div>
+              <Button variant="outline" onClick={handleRetry}>
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Retry
+              </Button>
             </CardContent>
           </Card>
-
-          {config.billingApiUrl && (
-            <Card className="my-4">
-              <CardHeader>
-                <CardTitle className="flex items-center mb-2">Upgrade your limits</CardTitle>
-                <CardDescription>
-                  Total vCPU, RAM, and Storage available across all active sandboxes. <br />
-                  Usage depends on the compute needs of each sandbox.
-                  <br />
-                  <div className="text-sm text-muted-foreground/70 mt-2">
-                    Note: for the top up requirements, make sure to top up in a single transaction.
+        ) : (
+          <>
+            <Card>
+              <CardHeader className="p-4">
+                <CardTitle className="flex justify-between gap-x-4 gap-y-2 flex-row flex-wrap items-center">
+                  <div className="flex items-center gap-2">
+                    Current Usage{' '}
+                    {organizationTier && (
+                      <Badge variant="outline" className="font-mono uppercase">
+                        Tier {organizationTier.tier}
+                      </Badge>
+                    )}
                   </div>
+                </CardTitle>
+                <CardDescription>
+                  Limits help us mitigate misuse and manage infrastructure resources. <br /> Ensuring fair and stable
+                  access to sandboxes and compute capacity across all users.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-0 mt-4">
-                {isLoading ? (
-                  <TierAccordionSkeleton />
+              <CardContent className="p-0 flex flex-col">
+                {usageOverviewQuery.isLoading ? (
+                  <UsageOverviewSkeleton />
                 ) : (
-                  <TierAccordion
-                    creditCardConnected={!!wallet?.creditCardConnected}
-                    organizationTier={organizationTier}
-                    emailVerified={!!user?.profile?.email_verified}
-                    githubConnected={githubConnected}
-                    tiers={tiers || []}
-                    phoneVerified={!!user?.profile?.phone_verified}
-                    tierLoading={organizationTierQuery.isLoading}
-                    onUpgrade={handleUpgradeTier}
-                    onDowngrade={handleDowngradeTier}
-                  />
+                  usageOverview && (
+                    <div className="p-4 border-t border-border flex flex-col gap-2">
+                      <div className="flex items-center gap-4">
+                        <div className="text-sm font-medium">Resources</div>
+                        <LiveIndicator
+                          isUpdating={usageOverviewQuery.isFetching}
+                          intervalMs={10_000}
+                          lastUpdatedAt={usageOverviewQuery.dataUpdatedAt || 0}
+                        />
+                      </div>
+                      <UsageOverview usageOverview={usageOverview} />
+                    </div>
+                  )
                 )}
+
+                <RateLimits
+                  className="border-t border-border"
+                  rateLimits={[
+                    {
+                      value: config?.rateLimit?.authenticated?.limit || selectedOrganization?.authenticatedRateLimit,
+                      label: 'General Requests',
+                    },
+                    {
+                      value: config?.rateLimit?.sandboxCreate?.limit || selectedOrganization?.sandboxCreateRateLimit,
+                      label: 'Sandbox Creation',
+                    },
+                    {
+                      value:
+                        config?.rateLimit?.sandboxLifecycle?.limit || selectedOrganization?.sandboxLifecycleRateLimit,
+                      label: 'Sandbox Lifecycle',
+                    },
+                  ]}
+                />
               </CardContent>
             </Card>
-          )}
-        </>
-      )}
+
+            {config.billingApiUrl && selectedOrganization && (
+              <>
+                <TierUpgradeCard
+                  organizationTier={organizationTier}
+                  tiers={tiers || []}
+                  organization={selectedOrganization}
+                  requirementsState={{
+                    emailVerified: !!user?.profile?.email_verified,
+                    creditCardLinked: !!wallet?.creditCardConnected,
+                    githubConnected: githubConnected,
+                    businessEmailVerified: !!user?.profile?.business_email_verified,
+                    phoneVerified: !!user?.profile?.phone_verified,
+                  }}
+                />
+
+                <Card className="mb-10">
+                  <CardHeader>
+                    <CardTitle className="flex items-center mb-2">Limits</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {isLoading ? (
+                      <TierComparisonTableSkeleton />
+                    ) : (
+                      <TierComparisonTable tiers={tiers || []} currentTier={organizationTier} />
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
 
-export default Limits
+function RateLimits({
+  rateLimits,
+  className,
+}: {
+  rateLimits: {
+    value?: number | null
+    label: string
+  }[]
+  className?: string
+}) {
+  const isEmpty = rateLimits.every(({ value }) => !value)
+  if (isEmpty) {
+    return null
+  }
+
+  return (
+    <div className={cn('p-4 border-t border-border flex flex-col gap-4', className)}>
+      <div className="flex flex-col gap-1">
+        <div className="text-foreground text-sm font-medium">Rate Limits</div>
+        <div className="text-muted-foreground text-sm">How many requests you can make per minute.</div>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {rateLimits.map(({ label, value }) => value && <RateLimitItem key={label} label={label} value={value} />)}
+      </div>
+    </div>
+  )
+}
+
+function RateLimitItem({ label, value }: { label: string; value?: number | null }) {
+  if (!value) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-col">
+      <div className="text-muted-foreground text-xs">{label}</div>
+      <div className="text-foreground text-sm font-medium">{value?.toLocaleString()}</div>
+    </div>
+  )
+}
