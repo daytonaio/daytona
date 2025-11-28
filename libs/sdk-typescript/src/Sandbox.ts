@@ -390,6 +390,22 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
+   *
+   * This method updates the sandbox's last activity timestamp without changing its state.
+   * It is useful for keeping long-running sessions alive while there is still user activity.
+   *
+   * @returns {Promise<void>}
+   *
+   * @example
+   * // Keep sandbox activity alive
+   * await sandbox.refreshActivity();
+   */
+  public async refreshActivity(): Promise<void> {
+    await this.sandboxApi.updateLastActivity(this.id)
+  }
+
+  /**
    * Set the auto-stop interval for the Sandbox.
    *
    * The Sandbox will automatically stop after being idle (no new events) for the specified interval.
