@@ -6,24 +6,21 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
-import { useApi } from '@/hooks/useApi'
+import { useEnrollInSmsMfaMutation } from '@/hooks/mutations/useEnrollInSmsMfaMutation'
 import { handleApiError } from '@/lib/error-handling'
 import { CheckCircleIcon } from 'lucide-react'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { useAuth } from 'react-oidc-context'
 import LinkedAccounts from './LinkedAccounts'
 
 const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedAccountsEnabled }) => {
-  const { userApi } = useApi()
   const { user, signinSilent } = useAuth()
-
-  const [enrollInSmsMfaLoading, setEnrollInSmsMfaLoading] = useState(false)
+  const enrollInSmsMfaMutation = useEnrollInSmsMfaMutation()
 
   const handleEnrollInSmsMfa = useCallback(async () => {
     try {
-      setEnrollInSmsMfaLoading(true)
-      const response = await userApi.enrollInSmsMfa()
-      const popup = window.open(response.data, '_blank', 'width=500,height=700,scrollbars=yes,resizable=yes')
+      const url = await enrollInSmsMfaMutation.mutateAsync()
+      const popup = window.open(url, '_blank', 'width=500,height=700,scrollbars=yes,resizable=yes')
       if (popup) {
         const checkClosed = setInterval(() => {
           if (popup.closed) {
@@ -36,10 +33,8 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
       }
     } catch (error) {
       handleApiError(error, 'Failed to enroll in SMS MFA')
-    } finally {
-      setEnrollInSmsMfaLoading(false)
     }
-  }, [userApi, signinSilent])
+  }, [enrollInSmsMfaMutation, signinSilent])
 
   const isPhoneVerified = user?.profile.phone_verified
 
@@ -70,8 +65,8 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
                 </div>
               </div>
               {!isPhoneVerified && (
-                <Button onClick={handleEnrollInSmsMfa} disabled={enrollInSmsMfaLoading}>
-                  {enrollInSmsMfaLoading && <Spinner />} Verify
+                <Button onClick={handleEnrollInSmsMfa} disabled={enrollInSmsMfaMutation.isPending}>
+                  {enrollInSmsMfaMutation.isPending && <Spinner />} Verify
                 </Button>
               )}
             </div>
