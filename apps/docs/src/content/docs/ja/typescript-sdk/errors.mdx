@@ -3,24 +3,24 @@ title: "エラー"
 hideTitleOnPage: true
 ---
 
+## DaytonaError \{#daytonaerror\}
 
-## DaytonaError
+Daytona SDK の基底エラークラスです。
 
-Daytona SDKの基底エラー。
+**継承元:**
 
-**継承:**
+* `Error`
 
-- `Error`
+### このクラスを拡張しているクラス \{#extended-by\}
 
-### 派生クラス
+* `DaytonaNotFoundError`
+* `DaytonaRateLimitError`
 
-- `DaytonaNotFoundError`
+### コンストラクタ \{#constructors\}
 
-### コンストラクタ
+#### new DaytonaError() \{#new-daytonaerror\}
 
-#### new DaytonaError()
-
-_継承元_: `Error.constructor`
+*継承元*: `Error.constructor`
 
 ```ts
 new DaytonaError(message?: string): DaytonaError
@@ -28,64 +28,60 @@ new DaytonaError(message?: string): DaytonaError
 
 **パラメータ**:
 
-- `message?` _string_
-
+* `message?` *string*
 
 **戻り値**:
 
-- `DaytonaError`
+* `DaytonaError`
 
-#### new DaytonaError()
+#### new DaytonaError() \{#new-daytonaerror\}
 
-_継承元_: `Error.constructor`
+*継承元*: `Error.constructor`
 
 ```ts
 new DaytonaError(message?: string, options?: ErrorOptions): DaytonaError
 ```
 
-**パラメータ**:
+**パラメーター**:
 
-- `message?` _string_
-- `options?` _ErrorOptions_
-
+* `message?` *string*
+* `options?` *ErrorOptions*
 
 **戻り値**:
 
-- `DaytonaError`
+* `DaytonaError`
 
 ***
 
+## DaytonaNotFoundError \{#daytonanotfounderror\}
 
-## DaytonaNotFoundError
+Daytona SDK における基本となるエラークラスです。
 
-Daytona SDK の基本となるエラー。
+**継承元:**
 
-**継承:**
+* `DaytonaError`
 
-- `DaytonaError`
+### コンストラクタ \{#constructors\}
 
-### コンストラクタ
+#### new DaytonaNotFoundError() \{#new-daytonanotfounderror\}
 
-#### new DaytonaNotFoundError()
-
-_継承元_: `DaytonaError.constructor`
+*継承元*: `DaytonaError.constructor`
 
 ```ts
 new DaytonaNotFoundError(message?: string): DaytonaNotFoundError
 ```
 
-**パラメータ**:
+**パラメーター**:
 
-- `message?` _string_
-
+* `message?` *string*
 
 **戻り値**:
 
-- `DaytonaNotFoundError`
+* `DaytonaNotFoundError`
 
-#### new DaytonaNotFoundError()
+#### new DaytonaNotFoundError() \{#new-daytonanotfounderror\}
 
-_継承元_: `DaytonaError.constructor`
+*継承元*: `DaytonaError.constructor`
 
 ```ts
 new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFoundError
@@ -93,11 +89,54 @@ new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFo
 
 **パラメータ**:
 
-- `message?` _string_
-- `options?` _ErrorOptions_
-
+* `message?` *string*
+* `options?` *ErrorOptions*
 
 **戻り値**:
 
-- `DaytonaNotFoundError`
+* `DaytonaNotFoundError`
 
+***
+
+## DaytonaRateLimitError \{#daytonaratelimiterror\}
+
+レート制限を超過した場合に送出されるエラーです。
+
+**継承元:**
+
+* `DaytonaError`
+
+### コンストラクタ \{#constructors\}
+
+#### new DaytonaRateLimitError() \{#new-daytonaratelimiterror\}
+
+*継承元*: `DaytonaError.constructor`
+
+```ts
+new DaytonaRateLimitError(message?: string): DaytonaRateLimitError
+```
+
+**パラメーター**:
+
+* `message?` *string*
+
+**戻り値**:
+
+* `DaytonaRateLimitError`
+
+#### new DaytonaRateLimitError() \{#new-daytonaratelimiterror\}
+
+*継承元*: `DaytonaError.constructor`
+
+```ts
+new DaytonaRateLimitError(message?: string, options?: ErrorOptions): DaytonaRateLimitError
+```
+
+**パラメータ**:
+
+* `message?` *string*
+* `options?` *ErrorOptions*
+
+**戻り値**:
+
+* `DaytonaRateLimitError`

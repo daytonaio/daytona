@@ -1,6 +1,6 @@
 ---
 title: AI でデータを分析する
-description: Daytona を使って、AI 生成コードでデータ分析と可視化を実行します。
+description: Daytona を使って AI 生成コードを実行し、データの分析と可視化を行います。
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -8,24 +8,27 @@ import { Image } from 'astro:assets'
 
 import chartImage from '../../../assets/docs/images/chart-0.png'
 
-Daytona のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を使えば、AI が生成したコードでデータを分析できます。一般的な AI によるデータ分析のワークフローは次のとおりです。
+Daytona サンドボックスを使用して、AI が生成したコードを実行し、データを分析できます。一般的な AI データ分析ワークフローは次のとおりです。
 
-1. ユーザーは CSV などの形式でデータセットを用意します。
-2. ユーザーのデータに基づいてコード（通常は Python）を生成するよう、LLM に指示します。
-3. サンドボックスが AI 生成コードを実行し、結果を返します。
-4. 結果をユーザーに表示します。
+1. ユーザーは CSV 形式またはその他の形式のデータセットを用意します。
+2. ユーザーのデータに基づいてコード（通常は Python）を生成するよう、LLM にプロンプトを送ります。
+3. サンドボックスが AI 生成コードを実行し、その結果を返します。
+4. LLM は実行結果からフィードバックを受け取り、必要に応じてコードを改善するために何度でも繰り返し実行できます。
+5. 最終的な結果をユーザーに表示します。
 
-## Daytona で AI データアナリストを構築する
+***
 
-この例では、Daytona の安全なサンドボックス環境を用いて、CSV データから自動的に洞察と可視化を生成する AI 搭載のデータアナリストを構築する方法を示します。
+## Daytona で AI データアナリストを構築する \{#build-an-ai-data-analyst-with-daytona\}
 
-**作成するもの:** 車両評価データセットを分析し、製造年と価格の関係を特定し、プロフェッショナルな可視化を生成するシステムです。すべて自然言語プロンプトで Claude に指示して実行します。
+この例では、Daytona の安全なサンドボックス環境を使って、CSV データから自動的に洞察と可視化を生成する AI を活用したデータアナリストを構築する方法を紹介します。
 
-### 1. プロジェクトのセットアップ
+**ここで構築するもの:** 車両評価データセットを分析し、製造年と価格の関係を明らかにし、プロフェッショナルな可視化を生成するシステムです。これらはすべて、Claude への自然言語プロンプトだけで行います。このシステムは、Claude が実行結果に基づいてコードを反復的に改善できるようにするエージェントループを利用します。
 
-#### 1.1 依存関係のインストール
+### 1. プロジェクトのセットアップ \{#1-project-setup\}
 
-Daytona SDK と Anthropic SDK をプロジェクトにインストールします:
+#### 1.1 依存関係のインストール \{#11-install-dependencies\}
+
+Daytona SDK と Anthropic SDK をプロジェクトにインストールします。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -37,12 +40,12 @@ Daytona SDK と Anthropic SDK をプロジェクトにインストールしま�
   </TabItem>
 </Tabs>
 
-#### 1.2 環境設定
+#### 1.2 環境の設定 \{#12-configure-environment\}
 
-APIキーを取得し、環境を設定します:
+API キーを取得し、環境を構成します:
 
-1. **Daytona API key:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得
-2. **Anthropic API key:** [Anthropic Console](https://console.anthropic.com/) から取得
+1. **Daytona の API キー:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得
+2. **Anthropic の API キー:** [Anthropic Console](https://console.anthropic.com/) から取得
 
 プロジェクトに `.env` ファイルを作成します:
 
@@ -51,19 +54,19 @@ DAYTONA_API_KEY=dtn_***
 ANTHROPIC_API_KEY=sk-ant-***
 ```
 
-### 2. データセットの準備
+### 2. データセット準備 \{#2-dataset-preparation\}
 
-#### 2.1 データセットのダウンロード
+#### 2.1 データセットのダウンロード \{#21-download-dataset\}
 
-公開されている車両評価データセットを使用します。以下から直接ダウンロードできます:
+車両評価に関する公開データセットを使用します。次のリンクから直接ダウンロードできます。
 
 [https://download.daytona.io/dataset.csv](https://download.daytona.io/dataset.csv)
 
-ファイルをダウンロードし、プロジェクトディレクトリに `dataset.csv` として保存します。
+ファイルをダウンロードし、プロジェクトディレクトリ内に `dataset.csv` として保存してください。
 
-#### 2.2 サンドボックスの初期化
+#### 2.2 サンドボックスの初期化 \{#22-initialize-sandbox\}
 
-Daytona のサンドボックスを作成し、データセットをアップロードします:
+Daytona のサンドボックスを作成し、データセットをアップロードします。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -74,13 +77,11 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
     load_dotenv()
 
-    # Create sandbox
-
+    # サンドボックスを作成
     daytona = Daytona()
     sandbox = daytona.create()
 
-    # Upload the dataset to the sandbox
-
+    # データセットをサンドボックスにアップロード
     sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
 
     ```
@@ -91,93 +92,108 @@ Daytona のサンドボックスを作成し、データセットをアップロ
     import 'dotenv/config'
     import { Daytona } from '@daytonaio/sdk';
 
-    // Create sandbox
+    // サンドボックスを作成
     const daytona = new Daytona();
     const sandbox = await daytona.create()
 
-    // Upload the dataset to the sandbox
+    // データセットをサンドボックスにアップロード
     await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
     ```
   </TabItem>
 </Tabs>
 
-### 3. AI データアナリストの構築
+### 3. AIデータアナリストの構築 \{#3-building-the-ai-data-analyst\}
 
-ここでは、Claude と Daytona を連携させてデータを分析し、可視化を生成する中核機能を作成します。
+ここでは、Claude と Daytona を連携させてデータを分析し、可視化を生成するための中核機能を実装します。
 
-#### 3.1 コード実行ハンドラー
+#### 3.1 コード実行ハンドラー \{#31-code-execution-handler\}
 
-まず、コード実行とチャート抽出を処理する関数を作成します:
+まず、コードの実行とチャートの抽出を行う関数を作成します。この関数は、AI モデルにフィードバックできる実行結果を返します。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
     import base64
+    from typing import TypedDict
 
-    def run_ai_generated_code(sandbox, ai_generated_code):
-      execution = sandbox.process.code_run(ai_generated_code)
-      if execution.exit_code != 0:
-        print('AI-generated code had an error.')
-        print(execution.exit_code)
-        print(execution.result)
-        return
+    class ExecutionResult(TypedDict):
+        stdout: str
+        exit_code: int
+        charts: list
 
-      # Check for charts in execution artifacts
-      if not execution.artifacts or not execution.artifacts.charts:
-        print('No charts found in execution artifacts')
-        return
+    def run_ai_generated_code(sandbox, ai_generated_code: str) -> ExecutionResult:
+        execution = sandbox.process.code_run(ai_generated_code)
 
-      result_idx = 0
-      for result in execution.artifacts.charts:
-        if result.png: # Save the png to a file (png is in base64 format)
-          with open(f'chart-{result_idx}.png', 'wb') as f:
-            f.write(base64.b64decode(result.png))
-            print(f'Chart saved to chart-{result_idx}.png')
-            result_idx += 1
+        result = ExecutionResult(
+            stdout=execution.result or "",
+            exit_code=execution.exit_code,
+            charts=execution.artifacts.charts if execution.artifacts else []
+        )
 
+        # 生成されたチャートを保存する
+        if execution.artifacts and execution.artifacts.charts:
+            result_idx = 0
+            for chart in execution.artifacts.charts:
+                if chart.png:
+                    filename = f'chart-{result_idx}.png'
+                    with open(filename, 'wb') as f:
+                        f.write(base64.b64decode(chart.png))
+                    print(f'✓ Chart saved to {filename}')
+                    result_idx += 1
+
+        return result
     ```
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
     import fs from 'fs'
+    import { Sandbox } from '@daytonaio/sdk'
 
-    async function runAIGeneratedCode(sandbox, aiGeneratedCode: string) {
+    interface ExecutionResult {
+      stdout: string
+      exitCode: number
+      charts?: Array<{ png?: string }>
+    }
+
+    async function runAIGeneratedCode(
+      sandbox: Sandbox,
+      aiGeneratedCode: string
+    ): Promise<ExecutionResult> {
       const execution = await sandbox.process.codeRun(aiGeneratedCode)
-      if (execution.exitCode != 0) {
-        console.error('AI-generated code had an error.')
-        console.log(execution.exitCode)
-        console.log(execution.result)
-        return
+
+      const result: ExecutionResult = {
+        stdout: execution.result || "",
+        exitCode: execution.exitCode,
+        charts: execution.artifacts?.charts
       }
 
-      // Check for charts in execution artifacts
-      if (!execution.artifacts || !execution.artifacts.charts) {
-        console.log('No charts found in execution artifacts')
-        return
-      }
-
-      let resultIdx = 0
-      for (const result of execution.artifacts.charts) {
-        if (result.png) {
-          // Save the png to a file (png is in base64 format)
-          fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
-          console.log(`Chart saved to chart-${resultIdx}.png`)
-          resultIdx++
+      # 生成されたチャートを保存する
+      if (execution.artifacts?.charts) {
+        let resultIdx = 0
+        for (const chart of execution.artifacts.charts) {
+          if (chart.png) {
+            const filename = `chart-${resultIdx}.png`
+            fs.writeFileSync(filename, chart.png, { encoding: 'base64' })
+            console.log(`✓ Chart saved to ${filename}`)
+            resultIdx++
+          }
         }
       }
+
+      return result
     }
     ```
   </TabItem>
 </Tabs>
 
-#### 3.2 分析用プロンプトの作成
+#### 3.2 分析プロンプトの作成 \{#32-creating-the-analysis-prompt\}
 
-次に、データセットと求める分析内容をClaudeに伝えるプロンプトを作成します。このプロンプトには以下が含まれます。
+次に、データセットの内容と実行したい分析内容を Claude に伝えるプロンプトを作成します。このプロンプトには次の内容が含まれます：
 
-- データセットのスキーマと列の説明
-- 具体的な分析リクエスト（製造年別の平均価格の推移）
-- コード生成に関する指示
+* データセットのスキーマとカラムの説明
+* 具体的な分析内容（製造年ごとの車両価格の変動）
+* コード生成に関する指示
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -191,14 +207,13 @@ Daytona のサンドボックスを作成し、データセットをアップロ
     - 'year': integer, the manufacturing year of the vehicle
     - 'price_in_euro': float, the listed price of the vehicle in Euros
 
-    Analyze how price varies by manufacturing year.  
-    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
+    Analyze how price varies by manufacturing year.
+    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.
     Create a line chart showing average price per year.
-    Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
-    Finish with a plt.show()"""
+    Write Python code that analyzes the dataset based on my request and produces a matplotlib chart accordingly.
+    Always finish with plt.show() to display the chart."""
 
     anthropic = Anthropic()
-    print('Waiting for the model response...')
 
     ```
   </TabItem>
@@ -214,126 +229,305 @@ Daytona のサンドボックスを作成し、データセットをアップロ
     - 'year': integer, the manufacturing year of the vehicle
     - 'price_in_euro': float, the listed price of the vehicle in Euros
 
-    Analyze how price varies by manufacturing year.  
-    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
+    Analyze how price varies by manufacturing year.
+    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.
     Create a line chart showing average price per year.
-    Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
-    Finish with a plt.show()`
+    Write Python code that analyzes the dataset based on my request and produces a matplotlib chart accordingly.
+    Always finish with plt.show() to display the chart.`
 
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    console.log('Waiting for the model response...')
     ```
   </TabItem>
 </Tabs>
 
-#### 3.3 ツール呼び出しのセットアップ
+#### 3.3 ツール定義 \{#33-tool-definition\}
 
-ここでは、ツール呼び出しを使用してClaudeをDaytonaのサンドボックスに接続します。これにより、Claudeは生成したPythonコードを自動的に実行できます。
+Claude がサンドボックス環境で Python コードを実行し、その結果を取得できるようにするツールを定義します。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
-    msg = anthropic.messages.create(
-        model='claude-3-5-sonnet-20240620',
-        max_tokens=1024,
-        messages=[{'role': 'user', 'content': prompt}],
-        tools=[
-            {
-                'name': 'run_python_code',
-                'description': 'Run Python code',
-                'input_schema': {
-                    'type': 'object',
-                    'properties': {
-                        'code': {
-                            'type': 'string',
-                            'description': 'The Python code to run',
-                        },
-                    },
-                    'required': ['code'],
-                },
-            },
-        ],
-    )
-    ```
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const msg = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20240620',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-      tools: [
+    tools = [
         {
-          name: 'run_python_code',
-          description: 'Run Python code',
-          input_schema: {
-            type: 'object',
-            properties: {
-              code: {
-                type: 'string',
-                description: 'The Python code to run',
-              },
+            'name': 'run_python_code',
+            'description': 'Run Python code in the sandbox environment and get execution results',
+            'input_schema': {
+                'type': 'object',
+                'properties': {
+                    'code': {
+                        'type': 'string',
+                        'description': 'The Python code to run',
+                    },
+                },
+                'required': ['code'],
             },
-            required: ['code'],
-          },
         },
-      ],
-    })
-    ```
-  </TabItem>
-</Tabs>
-
-#### 3.4 レスポンス処理
-
-最後に、Claude のレスポンスを解析し、生成されたコードを Daytona のサンドボックスで実行します:
-
-<Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    for content_block in msg.content:
-        if content_block.type == 'tool_use':
-            if content_block.name == 'run_python_code':
-                code = content_block.input['code']
-                print('Will run following code in the Sandbox:\n', code)
-                # Execute the code in the sandbox
-                run_ai_generated_code(sandbox, code)
+    ]
     ```
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
+    import type { Tool, ToolUseBlock } from '@anthropic-ai/sdk/resources/messages.mjs'
+
+    const tools: Tool[] = [
+      {
+        name: 'run_python_code',
+        description: 'Run Python code in the sandbox environment and get execution results',
+        input_schema: {
+          type: 'object',
+          properties: {
+            code: {
+              type: 'string',
+              description: 'The Python code to run',
+            },
+          },
+          required: ['code'],
+        },
+      },
+    ]
+    ```
+  </TabItem>
+</Tabs>
+
+#### 3.4 エージェンティックループの実装 \{#34-agentic-loop-implementation\}
+
+ここでは、Claude が実行フィードバックに基づいてコードを反復的に改善できるようにする、エージェンティックループを実装します。これにより、Claude はエラーの修正やエッジケースの処理を行い、複数回の反復を通じて分析を高度化できるようになります。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 会話履歴を初期化
+    messages = [{'role': 'user', 'content': prompt}]
+
+    continue_loop = True
+    iteration_count = 0
+    max_iterations = 10
+
+    print("エージェントループを開始しています...\n")
+
+    while continue_loop and iteration_count < max_iterations:
+        iteration_count += 1
+        print(f"\n=== イテレーション {iteration_count} ===")
+        print("モデルの応答を待機しています...")
+
+        # Claudeから応答を取得
+        msg = anthropic.messages.create(
+            model='claude-sonnet-4-5',
+            max_tokens=64000,
+            messages=messages,
+            tools=tools
+        )
+
+        # Claudeのテキスト応答をログに記録
+        for content_block in msg.content:
+            if content_block.type == 'text':
+                print("\nClaudeの応答:")
+                print(content_block.text)
+
+        # Claudeがツールを使用するかどうかを確認
+        tool_uses = [block for block in msg.content if block.type == 'tool_use']
+
+        if len(tool_uses) == 0:
+            # ツールの使用なし、Claudeは完了
+            print("\nタスクが完了しました - これ以上のアクションは不要です。")
+            continue_loop = False
+            break
+
+        # Claudeの応答をメッセージ履歴に追加
+        messages.append({'role': 'assistant', 'content': msg.content})
+
+        # すべてのツール呼び出しを実行し、結果を収集
+        tool_results = []
+
+        for tool_use in tool_uses:
+            if tool_use.name == 'run_python_code':
+                code = tool_use.input['code']
+                print("\n--- サンドボックス内でPythonコードを実行中 ---")
+                print(code)
+                print("--- コード終了 ---\n")
+
+                # サンドボックス内でコードを実行
+                execution_result = run_ai_generated_code(sandbox, code)
+
+                # ツール結果をフォーマット
+                result_content = ""
+                if execution_result['exit_code'] == 0:
+                    result_content += "実行が成功しました!\n\n"
+                    if execution_result['stdout']:
+                        result_content += f"出力:\n{execution_result['stdout']}\n"
+                    if execution_result['charts'] and len(execution_result['charts']) > 0:
+                        result_content += f"\n{len(execution_result['charts'])}個のチャートを生成しました。"
+                    else:
+                        result_content += "\n注意: チャートは生成されませんでした。チャートを表示するにはplt.show()を使用してください。"
+                else:
+                    result_content += f"実行が終了コード{execution_result['exit_code']}で失敗しました\n\n"
+                    if execution_result['stdout']:
+                        result_content += f"出力:\n{execution_result['stdout']}\n"
+
+                tool_results.append({
+                    'type': 'tool_result',
+                    'tool_use_id': tool_use.id,
+                    'content': result_content
+                })
+
+                print("実行結果をClaudeに送信しました。")
+
+        # ツール結果を会話履歴に追加
+        messages.append({'role': 'user', 'content': tool_results})
+
+    if iteration_count >= max_iterations:
+        print("\n⚠️  最大イテレーション数に達しました。タスクが完了していない可能性があります。")
+
+    print("\n=== エージェントループが完了しました ===")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import type { MessageParam } from '@anthropic-ai/sdk/resources/messages.mjs'
+
     interface CodeRunToolInput {
       code: string
     }
 
-    for (const contentBlock of msg.content) {
-      if (contentBlock.type === 'tool_use') {
-        if (contentBlock.name === 'run_python_code') {
-          const code = (contentBlock.input as CodeRunToolInput).code
-          console.log('Will run following code in the Sandbox:\n', code)
-          // Execute the code in the sandbox
-          await runAIGeneratedCode(sandbox, code)
+    // 会話履歴を初期化
+    const messages: MessageParam[] = [
+      { role: 'user', content: initialPrompt }
+    ]
+
+    let continueLoop = true
+    let iterationCount = 0
+    const maxIterations = 10
+
+    console.log("Starting agentic loop...\n")
+
+    while (continueLoop && iterationCount < maxIterations) {
+      iterationCount++
+      console.log(`\n=== Iteration ${iterationCount} ===`)
+      console.log("Waiting for the model response...")
+
+      // Claudeからの応答を取得
+      const stream = anthropic.messages.stream({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 64000,
+        messages: messages,
+        tools: tools
+      })
+
+      const message = await stream.finalMessage()
+
+      // Claudeのテキスト応答をログに記録
+      for (const contentBlock of message.content) {
+        if (contentBlock.type === 'text') {
+          console.log("\nClaude's response:")
+          console.log(contentBlock.text)
         }
       }
+
+      // Claudeがツールを使用するかどうかを確認
+      const toolUses = message.content.filter(
+        (block): block is ToolUseBlock => block.type === 'tool_use'
+      )
+
+      if (toolUses.length === 0) {
+        // ツールの使用はなし、Claudeは処理完了
+        console.log("\nTask completed - no more actions needed.")
+        continueLoop = false
+        break
+      }
+
+      // Claudeの応答をメッセージ履歴に追加
+      messages.push({
+        role: 'assistant',
+        content: message.content
+      })
+
+      // すべてのツール呼び出しを実行し、結果を収集
+      const toolResults = []
+
+      for (const toolUse of toolUses) {
+        if (toolUse.name === 'run_python_code') {
+          const code = (toolUse.input as CodeRunToolInput).code
+          console.log("\n--- サンドボックス内でPythonコードを実行中 ---")
+          console.log(code)
+          console.log("--- コード終了 ---\n")
+
+          // サンドボックス内でコードを実行
+          const executionResult = await runAIGeneratedCode(sandbox, code)
+
+          // ツール結果をフォーマット
+          let resultContent = ""
+          if (executionResult.exitCode === 0) {
+            resultContent += "Execution successful!\n\n"
+            if (executionResult.stdout) {
+              resultContent += `Output:\n${executionResult.stdout}\n`
+            }
+            if (executionResult.charts && executionResult.charts.length > 0) {
+              resultContent += `\nGenerated ${executionResult.charts.length} chart(s).`
+            } else {
+              resultContent += "\nNote: No charts were generated. Make sure to use plt.show() to display the chart."
+            }
+          } else {
+            resultContent += `Execution failed with exit code ${executionResult.exitCode}\n\n`
+            if (executionResult.stdout) {
+              resultContent += `Output:\n${executionResult.stdout}\n`
+            }
+          }
+
+          toolResults.push({
+            type: 'tool_result' as const,
+            tool_use_id: toolUse.id,
+            content: resultContent
+          })
+
+          console.log("Execution result sent back to Claude.")
+        }
+      }
+
+      // ツール結果を会話履歴に追加
+      messages.push({
+        role: 'user',
+        content: toolResults
+      })
     }
 
+    if (iterationCount >= maxIterations) {
+      console.log("\n⚠️  Reached maximum iteration limit. Task may not be complete.")
+    }
+
+    console.log("\n=== Agentic loop completed ===")
     ```
   </TabItem>
 </Tabs>
 
-以上です。作成した `run_ai_generated_code` 関数はチャートの保存を自動的に処理します。Claude が `plt.show()` で可視化を生成すると、Daytona がそれをチャートの成果物として取得し、PNG ファイルとして保存します。
+エージェントループは次のように動作します。
 
-主な利点:
+1. **初回リクエスト**: ツール定義とともに最初のプロンプトを Claude に送信する
+2. **反復ループ**: 各イテレーション（最大 10 回）ごとに:
+   * Claude が、任意のツール呼び出しを含むレスポンスを生成する
+   * ツール呼び出しがある場合、サンドボックス内で Python コードを実行する
+   * 実行結果を Claude に返す（エラーや成功メッセージを含む）
+   * Claude はフィードバックに基づいてコードを改善できる
+3. **完了**: Claude がこれ以上ツール呼び出しが不要であると示すか、最大イテレーション数に達した時点でループが終了する
 
-- セキュアな実行: 分離された Daytona のサンドボックスでコードを実行
-- 成果物の自動取得: チャート、テーブル、出力を自動的に抽出
-- エラーハンドリング: 組み込みのエラー検出とロギング
-- 言語非依存: ここでは Python を使用しましたが、Daytona は複数言語をサポート
+このアプローチにより、Claude は次のことが可能になります。
 
-### 4. 分析の実行
+* 初期コードが失敗した場合にエラーを修正する
+* 結果に満足できない場合に分析を繰り返し改善する
+* 実行中に発見されたエッジケースを処理する
+* 実際のデータに基づいて可視化を改善する
 
-完全なコードを実行して結果を確認します。
+**このアプローチの主な利点:**
+
+* **安全な実行:** コードは分離された Daytona サンドボックス内で実行される
+* **アーティファクトの自動取得:** チャート、テーブル、各種出力が自動的に抽出される
+* **エラー処理:** エラー検出とロギングが組み込みで提供される
+* **言語非依存:** ここでは Python を使用しているが、Daytona は複数の言語をサポートしている
+
+### 4. 分析を実行する \{#4-running-your-analysis\}
+
+これで、結果を確認するためにコード全体を実行できます。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -349,13 +543,13 @@ Daytona のサンドボックスを作成し、データセットをアップロ
   </TabItem>
 </Tabs>
 
-プロジェクトディレクトリ内に、次のようなチャートが出力されるはずです:
+プロジェクトディレクトリに、次のようなグラフが生成されるはずです：
 
-<Image src={chartImage} alt="製造年別の車両評価額チャート" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+<Image src={chartImage} alt="製造年別の車両評価のグラフ" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
 
-### 5. 完全な実装
+### 5. 完全な実装 \{#5-complete-implementation\}
 
-以下に、すぐに実行できるサンプル一式を示します:
+以下に、エージェントループを備えた、すぐに実行できる完全なサンプルを示します。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -364,86 +558,163 @@ Daytona のサンドボックスを作成し、データセットをアップロ
     from dotenv import load_dotenv
     from daytona import Daytona, Sandbox
     from anthropic import Anthropic
+    from typing import TypedDict
+
+
+    class ExecutionResult(TypedDict):
+        stdout: str
+        exit_code: int
+        charts: list
 
 
     def main():
         load_dotenv()
+
         # サンドボックスを作成
         daytona = Daytona()
         sandbox = daytona.create()
-        
-        # データセットをサンドボックスへアップロード
+
+        # データセットをサンドボックスにアップロード
         sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
-        
-        prompt = f"""
-    /home/daytona/dataset.csv のサンドボックスに、車両の評価額が保存された CSV ファイルがあります。
+
+        initial_prompt = """
+    /home/daytona/dataset.csv のサンドボックス内に車両評価額のCSVファイルがあります。
 
     関連する列:
     - 'year': 整数型、車両の製造年
-    - 'price_in_euro': 浮動小数点型、車両のユーロ建て掲載価格
+    - 'price_in_euro': 浮動小数点型、車両の表示価格(ユーロ)
 
-    製造年ごとの価格変動を分析してください。  
-    'year' または 'price_in_euro' が欠損、非数値、または外れ値の行は除外してください。  
+    製造年ごとの価格変動を分析してください。
+    'year' または 'price_in_euro' が欠損値、非数値、または外れ値である行を削除してください。
     年ごとの平均価格を示す折れ線グラフを作成してください。
-    この要件に基づいてデータセットを分析し、適切なグラフを生成する Python コードを書いてください。
-    最後に plt.show() で終了してください"""
+    私の要求に基づいてデータセットを分析し、matplotlibグラフを生成するPythonコードを記述してください。
+    必ず最後にplt.show()を使用してグラフを表示してください。"""
 
         anthropic = Anthropic()
-        print('モデルの応答を待機中...')
-        msg = anthropic.messages.create(
-            model='claude-3-5-sonnet-20240620',
-            max_tokens=1024,
-            messages=[{'role': 'user', 'content': prompt}],
-            tools=[
-                {
-                    'name': 'run_python_code',
-                    'description': 'Python コードを実行',
-                    'input_schema': {
-                        'type': 'object',
-                        'properties': {
-                            'code': {
-                                'type': 'string',
-                                'description': '実行する Python コード',
-                            },
+
+        tools = [
+            {
+                'name': 'run_python_code',
+                'description': 'サンドボックス環境でPythonコードを実行し、実行結果を取得',
+                'input_schema': {
+                    'type': 'object',
+                    'properties': {
+                        'code': {
+                            'type': 'string',
+                            'description': '実行するPythonコード',
                         },
-                        'required': ['code'],
                     },
+                    'required': ['code'],
                 },
-            ],
+            },
+        ]
+
+        # 会話履歴を初期化
+        messages = [{'role': 'user', 'content': initial_prompt}]
+
+        continue_loop = True
+        iteration_count = 0
+        max_iterations = 10
+
+        print("エージェントループを開始中...\n")
+
+        while continue_loop and iteration_count < max_iterations:
+            iteration_count += 1
+            print(f"\n=== 反復処理 {iteration_count} ===")
+            print("モデルの応答を待機中...")
+
+            # Claudeからの応答を取得
+            msg = anthropic.messages.create(
+                model='claude-sonnet-4-5',
+                max_tokens=64000,
+                messages=messages,
+                tools=tools
+            )
+
+            # Claudeのテキスト応答をログに記録
+            for content_block in msg.content:
+                if content_block.type == 'text':
+                    print("\nClaudeの応答:")
+                    print(content_block.text)
+
+            # Claudeがツールを使用するかどうかを確認
+            tool_uses = [block for block in msg.content if block.type == 'tool_use']
+
+            if len(tool_uses) == 0:
+                # ツールの使用なし、Claudeは完了
+                print("\nタスク完了 - これ以上のアクションは不要です。")
+                continue_loop = False
+                break
+
+            # Claudeの応答をメッセージ履歴に追加
+            messages.append({'role': 'assistant', 'content': msg.content})
+
+            # すべてのツール呼び出しを実行し、結果を収集
+            tool_results = []
+
+            for tool_use in tool_uses:
+                if tool_use.name == 'run_python_code':
+                    code = tool_use.input['code']
+                    print("\n--- サンドボックスでPythonコードを実行中 ---")
+                    print(code)
+                    print("--- コード終了 ---\n")
+
+                    # サンドボックスでコードを実行
+                    execution_result = run_ai_generated_code(sandbox, code)
+
+                    # ツール結果をフォーマット
+                    result_content = ""
+                    if execution_result['exit_code'] == 0:
+                        result_content += "実行成功!\n\n"
+                        if execution_result['stdout']:
+                            result_content += f"出力:\n{execution_result['stdout']}\n"
+                        if execution_result['charts'] and len(execution_result['charts']) > 0:
+                            result_content += f"\n{len(execution_result['charts'])}個のグラフを生成しました。"
+                        else:
+                            result_content += "\n注意: グラフは生成されませんでした。グラフを表示するにはplt.show()を使用してください。"
+                    else:
+                        result_content += f"実行が終了コード {execution_result['exit_code']} で失敗しました\n\n"
+                        if execution_result['stdout']:
+                            result_content += f"出力:\n{execution_result['stdout']}\n"
+
+                    tool_results.append({
+                        'type': 'tool_result',
+                        'tool_use_id': tool_use.id,
+                        'content': result_content
+                    })
+
+                    print("実行結果をClaudeに送信しました。")
+
+            # ツール結果を会話履歴に追加
+            messages.append({'role': 'user', 'content': tool_results})
+
+        if iteration_count >= max_iterations:
+            print("\n⚠️  最大反復回数に達しました。タスクが完了していない可能性があります。")
+
+        print("\n=== エージェントループ完了 ===")
+
+
+    def run_ai_generated_code(sandbox: Sandbox, ai_generated_code: str) -> ExecutionResult:
+        execution = sandbox.process.code_run(ai_generated_code)
+
+        result = ExecutionResult(
+            stdout=execution.result or "",
+            exit_code=execution.exit_code,
+            charts=execution.artifacts.charts if execution.artifacts else []
         )
 
-        for content_block in msg.content:
-            if content_block.type == 'tool_use':
-                if content_block.name == 'run_python_code':
-                    code = content_block.input['code']
-                    print('サンドボックスで次のコードを実行します:\n', code)
-                    # サンドボックス内でコードを実行
-                    run_ai_generated_code(sandbox, code)
+        # 生成されたグラフを保存
+        if execution.artifacts and execution.artifacts.charts:
+            result_idx = 0
+            for chart in execution.artifacts.charts:
+                if chart.png:
+                    filename = f'chart-{result_idx}.png'
+                    with open(filename, 'wb') as f:
+                        f.write(base64.b64decode(chart.png))
+                    print(f'✓ グラフを {filename} に保存しました')
+                    result_idx += 1
 
-
-    def run_ai_generated_code(sandbox: Sandbox, ai_generated_code: str):
-        execution = sandbox.process.code_run(ai_generated_code)
-        if execution.exit_code != 0:
-            print('AI 生成コードでエラーが発生しました。')
-            print(execution.exit_code)
-            print(execution.result)
-            return
-        
-        # すべての結果を走査し、グラフを表す png ファイルがあるか確認
-        if not execution.artifacts or not execution.artifacts.charts:
-            print('実行成果物にグラフが見つかりませんでした')
-            print(execution.artifacts)
-            return
-
-        result_idx = 0
-        for result in execution.artifacts.charts:
-            if result.png:
-                # png をファイルに保存
-                # png は base64 形式です。
-                with open(f'chart-{result_idx}.png', 'wb') as f:
-                    f.write(base64.b64decode(result.png))
-                print(f'グラフを chart-{result_idx}.png に保存しました')
-                result_idx += 1
+        return result
 
 
     if __name__ == "__main__":
@@ -453,98 +724,204 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
-    import 'dotenv/config'
-    import fs from 'fs'
-    import Anthropic from '@anthropic-ai/sdk'
-    import { Daytona, Sandbox } from '@daytonaio/sdk';
+    import "dotenv/config";
+    import fs from "fs";
+    import Anthropic from "@anthropic-ai/sdk";
+    import { Daytona, Sandbox } from "@daytonaio/sdk";
+    import type {
+      MessageParam,
+      Tool,
+      ToolUseBlock,
+    } from "@anthropic-ai/sdk/resources/messages.mjs";
 
+    interface CodeRunToolInput {
+      code: string;
+    }
+
+    interface ExecutionResult {
+      stdout: string;
+      exitCode: number;
+      charts?: Array<{ png?: string }>;
+    }
 
     async function main() {
       // サンドボックスを作成
       const daytona = new Daytona();
-      const sandbox = await daytona.create()
+      const sandbox = await daytona.create();
 
       // データセットをサンドボックスにアップロード
-      await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
+      await sandbox.fs.uploadFile("dataset.csv", "/home/daytona/dataset.csv");
 
-      const prompt = `
-    サンドボックス内の /home/daytona/dataset.csv に車両評価のCSVファイルがあります。
+      const initialPrompt = `
+    /home/daytona/dataset.csv に車両評価データを含むCSVファイルがサンドボックス内に保存されています。
 
-    関連列:
-    - 'year': 整数、車両の製造年
-    - 'price_in_euro': 浮動小数点数、ユーロ建ての掲載価格
+    関連する列:
+    - 'year': 整数型、車両の製造年
+    - 'price_in_euro': 浮動小数点型、車両のユーロ建て表示価格
 
-    製造年ごとの価格の変動を分析してください。  
-    'year' または 'price_in_euro' が欠損、非数値、または外れ値の行は除外してください。  
+    製造年ごとの価格変動を分析してください。
+    'year' または 'price_in_euro' が欠損値、非数値、または外れ値である行を削除してください。
     年ごとの平均価格を示す折れ線グラフを作成してください。
-    リクエストに基づいてデータセットを分析し、適切なグラフを生成する Python コードを書いてください。
-    最後に plt.show() で終了してください`
+    私の要求に基づいてデータセットを分析し、matplotlibでグラフを生成するPythonコードを記述してください。
+    グラフを表示するため、必ず最後に plt.show() を実行してください。`;
 
-      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-      console.log('モデルの応答を待っています...')
-      const msg = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20240620',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-        tools: [
-          {
-            name: 'run_python_code',
-            description: 'Python コードを実行',
-            input_schema: {
-              type: 'object',
-              properties: {
-                code: {
-                  type: 'string',
-                  description: '実行する Python コード',
-                },
+      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+      const tools: Tool[] = [
+        {
+          name: "run_python_code",
+          description: "サンドボックス環境でPythonコードを実行し、実行結果を取得します",
+          input_schema: {
+            type: "object",
+            properties: {
+              code: {
+                type: "string",
+                description: "実行するPythonコード",
               },
-              required: ['code'],
             },
+            required: ["code"],
           },
-        ],
-      })
+        },
+      ];
 
-      interface CodeRunToolInput {
-        code: string
+      // 会話履歴を初期化
+      const messages: MessageParam[] = [
+        { role: "user", content: initialPrompt },
+      ];
+
+      let continueLoop = true;
+      let iterationCount = 0;
+      const maxIterations = 10;
+
+      console.log("エージェントループを開始しています...\n");
+
+      while (continueLoop && iterationCount < maxIterations) {
+        iterationCount++;
+        console.log(`\n=== 反復処理 ${iterationCount} ===`);
+        console.log("モデルの応答を待機しています...");
+
+        // Claudeからの応答を取得
+        const stream = anthropic.messages.stream({
+          model: "claude-sonnet-4-5",
+          max_tokens: 64000,
+          messages: messages,
+          tools: tools,
+        });
+
+        const message = await stream.finalMessage();
+
+        // Claudeのテキスト応答をログに記録
+        for (const contentBlock of message.content) {
+          if (contentBlock.type === "text") {
+            console.log("\nClaudeの応答:");
+            console.log(contentBlock.text);
+          }
+        }
+
+        // Claudeがツールを使用するかどうかを確認
+        const toolUses = message.content.filter(
+          (block): block is ToolUseBlock => block.type === "tool_use"
+        );
+
+        if (toolUses.length === 0) {
+          // ツールの使用はなし、Claudeの処理が完了
+          console.log("\nタスク完了 - これ以上のアクションは不要です。");
+          continueLoop = false;
+          break;
+        }
+
+        // Claudeの応答をメッセージ履歴に追加
+        messages.push({
+          role: "assistant",
+          content: message.content,
+        });
+
+        // すべてのツール呼び出しを実行し、結果を収集
+        const toolResults = [];
+
+        for (const toolUse of toolUses) {
+          if (toolUse.name === "run_python_code") {
+            const code = (toolUse.input as CodeRunToolInput).code;
+            console.log("\n--- サンドボックス内でPythonコードを実行中 ---");
+            console.log(code);
+            console.log("--- コード終了 ---\n");
+
+            // サンドボックス内でコードを実行
+            const executionResult = await runAIGeneratedCode(sandbox, code);
+
+            // ツール結果をフォーマット
+            let resultContent = "";
+            if (executionResult.exitCode === 0) {
+              resultContent += `実行成功しました!\n\n`;
+              if (executionResult.stdout) {
+                resultContent += `出力:\n${executionResult.stdout}\n`;
+              }
+              if (executionResult.charts && executionResult.charts.length > 0) {
+                resultContent += `\n${executionResult.charts.length}個のグラフを生成しました。`;
+              } else {
+                resultContent += `\n注意: グラフは生成されませんでした。グラフを表示するには plt.show() を使用してください。`;
+              }
+            } else {
+              resultContent += `終了コード ${executionResult.exitCode} で実行が失敗しました\n\n`;
+              if (executionResult.stdout) {
+                resultContent += `出力:\n${executionResult.stdout}\n`;
+              }
+            }
+
+            toolResults.push({
+              type: "tool_result" as const,
+              tool_use_id: toolUse.id,
+              content: resultContent,
+            });
+
+            console.log("実行結果をClaudeに送信しました。");
+          }
+        }
+
+        // ツール結果を会話履歴に追加
+        messages.push({
+          role: "user",
+          content: toolResults,
+        });
       }
 
-      for (const contentBlock of msg.content) {
-        if (contentBlock.type === 'tool_use') {
-          if (contentBlock.name === 'run_python_code') {
-            const code = (contentBlock.input as CodeRunToolInput).code
-            console.log('サンドボックスで次のコードを実行します:\n', code)
-            // サンドボックスでコードを実行
-            await runAIGeneratedCode(sandbox, code)
+      if (iterationCount >= maxIterations) {
+        console.log(
+          "\n⚠️  最大反復回数に達しました。タスクが完了していない可能性があります。"
+        );
+      }
+
+      console.log("\n=== エージェントループが完了しました ===");
+    }
+
+    async function runAIGeneratedCode(
+      sandbox: Sandbox,
+      aiGeneratedCode: string
+    ): Promise<ExecutionResult> {
+      const execution = await sandbox.process.codeRun(aiGeneratedCode);
+
+      const result: ExecutionResult = {
+        stdout: execution.result || "",
+        exitCode: execution.exitCode,
+        charts: execution.artifacts?.charts,
+      };
+
+      // 生成されたグラフを保存
+      if (execution.artifacts?.charts) {
+        let resultIdx = 0;
+        for (const chart of execution.artifacts.charts) {
+          if (chart.png) {
+            const filename = `chart-${resultIdx}.png`;
+            fs.writeFileSync(filename, chart.png, {
+              encoding: "base64",
+            });
+            console.log(`✓ グラフを ${filename} に保存しました`);
+            resultIdx++;
           }
         }
       }
-    }
 
-    async function runAIGeneratedCode(sandbox: Sandbox, aiGeneratedCode: string) {
-      const execution = await sandbox.process.codeRun(aiGeneratedCode)
-      if (execution.exitCode != 0) {
-        console.error('AI生成コードでエラーが発生しました。')
-        console.log(execution.exitCode)
-        console.log(execution.result)
-        process.exit(1)
-      }
-      // すべての結果を確認し、グラフを表す PNG ファイルがあるかを特に確認します。
-      if (!execution.artifacts || !execution.artifacts.charts) {
-        console.log('実行成果物にチャートが見つかりません')
-        console.log(execution.artifacts)
-        return
-      }
-
-      let resultIdx = 0
-      for (const result of execution.artifacts.charts) {
-        if (result.png) {
-          // PNG をファイルに保存
-          // PNG は base64 形式です。
-          fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
-          console.log(`チャートを chart-${resultIdx}.png に保存しました`)
-          resultIdx++
-        }
-      }
+      return result;
     }
 
     main().catch(console.error);
