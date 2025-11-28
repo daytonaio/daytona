@@ -36,6 +36,7 @@ import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
 import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
+import { Region } from '../../region/entities/region.entity'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -51,6 +52,8 @@ export class SnapshotService {
     private readonly buildInfoRepository: Repository<BuildInfo>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
+    @InjectRepository(Region)
+    private readonly regionRepository: Repository<Region>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
@@ -662,6 +665,27 @@ export class SnapshotService {
     }
 
     return ['sleep', 'infinity']
+  }
+
+  /**
+   * Get all regions for snapshot propagation for an organization.
+   *
+   * Regions are considered for snapshot propagation if:
+   * - they are organization regions
+   * - they are shared regions with quotas allocated for the organization
+   *
+   * @param organizationId - The ID of the organization.
+   * @returns The regions for snapshot propagation.
+   */
+  async getRegionsForSnapshotPropagation(organizationId: string): Promise<Region[]> {
+    return await this.regionRepository
+      .createQueryBuilder('region')
+      .where('region.organizationId = :organizationId', { organizationId })
+      .orWhere(
+        'region.organizationId IS NULL AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq.regionId = region.id AND rq.organizationId = :organizationId)',
+        { organizationId },
+      )
+      .getMany()
   }
 
   @OnEvent(OrganizationEvents.SUSPENDED_SNAPSHOT_DEACTIVATED)

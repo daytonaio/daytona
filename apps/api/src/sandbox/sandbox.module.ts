@@ -47,6 +47,7 @@ import { SshAccess } from './entities/ssh-access.entity'
 import { SandboxRepository } from './repositories/sandbox.repository'
 import { ProxyCacheInvalidationService } from './services/proxy-cache-invalidation.service'
 import { RegionModule } from '../region/region.module'
+import { Region } from '../region/entities/region.entity'
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { RegionModule } from '../region/region.module'
       WarmPool,
       Volume,
       SshAccess,
+      Region,
     ]),
   ],
   controllers: [
