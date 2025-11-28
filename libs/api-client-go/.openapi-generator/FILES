@@ -114,6 +114,8 @@ model_pty_list_response.go
 model_pty_resize_request.go
 model_pty_session_info.go
 model_range.go
+model_rate_limit_config.go
+model_rate_limit_entry.go
 model_region.go
 model_region_screenshot_response.go
 model_registry_push_access_dto.go
