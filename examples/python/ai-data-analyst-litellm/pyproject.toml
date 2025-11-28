@@ -1,0 +1,13 @@
+[project]
+name = "ai-data-analyst"
+version = "0.1.0"
+description = "Daytona + LiteLLM data analyst example in Python"
+requires-python = ">=3.10,<4.0"
+
+dependencies = [
+  "litellm",
+  "daytona",
+]
+
+[tool.setuptools]
+py-modules = []
