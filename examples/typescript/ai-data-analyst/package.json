@@ -1,0 +1,19 @@
+{
+  "name": "ai-data-analyst",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@daytonaio/sdk": "^0.119.0",
+    "openai": "^6.9.1"
+  }
+}
