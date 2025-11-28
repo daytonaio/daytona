@@ -7332,9 +7332,36 @@ components:
         - clientId
         - issuer
       type: object
+    RateLimitEntry:
+      properties:
+        ttl:
+          description: Rate limit TTL in seconds
+          example: 60
+          type: number
+        limit:
+          description: Rate limit max requests
+          example: 100
+          type: number
+      type: object
+    RateLimitConfig:
+      properties:
+        authenticated:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Authenticated rate limit
+        sandboxCreate:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Sandbox create rate limit
+        sandboxLifecycle:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Sandbox lifecycle rate limit
+      type: object
     DaytonaConfiguration:
       example:
         dashboardUrl: https://dashboard.example.com
+        rateLimit: ''
         sshGatewayPublicKey: ssh-gateway-public-key
         billingApiUrl: https://billing.example.com
         linkedAccountsEnabled: true
@@ -7423,6 +7450,10 @@ components:
           description: Base64 encoded SSH Gateway public key
           example: ssh-gateway-public-key
           type: string
+        rateLimit:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitConfig'
+          description: Rate limit configuration
       required:
         - announcements
         - dashboardUrl
