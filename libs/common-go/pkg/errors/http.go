@@ -129,3 +129,21 @@ func NewBadRequestError(err error) error {
 func IsBadRequestError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "bad request")
 }
+
+type RequestTimeoutError struct {
+	Message string
+}
+
+func (e *RequestTimeoutError) Error() string {
+	return e.Message
+}
+
+func NewRequestTimeoutError(err error) error {
+	return &RequestTimeoutError{
+		Message: fmt.Sprintf("request timeout: %s", err.Error()),
+	}
+}
+
+func IsRequestTimeoutError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "request timeout")
+}
