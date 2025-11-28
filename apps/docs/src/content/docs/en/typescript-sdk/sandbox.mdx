@@ -410,6 +410,30 @@ console.log(`Sandbox working directory: ${workDir}`);
 
 ***
 
+#### refreshActivity()
+
+```ts
+refreshActivity(): Promise<void>
+```
+
+Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
+
+This method updates the sandbox's last activity timestamp without changing its state.
+It is useful for keeping long-running sessions alive while there is still user activity.
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// Keep sandbox activity alive
+await sandbox.refreshActivity();
+```
+
+***
+
 #### refreshData()
 
 ```ts
