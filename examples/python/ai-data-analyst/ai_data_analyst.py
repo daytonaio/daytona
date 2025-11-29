@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+import base64
 
 from daytona import CreateSandboxFromSnapshotParams, Daytona
 from openai import OpenAI
@@ -31,7 +32,7 @@ def main() -> None:
             csv_sample = "".join(f.readlines()[:3]).strip()
 
         # Define the user prompt
-        user_prompt = "Give the three highest revenue products for the month of January."
+        user_prompt = "Give the three highest revenue products for the month of January and show them as a bar chart."
         print("Prompt:", user_prompt)
 
         system_prompt = (
@@ -61,6 +62,16 @@ def main() -> None:
         print("Running code...")
         code = extract_python(first_message.content or "")
         exec_result = sandbox.process.code_run(code)
+
+        artifacts = getattr(exec_result, "artifacts", None)
+        charts = getattr(artifacts, "charts", None) if artifacts is not None else None
+        if charts:
+            for index, chart in enumerate(charts):
+                png_data = chart.get("png") if isinstance(chart, dict) else getattr(chart, "png", None)
+                if png_data:
+                    filename = f"chart-{index}.png"
+                    Path(filename).write_bytes(base64.b64decode(png_data))
+                    print(f"✓ Chart saved to {filename}")
 
         messages.append(
             {

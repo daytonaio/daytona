@@ -22,7 +22,7 @@ async function run() {
     await sb.fs.uploadFile('cafe_sales_data.csv', 'cafe_sales_data.csv')
 
     // Define the user prompt
-    const userPrompt = `Give the three highest revenue products for the month of January.`
+    const userPrompt = `Give the three highest revenue products for the month of January and show them as a bar chart.`
     console.log("Prompt:", userPrompt)
 
     // Generate the system prompt with the first few rows of data for context
@@ -51,6 +51,16 @@ ${csvSample}
     const code = extractPython(llmOutput.choices[0].message.content || '')
     const exec = await sb.process.codeRun(code)
     messages.push({ role: 'user', content: `Code execution result:\n${exec.result}.` })
+
+    if (exec.artifacts?.charts) {
+      exec.artifacts.charts.forEach((chart: { png?: string }, index: number) => {
+        if (chart.png) {
+          const filename = `chart-${index}.png`
+          fs.writeFileSync(filename, chart.png, { encoding: 'base64' })
+          console.log(`✓ Chart saved to ${filename}`)
+        }
+      })
+    }
 
     // Generate the final response with the LLM
     const summaryOutput = await openai.chat.completions.create({
