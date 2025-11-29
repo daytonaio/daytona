@@ -8,7 +8,7 @@ function extractPython(text: string): string {
   return m ? m[1].trim() : ''
 }
 
-// Make sure you have the DAYTONA_API_KEY and OPENAI_API_KEY environment variables set
+// Make sure you have the DAYTONA_API_KEY environment variable set
 const dt = new Daytona()
 
 async function run() {
@@ -39,8 +39,14 @@ ${csvSample}
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ]
+    // OpenRouter supports a variety of model providers
+    // Make sure to have the right environment variables set
     const llmOutput = await completion({
-      model: 'gpt-5.1',
+      //model: "openai/gpt-5.1",
+      //model: "mistral/mistral-large-latest",
+      //model: "deepseek/deepseek-chat",
+      //model: "openrouter/moonshotai/kimi-k2",
+      model: "anthropic/claude-sonnet-4-0",
       // Relax typing for this example; LiteLLM will accept OpenAI-format messages
       messages: messages as any,
     })
@@ -68,7 +74,11 @@ ${csvSample}
 
     // Generate the final response with the LLM via LiteLLM
     const summaryOutput = await completion({
-      model: 'gpt-4o',
+      //model: "openai/gpt-4o",
+      //model: "mistral/mistral-small-latest",
+      //model: "deepseek/deepseek-chat",
+      //model: "openrouter/moonshotai/kimi-k2",
+      model: "anthropic/claude-haiku-4-5",
       messages: messages as any,
     })
     console.log('Response:', summaryOutput.choices[0].message.content)

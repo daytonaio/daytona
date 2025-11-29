@@ -12,7 +12,7 @@ def extract_python(text: str) -> str:
     return match.group(1).strip() if match else ""
 
 
-# Make sure you have the DAYTONA_API_KEY and OPENAI_API_KEY environment variables set
+# Make sure you have the DAYTONA_API_KEY environment variable set
 def main() -> None:
     daytona = Daytona()
     sandbox = None
@@ -49,8 +49,14 @@ def main() -> None:
             {"role": "user", "content": user_prompt},
         ]
 
+        # OpenRouter supports a variety of model providers
+        # Make sure to have the right environment variables set
         llm_output = completion(
-            model="gpt-5.1",
+            #model="openai/gpt-5.1",
+            #model="mistral/mistral-large-latest",
+            #model="deepseek/deepseek-chat",
+            #model="openrouter/moonshotai/kimi-k2",
+            model="anthropic/claude-sonnet-4-0",
             messages=messages,
         )
 
@@ -81,7 +87,11 @@ def main() -> None:
 
         # Generate the final response with the LLM
         summary = completion(
-            model="gpt-4o",
+            #model="openai/gpt-4o",
+            #model="mistral/mistral-small-latest",
+            #model="deepseek/deepseek-chat",
+            #model="openrouter/moonshotai/kimi-k2",
+            model="anthropic/claude-haiku-4-5",
             messages=messages,
         )
 
