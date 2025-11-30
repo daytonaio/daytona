@@ -71,6 +71,9 @@ definitions:
         $ref: '#/definitions/RegistryDTO'
       snapshot:
         type: string
+      storageExpansionQuota:
+        description: Tracks additional storage added through recovery
+        type: integer
       storageQuota:
         minimum: 1
         type: integer
@@ -127,6 +130,12 @@ definitions:
         type: string
     required:
       - snapshot
+    type: object
+  RecoverExpandStorageDTO:
+    properties:
+      storageQuota:
+        minimum: 1
+        type: integer
     type: object
   RegistryDTO:
     properties:
@@ -613,6 +622,52 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Update sandbox network settings
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/recover-expand-storage:
+    post:
+      description: Recover sandbox from storage limit by expanding storage quota
+      operationId: RecoverExpandStorage
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Recovery parameters
+          in: body
+          name: recovery
+          required: true
+          schema:
+            $ref: '#/definitions/RecoverExpandStorageDTO'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox storage recovered
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Recover sandbox from storage limit
       tags:
         - sandbox
   /sandboxes/{sandboxId}/resize:

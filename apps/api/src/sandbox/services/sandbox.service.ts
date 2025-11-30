@@ -67,6 +67,7 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { detectRecoveryType, RecoveryType } from '../utils/recovery-error.util'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -1094,6 +1095,69 @@ export class SandboxService {
       this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
     }
     return sandbox
+  }
+
+  async recover(sandboxId: string, organization: Organization): Promise<Sandbox> {
+    const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    if (sandbox.state !== SandboxState.ERROR) {
+      throw new BadRequestError('Sandbox must be in error state to recover')
+    }
+
+    if (sandbox.pending) {
+      throw new SandboxError('Sandbox state change in progress')
+    }
+
+    // Use centralized recovery detection
+    const recoveryType = detectRecoveryType(sandbox.errorReason)
+
+    if (!recoveryType) {
+      throw new BadRequestError('This error is not recoverable. Please check logs or contact support.')
+    }
+
+    // Execute recovery based on type
+    switch (recoveryType) {
+      case RecoveryType.STORAGE_EXPANSION:
+        await this.recoverExpandStorage(sandboxId)
+        break
+      default:
+        throw new Error(`Unknown recovery type: ${recoveryType}`)
+    }
+
+    // Clear error state
+    sandbox.state = SandboxState.STOPPED
+    sandbox.desiredState = SandboxDesiredState.STOPPED
+    sandbox.errorReason = null
+    await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
+
+    // Now that sandbox is in STOPPED state, use the normal start flow
+    // This handles quota validation, pending usage, event emission, etc.
+    return await this.start(sandbox.id, organization)
+  }
+
+  private async recoverExpandStorage(sandboxId: string): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
+    }
+    const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
+    }
+
+    const originalDiskGB = sandbox.disk
+
+    this.logger.log(`Expanding storage for sandbox ${sandboxId}: original=${originalDiskGB}GB`)
+
+    // Call runner to expand storage (runner leaves container in STOPPED state)
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    await runnerAdapter.recoverExpandStorage(sandboxId, originalDiskGB)
   }
 
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
