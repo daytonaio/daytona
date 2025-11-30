@@ -66,7 +66,7 @@ Download the file and save it as `dataset.csv` in your project directory.
 
 #### 2.2 Initialize Sandbox
 
-Now create a Daytona sandbox and upload your dataset:
+Now create a [Daytona sandbox](/docs/en/sandbox-management/#basic-sandbox-creation) and upload your dataset:
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -79,7 +79,7 @@ Now create a Daytona sandbox and upload your dataset:
 
     # Create sandbox
 
-    daytona = Daytona()
+    daytona = Daytona() # The sandbox language is Python by default.
     sandbox = daytona.create()
 
     # Upload the dataset to the sandbox
@@ -95,7 +95,7 @@ Now create a Daytona sandbox and upload your dataset:
     import { Daytona } from '@daytonaio/sdk';
 
     // Create sandbox
-    const daytona = new Daytona();
+    const daytona = new Daytona(); // The sandbox language is Python by default.
     const sandbox = await daytona.create()
 
     // Upload the dataset to the sandbox

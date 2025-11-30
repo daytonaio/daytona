@@ -80,6 +80,8 @@ export interface DaytonaConfig {
 
 /**
  * Supported programming languages for code execution
+ *
+ * Python is used as the default sandbox language when no language is explicitly specified.
  */
 export enum CodeLanguage {
   PYTHON = 'python',
@@ -119,7 +121,7 @@ export interface Resources {
  *
  * @interface
  * @property {string} [user] - Optional os user to use for the Sandbox
- * @property {CodeLanguage | string} [language] - Programming language for direct code execution
+ * @property {CodeLanguage | string} [language] - Programming language for direct code execution. Defaults to "python" if not specified.
  * @property {Record<string, string>} [envVars] - Optional environment variables to set in the Sandbox
  * @property {Record<string, string>} [labels] - Sandbox labels
  * @property {boolean} [public] - Is the Sandbox port preview public
