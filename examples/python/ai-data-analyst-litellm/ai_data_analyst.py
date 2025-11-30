@@ -49,7 +49,7 @@ def main() -> None:
             {"role": "user", "content": user_prompt},
         ]
 
-        # OpenRouter supports a variety of model providers
+        # LiteLLM supports a variety of model providers
         # Make sure to have the right environment variables set
         llm_output = completion(
             #model="openai/gpt-5.1",

@@ -39,7 +39,7 @@ ${csvSample}
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ]
-    // OpenRouter supports a variety of model providers
+    // LiteLLM supports a variety of model providers
     // Make sure to have the right environment variables set
     const llmOutput = await completion({
       //model: "openai/gpt-5.1",
@@ -47,7 +47,6 @@ ${csvSample}
       //model: "deepseek/deepseek-chat",
       //model: "openrouter/moonshotai/kimi-k2",
       model: "anthropic/claude-sonnet-4-0",
-      // Relax typing for this example; LiteLLM will accept OpenAI-format messages
       messages: messages as any,
     })
 
