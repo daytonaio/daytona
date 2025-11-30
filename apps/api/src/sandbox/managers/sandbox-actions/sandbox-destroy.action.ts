@@ -6,7 +6,7 @@
 import { Injectable } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
+import { DONT_SYNC_AGAIN, SandboxAction, SyncState } from './sandbox.action'
 import { RunnerState } from '../../enums/runner-state.enum'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
@@ -27,8 +27,8 @@ export class SandboxDestroyAction extends SandboxAction {
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
-    if (sandbox.state === SandboxState.ARCHIVED) {
-      await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED, lockCode)
+    // Only return early if already destroyed; allow ARCHIVED sandboxes to be destroyed
+    if (sandbox.state === SandboxState.DESTROYED) {
       return DONT_SYNC_AGAIN
     }
 
@@ -39,44 +39,17 @@ export class SandboxDestroyAction extends SandboxAction {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    switch (sandbox.state) {
-      case SandboxState.DESTROYED:
-        return DONT_SYNC_AGAIN
-      case SandboxState.DESTROYING: {
-        // check if sandbox is destroyed
-        try {
-          const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-          if (sandboxInfo.state === SandboxState.DESTROYED || sandboxInfo.state === SandboxState.ERROR) {
-            await runnerAdapter.removeDestroyedSandbox(sandbox.id)
-          }
-        } catch (e) {
-          //  if the sandbox is not found on runner, it is already destroyed
-          if (e.response?.status !== 404) {
-            throw e
-          }
-        }
-
-        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED, lockCode)
-        return DONT_SYNC_AGAIN
-      }
-      default: {
-        // destroy sandbox
-        try {
-          const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-          if (sandboxInfo?.state === SandboxState.DESTROYED) {
-            await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING, lockCode)
-            return SYNC_AGAIN
-          }
-          await runnerAdapter.destroySandbox(sandbox.id)
-        } catch (e) {
-          //  if the sandbox is not found on runner, it is already destroyed
-          if (e.response?.status !== 404) {
-            throw e
-          }
-        }
-        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING, lockCode)
-        return SYNC_AGAIN
+    try {
+      await runnerAdapter.destroySandbox(sandbox.id)
+    } catch (error) {
+      //  log errors other than sandbox not found
+      if (error.response?.status !== 404) {
+        this.logger.error(`Failed to destroy sandbox ${sandbox.id} on runner ${runner.id}:`, error)
+        throw error
       }
     }
+
+    await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED, lockCode)
+    return DONT_SYNC_AGAIN
   }
 }

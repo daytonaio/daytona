@@ -11,10 +11,8 @@ import (
 	"strings"
 
 	"github.com/daytonaio/common-go/pkg/timer"
-	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
-	"github.com/daytonaio/runner/pkg/models/enums"
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
@@ -44,13 +42,6 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	}
 
 	log.Infof("Pulling image %s...", imageName)
-
-	sandboxIdValue := ctx.Value(constants.ID_KEY)
-
-	if sandboxIdValue != nil {
-		sandboxId := sandboxIdValue.(string)
-		d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStatePullingSnapshot)
-	}
 
 	responseBody, err := d.apiClient.ImagePull(ctx, imageName, image.PullOptions{
 		RegistryAuth: getRegistryAuth(reg),
