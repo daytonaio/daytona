@@ -18,6 +18,7 @@ import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { RedisLockProvider } from '../common/redis-lock.provider'
 
 @Injectable()
 export class VolumeService {
@@ -29,6 +30,7 @@ export class VolumeService {
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly configService: TypedConfigService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -248,7 +250,11 @@ export class VolumeService {
       const volumes = await this.volumeRepository.find({ where: { id: In(volumeIds) } })
 
       const results = await Promise.allSettled(
-        volumes.map((volume) => {
+        volumes.map(async (volume) => {
+          // Update once per minute at most
+          if (!(await this.redisLockProvider.lock(`volume:${volume.id}:update-last-used`, 60))) {
+            return
+          }
           volume.lastUsedAt = event.sandbox.createdAt
           return this.volumeRepository.save(volume)
         }),
