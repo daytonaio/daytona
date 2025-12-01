@@ -6,7 +6,7 @@ package docker
 import (
 	"context"
 
-	"github.com/containerd/errdefs"
+	cerrdefs "github.com/containerd/containerd/errdefs"
 	"github.com/docker/docker/api/types/image"
 
 	log "github.com/sirupsen/logrus"
@@ -18,7 +18,7 @@ func (d *DockerClient) RemoveImage(ctx context.Context, imageName string, force 
 		PruneChildren: true,
 	})
 	if err != nil {
-		if errdefs.IsNotFound(err) {
+		if cerrdefs.IsNotFound(err) {
 			log.Infof("Image %s already removed and not found", imageName)
 			return nil
 		}
