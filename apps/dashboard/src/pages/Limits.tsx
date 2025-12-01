@@ -63,9 +63,11 @@ export default function Limits() {
 
   useEffect(() => {
     if (usageOverview && usageOverview.regionUsage.length > 0 && !selectedRegionId) {
-      setSelectedRegionId(usageOverview.regionUsage[0].regionId)
+      const regionIds = usageOverview.regionUsage.map((usage) => usage.regionId)
+      const regionId = regionIds.find((regionId) => regionId === selectedOrganization?.defaultRegionId) || regionIds[0]
+      setSelectedRegionId(regionId)
     }
-  }, [usageOverview, selectedRegionId])
+  }, [usageOverview, selectedOrganization?.defaultRegionId, selectedRegionId])
 
   const githubConnected = useMemo(() => {
     if (!user?.profile?.identities) {
