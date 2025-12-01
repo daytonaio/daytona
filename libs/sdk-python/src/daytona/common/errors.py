@@ -12,3 +12,7 @@ class DaytonaNotFoundError(DaytonaError):
 
 class DaytonaRateLimitError(DaytonaError):
     """Error for when rate limit is exceeded."""
+
+
+class DaytonaTimeoutError(DaytonaError):
+    """Error for when a timeout occurs."""

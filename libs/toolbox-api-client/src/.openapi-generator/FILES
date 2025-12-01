@@ -5,6 +5,7 @@ api/computer-use-api.ts
 api/file-system-api.ts
 api/git-api.ts
 api/info-api.ts
+api/interpreter-api.ts
 api/lsp-api.ts
 api/port-api.ts
 api/process-api.ts
@@ -20,6 +21,7 @@ models/completion-list.ts
 models/computer-use-start-response.ts
 models/computer-use-status-response.ts
 models/computer-use-stop-response.ts
+models/create-context-request.ts
 models/create-session-request.ts
 models/display-info-response.ts
 models/display-info.ts
@@ -39,11 +41,13 @@ models/git-git-delete-branch-request.ts
 models/git-repo-request.ts
 models/git-status.ts
 models/index.ts
+models/interpreter-context.ts
 models/is-port-in-use-response.ts
 models/keyboard-hotkey-request.ts
 models/keyboard-press-request.ts
 models/keyboard-type-request.ts
 models/list-branch-response.ts
+models/list-contexts-response.ts
 models/lsp-completion-params.ts
 models/lsp-document-request.ts
 models/lsp-location.ts

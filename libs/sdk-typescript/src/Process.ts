@@ -18,10 +18,9 @@ import { ExecuteResponse } from './types/ExecuteResponse'
 import { ArtifactParser } from './utils/ArtifactParser'
 import { stdDemuxStream } from './utils/Stream'
 import { Buffer } from 'buffer'
-import WebSocket from 'isomorphic-ws'
-import { RUNTIME, Runtime } from './utils/Runtime'
 import { PtyHandle } from './PtyHandle'
 import { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
+import { createSandboxWebSocket } from './utils/WebSocket'
 
 // 3-byte multiplexing markers inserted by the shell labelers
 export const STDOUT_PREFIX_BYTES = new Uint8Array([0x01, 0x01, 0x01])
@@ -380,7 +379,7 @@ export class Process {
     await this.ensureToolboxUrl()
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
 
-    const ws = await createWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
+    const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
 
     await stdDemuxStream(ws, onStdout, onStderr)
   }
@@ -512,7 +511,7 @@ export class Process {
     await this.ensureToolboxUrl()
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/pty/${sessionId}/connect`
 
-    const ws = await createWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
+    const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
 
     const handle = new PtyHandle(
       ws,
@@ -770,20 +769,4 @@ function findSubarray(haystack: Uint8Array, needle: Uint8Array, fromIndex = 0): 
     if (j === needle.length) return i
   }
   return -1
-}
-
-async function createWebSocket(
-  url: string,
-  headers: Record<string, string>,
-  getPreviewToken: () => Promise<string>,
-): Promise<WebSocket> {
-  if (RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.DENO || RUNTIME === Runtime.SERVERLESS) {
-    const previewToken = await getPreviewToken()
-    return new WebSocket(
-      url + '&DAYTONA_SANDBOX_AUTH_KEY=' + previewToken,
-      `X-Daytona-SDK-Version~${headers['X-Daytona-SDK-Version']}`,
-    )
-  } else {
-    return new WebSocket(url, { headers })
-  }
 }
