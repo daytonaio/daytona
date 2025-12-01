@@ -281,7 +281,11 @@ export class SnapshotService {
         where: { snapshotRef: buildSnapshotRef },
       })
 
-      if (existingBuildInfo) {
+      if (
+        existingBuildInfo &&
+        // Update lastUsed once per minute at most
+        (await this.redisLockProvider.lock(`build-info:${existingBuildInfo.snapshotRef}:update`, 60))
+      ) {
         snapshot.buildInfo = existingBuildInfo
         existingBuildInfo.lastUsedAt = new Date()
         await this.buildInfoRepository.save(existingBuildInfo)
@@ -495,6 +499,11 @@ export class SnapshotService {
   @OnEvent(SandboxEvents.CREATED)
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     if (!event.sandbox.snapshot) {
+      return
+    }
+
+    // Update once per minute at most
+    if (!(await this.redisLockProvider.lock(`snapshot:${event.sandbox.snapshot}:update-last-used`, 60))) {
       return
     }
 
