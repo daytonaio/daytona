@@ -15,13 +15,19 @@
 /**
  *
  * @export
- * @interface FileDownloadRequest
+ * @interface CreateContextRequest
  */
-export interface FileDownloadRequest {
+export interface CreateContextRequest {
   /**
    *
-   * @type {Array<string>}
-   * @memberof FileDownloadRequest
+   * @type {string}
+   * @memberof CreateContextRequest
    */
-  paths: Array<string>
+  cwd?: string
+  /**
+   *
+   * @type {string}
+   * @memberof CreateContextRequest
+   */
+  language?: string
 }

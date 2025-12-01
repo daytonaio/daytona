@@ -1,4 +1,4 @@
-import { Daytona, Sandbox, Image } from '@daytonaio/sdk'
+import { Daytona, Sandbox, Image, DaytonaTimeoutError, ExecutionError, OutputMessage } from '@daytonaio/sdk'
 
 async function basicExec(sandbox: Sandbox) {
   //  run some typescript code directly
@@ -75,6 +75,90 @@ async function sessionExecLogsAsync(sandbox: Sandbox) {
   )
 }
 
+async function statefulCodeInterpreter(sandbox: Sandbox) {
+  const logStdout = (msg: OutputMessage) => process.stdout.write(`[STDOUT] ${msg.output}`)
+  const logStderr = (msg: OutputMessage) => process.stdout.write(`[STDERR] ${msg.output}`)
+  const logError = (err: ExecutionError) => {
+    process.stdout.write(`[ERROR] ${err.name}: ${err.value}\n`)
+    if (err.traceback) {
+      process.stdout.write(`${err.traceback}\n`)
+    }
+  }
+
+  console.log('\n' + '='.repeat(60))
+  console.log('Stateful Code Interpreter')
+  console.log('='.repeat(60))
+  const baseline = await sandbox.codeInterpreter.runCode(`counter = 1
+print(f'Initialized counter = {counter}')`)
+  process.stdout.write(`[STDOUT] ${baseline.stdout}`)
+
+  await sandbox.codeInterpreter.runCode(
+    `counter += 1
+print(f'Counter after second call = {counter}')`,
+    {
+      onStdout: logStdout,
+      onStderr: logStderr,
+      onError: logError,
+    },
+  )
+
+  console.log('\n' + '='.repeat(60))
+  console.log('Context isolation')
+  console.log('='.repeat(60))
+  const ctx = await sandbox.codeInterpreter.createContext()
+  try {
+    await sandbox.codeInterpreter.runCode(
+      `value = 'stored in isolated context'
+print(f'Isolated context value: {value}')`,
+      {
+        context: ctx,
+        onStdout: logStdout,
+        onStderr: logStderr,
+        onError: logError,
+      },
+    )
+
+    console.log('--- Print value from same context ---')
+    const ctxResult = await sandbox.codeInterpreter.runCode("print(f'Value still available: {value}')", {
+      context: ctx,
+    })
+    process.stdout.write(`[STDOUT] ${ctxResult.stdout}`)
+
+    console.log('--- Print value from different context ---')
+    await sandbox.codeInterpreter.runCode('print(value)', {
+      onStdout: logStdout,
+      onStderr: logStderr,
+      onError: logError,
+    })
+  } finally {
+    await sandbox.codeInterpreter.deleteContext(ctx)
+  }
+
+  console.log('\n' + '='.repeat(60))
+  console.log('Timeout handling')
+  console.log('='.repeat(60))
+  try {
+    await sandbox.codeInterpreter.runCode(
+      `import time
+print('Starting long running task...')
+time.sleep(5)
+print('Finished!')`,
+      {
+        timeout: 1,
+        onStdout: logStdout,
+        onStderr: logStderr,
+        onError: logError,
+      },
+    )
+  } catch (error) {
+    if (error instanceof DaytonaTimeoutError) {
+      console.log(`Timed out as expected: ${error.message}`)
+    } else {
+      throw error
+    }
+  }
+}
+
 async function main() {
   const daytona = new Daytona()
 
@@ -82,7 +166,9 @@ async function main() {
   const sandbox = await daytona.create(
     {
       image: Image.base('ubuntu:22.04').runCommands(
-        'apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils',
+        'apt-get update',
+        'apt-get install -y --no-install-recommends python3 python3-pip python3-venv',
+        'apt-get install -y --no-install-recommends nodejs npm coreutils',
         'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -',
         'apt-get install -y nodejs',
         'npm install -g ts-node typescript',
@@ -93,6 +179,7 @@ async function main() {
       autoDeleteInterval: 120,
     },
     {
+      timeout: 200,
       onSnapshotCreateLogs: console.log,
     },
   )
@@ -101,6 +188,7 @@ async function main() {
     await basicExec(sandbox)
     await sessionExec(sandbox)
     await sessionExecLogsAsync(sandbox)
+    await statefulCodeInterpreter(sandbox)
   } catch (error) {
     console.error('Error executing commands:', error)
   } finally {

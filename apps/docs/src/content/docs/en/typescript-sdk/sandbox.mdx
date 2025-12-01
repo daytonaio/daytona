@@ -52,6 +52,8 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.buildInfo
     ```
+- `codeInterpreter` _CodeInterpreter_ - Stateful interpreter interface for executing code.
+    Currently supports only Python. For other languages, use the `process.codeRun` method.
 - `computerUse` _ComputerUse_ - Computer use operations interface for desktop automation
 - `cpu` _number_ - Number of CPUs allocated to the Sandbox
     

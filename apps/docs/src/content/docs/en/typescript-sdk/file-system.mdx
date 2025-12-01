@@ -513,7 +513,7 @@ Represents metadata for a file download operation.
 
 - `destination?` _string_ - Destination path in the local filesystem where the file content will be streamed to.
 - `error?` _string_ - Error message if the download failed, undefined if successful.
-- `result?` _string \| Uint8Array\<ArrayBufferLike\> \| Buffer\<ArrayBufferLike\>_ - The download result - file path (if destination provided in the request)
+- `result?` _string \| Buffer\<ArrayBufferLike\> \| Uint8Array\<ArrayBufferLike\>_ - The download result - file path (if destination provided in the request)
     or bytes content (if no destination in the request), undefined if failed or no data received.
 ## FileDownloadRequest
 

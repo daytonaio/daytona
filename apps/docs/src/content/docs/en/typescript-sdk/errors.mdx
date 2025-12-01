@@ -16,6 +16,7 @@ Base error for Daytona SDK.
 
 - `DaytonaNotFoundError`
 - `DaytonaRateLimitError`
+- `DaytonaTimeoutError`
 
 ### Constructors
 
@@ -149,4 +150,52 @@ new DaytonaRateLimitError(message?: string, options?: ErrorOptions): DaytonaRate
 **Returns**:
 
 - `DaytonaRateLimitError`
+
+***
+
+
+## DaytonaTimeoutError
+
+Error thrown when a timeout occurs.
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaTimeoutError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaTimeoutError(message?: string): DaytonaTimeoutError
+```
+
+**Parameters**:
+
+- `message?` _string_
+
+
+**Returns**:
+
+- `DaytonaTimeoutError`
+
+#### new DaytonaTimeoutError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaTimeoutError(message?: string, options?: ErrorOptions): DaytonaTimeoutError
+```
+
+**Parameters**:
+
+- `message?` _string_
+- `options?` _ErrorOptions_
+
+
+**Returns**:
+
+- `DaytonaTimeoutError`
 

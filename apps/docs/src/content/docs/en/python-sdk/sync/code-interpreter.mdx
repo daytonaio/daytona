@@ -1,0 +1,254 @@
+---
+title: "CodeInterpreter"
+hideTitleOnPage: true
+---
+
+## CodeInterpreter
+
+```python
+class CodeInterpreter()
+```
+
+Handles code interpretation and execution within a Sandbox. Currently supports only Python.
+
+This class provides methods to execute code in isolated interpreter contexts,
+manage contexts, and stream execution output via callbacks. If subsequent code executions
+are performed in the same context, the variables, imports, and functions defined in
+the previous execution will be available.
+
+For other languages, use the `code_run` method from the `Process` interface,
+or execute the appropriate command directly in the sandbox terminal.
+
+#### CodeInterpreter.\_\_init\_\_
+
+```python
+def __init__(api_client: InterpreterApi, ensure_toolbox_url: Callable[[],
+                                                                      None])
+```
+
+Initialize a new CodeInterpreter instance.
+
+**Arguments**:
+
+- `api_client` - API client for interpreter operations.
+- `ensure_toolbox_url` - Ensures the toolbox API URL is initialized.
+
+#### CodeInterpreter.run\_code
+
+```python
+@intercept_errors(message_prefix="Failed to run code: ")
+def run_code(code: str,
+             *,
+             context: Optional[InterpreterContext] = None,
+             on_stdout: Optional[OutputHandler[OutputMessage]] = None,
+             on_stderr: Optional[OutputHandler[OutputMessage]] = None,
+             on_error: Optional[OutputHandler[ExecutionError]] = None,
+             envs: Optional[Dict[str, str]] = None,
+             timeout: Optional[int] = None) -> ExecutionResult
+```
+
+Execute Python code in the sandbox.
+
+By default, code runs in the default shared context which persists variables,
+imports, and functions across executions. To run in an isolated context,
+create a new context with `create_context()` and pass it as `context` argument.
+
+**Arguments**:
+
+- `code` _str_ - Code to execute.
+- `context` _Optional[InterpreterContext]_ - Context to run code in. If not provided, uses default context.
+- `on_stdout` _Optional[OutputHandler[OutputMessage]]_ - Callback for stdout messages.
+- `on_stderr` _Optional[OutputHandler[OutputMessage]]_ - Callback for stderr messages.
+- `on_error` _Optional[OutputHandler[ExecutionError]]_ - Callback for execution errors
+  (e.g., syntax errors, runtime errors).
+- `envs` _Optional[Dict[str, str]]_ - Environment variables for this execution.
+- `timeout` _Optional[int]_ - Timeout in seconds. 0 means no timeout. Default is 10 minutes.
+  
+
+**Returns**:
+
+- `ExecutionResult` - Result object containing stdout, stderr and error if any.
+  
+
+**Raises**:
+
+- `DaytonaTimeoutError` - If execution times out.
+- `DaytonaError` - If execution fails due to communication or other SDK errors.
+  
+
+**Examples**:
+
+```python
+def handle_stdout(msg: OutputMessage):
+    print(f"STDOUT: {msg.output}", end="")
+
+def handle_stderr(msg: OutputMessage):
+    print(f"STDERR: {msg.output}", end="")
+
+def handle_error(err: ExecutionError):
+    print(f"ERROR: {err.name}: {err.value}")
+
+code = '''
+import sys
+import time
+for i in range(5):
+    print(i)
+    time.sleep(1)
+sys.stderr.write("Counting done!")
+'''
+result = sandbox.code_interpreter.run_code(
+    code=code,
+    on_stdout=handle_stdout,
+    on_stderr=handle_stderr,
+    on_error=handle_error,
+    timeout=10
+)
+```
+
+#### CodeInterpreter.create\_context
+
+```python
+@intercept_errors(message_prefix="Failed to create interpreter context: ")
+def create_context(cwd: Optional[str] = None) -> InterpreterContext
+```
+
+Create a new isolated interpreter context.
+
+Contexts provide isolated execution environments with their own global namespace.
+Variables, imports, and functions defined in one context don't affect others.
+
+**Arguments**:
+
+- `cwd` _Optional[str]_ - Working directory for the context. If not specified, uses sandbox working directory.
+  
+
+**Returns**:
+
+- `InterpreterContext` - The created context with its ID and metadata.
+  
+
+**Raises**:
+
+- `DaytonaError` - If context creation fails.
+  
+
+**Examples**:
+
+```python
+# Create isolated context
+ctx = sandbox.code_interpreter.create_context()
+
+# Execute code in this context
+sandbox.code_interpreter.run_code("x = 100", context=ctx)
+
+# Variable only exists in this context
+result = sandbox.code_interpreter.run_code("print(x)", context=ctx)  # OK
+
+# Won't see the variable in default context
+result = sandbox.code_interpreter.run_code("print(x)")  # NameError
+
+# Clean up
+sandbox.code_interpreter.delete_context(ctx)
+```
+
+#### CodeInterpreter.list\_contexts
+
+```python
+@intercept_errors(message_prefix="Failed to list interpreter contexts: ")
+def list_contexts() -> List[InterpreterContext]
+```
+
+List all user-created interpreter contexts.
+
+The default context is not included in this list. Only contexts created
+via `create_context()` are returned.
+
+**Returns**:
+
+- `List[InterpreterContext]` - List of context objects.
+  
+
+**Raises**:
+
+- `DaytonaError` - If listing fails.
+  
+
+**Examples**:
+
+```python
+contexts = sandbox.code_interpreter.list_contexts()
+for ctx in contexts:
+    print(f"Context {ctx.id}: {ctx.language} at {ctx.cwd}")
+```
+
+#### CodeInterpreter.delete\_context
+
+```python
+@intercept_errors(message_prefix="Failed to delete interpreter context: ")
+def delete_context(context: InterpreterContext) -> None
+```
+
+Delete an interpreter context and shut down all associated processes.
+
+This permanently removes the context and all its state (variables, imports, etc.).
+The default context cannot be deleted.
+
+**Arguments**:
+
+- `context` _InterpreterContext_ - Context to delete.
+  
+
+**Raises**:
+
+- `DaytonaError` - If deletion fails or context not found.
+  
+
+**Examples**:
+
+```python
+ctx = sandbox.code_interpreter.create_context()
+# ... use context ...
+sandbox.code_interpreter.delete_context(ctx)
+```
+
+
+## OutputMessage
+
+```python
+class OutputMessage(BaseModel)
+```
+
+Represents stdout or stderr output from code execution.
+
+**Attributes**:
+
+- `output` - The output content.
+
+## ExecutionError
+
+```python
+class ExecutionError(BaseModel)
+```
+
+Represents an error that occurred during code execution.
+
+**Attributes**:
+
+- `name` - The error type/class name (e.g., "ValueError", "SyntaxError").
+- `value` - The error value.
+- `traceback` - Full traceback of the error.
+
+## ExecutionResult
+
+```python
+class ExecutionResult(BaseModel)
+```
+
+Result of code execution.
+
+**Attributes**:
+
+- `stdout` - Standard output from the code execution.
+- `stderr` - Standard error output from the code execution.
+- `error` - Error details if execution failed, None otherwise.
+
