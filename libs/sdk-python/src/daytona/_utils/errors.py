@@ -48,6 +48,13 @@ def intercept_errors(
                 e, (OpenApiException, OpenApiExceptionAsync, OpenApiExceptionToolbox, OpenApiExceptionToolboxAsync)
             ):
                 msg = _get_open_api_exception_message(e)
+                status_code = getattr(e, "status", None)
+                headers = getattr(e, "headers", None) or {}
+
+                # Convert headers to dict if needed
+                if headers and hasattr(headers, "items"):
+                    headers = dict(headers.items())
+
                 if isinstance(
                     e,
                     (
@@ -57,11 +64,15 @@ def intercept_errors(
                         NotFoundExceptionToolboxAsync,
                     ),
                 ):
-                    raise DaytonaNotFoundError(f"{message_prefix}{msg}") from None
+                    raise DaytonaNotFoundError(
+                        f"{message_prefix}{msg}", status_code=status_code, headers=headers
+                    ) from None
                 # Check for rate limit (429) errors
-                if hasattr(e, "status") and e.status == 429:
-                    raise DaytonaRateLimitError(f"{message_prefix}{msg}") from None
-                raise DaytonaError(f"{message_prefix}{msg}") from None
+                if status_code == 429:
+                    raise DaytonaRateLimitError(
+                        f"{message_prefix}{msg}", status_code=status_code, headers=headers
+                    ) from None
+                raise DaytonaError(f"{message_prefix}{msg}", status_code=status_code, headers=headers) from None
 
             if isinstance(e, RuntimeError) and SESSION_IS_CLOSED_ERROR_MESSAGE in str(e):
                 raise DaytonaError(
