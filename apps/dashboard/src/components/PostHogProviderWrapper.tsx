@@ -14,7 +14,7 @@ interface PostHogProviderWrapperProps {
 export const PostHogProviderWrapper: FC<PostHogProviderWrapperProps> = ({ children }) => {
   const config = useConfig()
 
-  if (!import.meta.env.PROD || !config.posthog) {
+  if (!config.posthog) {
     return children
   }
 

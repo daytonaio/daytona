@@ -5,6 +5,7 @@
 
 import { VolumeDto, VolumesApi } from '@daytonaio/api-client'
 import { DaytonaNotFoundError } from './errors/DaytonaError'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Represents a Daytona Volume which is a shared storage volume for Sandboxes.
@@ -62,6 +63,7 @@ export class VolumeService {
    * const volume = await daytona.volume.get("volume-name", true);
    * console.log(`Volume ${volume.name} is in state ${volume.state}`);
    */
+  @WithInstrumentation()
   async get(name: string, create = false): Promise<Volume> {
     try {
       const response = await this.volumesApi.getVolumeByName(name)
@@ -86,6 +88,7 @@ export class VolumeService {
    * const volume = await daytona.volume.create("my-data-volume");
    * console.log(`Created volume ${volume.name} with ID ${volume.id}`);
    */
+  @WithInstrumentation()
   async create(name: string): Promise<Volume> {
     const response = await this.volumesApi.createVolume({ name })
     return response.data as Volume
@@ -104,6 +107,7 @@ export class VolumeService {
    * await daytona.volume.delete(volume);
    * console.log("Volume deleted successfully");
    */
+  @WithInstrumentation()
   async delete(volume: Volume): Promise<void> {
     await this.volumesApi.deleteVolume(volume.id)
   }

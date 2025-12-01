@@ -64,9 +64,11 @@ func main() {
 		panic(fmt.Errorf("failed to get current working directory: %w", err))
 	}
 
-	toolBoxServer := &toolbox.Server{
-		WorkDir: workDir,
-	}
+	toolBoxServer := toolbox.NewServer(toolbox.ServerConfig{
+		WorkDir:      workDir,
+		OtelEndpoint: c.OtelEndpoint,
+		SandboxId:    c.SandboxId,
+	})
 
 	// Start the toolbox server in a go routine
 	go func() {

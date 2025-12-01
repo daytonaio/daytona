@@ -66,7 +66,9 @@ type Organization struct {
 	SandboxCreateRateLimit NullableFloat32 `json:"sandboxCreateRateLimit"`
 	// Sandbox lifecycle rate limit per minute
 	SandboxLifecycleRateLimit NullableFloat32 `json:"sandboxLifecycleRateLimit"`
-	AdditionalProperties      map[string]interface{}
+	// Experimental configuration
+	ExperimentalConfig   map[string]interface{} `json:"experimentalConfig"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Organization Organization
@@ -75,7 +77,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, defaultRegion string, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, defaultRegion string, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, experimentalConfig map[string]interface{}) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -99,6 +101,7 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.AuthenticatedRateLimit = authenticatedRateLimit
 	this.SandboxCreateRateLimit = sandboxCreateRateLimit
 	this.SandboxLifecycleRateLimit = sandboxLifecycleRateLimit
+	this.ExperimentalConfig = experimentalConfig
 	return &this
 }
 
@@ -644,6 +647,30 @@ func (o *Organization) SetSandboxLifecycleRateLimit(v float32) {
 	o.SandboxLifecycleRateLimit.Set(&v)
 }
 
+// GetExperimentalConfig returns the ExperimentalConfig field value
+func (o *Organization) GetExperimentalConfig() map[string]interface{} {
+	if o == nil {
+		var ret map[string]interface{}
+		return ret
+	}
+
+	return o.ExperimentalConfig
+}
+
+// GetExperimentalConfigOk returns a tuple with the ExperimentalConfig field value
+// and a boolean to check if the value has been set.
+func (o *Organization) GetExperimentalConfigOk() (map[string]interface{}, bool) {
+	if o == nil {
+		return map[string]interface{}{}, false
+	}
+	return o.ExperimentalConfig, true
+}
+
+// SetExperimentalConfig sets field value
+func (o *Organization) SetExperimentalConfig(v map[string]interface{}) {
+	o.ExperimentalConfig = v
+}
+
 func (o Organization) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -676,6 +703,7 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["authenticatedRateLimit"] = o.AuthenticatedRateLimit.Get()
 	toSerialize["sandboxCreateRateLimit"] = o.SandboxCreateRateLimit.Get()
 	toSerialize["sandboxLifecycleRateLimit"] = o.SandboxLifecycleRateLimit.Get()
+	toSerialize["experimentalConfig"] = o.ExperimentalConfig
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -711,6 +739,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"authenticatedRateLimit",
 		"sandboxCreateRateLimit",
 		"sandboxLifecycleRateLimit",
+		"experimentalConfig",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -762,6 +791,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "authenticatedRateLimit")
 		delete(additionalProperties, "sandboxCreateRateLimit")
 		delete(additionalProperties, "sandboxLifecycleRateLimit")
+		delete(additionalProperties, "experimentalConfig")
 		o.AdditionalProperties = additionalProperties
 	}
 
