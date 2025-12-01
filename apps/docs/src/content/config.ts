@@ -432,6 +432,15 @@ export const getSidebarConfig = (
       entries: [
         {
           type: 'link',
+          href: localizePath('/docs/inngest-agentkit-coding-agent', locale),
+          label: labels['sidebarconfig.inngestAgentKit'],
+          disablePagination: true,
+          attrs: {
+            icon: 'inngest-agentkit.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/langchain-data-analysis', locale),
           label: labels['sidebarconfig.langchainIntegrations'],
           disablePagination: true,
