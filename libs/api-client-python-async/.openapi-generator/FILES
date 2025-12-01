@@ -120,6 +120,7 @@ daytona_api_client_async/models/range.py
 daytona_api_client_async/models/rate_limit_config.py
 daytona_api_client_async/models/rate_limit_entry.py
 daytona_api_client_async/models/region.py
+daytona_api_client_async/models/region_quota.py
 daytona_api_client_async/models/region_screenshot_response.py
 daytona_api_client_async/models/region_usage_overview.py
 daytona_api_client_async/models/registry_push_access_dto.py

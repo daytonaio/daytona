@@ -118,6 +118,7 @@ model_range.go
 model_rate_limit_config.go
 model_rate_limit_entry.go
 model_region.go
+model_region_quota.go
 model_region_screenshot_response.go
 model_region_usage_overview.go
 model_registry_push_access_dto.go

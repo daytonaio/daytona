@@ -48,6 +48,7 @@ import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-reg
 import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
+import { RegionQuotaDto } from '../dto/region-quota.dto'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -182,12 +183,27 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.regionQuotaRepository.save(regionQuota)
   }
 
-  async getRegionQuotas(organizationId: string): Promise<RegionQuota[]> {
-    return this.regionQuotaRepository.find({ where: { organizationId } })
+  async getRegionQuotas(organizationId: string): Promise<RegionQuotaDto[]> {
+    const regionQuotas = await this.regionQuotaRepository.find({ where: { organizationId } })
+    return regionQuotas.map((regionQuota) => new RegionQuotaDto(regionQuota))
   }
 
-  async getRegionQuota(organizationId: string, regionId: string): Promise<RegionQuota | null> {
-    return this.regionQuotaRepository.findOne({ where: { organizationId, regionId } })
+  async getRegionQuota(organizationId: string, regionId: string): Promise<RegionQuotaDto | null> {
+    const regionQuota = await this.regionQuotaRepository.findOne({ where: { organizationId, regionId } })
+    if (!regionQuota) {
+      return null
+    }
+    return new RegionQuotaDto(regionQuota)
+  }
+
+  async getRegionQuotaBySandboxId(sandboxId: string): Promise<RegionQuotaDto | null> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+    if (!sandbox) {
+      return null
+    }
+    return this.getRegionQuota(sandbox.organizationId, sandbox.region)
   }
 
   async suspend(

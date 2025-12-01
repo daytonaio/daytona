@@ -145,6 +145,7 @@ from daytona_api_client_async.models.range import Range
 from daytona_api_client_async.models.rate_limit_config import RateLimitConfig
 from daytona_api_client_async.models.rate_limit_entry import RateLimitEntry
 from daytona_api_client_async.models.region import Region
+from daytona_api_client_async.models.region_quota import RegionQuota
 from daytona_api_client_async.models.region_screenshot_response import RegionScreenshotResponse
 from daytona_api_client_async.models.region_usage_overview import RegionUsageOverview
 from daytona_api_client_async.models.registry_push_access_dto import RegistryPushAccessDto

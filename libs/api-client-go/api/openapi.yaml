@@ -644,6 +644,34 @@ paths:
       summary: Get organization by sandbox ID
       tags:
         - organizations
+  /organizations/region-quota/by-sandbox-id/{sandboxId}:
+    get:
+      operationId: getRegionQuotaBySandboxId
+      parameters:
+        - description: Sandbox ID
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionQuota'
+          description: Region quota
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get region quota by sandbox ID
+      tags:
+        - organizations
   /organizations/{organizationId}/sandbox-default-limited-network-egress:
     post:
       operationId: updateSandboxDefaultLimitedNetworkEgress
@@ -8144,6 +8172,31 @@ components:
         - reason
         - suspensionCleanupGracePeriodHours
         - until
+      type: object
+    RegionQuota:
+      example:
+        organizationId: organizationId
+        totalCpuQuota: 0.8008281904610115
+        regionId: regionId
+        totalMemoryQuota: 6.027456183070403
+        totalDiskQuota: 1.4658129805029452
+      properties:
+        organizationId:
+          type: string
+        regionId:
+          type: string
+        totalCpuQuota:
+          type: number
+        totalMemoryQuota:
+          type: number
+        totalDiskQuota:
+          type: number
+      required:
+        - organizationId
+        - regionId
+        - totalCpuQuota
+        - totalDiskQuota
+        - totalMemoryQuota
       type: object
     OrganizationSandboxDefaultLimitedNetworkEgress:
       example:

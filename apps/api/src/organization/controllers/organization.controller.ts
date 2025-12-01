@@ -47,6 +47,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
+import { RegionQuotaDto } from '../dto/region-quota.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -528,6 +529,32 @@ export class OrganizationController {
     }
 
     return OrganizationDto.fromOrganization(organization)
+  }
+
+  @Get('/region-quota/by-sandbox-id/:sandboxId')
+  @ApiOperation({
+    summary: 'Get region quota by sandbox ID',
+    operationId: 'getRegionQuotaBySandboxId',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Region quota',
+    type: RegionQuotaDto,
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'Sandbox ID',
+    type: 'string',
+  })
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  async getRegionQuotaBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RegionQuotaDto> {
+    const regionQuota = await this.organizationService.getRegionQuotaBySandboxId(sandboxId)
+    if (!regionQuota) {
+      throw new NotFoundException(`Region quota for sandbox with ID ${sandboxId} not found`)
+    }
+
+    return regionQuota
   }
 
   @Post('/:organizationId/sandbox-default-limited-network-egress')
