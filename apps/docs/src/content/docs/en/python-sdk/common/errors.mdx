@@ -11,6 +11,22 @@ class DaytonaError(Exception)
 
 Base error for Daytona SDK.
 
+#### DaytonaError.\_\_init\_\_
+
+```python
+def __init__(message: str,
+             status_code: Optional[int] = None,
+             headers: Optional[dict] = None)
+```
+
+Initialize Daytona error.
+
+**Arguments**:
+
+- `message` - Error message
+- `status_code` - HTTP status code if available
+- `headers` - Response headers if available
+
 
 ## DaytonaNotFoundError
 

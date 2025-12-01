@@ -120,8 +120,31 @@ When you exceed a rate limit, subsequent requests will fail with:
 
 If you're using the official Daytona SDKs:
 
-- **TypeScript SDK**: Throws `RateLimitError`
-- **Python SDK**: Raises `RateLimitException`
+- **TypeScript SDK**: Throws `DaytonaRateLimitError`
+- **Python SDK**: Raises `DaytonaRateLimitError`
+
+All errors include `headers` and `statusCode` properties, allowing you to access rate limit headers directly from the error object. Headers support case-insensitive access:
+
+```typescript
+// TypeScript - use .get() for case-insensitive access
+try {
+  await daytona.create()
+} catch (error) {
+  if (error instanceof DaytonaRateLimitError) {
+    console.log(error.headers?.get('x-ratelimit-remaining-sandbox-create'))
+    console.log(error.headers?.get('X-RateLimit-Remaining-Sandbox-Create')) // also works
+  }
+}
+```
+
+```python
+# Python - headers support case-insensitive access
+try:
+    daytona.create(snapshot="my-snapshot")
+except DaytonaRateLimitError as e:
+    print(e.headers['x-ratelimit-remaining-sandbox-create'])
+    print(e.headers['X-RateLimit-Remaining-Sandbox-Create'])  # also works
+```
 
 #### Example Error Response
 
@@ -138,14 +161,14 @@ If you're using the official Daytona SDKs:
 
 ### Rate Limit Headers
 
-Daytona includes rate limit information in API response headers:
+Daytona includes rate limit information in API response headers. Header names include a suffix based on which rate limit is triggered (e.g., `-anonymous`, `-authenticated`, `-sandbox-create`, `-sandbox-lifecycle`):
 
-| Header                  | Description                                                               |
-|-------------------------|---------------------------------------------------------------------------|
-| `X-RateLimit-Limit`     | Maximum number of requests allowed in the time window                     |
-| `X-RateLimit-Remaining` | Number of requests remaining in the current window                        |
-| `X-RateLimit-Reset`     | Time in seconds until the rate limit window resets                        |
-| `Retry-After`           | Time in seconds to wait before retrying (included when limit is exceeded) |
+| Header Pattern                       | Description                                                               |
+|--------------------------------------|---------------------------------------------------------------------------|
+| `X-RateLimit-Limit-{throttler}`      | Maximum number of requests allowed in the time window                     |
+| `X-RateLimit-Remaining-{throttler}`  | Number of requests remaining in the current window                        |
+| `X-RateLimit-Reset-{throttler}`      | Time in seconds until the rate limit window resets                        |
+| `Retry-After-{throttler}`            | Time in seconds to wait before retrying (included when limit is exceeded) |
 
 
 
@@ -162,8 +185,10 @@ async function createSandboxWithRetry() {
     try {
       return await daytona.create({ snapshot: 'my-snapshot' })
     } catch (error) {
-      if (error.statusCode === 429 && retries < maxRetries - 1) {
-        const delay = Math.pow(2, retries) * 1000 // 1s, 2s, 4s, 8s, 16s
+      if (error instanceof DaytonaRateLimitError && retries < maxRetries - 1) {
+        // Use Retry-After header if available, otherwise exponential backoff
+        const retryAfter = error.headers?.get('retry-after-sandbox-create')
+        const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, retries) * 1000
         await new Promise(resolve => setTimeout(resolve, delay))
         retries++
       } else {
@@ -174,7 +199,7 @@ async function createSandboxWithRetry() {
 }
 ```
 
-**Monitor rate limit headers** (`X-RateLimit-Remaining`, `X-RateLimit-Reset`) to track your consumption and implement proactive throttling before hitting limits.
+**Monitor rate limit headers** (e.g., `X-RateLimit-Remaining-{throttler}`, `X-RateLimit-Reset-{throttler}`) to track your consumption and implement proactive throttling before hitting limits. These headers are available on all error objects via the `headers` property.
 
 **Cache API responses** that don't change frequently, such as sandbox lists (when relatively static), available regions, and snapshot information. This reduces unnecessary API calls and helps you stay well within your limits.
 
