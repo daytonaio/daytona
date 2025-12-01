@@ -114,6 +114,7 @@
   "sidebarconfig.deployments": "Deployments",
   "sidebarconfig.integrations": "Integrations",
   "sidebarconfig.langchainIntegrations": "LangChain",
+  "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
 }
