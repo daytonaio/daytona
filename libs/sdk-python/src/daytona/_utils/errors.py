@@ -51,10 +51,6 @@ def intercept_errors(
                 status_code = getattr(e, "status", None)
                 headers = getattr(e, "headers", None) or {}
 
-                # Convert headers to dict if needed
-                if headers and hasattr(headers, "items"):
-                    headers = dict(headers.items())
-
                 if isinstance(
                     e,
                     (

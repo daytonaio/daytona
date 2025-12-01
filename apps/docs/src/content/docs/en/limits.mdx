@@ -123,27 +123,27 @@ If you're using the official Daytona SDKs:
 - **TypeScript SDK**: Throws `DaytonaRateLimitError`
 - **Python SDK**: Raises `DaytonaRateLimitError`
 
-All errors include `headers` and `statusCode` properties, allowing you to access rate limit headers directly from the error object:
+All errors include `headers` and `statusCode` properties, allowing you to access rate limit headers directly from the error object. Headers support case-insensitive access:
 
 ```typescript
-// TypeScript
+// TypeScript - use .get() for case-insensitive access
 try {
   await daytona.create()
 } catch (error) {
   if (error instanceof DaytonaRateLimitError) {
-    console.log(error.headers['x-ratelimit-remaining-sandbox-create'])
-    console.log(error.headers['retry-after-sandbox-create'])
+    console.log(error.headers?.get('x-ratelimit-remaining-sandbox-create'))
+    console.log(error.headers?.get('X-RateLimit-Remaining-Sandbox-Create')) // also works
   }
 }
 ```
 
 ```python
-# Python
+# Python - headers support case-insensitive access
 try:
     daytona.create(snapshot="my-snapshot")
 except DaytonaRateLimitError as e:
-    print(e.headers.get('x-ratelimit-remaining-sandbox-create'))
-    print(e.headers.get('retry-after-sandbox-create'))
+    print(e.headers['x-ratelimit-remaining-sandbox-create'])
+    print(e.headers['X-RateLimit-Remaining-Sandbox-Create'])  # also works
 ```
 
 #### Example Error Response
@@ -187,7 +187,7 @@ async function createSandboxWithRetry() {
     } catch (error) {
       if (error instanceof DaytonaRateLimitError && retries < maxRetries - 1) {
         // Use Retry-After header if available, otherwise exponential backoff
-        const retryAfter = error.headers['retry-after-sandbox-create']
+        const retryAfter = error.headers?.get('retry-after-sandbox-create')
         const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, retries) * 1000
         await new Promise(resolve => setTimeout(resolve, delay))
         retries++

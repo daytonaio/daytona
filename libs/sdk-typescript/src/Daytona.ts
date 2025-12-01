@@ -710,7 +710,7 @@ export class Daytona {
         }
 
         const statusCode = error.response?.status
-        const headers = error.response?.headers || {}
+        const headers = error.response?.headers
 
         switch (statusCode) {
           case 404:
