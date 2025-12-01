@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import type { RegionUsageOverview } from '@daytonaio/api-client'
 import { LiveIndicator } from '@/components/LiveIndicator'
 import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
 import { TierUpgradeCard } from '@/components/TierUpgradeCard'
@@ -21,6 +20,7 @@ import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
+import type { RegionUsageOverview } from '@daytonaio/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -134,13 +134,15 @@ export default function Limits() {
                       <span className="text-sm text-muted-foreground">Region:</span>
                       <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
                         <SelectTrigger
-                          className={`w-auto min-w-12 max-w-48 gap-x-2 ${usageOverview.regionUsage.length === 1 ? 'pointer-events-none select-none [&>svg]:hidden min-w-10' : ''}`}
+                          size="xs"
+                          disabled={usageOverview.regionUsage.length === 1}
+                          className={`uppercase w-auto min-w-12 max-w-48 gap-x-2 ${usageOverview.regionUsage.length === 1 ? 'pointer-events-none select-none [&>svg]:hidden min-w-10 disabled:opacity-100' : ''}`}
                         >
                           <SelectValue placeholder="Select region" />
                         </SelectTrigger>
                         <SelectContent className="min-w-24 max-w-48" align="end">
                           {usageOverview.regionUsage.map((usage) => (
-                            <SelectItem key={usage.regionId} value={usage.regionId}>
+                            <SelectItem key={usage.regionId} value={usage.regionId} className="uppercase">
                               {getRegionName(usage.regionId) ?? usage.regionId}
                             </SelectItem>
                           ))}
