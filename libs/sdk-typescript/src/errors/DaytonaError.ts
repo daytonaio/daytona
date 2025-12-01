@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { AxiosHeaders } from 'axios'
-
 /**
  * @module Errors
  */
+
+import type { AxiosHeaders } from 'axios'
 
 type ResponseHeaders = InstanceType<typeof AxiosHeaders>
 
