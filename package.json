@@ -129,7 +129,7 @@
     "envalid": "^8.0.0",
     "es-toolkit": "^1.41.0",
     "expand-tilde": "^2.0.2",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "express-openid-connect": "^2.18.0",
     "express-session": "^1.18.1",
     "fast-glob": "^3.3.0",
