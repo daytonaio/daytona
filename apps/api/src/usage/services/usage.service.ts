@@ -99,10 +99,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     const lastUsagePeriod = await this.sandboxUsagePeriodRepository.findOne({
       where: {
         sandboxId,
-        endAt: null,
-      },
-      order: {
-        startAt: 'DESC',
+        endAt: IsNull(),
       },
     })
 
