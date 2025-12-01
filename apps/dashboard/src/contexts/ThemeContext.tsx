@@ -25,6 +25,26 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
+async function runWithoutAnimation<T>(callback: () => T | Promise<T>): Promise<T> {
+  const style = document.createElement('style')
+  style.appendChild(
+    document.createTextNode(`*, *::before, *::after { transition: none !important; animation: none !important; }`),
+  )
+  document.head.appendChild(style)
+
+  try {
+    return await callback()
+  } finally {
+    window.getComputedStyle(document.body)
+
+    setTimeout(() => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style)
+      }
+    }, 1)
+  }
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = 'dark',
@@ -34,11 +54,13 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(storageKey) as Theme) || defaultTheme)
 
   useEffect(() => {
-    const root = window.document.documentElement
+    runWithoutAnimation(() => {
+      const root = window.document.documentElement
 
-    root.classList.remove('light', 'dark')
+      root.classList.remove('light', 'dark')
 
-    root.classList.add(theme)
+      root.classList.add(theme)
+    })
   }, [theme])
 
   const value = {
