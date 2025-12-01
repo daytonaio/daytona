@@ -49,7 +49,7 @@ export class DaytonaRateLimitError extends DaytonaError {
  * Error thrown when a timeout occurs.
  */
 export class DaytonaTimeoutError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: Record<string, string>) {
+  constructor(message: string, statusCode?: number, headers?: ResponseHeaders) {
     super(message, statusCode, headers)
     this.name = 'DaytonaTimeoutError'
   }

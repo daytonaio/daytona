@@ -107,7 +107,9 @@ Error thrown when rate limit is exceeded.
 - `headers?` _AxiosHeaders_ - Response headers if available
     - _Inherited from_: `DaytonaError.headers`
 - `statusCode?` _number_ - HTTP status code if available
+    
     - _Inherited from_: `DaytonaError.statusCode`
+
 
 
 
@@ -137,30 +139,21 @@ new DaytonaRateLimitError(
 
 - `DaytonaRateLimitError`
 
-#### new DaytonaRateLimitError()
+##### Overrides
 
-_Inherited from_: `DaytonaError.constructor`
-
-```ts
-new DaytonaRateLimitError(message?: string, options?: ErrorOptions): DaytonaRateLimitError
-```
-
-**Parameters**:
-
-- `message?` _string_
-- `options?` _ErrorOptions_
-
-
-**Returns**:
-
-- `DaytonaRateLimitError`
-
-***
-
-
+`DaytonaError`.`constructor`
 ## DaytonaTimeoutError
 
 Error thrown when a timeout occurs.
+
+**Properties**:
+
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
 
 **Extends:**
 
@@ -170,39 +163,23 @@ Error thrown when a timeout occurs.
 
 #### new DaytonaTimeoutError()
 
-_Inherited from_: `DaytonaError.constructor`
-
 ```ts
-new DaytonaTimeoutError(message?: string): DaytonaTimeoutError
+new DaytonaTimeoutError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaTimeoutError
 ```
 
 **Parameters**:
 
-- `message?` _string_
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
 
 
 **Returns**:
 
 - `DaytonaTimeoutError`
-
-#### new DaytonaTimeoutError()
-
-_Inherited from_: `DaytonaError.constructor`
-
-```ts
-new DaytonaTimeoutError(message?: string, options?: ErrorOptions): DaytonaTimeoutError
-```
-
-**Parameters**:
-
-- `message?` _string_
-- `options?` _ErrorOptions_
-
-
-**Returns**:
-
-- `DaytonaTimeoutError`
-
 
 ##### Overrides
 
