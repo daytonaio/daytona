@@ -101,6 +101,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       .getMany()
 
     if (snapshots.length === 0) {
+      await this.redisLockProvider.unlock(lockKey)
       await this.redis.set('sync-runner-snapshots-skip', 0)
       return
     }
