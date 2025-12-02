@@ -50,6 +50,7 @@ import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
 import { BillingProvider } from './providers/BillingProvider'
 import { QueryProvider } from './providers/QueryProvider'
+import { RegionsProvider } from './providers/RegionsProvider'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -135,13 +136,15 @@ function App() {
                 <ApiProvider>
                   <OrganizationsProvider>
                     <SelectedOrganizationProvider>
-                      <BillingProvider>
-                        <UserOrganizationInvitationsProvider>
-                          <NotificationSocketProvider>
-                            <Dashboard />
-                          </NotificationSocketProvider>
-                        </UserOrganizationInvitationsProvider>
-                      </BillingProvider>
+                      <RegionsProvider>
+                        <BillingProvider>
+                          <UserOrganizationInvitationsProvider>
+                            <NotificationSocketProvider>
+                              <Dashboard />
+                            </NotificationSocketProvider>
+                          </UserOrganizationInvitationsProvider>
+                        </BillingProvider>
+                      </RegionsProvider>
                     </SelectedOrganizationProvider>
                   </OrganizationsProvider>
                 </ApiProvider>

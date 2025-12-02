@@ -41,13 +41,22 @@ const Dashboard: React.FC = () => {
       return
     }
 
+    if (!selectedOrganization) {
+      return
+    }
+
+    if (!selectedOrganization.defaultRegionId) {
+      navigate(RoutePath.SETTINGS)
+      return
+    }
+
     const excludedRoutes = [RoutePath.BILLING_WALLET, RoutePath.USER_INVITATIONS, RoutePath.MEMBERS]
     const shouldSkipRedirect = excludedRoutes.some((route) => location.pathname.startsWith(route))
 
     if (wallet && wallet.ongoingBalanceCents <= 0 && !shouldSkipRedirect) {
       navigate(RoutePath.BILLING_WALLET)
     }
-  }, [wallet, config.billingApiUrl]) // Only depend on wallet to avoid infinite loops from navigation
+  }, [wallet, config.billingApiUrl, selectedOrganization]) // Do not depend on navigate to avoid infinite loops
 
   const [bannerText, bannerLearnMoreUrl] = useMemo(() => {
     if (!config.announcements || Object.entries(config.announcements).length === 0) {

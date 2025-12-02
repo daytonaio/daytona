@@ -8,7 +8,7 @@ import { createContext } from 'react'
 
 export interface IOrganizationsContext {
   organizations: Organization[]
-  refreshOrganizations: (selectedOrganizationId?: string) => Promise<Organization[]>
+  refreshOrganizations: (selectedOrganizationId?: string) => Promise<void>
 }
 
 export const OrganizationsContext = createContext<IOrganizationsContext | undefined>(undefined)
