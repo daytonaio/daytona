@@ -5,8 +5,6 @@ services:
       context: ../
       dockerfile: apps/api/Dockerfile
       target: daytona
-    environment:
-      - DEFAULT_SNAPSHOT=ubuntu:22.04
   
   proxy:
     build:
