@@ -44,6 +44,12 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     return `fallback:${ip}`
   }
 
+  protected generateKey(context: ExecutionContext, suffix: string, name: string): string {
+    // Override to make rate limiting per-rate-limit-type, not per-route
+    // This ensures all routes share the same counter per rate limit type (authenticated, sandbox-create, sandbox-lifecycle)
+    return `${name}-${suffix}`
+  }
+
   async handleRequest(requestProps: ThrottlerRequest): Promise<boolean> {
     const { context, throttler } = requestProps
     const request = context.switchToHttp().getRequest<Request>()
