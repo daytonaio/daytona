@@ -7,7 +7,6 @@ import { Injectable, ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { ThrottlerGuard, ThrottlerModuleOptions, ThrottlerRequest, ThrottlerStorage } from '@nestjs/throttler'
 import { Request } from 'express'
-import { createHash } from 'crypto'
 
 @Injectable()
 export class AnonymousRateLimitGuard extends ThrottlerGuard {
@@ -24,7 +23,7 @@ export class AnonymousRateLimitGuard extends ThrottlerGuard {
   protected generateKey(context: ExecutionContext, suffix: string, name: string): string {
     // Override to make rate limiting per-rate-limit-type, not per-route
     // This ensures all routes share the same counter for anonymous rate limiting
-    return createHash('sha256').update(`${name}-${suffix}`).digest('hex')
+    return `${name}-${suffix}`
   }
 
   async handleRequest(requestProps: ThrottlerRequest): Promise<boolean> {
