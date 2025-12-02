@@ -240,7 +240,7 @@ export class OrganizationController {
     @Param('organizationId') organizationId: string,
     @Body() updateDto: UpdateOrganizationDefaultRegionDto,
   ): Promise<void> {
-    return this.organizationService.setDefaultRegion(organizationId, updateDto.defaultRegionId)
+    await this.organizationService.setDefaultRegion(organizationId, updateDto.defaultRegionId)
   }
 
   @Get()
@@ -410,7 +410,7 @@ export class OrganizationController {
     @Param('regionId') regionId: string,
     @Body() updateDto: UpdateOrganizationRegionQuotaDto,
   ): Promise<void> {
-    return this.organizationService.updateRegionQuota(organizationId, regionId, updateDto)
+    await this.organizationService.updateRegionQuota(organizationId, regionId, updateDto)
   }
 
   @Post('/:organizationId/leave')
