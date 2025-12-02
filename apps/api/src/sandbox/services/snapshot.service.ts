@@ -37,6 +37,8 @@ import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages
 import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { Region } from '../../region/entities/region.entity'
+import { Runner } from '../entities/runner.entity'
+import { RunnerState } from '../enums/runner-state.enum'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -54,6 +56,8 @@ export class SnapshotService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
@@ -109,27 +113,40 @@ export class SnapshotService {
     ref: string,
     entrypoint: string[] | undefined,
     skipValidation: boolean,
+    regionId: string,
   ): Promise<Snapshot | null> {
-    // Check if there is already an active snapshot with the same ref;
+    // Check if there is already an active snapshot with the same ref in the provided region
     // Only check entrypoint if skipValidation is not set on the DTO
     // We can skip the pulling and validation in that case - note: relevant only for Docker
-
-    const snapshotFindOptions: any = {
-      ref,
-      state: SnapshotState.ACTIVE,
-    }
 
     if (!entrypoint || entrypoint.length === 0) {
       return null
     }
 
+    const qb = this.snapshotRepository
+      .createQueryBuilder('s')
+      .innerJoin('snapshot_runner', 'sr', 'sr."snapshotRef" = s.ref')
+      .innerJoin('runner', 'r', 'r.id::text = sr."runnerId"::text')
+      .where('s.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
+      .andWhere('sr.state = :snapshotRunnerState', { snapshotRunnerState: SnapshotRunnerState.READY })
+      .andWhere('s.ref = :ref', { ref })
+      .andWhere('r.region = :regionId', { regionId })
+      .andWhere('r.state = :runnerState', { runnerState: RunnerState.READY })
+      .andWhere('r.unschedulable = false')
+
     if (!skipValidation) {
-      snapshotFindOptions.entrypoint = Array.isArray(entrypoint) ? entrypoint : [entrypoint]
+      qb.andWhere('s.entrypoint = :entrypoint', {
+        entrypoint: Array.isArray(entrypoint) ? entrypoint : [entrypoint],
+      })
     }
 
-    return await this.snapshotRepository.findOne({
-      where: snapshotFindOptions,
-    })
+    const snapshot = await qb.getOne()
+
+    if (!snapshot) {
+      return null
+    }
+
+    return snapshot
   }
 
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
@@ -208,6 +225,7 @@ export class SnapshotService {
           ref,
           entrypoint,
           createSnapshotDto.skipValidation,
+          organization.defaultRegionId,
         )
 
         if (existingSnapshot) {
@@ -316,6 +334,7 @@ export class SnapshotService {
         snapshot.ref,
         entrypoint,
         createSnapshotDto.skipValidation,
+        organization.defaultRegionId,
       )
 
       if (existingSnapshot) {
