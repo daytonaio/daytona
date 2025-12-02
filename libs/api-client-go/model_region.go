@@ -21,8 +21,16 @@ var _ MappedNullable = &Region{}
 
 // Region struct for Region
 type Region struct {
+	// Region ID
+	Id string `json:"id"`
 	// Region name
-	Name                 string `json:"name"`
+	Name string `json:"name"`
+	// Organization ID
+	OrganizationId NullableString `json:"organizationId,omitempty"`
+	// Creation timestamp
+	CreatedAt string `json:"createdAt"`
+	// Last update timestamp
+	UpdatedAt            string `json:"updatedAt"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -32,9 +40,12 @@ type _Region Region
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegion(name string) *Region {
+func NewRegion(id string, name string, createdAt string, updatedAt string) *Region {
 	this := Region{}
+	this.Id = id
 	this.Name = name
+	this.CreatedAt = createdAt
+	this.UpdatedAt = updatedAt
 	return &this
 }
 
@@ -44,6 +55,30 @@ func NewRegion(name string) *Region {
 func NewRegionWithDefaults() *Region {
 	this := Region{}
 	return &this
+}
+
+// GetId returns the Id field value
+func (o *Region) GetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Id
+}
+
+// GetIdOk returns a tuple with the Id field value
+// and a boolean to check if the value has been set.
+func (o *Region) GetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Id, true
+}
+
+// SetId sets field value
+func (o *Region) SetId(v string) {
+	o.Id = v
 }
 
 // GetName returns the Name field value
@@ -70,6 +105,97 @@ func (o *Region) SetName(v string) {
 	o.Name = v
 }
 
+// GetOrganizationId returns the OrganizationId field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *Region) GetOrganizationId() string {
+	if o == nil || IsNil(o.OrganizationId.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.OrganizationId.Get()
+}
+
+// GetOrganizationIdOk returns a tuple with the OrganizationId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Region) GetOrganizationIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.OrganizationId.Get(), o.OrganizationId.IsSet()
+}
+
+// HasOrganizationId returns a boolean if a field has been set.
+func (o *Region) HasOrganizationId() bool {
+	if o != nil && o.OrganizationId.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetOrganizationId gets a reference to the given NullableString and assigns it to the OrganizationId field.
+func (o *Region) SetOrganizationId(v string) {
+	o.OrganizationId.Set(&v)
+}
+
+// SetOrganizationIdNil sets the value for OrganizationId to be an explicit nil
+func (o *Region) SetOrganizationIdNil() {
+	o.OrganizationId.Set(nil)
+}
+
+// UnsetOrganizationId ensures that no value is present for OrganizationId, not even an explicit nil
+func (o *Region) UnsetOrganizationId() {
+	o.OrganizationId.Unset()
+}
+
+// GetCreatedAt returns the CreatedAt field value
+func (o *Region) GetCreatedAt() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.CreatedAt
+}
+
+// GetCreatedAtOk returns a tuple with the CreatedAt field value
+// and a boolean to check if the value has been set.
+func (o *Region) GetCreatedAtOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CreatedAt, true
+}
+
+// SetCreatedAt sets field value
+func (o *Region) SetCreatedAt(v string) {
+	o.CreatedAt = v
+}
+
+// GetUpdatedAt returns the UpdatedAt field value
+func (o *Region) GetUpdatedAt() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.UpdatedAt
+}
+
+// GetUpdatedAtOk returns a tuple with the UpdatedAt field value
+// and a boolean to check if the value has been set.
+func (o *Region) GetUpdatedAtOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.UpdatedAt, true
+}
+
+// SetUpdatedAt sets field value
+func (o *Region) SetUpdatedAt(v string) {
+	o.UpdatedAt = v
+}
+
 func (o Region) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -80,7 +206,13 @@ func (o Region) MarshalJSON() ([]byte, error) {
 
 func (o Region) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
+	if o.OrganizationId.IsSet() {
+		toSerialize["organizationId"] = o.OrganizationId.Get()
+	}
+	toSerialize["createdAt"] = o.CreatedAt
+	toSerialize["updatedAt"] = o.UpdatedAt
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -94,7 +226,10 @@ func (o *Region) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"id",
 		"name",
+		"createdAt",
+		"updatedAt",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -124,7 +259,11 @@ func (o *Region) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
 		delete(additionalProperties, "name")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
 		o.AdditionalProperties = additionalProperties
 	}
 

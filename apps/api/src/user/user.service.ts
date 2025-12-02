@@ -47,7 +47,12 @@ export class UserService {
       user = await em.save(user)
       await this.eventEmitter.emitAsync(
         UserEvents.CREATED,
-        new UserCreatedEvent(em, user, createUserDto.personalOrganizationQuota),
+        new UserCreatedEvent(
+          em,
+          user,
+          createUserDto.personalOrganizationQuota,
+          createUserDto.personalOrganizationDefaultRegionId,
+        ),
       )
     })
 

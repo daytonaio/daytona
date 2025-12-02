@@ -3,27 +3,57 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Copy } from 'lucide-react'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { DeleteOrganizationDialog } from '@/components/Organizations/DeleteOrganizationDialog'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { LeaveOrganizationDialog } from '@/components/Organizations/LeaveOrganizationDialog'
+import { SetDefaultRegionDialog } from '@/components/Organizations/SetDefaultRegionDialog'
 import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
+import { useRegions } from '@/hooks/useRegions'
 
 const OrganizationSettings: React.FC = () => {
   const { organizationsApi } = useApi()
 
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { getRegionName, regions, loadingRegions } = useRegions()
 
   const [loadingDeleteOrganization, setLoadingDeleteOrganization] = useState(false)
   const [loadingLeaveOrganization, setLoadingLeaveOrganization] = useState(false)
+  const [showSetDefaultRegionDialog, setSetDefaultRegionDialog] = useState(false)
+
+  useEffect(() => {
+    if (selectedOrganization && !selectedOrganization.defaultRegionId) {
+      setSetDefaultRegionDialog(true)
+    }
+  }, [selectedOrganization])
+
+  const handleSetDefaultRegion = async (defaultRegionId: string): Promise<boolean> => {
+    if (!selectedOrganization) {
+      return false
+    }
+
+    try {
+      await organizationsApi.setOrganizationDefaultRegion(selectedOrganization.id, {
+        defaultRegionId,
+      })
+      toast.success('Default region set successfully')
+      await refreshOrganizations(selectedOrganization.id)
+      setSetDefaultRegionDialog(false)
+      return true
+    } catch (error) {
+      handleApiError(error, 'Failed to set default region')
+      return false
+    }
+  }
 
   const handleDeleteOrganization = async () => {
     if (!selectedOrganization) {
@@ -95,7 +125,22 @@ const OrganizationSettings: React.FC = () => {
 
         <div className="space-y-3">
           <Label htmlFor="organization-default-region">Default Region</Label>
-          <Input id="organization-default-region" value={selectedOrganization.defaultRegion} readOnly />
+          {selectedOrganization.defaultRegionId ? (
+            <Input
+              id="organization-default-region"
+              value={getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
+              readOnly
+            />
+          ) : (
+            <div>
+              <Button onClick={() => setSetDefaultRegionDialog(true)} variant="outline">
+                Set Default Region
+              </Button>
+            </div>
+          )}
+          <p className="text-sm text-muted-foreground mt-1 pl-1">
+            The region that is used as the default target for creating sandboxes in this organization.
+          </p>
         </div>
 
         {!selectedOrganization.personal && authenticatedUserOrganizationMember !== null && (
@@ -116,6 +161,14 @@ const OrganizationSettings: React.FC = () => {
           </div>
         )}
       </div>
+
+      <SetDefaultRegionDialog
+        open={showSetDefaultRegionDialog}
+        onOpenChange={setSetDefaultRegionDialog}
+        regions={regions}
+        loadingRegions={loadingRegions}
+        onSetDefaultRegion={handleSetDefaultRegion}
+      />
     </div>
   )
 }

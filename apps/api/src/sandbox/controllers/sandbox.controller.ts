@@ -68,7 +68,6 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
-import { RegionDto } from '../dto/region.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
@@ -210,21 +209,6 @@ export class SandboxController {
       page: result.page,
       totalPages: result.totalPages,
     }
-  }
-
-  @Get('regions')
-  @ApiOperation({
-    summary: 'List all regions where sandboxes have been created',
-    operationId: 'getSandboxRegions',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of regions where sandboxes have been created',
-    type: [RegionDto],
-  })
-  async getSandboxRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
-    const regions = await this.sandboxService.getDistinctRegions(authContext.organizationId)
-    return regions.map((region) => ({ name: region }))
   }
 
   @Post()

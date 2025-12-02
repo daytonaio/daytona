@@ -9,6 +9,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Patch,
@@ -44,6 +45,9 @@ import { OrganizationUsageService } from '../services/organization-usage.service
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
+import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
+import { RegionQuotaDto } from '../dto/region-quota.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -184,6 +188,7 @@ export class OrganizationController {
     requestMetadata: {
       body: (req: TypedRequest<CreateOrganizationDto>) => ({
         name: req.body?.name,
+        defaultRegionId: req.body?.defaultRegionId,
       }),
     },
   })
@@ -198,6 +203,44 @@ export class OrganizationController {
 
     const organization = await this.organizationService.create(createOrganizationDto, authContext.userId, false, true)
     return OrganizationDto.fromOrganization(organization)
+  }
+
+  @Patch('/:organizationId/default-region')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Set default region for organization',
+    operationId: 'setOrganizationDefaultRegion',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Default region set successfully',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiBody({
+    type: UpdateOrganizationDefaultRegionDto,
+    required: true,
+  })
+  @UseGuards(AuthGuard('jwt'), AuthenticatedRateLimitGuard, OrganizationActionGuard)
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateOrganizationDefaultRegionDto>) => ({
+        defaultRegionId: req.body?.defaultRegionId,
+      }),
+    },
+  })
+  async setDefaultRegion(
+    @Param('organizationId') organizationId: string,
+    @Body() updateDto: UpdateOrganizationDefaultRegionDto,
+  ): Promise<void> {
+    await this.organizationService.setDefaultRegion(organizationId, updateDto.defaultRegionId)
   }
 
   @Get()
@@ -287,14 +330,14 @@ export class OrganizationController {
   }
 
   @Patch('/:organizationId/quota')
+  @HttpCode(204)
   @ApiOperation({
     summary: 'Update organization quota',
     operationId: 'updateOrganizationQuota',
   })
   @ApiResponse({
-    status: 200,
-    description: 'Organization details',
-    type: OrganizationDto,
+    status: 204,
+    description: 'Organization quota updated successfully',
   })
   @ApiParam({
     name: 'organizationId',
@@ -309,9 +352,6 @@ export class OrganizationController {
     targetIdFromRequest: (req) => req.params.organizationId,
     requestMetadata: {
       body: (req: TypedRequest<UpdateOrganizationQuotaDto>) => ({
-        totalCpuQuota: req.body?.totalCpuQuota,
-        totalMemoryQuota: req.body?.totalMemoryQuota,
-        totalDiskQuota: req.body?.totalDiskQuota,
         maxCpuPerSandbox: req.body?.maxCpuPerSandbox,
         maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
         maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
@@ -323,10 +363,54 @@ export class OrganizationController {
   })
   async updateOrganizationQuota(
     @Param('organizationId') organizationId: string,
-    @Body() updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
-  ): Promise<OrganizationDto> {
-    const organization = await this.organizationService.updateQuota(organizationId, updateOrganizationQuotaDto)
-    return OrganizationDto.fromOrganization(organization)
+    @Body() updateDto: UpdateOrganizationQuotaDto,
+  ): Promise<void> {
+    await this.organizationService.updateQuota(organizationId, updateDto)
+  }
+
+  @Patch('/:organizationId/quota/:regionId')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Update organization region quota',
+    operationId: 'updateOrganizationRegionQuota',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Region quota updated successfully',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'regionId',
+    description: 'ID of the region where the updated quota will be applied',
+    type: 'string',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @Audit({
+    action: AuditAction.UPDATE_REGION_QUOTA,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      params: (req) => ({
+        regionId: req.params.regionId,
+      }),
+      body: (req: TypedRequest<UpdateOrganizationRegionQuotaDto>) => ({
+        totalCpuQuota: req.body?.totalCpuQuota,
+        totalMemoryQuota: req.body?.totalMemoryQuota,
+        totalDiskQuota: req.body?.totalDiskQuota,
+      }),
+    },
+  })
+  async updateOrganizationRegionQuota(
+    @Param('organizationId') organizationId: string,
+    @Param('regionId') regionId: string,
+    @Body() updateDto: UpdateOrganizationRegionQuotaDto,
+  ): Promise<void> {
+    await this.organizationService.updateRegionQuota(organizationId, regionId, updateDto)
   }
 
   @Post('/:organizationId/leave')
@@ -445,6 +529,32 @@ export class OrganizationController {
     }
 
     return OrganizationDto.fromOrganization(organization)
+  }
+
+  @Get('/region-quota/by-sandbox-id/:sandboxId')
+  @ApiOperation({
+    summary: 'Get region quota by sandbox ID',
+    operationId: 'getRegionQuotaBySandboxId',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Region quota',
+    type: RegionQuotaDto,
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'Sandbox ID',
+    type: 'string',
+  })
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  async getRegionQuotaBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RegionQuotaDto> {
+    const regionQuota = await this.organizationService.getRegionQuotaBySandboxId(sandboxId)
+    if (!regionQuota) {
+      throw new NotFoundException(`Region quota for sandbox with ID ${sandboxId} not found`)
+    }
+
+    return regionQuota
   }
 
   @Post('/:organizationId/sandbox-default-limited-network-egress')
