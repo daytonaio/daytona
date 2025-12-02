@@ -2,45 +2,208 @@
 title: 制限
 ---
 
-Daytonaは、すべての組織での公平な利用と安定性を確保するため、リソース制限を適用しています。組織は、次のリソースで構成されるコンピュートプールにアクセスできます:
+Daytona では、すべての組織に対して公平な利用と安定性を確保するため、リソースおよびリクエストに制限を設けています。
 
-- **vCPU** — 利用可能なCPUコアの総数
-- **Memory** — 利用可能なRAMの総量
-- **Storage** — 利用可能なディスク容量の総量
+## リソース制限 \{#resource-limits\}
 
-これらのリソースはプールされ、稼働中のすべてのサンドボックス間で共有されます。\
-同時に実行できるサンドボックス数は、各サンドボックスが使用するCPU、RAM、ストレージの量によって異なります。リソース使用量の設定や見積もり方法は、[サンドボックス管理のドキュメント](https://www.daytona.io/docs/sandbox-management/)を参照してください。
+リソースは起動中のすべてのサンドボックス間で共有されるため、一度に実行できるサンドボックスの数は、それぞれの使用状況に左右されます。
+組織では、次の構成要素から成るコンピュートプールにアクセスできます：
 
-## ティアと上限引き上げ
+* **vCPU** — 利用可能な CPU コアの合計数
+* **Memory** — 利用可能な RAM の合計量
+* **Storage** — 利用可能なディスク容量の合計
 
-組織は認証状況に基づいて自動的にティアに割り当てられます。\
-以下の手順を完了すると、より高い上限を利用できるようになります:
+デフォルト値および利用設定の方法については、[Sandbox Resources](/docs/ja/sandbox-management/#sandbox-resources) を参照してください。現在の使用状況と制限は [Dashboard](https://app.daytona.io/dashboard/limits) で確認できます。
 
-| ティア   | リソース (vCPU / RAM / Storage) | アクセス要件                                                                                                            |
+### ティアとリソース上限の引き上げ \{#tiers-resource-limit-increases\}
+
+組織は、認証状況に基づいて自動的にティアに割り当てられます。\
+以下の条件を満たすことで、より高い上限を利用できるようになります。
+
+| ティア | リソース (vCPU / RAM / Storage) | アクセス要件                                                                                                             |
 | ------ | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| ティア 1 | 10 / 10GiB / 30GiB               | メール認証済み                                                                                                          |
-| ティア 2 | 100 / 200GiB / 300GiB            | クレジットカード連携、$25 のチャージ、[GitHub 連携](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account)。 |
-| ティア 3 | 250 / 500GiB / 2000GiB           | 企業メール認証済み、電話番号認証済み、$500 のチャージ。                                                                   |
-| ティア 4 | 500 / 1000GiB / 5000GiB          | 30 日ごとに $2000 のチャージ。                                                                                           |
-| カスタム | カスタム上限                      | [support@daytona.io](mailto:support@daytona.io) までご連絡ください                                                       |
+| Tier 1 | 10 / 10GiB / 30GiB               | メールアドレス認証済み                                                                                                  |
+| Tier 2 | 100 / 200GiB / 300GiB            | クレジットカード連携、$25 のチャージ、[GitHub 連携済み](/docs/ja/linked-accounts#how-to-link-an-account)。 |
+| Tier 3 | 250 / 500GiB / 2000GiB           | ビジネスメールアドレス認証済み、電話番号認証済み、$500 のチャージ。                                                     |
+| Tier 4 | 500 / 1000GiB / 5000GiB          | 30 日ごとに $2000 をチャージ。                                                                                          |
+| Custom | カスタム上限                     | [support@daytona.io](mailto:support@daytona.io) までお問い合わせください                                                 |
 
-より高いティアの条件を満たしたら、[Dashboard](https://app.daytona.io/dashboard/limits) の「Upgrade」ボタンをクリックしてアップグレードしてください。
+上位ティアの条件を満たしたら、[Dashboard](https://app.daytona.io/dashboard/limits) の「Upgrade」ボタンをクリックしてアップグレードしてください。
 
-:::tip
+### 利用量を動的に管理する \{#manage-usage-dynamically\}
 
-### 利用状況を動的に管理する
+サンドボックスの[状態を変更する](/docs/sandbox-management#sandbox-lifecycle)ことで、リソースの利用状況を管理できます。以下の表は、それぞれの状態がリソース利用にどのように影響するかをまとめたものです。
 
-サンドボックスの状態によるリソースへの影響は次のとおりです:
+| State      | vCPU    | Memory  | Storage | Notes                                                      |
+|------------|---------|---------|---------|------------------------------------------------------------|
+| Running    |   ✅    |   ✅     |  ✅     | すべてのリソース制限に対して消費としてカウントされる       |
+| Stopped    |   ❌    |   ❌     |  ✅     | CPU とメモリは解放されるが、ストレージは引き続き使用される |
+| Archived   |   ❌    |   ❌     |  ❌     | データはコールドストレージに移動され、クォータへの影響はない |
+| Deleted    |   ❌    |   ❌     |  ❌     | すべてのリソースが解放される                               |
 
-- **Running:** Compute、Memory、Storage を使用します。
-- **Stopped:** Compute と Memory は解放されますが、Storage は引き続き使用します。
-- **Archived:** データをコールドストレージに移し、すべてのリソースを解放します。
-- **Deleted:** 完全に削除され、すべてのリソースが解放されます。
+詳細については、[Sandbox Management](/docs/ja/sandbox-management/) を参照してください。
 
+***
+
+## API リクエストのレート制限 \{#api-request-rate-limits\}
+
+リクエストのレート制限は、利用中のプラン、認証状態、および実行する操作の種類に応じて適用されます。
+
+### ティアとレート制限の引き上げ \{#tiers-rate-limit-increases\}
+
+レート制限は、特定の時間枠内に実行できる API リクエスト数を制御します。これらの制限を理解しておくことで、レート制限を適切に処理し、サービス中断を回避できる堅牢なアプリケーションを構築できます。
+
+| ティア | 一般リクエスト（1 分あたり） | サンドボックス作成（1 分あたり） | サンドボックスライフサイクル操作（1 分あたり） |
+|--------|------------------------------|-----------------------------------|--------------------------------------------------|
+| ティア 1 | 10,000                       | 300                               | 10,000                                           |
+| ティア 2 | 20,000                       | 400                               | 20,000                                           |
+| ティア 3 | 40,000                       | 500                               | 40,000                                           |
+| ティア 4 | 50,000                       | 600                               | 50,000                                           |
+| カスタム | カスタム制限                  | カスタム制限                      | カスタム制限                                     |
+
+### 一般的な API リクエスト \{#general-api-requests\}
+
+これは、サンドボックスの作成やライフサイクル操作に該当しない認証済み API リクエストに適用される一般的なレート制限です。これには次のものが含まれます：
+
+* サンドボックスの一覧取得
+* サンドボックス詳細の取得
+* サンドボックスのリージョン情報の取得
+* スナップショットの一覧取得
+* ボリュームの管理
+* 監査ログの閲覧
+* その他の読み取り／管理操作
+
+一般的な認証済みリクエストに対するレート制限は、組織ごとに管理されます。
+
+***
+
+### サンドボックスの作成 \{#sandbox-creation\}
+
+このレート制限は、スナップショットからの作成、宣言的ビルド、`daytona.create()`（SDK）にその他のパラメータを指定した場合や `/api/sandbox`（API）への POST リクエストなど、すべてのサンドボックス作成方法に適用されます。
+
+この独立した上限により、リソースの枯渇を防ぎつつ、既存のサンドボックスに対するライフサイクル操作は制限なく実行できます。
+
+:::note
+お使いのユースケースで、より高い頻度でサンドボックスを作成する必要がある場合は、カスタムレート制限についてご相談いただくために [support@daytona.io](mailto:support@daytona.io) までご連絡ください。
 :::
 
-現在の使用量と上限は [Dashboard](https://app.daytona.io/dashboard/limits) で確認できます。
+***
 
-## さらに必要ですか？
+### サンドボックスのライフサイクル操作 \{#sandbox-lifecycle-operations\}
+
+このレート制限は、既存のサンドボックスに対するライフサイクルおよび状態管理操作に適用されます：
+
+* サンドボックスの**起動** (`POST /api/sandbox/:id/start`)
+* サンドボックスの**停止** (`POST /api/sandbox/:id/stop`)
+* サンドボックスの**削除** (`DELETE /api/sandbox/:id`)
+* サンドボックスの**アーカイブ** (`POST /api/sandbox/:id/archive`)
+
+およびそれに対応するすべての SDK メソッド。
+
+これらの操作は、開発ワークフロー中により頻繁に実行されることが多いため、より高い上限が設定されています。
+
+***
+
+### 制限に達した場合の挙動 \{#what-happens-when-you-hit-the-limit\}
+
+レート制限を超過すると、それ以降のリクエストは失敗し、次の応答が返されます。
+
+* **HTTP ステータス**: `429 Too Many Requests`
+* **エラーレスポンス**: レート制限の詳細を含む JSON ボディ
+* **Retry-After ヘッダー**: 再試行までに待機する必要がある時間（秒単位）
+
+#### SDK の動作 \{#sdk-behavior\}
+
+公式の Daytona SDK を使用している場合:
+
+* **TypeScript SDK**: `DaytonaRateLimitError` をスローします
+* **Python SDK**: `DaytonaRateLimitError` を送出します
+
+すべてのエラーには `headers` と `statusCode` プロパティが含まれており、エラーオブジェクトから直接レート制限ヘッダーにアクセスできます。ヘッダーは大文字・小文字を区別せずに参照できます:
+
+```typescript
+// TypeScript - 大文字小文字を区別しないアクセスには .get() を使用します
+try {
+  await daytona.create()
+} catch (error) {
+  if (error instanceof DaytonaRateLimitError) {
+    console.log(error.headers?.get('x-ratelimit-remaining-sandbox-create'))
+    console.log(error.headers?.get('X-RateLimit-Remaining-Sandbox-Create')) // こちらも動作します
+  }
+}
+```
+
+```python
+# Python - ヘッダーは大文字小文字を区別せずにアクセス可能
+try:
+    daytona.create(snapshot="my-snapshot")
+except DaytonaRateLimitError as e:
+    print(e.headers['x-ratelimit-remaining-sandbox-create'])
+    print(e.headers['X-RateLimit-Remaining-Sandbox-Create'])  # 同様に動作します
+```
+
+#### エラーレスポンスの例 \{#example-error-response\}
+
+```json
+{
+  "statusCode": 429,
+  "message": "レート制限を超過しました",
+  "error": "リクエスト数が多すぎます"
+}
+```
+
+***
+
+### レート制限ヘッダー \{#rate-limit-headers\}
+
+Daytona は API レスポンスヘッダーにレート制限に関する情報を含めています。ヘッダー名には、どのレート制限に対応するかに基づいたサフィックスが付きます（例: `-anonymous`, `-authenticated`, `-sandbox-create`, `-sandbox-lifecycle`）:
+
+| Header Pattern                       | Description                                                               |
+|--------------------------------------|---------------------------------------------------------------------------|
+| `X-RateLimit-Limit-{throttler}`      | 時間枠内で許可される最大リクエスト数                                     |
+| `X-RateLimit-Remaining-{throttler}`  | 現在の時間枠内で残っているリクエスト数                                   |
+| `X-RateLimit-Reset-{throttler}`      | レート制限の時間枠がリセットされるまでの秒数                             |
+| `Retry-After-{throttler}`            | 再試行までに待機する秒数（制限超過時に含まれる）                         |
+
+### ベストプラクティス \{#best-practices\}
+
+レート制限の範囲内で効率的に動作させるため、常に `429` エラーを適切なリトライロジックで確実に処理してください。レート制限エラーを受け取った場合は、指数バックオフを実装し、API に過負荷をかけないようにリトライ間隔を徐々に長くします（1 秒、2 秒、4 秒、8 秒など）。以下はその例です：
+
+```typescript
+async function createSandboxWithRetry() {
+  let retries = 0
+  const maxRetries = 5
+
+  while (retries < maxRetries) {
+    try {
+      return await daytona.create({ snapshot: 'my-snapshot' })
+    } catch (error) {
+      if (error instanceof DaytonaRateLimitError && retries < maxRetries - 1) {
+        // Retry-Afterヘッダーが利用可能な場合はそれを使用、それ以外は指数バックオフを使用
+        const retryAfter = error.headers?.get('retry-after-sandbox-create')
+        const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, retries) * 1000
+        await new Promise(resolve => setTimeout(resolve, delay))
+        retries++
+      } else {
+        throw error
+      }
+    }
+  }
+}
+```
+
+**レート制限ヘッダー**（例: `X-RateLimit-Remaining-{throttler}`、`X-RateLimit-Reset-{throttler}`）を監視し、利用状況を追跡して、上限に達する前に事前のスロットリングを実装してください。これらのヘッダーは、すべてのエラーオブジェクトの `headers` プロパティから参照できます。
+
+**頻繁に変化しない API レスポンスをキャッシュ**しましょう。たとえば、（比較的静的な）サンドボックス一覧、利用可能なリージョン、スナップショット情報などです。これにより不要な API コールが減り、レート制限の範囲内に余裕を持って収めることができます。
+
+**操作をバッチ化・最適化**し、逐次ではなく（レート制限の範囲内で）複数のサンドボックスを並列に作成するようにします。可能な場合は、毎回新しいサンドボックスを作成するのではなく、既存のサンドボックスを再利用することも検討してください。
+
+**サンドボックスのライフサイクルを効率的に管理**して API コールを減らします。サンドボックスを削除して再作成するのではなくアーカイブしたり、不要なときは削除するのではなく停止するようにし、[自動停止間隔](/docs/ja/sandbox-management#auto-stop) を活用して、手動操作なしで稼働中のサンドボックスを自動的に管理します。
+
+**リクエストのキューイングを実装**して、レート制限を超えるバーストを防ぎ、状態変化の検知にはポーリングの代わりに [webhooks](/docs/ja/webhooks) を利用して不要な API コールを避けます。アプリケーションログ内の `429` エラーに対してモニタリングとアラートを設定し、ユーザーに影響が出る前にレート制限の問題へ積極的に対処できるようにしてください。
+
+***
+
+## さらに必要ですか？ \{#need-more\}
 
 より高い、または特別な上限が必要な場合は、[support@daytona.io](mailto:support@daytona.io) までお問い合わせください。
