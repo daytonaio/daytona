@@ -26,4 +26,11 @@ RUN curl -fL https://app.getambassador.io/download/tel2oss/releases/download/v2.
 
 RUN echo "address=/proxy.localhost/127.0.0.1" >> /etc/dnsmasq.conf
 
+# Create non-root user and grant full Python access
+RUN useradd -m -s /bin/bash daytona && \
+    PYTHON_VERSION_DIR=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')") && \
+    mkdir -p "/usr/local/lib/python${PYTHON_VERSION_DIR}/dist-packages" && \
+    chown -R daytona:daytona /usr/local /usr/lib/python3 "/usr/local/lib/python${PYTHON_VERSION_DIR}" && \
+    chmod -R u+w /usr/local /usr/lib/python3 "/usr/local/lib/python${PYTHON_VERSION_DIR}"
+
 CMD ["sh", "-c", "service dnsmasq start && echo 'nameserver 127.0.0.1' > /etc/resolv.conf && tail -f /dev/null"]
