@@ -52,8 +52,5 @@ RUN mkdir -p /usr/local/lib && sudo chown daytona:daytona /usr/local/lib
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-# Create .zshrc to suppress zsh-newuser-install prompt
-RUN touch ~/.zshrc
-
 # Keep the container running indefinitely
 ENTRYPOINT [ "sleep", "infinity" ]
