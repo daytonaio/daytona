@@ -3,6 +3,8 @@ go 1.25.4
 use (
 	./apps/cli
 	./apps/daemon
+	./apps/otel-collector/dist
+	./apps/otel-collector/exporter
 	./apps/otel-proxy
 	./apps/proxy
 	./apps/runner

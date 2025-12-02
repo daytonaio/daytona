@@ -1,0 +1,19 @@
+dist:
+  name: daytona-otel-collector
+  description: Daytona OpenTelemetry Collector
+  output_path: dist
+
+exporters:
+  - gomod: github.com/daytonaio/otel-collector/exporter v0.0.1
+    name: daytona_exporter
+    path: ./exporter
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.140.0
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.140.0
+  - gomod: go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.140.0
+
+extensions:
+  - gomod: go.opentelemetry.io/collector/extension/zpagesextension v0.140.0
