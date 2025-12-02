@@ -171,7 +171,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     regionId: string,
     updateDto: UpdateOrganizationRegionQuotaDto,
   ): Promise<void> {
-    const regionQuota = await this.getRegionQuota(organizationId, regionId)
+    const regionQuota = await this.regionQuotaRepository.findOne({ where: { organizationId, regionId } })
     if (!regionQuota) {
       throw new NotFoundException('Region not found')
     }
