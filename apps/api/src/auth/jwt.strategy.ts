@@ -48,7 +48,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(request: Request, payload: any): Promise<AuthContext> {
-    const userId = payload.sub
+    // OKTA does not return the userId in access_token sub claim
+    // real userId is in the uid claim and email is in the sub claim
+    let userId = payload.sub
+    let email = payload.email
+    if (payload.cid && payload.uid) {
+      userId = payload.uid
+      email = payload.sub
+    }
     let user = await this.userService.findOne(userId)
 
     if (user && !user.emailVerified && payload.email_verified) {
@@ -61,7 +68,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       user = await this.userService.create({
         id: userId,
         name: payload.name || payload.username || 'Unknown',
-        email: payload.email || '',
+        email: email || '',
         emailVerified: payload.email_verified || false,
         personalOrganizationQuota: this.configService.getOrThrow('defaultOrganizationQuota'),
       })
@@ -69,12 +76,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     } else if (user.name === 'Unknown' || !user.email) {
       await this.userService.update(user.id, {
         name: payload.name || payload.username || 'Unknown',
-        email: payload.email || '',
+        email: email || '',
       })
       this.logger.debug(`Updated name and email address for existing user with ID: ${userId}`)
     } else if (user.email !== payload.email) {
       await this.userService.update(user.id, {
-        email: payload.email || '',
+        email: email || '',
       })
       this.logger.debug(`Updated email address for existing user with ID: ${userId}`)
     }
