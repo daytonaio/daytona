@@ -1,1871 +1,2829 @@
 ---
 title: API
-description: Daytona APIで利用可能な操作のリファレンス。
+description: Daytona API で利用可能な操作のリファレンス。
 ---
 
 import Label from '@components/Label.astro'
 
-## POST /api-keys
+## GET /config \{#get-config\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`201`** | APIキーが正常に作成されました。 |
+| ステータスコード | 説明                    |
+| :--------------- | :---------------------- |
+| **`200`**        | Daytona の設定          |
 
-## GET /api-keys
+## POST /api-keys \{#post-api-keys\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | APIキーが正常に取得されました。 |
-| **`500`** | APIキーの取得中にエラーが発生しました。 |
+| Name                            | Location | Required | Type      | Description                                     |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
 
+### レスポンス \{#responses\}
 
-## GET /api-keys/current
+| ステータスコード | 説明                    |
+| :--------------- | :---------------------- |
+| **`201`**        | API キーの作成に成功しました。 |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）の ID を指定します |
+## GET /api-keys \{#get-api-keys\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | APIキーが正常に取得されました。 |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                             |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します |
 
-## GET /api-keys/\{name\}
+### レスポンス \{#responses\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | いいえ | undefined | JWT と併用して 組織（Organization）の ID を指定します |
-| **`name`** | path | はい | undefined | undefined |
+| ステータスコード | 説明                         |
+| :--------------- | :--------------------------- |
+| **`200`**        | API キーを正常に取得しました。 |
+| **`500`**        | API キーの取得中にエラーが発生しました。 |
 
-### レスポンス
+## GET /api-keys/current \{#get-api-keyscurrent\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                          |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明                       |
+| :---------- | :------------------------ |
+| **`200`**   | API キーの取得に成功。 |
+
+## GET /api-keys/{name} \{#get-api-keysname\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`name`**                      | path     | true     | undefined | undefined                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                         |
+| :---------- | :------------------------------ |
+| **`200`**   | API キーの取得に成功しました。 |
+
+## DELETE /api-keys/{name} \{#delete-api-keysname\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`name`**                      | path     | true     | undefined | undefined                                           |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                        |
+| :--------------- | :-------------------------- |
+| **`204`**        | API キーが正常に削除されました。 |
+
+## DELETE /api-keys/{userId}/{name} \{#delete-api-keysuseridname\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                    |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します |
+| **`userId`**                    | path     | true     | undefined | undefined                                      |
+| **`name`**                      | path     | true     | undefined | undefined                                      |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                          |
+| :--------------- | :--------------------------- |
+| **`204`**        | API キーが正常に削除されました。 |
+
+## GET /organizations/invitations \{#get-organizationsinvitations\}
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                     |
+| :--------------- | :----------------------- |
+| **`200`**        | 組織への招待の一覧       |
+
+## GET /organizations/invitations/count \{#get-organizationsinvitationscount\}
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                   |
+| :---------- | :------------------------ |
+| **`200`**   | 組織への招待数            |
+
+## POST /organizations/invitations/{invitationId}/accept \{#post-organizationsinvitationsinvitationidaccept\}
+
+### パラメータ \{#parameters\}
+
+| Name               | Location | Required | Type      | Description   |
+| :----------------- | :------- | :------- | :-------- | :------------ |
+| **`invitationId`** | path     | true     | undefined | 招待 ID |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                           |
+| :---------- | :-------------------------------- |
+| **`200`**   | 組織への招待が正常に承諾されました |
+
+## POST /organizations/invitations/{invitationId}/decline \{#post-organizationsinvitationsinvitationiddecline\}
+
+### パラメーター \{#parameters\}
+
+| 名前               | 位置   | 必須  | 型        | 説明           |
+| :----------------- | :----- | :---- | :-------- | :------------- |
+| **`invitationId`** | path   | true  | undefined | 招待 ID        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                  |
+| :--------------- | :------------------------------------ |
+| **`200`**        | 組織への招待を正常に辞退しました |
+
+## POST /organizations \{#post-organizations\}
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                  |
+| :--------------- | :-------------------- |
+| **`201`**        | 組織が正常に作成されました |
+
+## GET /organizations \{#get-organizations\}
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明             |
+| :---------- | :-------------------- |
+| **`200`**   | 組織のリスト |
+
+## GET /organizations/{organizationId} \{#get-organizationsorganizationid\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明           |
+| :---------- | :------------- |
+| **`200`**   | 組織の詳細情報 |
+
+## DELETE /organizations/{organizationId} \{#delete-organizationsorganizationid\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                       |
+| :---------- | :-------------------------------- |
+| **`204`**   | 組織が正常に削除されました |
+
+## GET /organizations/{organizationId}/usage \{#get-organizationsorganizationidusage\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明               |
+| :---------- | :--------------------- |
+| **`200`**   | 現在の利用状況の概要   |
+
+## PATCH /organizations/{organizationId}/quota \{#patch-organizationsorganizationidquota\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description   |
+| :------------------- | :------- | :------- | :-------- | :------------ |
+| **`organizationId`** | path     | true     | undefined | 組織 ID        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明           |
+| :---------- | :------------------- |
+| **`200`**   | 組織の詳細 |
+
+## POST /organizations/{organizationId}/leave \{#post-organizationsorganizationidleave\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID      |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                   |
+| :---------- | :------------------------ |
+| **`204`**   | 組織から正常に退出しました |
+
+## POST /organizations/{organizationId}/suspend \{#post-organizationsorganizationidsuspend\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明                       |
+| :---------- | :------------------------ |
+| **`204`**   | 組織が正常に停止されました |
+
+## POST /organizations/{organizationId}/unsuspend \{#post-organizationsorganizationidunsuspend\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### Responses \{#responses\}
+
+| Status Code | Description              |
+| :---------- | :----------------------- |
+| **`204`**   | 組織の一時停止が正常に解除された |
+
+## GET /organizations/by-sandbox-id/{sandboxId} \{#get-organizationsby-sandbox-idsandboxid\}
+
+### パラメーター \{#parameters\}
+
+| 名前           | 位置     | 必須     | 型        | 説明        |
+| :-------------- | :------- | :------- | :-------- | :---------- |
+| **`sandboxId`** | path     | true     | undefined | サンドボックス ID |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明     |
+| :---------- | :----------- |
+| **`200`**   | Organization オブジェクト |
+
+## POST /organizations/{organizationId}/sandbox-default-limited-network-egress \{#post-organizationsorganizationidsandbox-default-limited-network-egress\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                                  |
+| :--------------- | :---------------------------------------------------- |
+| **`204`**        | サンドボックスのデフォルトの制限付きネットワークエグレスが正常に更新されました |
+
+## POST /organizations/{organizationId}/roles \{#post-organizationsorganizationidroles\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description      |
+| :------------------- | :------- | :------- | :-------- | :--------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                            |
+| :---------- | :------------------------------------- |
+| **`201`**   | 組織ロールが正常に作成されました |
+
+## GET /organizations/{organizationId}/roles \{#get-organizationsorganizationidroles\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID      |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                   |
+| :--------------- | :---------------------- |
+| **`200`**        | 組織ロールのリスト     |
+
+## PUT /organizations/{organizationId}/roles/{roleId} \{#put-organizationsorganizationidrolesroleid\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description     |
+| :------------------- | :------- | :------- | :-------- | :-------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID         |
+| **`roleId`**         | path     | true     | undefined | ロール ID       |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                     |
+| :---------- | :------------------------ |
+| **`200`**   | ロールが正常に更新されました |
+
+## DELETE /organizations/{organizationId}/roles/{roleId} \{#delete-organizationsorganizationidrolesroleid\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description        |
+| :------------------- | :------- | :------- | :-------- | :----------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID            |
+| **`roleId`**         | path     | true     | undefined | ロール ID          |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                    |
+| :--------------- | :--------------------- |
+| **`204`**        | 組織ロールを正常に削除しました |
+
+## GET /organizations/{organizationId}/users \{#get-organizationsorganizationidusers\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description     |
+| :------------------- | :------- | :------- | :-------- | :-------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                   |
+| :---------- | :--------------------------- |
+| **`200`**   | 組織メンバーのリスト |
+
+## POST /organizations/{organizationId}/users/{userId}/access \{#post-organizationsorganizationidusersuseridaccess\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+| **`userId`**         | path     | true     | undefined | ユーザー ID |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                 |
+| :--------------- | :------------------ |
+| **`200`**        | アクセスが正常に更新されました |
+
+| ステータスコード | 説明                         |
+| :--------------- | :-------------------------- |
+| **`200`**        | 割り当てられたロールが正常に更新されました |
+
+## DELETE /organizations/{organizationId}/users/{userId} \{#delete-organizationsorganizationidusersuserid\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description      |
+| :------------------- | :------- | :------- | :-------- | :--------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID          |
+| **`userId`**         | path     | true     | undefined | ユーザー ID      |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                         |
+| :---------- | :-------------------------- |
+| **`204`**   | ユーザーが組織から正常に削除された |
+
+## POST /organizations/{organizationId}/invitations \{#post-organizationsorganizationidinvitations\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                     |
+| :--------------- | :---------------------- |
+| **`201`**        | 組織への招待を作成しました |
+
+## GET /organizations/{organizationId}/invitations \{#get-organizationsorganizationidinvitations\}
+
+### パラメーター \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                  |
+| :--------------- | :----------------------------------- |
+| **`200`**        | 保留中の組織への招待の一覧           |
+
+## PUT /organizations/{organizationId}/invitations/{invitationId} \{#put-organizationsorganizationidinvitationsinvitationid\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description     |
+| :------------------- | :------- | :------- | :-------- | :-------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID         |
+| **`invitationId`**   | path     | true     | undefined | 招待 ID         |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                   |
+| :--------------- | :-------------------------------------- |
+| **`200`**        | 組織の招待が正常に更新されました |
+
+## POST /organizations/{organizationId}/invitations/{invitationId}/cancel \{#post-organizationsorganizationidinvitationsinvitationidcancel\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description     |
+| :------------------- | :------- | :------- | :-------- | :-------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID          |
+| **`invitationId`**   | path     | true     | undefined | 招待 ID          |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                             |
+| :--------------- | :-------------------------------- |
+| **`204`**        | 組織への招待が正常にキャンセルされました |
+
+## GET /users/me \{#get-usersme\}
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明         |
+| :---------- | :----------- |
+| **`200`**   | ユーザー情報   |
+
+## POST /users \{#post-users\}
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | APIキーが正常に取得されました。 |
+| :---------- | :---------- |
+| **`201`**   |             |
 
-## DELETE /api-keys/\{name\}
+## GET /users \{#get-users\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`name`** | path | true | undefined | undefined |
+### レスポンス \{#responses\}
 
-### レスポンス
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | APIキーは正常に削除されました。 |
+| :---------- | :---------- |
+| **`200`**   |             |
 
+## POST /users/{id}/regenerate-key-pair \{#post-usersidregenerate-key-pair\}
 
-## GET /organizations/invitations
+### パラメータ \{#parameters\}
 
-### 応答
+| Name     | Location | Required | Type      | Description |
+| :------- | :------- | :------- | :-------- | :---------- |
+| **`id`** | path     | true     | undefined | undefined   |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 組織の招待一覧 |
+| :---------- | :---------- |
+| **`201`**   |             |
 
+## GET /users/account-providers \{#get-usersaccount-providers\}
 
-## GET /organizations/invitations/count
+### レスポンス \{#responses\}
 
-### レスポンス
+| ステータスコード | 説明                     |
+| :--------------- | :---------------------- |
+| **`200`**        | 利用可能なアカウントプロバイダ |
+
+## POST /users/linked-accounts \{#post-userslinked-accounts\}
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明               |
+| :--------------- | :----------------- |
+| **`204`**        | アカウントの連携に成功 |
+
+## DELETE /users/linked-accounts/{provider}/{providerUserId} \{#delete-userslinked-accountsproviderprovideruserid\}
+
+### パラメータ \{#parameters\}
+
+| Name                 | Location | Required | Type      | Description |
+| :------------------- | :------- | :------- | :-------- | :---------- |
+| **`provider`**       | path     | true     | undefined | undefined   |
+| **`providerUserId`** | path     | true     | undefined | undefined   |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                      |
+| :--------------- | :------------------------ |
+| **`204`**        | アカウントの連携解除に成功しました |
+
+## POST /users/mfa/sms/enroll \{#post-usersmfasmsenroll\}
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明            |
+| :---------- | :---------------- |
+| **`200`**   | SMS MFA 登録用 URL |
+
+## GET /users/{id} \{#get-usersid\}
+
+### パラメータ \{#parameters\}
+
+| Name     | Location | Required | Type      | Description |
+| :------- | :------- | :------- | :-------- | :---------- |
+| **`id`** | path     | true     | undefined | undefined   |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明        |
+| :---------- | :----------- |
+| **`200`**   | ユーザー情報 |
+
+## GET /sandbox \{#get-sandbox\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                     |
+| **`verbose`**                   | query    | false    | undefined | 詳細な出力を有効にします                               |
+| **`labels`**                    | query    | false    | undefined | フィルターに使用する JSON エンコード済みのラベルを指定します |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                  |
+| :--------------- | :-------------------- |
+| **`200`**        | すべてのサンドボックスのリスト |
+
+## GET /sandbox/paginated \{#get-sandboxpaginated\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                       |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用します                          |
+| **`page`**                      | query    | false    | undefined | 結果のページ番号                                                  |
+| **`limit`**                     | query    | false    | undefined | 1 ページあたりの結果数                                            |
+| **`id`**                        | query    | false    | undefined | ID の部分一致によるフィルタリング                                 |
+| **`labels`**                    | query    | false    | undefined | フィルタリングに使用する JSON エンコードされたラベル             |
+| **`includeErroredDeleted`**     | query    | false    | undefined | エラー状態および削除済みの desired state を持つ結果を含めます     |
+| **`states`**                    | query    | false    | undefined | フィルタリングに使用する state の一覧                             |
+| **`snapshots`**                 | query    | false    | undefined | フィルタリングに使用するスナップショット名の一覧                  |
+| **`regions`**                   | query    | false    | undefined | フィルタリングに使用するリージョンの一覧                          |
+| **`minCpu`**                    | query    | false    | undefined | 最小 CPU                                                          |
+| **`maxCpu`**                    | query    | false    | undefined | 最大 CPU                                                          |
+| **`minMemoryGiB`**              | query    | false    | undefined | 最小メモリ (GiB)                                                  |
+| **`maxMemoryGiB`**              | query    | false    | undefined | 最大メモリ (GiB)                                                  |
+| **`minDiskGiB`**                | query    | false    | undefined | 最小ディスク容量 (GiB)                                            |
+| **`maxDiskGiB`**                | query    | false    | undefined | 最大ディスク容量 (GiB)                                            |
+| **`lastEventAfter`**            | query    | false    | undefined | 最後のイベントがこのタイムスタンプより後に発生した項目を含めます   |
+| **`lastEventBefore`**           | query    | false    | undefined | 最後のイベントがこのタイムスタンプより前に発生した項目を含めます   |
+| **`sort`**                      | query    | false    | undefined | ソート対象のフィールド                                            |
+| **`order`**                     | query    | false    | undefined | ソート方向                                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                           |
+| :--------------- | :----------------------------- |
+| **`200`**        | すべてのサンドボックスのページネーションされた一覧 |
+
+## POST /sandbox \{#post-sandbox\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                             |
+| :--------------- | :------------------------------ |
+| **`200`**        | サンドボックスが正常に作成されました。 |
+
+## GET /sandbox/regions \{#get-sandboxregions\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                                |
+| :---------- | :------------------------------------------------ |
+| **`200`**   | サンドボックスが作成されているリージョンのリスト |
+
+## GET /sandbox/for-runner \{#get-sandboxfor-runner\}
+
+### パラメーター \{#parameters\}
+
+| 名前                            | 場所     | 必須     | 型        | 説明                                                         |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                           |
+| **`states`**                    | query    | false    | undefined | フィルタリング対象とするサンドボックス状態のカンマ区切りリスト |
+| **`skipReconcilingSandboxes`**  | query    | false    | undefined | 望ましい状態と異なる状態にあるサンドボックスをスキップします    |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                           |
+| :--------------- | :-------------------------------------------- |
+| **`200`**        | 認証済みランナーに紐づくサンドボックスの一覧 |
+
+## GET /sandbox/{sandboxIdOrName} \{#get-sandboxsandboxidorname\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                        |
+| **`verbose`**                   | query    | false    | undefined | 詳細な出力を含めるかどうか                            |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明             |
+| :--------------- | :--------------- |
+| **`200`**        | サンドボックスの詳細 |
+
+## DELETE /sandbox/{sandboxIdOrName} \{#delete-sandboxsandboxidorname\}
+
+### パラメータ \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                             |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用します |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前          |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                       |
+| :---------- | :------------------------- |
+| **`200`**   | サンドボックスが削除されました |
+
+## POST /sandbox/{sandboxIdOrName}/start \{#post-sandboxsandboxidornamestart\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します        |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                                         |
+| :--------------- | :---------------------------------------------------------- |
+| **`200`**        | サンドボックスが起動済み、またはアーカイブ状態から復元中である |
+
+| ステータスコード | 説明                 |
+| :--------------- | :------------------ |
+| **`200`**        | サンドボックスが起動済み |
+
+## POST /sandbox/{sandboxIdOrName}/stop \{#post-sandboxsandboxidornamestop\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します    |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                      |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                   |
+| :---------- | :---------------------- |
+| **`200`**   | サンドボックスが停止済みです |
+
+## PUT /sandbox/{sandboxIdOrName}/labels \{#put-sandboxsandboxidornamelabels\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                |
+| :--------------- | :---------------------------------- |
+| **`200`**        | ラベルが正常に置換されました |
+
+## PUT /sandbox/{sandboxIdOrName}/state \{#put-sandboxsandboxidornamestate\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                     |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して、組織 ID を指定するために使用します             |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                                |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                               |
+| :---------- | :------------------------------------ |
+| **`200`**   | サンドボックスの状態が正常に更新されました |
+
+## POST /sandbox/{sandboxIdOrName}/backup \{#post-sandboxsandboxidornamebackup\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します           |
+| **`sandboxId`**                 | path     | true     | undefined | サンドボックスの ID                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                           |
+| :-------------- | :----------------------------- |
+| **`200`**       | サンドボックスのバックアップを開始しました |
+
+## POST /sandbox/{sandboxIdOrName}/public/{isPublic} \{#post-sandboxsandboxidornamepublicispublic\}
+
+### パラメーター \{#parameters\}
+
+| 名前                            | 位置     | 必須     | 型        | 説明                                                |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用します           |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                     |
+| **`isPublic`**                  | path     | true     | undefined | 設定する公開状態                                   |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 組織の招待数 |
+| :---------- | :---------- |
+| **`201`**   |             |
 
+## POST /sandbox/{sandboxIdOrName}/autostop/{interval} \{#post-sandboxsandboxidornameautostopinterval\}
 
-## POST /organizations/invitations/\{invitationId\}/accept
+### パラメーター \{#parameters\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`invitationId`** | path | true | undefined | 招待ID |
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します     |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                      |
+| **`interval`**                  | path     | true     | undefined | 自動停止までの間隔（分単位、0 で無効化）            |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 組織（Organization）の招待を正常に承諾しました |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明                       |
+| :--------------- | :------------------------ |
+| **`200`**        | 自動停止間隔が設定されました |
 
-## POST /organizations/invitations/\{invitationId\}/decline
+## POST /sandbox/{sandboxIdOrName}/autoarchive/{interval} \{#post-sandboxsandboxidornameautoarchiveinterval\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`invitationId`** | path | true | undefined | 招待ID |
+### パラメーター \{#parameters\}
 
-### レスポンス
+| Name                            | Location | Required | Type      | Description                                                                                     |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                                                              |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                                                                  |
+| **`interval`**                  | path     | true     | undefined | 自動アーカイブ間隔（分）。0 の場合は最大の間隔が使用されます |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                               |
+| :--------------- | :--------------------------------- |
+| **`200`**        | 自動アーカイブ間隔が設定されました |
+
+## POST /sandbox/{sandboxIdOrName}/autodelete/{interval} \{#post-sandboxsandboxidornameautodeleteinterval\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                                                               |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                                                                        |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                                                                           |
+| **`interval`**                  | path     | true     | undefined | 自動削除までの間隔（分）。負の値は無効化、0 は停止と同時に即時削除することを意味します                  |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                         |
+| :--------------- | :-------------------------- |
+| **`200`**        | 自動削除間隔が正常に設定されました |
+
+## POST /sandbox/{sandboxIdOrName}/archive \{#post-sandboxsandboxidornamearchive\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します               |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                   |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                |
+| :--------------- | :------------------ |
+| **`200`**        | サンドボックスがアーカイブ済み |
+
+## GET /sandbox/{sandboxIdOrName}/ports/{port}/preview-url \{#get-sandboxsandboxidornameportsportpreview-url\}
+
+### パラメータ \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                             |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します        |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                          |
+| **`port`**                      | path     | true     | undefined | プレビュー URL を取得する対象のポート番号              |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                               |
+| :-------------- | :--------------------------------- |
+| **`200`**       | 指定したポートのプレビュー URL    |
+
+## GET /sandbox/{sandboxIdOrName}/build-logs \{#get-sandboxsandboxidornamebuild-logs\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                    |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用       |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                 |
+| **`follow`**                    | query    | false    | undefined | ログストリームをフォローするかどうか           |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                 |
+| :--------------- | :------------------- |
+| **`200`**        | ビルドログストリーム |
+
+## POST /sandbox/{sandboxIdOrName}/ssh-access \{#post-sandboxsandboxidornamessh-access\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                  |
+| **`expiresInMinutes`**          | query    | false    | undefined | 有効期限（分単位、既定値: 60）                  |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                  |
+| :--------------- | :-------------------- |
+| **`200`**        | SSH アクセスが作成された |
+
+## DELETE /sandbox/{sandboxIdOrName}/ssh-access \{#delete-sandboxsandboxidornamessh-access\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                                                  |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して、組織 ID を指定します                                                          |
+| **`sandboxIdOrName`**           | path     | true     | undefined | サンドボックスの ID または名前                                                               |
+| **`token`**                     | query    | false    | undefined | 失効させる SSH アクセストークン。指定しない場合、そのサンドボックスに対するすべての SSH アクセスが失効します。 |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                    |
+| :--------------- | :---------------------- |
+| **`200`**        | SSH アクセスが取り消されました |
+
+## GET /sandbox/ssh-access/validate \{#get-sandboxssh-accessvalidate\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`token`**                     | query    | true     | undefined | 検証対象の SSH アクセストークン                  |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                |
+| :---------- | :------------------- |
+| **`200`**   | SSH アクセス検証の結果 |
+
+## POST /runners \{#post-runners\}
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 組織の招待を辞退しました |
+| :---------- | :---------- |
+| **`201`**   |             |
 
+## GET /runners \{#get-runners\}
 
-## POST /organizations
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`201`** | 組織の作成に成功しました |
-
-## GET /organizations
-
-### レスポンス
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 組織のリスト |
+| :---------- | :---------- |
+| **`200`**   |             |
 
+## PATCH /runners/{id}/scheduling \{#patch-runnersidscheduling\}
 
-## GET /organizations/\{organizationId\}
+### パラメータ \{#parameters\}
 
-### パラメータ
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID |
+| Name     | Location | Required | Type      | Description |
+| :------- | :------- | :------- | :-------- | :---------- |
+| **`id`** | path     | true     | undefined | undefined   |
 
-### レスポンス
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 組織の詳細 |
+### レスポンス \{#responses\}
 
-## DELETE /organizations/\{organizationId\}
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
-
-### レスポンス
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | 組織を正常に削除しました |
+| :---------- | :---------- |
+| **`200`**   |             |
 
+## GET /runners/by-sandbox/{sandboxId} \{#get-runnersby-sandboxsandboxid\}
 
-## GET /organizations/\{organizationId\}/usage
+### パラメータ \{#parameters\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | パス | 必須 | undefined | 組織ID |
+| Name            | Location | Required | Type      | Description |
+| :-------------- | :------- | :------- | :-------- | :---------- |
+| **`sandboxId`** | path     | true     | undefined | undefined   |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 現在の利用状況の概要 |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明        |
+| :--------------- | :---------- |
+| **`200`**        | Runner が見つかりました |
 
-## PATCH /organizations/\{organizationId\}/quota
+## GET /runners/by-snapshot-ref \{#get-runnersby-snapshot-ref\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | パス | 必須 | undefined | 組織ID |
+### パラメーター \{#parameters\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 組織の詳細 |
+| Name      | Location | Required | Type      | Description           |
+| :-------- | :------- | :------- | :-------- | :-------------------- |
+| **`ref`** | query    | true     | undefined | スナップショット参照 |
 
+### レスポンス \{#responses\}
 
-## POST /organizations/\{organizationId\}/leave
+| ステータスコード | 説明                          |
+| :--------------- | :--------------------------- |
+| **`200`**        | スナップショットに使用可能なランナーが見つかりました |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
+## GET /toolbox/{sandboxId}/toolbox/project-dir \{#get-toolboxsandboxidtoolboxproject-dir\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | 組織から正常に退出しました |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します               |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
 
-## POST /organizations/\{organizationId\}/suspend
+### レスポンス \{#responses\}
 
-### パラメータ
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
+| ステータスコード | 説明                          |
+| :-------------- | :--------------------------- |
+| **`200`**       | プロジェクトディレクトリを正常に取得しました |
 
-### 応答
-| Status Code | Description |
-| :-------- | :---------- |
-| **`204`** | 組織の一時停止に成功 |
+## GET /toolbox/{sandboxId}/toolbox/user-home-dir \{#get-toolboxsandboxidtoolboxuser-home-dir\}
 
+### パラメーター \{#parameters\}
 
-## POST /organizations/\{organizationId\}/unsuspend
+| Name                            | Location | Required | Type      | Description                                            |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します        |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                                 |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`204`** | 組織（Organization）の一時停止を解除しました |
+| ステータスコード | 説明                               |
+| :--------------- | :---------------------------------- |
+| **`200`**        | ユーザーのホームディレクトリを正常に取得できました |
 
+## GET /toolbox/{sandboxId}/toolbox/work-dir \{#get-toolboxsandboxidtoolboxwork-dir\}
 
-## POST /organizations/\{organizationId\}/roles
+### パラメーター \{#parameters\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID |
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                           |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`201`** | 組織のロールを正常に作成しました |
+### レスポンス \{#responses\}
 
-## GET /organizations/\{organizationId\}/roles
+| ステータスコード | 説明                      |
+| :--------------- | :----------------------- |
+| **`200`**        | Work-dir の取得に成功しました |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
+## GET /toolbox/{sandboxId}/toolbox/files \{#get-toolboxsandboxidtoolboxfiles\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 組織のロール一覧 |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
+| **`path`**                      | query    | false    | undefined | undefined                                         |
 
-## PUT /organizations/\{organizationId\}/roles/\{roleId\}
+### レスポンス \{#responses\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID |
-| **`roleId`** | path | true | undefined | ロールID |
+| ステータスコード | 説明                    |
+| :---------- | :------------------------ |
+| **`200`**   | ファイルの一覧を正常に取得しました |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ロールを正常に更新しました |
+## DELETE /toolbox/{sandboxId}/toolbox/files \{#delete-toolboxsandboxidtoolboxfiles\}
 
-## DELETE /organizations/\{organizationId\}/roles/\{roleId\}
+サンドボックス内のファイルを削除する
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID |
-| **`roleId`** | path | true | undefined | ロールID |
+### パラメーター \{#parameters\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | 組織のロールを正常に削除しました |
+| Name                            | Location | Required | Type      | Description                                     |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します              |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                       |
+| **`recursive`**                 | query    | false    | undefined | undefined                                       |
+| **`path`**                      | query    | true     | undefined | undefined                                       |
 
+### レスポンス \{#responses\}
 
-## GET /organizations/\{organizationId\}/users
+| ステータスコード | 説明               |
+| :--------------- | :---------------- |
+| **`200`**        | ファイルを正常に削除しました |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
+## GET /toolbox/{sandboxId}/toolbox/files/download \{#get-toolboxsandboxidtoolboxfilesdownload\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 組織メンバーのリスト |
+サンドボックスからファイルをダウンロードします
 
+### パラメーター \{#parameters\}
 
-## POST /organizations/\{organizationId\}/users/\{userId\}/role
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+| **`path`**                      | query    | true     | undefined | undefined                                        |
 
-### パラメーター
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
-| **`userId`** | path | true | undefined | ユーザーID |
+### レスポンス \{#responses\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ロールを正常に更新しました |
+| ステータスコード | 説明               |
+| :--------------- | :----------------- |
+| **`200`**        | ファイルを正常にダウンロード |
 
+## POST /toolbox/{sandboxId}/toolbox/files/bulk-download \{#post-toolboxsandboxidtoolboxfilesbulk-download\}
 
-## POST /organizations/\{organizationId\}/users/\{userId\}/assigned-roles
+指定されたパスを含む multipart/form-data のバンドルをストリーミングで返します
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID（Daytona内のリソースとユーザーのグループ化、ロールや請求など） |
-| **`userId`** | path | true | undefined | ユーザーID |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 割り当て／ロールを正常に更新しました |
+| Name                            | Location | Required | Type      | Description                                        |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                 |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                          |
 
+### レスポンス \{#responses\}
 
-## DELETE /organizations/\{organizationId\}/users/\{userId\}
+| ステータスコード | 説明                                                       |
+| :-------------- | :-------------------------------------------------------- |
+| **`200`**       | 各ファイルがパートとして含まれる multipart/form-data レスポンス |
 
-### パラメーター
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID |
-| **`userId`** | path | true | undefined | ユーザーID |
+## GET /toolbox/{sandboxId}/toolbox/files/find \{#get-toolboxsandboxidtoolboxfilesfind\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | 組織からユーザーを正常に削除しました |
+サンドボックス内のファイルでテキストやパターンを検索する
 
+### パラメーター \{#parameters\}
 
-## POST /organizations/\{organizationId\}/invitations
+| Name                            | Location | Required | Type      | Description                                            |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します        |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                              |
+| **`path`**                      | query    | true     | undefined | undefined                                              |
+| **`pattern`**                   | query    | true     | undefined | undefined                                              |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`201`** | 組織への招待が正常に作成されました |
+| ステータスコード | 説明                 |
+| :--------------- | :------------------ |
+| **`200`**        | 検索が正常に終了しました |
 
-## GET /organizations/\{organizationId\}/invitations
+## POST /toolbox/{sandboxId}/toolbox/files/folder \{#post-toolboxsandboxidtoolboxfilesfolder\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID |
+サンドボックス内にフォルダを作成します
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 未処理の組織招待の一覧 |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                              |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                      |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                                |
+| **`path`**                      | query    | true     | undefined | undefined                                                |
+| **`mode`**                      | query    | true     | undefined | undefined                                                |
 
-## PUT /organizations/\{organizationId\}/invitations/\{invitationId\}
+### レスポンス \{#responses\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織ID |
-| **`invitationId`** | path | true | undefined | 招待ID |
+| ステータスコード | 説明                    |
+| :---------- | :-------------------------- |
+| **`200`**   | フォルダーが正常に作成されました |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 組織の招待を正常に更新しました |
+## GET /toolbox/{sandboxId}/toolbox/files/info \{#get-toolboxsandboxidtoolboxfilesinfo\}
 
+サンドボックス内のファイル情報を取得します
 
-## POST /organizations/\{organizationId\}/invitations/\{invitationId\}/cancel
+### パラメーター \{#parameters\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | 組織（Organization）ID |
-| **`invitationId`** | path | true | undefined | 招待（Invitation）ID |
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+| **`path`**                      | query    | true     | undefined | undefined                                        |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | 組織の招待を正常にキャンセルしました |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明                        |
+| :--------------- | :-------------------------- |
+| **`200`**        | ファイル情報の取得に成功    |
 
-## GET /users/me
+## POST /toolbox/{sandboxId}/toolbox/files/move \{#post-toolboxsandboxidtoolboxfilesmove\}
 
-### 応答
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ユーザー詳細 |
+サンドボックス内のファイルを移動する
 
+### パラメーター \{#parameters\}
 
-## POST /users
+| Name                            | Location | Required | Type      | Description                                        |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                          |
+| **`source`**                    | query    | true     | undefined | undefined                                          |
+| **`destination`**               | query    | true     | undefined | undefined                                          |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`201`** |  |
+### レスポンス \{#responses\}
 
-## GET /users
+| ステータスコード | 説明               |
+| :---------- | :---------------- |
+| **`200`**   | ファイルは正常に移動されました |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** |  |
+## POST /toolbox/{sandboxId}/toolbox/files/permissions \{#post-toolboxsandboxidtoolboxfilespermissions\}
 
+サンドボックス内のファイルの所有者・グループ・権限を設定します
 
-## POST /users/\{id\}/regenerate-key-pair
+### パラメーター \{#parameters\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`id`** | パス | 必須 | 未定義 | 未定義 |
+| 名前                            | 位置    | 必須     | 型        | 説明                                              |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します               |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+| **`path`**                      | query    | true     | undefined | undefined                                        |
+| **`owner`**                     | query    | false    | undefined | undefined                                        |
+| **`group`**                     | query    | false    | undefined | undefined                                        |
+| **`mode`**                      | query    | false    | undefined | undefined                                        |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`201`** |  |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明                          |
+| :---------- | :------------------------------------ |
+| **`200`**   | ファイルのパーミッションが正常に更新されました |
 
-## GET /users/account-providers
+## POST /toolbox/{sandboxId}/toolbox/files/replace \{#post-toolboxsandboxidtoolboxfilesreplace\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 利用可能なアカウントプロバイダー |
+サンドボックス内の複数ファイルでテキスト／パターンを一括置換
 
+### パラメーター \{#parameters\}
 
-## POST /users/linked-accounts
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | アカウントのリンクが成功しました |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明               |
+| :--------------- | :----------------- |
+| **`200`**        | テキストを正常に置換しました |
 
-## DELETE /users/linked-accounts/\{provider\}/\{providerUserId\}
+## GET /toolbox/{sandboxId}/toolbox/files/search \{#get-toolboxsandboxidtoolboxfilessearch\}
 
-### パラメーター
-| 名称 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`provider`** | path | true | undefined | undefined |
-| **`providerUserId`** | path | true | undefined | undefined |
+サンドボックス内のファイルを検索する
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | アカウントの連携を解除しました |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
+| **`path`**                      | query    | true     | undefined | undefined                                         |
+| **`pattern`**                   | query    | true     | undefined | undefined                                         |
 
-## GET /users/\{id\}
+### レスポンス \{#responses\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`id`** | パス | 必須 | 未定義 | 未定義 |
+| ステータスコード | 説明                    |
+| :--------------- | :---------------------- |
+| **`200`**        | 検索が正常に完了しました |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ユーザーの詳細 |
+## POST /toolbox/{sandboxId}/toolbox/files/upload \{#post-toolboxsandboxidtoolboxfilesupload\}
 
+サンドボックス内にファイルをアップロードします
 
-## GET /sandbox
+### パラメーター \{#parameters\}
 
-### パラメータ
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定する |
-| **`verbose`** | query | false | undefined | 詳細出力を含める |
-| **`labels`** | query | false | undefined | フィルタ用の JSON エンコード済みラベル |
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して、組織 ID を指定します                 |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
+| **`path`**                      | query    | true     | undefined | undefined                                             |
 
-### レスポンス
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | すべてのサンドボックス（Sandbox）の一覧 |
+### レスポンス \{#responses\}
 
-## POST /sandbox
+| ステータスコード | 説明                     |
+| :--------------- | :---------------------- |
+| **`200`**        | ファイルのアップロードに成功しました |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定します |
+## POST /toolbox/{sandboxId}/toolbox/files/bulk-upload \{#post-toolboxsandboxidtoolboxfilesbulk-upload\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | サンドボックス（Sandbox）が正常に作成されました。 |
+サンドボックス内に複数のファイルをアップロードします
 
+### パラメーター \{#parameters\}
 
-## GET /sandbox/\{sandboxId\}
+| Name                            | Location | Required | Type      | Description                                                 |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します           |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                                      |
 
-### パラメータ
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定 |
-| **`verbose`** | query | false | undefined | 詳細出力を含める |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
+### レスポンス \{#responses\}
 
-### レスポンス
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | サンドボックスの詳細 |
+| ステータスコード | 説明                         |
+| :---------- | :-------------------------- |
+| **`200`**   | ファイルが正常にアップロードされました |
 
-## DELETE /sandbox/\{sandboxId\}
+## POST /toolbox/{sandboxId}/toolbox/git/add \{#post-toolboxsandboxidtoolboxgitadd\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-| **`force`** | query | true | undefined | 強制削除を行うかどうか |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | サンドボックスを削除しました |
-
-
-## POST /sandbox/\{sandboxId\}/start
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | サンドボックスを起動しました |
-
-
-## POST /sandbox/\{sandboxId\}/stop
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | サンドボックスを停止しました |
-
-
-## PUT /sandbox/\{sandboxId\}/labels
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）の ID を指定します |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ラベルを正常に置換しました |
-
-
-## POST /sandbox/\{sandboxId\}/backup
-
-### パラメータ
-| 名前 | ロケーション | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）の ID を指定します |
-| **`sandboxId`** | path | true | undefined | サンドボックス（隔離された一時的な実行環境）の ID |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | サンドボックスのバックアップの開始を受け付けました |
-
-
-## POST /sandbox/\{sandboxId\}/public/\{isPublic\}
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-| **`isPublic`** | path | true | undefined | 設定する公開状態 |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`201`** |  |
-
-
-## POST /sandbox/\{sandboxId\}/autostop/\{interval\}
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定 |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-| **`interval`** | path | true | undefined | 自動停止（Auto-stop）の間隔（分）。0 で無効化 |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 自動停止（Auto-stop）の間隔を設定しました |
-
-
-## POST /sandbox/\{sandboxId\}/autoarchive/\{interval\}
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | いいえ | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | はい | undefined | サンドボックス（Sandbox）の ID |
-| **`interval`** | path | はい | undefined | 自動アーカイブ（Auto-archive）の間隔（分）。0 の場合は最大間隔が適用されます |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 自動アーカイブの間隔を設定しました |
-
-
-## POST /sandbox/\{sandboxId\}/archive
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | サンドボックス（Sandbox）をアーカイブしました |
-
-
-## GET /sandbox/\{sandboxId\}/ports/\{port\}/preview-url
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-| **`port`** | path | true | undefined | プレビューリンクの URL を取得するポート番号 |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 指定したポートのプレビューリンクの URL |
-
-
-## GET /sandbox/\{sandboxId\}/build-logs
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | ヘッダー | いいえ | 未定義 | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）の ID を指定 |
-| **`sandboxId`** | パス | はい | 未定義 | サンドボックス（隔離された一時的な実行環境）の ID |
-| **`follow`** | クエリ | いいえ | 未定義 | ログストリームをフォローするかどうか |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ビルドログのストリーム |
-
-
-## POST /runners
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`201`** |  |
-
-## GET /runners
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** |  |
-
-
-## PATCH /runners/\{id\}/scheduling
-
-### パラメーター
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`id`** | パス | 必須 | 未定義 | 未定義 |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** |  |
-
-
-## GET /runners/by-sandbox/\{sandboxId\}
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ランナー（サンドボックスがスケジュールおよび実行される基盤の計算ノード/ホスト）が見つかりました |
-
-
-## GET /runners/by-snapshot
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`ref`** | query | true | undefined | スナップショットの内部名 |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | スナップショットに対して見つかったランナー（サンドボックスがスケジュールおよび実行される基盤の計算ノード/ホスト） |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/project-dir
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して、組織（Organization）IDを指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | プロジェクトディレクトリを正常に取得しました |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/files
-
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | いいえ | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | はい | undefined | なし |
-| **`path`** | query | いいえ | undefined | なし |
-
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ファイル一覧の取得に成功 |
-
-## DELETE /toolbox/\{sandboxId\}/toolbox/files
-サンドボックス内のファイルを削除
-
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | なし |
-| **`path`** | query | true | undefined | なし |
-
-### Responses
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ファイルを正常に削除しました |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/files/download
-サンドボックスからファイルをダウンロード
-
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
-
-### Responses
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ファイルを正常にダウンロードしました |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/files/find
-サンドボックス内のファイルでテキスト／パターンを検索
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
-| **`pattern`** | query | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 検索が正常に完了しました |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/files/folder
-サンドボックス内にフォルダを作成
-
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | 未定義 |
-| **`path`** | query | true | undefined | 未定義 |
-| **`mode`** | query | true | undefined | 未定義 |
-
-### Responses
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | フォルダを作成しました |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/files/info
-サンドボックス内のファイル情報を取得
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ファイル情報の取得に成功 |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/files/move
-サンドボックス内のファイルを移動
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`source`** | query | true | undefined | undefined |
-| **`destination`** | query | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ファイルを正常に移動しました |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/files/permissions
-サンドボックス内のファイルの所有者／グループ／権限を設定
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
-| **`owner`** | query | false | undefined | undefined |
-| **`group`** | query | false | undefined | undefined |
-| **`mode`** | query | false | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ファイルの権限を正常に更新しました |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/files/replace
-サンドボックス（隔離された一時的な実行環境）内の複数ファイルでテキスト／パターンを一括置換する
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定する |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | テキストを正常に置換しました |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/files/search
-サンドボックス（隔離された一時的な実行環境）内のファイルを検索
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（組織）IDを指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
-| **`pattern`** | query | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 検索が正常に完了しました |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/files/upload
-サンドボックス内にファイルをアップロード
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ファイルのアップロードに成功しました |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/files/bulk-upload
-サンドボックス内に複数ファイルをアップロード
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織 ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ファイルを正常にアップロードしました |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/git/add
 ファイルを Git のコミットに追加します
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して、組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ファイルを Git に正常に追加しました |
+| Name                            | Location | Required | Type      | Description                                        |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                 |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                          |
 
+### レスポンス \{#responses\}
 
-## GET /toolbox/\{sandboxId\}/toolbox/git/branches
-Git リポジトリからブランチ一覧を取得
+| ステータスコード | 説明                            |
+| :---------- | :------------------------------ |
+| **`200`**   | ファイルが Git に正常に追加されました |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
+## GET /toolbox/{sandboxId}/toolbox/git/branches \{#get-toolboxsandboxidtoolboxgitbranches\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ブランチ一覧の取得に成功しました |
+Git リポジトリのブランチ一覧を取得します
 
-## POST /toolbox/\{sandboxId\}/toolbox/git/branches
-Git リポジトリにブランチを作成
+### パラメーター \{#parameters\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定 |
-| **`sandboxId`** | path | true | undefined | undefined |
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
+| **`path`**                      | query    | true     | undefined | undefined                                         |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ブランチの作成に成功しました |
+### レスポンス \{#responses\}
 
-## DELETE /toolbox/\{sandboxId\}/toolbox/git/branches
-Git リポジトリのブランチを削除
+| ステータスコード | 説明                     |
+| :--------------- | :----------------------- |
+| **`200`**        | ブランチ一覧を正常に取得しました |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
+## POST /toolbox/{sandboxId}/toolbox/git/branches \{#post-toolboxsandboxidtoolboxgitbranches\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ブランチを正常に削除しました |
+Git リポジトリにブランチを作成する
 
+### パラメーター \{#parameters\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/git/clone
-Gitリポジトリをクローンする
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | リポジトリを正常にクローンしました |
+| ステータスコード | 説明                     |
+| :---------- | :-------------------------- |
+| **`200`**   | ブランチが正常に作成されました |
 
+## DELETE /toolbox/{sandboxId}/toolbox/git/branches \{#delete-toolboxsandboxidtoolboxgitbranches\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/git/commit
+Git リポジトリのブランチを削除します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                     |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用します                        |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                                       |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明           |
+| :--------------- | :------------- |
+| **`200`**        | ブランチが正常に削除されました |
+
+## POST /toolbox/{sandboxId}/toolbox/git/clone \{#post-toolboxsandboxidtoolboxgitclone\}
+
+Git リポジトリをクローン
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                      |
+| :--------------- | :----------------------- |
+| **`200`**        | リポジトリのクローンに成功 |
+
+## POST /toolbox/{sandboxId}/toolbox/git/commit \{#post-toolboxsandboxidtoolboxgitcommit\}
+
 Git リポジトリに変更をコミットします
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織 ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 変更のコミットに成功しました |
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用します           |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
 
+### レスポンス \{#responses\}
 
-## GET /toolbox/\{sandboxId\}/toolbox/git/history
-Git リポジトリのコミット履歴を取得
+| ステータスコード | 説明                     |
+| :--------------- | :----------------------- |
+| **`200`**        | 変更が正常に確定されました |
 
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）ID を指定する |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
+## GET /toolbox/{sandboxId}/toolbox/git/history \{#get-toolboxsandboxidtoolboxgithistory\}
 
-### Responses
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | コミット履歴を正常に取得しました |
+Git リポジトリのコミット履歴を取得します
 
+### パラメーター \{#parameters\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/git/pull
-リモートから変更を取得する（pull）
+| Name                            | Location | Required | Type      | Description                                          |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                   |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                            |
+| **`path`**                      | query    | true     | undefined | undefined                                            |
 
-### Parameters
-| 名称 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定する |
-| **`sandboxId`** | path | true | undefined | undefined |
+### レスポンス \{#responses\}
 
-### Responses
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 変更を正常に取得しました |
+| ステータスコード | 説明                           |
+| :---------- | :------------------------------------ |
+| **`200`**   | コミット履歴の取得に成功           |
 
+## POST /toolbox/{sandboxId}/toolbox/git/pull \{#post-toolboxsandboxidtoolboxgitpull\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/git/push
+リモートの変更を取得する
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します           |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                  |
+| :--------------- | :-------------------- |
+| **`200`**        | 変更が正常に取得されました |
+
+## POST /toolbox/{sandboxId}/toolbox/git/push \{#post-toolboxsandboxidtoolboxgitpush\}
+
 変更をリモートにプッシュする
 
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）IDを指定する |
-| **`sandboxId`** | path | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します       |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                        |
+| :---------- | :-------------------------- |
+| **`200`**   | 変更が正常にプッシュされました |
+
+## POST /toolbox/{sandboxId}/toolbox/git/checkout \{#post-toolboxsandboxidtoolboxgitcheckout\}
+
+Git リポジトリ内のブランチまたはコミットをチェックアウトします
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                          |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID（Organization ID）を指定します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                            |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                      |
+| :--------------- | :------------------------ |
+| **`200`**        | ブランチのチェックアウトに成功しました |
+
+## GET /toolbox/{sandboxId}/toolbox/git/status \{#get-toolboxsandboxidtoolboxgitstatus\}
+
+Git リポジトリのステータスを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+| **`path`**                      | query    | true     | undefined | undefined                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                       |
+| :--------------- | :------------------------ |
+| **`200`**        | Git ステータスの取得に成功しました |
+
+## POST /toolbox/{sandboxId}/toolbox/process/execute \{#post-toolboxsandboxidtoolboxprocessexecute\}
+
+サンドボックス内でコマンドを同期実行します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                        |
+| :--------------- | :-------------------------- |
+| **`200`**        | コマンドが正常に実行されました |
+
+## GET /toolbox/{sandboxId}/toolbox/process/session \{#get-toolboxsandboxidtoolboxprocesssession\}
+
+サンドボックス内のアクティブなセッションをすべて一覧表示します
+
+### パラメーター \{#parameters\}
+
+| 名前                            | 位置 | 必須 | 型        | 説明                                       |
+| :------------------------------ | :--- | :--- | :-------- | :---------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して、組織 ID を指定します        |
+| **`sandboxId`**                 | path   | true  | undefined | undefined                                 |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明                     |
+| :---------- | :----------------------- |
+| **`200`**   | セッションが正常に取得されました |
+
+## POST /toolbox/{sandboxId}/toolbox/process/session \{#post-toolboxsandboxidtoolboxprocesssession\}
+
+サンドボックス内に新しいセッションを作成します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 変更のプッシュに成功 |
+| :---------- | :---------- |
+| **`200`**   |             |
 
+## GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId} \{#get-toolboxsandboxidtoolboxprocesssessionsessionid\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/git/checkout
-git リポジトリでブランチまたはコミットをチェックアウトする
+IDでセッションを取得
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定する |
-| **`sandboxId`** | path | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ブランチを正常にチェックアウトしました |
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
+| **`sessionId`**                 | path     | true     | undefined | undefined                                         |
 
+### レスポンス \{#responses\}
 
-## GET /toolbox/\{sandboxId\}/toolbox/git/status
-Git リポジトリのステータスを取得
+| ステータスコード | 説明                    |
+| :---------- | :----------------------------- |
+| **`200`**   | セッションの取得に成功        |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`path`** | query | true | undefined | undefined |
+## DELETE /toolbox/{sandboxId}/toolbox/process/session/{sessionId} \{#delete-toolboxsandboxidtoolboxprocesssessionsessionid\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Git ステータスを正常に取得しました |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/process/execute
-サンドボックス（隔離された一時的な実行環境）内でコマンドを同期的に実行します
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）の ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | コマンドが正常に実行されました |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/process/session
-サンドボックス内のすべてのアクティブなセッションを一覧表示します
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | セッションを正常に取得しました |
-
-## POST /toolbox/\{sandboxId\}/toolbox/process/session
-サンドボックス（隔離された一時的な実行環境）内で新しいセッションを作成する
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定する |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** |  |
-
-
-## GET /toolbox/\{sandboxId\}/toolbox/process/session/\{sessionId\}
-IDでセッションを取得する
-
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | いいえ | undefined | JWTと併用して組織（Organization）IDを指定します |
-| **`sandboxId`** | path | はい | undefined | undefined |
-| **`sessionId`** | path | はい | undefined | undefined |
-
-### Responses
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | セッションの取得に成功しました |
-
-## DELETE /toolbox/\{sandboxId\}/toolbox/process/session/\{sessionId\}
 特定のセッションを削除します
 
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`sessionId`** | path | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | セッションを正常に削除しました |
+| Name                            | Location | Required | Type      | Description                                                   |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                                     |
+| **`sessionId`**                 | path     | true     | undefined | undefined                                                     |
 
+### レスポンス \{#responses\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/process/session/\{sessionId\}/exec
+| ステータスコード | 説明                 |
+| :--------------- | :------------------ |
+| **`200`**        | セッションを削除しました |
+
+## POST /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec \{#post-toolboxsandboxidtoolboxprocesssessionsessionidexec\}
+
 特定のセッションでコマンドを実行する
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定する |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`sessionId`** | path | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | コマンドが正常に実行された |
-| **`202`** | コマンドを受け付け、処理中 |
+| Name                            | Location | Required | Type      | Description                                              |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します          |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                                |
+| **`sessionId`**                 | path     | true     | undefined | undefined                                                |
 
+### レスポンス \{#responses\}
 
-## GET /toolbox/\{sandboxId\}/toolbox/process/session/\{sessionId\}/command/\{commandId\}
-IDでセッションコマンドを取得
+| ステータスコード | 説明                                   |
+| :---------- | :-------------------------------------- |
+| **`200`**   | コマンドが正常に実行されました           |
+| **`202`**   | コマンドが受理され、処理中です           |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織IDを指定 |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`sessionId`** | path | true | undefined | undefined |
-| **`commandId`** | path | true | undefined | undefined |
+## GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId} \{#get-toolboxsandboxidtoolboxprocesssessionsessionidcommandcommandid\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | セッションコマンドを正常に取得 |
+ID によるセッションコマンドの取得
 
+### パラメーター \{#parameters\}
 
-## GET /toolbox/\{sandboxId\}/toolbox/process/session/\{sessionId\}/command/\{commandId\}/logs
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
+| **`sessionId`**                 | path     | true     | undefined | undefined                                             |
+| **`commandId`**                 | path     | true     | undefined | undefined                                             |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                             |
+| :---------- | :-------------------------------- |
+| **`200`**   | セッションコマンドを正常に取得しました |
+
+## GET /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs \{#get-toolboxsandboxidtoolboxprocesssessionsessionidcommandcommandidlogs\}
+
 セッション内の特定のコマンドのログを取得します
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`sessionId`** | path | true | undefined | undefined |
-| **`commandId`** | path | true | undefined | undefined |
-| **`follow`** | query | false | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | コマンドのログストリーム |
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
+| **`sessionId`**                 | path     | true     | undefined | undefined                                             |
+| **`commandId`**                 | path     | true     | undefined | undefined                                             |
+| **`follow`**                    | query    | false    | undefined | ログをストリーミングするかどうか                     |
 
+### レスポンス \{#responses\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/lsp/completions
-Completion リクエストは、指定したカーソル位置の補完候補を算出するために、クライアントからサーバーへ送信されます。
+| ステータスコード | 説明                                                |
+| :--------------- | :------------------------------------------------- |
+| **`200`**        | stdout と stderr のプレフィックスで区別されたコマンドログストリーム |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織 ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
+| ステータスコード | 説明              |
+| :--------------- | :---------------- |
+| **`200`**        | コマンドログストリーム |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | OK |
+## POST /toolbox/{sandboxId}/toolbox/lsp/completions \{#post-toolboxsandboxidtoolboxlspcompletions\}
 
+Completion リクエストは、指定されたカーソル位置での補完候補を算出するため、クライアントからサーバーに送信されます。
 
-## POST /toolbox/\{sandboxId\}/toolbox/lsp/did-close
-ドキュメントがクライアント側で閉じられた際に、クライアントからサーバーへ送信されるドキュメントクローズ通知です。
+### パラメーター \{#parameters\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                        |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | OK |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明 |
+| :---------- | :---------- |
+| **`200`**   | 正常        |
 
-## POST /toolbox/\{sandboxId\}/toolbox/lsp/did-open
-ドキュメントのオープン通知は、新規に開いたテキストドキュメントを知らせるため、クライアントからサーバーへ送信されます。
+## POST /toolbox/{sandboxId}/toolbox/lsp/did-close \{#post-toolboxsandboxidtoolboxlspdid-close\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
+ドキュメントがクライアント側で閉じられた際、ドキュメントクローズ通知がクライアントからサーバーに送信されます。
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | OK |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                                |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                        |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                                     |
 
-## GET /toolbox/\{sandboxId\}/toolbox/lsp/document-symbols
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明 |
+| :---------- | :---------- |
+| **`200`**   | 成功        |
+
+## POST /toolbox/{sandboxId}/toolbox/lsp/did-open \{#post-toolboxsandboxidtoolboxlspdid-open\}
+
+ドキュメントのオープン通知は、新たに開かれたテキストドキュメントを知らせるためにクライアントからサーバーへ送信されます。
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明 |
+| :---------- | :---------- |
+| **`200`**   | 正常終了    |
+
+## GET /toolbox/{sandboxId}/toolbox/lsp/document-symbols \{#get-toolboxsandboxidtoolboxlspdocument-symbols\}
+
 ドキュメントシンボルのリクエストはクライアントからサーバーに送信されます。
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`languageId`** | query | true | undefined | undefined |
-| **`pathToProject`** | query | true | undefined | undefined |
-| **`uri`** | query | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | OK |
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                     |
+| **`languageId`**                | query    | true     | undefined | undefined                                     |
+| **`pathToProject`**             | query    | true     | undefined | undefined                                     |
+| **`uri`**                       | query    | true     | undefined | undefined                                     |
 
+### レスポンス \{#responses\}
 
-## POST /toolbox/\{sandboxId\}/toolbox/lsp/start
-サンドボックスのプロジェクト内で LSP（言語サーバープロトコル）サーバープロセスを開始します
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 正常 |
-
-
-## POST /toolbox/\{sandboxId\}/toolbox/lsp/stop
-サンドボックス内のプロジェクトで動作する LSP（言語サーバープロトコル）サーバープロセスを停止します
-
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-
-### Responses
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | OK |
+| :---------- | :---------- |
+| **`200`**   | 正常        |
 
+## POST /toolbox/{sandboxId}/toolbox/lsp/start \{#post-toolboxsandboxidtoolboxlspstart\}
 
-## GET /toolbox/\{sandboxId\}/toolbox/lsp/workspace-symbols
-ワークスペースシンボルリクエストは、クライアントからサーバーに送られ、クエリ文字列に合致するプロジェクト全体のシンボルを一覧します。
+サンドボックスのプロジェクト内で LSP サーバー・プロセスを開始します
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定します |
-| **`sandboxId`** | path | true | undefined | undefined |
-| **`languageId`** | query | true | undefined | undefined |
-| **`pathToProject`** | query | true | undefined | undefined |
-| **`query`** | query | true | undefined | undefined |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | OK |
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用します          |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
 
+### レスポンス \{#responses\}
 
-## POST /snapshots
-
-### Parameters
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | いいえ | undefined | JWT と併用して 組織（Organization）ID を指定します |
-
-### Responses
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | スナップショットが正常に作成されました。 |
-| **`400`** | 不正なリクエスト - タグ「:latest」のスナップショットは許可されていません |
+| :---------- | :---------- |
+| **`200`**   | 正常         |
 
-## GET /snapshots
+## POST /toolbox/{sandboxId}/toolbox/lsp/stop \{#post-toolboxsandboxidtoolboxlspstop\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）のIDを指定 |
-| **`limit`** | query | false | undefined | 1ページあたりの件数 |
-| **`page`** | query | false | undefined | ページ番号 |
+サンドボックスのプロジェクト内で LSP サーバー プロセスを停止します
 
-### レスポンス
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                           |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ページネーション対応のスナップショット（Snapshot）一覧 |
+| :---------- | :---------- |
+| **`200`**   | 正常        |
 
+## GET /toolbox/{sandboxId}/toolbox/lsp/workspace-symbols \{#get-toolboxsandboxidtoolboxlspworkspace-symbols\}
 
-## GET /snapshots/\{id\}
+Workspace Symbol リクエストは、クエリ文字列に一致するプロジェクト全体のシンボルを列挙するために、クライアントからサーバーへ送信されます。
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）IDを指定 |
-| **`id`** | path | true | undefined | スナップショット（Snapshot）のIDまたは名前 |
+### パラメーター \{#parameters\}
 
-### レスポンス
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
+| **`languageId`**                | query    | true     | undefined | undefined                                             |
+| **`pathToProject`**             | query    | true     | undefined | undefined                                             |
+| **`query`**                     | query    | true     | undefined | undefined                                             |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | スナップショット |
-| **`404`** | スナップショットが見つかりません |
+| :---------- | :---------- |
+| **`200`**   | 正常          |
 
-## DELETE /snapshots/\{id\}
+## POST /toolbox/{sandboxId}/toolbox/computeruse/start \{#post-toolboxsandboxidtoolboxcomputerusestart\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`id`** | path | true | undefined | スナップショット（Snapshot）ID |
+VNC デスクトップ関連のすべてのプロセス（Xvfb、xfce4、x11vnc、noVNC）を起動します
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | スナップショットを削除しました |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                           |
 
-## PATCH /snapshots/\{id\}/toggle
+### レスポンス \{#responses\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）のIDを指定します |
-| **`id`** | path | true | undefined | スナップショット（Snapshot）のID |
+| ステータスコード | 説明                               |
+| :--------------- | :-------------------------------- |
+| **`200`**        | Computer use プロセスの開始に成功 |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | スナップショットの状態を切り替えました |
+## POST /toolbox/{sandboxId}/toolbox/computeruse/stop \{#post-toolboxsandboxidtoolboxcomputerusestop\}
 
+VNC デスクトップ関連の全プロセス（Xvfb、xfce4、x11vnc、noVNC）を停止します
 
-## PATCH /snapshots/\{id\}/general
+### パラメーター \{#parameters\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`id`** | path | true | undefined | スナップショット（Snapshot）ID |
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用します             |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
 
-### レスポンス
+### レスポンス \{#responses\}
+
+| Status Code | 説明                              |
+| :---------- | :-------------------------------- |
+| **`200`**   | Computer use プロセスが正常に停止しました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/status \{#get-toolboxsandboxidtoolboxcomputerusestatus\}
+
+すべての VNC デスクトップ・プロセスのステータスを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                           |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して、組織 ID（Organization ID）を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                                             |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明                           |
+| :---------- | :----------------------------- |
+| **`200`**   | コンピュータ使用状況を取得しました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status \{#get-toolboxsandboxidtoolboxcomputeruseprocessprocessnamestatus\}
+
+特定のVNCプロセスのステータスを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します |
+| **`processName`**               | path     | true     | undefined | undefined                                        |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                             |
+| :--------------- | :------------------------------ |
+| **`200`**        | プロセスステータスを正常に取得しました |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart \{#post-toolboxsandboxidtoolboxcomputeruseprocessprocessnamerestart\}
+
+特定の VNC プロセスを再起動します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します |
+| **`processName`**               | path     | true     | undefined | undefined                                        |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明                   |
+| :---------- | :--------------------- |
+| **`200`**   | プロセスが正常に再起動されました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs \{#get-toolboxsandboxidtoolboxcomputeruseprocessprocessnamelogs\}
+
+特定の VNC プロセスのログを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                 |
+| **`processName`**               | path     | true     | undefined | undefined                                         |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                           |
+| :--------------- | :---------------------------- |
+| **`200`**        | プロセスログの取得に成功しました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors \{#get-toolboxsandboxidtoolboxcomputeruseprocessprocessnameerrors\}
+
+特定のVNCプロセスのエラーログを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                  |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します           |
+| **`processName`**               | path     | true     | undefined | undefined                                    |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                    |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明                          |
+| :---------- | :---------------------------- |
+| **`200`**   | プロセスエラーを正常に取得しました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/mouse/position \{#get-toolboxsandboxidtoolboxcomputerusemouseposition\}
+
+現在のマウスカーソルの位置を取得
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                       |
+
+### レスポンス \{#responses\}
+
+| Status Code | 説明                           |
+| :---------- | :---------------------------- |
+| **`200`**   | マウス位置の取得に成功しました |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/move \{#post-toolboxsandboxidtoolboxcomputerusemousemove\}
+
+マウスカーソルを指定した座標に移動します。
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                     |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します              |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                       |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明               |
+| :--------------- | :---------------- |
+| **`200`**        | マウスの移動に成功しました |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/click \{#post-toolboxsandboxidtoolboxcomputerusemouseclick\}
+
+指定した座標でマウスをクリックします
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                          |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します        |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                            |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明               |
+| :--------------- | :----------------- |
+| **`200`**        | マウスクリックに成功しました |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/drag \{#post-toolboxsandboxidtoolboxcomputerusemousedrag\}
+
+マウスを開始座標から終了座標までドラッグします
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                   |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                            |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                                     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                  |
+| :---------- | :------------------------- |
+| **`200`**   | マウスのドラッグに成功    |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll \{#post-toolboxsandboxidtoolboxcomputerusemousescroll\}
+
+指定した座標でマウスをスクロールします
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して、組織 ID を指定します               |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                           |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                      |
+| :--------------- | :------------------------ |
+| **`200`**        | マウススクロールに成功しました |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/type \{#post-toolboxsandboxidtoolboxcomputerusekeyboardtype\}
+
+キーボードでテキストを入力する
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                         |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明             |
+| :---------- | :---------------- |
+| **`200`**   | テキストの入力に成功 |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/key \{#post-toolboxsandboxidtoolboxcomputerusekeyboardkey\}
+
+必要に応じて修飾キーを指定してキー入力を実行します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                          |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                  |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                            |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明           |
+| :---------- | :----------------------- |
+| **`200`**   | キーが正常に押下されました |
+
+## POST /toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey \{#post-toolboxsandboxidtoolboxcomputerusekeyboardhotkey\}
+
+ホットキーの組み合わせを押す
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明               |
+| :--------------- | :---------------- |
+| **`200`**        | ホットキーが正常に押されました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot \{#get-toolboxsandboxidtoolboxcomputerusescreenshot\}
+
+画面全体のスクリーンショットを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します               |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                        |
+| **`show_cursor`**               | query    | false    | undefined | undefined                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                       |
+| :---------- | :---------------------------- |
+| **`200`**   | スクリーンショットの取得に成功 |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region \{#get-toolboxsandboxidtoolboxcomputerusescreenshotregion\}
+
+特定領域のスクリーンショットを取得します
+
+### パラメータ \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                  |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して Organization ID を指定します |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                    |
+| **`show_cursor`**               | query    | false    | undefined | undefined                                    |
+| **`height`**                    | query    | true     | undefined | undefined                                    |
+| **`width`**                     | query    | true     | undefined | undefined                                    |
+| **`y`**                         | query    | true     | undefined | undefined                                    |
+| **`x`**                         | query    | true     | undefined | undefined                                    |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                               |
+| :--------------- | :---------------------------------- |
+| **`200`**        | リージョンのスクリーンショットを正常に取得しました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed \{#get-toolboxsandboxidtoolboxcomputerusescreenshotcompressed\}
+
+フォーマット、品質、スケールを指定して圧縮スクリーンショットを取得します
+
+### パラメータ \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                        |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して organization ID を指定します        |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                          |
+| **`scale`**                     | query    | false    | undefined | undefined                                          |
+| **`quality`**                   | query    | false    | undefined | undefined                                          |
+| **`format`**                    | query    | false    | undefined | undefined                                          |
+| **`show_cursor`**               | query    | false    | undefined | undefined                                          |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                             |
+| :---------- | :-------------------------------- |
+| **`200`**   | 圧縮スクリーンショットの取得に成功 |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed \{#get-toolboxsandboxidtoolboxcomputerusescreenshotregioncompressed\}
+
+特定の領域の圧縮済みスクリーンショットを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                                   |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                           |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                                     |
+| **`scale`**                     | query    | false    | undefined | undefined                                                     |
+| **`quality`**                   | query    | false    | undefined | undefined                                                     |
+| **`format`**                    | query    |false     | undefined | undefined                                                     |
+| **`show_cursor`**               | query    | false    | undefined | undefined                                                     |
+| **`height`**                    | query    | true     | undefined | undefined                                                     |
+| **`width`**                     | query    | true     | undefined | undefined                                                     |
+| **`y`**                         | query    | true     | undefined | undefined                                                     |
+| **`x`**                         | query    | true     | undefined | undefined                                                     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                            |
+| :--------------- | :----------------------------- |
+| **`200`**        | 圧縮領域のスクリーンショットを正常に取得しました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/display/info \{#get-toolboxsandboxidtoolboxcomputerusedisplayinfo\}
+
+ディスプレイ情報を取得する
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`sandboxId`**                 | path     | true     | undefined | 未定義                                           |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                          |
+| :--------------- | :--------------------------- |
+| **`200`**        | Display 情報を正常に取得しました |
+
+## GET /toolbox/{sandboxId}/toolbox/computeruse/display/windows \{#get-toolboxsandboxidtoolboxcomputerusedisplaywindows\}
+
+開いているウィンドウのリストを取得します
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します          |
+| **`sandboxId`**                 | path     | true     | undefined | undefined                                             |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                     |
+| :--------------- | :---------------------- |
+| **`200`**        | Windows の一覧を正常に取得しました |
+
+## POST /snapshots \{#post-snapshots\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                               |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用 |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                                         |
+| :--------------- | :---------------------------------------------------------- |
+| **`200`**        | スナップショットが正常に作成されました。                    |
+| **`400`**        | 不正なリクエスト - タグ「:latest」が付いたスナップショットは許可されていません |
+
+## GET /snapshots \{#get-snapshots\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                 |
+| **`page`**                      | query    | false    | undefined | 結果のページ番号                                   |
+| **`limit`**                     | query    | false    | undefined | 1 ページあたりの結果数                             |
+| **`name`**                      | query    | false    | undefined | 名前の部分一致でフィルタリングします               |
+| **`sort`**                      | query    | false    | undefined | ソート対象のフィールド                             |
+| **`order`**                     | query    | false    | undefined | ソート方向                                         |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                            |
+| :---------- | :------------------------------ |
+| **`200`**   | すべてのスナップショットのページネーションされた一覧 |
+
+## GET /snapshots/can-cleanup-image \{#get-snapshotscan-cleanup-image\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                          |
+| :------------------------------ | :------- | :------- | :-------- | :--------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します       |
+| **`imageName`**                 | query    | true     | undefined | 確認対象のタグ付きイメージ名                         |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                        |
+| :--------------- | :----------------------------------------- |
+| **`200`**        | 画像をクリーンアップ可能かどうかを示すブール値 |
+
+| ステータスコード | 説明                                  |
+| :--------------- | :----------------------------------- |
+| **`200`**        | ページネーション付きのスナップショット一覧 |
+
+## GET /snapshots/{id} \{#get-snapshotsid\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します     |
+| **`id`**                        | path     | true     | undefined | スナップショットの ID または名前                   |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                    |
+| :-------------- | :---------------------- |
+| **`200`**       | スナップショット情報を返します |
+| **`404`**       | スナップショットが見つかりません |
+
+## DELETE /snapshots/{id} \{#delete-snapshotsid\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`id`**                        | path     | true     | undefined | スナップショット ID                                   |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                  |
+| :---------- | :---------------------- |
+| **`200`**   | スナップショットが削除されました |
+
+## PATCH /snapshots/{id}/general \{#patch-snapshotsidgeneral\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                |
+| **`id`**                        | path     | true     | undefined | スナップショット ID                              |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                           |
+| :-------------- | :----------------------------- |
+| **`200`**       | スナップショットの全体ステータスが設定されました |
+
+## GET /snapshots/{id}/build-logs \{#get-snapshotsidbuild-logs\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                  |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します          |
+| **`id`**                        | path     | true     | undefined | スナップショット ID                         |
+| **`follow`**                    | query    | false    | undefined | ログストリームをフォローするかどうか       |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | スナップショットの general ステータスが設定されました |
+| :---------- | :---------- |
+| **`200`**   |             |
 
+## POST /snapshots/{id}/activate \{#post-snapshotsidactivate\}
 
-## GET /snapshots/\{id\}/build-logs
+### パラメーター \{#parameters\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定 |
-| **`id`** | path | true | undefined | スナップショット（Snapshot）ID |
-| **`follow`** | query | false | undefined | ログストリームをフォローするかどうか |
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します               |
+| **`id`**                        | path     | true     | undefined | スナップショット ID                              |
 
-### レスポンス
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                                                                                      |
+| :--------------- | :--------------------------------------------------------------------------------------------------------- |
+| **`200`**        | スナップショットが正常にアクティブ化されました。                                                           |
+| **`400`**        | 不正なリクエスト - スナップショットがすでにアクティブである、非アクティブ状態ではない、または関連するスナップショットランナーが存在します |
+| **`404`**        | スナップショットが見つかりません                                                                          |
+
+## POST /snapshots/{id}/deactivate \{#post-snapshotsiddeactivate\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                            |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して、組織 ID を指定するために使用します |
+| **`id`**                        | path     | true     | undefined | スナップショット ID                                    |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                          |
+| :--------------- | :--------------------------- |
+| **`204`**        | スナップショットは正常に無効化されました。 |
+
+## GET /workspace \{#get-workspace\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | 組織 ID を指定するために JWT と併用して使用します |
+| **`verbose`**                   | query    | false    | undefined | 詳細な出力を含めます                              |
+| **`labels`**                    | query    | false    | undefined | フィルタリングに使用する JSON エンコード済みラベル |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                   |
+| :---------- | :---------------------- |
+| **`200`**   | すべてのワークスペース一覧 |
+
+## POST /workspace \{#post-workspace\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                 |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                                   |
+| :--------------- | :-------------------------------------- |
+| **`200`**        | ワークスペースが正常に作成されました。 |
+
+## GET /workspace/{workspaceId} \{#get-workspaceworkspaceid\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する                 |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペースの ID                              |
+| **`verbose`**                   | query    | false    | undefined | 詳細な出力を含めるかどうか                       |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明             |
+| :--------------- | :--------------- |
+| **`200`**        | ワークスペースの詳細 |
+
+## DELETE /workspace/{workspaceId} \{#delete-workspaceworkspaceid\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して organization ID を指定します |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペース ID                         |
+| **`force`**                     | query    | false    | undefined | 未定義                                        |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明              |
+| :--------------- | :---------------- |
+| **`200`**        | ワークスペースは削除されました |
+
+## POST /workspace/{workspaceId}/start \{#post-workspaceworkspaceidstart\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                 |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペースの ID                                |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                   |
+| :---------- | :----------------------- |
+| **`200`**   | ワークスペースが起動しました |
+
+## POST /workspace/{workspaceId}/stop \{#post-workspaceworkspaceidstop\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペースの ID                              |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明               |
+| :---------- | :---------------- |
+| **`200`**   | Workspace が停止しました |
+
+## PUT /workspace/{workspaceId}/labels \{#put-workspaceworkspaceidlabels\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペースの ID                               |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                            |
+| :--------------- | :----------------------------- |
+| **`200`**        | ラベルが正常に置換されました     |
+
+## POST /workspaces/{workspaceId}/backup \{#post-workspaceworkspaceidbackup\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                  |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペースの ID                          |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                          |
+| :---------- | :---------------------------------- |
+| **`200`**   | ワークスペースのバックアップが開始されました |
+
+## POST /workspace/{workspaceId}/public/{isPublic} \{#post-workspaceworkspaceidpublicispublic\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                             |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                      |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペース ID                                      |
+| **`isPublic`**                  | path     | true     | undefined | 設定する公開ステータス                                 |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** |  |
+| :---------- | :---------- |
+| **`201`**   |             |
 
+## POST /workspace/{workspaceId}/autostop/{interval} \{#post-workspaceworkspaceidautostopinterval\}
 
-## POST /snapshots/\{id\}/activate
+### パラメーター \{#parameters\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定します |
-| **`id`** | path | true | undefined | スナップショット（Snapshot）ID |
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペース ID                                     |
+| **`interval`**                  | path     | true     | undefined | 自動停止までの間隔（分単位、0 を指定すると無効）     |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | スナップショットを正常に有効化しました。 |
-| **`400`** | 不正なリクエスト - スナップショットがすでに有効、非アクティブ状態ではない、または関連するランナー（サンドボックスがスケジュールおよび実行される基盤の計算ノード/ホスト）があります |
-| **`404`** | スナップショットが見つかりません |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明                         |
+| :--------------- | :-------------------------- |
+| **`200`**        | 自動停止間隔が設定されました |
 
-## GET /workspace
+## POST /workspace/{workspaceId}/autoarchive/{interval} \{#post-workspaceworkspaceidautoarchiveinterval\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定する |
-| **`verbose`** | query | false | undefined | 詳細出力を含める |
-| **`labels`** | query | false | undefined | フィルタに使用する JSON エンコード済みラベル |
+### パラメーター \{#parameters\}
 
-### レスポンス
+| Name                            | Location | Required | Type      | Description                                                                                     |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                                                              |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペースの ID                                                                             |
+| **`interval`**                  | path     | true     | undefined | 自動アーカイブ間隔（分単位）（0 の場合、利用可能な最大間隔が使用されます） |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                               |
+| :--------------- | :---------------------------------- |
+| **`200`**        | 自動アーカイブ間隔が正常に設定されました |
+
+## POST /workspace/{workspaceId}/archive \{#post-workspaceworkspaceidarchive\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                |
+| **`workspaceId`**               | path     | true     | undefined | undefined                                         |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                  |
+| :--------------- | :-------------------- |
+| **`200`**        | ワークスペースがアーカイブ済み |
+
+## GET /workspace/{workspaceId}/ports/{port}/preview-url \{#get-workspaceworkspaceidportsportpreview-url\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペース ID                                  |
+| **`port`**                      | path     | true     | undefined | プレビュー URL を取得する対象のポート番号          |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                           |
+| :--------------- | :---------------------------- |
+| **`200`**        | 指定したポートのプレビュー URL |
+
+## GET /workspace/{workspaceId}/build-logs \{#get-workspaceworkspaceidbuild-logs\}
+
+### パラメーター \{#parameters\}
+
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`workspaceId`**               | path     | true     | undefined | ワークスペース ID                                     |
+| **`follow`**                    | query    | false    | undefined | ログストリームを追従するかどうか                     |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明             |
+| :---------- | :---------------- |
+| **`200`**   | ビルドログのストリーム |
+
+## GET /preview/{sandboxId}/public \{#get-previewsandboxidpublic\}
+
+### パラメータ \{#parameters\}
+
+| Name            | Location | Required | Type      | Description      |
+| :-------------- | :------- | :------- | :-------- | :--------------- |
+| **`sandboxId`** | path     | true     | undefined | サンドボックスの ID |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                         |
+| :---------- | :--------------------------- |
+| **`200`**   | サンドボックスの公開ステータス |
+
+## GET /preview/{sandboxId}/validate/{authToken} \{#get-previewsandboxidvalidateauthtoken\}
+
+### パラメーター \{#parameters\}
+
+| Name            | Location | Required | Type      | Description                    |
+| :-------------- | :------- | :------- | :-------- | :----------------------------- |
+| **`sandboxId`** | path     | true     | undefined | サンドボックスのID             |
+| **`authToken`** | path     | true     | undefined | サンドボックスの認証トークン   |
+
+### レスポンス \{#responses\}
+
+| ステータスコード | 説明                             |
+| :--------------- | :------------------------------- |
+| **`200`**        | サンドボックス認証トークンの検証ステータス |
+
+## GET /preview/{sandboxId}/access \{#get-previewsandboxidaccess\}
+
+### パラメーター \{#parameters\}
+
+| Name            | Location | Required | Type      | Description |
+| :-------------- | :------- | :------- | :-------- | :---------- |
+| **`sandboxId`** | path     | true     | undefined | undefined   |
+
+### レスポンス \{#responses\}
+
 | ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | すべてのワークスペースの一覧 |
+| :---------- | :---------- |
+| **`200`**   |             |
 
-## POST /workspace
+## GET /volumes \{#get-volumes\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織IDを指定します |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ワークスペースの作成に成功しました。 |
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`includeDeleted`**            | query    | false    | undefined | レスポンスに削除済みボリュームを含めるかどうかを指定します |
 
+### レスポンス \{#responses\}
 
-## GET /workspace/\{workspaceId\}
+| ステータスコード | 説明                  |
+| :---------- | :------------------ |
+| **`200`**   | すべてのボリュームの一覧 |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）の ID を指定 |
-| **`verbose`** | query | false | undefined | 冗長な出力を含める |
-| **`workspaceId`** | path | true | undefined | ワークスペースの ID |
+## POST /volumes \{#post-volumes\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ワークスペースの詳細 |
+### パラメーター \{#parameters\}
 
-## DELETE /workspace/\{workspaceId\}
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定 |
-| **`workspaceId`** | path | true | undefined | ワークスペースの ID |
-| **`force`** | query | true | undefined | 未定義 |
+### レスポンス \{#responses\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ワークスペースを削除しました |
+| ステータスコード | 説明                          |
+| :--------------- | :--------------------------- |
+| **`200`**        | ボリュームが正常に作成されました。 |
 
+## GET /volumes/{volumeId} \{#get-volumesvolumeid\}
 
-## POST /workspace/\{workspaceId\}/start
+### パラメーター \{#parameters\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペースの ID |
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                    |
+| **`volumeId`**                  | path     | true     | undefined | ボリュームの ID                                      |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ワークスペースを起動しました |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明          |
+| :--------------- | :------------ |
+| **`200`**        | ボリュームの詳細情報 |
 
-## POST /workspace/\{workspaceId\}/stop
+## DELETE /volumes/{volumeId} \{#delete-volumesvolumeid\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペースのID |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ワークスペースを停止しました |
+| Name                            | Location | Required | Type      | Description                                         |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                 |
+| **`volumeId`**                  | path     | true     | undefined | ボリュームの ID                                    |
 
+### レスポンス \{#responses\}
 
-## PUT /workspace/\{workspaceId\}/labels
+| ステータスコード | 説明                          |
+| :---------- | :---------------------------------- |
+| **`200`**   | ボリュームが削除対象としてマークされました |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペース ID |
+## GET /volumes/by-name/{name} \{#get-volumesby-namename\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ラベルを正常に置換しました |
+### パラメーター \{#parameters\}
 
+| 名前                            | 位置    | 必須 | 型        | 説明                                   |
+| :------------------------------ | :------ | :--- | :-------- | :-------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header  | false | undefined | JWT と併用して組織 ID を指定するために使用 |
+| **`name`**                      | path    | true  | undefined | ボリューム名                           |
 
-## POST /workspace/\{workspaceId\}/backup
+### レスポンス \{#responses\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）のIDを指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペースのID |
+| ステータスコード | 説明       |
+| :--------------- | :--------- |
+| **`200`**        | ボリュームの詳細 |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ワークスペースのバックアップの開始を受け付けました |
+## POST /docker-registry \{#post-docker-registry\}
 
+### パラメーター \{#parameters\}
 
-## POST /workspace/\{workspaceId\}/public/\{isPublic\}
+| Name                            | Location | Required | Type      | Description                                   |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）の ID を指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペースの ID |
-| **`isPublic`** | path | true | undefined | 設定する公開ステータス |
+### レスポンス \{#responses\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`201`** |  |
+| ステータスコード | 説明                                         |
+| :--------------- | :------------------------------------------- |
+| **`201`**        | Docker レジストリが正常に作成されました。 |
 
+## GET /docker-registry \{#get-docker-registry\}
 
-## POST /workspace/\{workspaceId\}/autostop/\{interval\}
+### パラメーター \{#parameters\}
 
-### パラメータ
-| 名前 | ロケーション | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）ID を指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペースのID |
-| **`interval`** | path | true | undefined | 自動停止（サンドボックスのライフサイクルを制御する自動タイマー）の間隔（分）。0 で無効化 |
+| Name                            | Location | Required | Type      | Description                                        |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID（organization ID）を指定します |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 自動停止（サンドボックスのライフサイクルを制御する自動タイマー）の間隔を設定しました |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明                      |
+| :---------- | :---------------------------- |
+| **`200`**   | すべての Docker レジストリのリスト |
 
-## POST /workspace/\{workspaceId\}/autoarchive/\{interval\}
+## GET /docker-registry/registry-push-access \{#get-docker-registryregistry-push-access\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）のIDを指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペースのID |
-| **`interval`** | path | true | undefined | 自動アーカイブ間隔（分）。0 を指定すると最大間隔が使用されます |
+### パラメーター \{#parameters\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 自動アーカイブ間隔を設定しました |
+| Name                            | Location | Required | Type      | Description                                       |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------ |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定する際に使用します |
 
+### レスポンス \{#responses\}
 
-## POST /sandbox/\{sandboxId\}/autodelete/\{interval\}
+| ステータスコード | 説明                                      |
+| :---------- | :------------------------------------------- |
+| **`200`**   | 一時的なレジストリアクセスが発行されました |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定 |
-| **`sandboxId`** | path | true | undefined | サンドボックス（Sandbox）の ID |
-| **`interval`** | path | true | undefined | 自動削除の間隔（分）。負の値で無効、0 で停止時に即時削除 |
+## GET /docker-registry/{id} \{#get-docker-registryid\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | 自動削除の間隔を設定しました |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                                     |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します               |
+| **`id`**                        | path     | true     | undefined | Docker レジストリの ID                                         |
 
-## POST /workspace/\{workspaceId\}/archive
+### レスポンス \{#responses\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | ヘッダー | いいえ | 未定義 | JWT と併用して組織（Organization）IDを指定します |
-| **`workspaceId`** | パス | はい | 未定義 | 未定義 |
+| ステータスコード | 説明                  |
+| :---------- | :------------------ |
+| **`200`**   | Docker レジストリ情報 |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ワークスペースをアーカイブしました |
+## PATCH /docker-registry/{id} \{#patch-docker-registryid\}
 
+### パラメーター \{#parameters\}
 
-## GET /workspace/\{workspaceId\}/ports/\{port\}/preview-url
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します      |
+| **`id`**                        | path     | true     | undefined | Docker レジストリの ID                               |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定 |
-| **`workspaceId`** | path | true | undefined | ワークスペース ID |
-| **`port`** | path | true | undefined | プレビューリンクを取得するポート番号 |
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 指定したポートのプレビューリンク |
+| ステータスコード | 説明                                      |
+| :--------------- | :----------------------------------------- |
+| **`200`**        | Docker レジストリが正常に更新されました。 |
 
+## DELETE /docker-registry/{id} \{#delete-docker-registryid\}
 
-## GET /workspace/\{workspaceId\}/build-logs
+### パラメーター \{#parameters\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWTと併用して組織（Organization）のIDを指定します |
-| **`workspaceId`** | path | true | undefined | ワークスペースID |
-| **`follow`** | query | false | undefined | ログストリームをフォローするかどうか |
+| Name                            | Location | Required | Type      | Description                                     |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`id`**                        | path     | true     | undefined | Docker レジストリの ID                          |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ビルドログのストリーム |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明                                   |
+| :--------------- | :-------------------------------------- |
+| **`204`**        | Docker レジストリが正常に削除されました。 |
 
-## GET /preview/\{sandboxId\}/public
+## POST /docker-registry/{id}/set-default \{#post-docker-registryidset-default\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`sandboxId`** | path | true | undefined | サンドボックス（隔離された一時的な実行環境）のID |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | サンドボックスの公開状態 |
+| Name                            | Location | Required | Type      | Description                                              |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します          |
+| **`id`**                        | path     | true     | undefined | Docker レジストリの ID                                   |
 
+### レスポンス \{#responses\}
 
-## GET /preview/\{sandboxId\}/validate/\{authToken\}
+| ステータスコード | 説明                                     |
+| :--------------- | :--------------------------------------- |
+| **`200`**        | Docker レジストリがデフォルトとして設定されました。 |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`sandboxId`** | path | true | undefined | サンドボックスのID |
-| **`authToken`** | path | true | undefined | サンドボックスの認証トークン |
+## POST /webhooks/organizations/{organizationId}/app-portal-access \{#post-webhooksorganizationsorganizationidapp-portal-access\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | サンドボックス認証トークンの検証結果 |
+### パラメーター \{#parameters\}
 
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します       |
+| **`organizationId`**            | path     | true     | undefined | undefined                                             |
 
-## GET /preview/\{sandboxId\}/access
+### レスポンス \{#responses\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`sandboxId`** | パス | 必須 | undefined | undefined |
+| Status Code | 説明                               |
+| :---------- | :-------------------------------- |
+| **`200`**   | App Portal へのアクセスが正常に生成されました |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** |  |
+## POST /webhooks/organizations/{organizationId}/send \{#post-webhooksorganizationsorganizationidsend\}
 
+### パラメーター \{#parameters\}
 
-## GET /volumes
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します |
+| **`organizationId`**            | path     | true     | undefined | undefined                                        |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して 組織（Organization）ID を指定します |
-| **`includeDeleted`** | query | false | undefined | レスポンスに削除済みのボリューム（Volume）を含めます |
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | すべてのボリューム（Volume）の一覧 |
+| ステータスコード | 説明                             |
+| :--------------- | :------------------------------ |
+| **`200`**        | Webhook メッセージが正常に送信されました |
 
-## POST /volumes
+## GET /webhooks/organizations/{organizationId}/messages/{messageId}/attempts \{#get-webhooksorganizationsorganizationidmessagesmessageidattempts\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Daytona内のリソースとユーザーのグループ化、ロールや請求など）の ID を指定します |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | ボリューム（S3互換オブジェクトストレージをバックエンドに持つFUSEベースの共有ストレージ）が正常に作成されました。 |
+| Name                            | Location | Required | Type      | Description                                               |
+| :------------------------------ | :------- | :------- | :-------- | :-------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します                         |
+| **`organizationId`**            | path     | true     | undefined | undefined                                                 |
+| **`messageId`**                 | path     | true     | undefined | undefined                                                 |
 
+### レスポンス \{#responses\}
 
-## GET /volumes/\{volumeId\}
+| ステータスコード | 説明                    |
+| :---------- | :------------------------ |
+| **`200`**   | 配信試行のリスト           |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）のIDを指定します |
-| **`volumeId`** | path | true | undefined | ボリューム（Volume）のID |
+## GET /webhooks/status \{#get-webhooksstatus\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ボリュームの詳細 |
+### パラメーター \{#parameters\}
 
-## DELETE /volumes/\{volumeId\}
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定します |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Daytona 内のリソースとユーザーのグループ化、ロールや請求など）の ID を指定します |
-| **`volumeId`** | path | true | undefined | ボリューム（S3互換オブジェクトストレージをバックエンドに持つFUSEベースの共有ストレージ）の ID |
+### レスポンス \{#responses\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ボリュームは削除対象としてマークされました |
+| ステータスコード | 説明            |
+| :---------- | :---------------- |
+| **`200`**   | Webhook サービスの状態 |
 
+## GET /webhooks/organizations/{organizationId}/initialization-status \{#get-webhooksorganizationsorganizationidinitialization-status\}
 
-## GET /volumes/by-name/\{name\}
+### パラメーター \{#parameters\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`name`** | path | true | undefined | ボリューム（S3互換オブジェクトストレージをバックエンドに持つFUSEベースの共有ストレージ）の名前 |
+| Name                            | Location | Required | Type      | Description                                              |
+| :------------------------------ | :------- | :------- | :-------- | :------------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します          |
+| **`organizationId`**            | path     | true     | undefined | undefined                                                |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | ボリュームの詳細 |
+### レスポンス \{#responses\}
 
+| ステータスコード | 説明                             |
+| :---------- | :-------------------------------------- |
+| **`200`**   | Webhook 初期化ステータス           |
+| **`404`**   | Webhook 初期化ステータスが見つかりません |
 
-## POST /docker-registry
+## POST /webhooks/organizations/{organizationId}/initialize \{#post-webhooksorganizationsorganizationidinitialize\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して、組織（Organization）のIDを指定します |
+### パラメーター \{#parameters\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`201`** | Dockerレジストリが正常に作成されました。 |
+| Name                            | Location | Required | Type      | Description                                           |
+| :------------------------------ | :------- | :------- | :-------- | :---------------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して組織 ID を指定するために使用します        |
+| **`organizationId`**            | path     | true     | undefined | undefined                                             |
 
-## GET /docker-registry
+### レスポンス \{#responses\}
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | いいえ | undefined | JWT と併用して組織（Organization）ID を指定する |
+| ステータスコード | 説明                                 |
+| :--------------- | :------------------------------------ |
+| **`201`**        | Webhook が正常に初期化されました      |
+| **`403`**        | ユーザーはこの組織へのアクセス権がありません |
+| **`404`**        | 組織が見つかりません                  |
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | すべての Docker レジストリの一覧 |
+## GET /object-storage/push-access \{#get-object-storagepush-access\}
 
+### パラメータ \{#parameters\}
 
-## GET /docker-registry/registry-push-access
+| Name                            | Location | Required | Type      | Description                                      |
+| :------------------------------ | :------- | :------- | :-------- | :----------------------------------------------- |
+| **`X-Daytona-Organization-ID`** | header   | false    | undefined | JWT と併用して、組織 ID を指定するために使用します |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して、組織（Organization）ID を指定します |
+### レスポンス \{#responses\}
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 一時的なレジストリへのアクセス権が発行されました |
+| ステータスコード | 説明                                  |
+| :---------- | :-------------------------------------- |
+| **`200`**   | 一時ストレージへのアクセスが生成されました |
 
+## GET /audit \{#get-audit\}
 
-## GET /docker-registry/\{id\}
+### パラメーター \{#parameters\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）の ID を指定します |
-| **`id`** | path | true | undefined | Docker レジストリの ID |
+| Name        | Location | Required | Type      | Description                    |
+| :---------- | :------- | :------- | :-------- | :----------------------------- |
+| **`page`**  | query    | false    | undefined | 結果のページ番号               |
+| **`limit`** | query    | false    | undefined | 1 ページあたりの結果数        |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Docker レジストリ |
+### レスポンス \{#responses\}
 
-## PATCH /docker-registry/\{id\}
+| ステータスコード | 説明                             |
+| :--------------- | :------------------------------ |
+| **`200`**        | すべての監査ログのページネーションされた一覧 |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織 ID を指定します |
-| **`id`** | path | true | undefined | Docker レジストリの ID |
+## POST /audit \{#post-audit\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`200`** | Docker レジストリを正常に更新しました。 |
+### レスポンス \{#responses\}
 
-## DELETE /docker-registry/\{id\}
+| ステータスコード | 説明                              |
+| :--------------- | :------------------------------- |
+| **`201`**        | 監査ログエントリが正常に作成されました |
 
-### パラメータ
-| 名前 | 位置 | 必須 | 型 | 説明 |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`id`** | path | true | undefined | Docker レジストリの ID |
+## GET /audit/organizations/{organizationId} \{#get-auditorganizationsorganizationid\}
 
-### レスポンス
-| ステータスコード | 説明 |
-| :-------- | :---------- |
-| **`204`** | Docker レジストリが正常に削除されました。 |
+### パラメーター \{#parameters\}
 
+| Name                 | Location | Required | Type      | Description                |
+| :------------------- | :------- | :------- | :-------- | :------------------------- |
+| **`organizationId`** | path     | true     | undefined | 組織 ID                     |
+| **`page`**           | query    | false    | undefined | 結果のページ番号            |
+| **`limit`**          | query    | false    | undefined | 1 ページあたりの結果数      |
 
-## POST /docker-registry/\{id\}/set-default
+### レスポンス \{#responses\}
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-| **`id`** | path | true | undefined | Docker レジストリの ID |
+| ステータスコード | 説明                                   |
+| :--------------- | :-------------------------------------- |
+| **`200`**        | 組織の監査ログのページネーションされた一覧 |
 
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Docker レジストリをデフォルトに設定しました。 |
+## GET /health \{#get-health\}
 
+### レスポンス \{#responses\}
 
-## GET /object-storage/push-access
+| ステータスコード | 説明                    |
+| :---------- | :------------------------- |
+| **`200`**   | ヘルスチェックに成功しました     |
+| **`503`**   | ヘルスチェックに失敗しました |
 
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | JWT と併用して組織（Organization）ID を指定します |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | 一時的なストレージアクセスが生成されます |
-
-
-
+| ステータスコード | 説明                                  |
+| :---------- | :--------------------------------------- |
+| **`200`**   | 一時ストレージへのアクセスが発行されました |
