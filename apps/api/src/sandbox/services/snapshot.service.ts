@@ -109,44 +109,16 @@ export class SnapshotService {
     return filteredEntrypoint.length > 0 ? filteredEntrypoint : undefined
   }
 
-  private async checkForValidActiveSnapshot(
-    ref: string,
-    entrypoint: string[] | undefined,
-    skipValidation: boolean,
-    regionId: string,
-  ): Promise<Snapshot | null> {
-    // Check if there is already an active snapshot with the same ref in the provided region
-    // Only check entrypoint if skipValidation is not set on the DTO
-    // We can skip the pulling and validation in that case - note: relevant only for Docker
-
-    if (!entrypoint || entrypoint.length === 0) {
-      return null
-    }
-
-    const qb = this.snapshotRepository
-      .createQueryBuilder('s')
-      .innerJoin('snapshot_runner', 'sr', 'sr."snapshotRef" = s.ref')
+  private async readySnapshotRunnerExists(ref: string, regionId: string): Promise<boolean> {
+    return await this.snapshotRunnerRepository
+      .createQueryBuilder('sr')
       .innerJoin('runner', 'r', 'r.id::text = sr."runnerId"::text')
-      .where('s.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
+      .where('sr."snapshotRef" = :ref', { ref })
       .andWhere('sr.state = :snapshotRunnerState', { snapshotRunnerState: SnapshotRunnerState.READY })
-      .andWhere('s.ref = :ref', { ref })
       .andWhere('r.region = :regionId', { regionId })
       .andWhere('r.state = :runnerState', { runnerState: RunnerState.READY })
       .andWhere('r.unschedulable = false')
-
-    if (!skipValidation) {
-      qb.andWhere('s.entrypoint = :entrypoint', {
-        entrypoint: Array.isArray(entrypoint) ? entrypoint : [entrypoint],
-      })
-    }
-
-    const snapshot = await qb.getOne()
-
-    if (!snapshot) {
-      return null
-    }
-
-    return snapshot
+      .getExists()
   }
 
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
@@ -221,14 +193,9 @@ export class SnapshotService {
             : imageDetails.digest
         ref = `${defaultInternalRegistry.url.replace(/^https?:\/\//, '')}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
 
-        const existingSnapshot = await this.checkForValidActiveSnapshot(
-          ref,
-          entrypoint,
-          createSnapshotDto.skipValidation,
-          organization.defaultRegionId,
-        )
+        const exists = await this.readySnapshotRunnerExists(ref, organization.defaultRegionId)
 
-        if (existingSnapshot) {
+        if (exists) {
           state = SnapshotState.ACTIVE
         }
       }
@@ -330,14 +297,9 @@ export class SnapshotService {
       const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
       snapshot.ref = `${defaultInternalRegistry.url.replace(/^(https?:\/\/)/, '')}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
 
-      const existingSnapshot = await this.checkForValidActiveSnapshot(
-        snapshot.ref,
-        entrypoint,
-        createSnapshotDto.skipValidation,
-        organization.defaultRegionId,
-      )
+      const exists = await this.readySnapshotRunnerExists(snapshot.ref, organization.defaultRegionId)
 
-      if (existingSnapshot) {
+      if (exists) {
         snapshot.state = SnapshotState.ACTIVE
       }
 
