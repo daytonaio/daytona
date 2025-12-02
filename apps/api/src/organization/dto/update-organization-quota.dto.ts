@@ -34,4 +34,13 @@ export class UpdateOrganizationQuotaDto {
 
   @ApiProperty({ nullable: true })
   volumeQuota?: number
+
+  @ApiProperty({ nullable: true })
+  authenticatedRateLimit?: number
+
+  @ApiProperty({ nullable: true })
+  sandboxCreateRateLimit?: number
+
+  @ApiProperty({ nullable: true })
+  sandboxLifecycleRateLimit?: number
 }

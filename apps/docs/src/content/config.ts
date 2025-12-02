@@ -1,6 +1,5 @@
 import { docsSchema, i18nSchema } from '@astrojs/starlight/schema'
 import { defineCollection, z } from 'astro:content'
-import { T } from 'gt-react'
 import { generateI18nSchema } from 'src/i18n/generateI18nSchema'
 import { localizePath } from 'src/i18n/utils'
 
@@ -93,6 +92,16 @@ export const getSidebarConfig = (
             icon: 'terminal.svg',
           },
         },
+        {
+          type: 'link',
+          href: 'https://www.daytona.io/dotfiles/guides',
+          label: labels['sidebarconfig.guides'],
+          disablePagination: true,
+          external: true,
+          attrs: {
+            icon: 'book.svg',
+          },
+        },
       ],
     },
     {
@@ -104,9 +113,9 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs', locale),
-          label: labels['sidebarconfig.home'],
+          label: labels['sidebarconfig.quickStart'],
           attrs: {
-            icon: 'home.svg',
+            icon: 'rocket.svg',
           },
         },
         {
@@ -421,6 +430,15 @@ export const getSidebarConfig = (
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/inngest-agentkit-coding-agent', locale),
+          label: labels['sidebarconfig.inngestAgentKit'],
+          disablePagination: true,
+          attrs: {
+            icon: 'inngest-agentkit.svg',
+          },
+        },
         {
           type: 'link',
           href: localizePath('/docs/langchain-data-analysis', locale),

@@ -7332,9 +7332,36 @@ components:
         - clientId
         - issuer
       type: object
+    RateLimitEntry:
+      properties:
+        ttl:
+          description: Rate limit TTL in seconds
+          example: 60
+          type: number
+        limit:
+          description: Rate limit max requests
+          example: 100
+          type: number
+      type: object
+    RateLimitConfig:
+      properties:
+        authenticated:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Authenticated rate limit
+        sandboxCreate:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Sandbox create rate limit
+        sandboxLifecycle:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Sandbox lifecycle rate limit
+      type: object
     DaytonaConfiguration:
       example:
         dashboardUrl: https://dashboard.example.com
+        rateLimit: ''
         sshGatewayPublicKey: ssh-gateway-public-key
         billingApiUrl: https://billing.example.com
         linkedAccountsEnabled: true
@@ -7423,6 +7450,10 @@ components:
           description: Base64 encoded SSH Gateway public key
           example: ssh-gateway-public-key
           type: string
+        rateLimit:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitConfig'
+          description: Rate limit configuration
       required:
         - announcements
         - dashboardUrl
@@ -7758,11 +7789,14 @@ components:
       example:
         totalCpuQuota: 6.027456183070403
         suspensionReason: suspensionReason
+        sandboxLifecycleRateLimit: 2.027123023002322
         suspendedAt: 2000-01-23T04:56:07.000+00:00
         defaultRegion: defaultRegion
         personal: true
         suspensionCleanupGracePeriodHours: 0.8008281904610115
+        authenticatedRateLimit: 9.301444243932576
         suspended: true
+        sandboxCreateRateLimit: 3.616076749251911
         createdAt: 2000-01-23T04:56:07.000+00:00
         maxCpuPerSandbox: 5.637376656633329
         sandboxLimitedNetworkEgress: true
@@ -7837,7 +7871,20 @@ components:
         defaultRegion:
           description: Default region
           type: string
+        authenticatedRateLimit:
+          description: Authenticated rate limit per minute
+          nullable: true
+          type: number
+        sandboxCreateRateLimit:
+          description: Sandbox create rate limit per minute
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimit:
+          description: Sandbox lifecycle rate limit per minute
+          nullable: true
+          type: number
       required:
+        - authenticatedRateLimit
         - createdAt
         - createdBy
         - defaultRegion
@@ -7847,6 +7894,8 @@ components:
         - maxMemoryPerSandbox
         - name
         - personal
+        - sandboxCreateRateLimit
+        - sandboxLifecycleRateLimit
         - sandboxLimitedNetworkEgress
         - suspended
         - suspendedAt
@@ -7909,11 +7958,14 @@ components:
         totalCpuQuota: 0.8008281904610115
         maxCpuPerSandbox: 5.962133916683182
         maxDiskPerSandbox: 2.3021358869347655
+        sandboxLifecycleRateLimit: 7.386281948385884
         maxMemoryPerSandbox: 5.637376656633329
         volumeQuota: 3.616076749251911
         totalMemoryQuota: 6.027456183070403
         maxSnapshotSize: 9.301444243932576
+        authenticatedRateLimit: 2.027123023002322
         totalDiskQuota: 1.4658129805029452
+        sandboxCreateRateLimit: 4.145608029883936
       properties:
         totalCpuQuota:
           nullable: true
@@ -7942,11 +7994,23 @@ components:
         volumeQuota:
           nullable: true
           type: number
+        authenticatedRateLimit:
+          nullable: true
+          type: number
+        sandboxCreateRateLimit:
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimit:
+          nullable: true
+          type: number
       required:
+        - authenticatedRateLimit
         - maxCpuPerSandbox
         - maxDiskPerSandbox
         - maxMemoryPerSandbox
         - maxSnapshotSize
+        - sandboxCreateRateLimit
+        - sandboxLifecycleRateLimit
         - snapshotQuota
         - totalCpuQuota
         - totalDiskQuota
@@ -8399,6 +8463,7 @@ components:
       example:
         mountPath: /data
         volumeId: volume123
+        subpath: users/alice
       properties:
         volumeId:
           description: The ID of the volume
@@ -8407,6 +8472,12 @@ components:
         mountPath:
           description: The mount path for the volume
           example: /data
+          type: string
+        subpath:
+          description: "Optional subpath within the volume to mount. When specified,\
+            \ only this S3 prefix will be accessible. When omitted, the entire volume\
+            \ is mounted."
+          example: users/alice
           type: string
       required:
         - mountPath
@@ -8463,8 +8534,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production
@@ -8658,8 +8731,10 @@ components:
             volumes:
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
             cpu: 2
             env:
               NODE_ENV: production
@@ -8693,8 +8768,10 @@ components:
             volumes:
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
               - mountPath: /data
                 volumeId: volume123
+                subpath: users/alice
             cpu: 2
             env:
               NODE_ENV: production
@@ -8768,8 +8845,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production
@@ -8899,6 +8978,7 @@ components:
       type: object
     UpdateSandboxStateDto:
       example:
+        errorReason: Failed to pull snapshot image
         state: started
       properties:
         state:
@@ -8921,6 +9001,10 @@ components:
             - archived
             - archiving
           example: started
+          type: string
+        errorReason:
+          description: Optional error message when reporting an error state
+          example: Failed to pull snapshot image
           type: string
       required:
         - state
@@ -10697,6 +10781,7 @@ components:
     CreateSnapshot:
       example:
         general: true
+        skipValidation: false
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
@@ -10743,12 +10828,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
+        skipValidation:
+          description: Whether to skip validation for the snapshot
+          example: false
+          type: boolean
       required:
         - name
       type: object
     SnapshotState:
       enum:
-        - build_pending
         - building
         - pending
         - pulling
@@ -10769,6 +10857,7 @@ components:
         organizationId: organizationId
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
+        skipValidation: true
         disk: 5.637376656633329
         size: 0.8008281904610115
         mem: 5.962133916683182
@@ -10828,6 +10917,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the snapshot
+        skipValidation:
+          type: boolean
       required:
         - cpu
         - createdAt
@@ -10841,6 +10932,7 @@ components:
         - mem
         - name
         - size
+        - skipValidation
         - state
         - updatedAt
       type: object
@@ -10857,6 +10949,7 @@ components:
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            skipValidation: true
             disk: 5.637376656633329
             size: 0.8008281904610115
             mem: 5.962133916683182
@@ -10876,6 +10969,7 @@ components:
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            skipValidation: true
             disk: 5.637376656633329
             size: 0.8008281904610115
             mem: 5.962133916683182
@@ -10959,8 +11053,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production
@@ -11161,8 +11257,10 @@ components:
         volumes:
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
           - mountPath: /data
             volumeId: volume123
+            subpath: users/alice
         cpu: 2
         env:
           NODE_ENV: production

@@ -85,4 +85,12 @@ export class CreateSnapshotDto {
   @IsOptional()
   @IsObject()
   buildInfo?: CreateBuildInfoDto
+
+  @ApiPropertyOptional({
+    description: 'Whether to skip validation for the snapshot',
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  skipValidation?: boolean
 }

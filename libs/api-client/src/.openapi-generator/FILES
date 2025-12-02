@@ -117,6 +117,8 @@ models/pty-list-response.ts
 models/pty-resize-request.ts
 models/pty-session-info.ts
 models/range.ts
+models/rate-limit-config.ts
+models/rate-limit-entry.ts
 models/region-screenshot-response.ts
 models/region.ts
 models/registry-push-access-dto.ts

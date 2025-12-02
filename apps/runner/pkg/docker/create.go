@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/containerd/errdefs"
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
-	"github.com/docker/docker/errdefs"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	log "github.com/sirupsen/logrus"
@@ -85,6 +85,10 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		OS:           "linux",
 	}, sandboxDto.Id)
 	if err != nil {
+		// Container already exists and is being created by another process
+		if errdefs.IsConflict(err) {
+			return sandboxDto.Id, nil
+		}
 		return "", err
 	}
 
@@ -98,7 +102,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	if err != nil {
 		log.Errorf("Failed to inspect container: %v", err)
 	}
-	ip := info.NetworkSettings.IPAddress
+	ip := common.GetContainerIpAddress(ctx, info)
 
 	if sandboxDto.NetworkBlockAll != nil && *sandboxDto.NetworkBlockAll {
 		go func() {
@@ -131,7 +135,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 func (p *DockerClient) validateImageArchitecture(ctx context.Context, image string) error {
 	defer timer.Timer()()
 
-	inspect, _, err := p.apiClient.ImageInspectWithRaw(ctx, image)
+	inspect, err := p.apiClient.ImageInspect(ctx, image)
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			return err

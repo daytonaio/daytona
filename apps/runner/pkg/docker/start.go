@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
@@ -37,12 +37,12 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	}
 
 	if c.State.Running {
-		containerIP, err := getContainerIP(&c)
-		if err != nil {
-			return err
+		containerIP := common.GetContainerIpAddress(ctx, c)
+		if containerIP == "" {
+			return errors.New("sandbox IP not found? Is the sandbox started?")
 		}
 
-		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+		err = d.waitForDaemonRunning(ctx, containerIP)
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	}
 
 	// make sure container is running
-	err = d.waitForContainerRunning(ctx, containerId, 10*time.Second)
+	err = d.waitForContainerRunning(ctx, containerId)
 	if err != nil {
 		return err
 	}
@@ -67,9 +67,9 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		return err
 	}
 
-	containerIP, err := getContainerIP(&c)
-	if err != nil {
-		return err
+	containerIP := common.GetContainerIpAddress(ctx, c)
+	if containerIP == "" {
+		return errors.New("sandbox IP not found? Is the sandbox started?")
 	}
 
 	processesCtx := context.Background()
@@ -79,7 +79,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		}
 	}()
 
-	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+	err = d.waitForDaemonRunning(ctx, containerIP)
 	if err != nil {
 		return err
 	}
@@ -99,9 +99,10 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	return nil
 }
 
-func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId string, timeout time.Duration) error {
+func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId string) error {
 	defer timer.Timer()()
 
+	timeout := time.Duration(d.sandboxStartTimeoutSec) * time.Second
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -125,7 +126,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	}
 }
 
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration) error {
+func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string) error {
 	defer timer.Timer()()
 
 	// Build the target URL
@@ -135,6 +136,7 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 		return common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
 	}
 
+	timeout := time.Duration(d.daemonStartTimeoutSec) * time.Second
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -152,11 +154,4 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 			return nil
 		}
 	}
-}
-
-func getContainerIP(container *types.ContainerJSON) (string, error) {
-	for _, network := range container.NetworkSettings.Networks {
-		return network.IPAddress, nil
-	}
-	return "", fmt.Errorf("no IP address found. Is the Sandbox started?")
 }

@@ -16,6 +16,7 @@ from daytona_toolbox_api_client_async import (
     FileSystemApi,
     GitApi,
     InfoApi,
+    InterpreterApi,
     LspApi,
     ProcessApi,
 )
@@ -26,6 +27,7 @@ from .._utils.errors import intercept_errors
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError, DaytonaNotFoundError
 from ..common.protocols import SandboxCodeToolbox
+from .code_interpreter import AsyncCodeInterpreter
 from .computer_use import AsyncComputerUse
 from .filesystem import AsyncFileSystem
 from .git import AsyncGit
@@ -41,6 +43,8 @@ class AsyncSandbox(SandboxDto):
         git (AsyncGit): Git operations interface.
         process (AsyncProcess): Process execution interface.
         computer_use (AsyncComputerUse): Computer use operations interface for desktop automation.
+        code_interpreter (AsyncCodeInterpreter): Stateful interpreter interface for executing code.
+            Currently supports only Python. For other languages, use the `process.code_run` interface.
         id (str): Unique identifier for the Sandbox.
         name (str): Name of the Sandbox.
         organization_id (str): Organization ID of the Sandbox.
@@ -73,6 +77,7 @@ class AsyncSandbox(SandboxDto):
     _git: AsyncGit = PrivateAttr()
     _process: AsyncProcess = PrivateAttr()
     _computer_use: AsyncComputerUse = PrivateAttr()
+    _code_interpreter: AsyncCodeInterpreter = PrivateAttr()
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -106,6 +111,7 @@ class AsyncSandbox(SandboxDto):
         self._git = AsyncGit(GitApi(toolbox_api))
         self._process = AsyncProcess(code_toolbox, ProcessApi(toolbox_api), self.__ensure_toolbox_url)
         self._computer_use = AsyncComputerUse(ComputerUseApi(toolbox_api))
+        self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(toolbox_api), self.__ensure_toolbox_url)
         self._info_api = InfoApi(toolbox_api)
 
         og_call_toolbox_api = self._toolbox_api.call_api
@@ -139,6 +145,10 @@ class AsyncSandbox(SandboxDto):
     @property
     def computer_use(self) -> AsyncComputerUse:
         return self._computer_use
+
+    @property
+    def code_interpreter(self) -> AsyncCodeInterpreter:
+        return self._code_interpreter
 
     @intercept_errors(message_prefix="Failed to refresh sandbox data: ")
     async def refresh_data(self) -> None:
@@ -524,6 +534,20 @@ class AsyncSandbox(SandboxDto):
             token (str): The token to validate.
         """
         return (await self._sandbox_api.validate_ssh_access(token)).data
+
+    @intercept_errors(message_prefix="Failed to refresh sandbox activity: ")
+    async def refresh_activity(self) -> None:
+        """Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
+
+        This method updates the sandbox's last activity timestamp without changing its state.
+        It is useful for keeping long-running sessions alive while there is still user activity.
+
+        Example:
+            ```python
+            await sandbox.refresh_activity()
+            ```
+        """
+        await self._sandbox_api.update_last_activity(self.id)
 
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id = sandbox_dto.id

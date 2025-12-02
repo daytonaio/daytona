@@ -103,6 +103,24 @@ export class OrganizationDto {
   })
   defaultRegion: string
 
+  @ApiProperty({
+    description: 'Authenticated rate limit per minute',
+    nullable: true,
+  })
+  authenticatedRateLimit: number | null
+
+  @ApiProperty({
+    description: 'Sandbox create rate limit per minute',
+    nullable: true,
+  })
+  sandboxCreateRateLimit: number | null
+
+  @ApiProperty({
+    description: 'Sandbox lifecycle rate limit per minute',
+    nullable: true,
+  })
+  sandboxLifecycleRateLimit: number | null
+
   static fromOrganization(organization: Organization): OrganizationDto {
     const dto: OrganizationDto = {
       id: organization.id,
@@ -124,6 +142,9 @@ export class OrganizationDto {
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
       defaultRegion: organization.defaultRegion,
+      authenticatedRateLimit: organization.authenticatedRateLimit,
+      sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
+      sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,
     }
 
     return dto

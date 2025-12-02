@@ -8,11 +8,19 @@ The Daytona SDK provides powerful process and code execution capabilities throug
 
 ## Code Execution
 
-Daytona SDK provides an option to execute code in Python and TypeScript.
+Daytona SDK supports both stateless and stateful code execution flows. Stateless runs use the `process` module and
+supports multiple languages (Python, TypeScript, JavaScript). The stateful code interpreter keeps variables and imports
+between calls and currently supports only Python.
 
-### Running Code
+:::note
 
-Daytona SDK provides an option to run code snippets in Python and TypeScript. You can execute code with input, timeout, and environment variables.
+- Stateless execution inherits the Sandbox language that you choose at creation time. See [Basic Sandbox Creation](/docs/en/sandbox-management/#basic-sandbox-creation).
+- The stateful interpreter supports only Python.
+  :::
+
+### Stateless Execution
+
+Use stateless execution when each snippet is independent. Every invocation starts from a clean interpreter.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -26,7 +34,6 @@ print(greet("Daytona"))
 ''')
 
 print(response.result)
-
 ```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -62,11 +69,92 @@ response = await sandbox.process.codeRun(
 );
 console.log(response.result);
 ```
-
 </TabItem>
 </Tabs>
 
 See: [code_run (Python SDK)](/docs/python-sdk/sync/process/#processcode_run), [codeRun (TypeScript SDK)](/docs/typescript-sdk/process/#coderun)
+
+### Stateful Code Interpreter
+
+When you need to persist variables, imports between calls, use the Sandbox code interpreter. It offers:
+
+- A shared default context that keeps state between calls.
+- The ability to create/delete isolated contexts for specific workflows.
+- Per-call environment variables and timeout controls.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import Daytona, OutputMessage
+
+def handle_stdout(message: OutputMessage):
+    print(f"[STDOUT] {message.output}")
+
+daytona = Daytona()
+sandbox = daytona.create()
+
+# Shared default context
+result = sandbox.code_interpreter.run_code(
+    "counter = 1\nprint(f'Counter initialized at {counter}')",
+    on_stdout=handle_stdout,
+)
+
+# Isolated context
+ctx = sandbox.code_interpreter.create_context()
+try:
+    sandbox.code_interpreter.run_code(
+        "value = 'stored in ctx'",
+        context=ctx,
+    )
+    sandbox.code_interpreter.run_code(
+        "print(value)",
+        context=ctx,
+        on_stdout=handle_stdout,
+    )
+finally:
+    sandbox.code_interpreter.delete_context(ctx)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+const daytona = new Daytona()
+
+async function main() {
+    const sandbox = await daytona.create()
+
+    // Shared default context
+    await sandbox.codeInterpreter.runCode(
+`
+counter = 1
+print(f'Counter initialized at {counter}')
+`,
+        { onStdout: (msg) => process.stdout.write(`[STDOUT] ${msg.output}`)},
+    )
+
+    // Isolated context
+    const ctx = await sandbox.codeInterpreter.createContext()
+    try {
+    await sandbox.codeInterpreter.runCode(
+        `value = 'stored in ctx'`,
+        { context: ctx },
+    )
+    await sandbox.codeInterpreter.runCode(
+        `print(value)`,
+        { context: ctx, onStdout: (msg) => process.stdout.write(`[STDOUT] ${msg.output}`) },
+    )
+    } finally {
+    await sandbox.codeInterpreter.deleteContext(ctx)
+    }
+}
+
+main()
+```
+</TabItem>
+</Tabs>
+
+See: [code_interpreter (Python SDK)](/docs/python-sdk/sync/code-interpreter) and [codeInterpreter (TypeScript SDK)](/docs/typescript-sdk/code-interpreter)
 
 ## Process Execution
 

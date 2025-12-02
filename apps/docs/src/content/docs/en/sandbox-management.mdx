@@ -26,6 +26,16 @@ Running Sandboxes utilize CPU, memory, and disk storage. Every resource is charg
 If you want to prolong the auto-stop interval, you can [set the auto-stop interval parameter](/docs/en/sandbox-management#auto-stop-interval) when creating a Sandbox.
 :::
 
+### Language parameter
+
+The `language` parameter controls which programming language runtime is available for direct code execution inside the Sandbox.
+
+- **`python`** – Python runtime (default in both the Python SDK and TypeScript SDK when `language` is not specified).
+- **`typescript`** – TypeScript runtime.
+- **`javascript`** – JavaScript runtime.
+
+If `language` is omitted, the SDK will default to `python`. You can always override this by explicitly setting the `language` value when creating the Sandbox.
+
 ### Basic Sandbox Creation
 
 The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, custom names, or custom labels using Python and TypeScript.

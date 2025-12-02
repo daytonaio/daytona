@@ -23,6 +23,7 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client.models.announcement import Announcement
 from daytona_api_client.models.oidc_config import OidcConfig
 from daytona_api_client.models.posthog_config import PosthogConfig
+from daytona_api_client.models.rate_limit_config import RateLimitConfig
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -46,8 +47,9 @@ class DaytonaConfiguration(BaseModel):
     billing_api_url: Optional[StrictStr] = Field(default=None, description="Billing API URL", alias="billingApiUrl")
     ssh_gateway_command: Optional[StrictStr] = Field(default=None, description="SSH Gateway command", alias="sshGatewayCommand")
     ssh_gateway_public_key: Optional[StrictStr] = Field(default=None, description="Base64 encoded SSH Gateway public key", alias="sshGatewayPublicKey")
+    rate_limit: Optional[RateLimitConfig] = Field(default=None, description="Rate limit configuration", alias="rateLimit")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["version", "posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "proxyToolboxUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl", "sshGatewayCommand", "sshGatewayPublicKey"]
+    __properties: ClassVar[List[str]] = ["version", "posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "proxyToolboxUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl", "sshGatewayCommand", "sshGatewayPublicKey", "rateLimit"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -103,6 +105,9 @@ class DaytonaConfiguration(BaseModel):
                 if self.announcements[_key_announcements]:
                     _field_dict[_key_announcements] = self.announcements[_key_announcements].to_dict()
             _dict['announcements'] = _field_dict
+        # override the default output from pydantic by calling `to_dict()` of rate_limit
+        if self.rate_limit:
+            _dict['rateLimit'] = self.rate_limit.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -140,7 +145,8 @@ class DaytonaConfiguration(BaseModel):
             "environment": obj.get("environment"),
             "billingApiUrl": obj.get("billingApiUrl"),
             "sshGatewayCommand": obj.get("sshGatewayCommand"),
-            "sshGatewayPublicKey": obj.get("sshGatewayPublicKey")
+            "sshGatewayPublicKey": obj.get("sshGatewayPublicKey"),
+            "rateLimit": RateLimitConfig.from_dict(obj["rateLimit"]) if obj.get("rateLimit") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

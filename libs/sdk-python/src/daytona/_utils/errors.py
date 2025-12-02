@@ -15,12 +15,14 @@ from daytona_toolbox_api_client.exceptions import OpenApiException as OpenApiExc
 from daytona_toolbox_api_client_async.exceptions import NotFoundException as NotFoundExceptionToolboxAsync
 from daytona_toolbox_api_client_async.exceptions import OpenApiException as OpenApiExceptionToolboxAsync
 
-from ..common.errors import DaytonaError, DaytonaNotFoundError
+from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
 else:
     from typing_extensions import ParamSpec
+
+SESSION_IS_CLOSED_ERROR_MESSAGE = "Session is closed"
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -46,6 +48,9 @@ def intercept_errors(
                 e, (OpenApiException, OpenApiExceptionAsync, OpenApiExceptionToolbox, OpenApiExceptionToolboxAsync)
             ):
                 msg = _get_open_api_exception_message(e)
+                status_code = getattr(e, "status", None)
+                headers = getattr(e, "headers", None) or {}
+
                 if isinstance(
                     e,
                     (
@@ -55,8 +60,22 @@ def intercept_errors(
                         NotFoundExceptionToolboxAsync,
                     ),
                 ):
-                    raise DaytonaNotFoundError(f"{message_prefix}{msg}") from None
-                raise DaytonaError(f"{message_prefix}{msg}") from None
+                    raise DaytonaNotFoundError(
+                        f"{message_prefix}{msg}", status_code=status_code, headers=headers
+                    ) from None
+                # Check for rate limit (429) errors
+                if status_code == 429:
+                    raise DaytonaRateLimitError(
+                        f"{message_prefix}{msg}", status_code=status_code, headers=headers
+                    ) from None
+                raise DaytonaError(f"{message_prefix}{msg}", status_code=status_code, headers=headers) from None
+
+            if isinstance(e, RuntimeError) and SESSION_IS_CLOSED_ERROR_MESSAGE in str(e):
+                raise DaytonaError(
+                    f"{message_prefix}{str(e)}: Daytona client is closed"
+                    " — sandbox is used outside its parent's context. "
+                    "Ensure sandboxes are only used within the scope of their parent Daytona object."
+                ) from e
 
             msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)
             raise DaytonaError(msg)  # pylint: disable=raise-missing-from

@@ -8,7 +8,7 @@ import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
 import { Injectable, Logger } from '@nestjs/common'
-import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo } from './runnerAdapter'
+import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import {
   Configuration,
@@ -193,6 +193,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       volumes: sandbox.volumes?.map((volume) => ({
         volumeId: volume.volumeId,
         mountPath: volume.mountPath,
+        subpath: volume.subpath,
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
@@ -239,6 +240,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   async buildSnapshot(
     buildInfo: BuildInfo,
     organizationId?: string,
+    sourceRegistries?: DockerRegistry[],
     registry?: DockerRegistry,
     pushToInternalRegistry?: boolean,
   ): Promise<void> {
@@ -248,6 +250,15 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       organizationId: organizationId,
       context: buildInfo.contextHashes,
       pushToInternalRegistry: pushToInternalRegistry,
+    }
+
+    if (sourceRegistries) {
+      request.sourceRegistries = sourceRegistries.map((sourceRegistry) => ({
+        project: sourceRegistry.project,
+        url: sourceRegistry.url.replace(/^(https?:\/\/)/, ''),
+        username: sourceRegistry.username,
+        password: sourceRegistry.password,
+      }))
     }
 
     if (registry) {
@@ -266,7 +277,12 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.snapshotApiClient.removeSnapshot(snapshotName)
   }
 
-  async pullSnapshot(snapshotName: string, registry?: DockerRegistry): Promise<void> {
+  async pullSnapshot(
+    snapshotName: string,
+    registry?: DockerRegistry,
+    destinationRegistry?: DockerRegistry,
+    destinationRef?: string,
+  ): Promise<void> {
     const request: PullSnapshotRequestDTO = {
       snapshot: snapshotName,
     }
@@ -280,12 +296,40 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       }
     }
 
+    if (destinationRegistry) {
+      request.destinationRegistry = {
+        project: destinationRegistry.project,
+        url: destinationRegistry.url.replace(/^(https?:\/\/)/, ''),
+        username: destinationRegistry.username,
+        password: destinationRegistry.password,
+      }
+    }
+
+    if (destinationRef) {
+      request.destinationRef = destinationRef
+    }
+
     await this.snapshotApiClient.pullSnapshot(request)
+  }
+
+  async tagImage(sourceImage: string, targetImage: string): Promise<void> {
+    await this.snapshotApiClient.tagImage({ sourceImage, targetImage })
   }
 
   async snapshotExists(snapshotName: string): Promise<boolean> {
     const response = await this.snapshotApiClient.snapshotExists(snapshotName)
     return response.data.exists
+  }
+
+  async getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo> {
+    const response = await this.snapshotApiClient.getSnapshotInfo(snapshotName)
+    return {
+      name: response.data.name || '',
+      sizeGB: response.data.sizeGB,
+      entrypoint: response.data.entrypoint,
+      cmd: response.data.cmd,
+      hash: response.data.hash,
+    }
   }
 
   async getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string> {

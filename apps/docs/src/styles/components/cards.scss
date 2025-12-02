@@ -148,3 +148,39 @@ h6 {
 .card-grid {
   margin-bottom: 80px;
 }
+
+.link-card {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  text-decoration: none !important;
+  background: transparent;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+  height: 100%;
+  width: 100%;
+
+  .title {
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-text-color);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .description p {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--secondary-text-color);
+    display: block;
+  }
+
+  &:hover {
+    background-color: var(--block-bg-color);
+  }
+}

@@ -7,7 +7,15 @@ from daytona_api_client_async import SandboxVolume as AsyncApiVolumeMount
 
 
 class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount):
-    ...
+    """Represents a Volume mount configuration for a Sandbox.
+
+    Attributes:
+        volume_id (str): ID of the volume to mount.
+        mount_path (str): Path where the volume will be mounted in the sandbox.
+        subpath (str, optional): Optional S3 subpath/prefix within the volume to mount.
+            When specified, only this prefix will be accessible. When omitted,
+            the entire volume is mounted.
+    """
 
 
 class Volume(VolumeDto):

@@ -23,4 +23,5 @@ func init() {
 	SandboxCmd.AddCommand(DeleteCmd)
 	SandboxCmd.AddCommand(StartCmd)
 	SandboxCmd.AddCommand(StopCmd)
+	SandboxCmd.AddCommand(ArchiveCmd)
 }

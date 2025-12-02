@@ -26,11 +26,26 @@ func (d *DockerClient) ImageExists(ctx context.Context, imageName string, includ
 
 	found := false
 	for _, image := range images {
+		// Check RepoTags for tag-based references
 		for _, tag := range image.RepoTags {
 			if strings.HasPrefix(tag, imageName) {
 				found = true
 				break
 			}
+		}
+		if found {
+			break
+		}
+
+		// Check RepoDigests for digest-based references
+		for _, digest := range image.RepoDigests {
+			if strings.HasPrefix(digest, imageName) || strings.HasSuffix(digest, strings.TrimPrefix(imageName, "library/")) {
+				found = true
+				break
+			}
+		}
+		if found {
+			break
 		}
 	}
 

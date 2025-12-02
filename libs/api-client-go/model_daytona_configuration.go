@@ -52,7 +52,9 @@ type DaytonaConfiguration struct {
 	// SSH Gateway command
 	SshGatewayCommand *string `json:"sshGatewayCommand,omitempty"`
 	// Base64 encoded SSH Gateway public key
-	SshGatewayPublicKey  *string `json:"sshGatewayPublicKey,omitempty"`
+	SshGatewayPublicKey *string `json:"sshGatewayPublicKey,omitempty"`
+	// Rate limit configuration
+	RateLimit            *RateLimitConfig `json:"rateLimit,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -510,6 +512,38 @@ func (o *DaytonaConfiguration) SetSshGatewayPublicKey(v string) {
 	o.SshGatewayPublicKey = &v
 }
 
+// GetRateLimit returns the RateLimit field value if set, zero value otherwise.
+func (o *DaytonaConfiguration) GetRateLimit() RateLimitConfig {
+	if o == nil || IsNil(o.RateLimit) {
+		var ret RateLimitConfig
+		return ret
+	}
+	return *o.RateLimit
+}
+
+// GetRateLimitOk returns a tuple with the RateLimit field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DaytonaConfiguration) GetRateLimitOk() (*RateLimitConfig, bool) {
+	if o == nil || IsNil(o.RateLimit) {
+		return nil, false
+	}
+	return o.RateLimit, true
+}
+
+// HasRateLimit returns a boolean if a field has been set.
+func (o *DaytonaConfiguration) HasRateLimit() bool {
+	if o != nil && !IsNil(o.RateLimit) {
+		return true
+	}
+
+	return false
+}
+
+// SetRateLimit gets a reference to the given RateLimitConfig and assigns it to the RateLimit field.
+func (o *DaytonaConfiguration) SetRateLimit(v RateLimitConfig) {
+	o.RateLimit = &v
+}
+
 func (o DaytonaConfiguration) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -545,6 +579,9 @@ func (o DaytonaConfiguration) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.SshGatewayPublicKey) {
 		toSerialize["sshGatewayPublicKey"] = o.SshGatewayPublicKey
+	}
+	if !IsNil(o.RateLimit) {
+		toSerialize["rateLimit"] = o.RateLimit
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -615,6 +652,7 @@ func (o *DaytonaConfiguration) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "billingApiUrl")
 		delete(additionalProperties, "sshGatewayCommand")
 		delete(additionalProperties, "sshGatewayPublicKey")
+		delete(additionalProperties, "rateLimit")
 		o.AdditionalProperties = additionalProperties
 	}
 

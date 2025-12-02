@@ -21,6 +21,9 @@ import type { OidcConfig } from './oidc-config'
 // May contain unused imports in some cases
 // @ts-ignore
 import type { PosthogConfig } from './posthog-config'
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RateLimitConfig } from './rate-limit-config'
 
 /**
  *
@@ -124,4 +127,10 @@ export interface DaytonaConfiguration {
    * @memberof DaytonaConfiguration
    */
   sshGatewayPublicKey?: string
+  /**
+   * Rate limit configuration
+   * @type {RateLimitConfig}
+   * @memberof DaytonaConfiguration
+   */
+  rateLimit?: RateLimitConfig
 }

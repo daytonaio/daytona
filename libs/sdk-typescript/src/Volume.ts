@@ -24,6 +24,10 @@ export type Volume = VolumeDto & { __brand: 'Volume' }
  *
  * This service provides methods to list, get, create, and delete Volumes.
  *
+ * Volumes can be mounted to Sandboxes with an optional subpath parameter to mount
+ * only a specific S3 prefix within the volume. When no subpath is specified,
+ * the entire volume is mounted.
+ *
  * @class
  */
 export class VolumeService {

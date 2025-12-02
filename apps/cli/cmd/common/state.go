@@ -19,9 +19,10 @@ func AwaitSnapshotState(ctx context.Context, apiClient *apiclient.APIClient, nam
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		if snapshot.State == state {
+		switch snapshot.State {
+		case state:
 			return nil
-		} else if snapshot.State == apiclient.SNAPSHOTSTATE_ERROR || snapshot.State == apiclient.SNAPSHOTSTATE_BUILD_FAILED {
+		case apiclient.SNAPSHOTSTATE_ERROR, apiclient.SNAPSHOTSTATE_BUILD_FAILED:
 			if !snapshot.ErrorReason.IsSet() {
 				return fmt.Errorf("snapshot processing failed")
 			}

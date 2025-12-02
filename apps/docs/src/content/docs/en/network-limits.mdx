@@ -91,6 +91,24 @@ For a complete list of whitelisted services, see [Essential Services](#essential
 
 The network access policies for your organization are set automatically depending on your organization's limits tier and cannot be modified by organization administrators. These policies determine the default network behavior for all sandboxes in your organization.
 
+## Whitelisting Daytona IP Addresses
+
+If your organization requires sandboxes to access services protected by a firewall (e.g., internal APIs, private databases, or cloud resources behind a Load Balancer), you may need to whitelist Daytona's egress IP addresses.
+
+Traffic originating from Daytona sandboxes will appear from the following IP addresses:
+
+- `100.28.153.11/32`
+- `44.213.113.27/32`
+- `44.202.200.25/32`
+- `44.202.186.29/32`
+- `54.157.121.57/32`
+- `44.202.128.241/32`
+- `52.91.252.131/32`
+
+:::caution[Important Update]
+The list of egress IP addresses is currently subject to change as infrastructure updates are performed. If you are configuring strict firewalls, please monitor this page or contact [support@daytona.io](mailto:support@daytona.io) for the most up-to-date list.
+:::
+
 ## Testing Network Access
 
 To test network connectivity from your sandbox:

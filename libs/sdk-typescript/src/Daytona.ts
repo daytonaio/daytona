@@ -17,7 +17,7 @@ import axios, { AxiosError, AxiosInstance } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
-import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
+import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
 import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
@@ -80,6 +80,8 @@ export interface DaytonaConfig {
 
 /**
  * Supported programming languages for code execution
+ *
+ * Python is used as the default sandbox language when no language is explicitly specified.
  */
 export enum CodeLanguage {
   PYTHON = 'python',
@@ -119,7 +121,7 @@ export interface Resources {
  *
  * @interface
  * @property {string} [user] - Optional os user to use for the Sandbox
- * @property {CodeLanguage | string} [language] - Programming language for direct code execution
+ * @property {CodeLanguage | string} [language] - Programming language for direct code execution. Defaults to "python" if not specified.
  * @property {Record<string, string>} [envVars] - Optional environment variables to set in the Sandbox
  * @property {Record<string, string>} [labels] - Sandbox labels
  * @property {boolean} [public] - Is the Sandbox port preview public
@@ -596,7 +598,14 @@ export class Daytona {
     return {
       items: response.data.items.map((sandbox) => {
         const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-        return new Sandbox(sandbox, structuredClone(this.clientConfig), this.createAxiosInstance(), this.sandboxApi, this.getCodeToolbox(language), this.getProxyToolboxUrl.bind(this))
+        return new Sandbox(
+          sandbox,
+          structuredClone(this.clientConfig),
+          this.createAxiosInstance(),
+          this.sandboxApi,
+          this.getCodeToolbox(language),
+          this.getProxyToolboxUrl.bind(this),
+        )
       }),
       total: response.data.total,
       page: response.data.page,
@@ -692,17 +701,24 @@ export class Daytona {
           errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
         }
 
-        try {
-          errorMessage = JSON.stringify(errorMessage)
-        } catch {
-          errorMessage = String(errorMessage)
+        if (typeof errorMessage === 'object') {
+          try {
+            errorMessage = JSON.stringify(errorMessage)
+          } catch {
+            errorMessage = String(errorMessage)
+          }
         }
 
-        switch (error.response?.data?.statusCode) {
+        const statusCode = error.response?.status
+        const headers = error.response?.headers
+
+        switch (statusCode) {
           case 404:
-            throw new DaytonaNotFoundError(errorMessage)
+            throw new DaytonaNotFoundError(errorMessage, statusCode, headers)
+          case 429:
+            throw new DaytonaRateLimitError(errorMessage, statusCode, headers)
           default:
-            throw new DaytonaError(errorMessage)
+            throw new DaytonaError(errorMessage, statusCode, headers)
         }
       },
     )

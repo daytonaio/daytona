@@ -43,6 +43,7 @@ import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -301,7 +302,7 @@ export class OrganizationController {
     type: 'string',
   })
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
   @Audit({
     action: AuditAction.UPDATE_QUOTA,
     targetType: AuditTarget.ORGANIZATION,
@@ -372,7 +373,7 @@ export class OrganizationController {
     required: false,
   })
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
   @Audit({
     action: AuditAction.SUSPEND,
     targetType: AuditTarget.ORGANIZATION,
@@ -410,7 +411,7 @@ export class OrganizationController {
     type: 'string',
   })
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
   @Audit({
     action: AuditAction.UNSUSPEND,
     targetType: AuditTarget.ORGANIZATION,
@@ -436,7 +437,7 @@ export class OrganizationController {
     type: 'string',
   })
   @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
-  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
   async getBySandboxId(@Param('sandboxId') sandboxId: string): Promise<OrganizationDto> {
     const organization = await this.organizationService.findBySandboxId(sandboxId)
     if (!organization) {

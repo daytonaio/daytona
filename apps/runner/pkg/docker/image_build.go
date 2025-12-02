@@ -16,7 +16,8 @@ import (
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/storage"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/build"
+	docker_registry "github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
@@ -92,7 +93,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 				}
 				if err != nil {
 					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Error reading tar with hash %s: %v\n", hash, err)))
+						fmt.Fprintf(d.logWriter, "Warning: Error reading tar with hash %s: %v\n", hash, err)
 					}
 					// Skip this tar file and continue with the next one
 					break
@@ -107,7 +108,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 				_, err = io.Copy(fileContent, tarReader)
 				if err != nil {
 					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Failed to read file %s from tar: %v\n", header.Name, err)))
+						fmt.Fprintf(d.logWriter, "Warning: Failed to read file %s from tar: %v\n", header.Name, err)
 					}
 					continue // Skip this file and continue with the next one
 				}
@@ -120,20 +121,20 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 				if err := tarWriter.WriteHeader(buildHeader); err != nil {
 					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Failed to write tar header for %s: %v\n", header.Name, err)))
+						fmt.Fprintf(d.logWriter, "Warning: Failed to write tar header for %s: %v\n", header.Name, err)
 					}
 					continue
 				}
 
 				if _, err := tarWriter.Write(fileContent.Bytes()); err != nil {
 					if d.logWriter != nil {
-						d.logWriter.Write([]byte(fmt.Sprintf("Warning: Failed to write file %s to tar: %v\n", header.Name, err)))
+						fmt.Fprintf(d.logWriter, "Warning: Failed to write file %s to tar: %v\n", header.Name, err)
 					}
 					continue
 				}
 
 				if d.logWriter != nil {
-					d.logWriter.Write([]byte(fmt.Sprintf("Added %s to build context\n", header.Name)))
+					fmt.Fprintf(d.logWriter, "Added %s to build context\n", header.Name)
 				}
 			}
 		}
@@ -141,13 +142,28 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	buildContext := io.NopCloser(buildContextTar)
 
-	resp, err := d.apiClient.ImageBuild(ctx, buildContext, types.ImageBuildOptions{
+	var authConfigs map[string]docker_registry.AuthConfig
+
+	if buildImageDto.SourceRegistries != nil {
+		authConfigs = make(map[string]docker_registry.AuthConfig, len(buildImageDto.SourceRegistries)*2)
+		for _, sourceRegistry := range buildImageDto.SourceRegistries {
+			authConfig := docker_registry.AuthConfig{
+				Username: sourceRegistry.Username,
+				Password: sourceRegistry.Password,
+			}
+			authConfigs["https://"+sourceRegistry.Url] = authConfig
+			authConfigs["http://"+sourceRegistry.Url] = authConfig
+		}
+	}
+
+	resp, err := d.apiClient.ImageBuild(ctx, buildContext, build.ImageBuildOptions{
 		Tags:        []string{buildImageDto.Snapshot},
 		Dockerfile:  "Dockerfile",
 		Remove:      true,
 		ForceRemove: true,
 		PullParent:  true,
 		Platform:    "linux/amd64", // Force AMD64 architecture
+		AuthConfigs: authConfigs,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to build image: %w", err)

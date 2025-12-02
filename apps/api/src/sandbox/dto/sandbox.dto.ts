@@ -25,6 +25,13 @@ export class SandboxVolume {
     example: '/data',
   })
   mountPath: string
+
+  @ApiPropertyOptional({
+    description:
+      'Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.',
+    example: 'users/alice',
+  })
+  subpath?: string
 }
 
 @ApiSchema({ name: 'Sandbox' })

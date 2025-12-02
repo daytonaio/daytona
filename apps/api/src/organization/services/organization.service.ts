@@ -155,6 +155,12 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     organization.maxSnapshotSize = updateOrganizationQuotaDto.maxSnapshotSize ?? organization.maxSnapshotSize
     organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota ?? organization.volumeQuota
     organization.snapshotQuota = updateOrganizationQuotaDto.snapshotQuota ?? organization.snapshotQuota
+    organization.authenticatedRateLimit =
+      updateOrganizationQuotaDto.authenticatedRateLimit ?? organization.authenticatedRateLimit
+    organization.sandboxCreateRateLimit =
+      updateOrganizationQuotaDto.sandboxCreateRateLimit ?? organization.sandboxCreateRateLimit
+    organization.sandboxLifecycleRateLimit =
+      updateOrganizationQuotaDto.sandboxLifecycleRateLimit ?? organization.sandboxLifecycleRateLimit
     return this.organizationRepository.save(organization)
   }
 

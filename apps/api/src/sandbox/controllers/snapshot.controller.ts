@@ -59,11 +59,13 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
+import { SnapshotState } from '../enums/snapshot-state.enum'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SnapshotController {
@@ -130,7 +132,9 @@ export class SnapshotController {
     }
 
     // TODO: consider - if using transient registry, prepend the snapshot name with the username
-    const snapshot = await this.snapshotService.createSnapshot(authContext.organization, createSnapshotDto)
+    const snapshot = createSnapshotDto.buildInfo
+      ? await this.snapshotService.createFromBuildInfo(authContext.organization, createSnapshotDto)
+      : await this.snapshotService.createFromPull(authContext.organization, createSnapshotDto)
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
@@ -182,7 +186,7 @@ export class SnapshotController {
     try {
       // Try to get by ID
       snapshot = await this.snapshotService.getSnapshot(snapshotIdOrName)
-    } catch (error) {
+    } catch {
       // If not found by ID, try by name
       snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
     }
@@ -308,11 +312,17 @@ export class SnapshotController {
       throw new NotFoundException(`Snapshot ${snapshotId} has no build info`)
     }
 
+    if (snapshot.state == SnapshotState.ACTIVE) {
+      // Close the connection
+      res.end()
+      return
+    }
+
     // Retry until a runner is assigned or timeout after 30 seconds
     const startTime = Date.now()
     const timeoutMs = 30 * 1000
 
-    while (!snapshot.buildRunnerId) {
+    while (!snapshot.initialRunnerId) {
       if (Date.now() - startTime > timeoutMs) {
         throw new NotFoundException(`Timeout waiting for build runner assignment for snapshot ${snapshotId}`)
       }
@@ -320,7 +330,7 @@ export class SnapshotController {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
     }
 
-    const runner = await this.runnerService.findOne(snapshot.buildRunnerId)
+    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
     if (!runner) {
       throw new NotFoundException(`Build runner for snapshot ${snapshotId} not found`)
     }

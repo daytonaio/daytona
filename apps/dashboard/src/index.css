@@ -36,6 +36,11 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --spacing: 0.25rem;
+    --warning: 32 100% 35%;
+    --warning-foreground: 0 0% 98%;
+    --success: 141 60% 30%;
+    --success-foreground: 0 0% 98%;
 
     --sidebar-background: 0 0% 99.5%;
     --sidebar-foreground: 0 0% 26.1%;
@@ -61,7 +66,7 @@ body {
     --muted-foreground: 0 0% 63.9%;
     --accent: 0 0% 14.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
@@ -71,6 +76,10 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --warning: 45 100% 50%;
+    --warning-foreground: 0 0% 98%;
+    --success: 141 71% 48%;
+    --success-foreground: 0 0% 98%;
 
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 95.9%;

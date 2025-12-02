@@ -27,6 +27,7 @@ from .common.charts import (
     PieChart,
     ScatterChart,
 )
+from .common.code_interpreter import ExecutionError, ExecutionResult, OutputHandler, OutputMessage
 from .common.daytona import (
     CodeLanguage,
     CreateSandboxBaseParams,
@@ -34,7 +35,7 @@ from .common.daytona import (
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
 )
-from .common.errors import DaytonaError
+from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
 from .common.lsp_server import LspCompletionPosition, LspLanguageId
@@ -51,6 +52,8 @@ __all__ = [
     "SessionExecuteRequest",
     "SessionExecuteResponse",
     "DaytonaError",
+    "DaytonaNotFoundError",
+    "DaytonaRateLimitError",
     "LspLanguageId",
     "CodeRunParams",
     "Sandbox",
@@ -87,4 +90,10 @@ __all__ = [
     "LspCompletionPosition",
     "ExecutionArtifacts",
     "ExecuteResponse",
+    "ExecutionResult",
+    "ExecutionError",
+    "OutputMessage",
+    "OutputHandler",
+    "DaytonaTimeoutError",
+    "DaytonaNotFoundError",
 ]

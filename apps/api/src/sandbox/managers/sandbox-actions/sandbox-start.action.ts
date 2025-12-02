@@ -12,7 +12,6 @@ import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from './sandbox
 import { SnapshotRunnerState } from '../../enums/snapshot-runner-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
-import { DockerProvider } from '../../docker/docker-provider'
 import { BuildInfo } from '../../entities/build-info.entity'
 import { SnapshotService } from '../../services/snapshot.service'
 import { DockerRegistryService } from '../../../docker-registry/services/docker-registry.service'
@@ -35,7 +34,6 @@ export class SandboxStartAction extends SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
-    protected readonly dockerProvider: DockerProvider,
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
@@ -47,8 +45,16 @@ export class SandboxStartAction extends SandboxAction {
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     switch (sandbox.state) {
+      case SandboxState.PULLING_SNAPSHOT: {
+        if (!sandbox.runnerId) {
+          // Using the PULLING_SNAPSHOT state for the case where the runner isn't assigned yet as well
+          return this.handleUnassignedRunnerSandbox(sandbox, lockCode)
+        } else {
+          return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
+        }
+      }
       case SandboxState.PENDING_BUILD: {
-        return this.handleUnassignedBuildSandbox(sandbox, lockCode)
+        return this.handleUnassignedRunnerSandbox(sandbox, lockCode, true)
       }
       case SandboxState.BUILDING_SNAPSHOT: {
         return this.handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox, lockCode)
@@ -65,7 +71,6 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.CREATING: {
         return this.handleRunnerSandboxPullingSnapshotStateCheck(sandbox, lockCode)
       }
-      case SandboxState.PULLING_SNAPSHOT:
       case SandboxState.STARTING: {
         return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
       }
@@ -75,20 +80,22 @@ export class SandboxStartAction extends SandboxAction {
 
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         if (sandboxInfo.state === SandboxState.STARTED) {
-          const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-            id: sandbox.id,
-          })
-          sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.setBackupState(BackupState.NONE)
-
+          let daemonVersion: string | undefined
           try {
-            const daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
-            sandboxToUpdate.daemonVersion = daemonVersion
+            daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
           } catch (error) {
             this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, error)
           }
 
-          await this.sandboxRepository.save(sandboxToUpdate)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.STARTED,
+            lockCode,
+            undefined,
+            undefined,
+            daemonVersion,
+            BackupState.NONE,
+          )
           return DONT_SYNC_AGAIN
         }
       }
@@ -97,68 +104,25 @@ export class SandboxStartAction extends SandboxAction {
     return DONT_SYNC_AGAIN
   }
 
-  private async handleUnassignedBuildSandbox(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
-    // Try to assign an available runner with the snapshot build
-    let runnerId: string
-    try {
-      const runner = await this.runnerService.getRandomAvailableRunner({
-        region: sandbox.region,
-        sandboxClass: sandbox.class,
-        snapshotRef: sandbox.buildInfo.snapshotRef,
-      })
-      runnerId = runner.id
-    } catch {
-      // Continue to next assignment method
-    }
-
-    if (runnerId) {
-      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode, runnerId)
-      return SYNC_AGAIN
-    }
-
-    // Try to assign an available runner that is currently building the snapshot
-    const snapshotRunners = await this.runnerService.getSnapshotRunners(sandbox.buildInfo.snapshotRef)
-
-    for (const snapshotRunner of snapshotRunners) {
-      const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
-      if (runner.availabilityScore >= this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold')) {
-        if (snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
-          await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
-          return SYNC_AGAIN
-        } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-          await this.updateSandboxState(
-            sandbox.id,
-            SandboxState.BUILD_FAILED,
-            lockCode,
-            undefined,
-            snapshotRunner.errorReason,
-          )
-          return DONT_SYNC_AGAIN
-        }
-      }
-    }
-
-    const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
-
-    // Try to assign a new available runner
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.region,
-      sandboxClass: sandbox.class,
-      excludedRunnerIds: excludedRunnerIds,
-    })
-    runnerId = runner.id
-
-    this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
-
-    await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, lockCode, runnerId)
-
-    return SYNC_AGAIN
-  }
-
   private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(
     sandbox: Sandbox,
     lockCode: LockCode,
   ): Promise<SyncState> {
+    // Check for timeout - allow up to 60 minutes since the last sandbox update
+    const timeoutMinutes = 60
+    const timeoutMs = timeoutMinutes * 60 * 1000
+
+    if (sandbox.updatedAt && Date.now() - sandbox.updatedAt.getTime() > timeoutMs) {
+      await this.updateSandboxState(
+        sandbox.id,
+        SandboxState.ERROR,
+        lockCode,
+        undefined,
+        'Timeout while building snapshot on runner',
+      )
+      return DONT_SYNC_AGAIN
+    }
+
     const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, sandbox.buildInfo.snapshotRef)
     if (snapshotRunner) {
       switch (snapshotRunner.state) {
@@ -188,6 +152,167 @@ export class SandboxStartAction extends SandboxAction {
     return DONT_SYNC_AGAIN
   }
 
+  private async handleUnassignedRunnerSandbox(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+    isBuild = false,
+  ): Promise<SyncState> {
+    // Get snapshot reference based on whether it's a pull or build operation
+    let snapshotRef: string
+
+    if (isBuild) {
+      snapshotRef = sandbox.buildInfo.snapshotRef
+    } else {
+      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+      snapshotRef = snapshot.ref
+    }
+
+    // Try to assign an available runner with the snapshot already available
+    try {
+      const runner = await this.runnerService.getRandomAvailableRunner({
+        regions: [sandbox.region],
+        sandboxClass: sandbox.class,
+        snapshotRef: snapshotRef,
+      })
+      if (runner) {
+        await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode, runner.id)
+        return SYNC_AGAIN
+      }
+    } catch {
+      // Continue to next assignment method
+    }
+
+    // Try to assign an available runner that is currently processing the snapshot
+    const snapshotRunners = await this.runnerService.getSnapshotRunners(snapshotRef)
+    const targetState = isBuild ? SnapshotRunnerState.BUILDING_SNAPSHOT : SnapshotRunnerState.PULLING_SNAPSHOT
+    const targetSandboxState = isBuild ? SandboxState.BUILDING_SNAPSHOT : SandboxState.PULLING_SNAPSHOT
+    const errorSandboxState = isBuild ? SandboxState.BUILD_FAILED : SandboxState.ERROR
+
+    for (const snapshotRunner of snapshotRunners) {
+      // Consider removing the runner usage rate check or improving it
+      const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
+      if (runner.availabilityScore >= this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold')) {
+        if (snapshotRunner.state === targetState) {
+          await this.updateSandboxState(sandbox.id, targetSandboxState, lockCode, runner.id)
+          return SYNC_AGAIN
+        } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
+          await this.updateSandboxState(sandbox.id, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
+          return DONT_SYNC_AGAIN
+        }
+      }
+    }
+
+    // Get excluded runner IDs based on operation type
+    const excludedRunnerIds = await (isBuild
+      ? this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
+      : this.runnerService.getRunnersWithMultipleSnapshotsPulling())
+
+    // Try to assign an available runner to start processing the snapshot
+    let runner: Runner
+
+    try {
+      runner = await this.runnerService.getRandomAvailableRunner({
+        regions: [sandbox.region],
+        sandboxClass: sandbox.class,
+        excludedRunnerIds: excludedRunnerIds,
+      })
+    } catch {
+      // TODO: reconsider the timeout here
+      // No runners available, wait for 3 seconds and retry
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+      return SYNC_AGAIN
+    }
+
+    if (isBuild) {
+      this.buildOnRunner(sandbox.buildInfo, runner, sandbox.organizationId)
+      await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
+    } else {
+      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+      await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.PULLING_SNAPSHOT)
+      this.pullSnapshotToRunner(snapshot.ref, runner)
+      await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
+    }
+
+    return SYNC_AGAIN
+  }
+
+  async pullSnapshotToRunner(snapshotRef: string, runner: Runner) {
+    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef)
+
+    // If no registry found by image name, use the default internal registry
+    if (!dockerRegistry) {
+      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      if (!dockerRegistry) {
+        throw new Error('No registry found for snapshot and no default internal registry configured')
+      }
+    }
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    let retries = 0
+    while (retries < 10) {
+      try {
+        await runnerAdapter.pullSnapshot(snapshotRef, dockerRegistry)
+        break
+      } catch (err) {
+        if (err.code !== 'ECONNRESET') {
+          throw err
+        }
+        if (++retries >= 10) {
+          throw err
+        }
+        await new Promise((resolve) => setTimeout(resolve, retries * 1000))
+      }
+    }
+  }
+
+  // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result
+  async buildOnRunner(buildInfo: BuildInfo, runner: Runner, organizationId: string) {
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    const sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
+
+    let retries = 0
+
+    while (retries < 10) {
+      try {
+        await runnerAdapter.buildSnapshot(buildInfo, organizationId, sourceRegistry ? [sourceRegistry] : undefined)
+        break
+      } catch (err) {
+        if (err.code !== 'ECONNRESET') {
+          await this.runnerService.createSnapshotRunnerEntry(
+            runner.id,
+            buildInfo.snapshotRef,
+            SnapshotRunnerState.ERROR,
+            err.message,
+          )
+          return
+        }
+        if (++retries >= 10) {
+          throw err
+        }
+        await new Promise((resolve) => setTimeout(resolve, retries * 1000))
+      }
+    }
+
+    if (retries === 10) {
+      await this.runnerService.createSnapshotRunnerEntry(
+        runner.id,
+        buildInfo.snapshotRef,
+        SnapshotRunnerState.ERROR,
+        'Timeout while building',
+      )
+      return
+    }
+
+    const exists = await runnerAdapter.snapshotExists(buildInfo.snapshotRef)
+    let state = SnapshotRunnerState.BUILDING_SNAPSHOT
+    if (exists) {
+      state = SnapshotRunnerState.READY
+    }
+
+    await this.runnerService.createSnapshotRunnerEntry(runner.id, buildInfo.snapshotRef, state)
+  }
+
   private async handleRunnerSandboxUnknownStateOnDesiredStateStart(
     sandbox: Sandbox,
     lockCode: LockCode,
@@ -206,21 +331,18 @@ export class SandboxStartAction extends SandboxAction {
     if (!sandbox.buildInfo) {
       //  get internal snapshot name
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-      const internalSnapshotName = snapshot.internalName
+      const snapshotRef = snapshot.ref
 
-      registry = await this.dockerRegistryService.findOneBySnapshotImageName(
-        internalSnapshotName,
-        sandbox.organizationId,
-      )
+      registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef, sandbox.organizationId)
       if (!registry) {
         throw new Error('No registry found for snapshot')
       }
 
-      sandbox.snapshot = internalSnapshotName
+      sandbox.snapshot = snapshotRef
       entrypoint = snapshot.entrypoint
     } else {
       sandbox.snapshot = sandbox.buildInfo.snapshotRef
-      entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
+      entrypoint = this.snapshotService.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
     let metadata: { [key: string]: string } | undefined = undefined
@@ -272,7 +394,7 @@ export class SandboxStartAction extends SandboxAction {
       if (sandbox.backupState === BackupState.COMPLETED) {
         if (runner.availabilityScore < this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
-            region: sandbox.region,
+            regions: [sandbox.region],
             sandboxClass: sandbox.class,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== originalRunnerId)
@@ -410,17 +532,15 @@ export class SandboxStartAction extends SandboxAction {
 
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          sandbox.setBackupState(BackupState.NONE)
-
-          const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-            id: sandbox.id,
-          })
-          sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.setBackupState(BackupState.NONE)
-          if (daemonVersion) {
-            sandboxToUpdate.daemonVersion = daemonVersion
-          }
-          await this.sandboxRepository.save(sandboxToUpdate)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.STARTED,
+            lockCode,
+            undefined,
+            undefined,
+            daemonVersion,
+            BackupState.NONE,
+          )
           return DONT_SYNC_AGAIN
         } else {
           await this.updateSandboxState(sandbox.id, SandboxState.STARTED, lockCode, undefined, undefined, daemonVersion)
@@ -435,8 +555,19 @@ export class SandboxStartAction extends SandboxAction {
         break
       }
       case SandboxState.STARTING:
+        if (await this.checkTimeoutError(sandbox, 5, 'Timeout while starting sandbox')) {
+          return DONT_SYNC_AGAIN
+        }
+        break
       case SandboxState.RESTORING:
+        if (await this.checkTimeoutError(sandbox, 30, 'Timeout while starting sandbox')) {
+          return DONT_SYNC_AGAIN
+        }
+        break
       case SandboxState.CREATING: {
+        if (await this.checkTimeoutError(sandbox, 15, 'Timeout while creating sandbox')) {
+          return DONT_SYNC_AGAIN
+        }
         break
       }
       case SandboxState.UNKNOWN: {
@@ -453,9 +584,20 @@ export class SandboxStartAction extends SandboxAction {
         )
         break
       }
+      case SandboxState.DESTROYED: {
+        this.logger.warn(
+          `Sandbox ${sandbox.id} is in destroyed state while starting on runner ${sandbox.runnerId}, prev runner ${sandbox.prevRunnerId}`,
+        )
+        await this.checkTimeoutError(
+          sandbox,
+          15,
+          'Timeout while starting sandbox: Sandbox is in unknown state on runner',
+        )
+        return DONT_SYNC_AGAIN
+      }
       // also any other state that is not STARTED
       default: {
-        console.error(`Sandbox ${sandbox.id} is in unexpected state ${sandboxInfo.state}`)
+        this.logger.error(`Sandbox ${sandbox.id} is in unexpected state ${sandboxInfo.state}`)
         await this.updateSandboxState(
           sandbox.id,
           SandboxState.ERROR,
@@ -470,84 +612,17 @@ export class SandboxStartAction extends SandboxAction {
     return SYNC_AGAIN
   }
 
-  // TODO: revise/cleanup
-  private getEntrypointFromDockerfile(dockerfileContent: string): string[] {
-    // Match ENTRYPOINT with either a string or JSON array
-    const entrypointMatch = dockerfileContent.match(/ENTRYPOINT\s+(.*)/)
-    if (entrypointMatch) {
-      const rawEntrypoint = entrypointMatch[1].trim()
-      try {
-        // Try parsing as JSON array
-        const parsed = JSON.parse(rawEntrypoint)
-        if (Array.isArray(parsed)) {
-          return parsed
-        }
-      } catch {
-        // Fallback: it's probably a plain string
-        return [rawEntrypoint.replace(/["']/g, '')]
-      }
+  private async checkTimeoutError(sandbox: Sandbox, timeoutMinutes: number, errorReason: string): Promise<boolean> {
+    if (
+      sandbox.lastActivityAt &&
+      new Date(sandbox.lastActivityAt).getTime() < Date.now() - 1000 * 60 * timeoutMinutes
+    ) {
+      sandbox.state = SandboxState.ERROR
+      sandbox.errorReason = errorReason
+      await this.sandboxRepository.save(sandbox)
+      return true
     }
-
-    // Match CMD with either a string or JSON array
-    const cmdMatch = dockerfileContent.match(/CMD\s+(.*)/)
-    if (cmdMatch) {
-      const rawCmd = cmdMatch[1].trim()
-      try {
-        const parsed = JSON.parse(rawCmd)
-        if (Array.isArray(parsed)) {
-          return parsed
-        }
-      } catch {
-        return [rawCmd.replace(/["']/g, '')]
-      }
-    }
-
-    return ['sleep', 'infinity']
-  }
-
-  // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result
-  async buildOnRunner(buildInfo: BuildInfo, runnerId: string, organizationId: string) {
-    const runner = await this.runnerService.findOne(runnerId)
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-    let retries = 0
-
-    while (retries < 10) {
-      try {
-        await runnerAdapter.buildSnapshot(buildInfo, organizationId)
-        break
-      } catch (err) {
-        if (err.code !== 'ECONNRESET') {
-          await this.runnerService.createSnapshotRunner(
-            runnerId,
-            buildInfo.snapshotRef,
-            SnapshotRunnerState.ERROR,
-            err.message,
-          )
-          return
-        }
-      }
-      retries++
-      await new Promise((resolve) => setTimeout(resolve, retries * 1000))
-    }
-
-    if (retries === 10) {
-      await this.runnerService.createSnapshotRunner(
-        runnerId,
-        buildInfo.snapshotRef,
-        SnapshotRunnerState.ERROR,
-        'Timeout while building',
-      )
-      return
-    }
-
-    const exists = await runnerAdapter.snapshotExists(buildInfo.snapshotRef)
-    let state = SnapshotRunnerState.BUILDING_SNAPSHOT
-    if (exists) {
-      state = SnapshotRunnerState.READY
-    }
-
-    await this.runnerService.createSnapshotRunner(runnerId, buildInfo.snapshotRef, state)
+    return false
   }
 
   private async restoreSandboxOnNewRunner(
@@ -558,6 +633,7 @@ export class SandboxStartAction extends SandboxAction {
     isRecovery?: boolean,
   ): Promise<SyncState | null> {
     let lockKey: string | null = null
+
     // Recovery lock to prevent frequent automatic restore attempts
     if (isRecovery) {
       lockKey = `sandbox-${sandbox.id}-restored-cooldown`
@@ -594,7 +670,7 @@ export class SandboxStartAction extends SandboxAction {
         } else {
           validBackup = existingBackups.pop()
         }
-        if (await this.dockerProvider.checkImageExistsInRegistry(validBackup, registry)) {
+        if (await this.dockerRegistryService.checkImageExistsInRegistry(validBackup, registry)) {
           exists = true
           break
         }
@@ -639,16 +715,18 @@ export class SandboxStartAction extends SandboxAction {
       }
     }
 
-    const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
+    const snapshotRef = baseSnapshot ? baseSnapshot.ref : null
 
     let availableRunners: Runner[] = []
 
+    const excludedRunnerIds: string[] = excludedRunnerId ? [excludedRunnerId] : []
+
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
-          region: sandbox.region,
+          regions: [sandbox.region],
           sandboxClass: sandbox.class,
           snapshotRef,
-          excludedRunnerIds: [excludedRunnerId],
+          excludedRunnerIds,
         })
       : []
     if (runnersWithBaseSnapshot.length > 0) {
@@ -656,9 +734,8 @@ export class SandboxStartAction extends SandboxAction {
     } else {
       //  if no runner has the base snapshot, get all available runners
       availableRunners = await this.runnerService.findAvailableRunners({
-        region: sandbox.region,
-        sandboxClass: sandbox.class,
-        excludedRunnerIds: [excludedRunnerId],
+        regions: [sandbox.region],
+        excludedRunnerIds,
       })
     }
 
@@ -677,7 +754,7 @@ export class SandboxStartAction extends SandboxAction {
 
     //  verify the runner is still available and ready
     if (!runner || runner.state !== RunnerState.READY || runner.unschedulable) {
-      this.logger.warn(`Selected runner ${runner.id} is no longer available, retrying sandbox assignment`)
+      this.logger.warn(`Selected runner ${runner?.id || 'null'} is no longer available, retrying sandbox assignment`)
       if (isRecovery) {
         await this.redisLockProvider.unlock(lockKey)
       }

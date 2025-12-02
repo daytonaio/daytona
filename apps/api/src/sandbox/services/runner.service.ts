@@ -149,8 +149,8 @@ export class RunnerService {
       runnerFilter.id = Not(In(excludedRunnerIds))
     }
 
-    if (params.region !== undefined) {
-      runnerFilter.region = params.region
+    if (params.regions?.length) {
+      runnerFilter.region = In(params.regions)
     }
 
     if (params.sandboxClass !== undefined) {
@@ -231,6 +231,8 @@ export class RunnerService {
             const abortController = new AbortController()
             let timeoutId: NodeJS.Timeout | null = null
 
+            const runnerHealthTimeoutSeconds = this.configService.get('runnerHealthTimeout')
+
             try {
               await Promise.race([
                 (async () => {
@@ -252,7 +254,7 @@ export class RunnerService {
                   timeoutId = setTimeout(() => {
                     abortController.abort()
                     reject(new Error('Health check timeout'))
-                  }, 3000)
+                  }, runnerHealthTimeoutSeconds * 1000)
                 }),
               ])
 
@@ -266,7 +268,9 @@ export class RunnerService {
               }
 
               if (e.message === 'Health check timeout') {
-                this.logger.error(`Runner ${runner.id} health check timed out after 3 seconds`)
+                this.logger.error(
+                  `Runner ${runner.id} health check timed out after ${runnerHealthTimeoutSeconds} seconds`,
+                )
               } else if (e.code === 'ECONNREFUSED') {
                 this.logger.error(`Runner ${runner.id} not reachable`)
               } else if (e.name === 'AbortError') {
@@ -361,7 +365,7 @@ export class RunnerService {
     return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
   }
 
-  async getSnapshotRunner(runnerId, snapshotRef: string): Promise<SnapshotRunner> {
+  async getSnapshotRunner(runnerId: string, snapshotRef: string): Promise<SnapshotRunner> {
     return this.snapshotRunnerRepository.findOne({
       where: {
         runnerId: runnerId,
@@ -373,7 +377,7 @@ export class RunnerService {
   async getSnapshotRunners(snapshotRef: string): Promise<SnapshotRunner[]> {
     return this.snapshotRunnerRepository.find({
       where: {
-        snapshotRef: snapshotRef,
+        snapshotRef,
       },
       order: {
         state: 'ASC', // Sorts state BUILDING_SNAPSHOT before ERROR
@@ -382,23 +386,38 @@ export class RunnerService {
     })
   }
 
-  async createSnapshotRunner(
+  async createSnapshotRunnerEntry(
     runnerId: string,
     snapshotRef: string,
-    state: SnapshotRunnerState,
+    state?: SnapshotRunnerState,
     errorReason?: string,
   ): Promise<void> {
-    const snapshotRunner = new SnapshotRunner()
-    snapshotRunner.runnerId = runnerId
-    snapshotRunner.snapshotRef = snapshotRef
-    snapshotRunner.state = state
-    if (errorReason) {
-      snapshotRunner.errorReason = errorReason
+    try {
+      const snapshotRunner = new SnapshotRunner()
+      snapshotRunner.runnerId = runnerId
+      snapshotRunner.snapshotRef = snapshotRef
+      if (state) {
+        snapshotRunner.state = state
+      }
+      if (errorReason) {
+        snapshotRunner.errorReason = errorReason
+      }
+      await this.snapshotRunnerRepository.save(snapshotRunner)
+    } catch (error) {
+      if (error.code === '23505') {
+        // PostgreSQL unique violation error code - entry already exists, allow it
+        this.logger.debug(
+          `SnapshotRunner entry already exists for runnerId: ${runnerId}, snapshotRef: ${snapshotRef}. Continuing...`,
+        )
+        return
+      }
+      throw error // Re-throw any other errors
     }
-    await this.snapshotRunnerRepository.save(snapshotRunner)
   }
 
-  async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 2): Promise<string[]> {
+  // TODO: combine getRunnersWithMultipleSnapshotsBuilding and getRunnersWithMultipleSnapshotsPulling?
+
+  async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 6): Promise<string[]> {
     const runners = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select('sandbox.runnerId', 'runnerId')
@@ -406,6 +425,18 @@ export class RunnerService {
       .andWhere('sandbox.buildInfoSnapshotRef IS NOT NULL')
       .groupBy('sandbox.runnerId')
       .having('COUNT(DISTINCT sandbox.buildInfoSnapshotRef) > :maxSnapshotCount', { maxSnapshotCount })
+      .getRawMany()
+
+    return runners.map((item) => item.runnerId)
+  }
+
+  async getRunnersWithMultipleSnapshotsPulling(maxSnapshotCount = 6): Promise<string[]> {
+    const runners = await this.snapshotRunnerRepository
+      .createQueryBuilder('snapshot_runner')
+      .select('snapshot_runner.runnerId')
+      .where('snapshot_runner.state = :state', { state: SnapshotRunnerState.PULLING_SNAPSHOT })
+      .groupBy('snapshot_runner.runnerId')
+      .having('COUNT(*) > :maxSnapshotCount', { maxSnapshotCount })
       .getRawMany()
 
     return runners.map((item) => item.runnerId)
@@ -563,7 +594,7 @@ export class RunnerService {
 }
 
 export class GetRunnerParams {
-  region?: string
+  regions?: string[]
   sandboxClass?: SandboxClass
   snapshotRef?: string
   excludedRunnerIds?: string[]

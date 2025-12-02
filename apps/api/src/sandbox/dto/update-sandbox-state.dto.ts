@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty } from '@nestjs/swagger'
-import { IsEnum } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsEnum, IsOptional, IsString } from 'class-validator'
 import { SandboxState } from '../enums/sandbox-state.enum'
 
 export class UpdateSandboxStateDto {
@@ -15,4 +15,12 @@ export class UpdateSandboxStateDto {
     example: SandboxState.STARTED,
   })
   state: SandboxState
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: 'Optional error message when reporting an error state',
+    example: 'Failed to pull snapshot image',
+  })
+  errorReason?: string
 }

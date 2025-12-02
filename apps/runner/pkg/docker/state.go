@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/containerd/errdefs"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 )
 
 func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
@@ -20,10 +20,10 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 
 	container, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
-		if client.IsErrNotFound(err) {
+		if errdefs.IsNotFound(err) {
 			return enums.SandboxStateDestroyed, nil
 		}
-		return enums.SandboxStateError, fmt.Errorf("failed to inspect container: %w", err)
+		return enums.SandboxStateError, fmt.Errorf("failed to inspect sandbox: %w", err)
 	}
 
 	switch container.State.Status {
@@ -50,7 +50,7 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 			return enums.SandboxStateStopped, nil
 		}
 
-		return enums.SandboxStateError, fmt.Errorf("container exited with code %d, reason: %s", container.State.ExitCode, container.State.Error)
+		return enums.SandboxStateError, fmt.Errorf("sandbox exited with code %d, reason: %s", container.State.ExitCode, container.State.Error)
 
 	case "dead":
 		return enums.SandboxStateDestroyed, nil

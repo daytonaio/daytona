@@ -77,16 +77,18 @@ jobs:
 
       - name: Publish projects
         run: |
+          source "$(poetry env info --path)/bin/activate"
           yarn publish
 
   update-homebrew-tap:
+    if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish
     runs-on: release-runner
     name: Update Homebrew CLI tap
     steps:
       - name: Update version
         run: |
-          curl -X POST -H "Accept: application/vnd.github.everest-preview+json" \
-          -H "Authorization: token ${{ secrets.GITHUBBOT_TOKEN }}" \
+          curl -f -X POST -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.GITHUBBOT_TOKEN }}" \
           https://api.github.com/repos/daytonaio/homebrew-cli/dispatches \
           -d "{\"event_type\": \"update-version\", \"client_payload\": {\"version\": \"${{ env.VERSION }}\"}}"

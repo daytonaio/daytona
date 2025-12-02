@@ -34,8 +34,9 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
+import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
 
-const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
+const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
@@ -52,11 +53,22 @@ export class SnapshotService {
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   private validateImageName(name: string): string | null {
+    // Check for digest format (@sha256:hash)
+    if (name.includes('@sha256:')) {
+      const [imageName, digest] = name.split('@sha256:')
+      if (!imageName || !digest || !/^[a-f0-9]{64}$/.test(digest)) {
+        return 'Invalid digest format. Must be image@sha256:64_hex_characters'
+      }
+      return null
+    }
+
+    // Handle tag format (image:tag)
     if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Image name must include a tag (e.g., ubuntu:22.04)'
+      return 'Image name must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)'
     }
 
     if (name.endsWith(':latest')) {
@@ -78,20 +90,64 @@ export class SnapshotService {
     return null
   }
 
-  async createSnapshot(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
+  private processEntrypoint(entrypoint?: string[]): string[] | undefined {
+    if (!entrypoint || entrypoint.length === 0) {
+      return undefined
+    }
+
+    // Filter out empty strings from the array
+    const filteredEntrypoint = entrypoint.filter((cmd) => cmd && cmd.trim().length > 0)
+
+    return filteredEntrypoint.length > 0 ? filteredEntrypoint : undefined
+  }
+
+  private async checkForValidActiveSnapshot(
+    ref: string,
+    entrypoint: string[] | undefined,
+    skipValidation: boolean,
+  ): Promise<Snapshot | null> {
+    // Check if there is already an active snapshot with the same ref;
+    // Only check entrypoint if skipValidation is not set on the DTO
+    // We can skip the pulling and validation in that case - note: relevant only for Docker
+
+    const snapshotFindOptions: any = {
+      ref,
+      state: SnapshotState.ACTIVE,
+    }
+
+    if (!entrypoint || entrypoint.length === 0) {
+      return null
+    }
+
+    if (!skipValidation) {
+      snapshotFindOptions.entrypoint = Array.isArray(entrypoint) ? entrypoint : [entrypoint]
+    }
+
+    return await this.snapshotRepository.findOne({
+      where: snapshotFindOptions,
+    })
+  }
+
+  async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     let pendingSnapshotCountIncrement: number | undefined
 
+    if (!createSnapshotDto.imageName) {
+      throw new BadRequestException('Must specify an image name')
+    }
+
     try {
+      let entrypoint = createSnapshotDto.entrypoint
+      let ref: string | undefined = undefined
+      let state: SnapshotState = SnapshotState.PENDING
+
       const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
       if (nameValidationError) {
         throw new BadRequestException(nameValidationError)
       }
 
-      if (createSnapshotDto.imageName) {
-        const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
-        if (imageValidationError) {
-          throw new BadRequestException(imageValidationError)
-        }
+      const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
+      if (imageValidationError) {
+        throw new BadRequestException(imageValidationError)
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
@@ -110,37 +166,151 @@ export class SnapshotService {
         pendingSnapshotCountIncrement = newSnapshotCount
       }
 
+      let imageDetails: ImageDetails | undefined = undefined
+
+      try {
+        imageDetails = await this.dockerRegistryService.getImageDetails(createSnapshotDto.imageName, organization.id)
+      } catch (error) {
+        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
+      }
+
+      if (imageDetails) {
+        if (imageDetails?.sizeGB > organization.maxSnapshotSize) {
+          throw new ForbiddenException(
+            `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
+          )
+        }
+
+        if ((!entrypoint || entrypoint.length === 0) && imageDetails) {
+          if (imageDetails.entrypoint && imageDetails.entrypoint.length > 0) {
+            entrypoint = imageDetails.entrypoint
+          } else {
+            entrypoint = ['sleep', 'infinity']
+          }
+        }
+
+        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        const hash =
+          imageDetails.digest && imageDetails.digest.startsWith('sha256:')
+            ? imageDetails.digest.substring('sha256:'.length)
+            : imageDetails.digest
+        ref = `${defaultInternalRegistry.url.replace(/^https?:\/\//, '')}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
+
+        const existingSnapshot = await this.checkForValidActiveSnapshot(
+          ref,
+          entrypoint,
+          createSnapshotDto.skipValidation,
+        )
+
+        if (existingSnapshot) {
+          state = SnapshotState.ACTIVE
+        }
+      }
+
       try {
         const snapshot = this.snapshotRepository.create({
           organizationId: organization.id,
           ...createSnapshotDto,
+          entrypoint: this.processEntrypoint(entrypoint),
           mem: createSnapshotDto.memory, // Map memory to mem
-          state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+          state,
+          ref,
           general,
         })
 
-        if (createSnapshotDto.buildInfo) {
-          const buildSnapshotRef = generateBuildSnapshotRef(
-            createSnapshotDto.buildInfo.dockerfileContent,
-            createSnapshotDto.buildInfo.contextHashes,
+        return await this.snapshotRepository.save(snapshot)
+      } catch (error) {
+        if (error.code === '23505') {
+          // PostgreSQL unique violation error code
+          throw new ConflictException(
+            `Snapshot with name "${createSnapshotDto.name}" already exists for this organization`,
           )
-
-          // Check if buildInfo with the same snapshotRef already exists
-          const existingBuildInfo = await this.buildInfoRepository.findOne({
-            where: { snapshotRef: buildSnapshotRef },
-          })
-
-          if (existingBuildInfo) {
-            snapshot.buildInfo = existingBuildInfo
-          } else {
-            const buildInfoEntity = this.buildInfoRepository.create({
-              ...createSnapshotDto.buildInfo,
-            })
-            await this.buildInfoRepository.save(buildInfoEntity)
-            snapshot.buildInfo = buildInfoEntity
-          }
         }
+        throw error
+      }
+    } catch (error) {
+      await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
+      throw error
+    }
+  }
 
+  async createFromBuildInfo(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
+    let pendingSnapshotCountIncrement: number | undefined
+    let entrypoint: string[] | undefined = undefined
+
+    try {
+      const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
+      if (nameValidationError) {
+        throw new BadRequestException(nameValidationError)
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const newSnapshotCount = 1
+
+      const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
+        organization,
+        newSnapshotCount,
+        createSnapshotDto.cpu,
+        createSnapshotDto.memory,
+        createSnapshotDto.disk,
+      )
+
+      if (pendingSnapshotCountIncremented) {
+        pendingSnapshotCountIncrement = newSnapshotCount
+      }
+
+      entrypoint = this.getEntrypointFromDockerfile(createSnapshotDto.buildInfo.dockerfileContent)
+
+      const snapshot = this.snapshotRepository.create({
+        organizationId: organization.id,
+        ...createSnapshotDto,
+        entrypoint: this.processEntrypoint(entrypoint),
+        mem: createSnapshotDto.memory, // Map memory to mem
+        state: SnapshotState.PENDING,
+        general,
+      })
+
+      const buildSnapshotRef = generateBuildSnapshotRef(
+        createSnapshotDto.buildInfo.dockerfileContent,
+        createSnapshotDto.buildInfo.contextHashes,
+      )
+
+      // Check if buildInfo with the same snapshotRef already exists
+      const existingBuildInfo = await this.buildInfoRepository.findOne({
+        where: { snapshotRef: buildSnapshotRef },
+      })
+
+      if (
+        existingBuildInfo &&
+        // Update lastUsed once per minute at most
+        (await this.redisLockProvider.lock(`build-info:${existingBuildInfo.snapshotRef}:update`, 60))
+      ) {
+        snapshot.buildInfo = existingBuildInfo
+        existingBuildInfo.lastUsedAt = new Date()
+        await this.buildInfoRepository.save(existingBuildInfo)
+      } else {
+        const buildInfoEntity = this.buildInfoRepository.create({
+          ...createSnapshotDto.buildInfo,
+        })
+        await this.buildInfoRepository.save(buildInfoEntity)
+        snapshot.buildInfo = buildInfoEntity
+      }
+
+      const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      snapshot.ref = `${defaultInternalRegistry.url.replace(/^(https?:\/\/)/, '')}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
+
+      const existingSnapshot = await this.checkForValidActiveSnapshot(
+        snapshot.ref,
+        entrypoint,
+        createSnapshotDto.skipValidation,
+      )
+
+      if (existingSnapshot) {
+        snapshot.state = SnapshotState.ACTIVE
+      }
+
+      try {
         return await this.snapshotRepository.save(snapshot)
       } catch (error) {
         if (error.code === '23505') {
@@ -332,6 +502,11 @@ export class SnapshotService {
       return
     }
 
+    // Update once per minute at most
+    if (!(await this.redisLockProvider.lock(`snapshot:${event.sandbox.snapshot}:update-last-used`, 60))) {
+      return
+    }
+
     const snapshot = await this.getSnapshotByName(event.sandbox.snapshot, event.sandbox.organizationId)
     snapshot.lastUsedAt = event.sandbox.createdAt
     await this.snapshotRepository.save(snapshot)
@@ -391,7 +566,7 @@ export class SnapshotService {
     const snapshot = await this.snapshotRepository.findOne({
       where: {
         state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
-        internalName: imageName,
+        ref: imageName,
       },
     })
 
@@ -440,14 +615,14 @@ export class SnapshotService {
       const countActiveSnapshots = await this.snapshotRepository.count({
         where: {
           state: SnapshotState.ACTIVE,
-          internalName: snapshot.internalName,
+          ref: snapshot.ref,
         },
       })
 
       if (countActiveSnapshots === 0) {
         // Set associated SnapshotRunner records to REMOVING state
         const result = await this.snapshotRunnerRepository.update(
-          { snapshotRef: snapshot.internalName },
+          { snapshotRef: snapshot.ref },
           { state: SnapshotRunnerState.REMOVING },
         )
         this.logger.debug(
@@ -457,6 +632,27 @@ export class SnapshotService {
     } catch (error) {
       this.logger.error(`Deactivated snapshot ${snapshot.id}, but failed to mark snapshot runners for removal`, error)
     }
+  }
+
+  // TODO: revise/cleanup
+  getEntrypointFromDockerfile(dockerfileContent: string): string[] {
+    // Match ENTRYPOINT with either a string or JSON array
+    const entrypointMatch = dockerfileContent.match(/ENTRYPOINT\s+(.*)/)
+    if (entrypointMatch) {
+      const rawEntrypoint = entrypointMatch[1].trim()
+      try {
+        // Try parsing as JSON array
+        const parsed = JSON.parse(rawEntrypoint)
+        if (Array.isArray(parsed)) {
+          return parsed
+        }
+      } catch {
+        // Fallback: it's probably a plain string
+        return [rawEntrypoint.replace(/["']/g, '')]
+      }
+    }
+
+    return ['sleep', 'infinity']
   }
 
   @OnEvent(OrganizationEvents.SUSPENDED_SNAPSHOT_DEACTIVATED)

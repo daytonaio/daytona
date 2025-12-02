@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,8 +29,9 @@ class SandboxVolume(BaseModel):
     """ # noqa: E501
     volume_id: StrictStr = Field(description="The ID of the volume", alias="volumeId")
     mount_path: StrictStr = Field(description="The mount path for the volume", alias="mountPath")
+    subpath: Optional[StrictStr] = Field(default=None, description="Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["volumeId", "mountPath"]
+    __properties: ClassVar[List[str]] = ["volumeId", "mountPath", "subpath"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +92,8 @@ class SandboxVolume(BaseModel):
 
         _obj = cls.model_validate({
             "volumeId": obj.get("volumeId"),
-            "mountPath": obj.get("mountPath")
+            "mountPath": obj.get("mountPath"),
+            "subpath": obj.get("subpath")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

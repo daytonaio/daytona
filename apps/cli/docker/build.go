@@ -6,6 +6,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
@@ -28,17 +29,15 @@ func ImageExistsLocally(ctx context.Context, dockerClient *client.Client, imageN
 }
 
 func CheckAmdArchitecture(ctx context.Context, dockerClient *client.Client, imageName string) (bool, error) {
-	inspect, _, err := dockerClient.ImageInspectWithRaw(ctx, imageName)
+	inspect, err := dockerClient.ImageInspect(ctx, imageName)
 	if err != nil {
 		return false, fmt.Errorf("failed to inspect image: %w", err)
 	}
 
 	x64Architectures := []string{"amd64", "x86_64"}
 
-	for _, arch := range x64Architectures {
-		if inspect.Architecture == arch {
-			return true, nil
-		}
+	if slices.Contains(x64Architectures, inspect.Architecture) {
+		return true, nil
 	}
 
 	return false, nil

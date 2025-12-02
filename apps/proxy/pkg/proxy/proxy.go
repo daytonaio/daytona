@@ -58,6 +58,9 @@ func StartProxy(config *config.Config) error {
 
 	proxy.secureCookie = securecookie.New([]byte(config.ProxyApiKey), nil)
 	cookieDomain := config.ProxyDomain
+	if config.CookieDomain != nil {
+		cookieDomain = *config.CookieDomain
+	}
 	cookieDomain = strings.Split(cookieDomain, ":")[0]
 	cookieDomain = fmt.Sprintf(".%s", cookieDomain)
 	proxy.cookieDomain = cookieDomain
@@ -129,7 +132,9 @@ func StartProxy(config *config.Config) error {
 		cors.New(corsConfig)(ctx)
 	})
 
-	router.Use(proxy.browserWarningMiddleware())
+	if config.PreviewWarningEnabled {
+		router.Use(proxy.browserWarningMiddleware())
+	}
 
 	router.Any("/*path", func(ctx *gin.Context) {
 		if ctx.Request.Method == "POST" && ctx.Request.URL.Path == ACCEPT_PREVIEW_PAGE_WARNING_PATH {

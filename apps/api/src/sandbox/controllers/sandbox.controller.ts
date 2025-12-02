@@ -71,11 +71,15 @@ import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { RegionDto } from '../dto/region.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { SkipThrottle } from '@nestjs/throttler'
+import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
+import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
@@ -226,6 +230,8 @@ export class SandboxController {
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-create')
   @ApiOperation({
     summary: 'Create a new sandbox',
     operationId: 'createSandbox',
@@ -370,6 +376,8 @@ export class SandboxController {
   }
 
   @Delete(':sandboxIdOrName')
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Delete sandbox',
     operationId: 'deleteSandbox',
@@ -402,6 +410,8 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/start')
   @HttpCode(200)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Start sandbox',
     operationId: 'startSandbox',
@@ -440,6 +450,8 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/stop')
   @HttpCode(200) //  for Daytona Api compatibility
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Stop sandbox',
     operationId: 'stopSandbox',
@@ -533,7 +545,7 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
     @Body() updateStateDto: UpdateSandboxStateDto,
   ): Promise<void> {
-    await this.sandboxService.updateState(sandboxId, updateStateDto.state)
+    await this.sandboxService.updateState(sandboxId, updateStateDto.state, updateStateDto.errorReason)
   }
 
   @Post(':sandboxIdOrName/backup')
@@ -623,7 +635,7 @@ export class SandboxController {
     status: 201,
     description: 'Last activity has been updated',
   })
-  @UseGuards(OrGuard([SandboxAccessGuard, ProxyGuard]))
+  @UseGuards(OrGuard([SandboxAccessGuard, ProxyGuard, SshGatewayGuard]))
   async updateLastActivity(@Param('sandboxId') sandboxId: string): Promise<void> {
     await this.sandboxService.updateLastActivityAt(sandboxId, new Date())
   }
@@ -809,6 +821,8 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/archive')
   @HttpCode(200)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Archive sandbox',
     operationId: 'archiveSandbox',
@@ -860,26 +874,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
     @Param('port') port: number,
   ): Promise<PortPreviewUrlDto> {
-    if (port < 1 || port > 65535) {
-      throw new BadRequestError('Invalid port')
-    }
-
-    const proxyDomain = this.configService.getOrThrow('proxy.domain')
-    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
-
-    const sandbox = await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
-
-    // Get runner info
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner not found for sandbox ${sandboxIdOrName}`)
-    }
-
-    return {
-      sandboxId: sandbox.id,
-      url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
-      token: sandbox.authToken,
-    }
+    return this.sandboxService.getPortPreviewUrl(sandboxIdOrName, authContext.organizationId, port)
   }
 
   @Get(':sandboxIdOrName/build-logs')

@@ -52,6 +52,8 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.buildInfo
     ```
+- `codeInterpreter` _CodeInterpreter_ - Stateful interpreter interface for executing code.
+    Currently supports only Python. For other languages, use the `process.codeRun` method.
 - `computerUse` _ComputerUse_ - Computer use operations interface for desktop automation
 - `cpu` _number_ - Number of CPUs allocated to the Sandbox
     
@@ -406,6 +408,30 @@ Gets the working directory path inside the Sandbox.
 ```ts
 const workDir = await sandbox.getWorkDir();
 console.log(`Sandbox working directory: ${workDir}`);
+```
+
+***
+
+#### refreshActivity()
+
+```ts
+refreshActivity(): Promise<void>
+```
+
+Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
+
+This method updates the sandbox's last activity timestamp without changing its state.
+It is useful for keeping long-running sessions alive while there is still user activity.
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// Keep sandbox activity alive
+await sandbox.refreshActivity();
 ```
 
 ***

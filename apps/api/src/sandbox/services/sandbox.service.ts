@@ -15,7 +15,6 @@ import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -65,8 +64,9 @@ import {
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
-import { validateMountPaths } from '../utils/volume-mount-path-validation.util'
+import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -258,9 +258,9 @@ export class SandboxService {
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.region,
+      regions: [sandbox.region],
       sandboxClass: sandbox.class,
-      snapshotRef: snapshot.internalName,
+      snapshotRef: snapshot.ref,
     })
 
     sandbox.runnerId = runner.id
@@ -380,9 +380,9 @@ export class SandboxService {
       }
 
       const runner = await this.runnerService.getRandomAvailableRunner({
-        region,
+        regions: [region],
         sandboxClass,
-        snapshotRef: snapshot.internalName,
+        snapshotRef: snapshot.ref,
       })
 
       const sandbox = new Sandbox(region, createSandboxDto.name)
@@ -613,7 +613,7 @@ export class SandboxService {
 
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
-          region: sandbox.region,
+          regions: [sandbox.region],
           sandboxClass: sandbox.class,
           snapshotRef: sandbox.buildInfo.snapshotRef,
         })
@@ -941,6 +941,47 @@ export class SandboxService {
     return sandbox.runnerId || null
   }
 
+  async getPortPreviewUrl(sandboxIdOrName: string, organizationId: string, port: number): Promise<PortPreviewUrlDto> {
+    if (port < 1 || port > 65535) {
+      throw new BadRequestError('Invalid port')
+    }
+
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
+
+    const where: FindOptionsWhere<Sandbox> = {
+      organizationId: organizationId,
+      state: Not(SandboxState.DESTROYED),
+    }
+
+    const sandbox = await this.sandboxRepository.findOne({
+      where: [
+        {
+          id: sandboxIdOrName,
+          ...where,
+        },
+        {
+          name: sandboxIdOrName,
+          ...where,
+        },
+      ],
+      cache: {
+        id: `sandbox:${sandboxIdOrName}:organization:${organizationId}`,
+        milliseconds: 1000,
+      },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    return {
+      sandboxId: sandbox.id,
+      url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
+      token: sandbox.authToken,
+    }
+  }
+
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1207,7 +1248,7 @@ export class SandboxService {
 
   // used by internal services to update the state of a sandbox to resolve domain and runner state mismatch
   // notably, when a sandbox instance stops or errors on the runner, the domain state needs to be updated to reflect the actual state
-  async updateState(sandboxId: string, newState: SandboxState): Promise<void> {
+  async updateState(sandboxId: string, newState: SandboxState, errorReason?: string): Promise<void> {
     const sandbox = await this.sandboxRepository.findOne({
       where: { id: sandboxId },
     })
@@ -1226,9 +1267,17 @@ export class SandboxService {
       throw new BadRequestError('Sandbox is not in a valid state to be updated')
     }
 
+    if (sandbox.desiredState == SandboxDesiredState.DESTROYED) {
+      this.logger.debug(`Sandbox ${sandboxId} is already DESTROYED, skipping state update`)
+      return
+    }
+
     const oldState = sandbox.state
     const oldDesiredState = sandbox.desiredState
     sandbox.state = newState
+    if (errorReason !== undefined) {
+      sandbox.errorReason = errorReason
+    }
     //  we need to update the desired state to match the new state
     const desiredState = this.getExpectedDesiredStateForState(newState)
     if (desiredState) {
@@ -1329,7 +1378,13 @@ export class SandboxService {
     try {
       validateMountPaths(volumes)
     } catch (error) {
-      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume mount paths')
+      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume mount configuration')
+    }
+
+    try {
+      validateSubpaths(volumes)
+    } catch (error) {
+      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid volume subpath configuration')
     }
 
     return volumes
@@ -1409,5 +1464,43 @@ export class SandboxService {
       .getRawMany()
 
     return result.map((row) => row.region)
+  }
+
+  async updateSandboxBackupState(
+    sandboxId: string,
+    backupState: BackupState,
+    backupSnapshot?: string | null,
+    backupRegistryId?: string | null,
+    backupErrorReason?: string | null,
+  ): Promise<void> {
+    const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
+      id: sandboxId,
+    })
+    const originalState = sandboxToUpdate.state
+    const originalRunnerId = sandboxToUpdate.runnerId
+
+    sandboxToUpdate.setBackupState(backupState, backupSnapshot, backupRegistryId, backupErrorReason)
+
+    const updateData: Partial<Sandbox> = {
+      backupState: sandboxToUpdate.backupState,
+      backupSnapshot: sandboxToUpdate.backupSnapshot,
+      backupRegistryId: sandboxToUpdate.backupRegistryId,
+      backupErrorReason: sandboxToUpdate.backupErrorReason,
+      lastBackupAt: sandboxToUpdate.lastBackupAt,
+      existingBackupSnapshots: sandboxToUpdate.existingBackupSnapshots,
+    }
+
+    if (sandboxToUpdate.state !== originalState) {
+      updateData.state = sandboxToUpdate.state
+    }
+
+    if (sandboxToUpdate.runnerId !== originalRunnerId) {
+      updateData.runnerId = sandboxToUpdate.runnerId
+    }
+
+    const updateResult = await this.sandboxRepository.update(sandboxId, updateData)
+    if (!updateResult.affected) {
+      throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
+    }
   }
 }

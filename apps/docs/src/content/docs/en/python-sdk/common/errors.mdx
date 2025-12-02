@@ -11,6 +11,22 @@ class DaytonaError(Exception)
 
 Base error for Daytona SDK.
 
+#### DaytonaError.\_\_init\_\_
+
+```python
+def __init__(message: str,
+             status_code: Optional[int] = None,
+             headers: Optional[dict] = None)
+```
+
+Initialize Daytona error.
+
+**Arguments**:
+
+- `message` - Error message
+- `status_code` - HTTP status code if available
+- `headers` - Response headers if available
+
 
 ## DaytonaNotFoundError
 
@@ -19,4 +35,20 @@ class DaytonaNotFoundError(DaytonaError)
 ```
 
 Error for when a resource is not found.
+
+## DaytonaRateLimitError
+
+```python
+class DaytonaRateLimitError(DaytonaError)
+```
+
+Error for when rate limit is exceeded.
+
+## DaytonaTimeoutError
+
+```python
+class DaytonaTimeoutError(DaytonaError)
+```
+
+Error for when a timeout occurs.
 

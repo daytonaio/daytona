@@ -10,6 +10,10 @@ Service for managing Daytona Volumes.
 
 This service provides methods to list, get, create, and delete Volumes.
 
+Volumes can be mounted to Sandboxes with an optional subpath parameter to mount
+only a specific S3 prefix within the volume. When no subpath is specified,
+the entire volume is mounted.
+
 ### Constructors
 
 #### new VolumeService()

@@ -116,6 +116,8 @@ daytona_api_client/models/pty_list_response.py
 daytona_api_client/models/pty_resize_request.py
 daytona_api_client/models/pty_session_info.py
 daytona_api_client/models/range.py
+daytona_api_client/models/rate_limit_config.py
+daytona_api_client/models/rate_limit_entry.py
 daytona_api_client/models/region.py
 daytona_api_client/models/region_screenshot_response.py
 daytona_api_client/models/registry_push_access_dto.py

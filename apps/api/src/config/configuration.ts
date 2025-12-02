@@ -178,9 +178,35 @@ const configuration = {
     memoryPenaltyThreshold: parseInt(process.env.RUNNER_MEMORY_PENALTY_THRESHOLD || '75', 10),
     diskPenaltyThreshold: parseInt(process.env.RUNNER_DISK_PENALTY_THRESHOLD || '75', 10),
   },
-  apiKey: {
-    validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),
-    userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
+  rateLimit: {
+    anonymous: {
+      ttl: process.env.RATE_LIMIT_ANONYMOUS_TTL ? parseInt(process.env.RATE_LIMIT_ANONYMOUS_TTL, 10) : undefined,
+      limit: process.env.RATE_LIMIT_ANONYMOUS_LIMIT ? parseInt(process.env.RATE_LIMIT_ANONYMOUS_LIMIT, 10) : undefined,
+    },
+    authenticated: {
+      ttl: process.env.RATE_LIMIT_AUTHENTICATED_TTL
+        ? parseInt(process.env.RATE_LIMIT_AUTHENTICATED_TTL, 10)
+        : undefined,
+      limit: process.env.RATE_LIMIT_AUTHENTICATED_LIMIT
+        ? parseInt(process.env.RATE_LIMIT_AUTHENTICATED_LIMIT, 10)
+        : undefined,
+    },
+    sandboxCreate: {
+      ttl: process.env.RATE_LIMIT_SANDBOX_CREATE_TTL
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_TTL, 10)
+        : undefined,
+      limit: process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_CREATE_LIMIT, 10)
+        : undefined,
+    },
+    sandboxLifecycle: {
+      ttl: process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_TTL, 10)
+        : undefined,
+      limit: process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT
+        ? parseInt(process.env.RATE_LIMIT_SANDBOX_LIFECYCLE_LIMIT, 10)
+        : undefined,
+    },
   },
   log: {
     console: {
@@ -216,6 +242,11 @@ const configuration = {
     volumeQuota: parseInt(process.env.ADMIN_VOLUME_QUOTA || '0', 10),
   },
   skipUserEmailVerification: process.env.SKIP_USER_EMAIL_VERIFICATION === 'true',
+  apiKey: {
+    validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),
+    userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
+  },
+  runnerHealthTimeout: parseInt(process.env.RUNNER_HEALTH_TIMEOUT_SECONDS || '3', 10),
 }
 
 export { configuration }

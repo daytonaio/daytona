@@ -1,6 +1,6 @@
 module github.com/daytonaio/computer-use
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/go-vgo/robotgo v0.110.8
@@ -49,9 +49,9 @@ require (
 	go.opentelemetry.io/otel/sdk v1.34.0 // indirect
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/image v0.28.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/grpc v1.69.4 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect

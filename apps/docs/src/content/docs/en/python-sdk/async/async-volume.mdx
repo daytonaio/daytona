@@ -127,3 +127,19 @@ async with AsyncDaytona() as daytona:
     print("Volume deleted")
 ```
 
+## VolumeMount
+
+```python
+class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount)
+```
+
+Represents a Volume mount configuration for a Sandbox.
+
+**Attributes**:
+
+- `volume_id` _str_ - ID of the volume to mount.
+- `mount_path` _str_ - Path where the volume will be mounted in the sandbox.
+- `subpath` _str, optional_ - Optional S3 subpath/prefix within the volume to mount.
+  When specified, only this prefix will be accessible. When omitted,
+  the entire volume is mounted.
+
