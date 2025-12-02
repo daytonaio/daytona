@@ -96,7 +96,7 @@ export function useSandboxTable({
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
     return regionsData.map((region) => ({
-      label: `${region.name}${region.organizationId ? ` (${region.id})` : ''}`,
+      label: `${region.name}${region.organizationId && region.name !== region.id ? ` (${region.id})` : ''}`,
       value: region.id,
     }))
   }, [regionsData])
