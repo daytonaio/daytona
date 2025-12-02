@@ -11,7 +11,7 @@ import { getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { THROTTLER_SCOPE_KEY } from '../decorators/throttler-scope.decorator'
-import { sha256 } from '@nestjs/throttler/dist/hash'
+import { createHash } from 'crypto'
 
 @Injectable()
 export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
@@ -48,7 +48,7 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
   protected generateKey(context: ExecutionContext, suffix: string, name: string): string {
     // Override to make rate limiting per-rate-limit-type, not per-route
     // This ensures all routes share the same counter per rate limit type (authenticated, sandbox-create, sandbox-lifecycle)
-    return sha256(`${name}-${suffix}`)
+    return createHash('sha256').update(`${name}-${suffix}`).digest('hex')
   }
 
   async handleRequest(requestProps: ThrottlerRequest): Promise<boolean> {
