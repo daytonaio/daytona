@@ -51,6 +51,7 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
 
     // Skip rate limiting for M2M system roles (checked AFTER auth runs)
     if (this.isSystemRole(request.user)) {
+      await this.clearAnonymousRateLimit(request, context)
       return true
     }
 
