@@ -112,7 +112,7 @@
   "sidebarconfig.dataAnalysis": "Data Analysis with AI",
   "sidebarconfig.ossDeployment": "Open Source",
   "sidebarconfig.deployments": "Deployments",
-  "sidebarconfig.integrations": "Integrations",
+  "sidebarconfig.integrations": "Guides",
   "sidebarconfig.langchainIntegrations": "LangChain",
   "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
