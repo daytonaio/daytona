@@ -209,7 +209,7 @@ export default function Limits() {
                     emailVerified: !!user?.profile?.email_verified,
                     creditCardLinked: !!wallet?.creditCardConnected,
                     githubConnected: githubConnected,
-                    businessEmailVerified: !!user?.profile?.business_email_verified,
+                    businessEmailVerified: !!organizationTier?.hasVerifiedBusinessEmail,
                     phoneVerified: !!user?.profile?.phone_verified,
                   }}
                 />
