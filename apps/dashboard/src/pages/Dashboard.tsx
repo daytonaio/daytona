@@ -6,26 +6,29 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
+import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
-import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
-import { cn } from '@/lib/utils'
-import { useBilling } from '@/hooks/useBilling'
 import { RoutePath } from '@/enums/RoutePath'
-import { useNavigate } from 'react-router-dom'
+import { useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useConfig } from '@/hooks/useConfig'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn } from '@/lib/utils'
+import { useNavigate } from 'react-router-dom'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
-  const { wallet } = useBilling()
+  const config = useConfig()
+  const walletQuery = useOwnerWalletQuery()
+
   const navigate = useNavigate()
   const location = useLocation()
-  const config = useConfig()
+
+  const wallet = walletQuery.data
 
   useEffect(() => {
     if (

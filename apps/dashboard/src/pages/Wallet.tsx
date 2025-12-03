@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationEmail } from '@/billing-api'
 import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { OrganizationEmailsTable } from '@/components/OrganizationEmails'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -13,10 +12,19 @@ import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAddOrganizationEmailMutation } from '@/hooks/mutations/useAddOrganizationEmailMutation'
+import { useDeleteOrganizationEmailMutation } from '@/hooks/mutations/useDeleteOrganizationEmailMutation'
+import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
+import { useResendOrganizationEmailVerificationMutation } from '@/hooks/mutations/useResendOrganizationEmailVerificationMutation'
+import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
+import {
+  useOwnerBillingPortalUrlQuery,
+  useOwnerOrganizationEmailsQuery,
+  useOwnerWalletQuery,
+} from '@/hooks/queries/billingQueries'
 import { useApi } from '@/hooks/useApi'
-import { useBilling } from '@/hooks/useBilling'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { ArrowUpRight, CheckCircleIcon, CreditCardIcon, InfoIcon, Loader, TriangleAlertIcon } from 'lucide-react'
+import { ArrowUpRight, CheckCircleIcon, CreditCardIcon, InfoIcon, Loader2, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -35,15 +43,23 @@ const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { billingApi } = useApi()
   const { user } = useAuth()
-  const { wallet, walletLoading, billingPortalUrl, billingPortalUrlLoading, refreshWallet } = useBilling()
   const [automaticTopUp, setAutomaticTopUp] = useState<AutomaticTopUp | undefined>(undefined)
-  const [automaticTopUpLoading, setAutomaticTopUpLoading] = useState(false)
-  const [redeemCouponLoading, setRedeemCouponLoading] = useState(false)
   const [couponCode, setCouponCode] = useState<string>('')
   const [redeemCouponError, setRedeemCouponError] = useState<string | null>(null)
   const [redeemCouponSuccess, setRedeemCouponSuccess] = useState<string | null>(null)
-  const [organizationEmails, setOrganizationEmails] = useState<OrganizationEmail[]>([])
-  const [organizationEmailsLoading, setOrganizationEmailsLoading] = useState(true)
+  const walletQuery = useOwnerWalletQuery()
+  const billingPortalUrlQuery = useOwnerBillingPortalUrlQuery()
+  const organizationEmailsQuery = useOwnerOrganizationEmailsQuery()
+
+  const wallet = walletQuery.data
+  const billingPortalUrl = billingPortalUrlQuery.data
+  const organizationEmails = organizationEmailsQuery.data
+
+  const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
+  const redeemCouponMutation = useRedeemCouponMutation()
+  const addOrganizationEmailMutation = useAddOrganizationEmailMutation()
+  const deleteOrganizationEmailMutation = useDeleteOrganizationEmailMutation()
+  const resendOrganizationEmailVerificationMutation = useResendOrganizationEmailVerificationMutation()
 
   useEffect(() => {
     if (wallet?.automaticTopUp) {
@@ -68,50 +84,45 @@ const Wallet = () => {
       return
     }
 
-    setAutomaticTopUpLoading(true)
     try {
-      await billingApi.setAutomaticTopUp(selectedOrganization.id, automaticTopUp)
+      await setAutomaticTopUpMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        automaticTopUp,
+      })
       toast.success('Automatic top up set successfully')
-      refreshWallet()
     } catch (error) {
-      console.error('Failed to set automatic top up:', error)
       toast.error('Failed to set automatic top up', {
         description: String(error),
       })
-    } finally {
-      setAutomaticTopUpLoading(false)
     }
-  }, [billingApi, selectedOrganization, automaticTopUp, refreshWallet])
+  }, [selectedOrganization, automaticTopUp, setAutomaticTopUpMutation])
 
   const handleRedeemCoupon = useCallback(async () => {
     if (!selectedOrganization || !couponCode) {
       return
     }
 
-    if (redeemCouponLoading) {
-      return
-    }
-
-    setRedeemCouponLoading(true)
     setRedeemCouponError(null)
     setRedeemCouponSuccess(null)
+
     try {
-      setRedeemCouponSuccess(await billingApi.redeemCoupon(selectedOrganization.id, couponCode))
+      const message = await redeemCouponMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        couponCode,
+      })
+      setRedeemCouponSuccess(message)
       setTimeout(() => {
         setRedeemCouponSuccess(null)
       }, 3000)
       setCouponCode('')
-      refreshWallet()
     } catch (error) {
-      console.error('Failed to redeem coupon:', error)
       setRedeemCouponError(String(error))
-    } finally {
-      setRedeemCouponLoading(false)
+      console.error('Failed to redeem coupon:', error)
     }
-  }, [billingApi, selectedOrganization, couponCode, refreshWallet, redeemCouponLoading])
+  }, [selectedOrganization, couponCode, redeemCouponMutation])
 
   const saveAutomaticTopUpDisabled = useMemo(() => {
-    if (automaticTopUpLoading) {
+    if (setAutomaticTopUpMutation.isPending) {
       return true
     }
 
@@ -136,22 +147,7 @@ const Wallet = () => {
     }
 
     return true
-  }, [automaticTopUpLoading, wallet, automaticTopUp])
-
-  const fetchOrganizationEmails = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setOrganizationEmailsLoading(true)
-    try {
-      const data = await billingApi.listOrganizationEmails(selectedOrganization.id)
-      setOrganizationEmails(data)
-    } catch (error) {
-      console.error('Failed to fetch organization emails:', error)
-    } finally {
-      setOrganizationEmailsLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
+  }, [setAutomaticTopUpMutation.isPending, wallet, automaticTopUp])
 
   const handleDeleteEmail = useCallback(
     async (email: string) => {
@@ -159,17 +155,18 @@ const Wallet = () => {
         return
       }
       try {
-        await billingApi.deleteOrganizationEmail(selectedOrganization.id, email)
+        await deleteOrganizationEmailMutation.mutateAsync({
+          organizationId: selectedOrganization.id,
+          email,
+        })
         toast.success('Email deleted successfully')
-        fetchOrganizationEmails()
       } catch (error) {
-        console.error('Failed to delete email:', error)
         toast.error('Failed to delete email', {
           description: String(error),
         })
       }
     },
-    [billingApi, selectedOrganization, fetchOrganizationEmails],
+    [selectedOrganization, deleteOrganizationEmailMutation],
   )
 
   const handleResendVerification = useCallback(
@@ -178,16 +175,18 @@ const Wallet = () => {
         return
       }
       try {
-        await billingApi.resendOrganizationEmailVerification(selectedOrganization.id, email)
+        await resendOrganizationEmailVerificationMutation.mutateAsync({
+          organizationId: selectedOrganization.id,
+          email,
+        })
         toast.success('Verification email sent successfully')
       } catch (error) {
-        console.error('Failed to resend verification email:', error)
         toast.error('Failed to resend verification email', {
           description: String(error),
         })
       }
     },
-    [billingApi, selectedOrganization],
+    [selectedOrganization, resendOrganizationEmailVerificationMutation],
   )
 
   const handleAddEmail = useCallback(
@@ -196,22 +195,19 @@ const Wallet = () => {
         return
       }
       try {
-        await billingApi.addOrganizationEmail(selectedOrganization.id, email)
+        await addOrganizationEmailMutation.mutateAsync({
+          organizationId: selectedOrganization.id,
+          email,
+        })
         toast.success('Email added successfully. A verification email has been sent.')
-        fetchOrganizationEmails()
       } catch (error) {
-        console.error('Failed to add email:', error)
         toast.error('Failed to add email', {
           description: String(error),
         })
       }
     },
-    [billingApi, selectedOrganization, fetchOrganizationEmails],
+    [selectedOrganization, addOrganizationEmailMutation],
   )
-
-  useEffect(() => {
-    fetchOrganizationEmails()
-  }, [fetchOrganizationEmails])
 
   return (
     <div className="p-6 max-w-3xl">
@@ -256,7 +252,7 @@ const Wallet = () => {
             <CardTitle>Overview</CardTitle>
           </CardHeader>
           <CardContent className="">
-            {walletLoading || !wallet ? (
+            {walletQuery.isLoading || !wallet ? (
               <Skeleton className="max-w-sm h-10" />
             ) : (
               <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-center justify-between">
@@ -286,7 +282,7 @@ const Wallet = () => {
             )}
           </CardContent>
           <CardContent className="border-t border-border">
-            {walletLoading || !wallet || billingPortalUrlLoading || !billingPortalUrl ? (
+            {walletQuery.isLoading || !wallet || billingPortalUrlQuery.isLoading || !billingPortalUrl ? (
               <Skeleton className="max-w-sm h-10" />
             ) : (
               <div className="flex gap-4 items-center justify-between">
@@ -334,7 +330,7 @@ const Wallet = () => {
                     onChange={(e) => setCouponCode(e.target.value)}
                   />
                   <Button variant="secondary" className="min-w-[4.5rem]" onClick={handleRedeemCoupon}>
-                    Redeem
+                    {redeemCouponMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Redeem'}
                   </Button>
                 </div>
               </div>
@@ -352,7 +348,7 @@ const Wallet = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {walletLoading || !wallet ? (
+              {walletQuery.isLoading || !wallet ? (
                 <Skeleton className="max-w-sm h-10" />
               ) : (
                 <div className="flex sm:flex-row flex-col gap-6">
@@ -439,10 +435,10 @@ const Wallet = () => {
               <div className="flex gap-2 items-center ml-auto">
                 <Button
                   onClick={handleSetAutomaticTopUp}
-                  disabled={saveAutomaticTopUpDisabled || walletLoading || !wallet}
+                  disabled={saveAutomaticTopUpDisabled || walletQuery.isLoading || !wallet}
                   className="min-w-[4.5rem]"
                 >
-                  {automaticTopUpLoading ? <Loader className="w-4 h-4 animate-spin" /> : 'Save'}
+                  {setAutomaticTopUpMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
                 </Button>
               </div>
             </CardFooter>
@@ -462,8 +458,8 @@ const Wallet = () => {
           </CardHeader>
           <CardContent>
             <OrganizationEmailsTable
-              data={organizationEmails}
-              loading={organizationEmailsLoading}
+              data={organizationEmails ?? []}
+              loading={organizationEmailsQuery.isLoading}
               handleDelete={handleDeleteEmail}
               handleResendVerification={handleResendVerification}
               handleAddEmail={handleAddEmail}

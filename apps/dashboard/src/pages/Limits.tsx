@@ -12,9 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UsageOverview, UsageOverviewSkeleton } from '@/components/UsageOverview'
 import { RoutePath } from '@/enums/RoutePath'
-import { useOrganizationTierQuery } from '@/hooks/queries/useOrganizationTierQuery'
+import { useOwnerTierQuery, useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
-import { useOrganizationWalletQuery } from '@/hooks/queries/useOrganizationWalletQuery'
 import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useRegions } from '@/hooks/useRegions'
@@ -31,6 +30,14 @@ import { UserProfileIdentity } from './LinkedAccounts'
 export default function Limits() {
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
+  const organizationTierQuery = useOwnerTierQuery()
+  const walletQuery = useOwnerWalletQuery()
+  const tiersQuery = useTiersQuery()
+
+  const organizationTier = organizationTierQuery.data
+  const tiers = tiersQuery.data
+  const wallet = walletQuery.data
+
   const { getRegionName } = useRegions()
   const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
   const config = useConfig()
@@ -42,13 +49,6 @@ export default function Limits() {
     }
   }, [navigate, selectedOrganization])
 
-  const { data: organizationTier, ...organizationTierQuery } = useOrganizationTierQuery({
-    organizationId: selectedOrganization?.id || '',
-  })
-  const { data: wallet, ...walletQuery } = useOrganizationWalletQuery({
-    organizationId: selectedOrganization?.id || '',
-  })
-  const { data: tiers, ...tiersQuery } = useTiersQuery()
   const { data: usageOverview, ...usageOverviewQuery } = useOrganizationUsageOverviewQuery(
     {
       organizationId: selectedOrganization?.id || '',
