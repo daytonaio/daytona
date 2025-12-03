@@ -69,6 +69,21 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		return
 	}
 
+	// Retrieve PKCE code verifier from secure cookie
+	codeVerifierCookie, err := ctx.Cookie("pkce_verifier")
+	if err != nil || codeVerifierCookie == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("authentication state verification failed")))
+		return
+	}
+	var codeVerifier string
+	if err := p.secureCookie.Decode("pkce_verifier", codeVerifierCookie, &codeVerifier); err != nil {
+		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to decode pkce_verifier cookie: %w", err)))
+		return
+	}
+
+	// Clear the PKCE cookie
+	ctx.SetCookie("pkce_verifier", "", -1, "/", p.cookieDomain, p.config.EnableTLS, true)
+
 	// Exchange code for token
 	authContext, endpoint, err := p.getOidcEndpoint(ctx)
 	if err != nil {
@@ -84,7 +99,7 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
 
-	token, err := oauth2Config.Exchange(authContext, code)
+	token, err := oauth2Config.Exchange(authContext, code, oauth2.VerifierOption(codeVerifier))
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to exchange token: %w", err)))
 		return
@@ -127,6 +142,14 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 		return "", fmt.Errorf("failed to generate random state: %w", err)
 	}
 
+	// Generate PKCE code verifier and store in secure cookie
+	codeVerifier := oauth2.GenerateVerifier()
+	encodedVerifier, err := p.secureCookie.Encode("pkce_verifier", codeVerifier)
+	if err != nil {
+		return "", fmt.Errorf("failed to encode pkce_verifier cookie: %w", err)
+	}
+	ctx.SetCookie("pkce_verifier", encodedVerifier, 300, "/", p.cookieDomain, p.config.EnableTLS, true)
+
 	// Store the original request URL in the state
 	stateData := map[string]string{
 		"state":     state,
@@ -142,6 +165,7 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 	authURL := oauth2Config.AuthCodeURL(
 		encodedState,
 		oauth2.SetAuthURLParam("audience", p.config.Oidc.Audience),
+		oauth2.S256ChallengeOption(codeVerifier),
 	)
 
 	return authURL, nil
