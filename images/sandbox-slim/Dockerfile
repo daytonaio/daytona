@@ -24,8 +24,8 @@ RUN python3 -m pip install python-lsp-server daytona matplotlib pandas numpy
 # Create the Daytona user and configure sudo access
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona
 
-ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 22.14.0
+ENV NVM_DIR=/usr/local/nvm
+ENV NODE_VERSION=22.14.0
 RUN mkdir -p $NVM_DIR
 
 # Install nvm with node and npm
@@ -38,8 +38,8 @@ RUN source $NVM_DIR/nvm.sh \
     && nvm use default
 
 # add node and npm to path so the commands are available
-ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
-ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+ENV NODE_PATH=$NVM_DIR/v$NODE_VERSION/lib/node_modules
+ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN npm install -g ts-node typescript typescript-language-server
 
@@ -48,9 +48,6 @@ USER daytona
 
 # Create directory for computer use plugin
 RUN mkdir -p /usr/local/lib && sudo chown daytona:daytona /usr/local/lib
-
-ENV LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8
 
 # Keep the container running indefinitely
 ENTRYPOINT [ "sleep", "infinity" ]
