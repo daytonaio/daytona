@@ -64,6 +64,13 @@ export class RateLimitEntry {
 @ApiSchema({ name: 'RateLimitConfig' })
 export class RateLimitConfig {
   @ApiPropertyOptional({
+    description: 'Failed authentication rate limit',
+    type: RateLimitEntry,
+  })
+  @IsOptional()
+  failedAuth?: RateLimitEntry
+
+  @ApiPropertyOptional({
     description: 'Authenticated rate limit',
     type: RateLimitEntry,
   })

@@ -57,12 +57,16 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
 
     // Skip rate limiting for M2M system roles (checked AFTER auth runs)
     if (this.isSystemRole(request.user)) {
-      await this.clearAnonymousRateLimit(request, context)
       return true
     }
 
-    // Skip anonymous throttler (handled by AnonymousRateLimitGuard)
+    // Skip anonymous throttler (handled by AnonymousRateLimitGuard on public routes)
     if (throttler.name === 'anonymous') {
+      return true
+    }
+
+    // Skip failed-auth throttler (handled by FailedAuthRateLimitMiddleware and auth guards)
+    if (throttler.name === 'failed-auth') {
       return true
     }
 
@@ -70,10 +74,6 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     const authenticatedThrottlers = ['authenticated', 'sandbox-create', 'sandbox-lifecycle']
     if (authenticatedThrottlers.includes(throttler.name)) {
       if (isAuthenticated) {
-        // Clear anonymous rate limit on successful authentication (once per request)
-        // Do this BEFORE checking throttler scope so it happens for all authenticated routes
-        await this.clearAnonymousRateLimit(request, context)
-
         // Only 'authenticated' applies to all routes by default
         // 'sandbox-create' and 'sandbox-lifecycle' only apply if explicitly configured via @SkipThrottle or @Throttle
         const isDefaultThrottler = throttler.name === 'authenticated'
@@ -125,30 +125,6 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
       return super.handleRequest(requestProps)
     }
     return true
-  }
-
-  private async clearAnonymousRateLimit(request: Request, context: ExecutionContext): Promise<void> {
-    try {
-      const ip = request.ips.length ? request.ips[0] : request.ip
-
-      const anonymousTracker = `anonymous:${ip}`
-      const anonymousThrottlerName = 'anonymous'
-
-      // Generate the key using the same context and tracker as the anonymous guard
-      const anonymousKey = this.generateKey(context, anonymousTracker, anonymousThrottlerName)
-
-      // Construct the Redis keys using the same format as the throttler storage
-      const keyPrefix = this.redis.options.keyPrefix || ''
-      const hitKey = `${keyPrefix}{${anonymousKey}:${anonymousThrottlerName}}:hits`
-      const blockKey = `${keyPrefix}{${anonymousKey}:${anonymousThrottlerName}}:blocked`
-
-      // Delete the specific keys for this IP and context
-      await this.redis.del(hitKey)
-      await this.redis.del(blockKey)
-    } catch (error) {
-      this.logger.warn('Failed to clear anonymous rate limit:', error)
-      // Don't throw - rate limiting should not break authentication
-    }
   }
 
   private isValidAuthContext(user: any): boolean {
