@@ -4,6 +4,9 @@
  */
 
 export const queryKeys = {
+  config: {
+    all: ['config'] as const,
+  },
   organization: {
     all: ['organization'] as const,
 
@@ -23,5 +26,7 @@ export const queryKeys = {
   billing: {
     all: ['billing'] as const,
     tiers: () => [...queryKeys.billing.all, 'tiers'] as const,
+    emails: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'emails'] as const,
+    portalUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'portal-url'] as const,
   },
 } as const
