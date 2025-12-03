@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { Sidebar } from '@/components/Sidebar'
@@ -23,12 +23,9 @@ const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const config = useConfig()
-  const walletQuery = useOwnerWalletQuery()
+  useOwnerWalletQuery() // prefetch wallet
 
   const navigate = useNavigate()
-  const location = useLocation()
-
-  const wallet = walletQuery.data
 
   useEffect(() => {
     if (
@@ -52,14 +49,7 @@ const Dashboard: React.FC = () => {
       navigate(RoutePath.SETTINGS)
       return
     }
-
-    const excludedRoutes = [RoutePath.BILLING_WALLET, RoutePath.USER_INVITATIONS, RoutePath.MEMBERS]
-    const shouldSkipRedirect = excludedRoutes.some((route) => location.pathname.startsWith(route))
-
-    if (wallet && wallet.ongoingBalanceCents <= 0 && !shouldSkipRedirect) {
-      navigate(RoutePath.BILLING_WALLET)
-    }
-  }, [wallet, config.billingApiUrl, selectedOrganization]) // Do not depend on navigate to avoid infinite loops
+  }, [config.billingApiUrl, selectedOrganization]) // Do not depend on navigate to avoid infinite loops
 
   const [bannerText, bannerLearnMoreUrl] = useMemo(() => {
     if (!config.announcements || Object.entries(config.announcements).length === 0) {
