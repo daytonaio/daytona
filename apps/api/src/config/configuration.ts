@@ -315,7 +315,7 @@ const configuration = {
     ),
     userCacheTtlSeconds: getIntConfig('API_KEY_USER_CACHE_TTL_SECONDS', 'apiKey.userCacheTtlSeconds', '60'),
   },
-  runnerHealthTimeout: parseInt(process.env.RUNNER_HEALTH_TIMEOUT_SECONDS || '3', 10),
+  runnerHealthTimeout: getIntConfig('RUNNER_HEALTH_TIMEOUT_SECONDS', 'runnerHealthTimeout', '3'),
 }
 
 export { configuration }
