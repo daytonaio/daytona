@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Inject, ExecutionContext } from '@nestjs/common'
+import { Injectable, Inject } from '@nestjs/common'
 import { getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { Request, Response } from 'express'
@@ -21,13 +21,11 @@ export class FailedAuthTrackerService {
     private readonly configService: TypedConfigService,
   ) {}
 
-  async incrementFailedAuth(context: ExecutionContext): Promise<void> {
+  async incrementFailedAuth(request: Request, response: Response): Promise<void> {
     try {
-      const request = context.switchToHttp().getRequest<Request>()
-      const response = context.switchToHttp().getResponse<Response>()
       const ip = request.ips.length ? request.ips[0] : request.ip
-      const tracker = `failedauth:${ip}`
       const throttlerName = 'failed-auth'
+      const tracker = `${throttlerName}:${ip}`
 
       // Get failed-auth config from TypedConfigService
       const failedAuthConfig = this.configService.get('rateLimit.failedAuth')
@@ -57,9 +55,9 @@ export class FailedAuthTrackerService {
       response.setHeader(`X-RateLimit-Reset-${throttlerName}`, Math.ceil(ttlRemaining / 1000).toString())
 
       // Check if blocked
-      if (hits > limit) {
+      if (hits >= limit) {
         await this.redis.set(blockedKey, '1', 'PX', ttl)
-        response.setHeader(`Retry-After-${throttlerName}`, Math.ceil(ttl / 1000).toString())
+        response.setHeader('Retry-After', Math.ceil(ttl / 1000).toString())
         throw new ThrottlerException()
       }
     } catch (error) {

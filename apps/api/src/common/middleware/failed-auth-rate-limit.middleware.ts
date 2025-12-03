@@ -29,8 +29,8 @@ export class FailedAuthRateLimitMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const ip = req.ips.length ? req.ips[0] : req.ip
-    const tracker = `failedauth:${ip}`
     const throttlerName = 'failed-auth'
+    const tracker = `${throttlerName}:${ip}`
 
     // Get failed-auth config from TypedConfigService
     const failedAuthConfig = this.configService.get('rateLimit.failedAuth')
@@ -52,12 +52,13 @@ export class FailedAuthRateLimitMiddleware implements NestMiddleware {
       if (isBlocked) {
         // Get TTL for the blocked key
         const ttl = await this.redis.pttl(blockedKey)
+        const ttlSeconds = Math.ceil(ttl / 1000)
 
         // Set rate limit headers to inform client (convert ttl from milliseconds to seconds)
-        res.setHeader('X-RateLimit-Limit-failed-auth', failedAuthConfig.limit.toString())
-        res.setHeader('X-RateLimit-Remaining-failed-auth', '0')
-        res.setHeader('X-RateLimit-Reset-failed-auth', Math.ceil(ttl / 1000).toString())
-        res.setHeader('Retry-After-failed-auth', Math.ceil(ttl / 1000).toString())
+        res.setHeader(`X-RateLimit-Limit-${throttlerName}`, failedAuthConfig.limit.toString())
+        res.setHeader(`X-RateLimit-Remaining-${throttlerName}`, '0')
+        res.setHeader(`X-RateLimit-Reset-${throttlerName}`, ttlSeconds.toString())
+        res.setHeader('Retry-After', ttlSeconds.toString())
 
         throw new ThrottlerException()
       }

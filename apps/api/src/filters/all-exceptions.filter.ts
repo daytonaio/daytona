@@ -43,14 +43,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Track failed authentication attempts
     if (exception instanceof UnauthorizedException) {
       try {
-        const executionContext = {
-          switchToHttp: () => ({
-            getRequest: () => request,
-            getResponse: () => response,
-          }),
-        } as any
-
-        await this.failedAuthTracker.incrementFailedAuth(executionContext)
+        await this.failedAuthTracker.incrementFailedAuth(request, response)
       } catch (error) {
         this.logger.error('Failed to track authentication failure:', error)
       }
