@@ -329,7 +329,12 @@ const Wallet = () => {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                   />
-                  <Button variant="secondary" className="min-w-[4.5rem]" onClick={handleRedeemCoupon}>
+                  <Button
+                    variant="secondary"
+                    className="min-w-[4.5rem]"
+                    onClick={handleRedeemCoupon}
+                    disabled={redeemCouponMutation.isPending}
+                  >
                     {redeemCouponMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Redeem'}
                   </Button>
                 </div>
