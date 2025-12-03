@@ -20,6 +20,8 @@ var _ MappedNullable = &RateLimitConfig{}
 
 // RateLimitConfig struct for RateLimitConfig
 type RateLimitConfig struct {
+	// Failed authentication rate limit
+	FailedAuth *RateLimitEntry `json:"failedAuth,omitempty"`
 	// Authenticated rate limit
 	Authenticated *RateLimitEntry `json:"authenticated,omitempty"`
 	// Sandbox create rate limit
@@ -46,6 +48,38 @@ func NewRateLimitConfig() *RateLimitConfig {
 func NewRateLimitConfigWithDefaults() *RateLimitConfig {
 	this := RateLimitConfig{}
 	return &this
+}
+
+// GetFailedAuth returns the FailedAuth field value if set, zero value otherwise.
+func (o *RateLimitConfig) GetFailedAuth() RateLimitEntry {
+	if o == nil || IsNil(o.FailedAuth) {
+		var ret RateLimitEntry
+		return ret
+	}
+	return *o.FailedAuth
+}
+
+// GetFailedAuthOk returns a tuple with the FailedAuth field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RateLimitConfig) GetFailedAuthOk() (*RateLimitEntry, bool) {
+	if o == nil || IsNil(o.FailedAuth) {
+		return nil, false
+	}
+	return o.FailedAuth, true
+}
+
+// HasFailedAuth returns a boolean if a field has been set.
+func (o *RateLimitConfig) HasFailedAuth() bool {
+	if o != nil && !IsNil(o.FailedAuth) {
+		return true
+	}
+
+	return false
+}
+
+// SetFailedAuth gets a reference to the given RateLimitEntry and assigns it to the FailedAuth field.
+func (o *RateLimitConfig) SetFailedAuth(v RateLimitEntry) {
+	o.FailedAuth = &v
 }
 
 // GetAuthenticated returns the Authenticated field value if set, zero value otherwise.
@@ -154,6 +188,9 @@ func (o RateLimitConfig) MarshalJSON() ([]byte, error) {
 
 func (o RateLimitConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.FailedAuth) {
+		toSerialize["failedAuth"] = o.FailedAuth
+	}
 	if !IsNil(o.Authenticated) {
 		toSerialize["authenticated"] = o.Authenticated
 	}
@@ -185,6 +222,7 @@ func (o *RateLimitConfig) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "failedAuth")
 		delete(additionalProperties, "authenticated")
 		delete(additionalProperties, "sandboxCreate")
 		delete(additionalProperties, "sandboxLifecycle")
