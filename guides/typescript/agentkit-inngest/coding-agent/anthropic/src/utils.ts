@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Daytona, Sandbox } from '@daytonaio/sdk'
 import { AgentResult, NetworkRun } from '@inngest/agent-kit'
 import type { TextMessage } from '@inngest/agent-kit'

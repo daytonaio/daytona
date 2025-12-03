@@ -12,6 +12,10 @@ header:
     - 'libs/**/*.ts'
     - 'libs/**/*.tsx'
     - 'libs/**/*.py'
+    - 'guides/**/*.py'
+    - 'guides/**/*.ts'
+    - 'guides/**/*.go'
+    - 'guides/**/*.js'
 
   paths-ignore:
     - 'libs/api-client/**'
