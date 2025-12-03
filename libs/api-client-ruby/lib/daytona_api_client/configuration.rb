@@ -266,8 +266,7 @@ module DaytonaApiClient
     end
 
     def operation_server_settings
-      {
-      }
+      {}
     end
 
     # Returns URL based on server settings
@@ -303,7 +302,5 @@ module DaytonaApiClient
 
       url
     end
-
-
   end
 end

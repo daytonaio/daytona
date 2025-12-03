@@ -22,6 +22,7 @@
   "installsAfter": [
     "ghcr.io/devcontainers/features/go",
     "ghcr.io/devcontainers/features/python",
+    "ghcr.io/devcontainers/features/ruby",
     "ghcr.io/devcontainers/features/docker-in-docker"
   ]
 }

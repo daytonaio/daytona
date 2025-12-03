@@ -8,13 +8,13 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "rbenv exec bundle install"
+        "command": "cd {projectRoot} && bundle install"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "rbenv exec bundle exec rubocop"
+        "command": "cd {projectRoot} && bundle exec rubocop"
       }
     },
     "generate:api-client": {
@@ -26,7 +26,11 @@
     "format": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd {projectRoot} && prettier --write \"**/*.{rb,yml}\""
+        "commands": [
+          "cd {projectRoot} && bundle exec rubocop -a --fail-level=E",
+          "cd {projectRoot} && prettier --write \"**/*.yml\""
+        ],
+        "parallel": false
       }
     }
   }

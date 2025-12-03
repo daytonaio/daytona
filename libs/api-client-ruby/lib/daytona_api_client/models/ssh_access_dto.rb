@@ -367,7 +367,5 @@ module DaytonaApiClient
         value
       end
     end
-
   end
-
 end

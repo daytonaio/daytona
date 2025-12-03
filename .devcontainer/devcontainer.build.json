@@ -31,7 +31,9 @@
         "cschlosser.doxdocgen",
         "ms-python.python",
         "ms-toolsai.jupyter",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "shopify.ruby-lsp",
+        "castwide.solargraph"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -62,6 +64,9 @@
       "version": "22.14.0",
       "installYarnUsingApt": false
     },
+    "ghcr.io/devcontainers/features/ruby:1": {
+      "version": "3.4.5"
+    },
     "./tools-feature": {
       "pipPackages": ["poetry==2.1.3"],
       "goTools": ["github.com/swaggo/swag/cmd/swag@v1.16.4", "github.com/mitranim/gow@latest"]
@@ -71,7 +76,7 @@
     // "install-deps": "git config --global --add safe.directory ${containerWorkspaceFolder} && yarn",
     "env": "test -f .env.local || touch .env.local"
   },
-  "postStartCommand": "yarn && poetry lock && poetry install",
+  "postStartCommand": "yarn && poetry lock && poetry install && (cd libs/api-client-ruby && bundle install) && (cd libs/sdk-ruby && bundle install)",
   "postAttachCommand": "",
   "forwardPorts": [5556, "pgadmin:80", "registry-ui:5100", "maildev:1080", "minio:9000", "minio:9001", "jaeger:16686"],
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.

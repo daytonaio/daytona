@@ -32,7 +32,7 @@ end
 result = daytona.list
 puts "Total sandboxes count: #{result.total.to_i}"
 
-puts "Printing sandboxes[0] -> id: #{sandboxes.items.first.id} state: #{sandboxes.items.first.state}"
+puts "Printing sandboxes[0] -> id: #{result.items.first.id} state: #{result.items.first.state}"
 
 puts 'Removing sandbox'
 daytona.delete(sandbox)

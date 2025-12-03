@@ -26,14 +26,14 @@ Gem::Specification.new do |s|
   s.description = "Daytona API Client"
   s.license     = "Unlicense"
   s.required_ruby_version = ">= 2.7"
-  s.metadata    = {}
+  s.metadata = {}
 
   s.add_runtime_dependency 'typhoeus', '~> 1.0', '>= 1.0.1'
 
   s.add_development_dependency 'rspec', '~> 3.6', '>= 3.6.0'
 
   s.files         = `find *`.split("\n").uniq.sort.select { |f| !f.empty? }
-  s.test_files    = `find spec/*`.split("\n")
+  s.test_files    = Dir.exist?('spec') ? `find spec/*`.split("\n") : []
   s.executables   = []
   s.require_paths = ["lib"]
 end
