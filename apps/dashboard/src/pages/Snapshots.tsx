@@ -142,7 +142,7 @@ const Snapshots: React.FC = () => {
     }) => {
       setSnapshotsData((prev) => ({
         ...prev,
-        items: prev.items.map((i) => (i.id === data.snapshot.id ? data.snapshot : i)),
+        items: prev.items.map((i) => (i.id === data.snapshot.id ? { ...i, state: data.newState } : i)),
       }))
     }
 

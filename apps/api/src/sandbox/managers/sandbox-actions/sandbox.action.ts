@@ -107,6 +107,8 @@ export abstract class SandboxAction {
       sandbox.setBackupState(backupState)
     }
 
+    // must use repository.save() to ensure that the entity subscriber will emit the appropriate events that critical parts of the system depend on
+    // todo: if we want to use repository.update(), we need to emit the appropriate events manually
     await this.sandboxRepository.save(sandbox)
   }
 }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
+import { Inject, Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, LessThan, Not, Repository } from 'typeorm'
@@ -32,12 +32,13 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RunnerAdapterFactory, RunnerSnapshotInfo } from '../runner-adapter/runnerAdapter'
-import { OnEvent } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotService } from '../services/snapshot.service'
+import { SnapshotStateUpdatedEvent } from '../events/snapshot-state-updated.event'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -69,6 +70,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly organizationService: OrganizationService,
     private readonly configService: TypedConfigService,
     private readonly snapshotService: SnapshotService,
+    @Inject(EventEmitter2)
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async onApplicationShutdown() {
@@ -521,7 +524,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         syncState = SYNC_AGAIN
       } else {
         const message = error.message || String(error)
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, message)
+        await this.updateSnapshotState(snapshot, SnapshotState.ERROR, message)
       }
     }
 
@@ -576,7 +579,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const timeoutMinutes = 1
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while validating snapshot')
+      await this.updateSnapshotState(snapshot, SnapshotState.ERROR, 'Timeout while validating snapshot')
       return DONT_SYNC_AGAIN
     }
 
@@ -603,7 +606,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
+      await this.updateSnapshotState(snapshot, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
       return DONT_SYNC_AGAIN
     }
 
@@ -617,7 +620,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     if (snapshot.skipValidation && snapshot.ref && snapshotRunner) {
       if (snapshotRunner.state === SnapshotRunnerState.READY) {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+        await this.updateSnapshotState(snapshot, SnapshotState.ACTIVE)
       } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
         await this.snapshotRunnerRepository.delete(snapshotRunner.id)
       }
@@ -658,8 +661,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     let snapshotErrorMessage: string | undefined = undefined
 
     if (!snapshot.skipValidation) {
-      snapshot.state = SnapshotState.VALIDATING
-      await this.snapshotRepository.save(snapshot)
+      await this.updateSnapshotState(snapshot, SnapshotState.VALIDATING)
 
       const { validationSuccess, errorMessage } = await this.validateSandboxCreationOnRunner(snapshot, runner)
       if (!validationSuccess) {
@@ -672,7 +674,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
     }
 
-    await this.updateSnapshotState(snapshot.id, nextState, snapshotErrorMessage)
+    await this.updateSnapshotState(snapshot, nextState, snapshotErrorMessage)
 
     // Best effort removal of old snapshot from transient registry
     const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
@@ -760,7 +762,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
       await this.updateSnapshotState(
-        snapshot.id,
+        snapshot,
         SnapshotState.ERROR,
         'Timeout processing snapshot pull on initial runner',
       )
@@ -814,7 +816,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
     } catch (err) {
       if (err.code !== 'ECONNRESET') {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, err.message)
+        await this.updateSnapshotState(snapshot, SnapshotState.ERROR, err.message)
         throw err
       }
       // TODO: check if retry
@@ -846,7 +848,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       this.logger.error(`Error building snapshot ${snapshot.name}: ${fromAxiosError(err)}`)
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, fromAxiosError(err).message)
+      await this.updateSnapshotState(snapshot, SnapshotState.BUILD_FAILED, fromAxiosError(err).message)
     }
   }
 
@@ -885,17 +887,17 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.snapshotRepository.save(snapshot)
 
     if (snapshot.buildInfo) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+      await this.updateSnapshotState(snapshot, SnapshotState.BUILDING)
       await this.processBuildOnRunner(snapshot, initialRunner)
     } else {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+      await this.updateSnapshotState(snapshot, SnapshotState.PULLING)
       await this.processPullOnInitialRunner(snapshot, initialRunner)
     }
 
     return SYNC_AGAIN
   }
 
-  private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
+  private async updateSnapshotState(snapshot: Snapshot, state: SnapshotState, errorReason?: string) {
     const partialUpdate: Partial<Snapshot> = {
       state,
     }
@@ -906,14 +908,16 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     const result = await this.snapshotRepository.update(
       {
-        id: snapshotId,
+        id: snapshot.id,
       },
       partialUpdate,
     )
 
     if (!result.affected) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot with ID ${snapshot.id} not found`)
     }
+
+    this.eventEmitter.emit(SnapshotEvents.STATE_UPDATED, new SnapshotStateUpdatedEvent(snapshot, snapshot.state, state))
   }
 
   @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup-old-buildinfo-snapshot-runners' })
@@ -1001,8 +1005,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       // Deactivate the snapshots
-      const snapshotIds = oldSnapshots.map((snapshot) => snapshot.id)
-      await this.snapshotRepository.update({ id: In(snapshotIds) }, { state: SnapshotState.INACTIVE })
+      for (const snapshot of oldSnapshots) {
+        await this.updateSnapshotState(snapshot, SnapshotState.INACTIVE)
+      }
 
       // Get internal names of deactivated snapshots
       const refs = oldSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
@@ -1099,7 +1104,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
       await this.updateSnapshotState(
-        snapshot.id,
+        snapshot,
         SnapshotState.ERROR,
         `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
       )
