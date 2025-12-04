@@ -76,6 +76,3 @@ func ProxyCommandLogsStream(ctx *gin.Context) {
 		}
 	}
 }
-
-
-

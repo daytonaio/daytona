@@ -14,9 +14,9 @@ import (
 
 // MockClientConfig contains configuration for the mock client
 type MockClientConfig struct {
-	StatesCache       *cache.StatesCache
-	LogWriter         io.Writer
-	ToolboxContainer  *toolbox.ToolboxContainer
+	StatesCache      *cache.StatesCache
+	LogWriter        io.Writer
+	ToolboxContainer *toolbox.ToolboxContainer
 }
 
 // MockClient implements sandbox and image operations without real Docker containers
@@ -26,8 +26,8 @@ type MockClient struct {
 	toolboxContainer *toolbox.ToolboxContainer
 
 	// In-memory storage for sandboxes
-	sandboxes     map[string]*SandboxInfo
-	sandboxesMu   sync.RWMutex
+	sandboxes   map[string]*SandboxInfo
+	sandboxesMu sync.RWMutex
 
 	// In-memory storage for images
 	images   map[string]*ImageInfo
@@ -143,6 +143,3 @@ func (m *MockClient) EnsureToolboxRunning(ctx context.Context) error {
 	}
 	return nil
 }
-
-
-

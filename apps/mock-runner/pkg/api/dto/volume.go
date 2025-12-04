@@ -7,6 +7,3 @@ type VolumeDTO struct {
 	Id        string `json:"id" validate:"required"`
 	MountPath string `json:"mountPath" validate:"required"`
 } //	@name	VolumeDTO
-
-
-

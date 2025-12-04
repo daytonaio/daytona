@@ -48,6 +48,3 @@ func kindOfData(data any) reflect.Kind {
 }
 
 var _ binding.StructValidator = &DefaultValidator{}
-
-
-

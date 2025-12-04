@@ -83,6 +83,3 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 
 	return target, nil, nil
 }
-
-
-

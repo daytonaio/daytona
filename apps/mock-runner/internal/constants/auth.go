@@ -7,6 +7,3 @@ const (
 	AUTH_HEADER = "Authorization"
 	AUTH_PREFIX = "Bearer "
 )
-
-
-

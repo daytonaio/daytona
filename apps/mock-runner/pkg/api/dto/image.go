@@ -24,6 +24,3 @@ type TagImageRequestDTO struct {
 	SourceImage string `json:"sourceImage" validate:"required"`
 	TargetImage string `json:"targetImage" validate:"required"`
 } //	@name	TagImageRequestDTO
-
-
-

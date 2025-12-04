@@ -9,6 +9,3 @@ import (
 
 //go:embed static/*
 var staticAssets embed.FS
-
-
-

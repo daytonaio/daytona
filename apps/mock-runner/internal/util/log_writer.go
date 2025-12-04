@@ -11,6 +11,3 @@ func (w *DebugLogWriter) Write(p []byte) (n int, err error) {
 	log.Debug(string(p))
 	return len(p), nil
 }
-
-
-

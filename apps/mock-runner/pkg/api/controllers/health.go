@@ -26,6 +26,3 @@ func HealthCheck(ctx *gin.Context) {
 		"mode":    "mock",
 	})
 }
-
-
-

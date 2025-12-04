@@ -105,6 +105,3 @@ func GetBuildLogFilePath(snapshotRef string) (string, error) {
 
 	return logPath, nil
 }
-
-
-

@@ -9,6 +9,3 @@ import "os"
 func IsSSHGatewayEnabled() bool {
 	return os.Getenv("SSH_GATEWAY_ENABLE") == "true"
 }
-
-
-

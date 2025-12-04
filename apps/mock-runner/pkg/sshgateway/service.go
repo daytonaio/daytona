@@ -42,6 +42,3 @@ func (s *Service) Start(ctx context.Context) error {
 func (s *Service) GetToolboxIP() string {
 	return s.toolboxContainer.GetIP()
 }
-
-
-

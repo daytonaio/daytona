@@ -218,6 +218,3 @@ func writeMockBuildLog(snapshotRef string) error {
 
 	return os.WriteFile(logPath, []byte(logContent), 0644)
 }
-
-
-

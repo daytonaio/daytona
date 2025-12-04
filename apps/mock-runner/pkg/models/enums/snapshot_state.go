@@ -15,6 +15,3 @@ const (
 func (s BackupState) String() string {
 	return string(s)
 }
-
-
-

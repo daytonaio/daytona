@@ -68,6 +68,7 @@ Unlike sandbox operations, **toolbox operations use a real Docker container**:
 4. SSH gateway connections also route to this shared container
 
 This means:
+
 - File operations, process execution, and other toolbox APIs actually work
 - All sandboxes share the same filesystem and process space
 - State in the toolbox container persists across sandbox operations
@@ -123,6 +124,7 @@ export TOOLBOX_IMAGE="ubuntu:22.04"
 ```
 
 The mock runner will:
+
 1. Start an API server on the configured port (default: 8080)
 2. Create and start the shared toolbox container
 3. Copy the daemon binary into the toolbox container
@@ -149,6 +151,7 @@ export MOCK_RUNNER_VERSION="0"
 ```
 
 When the API starts, it will automatically:
+
 1. Check if a runner with `MOCK_RUNNER_DOMAIN` exists
 2. If not, create the runner with the configured settings
 3. Wait for the mock runner to be healthy (up to 30 seconds)
@@ -311,6 +314,7 @@ The Mock Runner exposes the **same API** as the regular Runner:
 **Problem**: Mock runner fails to start with Docker errors.
 
 **Solution**: Ensure Docker is running and the mock runner has access to the Docker socket:
+
 ```bash
 # Check Docker is running
 docker ps
@@ -324,6 +328,7 @@ docker run -v /var/run/docker.sock:/var/run/docker.sock mock-runner
 **Problem**: Mock runner starts but toolbox operations fail.
 
 **Solution**: Check if the toolbox container exists and is running:
+
 ```bash
 # Check for the toolbox container
 docker ps -a | grep mock-runner-toolbox
@@ -340,6 +345,7 @@ docker rm -f mock-runner-toolbox
 **Problem**: Toolbox operations timeout waiting for daemon.
 
 **Solution**: The daemon binary might not be available. Check:
+
 ```bash
 # Ensure daemon binary is built
 npx nx build daemon
@@ -353,6 +359,7 @@ ls -la apps/mock-runner/pkg/daemon/static/daemon-amd64
 **Problem**: Daytona API can't connect to mock runner.
 
 **Solution**: Verify network connectivity and configuration:
+
 ```bash
 # Test mock runner health from API server
 curl http://mock-runner:8080/
@@ -367,6 +374,7 @@ echo $MOCK_RUNNER_DOMAIN
 **Problem**: Sandbox state is lost after restart.
 
 **Expected behavior**: This is by design. The mock runner stores all sandbox state in memory. When the mock runner restarts:
+
 - All sandbox metadata is cleared
 - The toolbox container may persist (unless manually removed)
 - Images tracked in memory are cleared

@@ -18,6 +18,3 @@ func GetContainerIpAddress(ctx context.Context, info container.InspectResponse) 
 	}
 	return ""
 }
-
-
-

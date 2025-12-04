@@ -33,6 +33,3 @@ type UpdateNetworkSettingsDTO struct {
 	NetworkAllowList   *string `json:"networkAllowList,omitempty"`
 	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO
-
-
-

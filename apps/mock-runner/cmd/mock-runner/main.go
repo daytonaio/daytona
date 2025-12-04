@@ -196,6 +196,3 @@ func init() {
 
 	golog.SetOutput(&util.DebugLogWriter{})
 }
-
-
-

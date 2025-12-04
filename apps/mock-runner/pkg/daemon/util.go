@@ -26,6 +26,3 @@ func WriteStaticBinary(name string) (string, error) {
 
 	return destPath, nil
 }
-
-
-

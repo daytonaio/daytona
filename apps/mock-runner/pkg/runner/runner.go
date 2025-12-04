@@ -55,6 +55,3 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 
 	return runner
 }
-
-
-

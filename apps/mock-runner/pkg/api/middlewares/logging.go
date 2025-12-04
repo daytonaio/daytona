@@ -37,6 +37,3 @@ func LoggingMiddleware() gin.HandlerFunc {
 		}).Info("Request")
 	}
 }
-
-
-

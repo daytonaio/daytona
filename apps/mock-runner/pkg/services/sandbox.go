@@ -58,6 +58,3 @@ func (s *SandboxService) RemoveDestroyedSandbox(ctx context.Context, sandboxId s
 
 	return nil
 }
-
-
-

@@ -386,6 +386,3 @@ type SnapshotInfoResponse struct {
 func getHashWithoutPrefix(hash string) string {
 	return strings.TrimPrefix(hash, "sha256:")
 }
-
-
-

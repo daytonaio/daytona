@@ -12,6 +12,3 @@ type SystemMetrics struct {
 	AllocatedDisk   float64
 	SnapshotCount   int64
 }
-
-
-

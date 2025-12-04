@@ -17,6 +17,3 @@ type RunnerMetrics struct {
 	CurrentAllocatedDiskGiB      float64 `json:"currentAllocatedDiskGiB"`
 	CurrentSnapshotCount         int64   `json:"currentSnapshotCount"`
 } //	@name	RunnerMetrics
-
-
-

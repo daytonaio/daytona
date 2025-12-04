@@ -129,6 +129,3 @@ func (sc *StatesCache) Delete(ctx context.Context, sandboxId string) {
 func (sc *StatesCache) getEntryExpiration() time.Time {
 	return time.Now().Add(time.Duration(sc.cacheRetentionDays) * 24 * time.Hour)
 }
-
-
-

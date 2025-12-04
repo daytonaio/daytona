@@ -42,6 +42,3 @@ func RunnerInfo(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, response)
 }
-
-
-

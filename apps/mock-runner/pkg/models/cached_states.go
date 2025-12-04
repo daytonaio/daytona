@@ -10,6 +10,3 @@ type CachedStates struct {
 	BackupState       enums.BackupState
 	BackupErrorReason *string
 }
-
-
-

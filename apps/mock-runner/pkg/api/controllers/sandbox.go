@@ -360,6 +360,3 @@ func RemoveDestroyed(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, "Sandbox removed")
 }
-
-
-

@@ -30,12 +30,12 @@ const (
 
 // ToolboxContainer manages the shared container used for all toolbox operations
 type ToolboxContainer struct {
-	client       client.APIClient
-	containerID  string
-	containerIP  string
-	daemonPath   string
-	mu           sync.RWMutex
-	isRunning    bool
+	client      client.APIClient
+	containerID string
+	containerIP string
+	daemonPath  string
+	mu          sync.RWMutex
+	isRunning   bool
 }
 
 // NewToolboxContainer creates a new toolbox container manager
@@ -70,7 +70,7 @@ func (tc *ToolboxContainer) Start(ctx context.Context) error {
 					}
 					tc.containerIP = tc.getContainerIP(inspect)
 					log.Infof("Toolbox container already running with IP: %s", tc.containerIP)
-					
+
 					// Ensure daemon is running
 					return tc.ensureDaemonRunning(ctx)
 				}
@@ -310,6 +310,3 @@ func (tc *ToolboxContainer) Stop(ctx context.Context) error {
 	log.Info("Toolbox container stopped")
 	return nil
 }
-
-
-

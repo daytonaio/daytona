@@ -9,6 +9,3 @@ type RegistryDTO struct {
 	Password string  `json:"password,omitempty"`
 	Project  *string `json:"project,omitempty"`
 } //	@name	RegistryDTO
-
-
-

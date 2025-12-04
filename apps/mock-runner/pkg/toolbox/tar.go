@@ -46,6 +46,3 @@ func createTarFromFile(filePath, destName string) (io.Reader, error) {
 
 	return &buf, nil
 }
-
-
-
