@@ -3,7 +3,7 @@ name = "daytona-langchain-data-analysis"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Mislav Ivanda", email = "mislavivanda454@gmail.com"}
+    {name = "Mislav Ivanda", email = "mivanda@daytona.io"}
 ]
 readme = "README.md"
 requires-python = "^3.10"
