@@ -4,9 +4,11 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
+	"runtime"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -114,4 +116,30 @@ func ExtractErrorPart(errorMsg string) string {
 	}
 
 	return fmt.Sprintf("bad request: %s", matches[1])
+}
+
+func Recovery() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				if errType, ok := err.(error); ok && errors.Is(errType, http.ErrAbortHandler) {
+					// Do nothing, the request was aborted
+					return
+				}
+
+				log.Errorf("panic recovered: %v", err)
+				// print caller stack
+				buf := make([]byte, 1<<16)
+				stackSize := runtime.Stack(buf, false)
+				log.Errorf("stack trace: %s", string(buf[:stackSize]))
+
+				if ctx.Writer.Written() {
+					return
+				}
+
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+		}()
+		ctx.Next()
+	}
 }

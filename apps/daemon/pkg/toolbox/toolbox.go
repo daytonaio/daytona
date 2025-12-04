@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -121,7 +122,7 @@ func (s *Server) Start() error {
 	}
 
 	r := gin.New()
-	r.Use(gin.Recovery())
+	r.Use(common_errors.Recovery())
 	r.Use(middlewares.LoggingMiddleware())
 	r.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
