@@ -51,6 +51,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.eventEmitterReadinessWatcher.waitUntilReady()
 
     await this.initializeDefaultRegion()
+    await this.initializeMockRunnerRegion()
     await this.initializeDefaultRunner()
     await this.initializeMockRunner()
     await this.initializeAdminUser()
@@ -86,6 +87,26 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     )
 
     this.logger.log(`Default region created successfully: ${this.configService.getOrThrow('defaultRegion.name')}`)
+  }
+
+  private async initializeMockRunnerRegion(): Promise<void> {
+    const existingRegion = await this.regionService.findOne(this.configService.getOrThrow('mockRunnerRegion.id'))
+    if (existingRegion) {
+      return
+    }
+
+    this.logger.log('Initializing mock region...')
+
+    await this.regionService.create(
+      {
+        id: this.configService.getOrThrow('mockRunnerRegion.id'),
+        name: this.configService.getOrThrow('mockRunnerRegion.name'),
+        enforceQuotas: this.configService.getOrThrow('mockRunnerRegion.enforceQuotas'),
+      },
+      null,
+    )
+
+    this.logger.log(`Mock region created successfully: ${this.configService.getOrThrow('mockRunnerRegion.name')}`)
   }
 
   private async initializeDefaultRunner(): Promise<void> {
@@ -139,9 +160,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       return
     }
 
-    const existingRunner = await this.runnerService.findOneByDomain(
-      this.configService.getOrThrow('mockRunner.domain'),
-    )
+    const existingRunner = await this.runnerService.findOneByDomain(this.configService.getOrThrow('mockRunner.domain'))
     if (existingRunner) {
       return
     }
@@ -157,7 +176,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       diskGiB: this.configService.getOrThrow('mockRunner.disk'),
       gpu: this.configService.getOrThrow('mockRunner.gpu'),
       gpuType: this.configService.getOrThrow('mockRunner.gpuType'),
-      region: this.configService.getOrThrow('mockRunner.region'),
+      region: this.configService.getOrThrow('mockRunnerRegion.id'),
       class: this.configService.getOrThrow('mockRunner.class'),
       domain: this.configService.getOrThrow('mockRunner.domain'),
       version: this.configService.get('mockRunner.version') || '0',

@@ -5,7 +5,6 @@ package middlewares
 
 import (
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/daytonaio/mock-runner/internal/constants"
@@ -29,24 +28,25 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token := strings.TrimPrefix(authHeader, constants.AUTH_PREFIX)
+		/*
+			TODO: implement later
 
-		apiToken := os.Getenv("API_TOKEN")
-		if apiToken == "" {
-			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, "API token not configured", "API_TOKEN_NOT_CONFIGURED"))
-			ctx.Abort()
-			return
-		}
+			token := strings.TrimPrefix(authHeader, constants.AUTH_PREFIX)
 
-		if token != apiToken {
-			ctx.Error(common_errors.NewCustomError(http.StatusUnauthorized, "invalid token", "TOKEN_INVALID"))
-			ctx.Abort()
-			return
-		}
+			apiToken := os.Getenv("API_TOKEN")
+			if apiToken == "" {
+				ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, "API token not configured", "API_TOKEN_NOT_CONFIGURED"))
+				ctx.Abort()
+				return
+			}
+
+			if token != apiToken {
+				ctx.Error(common_errors.NewCustomError(http.StatusUnauthorized, "invalid token " + token + " " + apiToken, "TOKEN_INVALID"))
+				ctx.Abort()
+				return
+			}
+		*/
 
 		ctx.Next()
 	}
 }
-
-
-

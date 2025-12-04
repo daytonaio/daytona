@@ -102,16 +102,26 @@ func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMet
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	/*
+		return &models.SystemMetrics{
+			CPUUsage:        s.metrics.CPUUsage,
+			RAMUsage:        s.metrics.RAMUsage,
+			DiskUsage:       s.metrics.DiskUsage,
+			AllocatedCPU:    s.metrics.AllocatedCPU,
+			AllocatedMemory: s.metrics.AllocatedMemory,
+			AllocatedDisk:   s.metrics.AllocatedDisk,
+			SnapshotCount:   s.metrics.SnapshotCount,
+		}
+	*/
+
+	// TODO: Remove this once mock metrics are implemented properly
 	return &models.SystemMetrics{
-		CPUUsage:        s.metrics.CPUUsage,
-		RAMUsage:        s.metrics.RAMUsage,
-		DiskUsage:       s.metrics.DiskUsage,
-		AllocatedCPU:    s.metrics.AllocatedCPU,
-		AllocatedMemory: s.metrics.AllocatedMemory,
-		AllocatedDisk:   s.metrics.AllocatedDisk,
-		SnapshotCount:   s.metrics.SnapshotCount,
+		CPUUsage:        10,
+		RAMUsage:        10,
+		DiskUsage:       10,
+		AllocatedCPU:    10,
+		AllocatedMemory: 10,
+		AllocatedDisk:   10,
+		SnapshotCount:   10,
 	}
 }
-
-
-

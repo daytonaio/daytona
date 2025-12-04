@@ -173,7 +173,6 @@ const configuration = {
     gpuType: process.env.MOCK_RUNNER_GPU_TYPE || '',
     class: process.env.MOCK_RUNNER_CLASS ? (process.env.MOCK_RUNNER_CLASS as SandboxClass) : undefined,
     version: process.env.MOCK_RUNNER_VERSION || '0',
-    region: process.env.MOCK_RUNNER_REGION || 'mock',
   },
   runnerUsage: {
     declarativeBuildScoreThreshold: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '60', 10),
@@ -245,6 +244,11 @@ const configuration = {
     id: process.env.DEFAULT_REGION_ID || 'us',
     name: process.env.DEFAULT_REGION_NAME || 'us',
     enforceQuotas: process.env.DEFAULT_REGION_ENFORCE_QUOTAS === 'true',
+  },
+  mockRunnerRegion: {
+    id: process.env.MOCK_RUNNER_REGION_ID || 'mock',
+    name: process.env.MOCK_RUNNER_REGION_NAME || 'mock',
+    enforceQuotas: process.env.MOCK_RUNNER_REGION_ENFORCE_QUOTAS === 'true',
   },
   admin: {
     apiKey: process.env.ADMIN_API_KEY,
