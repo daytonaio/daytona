@@ -64,18 +64,15 @@ func (c *Context) processQueue() {
 // closeClient closes the WebSocket client with specified close code
 func (c *Context) closeClient(code int, message string) {
 	c.mu.Lock()
-	defer c.mu.Unlock()
+	cl := c.client
+	c.client = nil
+	c.mu.Unlock()
 
-	if c.client == nil {
+	if cl == nil {
 		return
 	}
 
-	closeMsg := websocket.FormatCloseMessage(code, message)
-	_ = c.client.conn.SetWriteDeadline(time.Now().Add(writeWait))
-	_ = c.client.conn.WriteMessage(websocket.CloseMessage, closeMsg)
-
-	c.client.close()
-	c.client = nil
+	cl.requestClose(code, message)
 }
 
 // executeCode executes code in the interpreter context
