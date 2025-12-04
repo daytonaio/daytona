@@ -43,7 +43,9 @@ model_create_organization.go
 model_create_organization_invitation.go
 model_create_organization_quota.go
 model_create_organization_role.go
+model_create_region.go
 model_create_runner.go
+model_create_runner_response.go
 model_create_sandbox.go
 model_create_session_request.go
 model_create_snapshot.go
@@ -125,6 +127,7 @@ model_registry_push_access_dto.go
 model_replace_request.go
 model_replace_result.go
 model_runner.go
+model_runner_full.go
 model_runner_snapshot_dto.go
 model_runner_state.go
 model_sandbox.go

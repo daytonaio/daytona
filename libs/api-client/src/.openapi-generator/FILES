@@ -45,6 +45,8 @@ models/create-organization-invitation.ts
 models/create-organization-quota.ts
 models/create-organization-role.ts
 models/create-organization.ts
+models/create-region.ts
+models/create-runner-response.ts
 models/create-runner.ts
 models/create-sandbox.ts
 models/create-session-request.ts
@@ -127,6 +129,7 @@ models/region.ts
 models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts
+models/runner-full.ts
 models/runner-snapshot-dto.ts
 models/runner-state.ts
 models/runner.ts

@@ -2,13 +2,21 @@
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
-
-import { Injectable, Logger, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { IsNull, Repository } from 'typeorm'
 import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
-import { CreateRegionInternalDto } from '../dto/create-region.internal.dto'
+import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
+import { Runner } from '../../sandbox/entities/runner.entity'
 
 @Injectable()
 export class RegionService {
@@ -17,11 +25,13 @@ export class RegionService {
   constructor(
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
   ) {}
 
   /**
    * @param createRegionDto - The region details.
-   * @param organizationId - The ID of the organization, or null for non-organization regions.
+   * @param organizationId - The ID of the organization, or null for shared regions.
    * @throws {BadRequestException} If the region name is invalid.
    * @throws {ConflictException} If the region with the same ID already exists or region with the same name already exists in the organization.
    */
@@ -76,7 +86,7 @@ export class RegionService {
 
   /**
    * @param regionId - The ID of the region.
-   * @returns The ID of the organization or null for non-organization regions if the region is found, or undefined if the region is not found.
+   * @returns The organization ID or null for shared regions if the region is found, or undefined if the region is not found.
    */
   async getOrganizationId(regionId: string): Promise<string | null | undefined> {
     const region = await this.regionRepository.findOne({
@@ -95,7 +105,7 @@ export class RegionService {
   }
 
   /**
-   * @param organizationId - The organization ID of the regions to find, or null for non-organization regions.
+   * @param organizationId - The organization ID of the regions to find, or null for shared regions.
    * @returns The regions found ordered by name ascending.
    */
   async findAll(organizationId: string | null): Promise<Region[]> {
@@ -114,10 +124,25 @@ export class RegionService {
    * @throws {NotFoundException} If the region is not found.
    */
   async delete(id: string): Promise<void> {
-    const result = await this.regionRepository.delete(id)
+    const region = await this.findOne(id)
 
-    if (!result.affected) {
+    if (!region) {
       throw new NotFoundException('Region not found')
     }
+
+    const runners = await this.runnerRepository.find({
+      where: {
+        region: id,
+      },
+    })
+
+    if (runners.length > 0) {
+      throw new HttpException(
+        'Cannot delete region which has runners associated with it',
+        HttpStatus.PRECONDITION_REQUIRED,
+      )
+    }
+
+    await this.regionRepository.remove(region)
   }
 }

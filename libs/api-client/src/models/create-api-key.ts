@@ -48,6 +48,11 @@ export const CreateApiKeyPermissionsEnum = {
   READ_VOLUMES: 'read:volumes',
   WRITE_VOLUMES: 'write:volumes',
   DELETE_VOLUMES: 'delete:volumes',
+  WRITE_REGIONS: 'write:regions',
+  DELETE_REGIONS: 'delete:regions',
+  READ_RUNNERS: 'read:runners',
+  WRITE_RUNNERS: 'write:runners',
+  DELETE_RUNNERS: 'delete:runners',
   READ_AUDIT_LOGS: 'read:audit_logs',
 } as const
 
