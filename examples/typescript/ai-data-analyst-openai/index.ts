@@ -29,10 +29,10 @@ async function run() {
     const csvSample = fs.readFileSync('cafe_sales_data.csv', 'utf8').split('\n').slice(0, 3).join('\n')
     const systemPrompt = `
 You are a helpful assistant that analyzes data.
-You can execute Python code. Pandas and numpy are installed.
-Read cafe_sales_data.csv. The first few rows are:
+Generate Python code when necessary. Pandas and numpy are installed.
+You have access to cafe_sales_data.csv. The first few rows are:
 ${csvSample}
-.`
+After seeing the results of the code, give your final response.`
 
     // Generate the Python code with the LLM
     console.log("Generating code...")

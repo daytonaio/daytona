@@ -37,9 +37,10 @@ def main() -> None:
 
         system_prompt = (
             "\nYou are a helpful assistant that analyzes data.\n"
-            "You can execute Python code. Pandas and numpy are installed.\n"
-            "Read cafe_sales_data.csv. The first few rows are:\n"
-            f"{csv_sample}\n."
+            "Generate Python code when necessary. Pandas and numpy are installed.\n"
+            "You have access to cafe_sales_data.csv. The first few rows are:\n"
+            f"{csv_sample}\n"
+            "After seeing the results of the code, give your final response."
         )
 
         # Generate the Python code with the LLM
@@ -61,7 +62,7 @@ def main() -> None:
         )
 
         first_message = llm_output.choices[0].message
-        messages.append({"role": first_message.role, "content": first_message.content})
+        messages.append({"role": "assistant", "content": first_message.content})
 
         # Extract and execute Python code from the LLM's response
         print("Running code...")
@@ -70,9 +71,9 @@ def main() -> None:
 
         messages.append(
             {
-                "role": "user",
+                "role": "assistant",
                 "content": f"Code execution result:\n{exec_result.result}.",
-            }
+            },
         )
 
         artifacts = getattr(exec_result, "artifacts", None)
