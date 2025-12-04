@@ -64,7 +64,11 @@ Prompt: Give the three highest revenue products for the month of January and sho
 Generating code...
 Running code...
 ✓ Chart saved to chart-0.png
-Response: The analysis is complete. The chart has been saved as chart-0.png and shows the three highest revenue products for January.
+Response: Great! It looks like you successfully executed the code and identified the top three revenue-generating products for January:
+
+1. **Matcha Espresso Fusion** with a total revenue of \$2,603.81.
+2. **Oat Milk Latte** with a total revenue of \$2,548.65.
+3. **Nitro Cold Brew** with a total revenue of \$2,242.41.
 ```
 
 The chart will be saved as `chart-0.png` in your project directory, showing a bar chart of the top three revenue-generating products for January.
