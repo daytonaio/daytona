@@ -632,6 +632,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       snapshotInfoResponse.hash,
       snapshotInfoResponse.sizeGB,
       snapshotInfoResponse.entrypoint,
+      snapshotInfoResponse.cmd,
     )
 
     try {
@@ -1076,6 +1077,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     hash: string,
     sizeGB: number,
     entrypoint?: string[] | string,
+    cmd?: string[],
   ) {
     let shouldSave = false
     if (!snapshot.ref) {
@@ -1116,6 +1118,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           snapshot.entrypoint = [entrypoint]
         }
       }
+    }
+
+    if (cmd && cmd.length > 0) {
+      shouldSave = true
+      snapshot.entrypoint = snapshot.entrypoint.concat(cmd)
     }
 
     if (shouldSave) {
