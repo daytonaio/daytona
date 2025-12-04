@@ -44,8 +44,11 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	if originalContainer.HostConfig.StorageOpt != nil {
 		if sizeStr, ok := originalContainer.HostConfig.StorageOpt["size"]; ok {
 			var sizeBytes int64
-			fmt.Sscanf(sizeStr, "%d", &sizeBytes)
-			currentStorage = float64(sizeBytes) / (1024 * 1024 * 1024)
+			if _, err := fmt.Sscanf(sizeStr, "%d", &sizeBytes); err != nil {
+				log.Warnf("Failed to parse storage size '%s': %v", sizeStr, err)
+			} else {
+				currentStorage = float64(sizeBytes) / (1024 * 1024 * 1024)
+			}
 		}
 	}
 
