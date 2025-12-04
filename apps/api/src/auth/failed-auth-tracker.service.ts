@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Inject } from '@nestjs/common'
+import { Injectable, Inject, Logger } from '@nestjs/common'
 import { getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { Request, Response } from 'express'
 import { ThrottlerException } from '@nestjs/throttler'
 import { TypedConfigService } from '../config/typed-config.service'
+import { setRateLimitHeaders } from '../common/utils/rate-limit-headers.util'
 
 /**
  * Service to track failed authentication attempts across all auth guards.
@@ -16,6 +17,8 @@ import { TypedConfigService } from '../config/typed-config.service'
  */
 @Injectable()
 export class FailedAuthTrackerService {
+  private readonly logger = new Logger(FailedAuthTrackerService.name)
+
   constructor(
     @Inject(getRedisConnectionToken('throttler')) private readonly redis: Redis,
     private readonly configService: TypedConfigService,
@@ -49,22 +52,32 @@ export class FailedAuthTrackerService {
       }
       const ttlRemaining = await this.redis.pttl(hitKey)
 
-      // Set headers (convert ttlRemaining from milliseconds to seconds to match other rate limiters)
-      response.setHeader(`X-RateLimit-Limit-${throttlerName}`, limit.toString())
-      response.setHeader(`X-RateLimit-Remaining-${throttlerName}`, Math.max(0, limit - hits).toString())
-      response.setHeader(`X-RateLimit-Reset-${throttlerName}`, Math.ceil(ttlRemaining / 1000).toString())
+      // Set rate limit headers
+      setRateLimitHeaders(response, {
+        throttlerName,
+        limit,
+        remaining: Math.max(0, limit - hits),
+        resetSeconds: Math.ceil(ttlRemaining / 1000),
+      })
 
       // Check if blocked
       if (hits >= limit) {
         await this.redis.set(blockedKey, '1', 'PX', ttl)
-        response.setHeader('Retry-After', Math.ceil(ttl / 1000).toString())
+        setRateLimitHeaders(response, {
+          throttlerName,
+          limit,
+          remaining: 0,
+          resetSeconds: Math.ceil(ttl / 1000),
+          retryAfterSeconds: Math.ceil(ttl / 1000),
+        })
         throw new ThrottlerException()
       }
     } catch (error) {
       if (error instanceof ThrottlerException) {
         throw error
       }
-      // Silently fail - don't block auth if rate limiting has issues
+      // Log error but don't block auth if rate limiting has issues
+      this.logger.error('Failed to track authentication failure:', error)
     }
   }
 }

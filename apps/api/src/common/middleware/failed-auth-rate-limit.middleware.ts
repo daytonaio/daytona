@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, NestMiddleware, Inject } from '@nestjs/common'
+import { Injectable, NestMiddleware, Inject, Logger } from '@nestjs/common'
 import { Request, Response, NextFunction } from 'express'
 import { ThrottlerException } from '@nestjs/throttler'
 import { getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { setRateLimitHeaders } from '../utils/rate-limit-headers.util'
 
 /**
  * Middleware that checks if an IP is blocked due to too many failed auth attempts.
@@ -22,6 +23,8 @@ import { TypedConfigService } from '../../config/typed-config.service'
  */
 @Injectable()
 export class FailedAuthRateLimitMiddleware implements NestMiddleware {
+  private readonly logger = new Logger(FailedAuthRateLimitMiddleware.name)
+
   constructor(
     @Inject(getRedisConnectionToken('throttler')) private readonly redis: Redis,
     private readonly configService: TypedConfigService,
@@ -54,11 +57,14 @@ export class FailedAuthRateLimitMiddleware implements NestMiddleware {
         const ttl = await this.redis.pttl(blockedKey)
         const ttlSeconds = Math.ceil(ttl / 1000)
 
-        // Set rate limit headers to inform client (convert ttl from milliseconds to seconds)
-        res.setHeader(`X-RateLimit-Limit-${throttlerName}`, failedAuthConfig.limit.toString())
-        res.setHeader(`X-RateLimit-Remaining-${throttlerName}`, '0')
-        res.setHeader(`X-RateLimit-Reset-${throttlerName}`, ttlSeconds.toString())
-        res.setHeader('Retry-After', ttlSeconds.toString())
+        // Set rate limit headers to inform client
+        setRateLimitHeaders(res, {
+          throttlerName,
+          limit: failedAuthConfig.limit,
+          remaining: 0,
+          resetSeconds: ttlSeconds,
+          retryAfterSeconds: ttlSeconds,
+        })
 
         throw new ThrottlerException()
       }
@@ -69,8 +75,9 @@ export class FailedAuthRateLimitMiddleware implements NestMiddleware {
       if (error instanceof ThrottlerException) {
         throw error
       }
-      // If there's an error checking the rate limit, allow the request to continue
+      // If there's an error checking the rate limit, log it and allow the request to continue
       // We don't want rate limiting failures to block legitimate requests
+      this.logger.error('Failed to check failed-auth rate limit:', error)
       next()
     }
   }
