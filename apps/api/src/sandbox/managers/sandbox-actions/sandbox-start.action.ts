@@ -375,11 +375,14 @@ export class SandboxStartAction extends SandboxAction {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       const originalRunnerId = sandbox.runnerId // Store original value
 
-      // if the runner is unschedulable/not ready and sandbox has a valid backup, move sandbox to a new runner
-      if (
-        (runner.unschedulable || runner.state != RunnerState.READY) &&
+      const startScoreThreshold = this.configService.get('runnerUsage.startScoreThreshold') || 0
+
+      const shouldMoveToNewRunner =
+        (runner.unschedulable || runner.state != RunnerState.READY || runner.availabilityScore < startScoreThreshold) &&
         sandbox.backupState === BackupState.COMPLETED
-      ) {
+
+      // if the runner is unschedulable/not ready and sandbox has a valid backup, move sandbox to a new runner
+      if (shouldMoveToNewRunner) {
         sandbox.prevRunnerId = originalRunnerId
         sandbox.runnerId = null
 
