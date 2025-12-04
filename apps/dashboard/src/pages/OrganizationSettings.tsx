@@ -24,7 +24,7 @@ const OrganizationSettings: React.FC = () => {
 
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { getRegionName, regions, loadingRegions } = useRegions()
+  const { getRegionName, sharedRegions, loadingRegions } = useRegions()
 
   const [loadingDeleteOrganization, setLoadingDeleteOrganization] = useState(false)
   const [loadingLeaveOrganization, setLoadingLeaveOrganization] = useState(false)
@@ -165,7 +165,7 @@ const OrganizationSettings: React.FC = () => {
       <SetDefaultRegionDialog
         open={showSetDefaultRegionDialog}
         onOpenChange={setSetDefaultRegionDialog}
-        regions={regions}
+        regions={sharedRegions}
         loadingRegions={loadingRegions}
         onSetDefaultRegion={handleSetDefaultRegion}
       />

@@ -271,7 +271,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ConflictException('Organization already has a default region set')
     }
 
-    const defaultRegion = await this.validateOrganizationDefaultRegion(defaultRegionId, organizationId)
+    const defaultRegion = await this.validateOrganizationDefaultRegion(defaultRegionId)
     organization.defaultRegionId = defaultRegionId
 
     if (defaultRegion.enforceQuotas) {
@@ -408,15 +408,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   /**
-   * @param organizationId - Optional when validating during organization creation.
-   * @throws NotFoundException - If the region is not found or not available to the organization
+   * @throws NotFoundException - If the region is not found, hidden, or not a shared region
    */
-  async validateOrganizationDefaultRegion(defaultRegionId: string, organizationId?: string): Promise<Region> {
+  async validateOrganizationDefaultRegion(defaultRegionId: string): Promise<Region> {
     const region = await this.regionService.findOne(defaultRegionId)
-    if (!region || region.hidden) {
-      throw new NotFoundException('Region not found')
-    }
-    if (organizationId && region.organizationId && region.organizationId !== organizationId) {
+    if (!region || region.hidden || region.organizationId !== null) {
       throw new NotFoundException('Region not found')
     }
 
