@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
-import { CreateOrganizationDto } from '../dto/create-organization.dto'
+import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
@@ -45,7 +45,6 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RegionQuota } from '../entities/region-quota.entity'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
-import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
@@ -90,7 +89,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   async create(
-    createOrganizationDto: CreateOrganizationDto,
+    createOrganizationDto: CreateOrganizationInternalDto,
     createdBy: string,
     personal = false,
     creatorEmailVerified = false,

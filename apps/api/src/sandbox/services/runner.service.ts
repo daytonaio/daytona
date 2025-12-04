@@ -3,12 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
-import { CreateRunnerDto } from '../dto/create-runner.dto'
+import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
@@ -26,6 +34,10 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { Organization } from '../../organization/entities/organization.entity'
+import { RegionService } from '../../region/services/region.service'
+import * as crypto from 'crypto'
+import { RUNNER_NAME_REGEX } from '../constants/runner-name-regex.constant'
 
 @Injectable()
 export class RunnerService {
@@ -43,36 +55,120 @@ export class RunnerService {
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
+    private readonly regionService: RegionService,
   ) {}
 
-  async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
+  private generateRunnerToken(): string {
+    return `dtn_${crypto.randomBytes(32).toString('hex')}`
+  }
+
+  /**
+   * @throws {BadRequestException} If the runner name is invalid.
+   * @throws {NotFoundException} If the region is not found.
+   * @throws {ConflictException} If a runner with the same name already exists.
+   */
+  async create(
+    createRunnerDto: CreateRunnerInternalDto,
+    organization?: Organization,
+  ): Promise<{
+    runner: Runner
+    apiKey: string
+  }> {
+    // Validate runner name
+    if (!RUNNER_NAME_REGEX.test(createRunnerDto.name)) {
+      throw new BadRequestException('Runner name must contain only letters, numbers, underscores, periods, and hyphens')
+    }
+    if (createRunnerDto.name.length < 2 || createRunnerDto.name.length > 255) {
+      throw new BadRequestException('Runner name must be between 3 and 255 characters')
+    }
+
     // Validate region and class
-    if (createRunnerDto.region.trim().length === 0) {
-      throw new Error('Invalid region')
+    const region = await this.regionService.findOne(createRunnerDto.regionId)
+    if (!region) {
+      throw new NotFoundException('Region not found')
     }
+    if (organization && region.organizationId && region.organizationId !== organization.id) {
+      throw new NotFoundException('Region not found')
+    }
+
     if (!this.isValidClass(createRunnerDto.class)) {
-      throw new Error('Invalid class')
+      throw new BadRequestError('Invalid class')
     }
+
+    const apiKey = createRunnerDto.apiKey ?? this.generateRunnerToken()
 
     const runner = new Runner()
     runner.domain = createRunnerDto.domain
     runner.apiUrl = createRunnerDto.apiUrl
     runner.proxyUrl = createRunnerDto.proxyUrl
-    runner.apiKey = createRunnerDto.apiKey
+    runner.apiKey = apiKey
     runner.cpu = createRunnerDto.cpu
     runner.memoryGiB = createRunnerDto.memoryGiB
     runner.diskGiB = createRunnerDto.diskGiB
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
-    runner.region = createRunnerDto.region
+    runner.region = createRunnerDto.regionId
+    runner.name = createRunnerDto.name
     runner.class = createRunnerDto.class
     runner.version = createRunnerDto.version
 
-    return this.runnerRepository.save(runner)
+    try {
+      const savedRunner = await this.runnerRepository.save(runner)
+      return { runner: savedRunner, apiKey }
+    } catch (error) {
+      if (error.code === '23505') {
+        if (error.detail.includes('domain')) {
+          throw new ConflictException('This domain is already in use')
+        }
+        if (error.detail.includes('name')) {
+          throw new ConflictException(
+            `Runner with name ${createRunnerDto.name} already exists in the region ${region.name}`,
+          )
+        }
+        throw new ConflictException('A runner with these values already exists')
+      }
+      throw error
+    }
   }
 
-  async findAll(): Promise<Runner[]> {
-    return this.runnerRepository.find()
+  /**
+   * @throws {NotFoundException} If the region is not found.
+   */
+  async findAll(organizationId?: string, regionName?: string): Promise<Runner[]> {
+    if (organizationId && regionName) {
+      return this.findAllByRegionName(organizationId, regionName)
+    } else if (organizationId) {
+      return this.findAllByOrganizationId(organizationId)
+    } else {
+      return this.runnerRepository.find()
+    }
+  }
+
+  /**
+   * @throws {NotFoundException} If the region is not found.
+   */
+  async findAllByRegionName(organizationId: string, regionName: string): Promise<Runner[]> {
+    const region = await this.regionService.findOneByName(regionName, organizationId)
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    return this.runnerRepository.find({
+      where: {
+        region: region.id,
+      },
+    })
+  }
+
+  async findAllByOrganizationId(organizationId: string): Promise<Runner[]> {
+    const regions = await this.regionService.findAll(organizationId)
+    const regionIds = regions.map((region) => region.id)
+
+    return this.runnerRepository.find({
+      where: {
+        region: In(regionIds),
+      },
+    })
   }
 
   async findAllReady(): Promise<Runner[]> {
@@ -168,8 +264,51 @@ export class RunnerService {
     return runners.sort((a, b) => b.availabilityScore - a.availabilityScore).slice(0, 10)
   }
 
+  /**
+   * @throws {NotFoundException} If the runner is not found.
+   * @throws {HttpException} If the runner is not unschedulable.
+   * @throws {HttpException} If the runner has sandboxes associated with it.
+   */
   async remove(id: string): Promise<void> {
-    await this.runnerRepository.delete(id)
+    const runner = await this.findOne(id)
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    if (!runner.unschedulable) {
+      throw new HttpException(
+        'Cannot delete runner which is available for scheduling sandboxes',
+        HttpStatus.PRECONDITION_REQUIRED,
+      )
+    }
+
+    const sandboxes = await this.sandboxRepository.find({
+      where: { runnerId: id, state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED])) },
+    })
+    if (sandboxes.length > 0) {
+      throw new HttpException(
+        'Cannot delete runner which has sandboxes associated with it',
+        HttpStatus.PRECONDITION_REQUIRED,
+      )
+    }
+
+    await this.runnerRepository.remove(runner)
+  }
+
+  async getRegionId(runnerId: string): Promise<string> {
+    const runner = await this.runnerRepository.findOne({
+      where: {
+        id: runnerId,
+      },
+      select: ['region'],
+      loadEagerRelations: false,
+    })
+
+    if (!runner || !runner.region) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return runner.region
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
@@ -192,10 +331,9 @@ export class RunnerService {
       return
     }
 
-    await this.runnerRepository.update(runnerId, {
-      state: newState,
-      lastChecked: new Date(),
-    })
+    runner.state = newState
+    runner.lastChecked = new Date()
+    await this.runnerRepository.save(runner)
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
@@ -308,29 +446,24 @@ export class RunnerService {
       return
     }
 
-    const updateData: Partial<Runner> = {
-      state: RunnerState.READY,
-      lastChecked: new Date(),
-    }
-
     const metrics = runnerInfo?.metrics
 
     if (metrics && typeof metrics.currentCpuUsagePercentage !== 'undefined') {
-      updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
-      updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
-      updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
-      updateData.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
-      updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
-      updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
-      updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
+      runner.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
+      runner.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
+      runner.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
+      runner.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
+      runner.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
+      runner.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
+      runner.currentSnapshotCount = metrics.currentSnapshotCount || 0
 
-      updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
-        cpuUsage: updateData.currentCpuUsagePercentage,
-        memoryUsage: updateData.currentMemoryUsagePercentage,
-        diskUsage: updateData.currentDiskUsagePercentage,
-        allocatedCpu: updateData.currentAllocatedCpu,
-        allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
-        allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
+      runner.availabilityScore = this.calculateAvailabilityScore(runnerId, {
+        cpuUsage: runner.currentCpuUsagePercentage,
+        memoryUsage: runner.currentMemoryUsagePercentage,
+        diskUsage: runner.currentDiskUsagePercentage,
+        allocatedCpu: runner.currentAllocatedCpu,
+        allocatedMemoryGiB: runner.currentAllocatedMemoryGiB,
+        allocatedDiskGiB: runner.currentAllocatedDiskGiB,
         runnerCpu: runner.cpu,
         runnerMemoryGiB: runner.memoryGiB,
         runnerDiskGiB: runner.diskGiB,
@@ -339,7 +472,10 @@ export class RunnerService {
       this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
     }
 
-    await this.runnerRepository.update(runnerId, updateData)
+    runner.state = RunnerState.READY
+    runner.lastChecked = new Date()
+
+    await this.runnerRepository.save(runner)
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {
@@ -349,7 +485,7 @@ export class RunnerService {
   async updateSchedulingStatus(id: string, unschedulable: boolean): Promise<Runner> {
     const runner = await this.runnerRepository.findOne({ where: { id } })
     if (!runner) {
-      throw new Error('Runner not found')
+      throw new NotFoundException('Runner not found')
     }
 
     runner.unschedulable = unschedulable

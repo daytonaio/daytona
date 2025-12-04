@@ -47,10 +47,12 @@ import {
   TextSearch,
   TriangleAlert,
   Users,
+  Server,
+  MapPinned,
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
@@ -64,7 +66,6 @@ interface SidebarProps {
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
-  const navigate = useNavigate()
   const { pathname } = useLocation()
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
@@ -169,6 +170,26 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     ]
   }, [billingEnabled, authenticatedUserOrganizationMember?.role])
 
+  const infrastructureItems = useMemo(() => {
+    const arr = [
+      {
+        icon: <MapPinned size={16} strokeWidth={1.5} />,
+        label: 'Regions',
+        path: RoutePath.REGIONS,
+      },
+    ]
+
+    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_RUNNERS)) {
+      arr.push({
+        icon: <Server size={16} strokeWidth={1.5} />,
+        label: 'Runners',
+        path: RoutePath.RUNNERS,
+      })
+    }
+
+    return arr
+  }, [authenticatedUserHasPermission])
+
   const handleSignOut = () => {
     signoutRedirect()
   }
@@ -207,23 +228,44 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          {billingItems.length > 0 && <SidebarGroupLabel>Billing</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {billingItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
-                    <Link to={item.path}>
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {billingItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Billing</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {billingItems.map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
+                      <Link to={item.path}>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+        {infrastructureItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Infrastructure</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {infrastructureItems.map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
+                      <Link to={item.path}>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
