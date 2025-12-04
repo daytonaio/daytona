@@ -118,6 +118,8 @@ func ExtractErrorPart(errorMsg string) string {
 	return fmt.Sprintf("bad request: %s", matches[1])
 }
 
+const maxStackTraceSize = 64 * 1024 // 64 KB
+
 func Recovery() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		defer func() {
@@ -129,7 +131,7 @@ func Recovery() gin.HandlerFunc {
 
 				log.Errorf("panic recovered: %v", err)
 				// print caller stack
-				buf := make([]byte, 1<<16)
+				buf := make([]byte, maxStackTraceSize)
 				stackSize := runtime.Stack(buf, false)
 				log.Errorf("stack trace: %s", string(buf[:stackSize]))
 
