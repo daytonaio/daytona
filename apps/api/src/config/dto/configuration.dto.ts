@@ -194,7 +194,7 @@ export class ConfigurationDto {
     example: false,
   })
   @IsBoolean()
-  maintananceMode: boolean
+  maintenanceMode: boolean
 
   @ApiProperty({
     description: 'Current environment',
@@ -248,7 +248,7 @@ export class ConfigurationDto {
     this.defaultSnapshot = configService.getOrThrow('defaultSnapshot')
     this.dashboardUrl = configService.getOrThrow('dashboardUrl')
     this.maxAutoArchiveInterval = configService.getOrThrow('maxAutoArchiveInterval')
-    this.maintananceMode = configService.getOrThrow('maintananceMode')
+    this.maintenanceMode = configService.getOrThrow('maintenanceMode')
     this.environment = configService.getOrThrow('environment')
 
     this.sshGatewayCommand = configService.get('sshGateway.command')
