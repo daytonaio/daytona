@@ -1,0 +1,14 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
+
+package dto
+
+type RegistryDTO struct {
+	Url      string  `json:"url" validate:"required"`
+	Username string  `json:"username,omitempty"`
+	Password string  `json:"password,omitempty"`
+	Project  *string `json:"project,omitempty"`
+} //	@name	RegistryDTO
+
+
+

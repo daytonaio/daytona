@@ -52,6 +52,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
     await this.initializeDefaultRegion()
     await this.initializeDefaultRunner()
+    await this.initializeMockRunner()
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeBackupRegistry()
@@ -131,6 +132,52 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     }
 
     this.logger.log(`Default runner created successfully: ${this.configService.getOrThrow('defaultRunner.domain')}`)
+  }
+
+  private async initializeMockRunner(): Promise<void> {
+    if (!this.configService.get('mockRunner.domain')) {
+      return
+    }
+
+    const existingRunner = await this.runnerService.findOneByDomain(
+      this.configService.getOrThrow('mockRunner.domain'),
+    )
+    if (existingRunner) {
+      return
+    }
+
+    this.logger.log(`Creating mock runner: ${this.configService.getOrThrow('mockRunner.domain')}`)
+
+    const runner = await this.runnerService.create({
+      apiUrl: this.configService.getOrThrow('mockRunner.apiUrl'),
+      proxyUrl: this.configService.getOrThrow('mockRunner.proxyUrl'),
+      apiKey: this.configService.getOrThrow('mockRunner.apiKey'),
+      cpu: this.configService.getOrThrow('mockRunner.cpu'),
+      memoryGiB: this.configService.getOrThrow('mockRunner.memory'),
+      diskGiB: this.configService.getOrThrow('mockRunner.disk'),
+      gpu: this.configService.getOrThrow('mockRunner.gpu'),
+      gpuType: this.configService.getOrThrow('mockRunner.gpuType'),
+      region: this.configService.getOrThrow('mockRunner.region'),
+      class: this.configService.getOrThrow('mockRunner.class'),
+      domain: this.configService.getOrThrow('mockRunner.domain'),
+      version: this.configService.get('mockRunner.version') || '0',
+    })
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    this.logger.log(`Waiting for mock runner ${runner.domain} to be healthy...`)
+    for (let i = 0; i < 30; i++) {
+      try {
+        await runnerAdapter.healthCheck()
+        this.logger.log(`Mock runner ${runner.domain} is healthy`)
+        break
+      } catch {
+        // ignore
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+
+    this.logger.log(`Mock runner created successfully: ${this.configService.getOrThrow('mockRunner.domain')}`)
   }
 
   private async initializeAdminUser(): Promise<void> {
