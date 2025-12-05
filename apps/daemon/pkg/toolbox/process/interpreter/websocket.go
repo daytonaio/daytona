@@ -139,10 +139,5 @@ func (cl *wsClient) requestClose(code int, message string) {
 		},
 	}
 
-	select {
-	case cl.send <- frame:
-	case <-cl.done:
-	default:
-		cl.close()
-	}
+	cl.send <- frame
 }
