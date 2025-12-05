@@ -1,0 +1,20 @@
+[project]
+name = "daytona-langchain-data-analysis"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Mislav Ivanda", email = "mivanda@daytona.io"}
+]
+readme = "README.md"
+requires-python = "^3.10"
+dependencies = [
+    "langchain (>=1.0.5,<2.0.0)",
+    "langchain-anthropic (>=1.0.3,<2.0.0)",
+    "langchain-daytona-data-analysis (>=0.1.1,<0.2.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
