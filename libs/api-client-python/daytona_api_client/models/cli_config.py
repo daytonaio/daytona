@@ -20,20 +20,17 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from daytona_api_client_async.models.cli_config import CliConfig
 from typing import Optional, Set
 from typing_extensions import Self
 
-class OidcConfig(BaseModel):
+class CliConfig(BaseModel):
     """
-    OidcConfig
+    CliConfig
     """ # noqa: E501
-    issuer: StrictStr = Field(description="OIDC issuer")
-    client_id: StrictStr = Field(description="OIDC client ID", alias="clientId")
-    audience: StrictStr = Field(description="OIDC audience")
-    cli: CliConfig = Field(description="CLI configuration")
+    client_id: StrictStr = Field(description="OIDC client ID for CLI", alias="clientId")
+    callback_port: StrictStr = Field(description="OAuth callback port for CLI", alias="callbackPort")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["issuer", "clientId", "audience", "cli"]
+    __properties: ClassVar[List[str]] = ["clientId", "callbackPort"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,7 +50,7 @@ class OidcConfig(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of OidcConfig from a JSON string"""
+        """Create an instance of CliConfig from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -76,9 +73,6 @@ class OidcConfig(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of cli
-        if self.cli:
-            _dict['cli'] = self.cli.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -88,7 +82,7 @@ class OidcConfig(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of OidcConfig from a dict"""
+        """Create an instance of CliConfig from a dict"""
         if obj is None:
             return None
 
@@ -96,10 +90,8 @@ class OidcConfig(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "issuer": obj.get("issuer"),
             "clientId": obj.get("clientId"),
-            "audience": obj.get("audience"),
-            "cli": CliConfig.from_dict(obj["cli"]) if obj.get("cli") is not None else None
+            "callbackPort": obj.get("callbackPort")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

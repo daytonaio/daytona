@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -11,6 +11,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+
+// May contain unused imports in some cases
+// @ts-ignore
+import type { CliConfig } from './cli-config'
 
 /**
  *
@@ -36,4 +40,10 @@ export interface OidcConfig {
    * @memberof OidcConfig
    */
   audience: string
+  /**
+   * CLI configuration
+   * @type {CliConfig}
+   * @memberof OidcConfig
+   */
+  cli: CliConfig
 }
