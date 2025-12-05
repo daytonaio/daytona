@@ -90,7 +90,6 @@ func (c *Context) emitOutput(msg *OutputMessage) {
 	default:
 		log.Debug("Client send channel full - closing slow consumer")
 		cl.requestClose(websocket.ClosePolicyViolation, "slow consumer")
-		cl.close()
 
 		c.mu.Lock()
 		if c.client != nil && c.client.id == cl.id {
@@ -104,6 +103,18 @@ func (c *Context) emitOutput(msg *OutputMessage) {
 func (cl *wsClient) close() {
 	cl.closeOnce.Do(func() {
 		close(cl.send)
+
+		// Wait for clientWriter to drain remaining messages with a timeout
+		// This ensures close frames and other pending messages have time to be sent
+		timeout := time.After(5 * time.Second)
+		select {
+		case <-cl.done:
+			// clientWriter has finished processing all messages
+		case <-timeout:
+			// Timeout reached, proceed with closing
+			log.Debug("Timeout waiting for client writer to finish")
+		}
+
 		_ = cl.conn.Close()
 	})
 }
@@ -139,5 +150,11 @@ func (cl *wsClient) requestClose(code int, message string) {
 		},
 	}
 
-	cl.send <- frame
+	select {
+	case cl.send <- frame:
+	default:
+		log.Debug("Couldn't send close frame to client - closing connection")
+	}
+
+	cl.close()
 }
