@@ -23,5 +23,6 @@ header:
     - 'hack/**'
     - 'guides/**'
     - 'apps/daemon/pkg/toolbox/docs/docs.go'
+    - 'apps/dashboard/public/mockServiceWorker.js'
 
   comment: on-failure
