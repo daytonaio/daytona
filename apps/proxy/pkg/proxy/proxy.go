@@ -106,7 +106,7 @@ func StartProxy(config *config.Config) error {
 	}
 
 	router := gin.New()
-	router.Use(gin.Recovery())
+	router.Use(common_errors.Recovery())
 
 	router.Use(common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
 		return common_errors.ErrorResponse{
