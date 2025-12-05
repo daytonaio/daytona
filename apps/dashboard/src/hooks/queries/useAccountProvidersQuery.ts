@@ -3,19 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { AccountProvider as AccountProviderApi } from '@daytonaio/api-client'
+import type { AccountProvider } from '@daytonaio/api-client'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { queryKeys } from './queryKeys'
 
-export const useAccountProvidersQuery = (
-  options?: Omit<Parameters<typeof useQuery<AccountProviderApi[]>>[0], 'queryKey' | 'queryFn'>,
-) => {
+export const useAccountProvidersQuery = () => {
   const { userApi } = useApi()
 
-  return useQuery<AccountProviderApi[]>({
+  return useQuery<AccountProvider[]>({
     queryKey: queryKeys.user.accountProviders(),
-    queryFn: async () => (await userApi.getAvailableAccountProviders()).data,
-    ...options,
+    queryFn: async () => userApi.getAvailableAccountProviders().then((response) => response.data),
   })
 }
