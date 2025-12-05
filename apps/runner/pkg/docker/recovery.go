@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/go-units"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	log "github.com/sirupsen/logrus"
@@ -43,12 +44,13 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	currentStorage := float64(0)
 	if originalContainer.HostConfig.StorageOpt != nil {
 		if sizeStr, ok := originalContainer.HostConfig.StorageOpt["size"]; ok {
-			var sizeBytes int64
-			if _, err := fmt.Sscanf(sizeStr, "%d", &sizeBytes); err != nil {
-				log.Warnf("Failed to parse storage size '%s': %v", sizeStr, err)
-			} else {
-				currentStorage = float64(sizeBytes) / (1024 * 1024 * 1024)
+			// Docker storage-opt uses binary units (GiB) for both string ("3G") and numeric formats
+			sizeBytes, err := units.RAMInBytes(sizeStr)
+			if err != nil {
+				common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
+				return fmt.Errorf("failed to parse storage size '%s': %w", sizeStr, err)
 			}
+			currentStorage = float64(sizeBytes) / (1024 * 1024 * 1024)
 		}
 	}
 
@@ -64,7 +66,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	// Validate expansion limit
 	if newExpansion > maxExpansion {
 		common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
-		return fmt.Errorf("storage cannot be expanded further. Maximum expansion of %.2fGB (10%% of original %.2fGB) has been reached. Please contact support", maxExpansion, originalStorageQuota)
+		return fmt.Errorf("storage cannot be further expanded")
 	}
 
 	var overlayDiffPath string
