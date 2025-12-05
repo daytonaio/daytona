@@ -27,7 +27,7 @@ import { useCopyToClipboard } from 'usehooks-ts'
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { regions, loadingRegions, getRegionName } = useRegions()
+  const { sharedRegions, loadingRegions, getRegionName } = useRegions()
 
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()
@@ -41,41 +41,11 @@ const OrganizationSettings: React.FC = () => {
     }
   }, [selectedOrganization])
 
-  const handleDeleteOrganization = async () => {
-    if (!selectedOrganization) {
-      return false
-    }
-    try {
-      await deleteOrganizationMutation.mutateAsync({ organizationId: selectedOrganization.id })
-      toast.success('Organization deleted successfully')
-      await refreshOrganizations()
-      return true
-    } catch (error) {
-      handleApiError(error, 'Failed to delete organization')
-      return false
-    }
-  }
-
-  const handleLeaveOrganization = async () => {
-    if (!selectedOrganization) {
-      return false
-    }
-    try {
-      await leaveOrganizationMutation.mutateAsync({ organizationId: selectedOrganization.id })
-      toast.success('Organization left successfully')
-      await refreshOrganizations()
-      return true
-    } catch (error) {
-      handleApiError(error, 'Failed to leave organization')
-      return false
-    }
+  if (!selectedOrganization) {
+    return null
   }
 
   const handleSetDefaultRegion = async (defaultRegionId: string): Promise<boolean> => {
-    if (!selectedOrganization) {
-      return false
-    }
-
     try {
       await setDefaultRegionMutation.mutateAsync({
         organizationId: selectedOrganization.id,
@@ -91,8 +61,28 @@ const OrganizationSettings: React.FC = () => {
     }
   }
 
-  if (!selectedOrganization) {
-    return null
+  const handleDeleteOrganization = async () => {
+    try {
+      await deleteOrganizationMutation.mutateAsync({ organizationId: selectedOrganization.id })
+      toast.success('Organization deleted successfully')
+      await refreshOrganizations()
+      return true
+    } catch (error) {
+      handleApiError(error, 'Failed to delete organization')
+      return false
+    }
+  }
+
+  const handleLeaveOrganization = async () => {
+    try {
+      await leaveOrganizationMutation.mutateAsync({ organizationId: selectedOrganization.id })
+      toast.success('Organization left successfully')
+      await refreshOrganizations()
+      return true
+    } catch (error) {
+      handleApiError(error, 'Failed to leave organization')
+      return false
+    }
   }
 
   const isOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
@@ -201,7 +191,7 @@ const OrganizationSettings: React.FC = () => {
       <SetDefaultRegionDialog
         open={showSetDefaultRegionDialog}
         onOpenChange={setSetDefaultRegionDialog}
-        regions={regions}
+        regions={sharedRegions}
         loadingRegions={loadingRegions}
         onSetDefaultRegion={handleSetDefaultRegion}
       />
