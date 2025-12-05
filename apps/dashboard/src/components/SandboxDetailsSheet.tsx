@@ -24,6 +24,7 @@ interface SandboxDetailsSheetProps {
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   getWebTerminalUrl: (id: string) => Promise<string | null>
+  getRegionName: (regionId: string) => string | undefined
   writePermitted: boolean
   deletePermitted: boolean
 }
@@ -38,6 +39,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   handleDelete,
   handleArchive,
   getWebTerminalUrl,
+  getRegionName,
   writePermitted,
   deletePermitted,
 }) => {
@@ -215,7 +217,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               <div>
                 <h3 className="text-sm text-muted-foreground">Region</h3>
                 <div className="mt-1 flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{sandbox.target}</p>
+                  <p className="text-sm font-medium truncate">{getRegionName(sandbox.target) ?? sandbox.target}</p>
                   <button
                     onClick={() => copyToClipboard(sandbox.target)}
                     className="text-muted-foreground hover:text-foreground transition-colors"

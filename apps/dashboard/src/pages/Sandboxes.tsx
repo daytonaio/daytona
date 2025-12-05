@@ -992,6 +992,7 @@ const Sandboxes: React.FC = () => {
         }}
         handleArchive={handleArchive}
         getWebTerminalUrl={getWebTerminalUrl}
+        getRegionName={getRegionName}
         writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
         deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
       />
