@@ -36,12 +36,7 @@ Create a `.env` file in the project directory with these variables.
    npm install
    ```
 
-2. Build the TypeScript code:
-   ```bash
-   npm run build
-   ```
-
-3. Run the example:
+2. Run the example:
    ```bash
    npm run start
    ```
