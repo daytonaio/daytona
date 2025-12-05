@@ -53,14 +53,24 @@ export function RegionsProvider(props: Props) {
     [regions],
   )
 
+  const sharedRegions = useMemo(() => {
+    return regions.filter((region) => region.organizationId === null)
+  }, [regions])
+
+  const organizationRegions = useMemo(() => {
+    return regions.filter((region) => region.organizationId !== null)
+  }, [regions])
+
   const contextValue: IRegionsContext = useMemo(() => {
     return {
       regions,
       loadingRegions,
+      sharedRegions,
+      organizationRegions,
       refreshRegions: getRegions,
       getRegionName,
     }
-  }, [regions, loadingRegions, getRegions, getRegionName])
+  }, [regions, loadingRegions, sharedRegions, organizationRegions, getRegions, getRegionName])
 
   return <RegionsContext.Provider value={contextValue}>{props.children}</RegionsContext.Provider>
 }
