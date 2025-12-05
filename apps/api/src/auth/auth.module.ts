@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs'
 import { UserService } from '../user/user.service'
 import { TypedConfigModule } from '../config/typed-config.module'
 import { catchError, map } from 'rxjs/operators'
+import { FailedAuthTrackerService } from './failed-auth-tracker.service'
 @Module({
   imports: [
     PassportModule.register({
@@ -70,7 +71,8 @@ import { catchError, map } from 'rxjs/operators'
       },
       inject: [UserService, HttpService, TypedConfigService],
     },
+    FailedAuthTrackerService,
   ],
-  exports: [PassportModule, JwtStrategy, ApiKeyStrategy],
+  exports: [PassportModule, JwtStrategy, ApiKeyStrategy, FailedAuthTrackerService],
 })
 export class AuthModule {}

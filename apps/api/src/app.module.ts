@@ -5,6 +5,7 @@
 
 import { Module, NestModule, MiddlewareConsumer, RequestMethod, ExecutionContext } from '@nestjs/common'
 import { VersionHeaderMiddleware } from './common/middleware/version-header.middleware'
+import { FailedAuthRateLimitMiddleware } from './common/middleware/failed-auth-rate-limit.middleware'
 import { AppService } from './app.service'
 import { UserModule } from './user/user.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
@@ -14,7 +15,6 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { ApiKeyModule } from './api-key/api-key.module'
 import { seconds, ThrottlerModule } from '@nestjs/throttler'
-import { AnonymousRateLimitGuard } from './common/guards/anonymous-rate-limit.guard'
 import { DockerRegistryModule } from './docker-registry/docker-registry.module'
 import { RedisModule, getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { ScheduleModule } from '@nestjs/schedule'
@@ -38,7 +38,6 @@ import { LoggerModule } from 'nestjs-pino'
 import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util'
 import { Redis } from 'ioredis'
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
-import { APP_GUARD } from '@nestjs/core'
 import { RegionModule } from './region/region.module'
 
 @Module({
@@ -151,6 +150,7 @@ import { RegionModule } from './region/region.module'
         const rateLimit = configService.get('rateLimit')
         const throttlers = [
           { name: 'anonymous', config: rateLimit.anonymous },
+          { name: 'failed-auth', config: rateLimit.failedAuth },
           { name: 'authenticated', config: rateLimit.authenticated },
           { name: 'sandbox-create', config: rateLimit.sandboxCreate },
           { name: 'sandbox-lifecycle', config: rateLimit.sandboxLifecycle },
@@ -219,17 +219,12 @@ import { RegionModule } from './region/region.module'
     }),
   ],
   controllers: [],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: AnonymousRateLimitGuard,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(VersionHeaderMiddleware).forRoutes({ path: '{*path}', method: RequestMethod.ALL })
+    consumer.apply(FailedAuthRateLimitMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL })
     consumer.apply(MaintenanceMiddleware).forRoutes({ path: '{*path}', method: RequestMethod.ALL })
   }
 }
