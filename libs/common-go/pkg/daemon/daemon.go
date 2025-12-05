@@ -3,4 +3,4 @@
 
 package daemon
 
-const UseUserHomeAsWorkDir = "DAYTONA_USER_HOME_AS_WORKDIR"
+const UserHomeAsWorkDirEnvVar = "DAYTONA_USER_HOME_AS_WORKDIR"

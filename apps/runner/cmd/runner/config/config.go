@@ -33,6 +33,7 @@ type Config struct {
 	ResourceLimitsDisabled bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
 	DaemonStartTimeoutSec  int    `envconfig:"DAEMON_START_TIMEOUT_SEC"`
 	SandboxStartTimeoutSec int    `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
+	UseSnapshotEntrypoint  bool   `envconfig:"USE_SNAPSHOT_ENTRYPOINT"`
 }
 
 var DEFAULT_API_PORT int = 8080
