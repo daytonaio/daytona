@@ -19,7 +19,7 @@ import (
 
 type DockerClientConfig struct {
 	ApiClient              client.APIClient
-	StatesCache            *cache.StatesCache
+	BackupInfoCache        *cache.BackupInfoCache
 	LogWriter              io.Writer
 	AWSRegion              string
 	AWSEndpointUrl         string
@@ -46,7 +46,7 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 
 	return &DockerClient{
 		apiClient:              config.ApiClient,
-		statesCache:            config.StatesCache,
+		backupInfoCache:        config.BackupInfoCache,
 		logWriter:              config.LogWriter,
 		awsRegion:              config.AWSRegion,
 		awsEndpointUrl:         config.AWSEndpointUrl,
@@ -68,7 +68,7 @@ func (d *DockerClient) ApiClient() client.APIClient {
 
 type DockerClient struct {
 	apiClient              client.APIClient
-	statesCache            *cache.StatesCache
+	backupInfoCache        *cache.BackupInfoCache
 	logWriter              io.Writer
 	awsRegion              string
 	awsEndpointUrl         string

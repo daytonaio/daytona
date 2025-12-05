@@ -264,7 +264,7 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 	// Get container details via docker client
 	container, err := s.dockerClient.ContainerInspect(context.Background(), sandboxId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to inspect container %s: %w", sandboxId, err)
+		return nil, err
 	}
 
 	// Get container IP address

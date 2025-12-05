@@ -92,11 +92,11 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
+	backupInfoCache := cache.GetBackupInfoCache(cfg.CacheRetentionDays)
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:              cli,
-		StatesCache:            statesCache,
+		BackupInfoCache:        backupInfoCache,
 		LogWriter:              os.Stdout,
 		AWSRegion:              cfg.AWSRegion,
 		AWSEndpointUrl:         cfg.AWSEndpointUrl,
@@ -108,7 +108,7 @@ func main() {
 		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
 	})
 
-	sandboxService := services.NewSandboxService(statesCache, dockerClient)
+	sandboxService := services.NewSandboxService(backupInfoCache, dockerClient)
 
 	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
 		Docker:   dockerClient,
@@ -139,7 +139,7 @@ func main() {
 	}
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		StatesCache:       statesCache,
+		BackupInfoCache:   backupInfoCache,
 		Docker:            dockerClient,
 		SandboxService:    sandboxService,
 		MetricsService:    metricsService,
