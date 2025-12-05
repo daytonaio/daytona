@@ -29,8 +29,6 @@ type Runner struct {
 	ApiUrl string `json:"apiUrl"`
 	// The proxy URL of the runner
 	ProxyUrl string `json:"proxyUrl"`
-	// The API key for the runner
-	ApiKey string `json:"apiKey"`
 	// The CPU capacity of the runner
 	Cpu float32 `json:"cpu"`
 	// The memory capacity of the runner in GiB
@@ -61,6 +59,8 @@ type Runner struct {
 	AvailabilityScore *float32 `json:"availabilityScore,omitempty"`
 	// The region of the runner
 	Region string `json:"region"`
+	// The name of the runner
+	Name string `json:"name"`
 	// The state of the runner
 	State RunnerState `json:"state"`
 	// The last time the runner was checked
@@ -82,13 +82,12 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, proxyUrl string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
 	this.ApiUrl = apiUrl
 	this.ProxyUrl = proxyUrl
-	this.ApiKey = apiKey
 	this.Cpu = cpu
 	this.Memory = memory
 	this.Disk = disk
@@ -96,6 +95,7 @@ func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey 
 	this.GpuType = gpuType
 	this.Class = class
 	this.Region = region
+	this.Name = name
 	this.State = state
 	this.Unschedulable = unschedulable
 	this.CreatedAt = createdAt
@@ -206,30 +206,6 @@ func (o *Runner) GetProxyUrlOk() (*string, bool) {
 // SetProxyUrl sets field value
 func (o *Runner) SetProxyUrl(v string) {
 	o.ProxyUrl = v
-}
-
-// GetApiKey returns the ApiKey field value
-func (o *Runner) GetApiKey() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ApiKey
-}
-
-// GetApiKeyOk returns a tuple with the ApiKey field value
-// and a boolean to check if the value has been set.
-func (o *Runner) GetApiKeyOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ApiKey, true
-}
-
-// SetApiKey sets field value
-func (o *Runner) SetApiKey(v string) {
-	o.ApiKey = v
 }
 
 // GetCpu returns the Cpu field value
@@ -656,6 +632,30 @@ func (o *Runner) SetRegion(v string) {
 	o.Region = v
 }
 
+// GetName returns the Name field value
+func (o *Runner) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *Runner) SetName(v string) {
+	o.Name = v
+}
+
 // GetState returns the State field value
 func (o *Runner) GetState() RunnerState {
 	if o == nil {
@@ -822,7 +822,6 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["domain"] = o.Domain
 	toSerialize["apiUrl"] = o.ApiUrl
 	toSerialize["proxyUrl"] = o.ProxyUrl
-	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["memory"] = o.Memory
 	toSerialize["disk"] = o.Disk
@@ -854,6 +853,7 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 		toSerialize["availabilityScore"] = o.AvailabilityScore
 	}
 	toSerialize["region"] = o.Region
+	toSerialize["name"] = o.Name
 	toSerialize["state"] = o.State
 	if !IsNil(o.LastChecked) {
 		toSerialize["lastChecked"] = o.LastChecked
@@ -879,7 +879,6 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"domain",
 		"apiUrl",
 		"proxyUrl",
-		"apiKey",
 		"cpu",
 		"memory",
 		"disk",
@@ -887,6 +886,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"gpuType",
 		"class",
 		"region",
+		"name",
 		"state",
 		"unschedulable",
 		"createdAt",
@@ -925,7 +925,6 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "domain")
 		delete(additionalProperties, "apiUrl")
 		delete(additionalProperties, "proxyUrl")
-		delete(additionalProperties, "apiKey")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "memory")
 		delete(additionalProperties, "disk")
@@ -941,6 +940,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "currentSnapshotCount")
 		delete(additionalProperties, "availabilityScore")
 		delete(additionalProperties, "region")
+		delete(additionalProperties, "name")
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "lastChecked")
 		delete(additionalProperties, "unschedulable")

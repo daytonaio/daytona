@@ -37,7 +37,6 @@ import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages
 import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { Region } from '../../region/entities/region.entity'
-import { Runner } from '../entities/runner.entity'
 import { RunnerState } from '../enums/runner-state.enum'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
@@ -56,8 +55,6 @@ export class SnapshotService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
-    @InjectRepository(Runner)
-    private readonly runnerRepository: Repository<Runner>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
@@ -652,8 +649,8 @@ export class SnapshotService {
    * Get all regions for snapshot propagation for an organization.
    *
    * Regions are considered for snapshot propagation if:
-   * - they are organization regions
-   * - they are shared regions with quotas allocated for the organization
+   * - the region is associated with the organization
+   * - the region is not associated with an organization, but the organization has quotas allocated for the region
    *
    * @param organizationId - The ID of the organization.
    * @returns The regions for snapshot propagation.

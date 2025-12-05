@@ -20,7 +20,7 @@ import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { getMaskedApiKey } from '@/lib/utils'
+import { getMaskedToken } from '@/lib/utils'
 
 const Onboarding: React.FC = () => {
   const { apiKeyApi } = useApi()
@@ -178,7 +178,7 @@ const Onboarding: React.FC = () => {
                   {createdApiKey ? (
                     <div className="p-4 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
                       <span className="overflow-x-auto pr-2 cursor-text select-all">
-                        {isApiKeyRevealed ? createdApiKey.value : getMaskedApiKey(createdApiKey.value)}
+                        {isApiKeyRevealed ? createdApiKey.value : getMaskedToken(createdApiKey.value)}
                       </span>
                       <div className="flex items-center space-x-3 pl-3">
                         {isApiKeyRevealed ? (

@@ -301,7 +301,7 @@ const Sandboxes: React.FC = () => {
 
   // Region Filter
 
-  const { regions: regionsData, loadingRegions: regionsDataIsLoading } = useRegions()
+  const { regions: regionsData, loadingRegions: regionsDataIsLoading, getRegionName } = useRegions()
 
   // Subscribe to Sandbox Events
 
@@ -809,6 +809,7 @@ const Sandboxes: React.FC = () => {
         onChangeSnapshotSearchValue={(name?: string) => handleSnapshotFiltersChange({ name })}
         regionsData={regionsData || []}
         regionsDataIsLoading={regionsDataIsLoading}
+        getRegionName={getRegionName}
         onRowClick={(sandbox: Sandbox) => {
           setSelectedSandbox(sandbox)
           setShowSandboxDetails(true)
@@ -991,6 +992,7 @@ const Sandboxes: React.FC = () => {
         }}
         handleArchive={handleArchive}
         getWebTerminalUrl={getWebTerminalUrl}
+        getRegionName={getRegionName}
         writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
         deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
       />

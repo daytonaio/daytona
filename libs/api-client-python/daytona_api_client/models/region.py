@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from daytona_api_client.models.region_type import RegionType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -30,10 +31,11 @@ class Region(BaseModel):
     id: StrictStr = Field(description="Region ID")
     name: StrictStr = Field(description="Region name")
     organization_id: Optional[StrictStr] = Field(default=None, description="Organization ID", alias="organizationId")
+    region_type: RegionType = Field(description="The type of the region", alias="regionType")
     created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
     updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "regionType", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -101,6 +103,7 @@ class Region(BaseModel):
             "id": obj.get("id"),
             "name": obj.get("name"),
             "organizationId": obj.get("organizationId"),
+            "regionType": obj.get("regionType"),
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt")
         })

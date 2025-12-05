@@ -3,8 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, Index, PrimaryColumn, UpdateDateColumn } from 'typeorm'
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Check,
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 import { nanoid } from 'nanoid'
+import { RegionType } from '../enums/region-type.enum'
 
 @Entity()
 @Index('region_organizationId_name_unique', ['organizationId', 'name'], {
@@ -15,6 +26,8 @@ import { nanoid } from 'nanoid'
   unique: true,
   where: '"organizationId" IS NULL',
 })
+@Check('region_not_shared', '"organizationId" IS NULL OR "regionType" != \'shared\'')
+@Check('region_not_custom', '"organizationId" IS NOT NULL OR "regionType" != \'custom\'')
 export class Region {
   @PrimaryColumn()
   id: string
@@ -28,8 +41,11 @@ export class Region {
   })
   organizationId: string | null
 
-  @Column({ default: false })
-  hidden: boolean
+  @Column({
+    type: 'enum',
+    enum: RegionType,
+  })
+  regionType: RegionType
 
   @Column({
     type: 'boolean',
@@ -47,9 +63,10 @@ export class Region {
   })
   updatedAt: Date
 
-  constructor(name: string, enforceQuotas: boolean, id?: string, organizationId?: string) {
+  constructor(name: string, enforceQuotas: boolean, regionType: RegionType, id?: string, organizationId?: string) {
     this.name = name
     this.enforceQuotas = enforceQuotas
+    this.regionType = regionType
 
     if (id) {
       this.id = id
@@ -59,6 +76,21 @@ export class Region {
 
     if (organizationId) {
       this.organizationId = organizationId
+    }
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  validateRegionType() {
+    if (this.regionType === RegionType.SHARED) {
+      if (this.organizationId) {
+        throw new Error('Shared regions cannot be associated with an organization.')
+      }
+    }
+    if (this.regionType === RegionType.CUSTOM) {
+      if (!this.organizationId) {
+        throw new Error('Custom regions must be associated with an organization.')
+      }
     }
   }
 }

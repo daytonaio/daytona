@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -11,6 +11,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RegionType } from './region-type'
 
 /**
  *
@@ -36,6 +40,12 @@ export interface Region {
    * @memberof Region
    */
   organizationId?: string | null
+  /**
+   * The type of the region
+   * @type {RegionType}
+   * @memberof Region
+   */
+  regionType: RegionType
   /**
    * Creation timestamp
    * @type {string}

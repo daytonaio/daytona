@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
-import { CreateOrganizationDto } from '../dto/create-organization.dto'
+import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
@@ -45,10 +45,10 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RegionQuota } from '../entities/region-quota.entity'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
-import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -90,7 +90,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   async create(
-    createOrganizationDto: CreateOrganizationDto,
+    createOrganizationDto: CreateOrganizationInternalDto,
     createdBy: string,
     personal = false,
     creatorEmailVerified = false,
@@ -271,7 +271,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ConflictException('Organization already has a default region set')
     }
 
-    const defaultRegion = await this.validateOrganizationDefaultRegion(defaultRegionId, organizationId)
+    const defaultRegion = await this.validateOrganizationDefaultRegion(defaultRegionId)
     organization.defaultRegionId = defaultRegionId
 
     if (defaultRegion.enforceQuotas) {
@@ -408,15 +408,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   /**
-   * @param organizationId - Optional when validating during organization creation.
    * @throws NotFoundException - If the region is not found or not available to the organization
    */
-  async validateOrganizationDefaultRegion(defaultRegionId: string, organizationId?: string): Promise<Region> {
+  async validateOrganizationDefaultRegion(defaultRegionId: string): Promise<Region> {
     const region = await this.regionService.findOne(defaultRegionId)
-    if (!region || region.hidden) {
-      throw new NotFoundException('Region not found')
-    }
-    if (organizationId && region.organizationId && region.organizationId !== organizationId) {
+    if (!region || region.regionType !== RegionType.SHARED) {
       throw new NotFoundException('Region not found')
     }
 

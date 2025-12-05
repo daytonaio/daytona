@@ -17,6 +17,7 @@ import { SchedulerRegistry } from '@nestjs/schedule'
 import { RegionService } from './region/services/region.service'
 import { RunnerService } from './sandbox/services/runner.service'
 import { RunnerAdapterFactory } from './sandbox/runner-adapter/runnerAdapter'
+import { RegionType } from './region/enums/region-type.enum'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -80,6 +81,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
         id: this.configService.getOrThrow('defaultRegion.id'),
         name: this.configService.getOrThrow('defaultRegion.name'),
         enforceQuotas: this.configService.getOrThrow('defaultRegion.enforceQuotas'),
+        regionType: RegionType.SHARED,
       },
       null,
     )
@@ -101,7 +103,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
     this.logger.log(`Creating default runner: ${this.configService.getOrThrow('defaultRunner.domain')}`)
 
-    const runner = await this.runnerService.create({
+    const { runner } = await this.runnerService.create({
       apiUrl: this.configService.getOrThrow('defaultRunner.apiUrl'),
       proxyUrl: this.configService.getOrThrow('defaultRunner.proxyUrl'),
       apiKey: this.configService.getOrThrow('defaultRunner.apiKey'),
@@ -110,10 +112,11 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       diskGiB: this.configService.getOrThrow('defaultRunner.disk'),
       gpu: this.configService.getOrThrow('defaultRunner.gpu'),
       gpuType: this.configService.getOrThrow('defaultRunner.gpuType'),
-      region: this.configService.getOrThrow('defaultRegion.id'),
+      regionId: this.configService.getOrThrow('defaultRegion.id'),
       class: this.configService.getOrThrow('defaultRunner.class'),
       domain: this.configService.getOrThrow('defaultRunner.domain'),
       version: this.configService.get('defaultRunner.version') || '0',
+      name: this.configService.getOrThrow('defaultRunner.name'),
     })
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
