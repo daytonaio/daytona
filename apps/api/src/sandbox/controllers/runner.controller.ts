@@ -3,7 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Body, Controller, Get, Post, Param, Patch, UseGuards, Query, Delete, HttpCode } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Param,
+  Patch,
+  UseGuards,
+  Query,
+  Delete,
+  HttpCode,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { RunnerService } from '../services/runner.service'
 import {
@@ -42,6 +55,8 @@ import { OrganizationResourcePermission } from '../../organization/enums/organiz
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { CreateRunnerResponseDto } from '../dto/create-runner-response.dto'
 import { RunnerFullDto } from '../dto/runner-full.dto'
+import { RegionType } from '../../region/enums/region-type.enum'
+import { RegionService } from '../../region/services/region.service'
 
 @ApiTags('runners')
 @Controller('runners')
@@ -49,7 +64,10 @@ import { RunnerFullDto } from '../dto/runner-full.dto'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class RunnerController {
-  constructor(private readonly runnerService: RunnerService) {}
+  constructor(
+    private readonly runnerService: RunnerService,
+    private readonly regionService: RegionService,
+  ) {}
 
   @Post()
   @HttpCode(201)
@@ -82,6 +100,18 @@ export class RunnerController {
     @Body() createRunnerDto: CreateRunnerDto,
     @AuthContext() authContext: OrganizationAuthContext,
   ): Promise<CreateRunnerResponseDto> {
+    // validate that the runner region is a custom region owned by the organization
+    const region = await this.regionService.findOne(createRunnerDto.regionId)
+
+    if (!region || region.organizationId !== authContext.organizationId) {
+      throw new NotFoundException('Region not found')
+    }
+
+    if (region.regionType !== RegionType.CUSTOM) {
+      throw new BadRequestException('Invalid region type')
+    }
+
+    // create the runner
     const { runner, apiKey } = await this.runnerService.create(
       {
         domain: createRunnerDto.domain,
@@ -98,8 +128,9 @@ export class RunnerController {
         // TODO
         version: '0',
       },
-      authContext.organization,
+      region,
     )
+
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)
   }
 
@@ -141,8 +172,17 @@ export class RunnerController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Query('region') regionName?: string,
   ): Promise<RunnerDto[]> {
-    const runners = await this.runnerService.findAll(authContext.organizationId, regionName)
-    return runners.map(RunnerDto.fromRunner)
+    if (!regionName) {
+      return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
+    }
+
+    // validate that the region is a custom region owned by the organization
+    const region = await this.regionService.findOneByName(regionName, authContext.organizationId)
+    if (!region || region.regionType !== RegionType.CUSTOM) {
+      throw new NotFoundException('Region not found')
+    }
+
+    return this.runnerService.findAllByRegion(region)
   }
 
   @Get(':id')

@@ -29,7 +29,7 @@ import { useRegions } from '@/hooks/useRegions'
 const Regions: React.FC = () => {
   const { regionsApi } = useApi()
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
-  const { organizationRegions, loadingRegions, refreshRegions } = useRegions()
+  const { regions, loadingRegions, refreshRegions } = useRegions()
 
   const [regionIsLoading, setRegionIsLoading] = useState<Record<string, boolean>>({})
 
@@ -169,7 +169,7 @@ const Regions: React.FC = () => {
       </Dialog>
 
       <RegionTable
-        data={organizationRegions}
+        data={regions}
         loading={loadingRegions}
         isLoadingRegion={(region) => regionIsLoading[region.id] || false}
         deletePermitted={deletePermitted}

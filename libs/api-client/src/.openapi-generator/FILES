@@ -124,6 +124,7 @@ models/rate-limit-config.ts
 models/rate-limit-entry.ts
 models/region-quota.ts
 models/region-screenshot-response.ts
+models/region-type.ts
 models/region-usage-overview.ts
 models/region.ts
 models/registry-push-access-dto.ts

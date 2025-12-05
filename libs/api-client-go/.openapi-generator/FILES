@@ -122,6 +122,7 @@ model_rate_limit_entry.go
 model_region.go
 model_region_quota.go
 model_region_screenshot_response.go
+model_region_type.go
 model_region_usage_overview.go
 model_registry_push_access_dto.go
 model_replace_request.go

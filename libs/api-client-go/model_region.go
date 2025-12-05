@@ -27,6 +27,8 @@ type Region struct {
 	Name string `json:"name"`
 	// Organization ID
 	OrganizationId NullableString `json:"organizationId,omitempty"`
+	// The type of the region
+	RegionType RegionType `json:"regionType"`
 	// Creation timestamp
 	CreatedAt string `json:"createdAt"`
 	// Last update timestamp
@@ -40,10 +42,11 @@ type _Region Region
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegion(id string, name string, createdAt string, updatedAt string) *Region {
+func NewRegion(id string, name string, regionType RegionType, createdAt string, updatedAt string) *Region {
 	this := Region{}
 	this.Id = id
 	this.Name = name
+	this.RegionType = regionType
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	return &this
@@ -148,6 +151,30 @@ func (o *Region) UnsetOrganizationId() {
 	o.OrganizationId.Unset()
 }
 
+// GetRegionType returns the RegionType field value
+func (o *Region) GetRegionType() RegionType {
+	if o == nil {
+		var ret RegionType
+		return ret
+	}
+
+	return o.RegionType
+}
+
+// GetRegionTypeOk returns a tuple with the RegionType field value
+// and a boolean to check if the value has been set.
+func (o *Region) GetRegionTypeOk() (*RegionType, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.RegionType, true
+}
+
+// SetRegionType sets field value
+func (o *Region) SetRegionType(v RegionType) {
+	o.RegionType = v
+}
+
 // GetCreatedAt returns the CreatedAt field value
 func (o *Region) GetCreatedAt() string {
 	if o == nil {
@@ -211,6 +238,7 @@ func (o Region) ToMap() (map[string]interface{}, error) {
 	if o.OrganizationId.IsSet() {
 		toSerialize["organizationId"] = o.OrganizationId.Get()
 	}
+	toSerialize["regionType"] = o.RegionType
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 
@@ -228,6 +256,7 @@ func (o *Region) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"id",
 		"name",
+		"regionType",
 		"createdAt",
 		"updatedAt",
 	}
@@ -262,6 +291,7 @@ func (o *Region) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "regionType")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
 		o.AdditionalProperties = additionalProperties

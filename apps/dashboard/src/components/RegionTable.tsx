@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Region } from '@daytonaio/api-client'
+import { Region, RegionType } from '@daytonaio/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -209,6 +209,10 @@ const getColumns = ({
       accessorKey: 'createdAt',
       header: 'Created',
       cell: ({ row }) => {
+        if (row.original.regionType !== RegionType.CUSTOM) {
+          return null
+        }
+
         const createdAt = row.original.createdAt
         const relativeTime = getRelativeTimeString(createdAt).relativeTimeString
         const fullDate = new Date(createdAt).toLocaleString()
@@ -235,8 +239,8 @@ const getColumns = ({
       return null
     },
     cell: ({ row }) => {
-      if (!deletePermitted) {
-        return null
+      if (row.original.regionType !== RegionType.CUSTOM || !deletePermitted) {
+        return <div className="flex justify-end h-8 w-8" />
       }
 
       const isLoading = isLoadingRegion(row.original)

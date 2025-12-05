@@ -1091,14 +1091,6 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Include shared regions
-          explode: true
-          in: query
-          name: includeShared
-          required: false
-          schema:
-            type: boolean
-          style: form
       responses:
         '200':
           content:
@@ -8722,10 +8714,18 @@ components:
         - assignedRoleIds
         - role
       type: object
+    RegionType:
+      description: The type of the region
+      enum:
+        - shared
+        - dedicated
+        - custom
+      type: string
     Region:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
         createdAt: 2023-01-01T00:00:00.000Z
+        regionType: shared
         name: us-east-1
         id: '123456789012'
         updatedAt: 2023-01-01T00:00:00.000Z
@@ -8743,6 +8743,11 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
           nullable: true
           type: string
+        regionType:
+          allOf:
+            - $ref: '#/components/schemas/RegionType'
+          description: The type of the region
+          example: shared
         createdAt:
           description: Creation timestamp
           example: 2023-01-01T00:00:00.000Z
@@ -8755,6 +8760,7 @@ components:
         - createdAt
         - id
         - name
+        - regionType
         - updatedAt
       type: object
     CreateRegion:

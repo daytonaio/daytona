@@ -48,6 +48,7 @@ import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-reg
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -407,11 +408,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   /**
-   * @throws NotFoundException - If the region is not found, hidden, or not a shared region
+   * @throws NotFoundException - If the region is not found or not available to the organization
    */
   async validateOrganizationDefaultRegion(defaultRegionId: string): Promise<Region> {
     const region = await this.regionService.findOne(defaultRegionId)
-    if (!region || region.hidden || region.organizationId !== null) {
+    if (!region || region.regionType !== RegionType.SHARED) {
       throw new NotFoundException('Region not found')
     }
 

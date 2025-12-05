@@ -33,7 +33,7 @@ import { useRegions } from '@/hooks/useRegions'
 const Runners: React.FC = () => {
   const { runnersApi } = useApi()
   const { notificationSocket } = useNotificationSocket()
-  const { organizationRegions, loadingRegions, getRegionName } = useRegions()
+  const { customRegions: regions, loadingRegions, getRegionName } = useRegions()
 
   const [runners, setRunners] = useState<Runner[]>([])
   const [loadingRunnersData, setLoadingRunnersData] = useState(false)
@@ -182,14 +182,14 @@ const Runners: React.FC = () => {
     <div className="px-6 py-2">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Runners</h1>
-        {writePermitted && organizationRegions.length > 0 && (
-          <CreateRunnerDialog regions={organizationRegions} onCreateRunner={handleCreateRunner} />
+        {writePermitted && regions.length > 0 && (
+          <CreateRunnerDialog regions={regions} onCreateRunner={handleCreateRunner} />
         )}
       </div>
 
       <RunnerTable
         data={runners}
-        regions={organizationRegions}
+        regions={regions}
         loading={loadingRunnersData || loadingRegions}
         isLoadingRunner={(runner) => runnerIsLoading[runner.id] || false}
         writePermitted={writePermitted}

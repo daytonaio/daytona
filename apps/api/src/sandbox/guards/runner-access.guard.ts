@@ -15,6 +15,7 @@ import { RegionService } from '../../region/services/region.service'
 import { RunnerService } from '../services/runner.service'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @Injectable()
 export class RunnerAccessGuard implements CanActivate {
@@ -33,11 +34,21 @@ export class RunnerAccessGuard implements CanActivate {
     const authContext: OrganizationAuthContext = request.user
 
     try {
-      const runnerRegionId = await this.runnerService.getRegionId(runnerId)
+      const runner = await this.runnerService.findOne(runnerId)
+      if (!runner) {
+        throw new NotFoundException('Runner not found')
+      }
+
       if (authContext.role !== SystemRole.ADMIN) {
-        const regionOrganizationId = await this.regionService.getOrganizationId(runnerRegionId)
-        if (regionOrganizationId !== authContext.organizationId) {
+        const region = await this.regionService.findOne(runner.region)
+        if (!region) {
+          throw new NotFoundException('Region not found')
+        }
+        if (region.organizationId !== authContext.organizationId) {
           throw new ForbiddenException('Request organization ID does not match resource organization ID')
+        }
+        if (region.regionType !== RegionType.CUSTOM) {
+          throw new ForbiddenException('Runner is not in a custom region')
         }
       }
       return true

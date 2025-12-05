@@ -649,8 +649,8 @@ export class SnapshotService {
    * Get all regions for snapshot propagation for an organization.
    *
    * Regions are considered for snapshot propagation if:
-   * - they are organization regions
-   * - they are shared regions with quotas allocated for the organization
+   * - the region is associated with the organization
+   * - the region is not associated with an organization, but the organization has quotas allocated for the region
    *
    * @param organizationId - The ID of the organization.
    * @returns The regions for snapshot propagation.

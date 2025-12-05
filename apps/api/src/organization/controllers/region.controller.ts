@@ -9,7 +9,6 @@ import {
   Logger,
   UseGuards,
   HttpCode,
-  Query,
   Post,
   UseInterceptors,
   Body,
@@ -17,16 +16,7 @@ import {
   NotFoundException,
   Delete,
 } from '@nestjs/common'
-import {
-  ApiOAuth2,
-  ApiResponse,
-  ApiOperation,
-  ApiTags,
-  ApiBearerAuth,
-  ApiHeader,
-  ApiQuery,
-  ApiParam,
-} from '@nestjs/swagger'
+import { ApiOAuth2, ApiResponse, ApiOperation, ApiTags, ApiBearerAuth, ApiHeader, ApiParam } from '@nestjs/swagger'
 import { RequiredOrganizationResourcePermissions } from '../decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../guards/organization-resource-action.guard'
@@ -42,8 +32,8 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { CreateRegionDto } from '../../region/dto/create-region.dto'
 import { RegionDto } from '../../region/dto/region.dto'
 import { RegionService } from '../../region/services/region.service'
-import { Region } from '../../region/entities/region.entity'
 import { RegionAccessGuard } from '../../region/guards/region-access.guard'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @ApiTags('regions')
 @Controller('regions')
@@ -70,30 +60,18 @@ export class OrganizationRegionController {
     description: 'List of all regions',
     type: [RegionDto],
   })
-  @ApiQuery({
-    name: 'includeShared',
-    required: false,
-    type: Boolean,
-    description: 'Include shared regions',
-  })
-  async listRegions(
-    @AuthContext() authContext: OrganizationAuthContext,
-    @Query('includeShared') includeShared?: boolean,
-  ): Promise<RegionDto[]> {
-    const regions: Region[] = []
+  async listRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
+    const customRegions = await this.regionService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
 
-    if (includeShared) {
-      const sharedRegions = await this.regionService.findAll(null)
-      const regionQuotas = await this.organizationService.getRegionQuotas(authContext.organizationId)
-      const availableSharedRegions = sharedRegions.filter(
-        (region) => !region.hidden || regionQuotas.some((quota) => quota.regionId === region.id),
-      )
-      regions.push(...availableSharedRegions)
-    }
+    const dedicatedRegions = await this.regionService.findAllByRegionType(RegionType.DEDICATED)
+    const regionQuotas = await this.organizationService.getRegionQuotas(authContext.organizationId)
+    const availableDedicatedRegions = dedicatedRegions.filter((region) =>
+      regionQuotas.some((quota) => quota.regionId === region.id),
+    )
 
-    const organizationRegions = await this.regionService.findAll(authContext.organizationId)
-    regions.push(...organizationRegions)
+    const sharedRegions = await this.regionService.findAllByRegionType(RegionType.SHARED)
 
+    const regions = [...customRegions, ...availableDedicatedRegions, ...sharedRegions]
     return regions.map(RegionDto.fromRegion)
   }
 
@@ -128,6 +106,7 @@ export class OrganizationRegionController {
       {
         ...createRegionDto,
         enforceQuotas: false,
+        regionType: RegionType.CUSTOM,
       },
       authContext.organizationId,
     )
