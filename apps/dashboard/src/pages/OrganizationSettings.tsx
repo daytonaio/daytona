@@ -5,28 +5,41 @@
 
 import { DeleteOrganizationDialog } from '@/components/Organizations/DeleteOrganizationDialog'
 import { LeaveOrganizationDialog } from '@/components/Organizations/LeaveOrganizationDialog'
+import { SetDefaultRegionDialog } from '@/components/Organizations/SetDefaultRegionDialog'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { useDeleteOrganizationMutation } from '@/hooks/mutations/useDeleteOrganizationMutation'
 import { useLeaveOrganizationMutation } from '@/hooks/mutations/useLeaveOrganizationMutation'
+import { useSetOrganizationDefaultRegionMutation } from '@/hooks/mutations/useSetOrganizationDefaultRegionMutation'
 import { useOrganizations } from '@/hooks/useOrganizations'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { CheckIcon, CopyIcon } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useCopyToClipboard } from 'usehooks-ts'
 
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { regions, loadingRegions, getRegionName } = useRegions()
 
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()
+  const setDefaultRegionMutation = useSetOrganizationDefaultRegionMutation()
+  const [showSetDefaultRegionDialog, setSetDefaultRegionDialog] = useState(false)
   const [copied, copyToClipboard] = useCopyToClipboard()
+
+  useEffect(() => {
+    if (selectedOrganization && !selectedOrganization.defaultRegionId) {
+      setSetDefaultRegionDialog(true)
+    }
+  }, [selectedOrganization])
 
   const handleDeleteOrganization = async () => {
     if (!selectedOrganization) {
@@ -54,6 +67,26 @@ const OrganizationSettings: React.FC = () => {
       return true
     } catch (error) {
       handleApiError(error, 'Failed to leave organization')
+      return false
+    }
+  }
+
+  const handleSetDefaultRegion = async (defaultRegionId: string): Promise<boolean> => {
+    if (!selectedOrganization) {
+      return false
+    }
+
+    try {
+      await setDefaultRegionMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        defaultRegionId,
+      })
+      toast.success('Default region set successfully')
+      await refreshOrganizations(selectedOrganization.id)
+      setSetDefaultRegionDialog(false)
+      return true
+    } catch (error) {
+      handleApiError(error, 'Failed to set default region')
       return false
     }
   }
@@ -116,12 +149,20 @@ const OrganizationSettings: React.FC = () => {
                 <FieldLabel htmlFor="organization-default-region">Default Region</FieldLabel>
                 <FieldDescription>The default target for creating sandboxes in this organization.</FieldDescription>
               </FieldContent>
-              <Input
-                id="organization-default-region"
-                value={selectedOrganization.defaultRegionId}
-                readOnly
-                className="flex-1 uppercase"
-              />
+              {selectedOrganization.defaultRegionId ? (
+                <Input
+                  id="organization-default-region"
+                  value={getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
+                  readOnly
+                  className="flex-1 uppercase"
+                />
+              ) : (
+                <div className="flex sm:justify-end">
+                  <Button onClick={() => setSetDefaultRegionDialog(true)} variant="secondary">
+                    Set Region
+                  </Button>
+                </div>
+              )}
             </Field>
           </CardContent>
         </Card>
@@ -157,6 +198,13 @@ const OrganizationSettings: React.FC = () => {
           </Card>
         )}
       </div>
+      <SetDefaultRegionDialog
+        open={showSetDefaultRegionDialog}
+        onOpenChange={setSetDefaultRegionDialog}
+        regions={regions}
+        loadingRegions={loadingRegions}
+        onSetDefaultRegion={handleSetDefaultRegion}
+      />
     </div>
   )
 }
