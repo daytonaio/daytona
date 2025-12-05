@@ -24,4 +24,16 @@ export interface CreateRegion {
    * @memberof CreateRegion
    */
   name: string
+  /**
+   * Proxy URL for the region
+   * @type {string}
+   * @memberof CreateRegion
+   */
+  proxyUrl?: string | null
+  /**
+   * SSH Gateway URL for the region
+   * @type {string}
+   * @memberof CreateRegion
+   */
+  sshGatewayUrl?: string | null
 }

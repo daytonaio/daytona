@@ -15,4 +15,53 @@ export class CreateRegionDto {
   @IsString()
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    description: 'Proxy URL for the region',
+    example: 'https://proxy.example.com',
+    nullable: true,
+    required: false,
+  })
+  proxyUrl?: string
+
+  @ApiProperty({
+    description: 'SSH Gateway URL for the region',
+    example: 'ssh://ssh-gateway.example.com',
+    nullable: true,
+    required: false,
+  })
+  sshGatewayUrl?: string
+}
+
+@ApiSchema({ name: 'CreateRegionResponse' })
+export class CreateRegionResponseDto {
+  @ApiProperty({
+    description: 'ID of the created region',
+    example: 'region_12345',
+  })
+  @IsString()
+  @IsNotEmpty()
+  id: string
+
+  @ApiProperty({
+    description: 'Proxy API key for the region',
+    example: 'proxy-api-key-xyz',
+    nullable: true,
+    required: false,
+  })
+  proxyApiKey?: string
+
+  @ApiProperty({
+    description: 'SSH Gateway API key for the region',
+    example: 'ssh-gateway-api-key-abc',
+    nullable: true,
+    required: false,
+  })
+  sshGatewayApiKey?: string
+
+  constructor(params: { id: string; proxyApiKey?: string; sshGatewayApiKey?: string }) {
+    this.id = params.id
+    this.proxyApiKey = params.proxyApiKey
+    this.sshGatewayApiKey = params.sshGatewayApiKey
+  }
 }

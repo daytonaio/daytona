@@ -7,12 +7,17 @@ import { ApiKey } from '../../api-key/api-key.entity'
 import { OrganizationUser } from '../../organization/entities/organization-user.entity'
 import { Organization } from '../../organization/entities/organization.entity'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { ProxyContext } from './proxy-context.interface'
+import { RunnerContext } from './runner-context.interface'
+import { SshGatewayContext } from './ssh-gateway-context.interface'
+import { RegionProxyContext } from './region-proxy.interface'
+import { RegionSSHGatewayContext } from './region-ssh-gateway.interface'
 
 export interface BaseAuthContext {
   role: ApiRole
 }
 
-export type ApiRole = SystemRole | 'proxy' | 'runner' | 'ssh-gateway'
+export type ApiRole = SystemRole | 'proxy' | 'runner' | 'ssh-gateway' | 'region-proxy' | 'region-ssh-gateway'
 
 export interface AuthContext extends BaseAuthContext {
   userId: string
@@ -35,3 +40,12 @@ export interface OrganizationAuthContext extends AuthContext {
 export function isOrganizationAuthContext(user: BaseAuthContext): user is OrganizationAuthContext {
   return 'organizationId' in user
 }
+
+export type AuthContextType =
+  | AuthContext
+  | OrganizationAuthContext
+  | ProxyContext
+  | RunnerContext
+  | SshGatewayContext
+  | RegionProxyContext
+  | RegionSSHGatewayContext

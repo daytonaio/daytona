@@ -7,7 +7,6 @@ import { ConflictException, Injectable, Logger, NotFoundException } from '@nestj
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository, ArrayOverlap } from 'typeorm'
 import { ApiKey } from './api-key.entity'
-import * as crypto from 'crypto'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { OnAsyncEvent } from '../common/decorators/on-async-event.decorator'
@@ -15,6 +14,7 @@ import { OrganizationEvents } from '../organization/constants/organization-event
 import { OrganizationResourcePermissionsUnassignedEvent } from '../organization/events/organization-resource-permissions-unassigned.event'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
+import { generateApiKeyHash, generateApiKeyValue } from '../common/utils/api-key'
 
 @Injectable()
 export class ApiKeyService {
@@ -26,14 +26,6 @@ export class ApiKeyService {
     private readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
   ) {}
-
-  private generateApiKeyValue(): string {
-    return `dtn_${crypto.randomBytes(32).toString('hex')}`
-  }
-
-  public generateApiKeyHash(value: string): string {
-    return crypto.createHash('sha256').update(value).digest('hex')
-  }
 
   private getApiKeyPrefix(value: string): string {
     return value.substring(0, 3)
@@ -56,13 +48,13 @@ export class ApiKeyService {
       throw new ConflictException('API key with this name already exists')
     }
 
-    const value = apiKeyValue || this.generateApiKeyValue()
+    const value = apiKeyValue || generateApiKeyValue()
 
     const apiKey = await this.apiKeyRepository.save({
       organizationId,
       userId,
       name,
-      keyHash: this.generateApiKeyHash(value),
+      keyHash: generateApiKeyHash(value),
       keyPrefix: this.getApiKeyPrefix(value),
       keySuffix: this.getApiKeySuffix(value),
       permissions,
@@ -107,7 +99,7 @@ export class ApiKeyService {
   async getApiKeyByValue(value: string): Promise<ApiKey> {
     const apiKey = await this.apiKeyRepository.findOne({
       where: {
-        keyHash: this.generateApiKeyHash(value),
+        keyHash: generateApiKeyHash(value),
       },
     })
 
