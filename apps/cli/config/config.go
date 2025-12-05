@@ -79,6 +79,15 @@ func (c *Config) GetActiveProfile() (Profile, error) {
 		return Profile{}, ErrNoProfilesFound
 	}
 
+	// Backward compatibility: if no active profile is set but profiles exist, use the first one
+	if c.ActiveProfileId == "" {
+		c.ActiveProfileId = c.Profiles[0].Id
+		if err := c.Save(); err != nil {
+			return Profile{}, err
+		}
+		return c.Profiles[0], nil
+	}
+
 	for _, profile := range c.Profiles {
 		if profile.Id == c.ActiveProfileId {
 			return profile, nil
@@ -154,6 +163,16 @@ func (c *Config) GetProfile(profileId string) (Profile, error) {
 	}
 
 	return Profile{}, errors.New("profile not found")
+}
+
+func (c *Config) SetActiveProfile(profileId string) error {
+	_, err := c.GetProfile(profileId)
+	if err != nil {
+		return err
+	}
+
+	c.ActiveProfileId = profileId
+	return c.Save()
 }
 
 func getConfigPath() (string, error) {

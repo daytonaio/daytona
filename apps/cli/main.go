@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/cli/cmd/auth"
 	"github.com/daytonaio/daytona/cli/cmd/mcp"
 	"github.com/daytonaio/daytona/cli/cmd/organization"
+	"github.com/daytonaio/daytona/cli/cmd/profile"
 	"github.com/daytonaio/daytona/cli/cmd/sandbox"
 	"github.com/daytonaio/daytona/cli/cmd/snapshot"
 	"github.com/daytonaio/daytona/cli/cmd/volume"
@@ -42,6 +43,7 @@ func init() {
 	rootCmd.AddCommand(snapshot.SnapshotsCmd)
 	rootCmd.AddCommand(volume.VolumeCmd)
 	rootCmd.AddCommand(organization.OrganizationCmd)
+	rootCmd.AddCommand(profile.ProfileCmd)
 	rootCmd.AddCommand(mcp.MCPCmd)
 	rootCmd.AddCommand(cmd.DocsCmd)
 	rootCmd.AddCommand(cmd.AutoCompleteCmd)
