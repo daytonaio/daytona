@@ -27,6 +27,7 @@ model_api_key_list.go
 model_api_key_response.go
 model_audit_log.go
 model_build_info.go
+model_cli_config.go
 model_command.go
 model_completion_context.go
 model_completion_item.go

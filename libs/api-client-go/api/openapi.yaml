@@ -7399,6 +7399,20 @@ components:
       required:
         - text
       type: object
+    CliConfig:
+      properties:
+        clientId:
+          description: OIDC client ID for CLI
+          example: daytona-cli-client
+          type: string
+        callbackPort:
+          description: OAuth callback port for CLI
+          example: '3009'
+          type: string
+      required:
+        - callbackPort
+        - clientId
+      type: object
     PosthogConfig:
       properties:
         apiKey:
@@ -7427,8 +7441,13 @@ components:
           description: OIDC audience
           example: daytona-api
           type: string
+        cli:
+          allOf:
+            - $ref: '#/components/schemas/CliConfig'
+          description: CLI configuration
       required:
         - audience
+        - cli
         - clientId
         - issuer
       type: object

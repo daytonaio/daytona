@@ -21,6 +21,7 @@ from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
 from daytona_api_client.models.audit_log import AuditLog
 from daytona_api_client.models.build_info import BuildInfo
+from daytona_api_client.models.cli_config import CliConfig
 from daytona_api_client.models.command import Command
 from daytona_api_client.models.completion_context import CompletionContext
 from daytona_api_client.models.completion_item import CompletionItem

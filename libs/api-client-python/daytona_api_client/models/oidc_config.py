@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
+from daytona_api_client.models.cli_config import CliConfig
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -30,8 +31,9 @@ class OidcConfig(BaseModel):
     issuer: StrictStr = Field(description="OIDC issuer")
     client_id: StrictStr = Field(description="OIDC client ID", alias="clientId")
     audience: StrictStr = Field(description="OIDC audience")
+    cli: CliConfig = Field(description="CLI configuration")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["issuer", "clientId", "audience"]
+    __properties: ClassVar[List[str]] = ["issuer", "clientId", "audience", "cli"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -74,6 +76,9 @@ class OidcConfig(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of cli
+        if self.cli:
+            _dict['cli'] = self.cli.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -93,7 +98,8 @@ class OidcConfig(BaseModel):
         _obj = cls.model_validate({
             "issuer": obj.get("issuer"),
             "clientId": obj.get("clientId"),
-            "audience": obj.get("audience")
+            "audience": obj.get("audience"),
+            "cli": CliConfig.from_dict(obj["cli"]) if obj.get("cli") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

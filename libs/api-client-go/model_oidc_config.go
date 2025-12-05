@@ -26,7 +26,9 @@ type OidcConfig struct {
 	// OIDC client ID
 	ClientId string `json:"clientId"`
 	// OIDC audience
-	Audience             string `json:"audience"`
+	Audience string `json:"audience"`
+	// CLI configuration
+	Cli                  CliConfig `json:"cli"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -36,11 +38,12 @@ type _OidcConfig OidcConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOidcConfig(issuer string, clientId string, audience string) *OidcConfig {
+func NewOidcConfig(issuer string, clientId string, audience string, cli CliConfig) *OidcConfig {
 	this := OidcConfig{}
 	this.Issuer = issuer
 	this.ClientId = clientId
 	this.Audience = audience
+	this.Cli = cli
 	return &this
 }
 
@@ -124,6 +127,30 @@ func (o *OidcConfig) SetAudience(v string) {
 	o.Audience = v
 }
 
+// GetCli returns the Cli field value
+func (o *OidcConfig) GetCli() CliConfig {
+	if o == nil {
+		var ret CliConfig
+		return ret
+	}
+
+	return o.Cli
+}
+
+// GetCliOk returns a tuple with the Cli field value
+// and a boolean to check if the value has been set.
+func (o *OidcConfig) GetCliOk() (*CliConfig, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Cli, true
+}
+
+// SetCli sets field value
+func (o *OidcConfig) SetCli(v CliConfig) {
+	o.Cli = v
+}
+
 func (o OidcConfig) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -137,6 +164,7 @@ func (o OidcConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize["issuer"] = o.Issuer
 	toSerialize["clientId"] = o.ClientId
 	toSerialize["audience"] = o.Audience
+	toSerialize["cli"] = o.Cli
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -153,6 +181,7 @@ func (o *OidcConfig) UnmarshalJSON(data []byte) (err error) {
 		"issuer",
 		"clientId",
 		"audience",
+		"cli",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -185,6 +214,7 @@ func (o *OidcConfig) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "issuer")
 		delete(additionalProperties, "clientId")
 		delete(additionalProperties, "audience")
+		delete(additionalProperties, "cli")
 		o.AdditionalProperties = additionalProperties
 	}
 
