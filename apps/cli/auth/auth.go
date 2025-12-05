@@ -6,10 +6,13 @@ package auth
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	_ "embed"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,13 +25,13 @@ import (
 //go:embed auth_success.html
 var successHTML []byte
 
-func StartCallbackServer(expectedState string) (string, error) {
+func StartCallbackServer(expectedState string, callbackPort string) (string, error) {
 	var code string
 	var err error
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	server := &http.Server{Addr: fmt.Sprintf(":%s", config.GetAuth0CallbackPort())}
+	server := &http.Server{Addr: fmt.Sprintf(":%s", callbackPort)}
 
 	http.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("state") != expectedState {
@@ -80,6 +83,27 @@ func GenerateRandomState() (string, error) {
 	return base64.URLEncoding.EncodeToString(b), nil
 }
 
+// GeneratePKCEVerifier generates a PKCE code verifier (random string)
+func GeneratePKCEVerifier() (string, error) {
+	// Generate 32 random bytes (256 bits) for the verifier
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate PKCE verifier: %w", err)
+	}
+
+	// Base64URL encode without padding
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+// GeneratePKCEChallenge generates a PKCE code challenge from a verifier using S256 method
+func GeneratePKCEChallenge(verifier string) string {
+	// SHA256 hash the verifier
+	hash := sha256.Sum256([]byte(verifier))
+	// Base64URL encode without padding
+	return base64.RawURLEncoding.EncodeToString(hash[:])
+}
+
 func RefreshTokenIfNeeded(ctx context.Context) error {
 	c, err := config.GetConfig()
 	if err != nil {
@@ -104,23 +128,53 @@ func RefreshTokenIfNeeded(ctx context.Context) error {
 		return nil
 	}
 
-	provider, err := oidc.NewProvider(ctx, config.GetAuth0Domain())
+	// Fetch CLI auth config from API (no authentication required)
+	cliAuthConfig, err := config.GetCliAuthConfigFromAPI(activeProfile.Api.Url)
+	if err != nil {
+		return fmt.Errorf("failed to fetch CLI authentication configuration from API: %w", err)
+	}
+
+	// Fetch discovery document to get the actual issuer (handles trailing slash issues)
+	discoveryURL := strings.TrimSuffix(cliAuthConfig.Issuer, "/") + "/.well-known/openid-configuration"
+
+	type DiscoveryDoc struct {
+		Issuer string `json:"issuer"`
+	}
+
+	var discoveryDoc DiscoveryDoc
+	resp, err := http.Get(discoveryURL)
+	if err == nil && resp.StatusCode == 200 {
+		if err := json.NewDecoder(resp.Body).Decode(&discoveryDoc); err == nil && discoveryDoc.Issuer != "" {
+			// Use the issuer from the discovery document
+			cliAuthConfig.Issuer = discoveryDoc.Issuer
+		}
+		resp.Body.Close()
+	}
+
+	provider, err := oidc.NewProvider(ctx, cliAuthConfig.Issuer)
 	if err != nil {
 		return fmt.Errorf("failed to initialize OIDC provider: %w", err)
 	}
 
+	// Get callback port from CLI config, default to 3009 if not provided
+	callbackPort := cliAuthConfig.CallbackPort
+	if callbackPort == "" {
+		callbackPort = "3009"
+	}
+
+	// Configure OAuth2 without client secret (public client)
 	oauth2Config := oauth2.Config{
-		ClientID:     config.GetAuth0ClientId(),
-		ClientSecret: config.GetAuth0ClientSecret(),
-		RedirectURL:  fmt.Sprintf("http://localhost:%s/callback", config.GetAuth0CallbackPort()),
-		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile"},
+		ClientID:    cliAuthConfig.ClientId,
+		RedirectURL: fmt.Sprintf("http://localhost:%s/callback", callbackPort),
+		Endpoint:    provider.Endpoint(),
+		Scopes:      []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile"},
 	}
 
 	token := &oauth2.Token{
 		RefreshToken: activeProfile.Api.Token.RefreshToken,
 	}
 
+	// Refresh token - for public clients, the refresh token itself is sufficient
 	newToken, err := oauth2Config.TokenSource(ctx, token).Token()
 	if err != nil {
 		return fmt.Errorf("use 'daytona login' to reauthenticate: %w", err)

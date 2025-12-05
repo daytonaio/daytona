@@ -38,6 +38,10 @@ const configuration = {
     issuer: process.env.OIDC_ISSUER_BASE_URL || process.env.OID_ISSUER_BASE_URL,
     publicIssuer: process.env.PUBLIC_OIDC_DOMAIN,
     audience: process.env.OIDC_AUDIENCE || process.env.OID_AUDIENCE,
+    cli: {
+      clientId: process.env.OIDC_CLI_CLIENT_ID || process.env.OIDC_CLIENT_ID || process.env.OID_CLIENT_ID,
+      callbackPort: process.env.OIDC_CLI_CALLBACK_PORT || '3009',
+    },
     managementApi: {
       enabled: process.env.OIDC_MANAGEMENT_API_ENABLED === 'true',
       clientId: process.env.OIDC_MANAGEMENT_API_CLIENT_ID,

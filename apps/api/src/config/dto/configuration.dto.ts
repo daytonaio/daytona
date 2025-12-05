@@ -85,6 +85,23 @@ export class RateLimitConfig {
   sandboxLifecycle?: RateLimitEntry
 }
 
+@ApiSchema({ name: 'CliConfig' })
+export class CliConfig {
+  @ApiProperty({
+    description: 'OIDC client ID for CLI',
+    example: 'daytona-cli-client',
+  })
+  @IsString()
+  clientId: string
+
+  @ApiProperty({
+    description: 'OAuth callback port for CLI',
+    example: '3009',
+  })
+  @IsString()
+  callbackPort: string
+}
+
 @ApiSchema({ name: 'OidcConfig' })
 export class OidcConfig {
   @ApiProperty({
@@ -107,9 +124,15 @@ export class OidcConfig {
   })
   @IsString()
   audience: string
+
+  @ApiProperty({
+    description: 'CLI configuration',
+    type: CliConfig,
+  })
+  cli: CliConfig
 }
 
-@ApiExtraModels(Announcement)
+@ApiExtraModels(Announcement, CliConfig)
 @ApiSchema({ name: 'DaytonaConfiguration' })
 export class ConfigurationDto {
   @ApiProperty({
@@ -241,6 +264,10 @@ export class ConfigurationDto {
       issuer: configService.get('oidc.publicIssuer') || configService.getOrThrow('oidc.issuer'),
       clientId: configService.getOrThrow('oidc.clientId'),
       audience: configService.getOrThrow('oidc.audience'),
+      cli: {
+        clientId: configService.get('oidc.cli.clientId') || configService.getOrThrow('oidc.clientId'),
+        callbackPort: configService.get('oidc.cli.callbackPort') || '3009',
+      },
     }
     this.linkedAccountsEnabled = configService.get('oidc.managementApi.enabled')
     this.proxyTemplateUrl = configService.getOrThrow('proxy.templateUrl')
