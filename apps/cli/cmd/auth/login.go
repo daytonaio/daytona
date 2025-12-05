@@ -5,7 +5,10 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/daytonaio/daytona/cli/auth"
@@ -143,19 +146,76 @@ func createInitialProfile(c *config.Config) (config.Profile, error) {
 }
 
 func login(ctx context.Context) (*oauth2.Token, error) {
-	provider, err := oidc.NewProvider(ctx, config.GetAuth0Domain())
+	// Get active profile to determine API URL
+	c, err := config.GetConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get config: %w", err)
+	}
+
+	activeProfile, err := c.GetActiveProfile()
+	if err != nil {
+		if err == config.ErrNoProfilesFound {
+			// Create initial profile if none exists
+			activeProfile, err = createInitialProfile(c)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create initial profile: %w", err)
+			}
+		} else {
+			return nil, fmt.Errorf("failed to get active profile: %w", err)
+		}
+	}
+
+	// Fetch CLI auth config from API (no authentication required)
+	cliAuthConfig, err := config.GetCliAuthConfigFromAPI(activeProfile.Api.Url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch CLI authentication configuration from API: %w", err)
+	}
+
+	// Fetch discovery document to get the actual issuer (handles trailing slash issues)
+	// Some OIDC providers (like Auth0) return issuer with trailing slash in discovery doc
+	discoveryURL := strings.TrimSuffix(cliAuthConfig.Issuer, "/") + "/.well-known/openid-configuration"
+
+	type DiscoveryDoc struct {
+		Issuer string `json:"issuer"`
+	}
+
+	var discoveryDoc DiscoveryDoc
+	resp, err := http.Get(discoveryURL)
+	if err == nil && resp.StatusCode == 200 {
+		if err := json.NewDecoder(resp.Body).Decode(&discoveryDoc); err == nil && discoveryDoc.Issuer != "" {
+			// Use the issuer from the discovery document
+			cliAuthConfig.Issuer = discoveryDoc.Issuer
+		}
+		resp.Body.Close()
+	}
+
+	// Initialize OIDC provider with the issuer (from discovery doc if available)
+	provider, err := oidc.NewProvider(ctx, cliAuthConfig.Issuer)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize OIDC provider: %w", err)
 	}
 
-	verifier := provider.Verifier(&oidc.Config{ClientID: config.GetAuth0ClientId()})
+	verifier := provider.Verifier(&oidc.Config{ClientID: cliAuthConfig.ClientId})
 
+	// Generate PKCE verifier and challenge
+	codeVerifier, err := auth.GeneratePKCEVerifier()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate PKCE verifier: %w", err)
+	}
+	codeChallenge := auth.GeneratePKCEChallenge(codeVerifier)
+
+	// Get callback port from CLI config, default to 3009 if not provided
+	callbackPort := cliAuthConfig.CallbackPort
+	if callbackPort == "" {
+		callbackPort = "3009"
+	}
+
+	// Configure OAuth2 without client secret (using PKCE instead)
 	oauth2Config := oauth2.Config{
-		ClientID:     config.GetAuth0ClientId(),
-		ClientSecret: config.GetAuth0ClientSecret(),
-		RedirectURL:  fmt.Sprintf("http://localhost:%s/callback", config.GetAuth0CallbackPort()),
-		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile"},
+		ClientID:    cliAuthConfig.ClientId,
+		RedirectURL: fmt.Sprintf("http://localhost:%s/callback", callbackPort),
+		Endpoint:    provider.Endpoint(),
+		Scopes:      []string{oidc.ScopeOpenID, oidc.ScopeOfflineAccess, "profile"},
 	}
 
 	state, err := auth.GenerateRandomState()
@@ -163,9 +223,12 @@ func login(ctx context.Context) (*oauth2.Token, error) {
 		return nil, fmt.Errorf("failed to generate random state: %w", err)
 	}
 
+	// Build auth URL with PKCE challenge
 	authURL := oauth2Config.AuthCodeURL(
 		state,
-		oauth2.SetAuthURLParam("audience", config.GetAuth0Audience()),
+		oauth2.SetAuthURLParam("audience", cliAuthConfig.Audience),
+		oauth2.SetAuthURLParam("code_challenge", codeChallenge),
+		oauth2.SetAuthURLParam("code_challenge_method", "S256"),
 	)
 
 	view_common.RenderInfoMessageBold("Opening the browser for authentication ...")
@@ -176,12 +239,17 @@ func login(ctx context.Context) (*oauth2.Token, error) {
 
 	_ = browser.OpenURL(authURL)
 
-	code, err := auth.StartCallbackServer(state)
+	code, err := auth.StartCallbackServer(state, callbackPort)
 	if err != nil {
 		return nil, fmt.Errorf("authentication failed: %w", err)
 	}
 
-	token, err := oauth2Config.Exchange(ctx, code)
+	// Exchange code for token with PKCE verifier
+	token, err := oauth2Config.Exchange(
+		ctx,
+		code,
+		oauth2.SetAuthURLParam("code_verifier", codeVerifier),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to exchange token: %w", err)
 	}

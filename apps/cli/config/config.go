@@ -7,8 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/cli/cmd"
@@ -239,51 +241,6 @@ func IsApiKeyAuth() bool {
 	return activeProfile.Api.Key != nil && activeProfile.Api.Token == nil
 }
 
-func GetAuth0Domain() string {
-	auth0Domain := os.Getenv("DAYTONA_AUTH0_DOMAIN")
-	if auth0Domain == "" {
-		auth0Domain = internal.Auth0Domain
-	}
-
-	return auth0Domain
-}
-
-func GetAuth0ClientId() string {
-	auth0ClientId := os.Getenv("DAYTONA_AUTH0_CLIENT_ID")
-	if auth0ClientId == "" {
-		auth0ClientId = internal.Auth0ClientId
-	}
-
-	return auth0ClientId
-}
-
-func GetAuth0ClientSecret() string {
-	auth0ClientSecret := os.Getenv("DAYTONA_AUTH0_CLIENT_SECRET")
-	if auth0ClientSecret == "" {
-		auth0ClientSecret = internal.Auth0ClientSecret
-	}
-
-	return auth0ClientSecret
-}
-
-func GetAuth0CallbackPort() string {
-	auth0CallbackPort := os.Getenv("DAYTONA_AUTH0_CALLBACK_PORT")
-	if auth0CallbackPort == "" {
-		auth0CallbackPort = internal.Auth0CallbackPort
-	}
-
-	return auth0CallbackPort
-}
-
-func GetAuth0Audience() string {
-	auth0Audience := os.Getenv("DAYTONA_AUTH0_AUDIENCE")
-	if auth0Audience == "" {
-		auth0Audience = internal.Auth0Audience
-	}
-
-	return auth0Audience
-}
-
 func GetDaytonaApiUrl() string {
 	daytonaApiUrl := os.Getenv("DAYTONA_API_URL")
 	if daytonaApiUrl == "" {
@@ -291,4 +248,82 @@ func GetDaytonaApiUrl() string {
 	}
 
 	return daytonaApiUrl
+}
+
+// OidcConfig represents the OIDC configuration from the API
+type OidcConfig struct {
+	Issuer   string    `json:"issuer"`
+	ClientId string    `json:"clientId"`
+	Audience string    `json:"audience"`
+	Cli      CliConfig `json:"cli"`
+}
+
+// CliConfig represents the CLI-specific configuration from the API
+type CliConfig struct {
+	ClientId     string `json:"clientId"`
+	CallbackPort string `json:"callbackPort"`
+}
+
+// DaytonaConfiguration represents the full configuration from the API
+type DaytonaConfiguration struct {
+	Oidc OidcConfig `json:"oidc"`
+}
+
+// CliAuthConfig represents the complete authentication configuration for the CLI
+type CliAuthConfig struct {
+	Issuer       string
+	ClientId     string
+	Audience     string
+	CallbackPort string
+}
+
+// GetCliAuthConfigFromAPI fetches CLI authentication configuration from the Daytona API
+// Endpoint: GET {apiUrl}/api/config
+// Returns: issuer (from oidc), clientId and callbackPort (from cli), and audience (from oidc)
+// This is used for public clients that don't have a client secret
+func GetCliAuthConfigFromAPI(apiUrl string) (*CliAuthConfig, error) {
+	// Normalize API URL
+	apiUrl = strings.TrimSuffix(apiUrl, "/")
+	if !strings.HasSuffix(apiUrl, "/api") {
+		apiUrl = apiUrl + "/api"
+	}
+
+	// Fetch configuration from GET /api/config endpoint
+	configUrl := apiUrl + "/config"
+	resp, err := http.Get(configUrl)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch CLI auth config from API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch CLI auth config: API returned status %d", resp.StatusCode)
+	}
+
+	var config DaytonaConfiguration
+	if err := json.NewDecoder(resp.Body).Decode(&config); err != nil {
+		return nil, fmt.Errorf("failed to decode CLI auth config: %w", err)
+	}
+
+	// Combine OIDC config (issuer, audience) with CLI config (clientId, callbackPort)
+	return &CliAuthConfig{
+		Issuer:       config.Oidc.Issuer,
+		ClientId:     config.Oidc.Cli.ClientId,
+		Audience:     config.Oidc.Audience,
+		CallbackPort: config.Oidc.Cli.CallbackPort,
+	}, nil
+}
+
+// GetOidcConfigFromAPI is deprecated - use GetCliAuthConfigFromAPI instead
+// Kept for backward compatibility
+func GetOidcConfigFromAPI(apiUrl string) (*OidcConfig, error) {
+	cliConfig, err := GetCliAuthConfigFromAPI(apiUrl)
+	if err != nil {
+		return nil, err
+	}
+	return &OidcConfig{
+		Issuer:   cliConfig.Issuer,
+		ClientId: cliConfig.ClientId,
+		Audience: cliConfig.Audience,
+	}, nil
 }
