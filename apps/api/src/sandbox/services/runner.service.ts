@@ -27,17 +27,18 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
-import { Organization } from '../../organization/entities/organization.entity'
 import { RegionService } from '../../region/services/region.service'
 import * as crypto from 'crypto'
 import { RUNNER_NAME_REGEX } from '../constants/runner-name-regex.constant'
+import { RegionType } from '../../region/enums/region-type.enum'
+import { RunnerDto } from '../dto/runner.dto'
+import { Region } from '../../region/entities/region.entity'
 
 @Injectable()
 export class RunnerService {
@@ -51,8 +52,6 @@ export class RunnerService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
     private readonly regionService: RegionService,
@@ -63,18 +62,17 @@ export class RunnerService {
   }
 
   /**
-   * @throws {BadRequestException} If the runner name is invalid.
+   * @throws {BadRequestException} If the runner name or class is invalid.
    * @throws {NotFoundException} If the region is not found.
-   * @throws {ConflictException} If a runner with the same name already exists.
+   * @throws {ConflictException} If a runner with the same values already exists.
    */
   async create(
     createRunnerDto: CreateRunnerInternalDto,
-    organization?: Organization,
+    region?: Region,
   ): Promise<{
     runner: Runner
     apiKey: string
   }> {
-    // Validate runner name
     if (!RUNNER_NAME_REGEX.test(createRunnerDto.name)) {
       throw new BadRequestException('Runner name must contain only letters, numbers, underscores, periods, and hyphens')
     }
@@ -82,17 +80,16 @@ export class RunnerService {
       throw new BadRequestException('Runner name must be between 3 and 255 characters')
     }
 
-    // Validate region and class
-    const region = await this.regionService.findOne(createRunnerDto.regionId)
     if (!region) {
-      throw new NotFoundException('Region not found')
-    }
-    if (organization && region.organizationId && region.organizationId !== organization.id) {
-      throw new NotFoundException('Region not found')
+      region = await this.regionService.findOne(createRunnerDto.regionId)
+
+      if (!region) {
+        throw new NotFoundException('Region not found')
+      }
     }
 
     if (!this.isValidClass(createRunnerDto.class)) {
-      throw new BadRequestError('Invalid class')
+      throw new BadRequestException('Invalid class')
     }
 
     const apiKey = createRunnerDto.apiKey ?? this.generateRunnerToken()
@@ -131,44 +128,32 @@ export class RunnerService {
     }
   }
 
-  /**
-   * @throws {NotFoundException} If the region is not found.
-   */
-  async findAll(organizationId?: string, regionName?: string): Promise<Runner[]> {
-    if (organizationId && regionName) {
-      return this.findAllByRegionName(organizationId, regionName)
-    } else if (organizationId) {
-      return this.findAllByOrganizationId(organizationId)
-    } else {
-      return this.runnerRepository.find()
-    }
+  async findAll(): Promise<RunnerDto[]> {
+    const runners = await this.runnerRepository.find()
+    return runners.map(RunnerDto.fromRunner)
   }
 
-  /**
-   * @throws {NotFoundException} If the region is not found.
-   */
-  async findAllByRegionName(organizationId: string, regionName: string): Promise<Runner[]> {
-    const region = await this.regionService.findOneByName(regionName, organizationId)
-    if (!region) {
-      throw new NotFoundException('Region not found')
-    }
-
-    return this.runnerRepository.find({
+  async findAllByRegion(region: Region): Promise<RunnerDto[]> {
+    const runners = await this.runnerRepository.find({
       where: {
         region: region.id,
       },
     })
+
+    return runners.map(RunnerDto.fromRunner)
   }
 
-  async findAllByOrganizationId(organizationId: string): Promise<Runner[]> {
-    const regions = await this.regionService.findAll(organizationId)
+  async findAllByOrganization(organizationId: string, regionType?: RegionType): Promise<RunnerDto[]> {
+    const regions = await this.regionService.findAllByOrganization(organizationId, regionType)
     const regionIds = regions.map((region) => region.id)
 
-    return this.runnerRepository.find({
+    const runners = await this.runnerRepository.find({
       where: {
         region: In(regionIds),
       },
     })
+
+    return runners.map(RunnerDto.fromRunner)
   }
 
   async findAllReady(): Promise<Runner[]> {
@@ -293,22 +278,6 @@ export class RunnerService {
     }
 
     await this.runnerRepository.remove(runner)
-  }
-
-  async getRegionId(runnerId: string): Promise<string> {
-    const runner = await this.runnerRepository.findOne({
-      where: {
-        id: runnerId,
-      },
-      select: ['region'],
-      loadEagerRelations: false,
-    })
-
-    if (!runner || !runner.region) {
-      throw new NotFoundException('Runner not found')
-    }
-
-    return runner.region
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)

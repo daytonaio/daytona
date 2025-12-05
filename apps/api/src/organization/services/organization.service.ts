@@ -48,6 +48,7 @@ import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-reg
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -270,7 +271,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ConflictException('Organization already has a default region set')
     }
 
-    const defaultRegion = await this.validateOrganizationDefaultRegion(defaultRegionId, organizationId)
+    const defaultRegion = await this.validateOrganizationDefaultRegion(defaultRegionId)
     organization.defaultRegionId = defaultRegionId
 
     if (defaultRegion.enforceQuotas) {
@@ -407,15 +408,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   }
 
   /**
-   * @param organizationId - Optional when validating during organization creation.
    * @throws NotFoundException - If the region is not found or not available to the organization
    */
-  async validateOrganizationDefaultRegion(defaultRegionId: string, organizationId?: string): Promise<Region> {
+  async validateOrganizationDefaultRegion(defaultRegionId: string): Promise<Region> {
     const region = await this.regionService.findOne(defaultRegionId)
-    if (!region || region.hidden) {
-      throw new NotFoundException('Region not found')
-    }
-    if (organizationId && region.organizationId && region.organizationId !== organizationId) {
+    if (!region || region.regionType !== RegionType.SHARED) {
       throw new NotFoundException('Region not found')
     }
 

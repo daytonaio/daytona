@@ -17,6 +17,7 @@ import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
 import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
 import { Runner } from '../../sandbox/entities/runner.entity'
+import { RegionType } from '../enums/region-type.enum'
 
 @Injectable()
 export class RegionService {
@@ -51,7 +52,13 @@ export class RegionService {
     }
 
     try {
-      const region = new Region(createRegionDto.name, createRegionDto.enforceQuotas, createRegionDto.id, organizationId)
+      const region = new Region(
+        createRegionDto.name,
+        createRegionDto.enforceQuotas,
+        createRegionDto.regionType,
+        createRegionDto.id,
+        organizationId,
+      )
       return await this.regionRepository.save(region)
     } catch (error) {
       if (error.code === '23505') {
@@ -75,7 +82,7 @@ export class RegionService {
 
   /**
    * @param name - The name of the region.
-   * @param organizationId - The organization ID, or null for non-organization regions.
+   * @param organizationId - The organization ID, or null for regions not associated with an organization.
    * @returns The region if found, or null otherwise.
    */
   async findOneByName(name: string, organizationId: string | null): Promise<Region | null> {
@@ -86,7 +93,7 @@ export class RegionService {
 
   /**
    * @param regionId - The ID of the region.
-   * @returns The organization ID or null for shared regions if the region is found, or undefined if the region is not found.
+   * @returns The organization ID or null for for regions not associated with an organization if the region is found, or undefined if the region is not found.
    */
   async getOrganizationId(regionId: string): Promise<string | null | undefined> {
     const region = await this.regionRepository.findOne({
@@ -105,13 +112,30 @@ export class RegionService {
   }
 
   /**
-   * @param organizationId - The organization ID of the regions to find, or null for shared regions.
+   * @param organizationId - The organization ID of the regions to find.
+   * @param regionType - If provided, only return regions of the specified type.
    * @returns The regions found ordered by name ascending.
    */
-  async findAll(organizationId: string | null): Promise<Region[]> {
+  async findAllByOrganization(organizationId: string, regionType?: RegionType): Promise<Region[]> {
     return this.regionRepository.find({
       where: {
-        organizationId: organizationId ?? IsNull(),
+        organizationId,
+        ...(regionType ? { regionType } : {}),
+      },
+      order: {
+        name: 'ASC',
+      },
+    })
+  }
+
+  /**
+   * @param type - The type of the regions to find.
+   * @returns The regions found ordered by name ascending.
+   */
+  async findAllByRegionType(regionType: RegionType): Promise<Region[]> {
+    return this.regionRepository.find({
+      where: {
+        regionType,
       },
       order: {
         name: 'ASC',

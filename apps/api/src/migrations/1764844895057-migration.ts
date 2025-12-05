@@ -11,6 +11,19 @@ export class Migration1764844895057 implements MigrationInterface {
   name = 'Migration1764844895057'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // add region type field with its type and constraints
+    await queryRunner.query(`CREATE TYPE "public"."region_regiontype_enum" AS ENUM('shared', 'dedicated', 'custom')`)
+    await queryRunner.query(`ALTER TABLE "region" ADD "regionType" "public"."region_regiontype_enum"`)
+    await queryRunner.query(
+      `ALTER TABLE "region" ADD CONSTRAINT "region_not_custom" CHECK ("organizationId" IS NOT NULL OR "regionType" != 'custom')`,
+    )
+    await queryRunner.query(
+      `ALTER TABLE "region" ADD CONSTRAINT "region_not_shared" CHECK ("organizationId" IS NULL OR "regionType" != 'shared')`,
+    )
+    await queryRunner.query(`UPDATE "region" SET "regionType" = 'custom' WHERE "organizationId" IS NOT NULL`)
+    await queryRunner.query(`UPDATE "region" SET "regionType" = 'shared' WHERE "organizationId" IS NULL`)
+    await queryRunner.query(`ALTER TABLE "region" ALTER COLUMN "regionType" SET NOT NULL`)
+
     // update api key permission enum
     await queryRunner.query(`ALTER TYPE "public"."api_key_permissions_enum" RENAME TO "api_key_permissions_enum_old"`)
     await queryRunner.query(
@@ -53,6 +66,12 @@ export class Migration1764844895057 implements MigrationInterface {
         )
     `)
 
+    // add runner name field
+    await queryRunner.query(`ALTER TABLE "runner" ADD "name" character varying`)
+    await queryRunner.query(`UPDATE "runner" SET "name" = "id"`)
+    await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "name" SET NOT NULL`)
+    await queryRunner.query(`ALTER TABLE "runner" ADD CONSTRAINT "runner_region_name_unique" UNIQUE ("region", "name")`)
+
     // create new index for runner
     await queryRunner.query(
       `CREATE INDEX "runner_state_unschedulable_region_index" ON "runner" ("state", "unschedulable", "region") `,
@@ -60,6 +79,10 @@ export class Migration1764844895057 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // drop region type field
+    await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "regionType"`)
+    await queryRunner.query(`DROP TYPE "public"."region_regiontype_enum"`)
+
     // revert api key permission enum
     await queryRunner.query(
       `CREATE TYPE "public"."api_key_permissions_enum_old" AS ENUM('delete:registries', 'delete:sandboxes', 'delete:snapshots', 'delete:volumes', 'read:audit_logs', 'read:volumes', 'write:registries', 'write:sandboxes', 'write:snapshots', 'write:volumes')`,
@@ -69,6 +92,7 @@ export class Migration1764844895057 implements MigrationInterface {
     )
     await queryRunner.query(`DROP TYPE "public"."api_key_permissions_enum"`)
     await queryRunner.query(`ALTER TYPE "public"."api_key_permissions_enum_old" RENAME TO "api_key_permissions_enum"`)
+
     // revert organization role permission enum
     await queryRunner.query(
       `CREATE TYPE "public"."organization_role_permissions_enum_old" AS ENUM('delete:registries', 'delete:sandboxes', 'delete:snapshots', 'delete:volumes', 'read:audit_logs', 'read:volumes', 'write:registries', 'write:sandboxes', 'write:snapshots', 'write:volumes')`,
@@ -85,6 +109,9 @@ export class Migration1764844895057 implements MigrationInterface {
     await queryRunner.query(
       `DELETE FROM "organization_role" WHERE "id" = '${GlobalOrganizationRolesIds.INFRASTRUCTURE_ADMIN}'`,
     )
+
+    // drop runner name field
+    await queryRunner.query(`ALTER TABLE "runner" DROP COLUMN "name"`)
 
     // drop new index for runner
     await queryRunner.query(`DROP INDEX "public"."runner_state_unschedulable_region_index"`)

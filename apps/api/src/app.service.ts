@@ -17,6 +17,7 @@ import { SchedulerRegistry } from '@nestjs/schedule'
 import { RegionService } from './region/services/region.service'
 import { RunnerService } from './sandbox/services/runner.service'
 import { RunnerAdapterFactory } from './sandbox/runner-adapter/runnerAdapter'
+import { RegionType } from './region/enums/region-type.enum'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -80,6 +81,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
         id: this.configService.getOrThrow('defaultRegion.id'),
         name: this.configService.getOrThrow('defaultRegion.name'),
         enforceQuotas: this.configService.getOrThrow('defaultRegion.enforceQuotas'),
+        regionType: RegionType.SHARED,
       },
       null,
     )

@@ -4,7 +4,9 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { IsEnum } from 'class-validator'
 import { Region } from '../entities/region.entity'
+import { RegionType } from '../enums/region-type.enum'
 
 @ApiSchema({ name: 'Region' })
 export class RegionDto {
@@ -29,6 +31,15 @@ export class RegionDto {
   organizationId: string | null
 
   @ApiProperty({
+    description: 'The type of the region',
+    enum: RegionType,
+    enumName: 'RegionType',
+    example: Object.values(RegionType)[0],
+  })
+  @IsEnum(RegionType)
+  regionType: RegionType
+
+  @ApiProperty({
     description: 'Creation timestamp',
     example: '2023-01-01T00:00:00.000Z',
   })
@@ -45,6 +56,7 @@ export class RegionDto {
       id: region.id,
       name: region.name,
       organizationId: region.organizationId,
+      regionType: region.regionType,
       createdAt: region.createdAt?.toISOString(),
       updatedAt: region.updatedAt?.toISOString(),
     }

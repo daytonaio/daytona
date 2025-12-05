@@ -24,7 +24,7 @@ const OrganizationSettings: React.FC = () => {
 
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { getRegionName, regions, loadingRegions } = useRegions()
+  const { getRegionName, sharedRegions: regions, loadingRegions } = useRegions()
 
   const [loadingDeleteOrganization, setLoadingDeleteOrganization] = useState(false)
   const [loadingLeaveOrganization, setLoadingLeaveOrganization] = useState(false)
