@@ -32,7 +32,7 @@ class PtyCreateRequest(BaseModel):
     envs: Optional[Dict[str, Any]] = Field(default=None, description="Environment variables for the PTY session")
     cols: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Number of terminal columns")
     rows: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Number of terminal rows")
-    lazy_start: Optional[StrictBool] = Field(default=False, description="Whether to start the PTY session lazily (only start when first client connects)", alias="lazyStart")
+    lazy_start: Optional[StrictBool] = Field(default=False, description="Whether to start the PTY session lazily (only start when first client connects)", serialization_alias="lazyStart")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "cwd", "envs", "cols", "rows", "lazyStart"]
 
@@ -99,7 +99,7 @@ class PtyCreateRequest(BaseModel):
             "envs": obj.get("envs"),
             "cols": obj.get("cols"),
             "rows": obj.get("rows"),
-            "lazyStart": obj.get("lazyStart") if obj.get("lazyStart") is not None else False
+            "lazy_start": obj.get("lazyStart") if obj.get("lazyStart") is not None else False
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

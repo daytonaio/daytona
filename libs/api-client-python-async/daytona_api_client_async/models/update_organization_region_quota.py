@@ -27,9 +27,9 @@ class UpdateOrganizationRegionQuota(BaseModel):
     """
     UpdateOrganizationRegionQuota
     """ # noqa: E501
-    total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalCpuQuota")
-    total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalMemoryQuota")
-    total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalDiskQuota")
+    total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalCpuQuota")
+    total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalMemoryQuota")
+    total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalDiskQuota")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"]
 
@@ -106,9 +106,9 @@ class UpdateOrganizationRegionQuota(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "totalCpuQuota": obj.get("totalCpuQuota"),
-            "totalMemoryQuota": obj.get("totalMemoryQuota"),
-            "totalDiskQuota": obj.get("totalDiskQuota")
+            "total_cpu_quota": obj.get("totalCpuQuota"),
+            "total_memory_quota": obj.get("totalMemoryQuota"),
+            "total_disk_quota": obj.get("totalDiskQuota")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -14,7 +14,7 @@ async def main():
 
         params = CreateSandboxFromSnapshotParams(
             language="python",
-            volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
+            volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1)],
         )
         sandbox = await daytona.create(params)
 
@@ -32,7 +32,7 @@ async def main():
 
         params = CreateSandboxFromSnapshotParams(
             language="python",
-            volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_2)],
+            volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_2)],
         )
         sandbox2 = await daytona.create(params)
 
@@ -50,7 +50,7 @@ async def main():
 
         params = CreateSandboxFromSnapshotParams(
             language="python",
-            volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_3, subpath="users/alice")],
+            volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_3, subpath="users/alice")],
         )
         sandbox3 = await daytona.create(params)
 

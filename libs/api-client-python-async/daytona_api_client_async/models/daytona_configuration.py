@@ -34,20 +34,20 @@ class DaytonaConfiguration(BaseModel):
     version: StrictStr = Field(description="Daytona version")
     posthog: Optional[PosthogConfig] = Field(default=None, description="PostHog configuration")
     oidc: OidcConfig = Field(description="OIDC configuration")
-    linked_accounts_enabled: StrictBool = Field(description="Whether linked accounts are enabled", alias="linkedAccountsEnabled")
+    linked_accounts_enabled: StrictBool = Field(description="Whether linked accounts are enabled", serialization_alias="linkedAccountsEnabled")
     announcements: Dict[str, Announcement] = Field(description="System announcements")
-    pylon_app_id: Optional[StrictStr] = Field(default=None, description="Pylon application ID", alias="pylonAppId")
-    proxy_template_url: StrictStr = Field(description="Proxy template URL", alias="proxyTemplateUrl")
-    proxy_toolbox_url: StrictStr = Field(description="Toolbox template URL", alias="proxyToolboxUrl")
-    default_snapshot: StrictStr = Field(description="Default snapshot for sandboxes", alias="defaultSnapshot")
-    dashboard_url: StrictStr = Field(description="Dashboard URL", alias="dashboardUrl")
-    max_auto_archive_interval: Union[StrictFloat, StrictInt] = Field(description="Maximum auto-archive interval in minutes", alias="maxAutoArchiveInterval")
-    maintanance_mode: StrictBool = Field(description="Whether maintenance mode is enabled", alias="maintananceMode")
+    pylon_app_id: Optional[StrictStr] = Field(default=None, description="Pylon application ID", serialization_alias="pylonAppId")
+    proxy_template_url: StrictStr = Field(description="Proxy template URL", serialization_alias="proxyTemplateUrl")
+    proxy_toolbox_url: StrictStr = Field(description="Toolbox template URL", serialization_alias="proxyToolboxUrl")
+    default_snapshot: StrictStr = Field(description="Default snapshot for sandboxes", serialization_alias="defaultSnapshot")
+    dashboard_url: StrictStr = Field(description="Dashboard URL", serialization_alias="dashboardUrl")
+    max_auto_archive_interval: Union[StrictFloat, StrictInt] = Field(description="Maximum auto-archive interval in minutes", serialization_alias="maxAutoArchiveInterval")
+    maintanance_mode: StrictBool = Field(description="Whether maintenance mode is enabled", serialization_alias="maintananceMode")
     environment: StrictStr = Field(description="Current environment")
-    billing_api_url: Optional[StrictStr] = Field(default=None, description="Billing API URL", alias="billingApiUrl")
-    ssh_gateway_command: Optional[StrictStr] = Field(default=None, description="SSH Gateway command", alias="sshGatewayCommand")
-    ssh_gateway_public_key: Optional[StrictStr] = Field(default=None, description="Base64 encoded SSH Gateway public key", alias="sshGatewayPublicKey")
-    rate_limit: Optional[RateLimitConfig] = Field(default=None, description="Rate limit configuration", alias="rateLimit")
+    billing_api_url: Optional[StrictStr] = Field(default=None, description="Billing API URL", serialization_alias="billingApiUrl")
+    ssh_gateway_command: Optional[StrictStr] = Field(default=None, description="SSH Gateway command", serialization_alias="sshGatewayCommand")
+    ssh_gateway_public_key: Optional[StrictStr] = Field(default=None, description="Base64 encoded SSH Gateway public key", serialization_alias="sshGatewayPublicKey")
+    rate_limit: Optional[RateLimitConfig] = Field(default=None, description="Rate limit configuration", serialization_alias="rateLimit")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["version", "posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "proxyToolboxUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl", "sshGatewayCommand", "sshGatewayPublicKey", "rateLimit"]
 
@@ -128,25 +128,25 @@ class DaytonaConfiguration(BaseModel):
             "version": obj.get("version"),
             "posthog": PosthogConfig.from_dict(obj["posthog"]) if obj.get("posthog") is not None else None,
             "oidc": OidcConfig.from_dict(obj["oidc"]) if obj.get("oidc") is not None else None,
-            "linkedAccountsEnabled": obj.get("linkedAccountsEnabled"),
+            "linked_accounts_enabled": obj.get("linkedAccountsEnabled"),
             "announcements": dict(
                 (_k, Announcement.from_dict(_v))
                 for _k, _v in obj["announcements"].items()
             )
             if obj.get("announcements") is not None
             else None,
-            "pylonAppId": obj.get("pylonAppId"),
-            "proxyTemplateUrl": obj.get("proxyTemplateUrl"),
-            "proxyToolboxUrl": obj.get("proxyToolboxUrl"),
-            "defaultSnapshot": obj.get("defaultSnapshot"),
-            "dashboardUrl": obj.get("dashboardUrl"),
-            "maxAutoArchiveInterval": obj.get("maxAutoArchiveInterval"),
-            "maintananceMode": obj.get("maintananceMode"),
+            "pylon_app_id": obj.get("pylonAppId"),
+            "proxy_template_url": obj.get("proxyTemplateUrl"),
+            "proxy_toolbox_url": obj.get("proxyToolboxUrl"),
+            "default_snapshot": obj.get("defaultSnapshot"),
+            "dashboard_url": obj.get("dashboardUrl"),
+            "max_auto_archive_interval": obj.get("maxAutoArchiveInterval"),
+            "maintanance_mode": obj.get("maintananceMode"),
             "environment": obj.get("environment"),
-            "billingApiUrl": obj.get("billingApiUrl"),
-            "sshGatewayCommand": obj.get("sshGatewayCommand"),
-            "sshGatewayPublicKey": obj.get("sshGatewayPublicKey"),
-            "rateLimit": RateLimitConfig.from_dict(obj["rateLimit"]) if obj.get("rateLimit") is not None else None
+            "billing_api_url": obj.get("billingApiUrl"),
+            "ssh_gateway_command": obj.get("sshGatewayCommand"),
+            "ssh_gateway_public_key": obj.get("sshGatewayPublicKey"),
+            "rate_limit": RateLimitConfig.from_dict(obj["rateLimit"]) if obj.get("rateLimit") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -1,12 +1,12 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
 
 import asyncio
 import hashlib
 import os
 import tarfile
 import threading
-from typing import Optional
 
 import aiofiles
 import aiofiles.os
@@ -35,17 +35,17 @@ class AsyncObjectStorage:
         aws_session_token: str,
         bucket_name: str = "daytona-volume-builds",
     ):
-        self.bucket_name = bucket_name
+        self.bucket_name: str = bucket_name
         with isolated_env():
-            self.store = S3Store(
+            self.store: S3Store = S3Store(
                 bucket=bucket_name,
                 endpoint=endpoint_url,
                 access_key_id=aws_access_key_id,
                 secret_access_key=aws_secret_access_key,
-                token=aws_session_token,
+                session_token=aws_session_token,
             )
 
-    async def upload(self, path: str, organization_id: str, archive_base_path: Optional[str] = None) -> str:
+    async def upload(self, path: str, organization_id: str, archive_base_path: str | None = None) -> str:
         """Uploads a file to the object storage service.
 
         Args:
@@ -89,7 +89,7 @@ class AsyncObjectStorage:
         # Remove leading separators (both / and \)
         return path_without_drive.lstrip("/").lstrip("\\")
 
-    async def _compute_hash_for_path_md5(self, path_str: str, archive_base_path: Optional[str] = None) -> str:
+    async def _compute_hash_for_path_md5(self, path_str: str, archive_base_path: str | None = None) -> str:
         """Computes the MD5 hash for a given path.
 
         Args:
@@ -140,18 +140,18 @@ class AsyncObjectStorage:
             bool: True if the object exists, False otherwise.
         """
         try:
-            await self.store.head_async(file_path)
+            _ = await self.store.head_async(file_path)
         except FileNotFoundError:
             return False
         return True
 
-    async def _upload_as_tar(self, s3_key: str, source_path: str, archive_base_path: Optional[str] = None) -> None:
+    async def _upload_as_tar(self, s3_key: str, source_path: str, archive_base_path: str | None = None) -> None:
         """Uploads a file to the object storage service as a tar.
 
         Args:
             s3_key (str): The key to upload the file to.
             source_path (str): The path to the file to upload.
-            archive_base_path (str): The base path to use for the archive.
+            archive_base_path (str | None): The base path to use for the archive.
         """
         source_path = os.path.normpath(source_path)
 
@@ -181,11 +181,8 @@ class AsyncObjectStorage:
             finally:
                 read_file.close()
 
-        await self.store.put_async(s3_key, reader_iter())
+        _ = await self.store.put_async(s3_key, reader_iter())
         await asyncio.to_thread(thread.join)
 
-    # unasync: delete start
-    async def _async_os_walk(self, path):
+    async def _async_os_walk(self, path: str) -> list[tuple[str, list[str], list[str]]]:
         return await asyncio.to_thread(lambda: list(os.walk(path)))
-
-    # unasync: delete end

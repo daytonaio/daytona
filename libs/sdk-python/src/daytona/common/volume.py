@@ -1,9 +1,12 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 from daytona_api_client import SandboxVolume as ApiVolumeMount
 from daytona_api_client import VolumeDto
 from daytona_api_client_async import SandboxVolume as AsyncApiVolumeMount
+from daytona_api_client_async import VolumeDto as AsyncVolumeDto
 
 
 class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount):
@@ -22,15 +25,15 @@ class Volume(VolumeDto):
     """Represents a Daytona Volume which is a shared storage volume for Sandboxes.
 
     Attributes:
-        id (StrictStr): Unique identifier for the Volume.
-        name (StrictStr): Name of the Volume.
-        organization_id (StrictStr): Organization ID of the Volume.
-        state (StrictStr): State of the Volume.
-        created_at (StrictStr): Date and time when the Volume was created.
-        updated_at (StrictStr): Date and time when the Volume was last updated.
-        last_used_at (StrictStr): Date and time when the Volume was last used.
+        id (str): Unique identifier for the Volume.
+        name (str): Name of the Volume.
+        organization_id (str): Organization ID of the Volume.
+        state (str): State of the Volume.
+        created_at (str): Date and time when the Volume was created.
+        updated_at (str): Date and time when the Volume was last updated.
+        last_used_at (str): Date and time when the Volume was last used.
     """
 
     @classmethod
-    def from_dto(cls, dto: VolumeDto) -> "Volume":
-        return cls(**dto.__dict__)
+    def from_dto(cls, dto: VolumeDto | AsyncVolumeDto) -> "Volume":
+        return cls.model_validate(dto.model_dump())

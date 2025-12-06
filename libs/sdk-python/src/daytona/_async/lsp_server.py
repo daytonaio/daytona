@@ -1,20 +1,21 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List
+from __future__ import annotations
 
 from daytona_toolbox_api_client_async import (
     CompletionList,
     LspApi,
     LspCompletionParams,
     LspDocumentRequest,
+    LspPosition,
     LspServerRequest,
     LspSymbol,
 )
 from deprecated import deprecated
 
 from .._utils.errors import intercept_errors
-from ..common.lsp_server import LspCompletionPosition, LspLanguageId
+from ..common.lsp_server import LspCompletionPosition, LspLanguageId, LspLanguageIdLiteral
 
 
 class AsyncLspServer:
@@ -24,21 +25,21 @@ class AsyncLspServer:
 
     def __init__(
         self,
-        language_id: LspLanguageId,
+        language_id: LspLanguageId | LspLanguageIdLiteral,
         path_to_project: str,
         api_client: LspApi,
     ):
         """Initializes a new LSP server instance.
 
         Args:
-            language_id (LspLanguageId): The language server type (e.g., LspLanguageId.TYPESCRIPT).
+            language_id (LspLanguageId | LspLanguageIdLiteral): The language server type
+                (e.g., LspLanguageId.TYPESCRIPT).
             path_to_project (str): Absolute path to the project root directory.
             api_client (LspApi): API client for Sandbox operations.
-            instance (SandboxInstance): The Sandbox instance this server belongs to.
         """
-        self._language_id = str(language_id)
-        self._path_to_project = path_to_project
-        self._api_client = api_client
+        self._language_id: str = str(language_id)
+        self._path_to_project: str = path_to_project
+        self._api_client: LspApi = api_client
 
     @intercept_errors(message_prefix="Failed to start LSP server: ")
     async def start(self) -> None:
@@ -134,7 +135,7 @@ class AsyncLspServer:
         )
 
     @intercept_errors(message_prefix="Failed to get symbols from document: ")
-    async def document_symbols(self, path: str) -> List[LspSymbol]:
+    async def document_symbols(self, path: str) -> list[LspSymbol]:
         """Gets symbol information (functions, classes, variables, etc.) from a document.
 
         Args:
@@ -142,7 +143,7 @@ class AsyncLspServer:
             set in the LSP server constructor.
 
         Returns:
-            List[LspSymbol]: List of symbols in the document. Each symbol includes:
+            list[LspSymbol]: List of symbols in the document. Each symbol includes:
                 - name: The symbol's name
                 - kind: The symbol's kind (function, class, variable, etc.)
                 - location: The location of the symbol in the file
@@ -164,7 +165,7 @@ class AsyncLspServer:
     @deprecated(
         reason="Method is deprecated. Use `sandbox_symbols` instead. This method will be removed in a future version."
     )
-    async def workspace_symbols(self, query: str) -> List[LspSymbol]:
+    async def workspace_symbols(self, query: str) -> list[LspSymbol]:
         """Searches for symbols matching the query string across all files
         in the Sandbox.
 
@@ -172,12 +173,12 @@ class AsyncLspServer:
             query (str): Search query to match against symbol names.
 
         Returns:
-            List[LspSymbol]: List of matching symbols from all files.
+            list[LspSymbol]: List of matching symbols from all files.
         """
         return await self.sandbox_symbols(query)
 
     @intercept_errors(message_prefix="Failed to get symbols from sandbox: ")
-    async def sandbox_symbols(self, query: str) -> List[LspSymbol]:
+    async def sandbox_symbols(self, query: str) -> list[LspSymbol]:
         """Searches for symbols matching the query string across all files
         in the Sandbox.
 
@@ -185,7 +186,7 @@ class AsyncLspServer:
             query (str): Search query to match against symbol names.
 
         Returns:
-            List[LspSymbol]: List of matching symbols from all files. Each symbol
+            list[LspSymbol]: List of matching symbols from all files. Each symbol
                 includes:
                 - name: The symbol's name
                 - kind: The symbol's kind (function, class, variable, etc.)
@@ -235,13 +236,11 @@ class AsyncLspServer:
                 print(f"{item.label} ({item.kind}): {item.detail}")
             ```
         """
-        position_dict = position if isinstance(position, dict) else vars(position)
-
         return await self._api_client.completions(
             request=LspCompletionParams(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
-                position=position_dict,
+                position=LspPosition(line=position.line, character=position.character),
             ),
         )

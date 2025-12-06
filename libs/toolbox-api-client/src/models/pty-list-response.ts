@@ -27,5 +27,5 @@ export interface PtyListResponse {
    * @type {Array<PtySessionInfo>}
    * @memberof PtyListResponse
    */
-  sessions?: Array<PtySessionInfo>
+  sessions: Array<PtySessionInfo>
 }

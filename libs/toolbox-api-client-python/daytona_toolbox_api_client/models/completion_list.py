@@ -27,7 +27,7 @@ class CompletionList(BaseModel):
     """
     CompletionList
     """ # noqa: E501
-    is_incomplete: StrictBool = Field(alias="isIncomplete")
+    is_incomplete: StrictBool = Field(serialization_alias="isIncomplete")
     items: List[CompletionItem]
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["isIncomplete", "items"]
@@ -97,7 +97,7 @@ class CompletionList(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "isIncomplete": obj.get("isIncomplete"),
+            "is_incomplete": obj.get("isIncomplete"),
             "items": [CompletionItem.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None
         })
         # store additional fields in additional_properties

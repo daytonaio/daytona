@@ -9,9 +9,9 @@ async def main():
         sandbox = await daytona.create()
         print("Sandbox created")
 
-        await sandbox.set_labels(
+        _ = await sandbox.set_labels(
             {
-                "public": True,
+                "public": "true",
             }
         )
 

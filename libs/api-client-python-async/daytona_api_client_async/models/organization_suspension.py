@@ -30,7 +30,7 @@ class OrganizationSuspension(BaseModel):
     """ # noqa: E501
     reason: StrictStr = Field(description="Suspension reason")
     until: datetime = Field(description="Suspension until")
-    suspension_cleanup_grace_period_hours: Union[StrictFloat, StrictInt] = Field(description="Suspension cleanup grace period hours", alias="suspensionCleanupGracePeriodHours")
+    suspension_cleanup_grace_period_hours: Union[StrictFloat, StrictInt] = Field(description="Suspension cleanup grace period hours", serialization_alias="suspensionCleanupGracePeriodHours")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["reason", "until", "suspensionCleanupGracePeriodHours"]
 
@@ -94,7 +94,7 @@ class OrganizationSuspension(BaseModel):
         _obj = cls.model_validate({
             "reason": obj.get("reason"),
             "until": obj.get("until"),
-            "suspensionCleanupGracePeriodHours": obj.get("suspensionCleanupGracePeriodHours")
+            "suspension_cleanup_grace_period_hours": obj.get("suspensionCleanupGracePeriodHours")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

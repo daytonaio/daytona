@@ -30,7 +30,7 @@ class CreateApiKey(BaseModel):
     """ # noqa: E501
     name: StrictStr = Field(description="The name of the API key")
     permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
-    expires_at: Optional[datetime] = Field(default=None, description="When the API key expires", alias="expiresAt")
+    expires_at: Optional[datetime] = Field(default=None, description="When the API key expires", serialization_alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "permissions", "expiresAt"]
 
@@ -107,7 +107,7 @@ class CreateApiKey(BaseModel):
         _obj = cls.model_validate({
             "name": obj.get("name"),
             "permissions": obj.get("permissions"),
-            "expiresAt": obj.get("expiresAt")
+            "expires_at": obj.get("expiresAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

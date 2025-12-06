@@ -1,15 +1,25 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from types import MethodType
-from typing import Awaitable, Callable, Dict, List, Optional
+from typing import cast
 
+from daytona_api_client_async import BuildInfo
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client_async import PortPreviewUrl
 from daytona_api_client_async import Sandbox as SandboxDto
-from daytona_api_client_async import SandboxApi, SandboxState, SshAccessDto, SshAccessValidationDto
+from daytona_api_client_async import (
+    SandboxApi,
+    SandboxLabels,
+    SandboxState,
+    SandboxVolume,
+    SshAccessDto,
+    SshAccessValidationDto,
+)
 from daytona_toolbox_api_client_async import (
     ApiClient,
     ComputerUseApi,
@@ -26,12 +36,13 @@ from pydantic import ConfigDict, PrivateAttr
 from .._utils.errors import intercept_errors
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError, DaytonaNotFoundError
+from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
 from .code_interpreter import AsyncCodeInterpreter
 from .computer_use import AsyncComputerUse
 from .filesystem import AsyncFileSystem
 from .git import AsyncGit
-from .lsp_server import AsyncLspServer, LspLanguageId
+from .lsp_server import AsyncLspServer
 from .process import AsyncProcess
 
 
@@ -50,8 +61,8 @@ class AsyncSandbox(SandboxDto):
         organization_id (str): Organization ID of the Sandbox.
         snapshot (str): Daytona snapshot used to create the Sandbox.
         user (str): OS user running in the Sandbox.
-        env (Dict[str, str]): Environment variables set in the Sandbox.
-        labels (Dict[str, str]): Custom labels attached to the Sandbox.
+        env (dict[str, str]): Environment variables set in the Sandbox.
+        labels (dict[str, str]): Custom labels attached to the Sandbox.
         public (bool): Whether the Sandbox is publicly accessible.
         target (str): Target location of the runner where the Sandbox runs.
         cpu (int): Number of CPUs allocated to the Sandbox.
@@ -65,7 +76,7 @@ class AsyncSandbox(SandboxDto):
         auto_stop_interval (int): Auto-stop interval in minutes.
         auto_archive_interval (int): Auto-archive interval in minutes.
         auto_delete_interval (int): Auto-delete interval in minutes.
-        volumes (List[str]): Volumes attached to the Sandbox.
+        volumes (list[str]): Volumes attached to the Sandbox.
         build_info (str): Build information for the Sandbox if it was created from dynamic build.
         created_at (str): When the Sandbox was created.
         updated_at (str): When the Sandbox was last updated.
@@ -80,7 +91,7 @@ class AsyncSandbox(SandboxDto):
     _code_interpreter: AsyncCodeInterpreter = PrivateAttr()
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(
         self,
@@ -101,27 +112,27 @@ class AsyncSandbox(SandboxDto):
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
-        self._sandbox_api = sandbox_api
-        self._code_toolbox = code_toolbox
-        self._toolbox_api = toolbox_api
+        self._sandbox_api: SandboxApi = sandbox_api
+        self._code_toolbox: SandboxCodeToolbox = code_toolbox
+        self._toolbox_api: ApiClient = toolbox_api
         self._toolbox_api.configuration.host = ""
-        self._get_toolbox_base_url = get_toolbox_base_url
+        self._get_toolbox_base_url: Callable[[], Awaitable[str]] = get_toolbox_base_url
 
         self._fs = AsyncFileSystem(FileSystemApi(toolbox_api), self.__ensure_toolbox_url)
         self._git = AsyncGit(GitApi(toolbox_api))
         self._process = AsyncProcess(code_toolbox, ProcessApi(toolbox_api), self.__ensure_toolbox_url)
         self._computer_use = AsyncComputerUse(ComputerUseApi(toolbox_api))
         self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(toolbox_api), self.__ensure_toolbox_url)
-        self._info_api = InfoApi(toolbox_api)
+        self._info_api: InfoApi = InfoApi(toolbox_api)
 
-        og_call_toolbox_api = self._toolbox_api.call_api
+        og_call_toolbox_api = self._toolbox_api.call_api  # pyright: ignore[reportUnknownVariableType]
 
-        async def call_toolbox_api_with_lazy_host_load(_, *args, **kwargs):
-            url = str(args[1])
+        async def call_toolbox_api_with_lazy_host_load(_: ApiClient, *args: object, **kwargs: object):
+            url: str = str(args[1])
             if url.startswith("/"):
                 await self.__ensure_toolbox_url()
-                url = self._toolbox_api.configuration.host + url
-                args = (args[0], url, *args[2:])
+                url = cast(str, self._toolbox_api.configuration.host) + url
+                args = cast(tuple[object, ...], (args[0], url, *args[2:]))
 
             return await og_call_toolbox_api(*args, **kwargs)
 
@@ -206,14 +217,16 @@ class AsyncSandbox(SandboxDto):
         response = await self._info_api.get_work_dir()
         return response.dir
 
-    def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> AsyncLspServer:
+    def create_lsp_server(
+        self, language_id: LspLanguageId | LspLanguageIdLiteral, path_to_project: str
+    ) -> AsyncLspServer:
         """Creates a new Language Server Protocol (LSP) server instance.
 
         The LSP server provides language-specific features like code completion,
         diagnostics, and more.
 
         Args:
-            language_id (LspLanguageId): The language server type (e.g., LspLanguageId.PYTHON).
+            language_id (LspLanguageId | LspLanguageIdLiteral): The language server type (e.g., LspLanguageId.PYTHON).
             path_to_project (str): Path to the project root directory. Relative paths are resolved
             based on the sandbox working directory.
 
@@ -232,16 +245,16 @@ class AsyncSandbox(SandboxDto):
         )
 
     @intercept_errors(message_prefix="Failed to set labels: ")
-    async def set_labels(self, labels: Dict[str, str]) -> Dict[str, str]:
+    async def set_labels(self, labels: dict[str, str]) -> dict[str, str]:
         """Sets labels for the Sandbox.
 
         Labels are key-value pairs that can be used to organize and identify Sandboxes.
 
         Args:
-            labels (Dict[str, str]): Dictionary of key-value pairs representing Sandbox labels.
+            labels (dict[str, str]): Dictionary of key-value pairs representing Sandbox labels.
 
         Returns:
-            Dict[str, str]: Dictionary containing the updated Sandbox labels.
+            dict[str, str]: Dictionary containing the updated Sandbox labels.
 
         Example:
             ```python
@@ -253,23 +266,20 @@ class AsyncSandbox(SandboxDto):
             print(f"Updated labels: {new_labels}")
             ```
         """
-        # Convert all values to strings and create the expected labels structure
-        string_labels = {k: str(v).lower() if isinstance(v, bool) else str(v) for k, v in labels.items()}
-        labels_payload = {"labels": string_labels}
-        self.labels = (await self._sandbox_api.replace_labels(self.id, labels_payload)).labels
+        self.labels = (await self._sandbox_api.replace_labels(self.id, SandboxLabels(labels=labels))).labels
         return self.labels
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout(
         error_message=lambda self, timeout: (
-            f"Sandbox {self.id} failed to start within the {timeout} seconds timeout period"
+            f"Sandbox {cast('AsyncSandbox', self).id} failed to start within the {timeout} seconds timeout period"
         )
     )
-    async def start(self, timeout: Optional[float] = 60):
+    async def start(self, timeout: float | None = 60):
         """Starts the Sandbox and waits for it to be ready.
 
         Args:
-            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+            timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
 
         Raises:
             DaytonaError: If timeout is negative. If sandbox fails to start or times out.
@@ -290,14 +300,14 @@ class AsyncSandbox(SandboxDto):
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
         error_message=lambda self, timeout: (
-            f"Sandbox {self.id} failed to stop within the {timeout} seconds timeout period"
+            f"Sandbox {cast('AsyncSandbox', self).id} failed to stop within the {timeout} seconds timeout period"
         )
     )
-    async def stop(self, timeout: Optional[float] = 60):
+    async def stop(self, timeout: float | None = 60):
         """Stops the Sandbox and waits for it to be fully stopped.
 
         Args:
-            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+            timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
 
         Raises:
             DaytonaError: If timeout is negative; If sandbox fails to stop or times out
@@ -310,37 +320,38 @@ class AsyncSandbox(SandboxDto):
             ```
         """
         start_time = time.time()
-        await self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
+        _ = await self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         await self.__refresh_data_safe()
         time_elapsed = time.time() - start_time
         await self.wait_for_sandbox_stop(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to remove sandbox: ")
-    async def delete(self, timeout: Optional[float] = 60) -> None:
+    async def delete(self, timeout: float | None = 60) -> None:
         """Deletes the Sandbox.
 
         Args:
-            timeout (Optional[float]): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
+            timeout (float | None): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
                 Default is 60 seconds.
         """
-        await self._sandbox_api.delete_sandbox(self.id, _request_timeout=timeout or None)
+        _ = await self._sandbox_api.delete_sandbox(self.id, _request_timeout=timeout or None)
         await self.__refresh_data_safe()
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
     @with_timeout(
         error_message=lambda self, timeout: (
-            f"Sandbox {self.id} failed to become ready within the {timeout} seconds timeout period"
+            f"Sandbox {cast('AsyncSandbox', self).id} failed to "
+            f"become ready within the {timeout} seconds timeout period"
         )
     )
     async def wait_for_sandbox_start(
         self,
-        timeout: Optional[float] = 60,  # pylint: disable=unused-argument
+        timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
         """Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
         reaches the 'started' state, encounters an error or times out.
 
         Args:
-            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+            timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
 
         Raises:
             DaytonaError: If timeout is negative; If Sandbox fails to start or times out
@@ -362,12 +373,13 @@ class AsyncSandbox(SandboxDto):
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout(
         error_message=lambda self, timeout: (
-            f"Sandbox {self.id} failed to become stopped within the {timeout} seconds timeout period"
+            f"Sandbox {cast('AsyncSandbox', self).id} failed to "
+            f"become stopped within the {timeout} seconds timeout period"
         )
     )
     async def wait_for_sandbox_stop(
         self,
-        timeout: Optional[float] = 60,  # pylint: disable=unused-argument
+        timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
         """Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
         reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
@@ -375,7 +387,7 @@ class AsyncSandbox(SandboxDto):
         Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
 
         Args:
-            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+            timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
 
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
@@ -419,10 +431,10 @@ class AsyncSandbox(SandboxDto):
             sandbox.set_autostop_interval(0)
             ```
         """
-        if not isinstance(interval, int) or interval < 0:
+        if not interval or interval < 0:
             raise DaytonaError("Auto-stop interval must be a non-negative integer")
 
-        await self._sandbox_api.set_autostop_interval(self.id, interval)
+        _ = await self._sandbox_api.set_autostop_interval(self.id, interval)
         self.auto_stop_interval = interval
 
     @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
@@ -446,9 +458,10 @@ class AsyncSandbox(SandboxDto):
             sandbox.set_auto_archive_interval(0)
             ```
         """
-        if not isinstance(interval, int) or interval < 0:
+        if not interval or interval < 0:
             raise DaytonaError("Auto-archive interval must be a non-negative integer")
-        await self._sandbox_api.set_auto_archive_interval(self.id, interval)
+
+        _ = await self._sandbox_api.set_auto_archive_interval(self.id, interval)
         self.auto_archive_interval = interval
 
     @intercept_errors(message_prefix="Failed to set auto-delete interval: ")
@@ -472,7 +485,7 @@ class AsyncSandbox(SandboxDto):
             sandbox.set_auto_delete_interval(-1)
             ```
         """
-        await self._sandbox_api.set_auto_delete_interval(self.id, interval)
+        _ = await self._sandbox_api.set_auto_delete_interval(self.id, interval)
         self.auto_delete_interval = interval
 
     @intercept_errors(message_prefix="Failed to get preview link: ")
@@ -505,15 +518,15 @@ class AsyncSandbox(SandboxDto):
         and stopped states is that starting an archived sandbox takes more time, depending on its size.
         Sandbox must be stopped before archiving.
         """
-        await self._sandbox_api.archive_sandbox(self.id)
+        _ = await self._sandbox_api.archive_sandbox(self.id)
         await self.refresh_data()
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
-    async def create_ssh_access(self, expires_in_minutes: Optional[int] = None) -> SshAccessDto:
+    async def create_ssh_access(self, expires_in_minutes: int | None = None) -> SshAccessDto:
         """Creates an SSH access token for the sandbox.
 
         Args:
-            expires_in_minutes (Optional[int]): The number of minutes the SSH access token will be valid for.
+            expires_in_minutes (int | None): The number of minutes the SSH access token will be valid for.
         """
         return await self._sandbox_api.create_ssh_access(self.id, expires_in_minutes=expires_in_minutes)
 
@@ -524,7 +537,7 @@ class AsyncSandbox(SandboxDto):
         Args:
             token (str): The token to revoke.
         """
-        await self._sandbox_api.revoke_ssh_access(self.id, token)
+        _ = await self._sandbox_api.revoke_ssh_access(self.id, token)
 
     @intercept_errors(message_prefix="Failed to validate SSH access: ")
     async def validate_ssh_access(self, token: str) -> SshAccessValidationDto:
@@ -533,7 +546,7 @@ class AsyncSandbox(SandboxDto):
         Args:
             token (str): The token to validate.
         """
-        return (await self._sandbox_api.validate_ssh_access(token)).data
+        return await self._sandbox_api.validate_ssh_access(token)
 
     @intercept_errors(message_prefix="Failed to refresh sandbox activity: ")
     async def refresh_activity(self) -> None:
@@ -550,32 +563,32 @@ class AsyncSandbox(SandboxDto):
         await self._sandbox_api.update_last_activity(self.id)
 
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
-        self.id = sandbox_dto.id
-        self.name = sandbox_dto.name
-        self.organization_id = sandbox_dto.organization_id
-        self.snapshot = sandbox_dto.snapshot
-        self.user = sandbox_dto.user
-        self.env = sandbox_dto.env
-        self.labels = sandbox_dto.labels
-        self.public = sandbox_dto.public
-        self.target = sandbox_dto.target
-        self.cpu = sandbox_dto.cpu
-        self.gpu = sandbox_dto.gpu
-        self.memory = sandbox_dto.memory
-        self.disk = sandbox_dto.disk
-        self.state = sandbox_dto.state
-        self.error_reason = sandbox_dto.error_reason
-        self.backup_state = sandbox_dto.backup_state
-        self.backup_created_at = sandbox_dto.backup_created_at
-        self.auto_stop_interval = sandbox_dto.auto_stop_interval
-        self.auto_archive_interval = sandbox_dto.auto_archive_interval
-        self.auto_delete_interval = sandbox_dto.auto_delete_interval
-        self.volumes = sandbox_dto.volumes
-        self.build_info = sandbox_dto.build_info
-        self.created_at = sandbox_dto.created_at
-        self.updated_at = sandbox_dto.updated_at
-        self.network_block_all = sandbox_dto.network_block_all
-        self.network_allow_list = sandbox_dto.network_allow_list
+        self.id: str = sandbox_dto.id
+        self.name: str = sandbox_dto.name
+        self.organization_id: str = sandbox_dto.organization_id
+        self.snapshot: str | None = sandbox_dto.snapshot
+        self.user: str = sandbox_dto.user
+        self.env: dict[str, str] = sandbox_dto.env
+        self.labels: dict[str, str] = sandbox_dto.labels
+        self.public: bool = sandbox_dto.public
+        self.target: str = sandbox_dto.target
+        self.cpu: float | int = sandbox_dto.cpu
+        self.gpu: float | int = sandbox_dto.gpu
+        self.memory: float | int = sandbox_dto.memory
+        self.disk: float | int = sandbox_dto.disk
+        self.state: SandboxState | None = sandbox_dto.state
+        self.error_reason: str | None = sandbox_dto.error_reason
+        self.backup_state: str | None = sandbox_dto.backup_state
+        self.backup_created_at: str | None = sandbox_dto.backup_created_at
+        self.auto_stop_interval: float | int | None = sandbox_dto.auto_stop_interval
+        self.auto_archive_interval: float | int | None = sandbox_dto.auto_archive_interval
+        self.auto_delete_interval: float | int | None = sandbox_dto.auto_delete_interval
+        self.volumes: list[SandboxVolume] | None = sandbox_dto.volumes
+        self.build_info: BuildInfo | None = sandbox_dto.build_info
+        self.created_at: str | None = sandbox_dto.created_at
+        self.updated_at: str | None = sandbox_dto.updated_at
+        self.network_block_all: bool = sandbox_dto.network_block_all
+        self.network_allow_list: str | None = sandbox_dto.network_allow_list
 
     async def __refresh_data_safe(self) -> None:
         """Refreshes the Sandbox data from the API, but does not throw an error if the sandbox has been deleted.
@@ -600,12 +613,12 @@ class AsyncPaginatedSandboxes(PaginatedSandboxesDto):
     """Represents a paginated list of Daytona Sandboxes.
 
     Attributes:
-        items (List[AsyncSandbox]): List of Sandbox instances in the current page.
+        items (list[AsyncSandbox]): List of Sandbox instances in the current page.
         total (int): Total number of Sandboxes across all pages.
         page (int): Current page number.
         total_pages (int): Total number of pages available.
     """
 
-    items: List[AsyncSandbox]
+    items: list[AsyncSandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)

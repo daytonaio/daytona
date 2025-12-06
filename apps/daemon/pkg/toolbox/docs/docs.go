@@ -3414,6 +3414,9 @@ const docTemplate = `{
         },
         "PtyCreateResponse": {
             "type": "object",
+            "required": [
+                "sessionId"
+            ],
             "properties": {
                 "sessionId": {
                     "type": "string"
@@ -3422,6 +3425,9 @@ const docTemplate = `{
         },
         "PtyListResponse": {
             "type": "object",
+            "required": [
+                "sessions"
+            ],
             "properties": {
                 "sessions": {
                     "type": "array",
@@ -3452,6 +3458,16 @@ const docTemplate = `{
         },
         "PtySessionInfo": {
             "type": "object",
+            "required": [
+                "active",
+                "cols",
+                "createdAt",
+                "cwd",
+                "envs",
+                "id",
+                "lazyStart",
+                "rows"
+            ],
             "properties": {
                 "active": {
                     "type": "boolean"
@@ -3592,6 +3608,9 @@ const docTemplate = `{
         },
         "SessionExecuteResponse": {
             "type": "object",
+            "required": [
+                "cmdId"
+            ],
             "properties": {
                 "cmdId": {
                     "type": "string"
@@ -3635,6 +3654,9 @@ const docTemplate = `{
         },
         "UserHomeDirResponse": {
             "type": "object",
+            "required": [
+                "dir"
+            ],
             "properties": {
                 "dir": {
                     "type": "string"
@@ -3680,6 +3702,9 @@ const docTemplate = `{
         },
         "WorkDirResponse": {
             "type": "object",
+            "required": [
+                "dir"
+            ],
             "properties": {
                 "dir": {
                     "type": "string"

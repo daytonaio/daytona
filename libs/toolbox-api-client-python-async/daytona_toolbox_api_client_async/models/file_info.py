@@ -27,8 +27,8 @@ class FileInfo(BaseModel):
     FileInfo
     """ # noqa: E501
     group: StrictStr
-    is_dir: StrictBool = Field(alias="isDir")
-    mod_time: StrictStr = Field(alias="modTime")
+    is_dir: StrictBool = Field(serialization_alias="isDir")
+    mod_time: StrictStr = Field(serialization_alias="modTime")
     mode: StrictStr
     name: StrictStr
     owner: StrictStr
@@ -96,8 +96,8 @@ class FileInfo(BaseModel):
 
         _obj = cls.model_validate({
             "group": obj.get("group"),
-            "isDir": obj.get("isDir"),
-            "modTime": obj.get("modTime"),
+            "is_dir": obj.get("isDir"),
+            "mod_time": obj.get("modTime"),
             "mode": obj.get("mode"),
             "name": obj.get("name"),
             "owner": obj.get("owner"),

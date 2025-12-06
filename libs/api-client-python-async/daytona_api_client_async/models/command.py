@@ -29,7 +29,7 @@ class Command(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="The ID of the command")
     command: StrictStr = Field(description="The command that was executed")
-    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the command", alias="exitCode")
+    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the command", serialization_alias="exitCode")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "command", "exitCode"]
 
@@ -93,7 +93,7 @@ class Command(BaseModel):
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "command": obj.get("command"),
-            "exitCode": obj.get("exitCode")
+            "exit_code": obj.get("exitCode")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

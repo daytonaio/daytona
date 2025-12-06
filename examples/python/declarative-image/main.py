@@ -18,7 +18,7 @@ def main():
 
     # Create local file with some data and add it to the image
     with open("file_example.txt", "w") as f:
-        f.write("Hello, World!")
+        _ = f.write("Hello, World!")
 
     # Create a Python image with common data science packages
     image = (
@@ -36,7 +36,7 @@ def main():
 
     # Create the snapshot
     print(f"=== Creating Snapshot: {snapshot_name} ===")
-    daytona.snapshot.create(
+    _ = daytona.snapshot.create(
         CreateSnapshotParams(
             name=snapshot_name,
             image=image,

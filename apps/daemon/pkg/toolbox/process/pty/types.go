@@ -60,14 +60,14 @@ type PTYSession struct {
 
 // PTYSessionInfo contains metadata about a PTY session
 type PTYSessionInfo struct {
-	ID        string            `json:"id"`
-	Cwd       string            `json:"cwd"`
-	Envs      map[string]string `json:"envs"`
-	Cols      uint16            `json:"cols"`
-	Rows      uint16            `json:"rows"`
-	CreatedAt time.Time         `json:"createdAt"`
-	Active    bool              `json:"active"`
-	LazyStart bool              `json:"lazyStart"` // Whether this session uses lazy start
+	ID        string            `json:"id" validate:"required"`
+	Cwd       string            `json:"cwd" validate:"required"`
+	Envs      map[string]string `json:"envs" validate:"required"`
+	Cols      uint16            `json:"cols" validate:"required"`
+	Rows      uint16            `json:"rows" validate:"required"`
+	CreatedAt time.Time         `json:"createdAt" validate:"required"`
+	Active    bool              `json:"active" validate:"required"`
+	LazyStart bool              `json:"lazyStart" validate:"required"` // Whether this session uses lazy start
 } // @name PtySessionInfo
 
 // API Request/Response types
@@ -84,12 +84,12 @@ type PTYCreateRequest struct {
 
 // PTYCreateResponse represents the response when creating a PTY session
 type PTYCreateResponse struct {
-	SessionID string `json:"sessionId"`
+	SessionID string `json:"sessionId" validate:"required"`
 } // @name PtyCreateResponse
 
 // PTYListResponse represents the response when listing PTY sessions
 type PTYListResponse struct {
-	Sessions []PTYSessionInfo `json:"sessions"`
+	Sessions []PTYSessionInfo `json:"sessions" validate:"required"`
 } // @name PtyListResponse
 
 // PTYResizeRequest represents a request to resize a PTY session

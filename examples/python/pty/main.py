@@ -16,8 +16,8 @@ def interactive_pty_session(sandbox: Sandbox):
     def handle_pty_data(data: bytes):
         # Decode UTF-8 bytes to text and write directly to preserve terminal formatting
         text = data.decode("utf-8", errors="replace")
-        sys.stdout.write(text)
-        sys.stdout.flush()
+        _ = sys.stdout.write(text)
+        _ = sys.stdout.flush()
 
     # Send interactive command
     print("\nSending interactive read command...")
@@ -27,7 +27,7 @@ def interactive_pty_session(sandbox: Sandbox):
     time.sleep(1)
     pty_handle.send_input("Alice\n")
 
-    pty_handle.resize(PtySize(cols=80, rows=25))
+    _ = pty_handle.resize(PtySize(cols=80, rows=25))
 
     # Send another command
     time.sleep(1)
@@ -58,8 +58,8 @@ def kill_pty_session(sandbox: Sandbox):
     def handle_pty_data(data: bytes):
         # Decode UTF-8 bytes to text and write directly to preserve terminal formatting
         text = data.decode("utf-8", errors="replace")
-        sys.stdout.write(text)
-        sys.stdout.flush()
+        _ = sys.stdout.write(text)
+        _ = sys.stdout.flush()
 
     # Send a long-running command
     print("\nSending long-running command (infinite loop)...")

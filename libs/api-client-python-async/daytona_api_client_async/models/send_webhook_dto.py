@@ -27,9 +27,9 @@ class SendWebhookDto(BaseModel):
     """
     SendWebhookDto
     """ # noqa: E501
-    event_type: StrictStr = Field(description="The type of event being sent", alias="eventType")
+    event_type: StrictStr = Field(description="The type of event being sent", serialization_alias="eventType")
     payload: Dict[str, Any] = Field(description="The payload data to send")
-    event_id: Optional[StrictStr] = Field(default=None, description="Optional event ID for idempotency", alias="eventId")
+    event_id: Optional[StrictStr] = Field(default=None, description="Optional event ID for idempotency", serialization_alias="eventId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["eventType", "payload", "eventId"]
 
@@ -91,9 +91,9 @@ class SendWebhookDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "eventType": obj.get("eventType"),
+            "event_type": obj.get("eventType"),
             "payload": obj.get("payload"),
-            "eventId": obj.get("eventId")
+            "event_id": obj.get("eventId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

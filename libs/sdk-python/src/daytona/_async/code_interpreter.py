@@ -1,9 +1,11 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 import json
 import re
-from typing import Awaitable, Callable, Dict, List, Optional
+from collections.abc import Awaitable, Callable
 
 from daytona_toolbox_api_client_async import CreateContextRequest, InterpreterApi, InterpreterContext
 from websockets.asyncio.client import connect
@@ -39,20 +41,20 @@ class AsyncCodeInterpreter:
             api_client: API client for interpreter operations.
             ensure_toolbox_url: Ensures the toolbox API URL is initialized.
         """
-        self._api_client = api_client
-        self._ensure_toolbox_url = ensure_toolbox_url
+        self._api_client: InterpreterApi = api_client
+        self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to run code: ")
     async def run_code(
         self,
         code: str,
         *,
-        context: Optional[InterpreterContext] = None,
-        on_stdout: Optional[OutputHandler[OutputMessage]] = None,
-        on_stderr: Optional[OutputHandler[OutputMessage]] = None,
-        on_error: Optional[OutputHandler[ExecutionError]] = None,
-        envs: Optional[Dict[str, str]] = None,
-        timeout: Optional[int] = None,
+        context: InterpreterContext | None = None,
+        on_stdout: OutputHandler[OutputMessage] | None = None,
+        on_stderr: OutputHandler[OutputMessage] | None = None,
+        on_error: OutputHandler[ExecutionError] | None = None,
+        envs: dict[str, str] | None = None,
+        timeout: int | None = None,
     ) -> ExecutionResult:
         """Execute Python code in the sandbox.
 
@@ -62,13 +64,13 @@ class AsyncCodeInterpreter:
 
         Args:
             code (str): Code to execute.
-            context (Optional[InterpreterContext]): Context to run code in. If not provided, uses default context.
-            on_stdout (Optional[OutputHandler[OutputMessage]]): Callback for stdout messages.
-            on_stderr (Optional[OutputHandler[OutputMessage]]): Callback for stderr messages.
-            on_error (Optional[OutputHandler[ExecutionError]]): Callback for execution errors
+            context (InterpreterContext | None): Context to run code in. If not provided, uses default context.
+            on_stdout (OutputHandler[OutputMessage] | None): Callback for stdout messages.
+            on_stderr (OutputHandler[OutputMessage] | None): Callback for stderr messages.
+            on_error (OutputHandler[ExecutionError] | None): Callback for execution errors
                 (e.g., syntax errors, runtime errors).
-            envs (Optional[Dict[str, str]]): Environment variables for this execution.
-            timeout (Optional[int]): Timeout in seconds. 0 means no timeout. Default is 10 minutes.
+            envs (dict[str, str] | None): Environment variables for this execution.
+            timeout (int | None): Timeout in seconds. 0 means no timeout. Default is 10 minutes.
 
         Returns:
             ExecutionResult: Result object containing stdout, stderr and error if any.
@@ -106,7 +108,7 @@ class AsyncCodeInterpreter:
             ```
         """
         await self._ensure_toolbox_url()
-        _, url, headers, *_ = self._api_client._execute_interpreter_code_serialize(  # pylint: disable=protected-access
+        _, url, headers, *_ = self._api_client._execute_interpreter_code_serialize(
             _request_auth=None,
             _content_type=None,
             _headers=None,
@@ -119,7 +121,7 @@ class AsyncCodeInterpreter:
         try:
             async with connect(url, additional_headers=headers) as websocket:
                 # Send execution request as first message
-                request = {"code": code}
+                request: dict[str, str | int | dict[str, str]] = {"code": code}
                 if context is not None:
                     request["contextId"] = context.id
                 if envs is not None:
@@ -139,13 +141,13 @@ class AsyncCodeInterpreter:
                         if chunk_type == "stdout":
                             stdout = chunk.get("text", "")
                             if on_stdout:
-                                on_stdout(OutputMessage(output=stdout))
+                                _ = on_stdout(OutputMessage(output=stdout))
                             result.stdout += stdout
 
                         elif chunk_type == "stderr":
                             stderr = chunk.get("text", "")
                             if on_stderr:
-                                on_stderr(OutputMessage(output=stderr))
+                                _ = on_stderr(OutputMessage(output=stderr))
                             result.stderr += stderr
 
                         elif chunk_type == "error":
@@ -156,7 +158,7 @@ class AsyncCodeInterpreter:
                             )
                             result.error = error
                             if on_error:
-                                on_error(error)
+                                _ = on_error(error)
 
                     except ConnectionClosed as e:
                         if isinstance(e, ConnectionClosedOK):
@@ -173,7 +175,7 @@ class AsyncCodeInterpreter:
     @intercept_errors(message_prefix="Failed to create interpreter context: ")
     async def create_context(
         self,
-        cwd: Optional[str] = None,
+        cwd: str | None = None,
     ) -> InterpreterContext:
         """Create a new isolated interpreter context.
 
@@ -181,7 +183,7 @@ class AsyncCodeInterpreter:
         Variables, imports, and functions defined in one context don't affect others.
 
         Args:
-            cwd (Optional[str]): Working directory for the context. If not specified, uses sandbox working directory.
+            cwd (str | None): Working directory for the context. If not specified, uses sandbox working directory.
 
         Returns:
             InterpreterContext: The created context with its ID and metadata.
@@ -210,14 +212,14 @@ class AsyncCodeInterpreter:
         return await self._api_client.create_interpreter_context(request=CreateContextRequest(cwd=cwd))
 
     @intercept_errors(message_prefix="Failed to list interpreter contexts: ")
-    async def list_contexts(self) -> List[InterpreterContext]:
+    async def list_contexts(self) -> list[InterpreterContext]:
         """List all user-created interpreter contexts.
 
         The default context is not included in this list. Only contexts created
         via `create_context()` are returned.
 
         Returns:
-            List[InterpreterContext]: List of context objects.
+            list[InterpreterContext]: List of context objects.
 
         Raises:
             DaytonaError: If listing fails.
@@ -251,7 +253,7 @@ class AsyncCodeInterpreter:
             await sandbox.code_interpreter.delete_context(ctx)
             ```
         """
-        await self._api_client.delete_interpreter_context(id=context.id)
+        _ = await self._api_client.delete_interpreter_context(id=context.id)
 
     def _raise_from_ws_close(self, error: ConnectionClosed) -> None:
         """Raise an appropriate Daytona error from a websocket close event."""

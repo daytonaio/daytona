@@ -1,15 +1,20 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 import base64
 import re
-from typing import Optional
+
+from typing_extensions import override
 
 from ..common.process import CodeRunParams
+from ..common.protocols import SandboxCodeToolbox
 
 
-class SandboxPythonCodeToolbox:
-    def get_run_command(self, code: str, params: Optional[CodeRunParams] = None) -> str:
+class SandboxPythonCodeToolbox(SandboxCodeToolbox):
+    @override
+    def get_run_command(self, code: str, params: CodeRunParams | None = None) -> str:
         # Encode the provided code in base64
         base64_code = base64.b64encode(code.encode()).decode()
 

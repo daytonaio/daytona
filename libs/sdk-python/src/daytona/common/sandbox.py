@@ -1,8 +1,9 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 TOOLBOX_PORT = 2280
 
@@ -12,10 +13,10 @@ class Resources:
     """Resources configuration for Sandbox.
 
     Attributes:
-        cpu (Optional[int]): Number of CPU cores to allocate.
-        memory (Optional[int]): Amount of memory in GiB to allocate.
-        disk (Optional[int]): Amount of disk space in GiB to allocate.
-        gpu (Optional[int]): Number of GPUs to allocate.
+        cpu (int | None): Number of CPU cores to allocate.
+        memory (int | None): Amount of memory in GiB to allocate.
+        disk (int | None): Amount of disk space in GiB to allocate.
+        gpu (int | None): Number of GPUs to allocate.
 
     Example:
         ```python
@@ -33,7 +34,7 @@ class Resources:
         ```
     """
 
-    cpu: Optional[int] = None
-    memory: Optional[int] = None
-    disk: Optional[int] = None
-    gpu: Optional[int] = None
+    cpu: int | None = None
+    memory: int | None = None
+    disk: int | None = None
+    gpu: int | None = None
