@@ -13,8 +13,8 @@ async def interactive_pty_session(sandbox: AsyncSandbox):
     def handle_pty_data(data: bytes):
         # Decode UTF-8 bytes to text and write directly to preserve terminal formatting
         text = data.decode("utf-8", errors="replace")
-        sys.stdout.write(text)
-        sys.stdout.flush()
+        _ = sys.stdout.write(text)
+        _ = sys.stdout.flush()
 
     # Create PTY session with custom dimensions and data handler
     pty_handle = await sandbox.process.create_pty_session(
@@ -56,8 +56,8 @@ async def kill_pty_session(sandbox: AsyncSandbox):
     def handle_pty_data(data: bytes):
         # Decode UTF-8 bytes to text and write directly to preserve terminal formatting
         text = data.decode("utf-8", errors="replace")
-        sys.stdout.write(text)
-        sys.stdout.flush()
+        _ = sys.stdout.write(text)
+        _ = sys.stdout.flush()
 
     # Create PTY session
     pty_handle = await sandbox.process.create_pty_session(

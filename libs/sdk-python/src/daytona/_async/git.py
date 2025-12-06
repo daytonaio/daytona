@@ -1,7 +1,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional
+from __future__ import annotations
 
 from daytona_toolbox_api_client_async import (
     GitAddRequest,
@@ -55,17 +55,17 @@ class AsyncGit:
         Args:
             api_client (GitApi): API client for Sandbox Git operations.
         """
-        self._api_client = api_client
+        self._api_client: GitApi = api_client
 
     @intercept_errors(message_prefix="Failed to add files: ")
-    async def add(self, path: str, files: List[str]) -> None:
+    async def add(self, path: str, files: list[str]) -> None:
         """Stages the specified files for the next commit, similar to
         running 'git add' on the command line.
 
         Args:
             path (str): Path to the Git repository root. Relative paths are resolved based on
             the sandbox working directory.
-            files (List[str]): List of file paths or directories to stage, relative to the repository root.
+            files (list[str]): List of file paths or directories to stage, relative to the repository root.
 
         Example:
             ```python
@@ -110,10 +110,10 @@ class AsyncGit:
         self,
         url: str,
         path: str,
-        branch: Optional[str] = None,
-        commit_id: Optional[str] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
+        branch: str | None = None,
+        commit_id: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
     ) -> None:
         """Clones a Git repository into the specified path. It supports
         cloning specific branches or commits, and can authenticate with the remote
@@ -123,12 +123,12 @@ class AsyncGit:
             url (str): Repository URL to clone from.
             path (str): Path where the repository should be cloned. Relative paths are resolved
             based on the sandbox working directory.
-            branch (Optional[str]): Specific branch to clone. If not specified,
+            branch (str | None): Specific branch to clone. If not specified,
                 clones the default branch.
-            commit_id (Optional[str]): Specific commit to clone. If specified,
+            commit_id (str | None): Specific commit to clone. If specified,
                 the repository will be left in a detached HEAD state at this commit.
-            username (Optional[str]): Git username for authentication.
-            password (Optional[str]): Git password or token for authentication.
+            username (str | None): Git username for authentication.
+            password (str | None): Git password or token for authentication.
 
         Example:
             ```python
@@ -162,7 +162,7 @@ class AsyncGit:
                 path=path,
                 username=username,
                 password=password,
-                commitId=commit_id,
+                commit_id=commit_id,
             ),
         )
 
@@ -179,7 +179,7 @@ class AsyncGit:
             message (str): Commit message describing the changes.
             author (str): Name of the commit author.
             email (str): Email address of the commit author.
-            allow_empty (bool, optional): Allow creating an empty commit when no changes are staged. Defaults to False.
+            allow_empty (bool): Allow creating an empty commit when no changes are staged. Defaults to False.
 
         Example:
             ```python
@@ -209,8 +209,8 @@ class AsyncGit:
     async def push(
         self,
         path: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
+        username: str | None = None,
+        password: str | None = None,
     ) -> None:
         """Pushes all local commits on the current branch to the remote
         repository. If the remote repository requires authentication, provide
@@ -219,8 +219,8 @@ class AsyncGit:
         Args:
             path (str): Path to the Git repository root. Relative paths are resolved based on
             the sandbox working directory.
-            username (Optional[str]): Git username for authentication.
-            password (Optional[str]): Git password or token for authentication.
+            username (str | None): Git username for authentication.
+            password (str | None): Git password or token for authentication.
 
         Example:
             ```python
@@ -247,8 +247,8 @@ class AsyncGit:
     async def pull(
         self,
         path: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
+        username: str | None = None,
+        password: str | None = None,
     ) -> None:
         """Pulls changes from the remote repository. If the remote repository requires authentication,
         provide username and password/token.
@@ -256,8 +256,8 @@ class AsyncGit:
         Args:
             path (str): Path to the Git repository root. Relative paths are resolved based on
             the sandbox working directory.
-            username (Optional[str]): Git username for authentication.
-            password (Optional[str]): Git password or token for authentication.
+            username (str | None): Git username for authentication.
+            password (str | None): Git password or token for authentication.
 
         Example:
             ```python

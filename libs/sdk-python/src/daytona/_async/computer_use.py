@@ -1,7 +1,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional
+from __future__ import annotations
 
 from daytona_toolbox_api_client_async import (
     ComputerUseApi,
@@ -35,7 +35,7 @@ class AsyncMouse:
     """Mouse operations for computer use functionality."""
 
     def __init__(self, api_client: ComputerUseApi):
-        self._api_client = api_client
+        self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to get mouse position: ")
     async def get_position(self) -> MousePositionResponse:
@@ -151,17 +151,17 @@ class AsyncMouse:
         """
         request = MouseScrollRequest(x=x, y=y, direction=direction, amount=amount)
         response = await self._api_client.scroll(request=request)
-        return response
+        return response.success is True
 
 
 class AsyncKeyboard:
     """Keyboard operations for computer use functionality."""
 
     def __init__(self, api_client: ComputerUseApi):
-        self._api_client = api_client
+        self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to type text: ")
-    async def type(self, text: str, delay: Optional[int] = None) -> None:
+    async def type(self, text: str, delay: int | None = None) -> None:
         """Types the specified text.
 
         Args:
@@ -188,15 +188,15 @@ class AsyncKeyboard:
             ```
         """
         request = KeyboardTypeRequest(text=text, delay=delay)
-        await self._api_client.type_text(request=request)
+        _ = await self._api_client.type_text(request=request)
 
     @intercept_errors(message_prefix="Failed to press key: ")
-    async def press(self, key: str, modifiers: Optional[List[str]] = None) -> None:
+    async def press(self, key: str, modifiers: list[str] | None = None) -> None:
         """Presses a key with optional modifiers.
 
         Args:
             key (str): The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A').
-            modifiers (List[str]): Modifier keys ('ctrl', 'alt', 'meta', 'shift').
+            modifiers (list[str]): Modifier keys ('ctrl', 'alt', 'meta', 'shift').
 
         Raises:
             DaytonaError: If the press operation fails.
@@ -224,7 +224,7 @@ class AsyncKeyboard:
             ```
         """
         request = KeyboardPressRequest(key=key, modifiers=modifiers or [])
-        await self._api_client.press_key(request=request)
+        _ = await self._api_client.press_key(request=request)
 
     @intercept_errors(message_prefix="Failed to press hotkey: ")
     async def hotkey(self, keys: str) -> None:
@@ -261,14 +261,14 @@ class AsyncKeyboard:
             ```
         """
         request = KeyboardHotkeyRequest(keys=keys)
-        await self._api_client.press_hotkey(request=request)
+        _ = await self._api_client.press_hotkey(request=request)
 
 
 class AsyncScreenshot:
     """Screenshot operations for computer use functionality."""
 
     def __init__(self, api_client: ComputerUseApi):
-        self._api_client = api_client
+        self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to take screenshot: ")
     async def take_full_screen(self, show_cursor: bool = False) -> ScreenshotResponse:
@@ -316,11 +316,11 @@ class AsyncScreenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
-    async def take_compressed(self, options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse:
+    async def take_compressed(self, options: ScreenshotOptions | None = None) -> ScreenshotResponse:
         """Takes a compressed screenshot of the entire screen.
 
         Args:
-            options (ScreenshotOptions): Compression and display options.
+            options (ScreenshotOptions | None): Compression and display options.
 
         Returns:
             ScreenshotResponse: Compressed screenshot data.
@@ -354,13 +354,13 @@ class AsyncScreenshot:
 
     @intercept_errors(message_prefix="Failed to take compressed region screenshot: ")
     async def take_compressed_region(
-        self, region: ScreenshotRegion, options: Optional[ScreenshotOptions] = None
+        self, region: ScreenshotRegion, options: ScreenshotOptions | None = None
     ) -> ScreenshotResponse:
         """Takes a compressed screenshot of a specific region.
 
         Args:
             region (ScreenshotRegion): The region to capture.
-            options (ScreenshotOptions): Compression and display options.
+            options (ScreenshotOptions | None): Compression and display options.
 
         Returns:
             ScreenshotResponse: Compressed screenshot data.
@@ -395,7 +395,7 @@ class AsyncDisplay:
     """Display operations for computer use functionality."""
 
     def __init__(self, api_client: ComputerUseApi):
-        self._api_client = api_client
+        self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to get display info: ")
     async def get_info(self) -> DisplayInfoResponse:
@@ -449,12 +449,12 @@ class AsyncComputerUse:
     """
 
     def __init__(self, api_client: ComputerUseApi):
-        self._api_client = api_client
+        self._api_client: ComputerUseApi = api_client
 
-        self.mouse = AsyncMouse(api_client)
-        self.keyboard = AsyncKeyboard(api_client)
-        self.screenshot = AsyncScreenshot(api_client)
-        self.display = AsyncDisplay(api_client)
+        self.mouse: AsyncMouse = AsyncMouse(api_client)
+        self.keyboard: AsyncKeyboard = AsyncKeyboard(api_client)
+        self.screenshot: AsyncScreenshot = AsyncScreenshot(api_client)
+        self.display: AsyncDisplay = AsyncDisplay(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     async def start(self) -> ComputerUseStartResponse:

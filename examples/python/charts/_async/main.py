@@ -90,18 +90,25 @@ async def main():
         if response.exit_code != 0:
             print(f"Error: {response.exit_code} {response.result}")
         else:
-            for chart in response.artifacts.charts:
-                img_data = base64.b64decode(chart.png)
-                script_dir = os.path.dirname(os.path.abspath(__file__))
-                if chart.title:
-                    filename = os.path.join(script_dir, f"{chart.title}.png")
-                else:
-                    filename = os.path.join(script_dir, f"chart_{time.time()}.png")
-                with open(filename, "wb") as f:
-                    f.write(img_data)
-                print(f"Image saved as: {filename}")
+            if response.artifacts and response.artifacts.charts:
+                for chart in response.artifacts.charts:
+                    if chart.png:
+                        img_data = base64.b64decode(chart.png)
+                    else:
+                        print(f"No PNG data for chart: '{chart.title}'")
+                        continue
+                    script_dir = os.path.dirname(os.path.abspath(__file__))
+                    if chart.title:
+                        filename = os.path.join(script_dir, f"{chart.title}.png")
+                    else:
+                        filename = os.path.join(script_dir, f"chart_{time.time()}.png")
+                    with open(filename, "wb") as f:
+                        _ = f.write(img_data)
+                    print(f"Image saved as: {filename}")
 
-                print_chart(chart)
+                    print_chart(chart)
+            else:
+                print("No charts found")
 
         await daytona.delete(sandbox)
 

@@ -10,4 +10,4 @@ class GitCommitResponse:
     """
 
     def __init__(self, sha: str):
-        self.sha = sha
+        self.sha: str = sha

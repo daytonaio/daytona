@@ -1,10 +1,14 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Optional
+from __future__ import annotations
+
+from typing import ClassVar
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class ScreenshotRegion:
+class ScreenshotRegion(BaseModel):
     """Region coordinates for screenshot operations.
 
     Attributes:
@@ -14,31 +18,27 @@ class ScreenshotRegion:
         height (int): Height of the region.
     """
 
-    def __init__(self, x: int, y: int, width: int, height: int):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+    model_config: ClassVar[ConfigDict] = ConfigDict(frozen=True)
+
+    x: int
+    y: int
+    width: int
+    height: int
 
 
-class ScreenshotOptions:
+class ScreenshotOptions(BaseModel):
     """Options for screenshot compression and display.
 
     Attributes:
-        show_cursor (bool): Whether to show the cursor in the screenshot.
-        fmt (str): Image format (e.g., 'png', 'jpeg', 'webp').
-        quality (int): Compression quality (0-100).
-        scale (float): Scale factor for the screenshot.
+        show_cursor (bool | None): Whether to show the cursor in the screenshot.
+        fmt (str | None): Image format (e.g., 'png', 'jpeg', 'webp').
+        quality (int | None): Compression quality (0-100).
+        scale (float | None): Scale factor for the screenshot.
     """
 
-    def __init__(
-        self,
-        show_cursor: Optional[bool] = None,
-        fmt: Optional[str] = None,
-        quality: Optional[int] = None,
-        scale: Optional[float] = None,
-    ):
-        self.show_cursor = show_cursor
-        self.fmt = fmt
-        self.quality = quality
-        self.scale = scale
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="forbid")
+
+    show_cursor: bool | None = Field(default=None, description="Whether to show the cursor in the screenshot.")
+    fmt: str | None = Field(default=None, description="Image format (png, jpeg, webp).")
+    quality: int | None = Field(default=None, ge=0, le=100, description="Compression quality.")
+    scale: float | None = Field(default=None, gt=0, description="Scale factor for the screenshot.")
