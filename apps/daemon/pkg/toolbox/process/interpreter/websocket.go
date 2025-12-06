@@ -106,11 +106,14 @@ func (cl *wsClient) close() {
 
 		// Wait for clientWriter to drain remaining messages with a timeout
 		// This ensures close frames and other pending messages have time to be sent
-		timeout := time.After(5 * time.Second)
+		timer := time.NewTimer(5 * time.Second)
 		select {
 		case <-cl.done:
 			// clientWriter has finished processing all messages
-		case <-timeout:
+			if !timer.Stop() {
+				<-timer.C
+			}
+		case <-timer.C:
 			// Timeout reached, proceed with closing
 			log.Debug("Timeout waiting for client writer to finish")
 		}
