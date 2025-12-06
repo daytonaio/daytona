@@ -1,0 +1,991 @@
+date,item,quantity,unit_price,revenue,time
+2024-01-01,Single-Origin Pour Over,20,5.44,108.78,08:00:00
+2024-01-01,Oat Milk Latte,14,6.08,85.15,08:00:36
+2024-01-01,Honey Lavender Latte,10,6.28,62.83,08:01:12
+2024-01-01,Turmeric Ginger Latte,10,6.29,62.87,08:01:49
+2024-01-01,Cold Brew Concentrate,11,5.92,65.14,08:02:25
+2024-01-01,Nitro Cold Brew,9,6.18,55.63,08:03:02
+2024-01-01,Matcha Espresso Fusion,16,6.52,104.25,08:03:38
+2024-01-01,Blue Pea Flower Tea,20,4.61,92.27,08:04:14
+2024-01-01,Sourdough Toast,9,5.93,53.41,08:04:51
+2024-01-01,Almond Butter Croissant,4,5.45,21.8,08:05:27
+2024-01-01,Vegan Morning Bun,6,5.85,35.12,08:06:04
+2024-01-02,Single-Origin Pour Over,10,5.76,57.57,08:06:40
+2024-01-02,Oat Milk Latte,6,6.0,36.01,08:07:16
+2024-01-02,Honey Lavender Latte,8,6.86,54.87,08:07:53
+2024-01-02,Turmeric Ginger Latte,8,6.42,51.4,08:08:29
+2024-01-02,Cold Brew Concentrate,10,5.86,58.63,08:09:06
+2024-01-02,Nitro Cold Brew,5,6.26,31.32,08:09:42
+2024-01-02,Matcha Espresso Fusion,8,6.8,54.44,08:10:18
+2024-01-02,Blue Pea Flower Tea,7,4.55,31.83,08:10:55
+2024-01-02,Sourdough Toast,6,6.31,37.86,08:11:31
+2024-01-02,Almond Butter Croissant,3,5.18,15.54,08:12:08
+2024-01-02,Vegan Morning Bun,15,5.8,86.93,08:12:44
+2024-01-03,Single-Origin Pour Over,9,5.58,50.26,08:13:20
+2024-01-03,Oat Milk Latte,9,5.81,52.26,08:13:57
+2024-01-03,Honey Lavender Latte,1,6.71,6.71,08:14:33
+2024-01-03,Turmeric Ginger Latte,10,6.49,64.85,08:15:10
+2024-01-03,Cold Brew Concentrate,17,5.74,97.63,08:15:46
+2024-01-03,Nitro Cold Brew,17,6.43,109.38,08:16:22
+2024-01-03,Matcha Espresso Fusion,16,6.71,107.39,08:16:59
+2024-01-03,Blue Pea Flower Tea,2,4.54,9.08,08:17:35
+2024-01-03,Sourdough Toast,17,6.22,105.75,08:18:12
+2024-01-03,Almond Butter Croissant,18,5.31,95.56,08:18:48
+2024-01-03,Vegan Morning Bun,8,5.55,44.38,08:19:24
+2024-01-04,Single-Origin Pour Over,12,5.38,64.55,08:20:01
+2024-01-04,Oat Milk Latte,12,5.87,70.46,08:20:37
+2024-01-04,Honey Lavender Latte,6,6.87,41.21,08:21:14
+2024-01-04,Turmeric Ginger Latte,14,6.46,90.44,08:21:50
+2024-01-04,Cold Brew Concentrate,21,5.67,119.1,08:22:26
+2024-01-04,Nitro Cold Brew,11,6.55,72.02,08:23:03
+2024-01-04,Matcha Espresso Fusion,20,6.98,139.68,08:23:39
+2024-01-04,Blue Pea Flower Tea,15,4.66,69.93,08:24:16
+2024-01-04,Sourdough Toast,13,5.99,77.84,08:24:52
+2024-01-04,Almond Butter Croissant,5,5.12,25.62,08:25:28
+2024-01-04,Vegan Morning Bun,13,5.97,77.63,08:26:05
+2024-01-05,Single-Origin Pour Over,12,5.31,63.7,08:26:41
+2024-01-05,Oat Milk Latte,17,6.07,103.15,08:27:18
+2024-01-05,Honey Lavender Latte,1,6.39,6.39,08:27:54
+2024-01-05,Turmeric Ginger Latte,7,6.12,42.81,08:28:30
+2024-01-05,Cold Brew Concentrate,7,5.77,40.38,08:29:07
+2024-01-05,Nitro Cold Brew,13,6.03,78.41,08:29:43
+2024-01-05,Matcha Espresso Fusion,15,6.92,103.85,08:30:20
+2024-01-05,Blue Pea Flower Tea,7,4.56,31.93,08:30:56
+2024-01-05,Sourdough Toast,16,6.37,101.95,08:31:32
+2024-01-05,Almond Butter Croissant,5,5.28,26.42,08:32:09
+2024-01-05,Vegan Morning Bun,18,5.61,100.99,08:32:45
+2024-01-06,Single-Origin Pour Over,12,5.42,65.03,08:33:22
+2024-01-06,Oat Milk Latte,15,5.97,89.57,08:33:58
+2024-01-06,Honey Lavender Latte,13,6.29,81.8,08:34:34
+2024-01-06,Turmeric Ginger Latte,9,6.48,58.34,08:35:11
+2024-01-06,Cold Brew Concentrate,15,5.6,84.04,08:35:47
+2024-01-06,Nitro Cold Brew,16,6.47,103.56,08:36:24
+2024-01-06,Matcha Espresso Fusion,14,6.73,94.27,08:37:00
+2024-01-06,Blue Pea Flower Tea,8,4.45,35.63,08:37:36
+2024-01-06,Sourdough Toast,14,6.02,84.32,08:38:13
+2024-01-06,Almond Butter Croissant,13,5.63,73.21,08:38:49
+2024-01-06,Vegan Morning Bun,13,5.74,74.61,08:39:26
+2024-01-07,Single-Origin Pour Over,8,5.79,46.3,08:40:02
+2024-01-07,Oat Milk Latte,8,6.38,51.02,08:40:38
+2024-01-07,Honey Lavender Latte,11,6.44,70.8,08:41:15
+2024-01-07,Turmeric Ginger Latte,21,6.54,137.38,08:41:51
+2024-01-07,Cold Brew Concentrate,14,6.05,84.72,08:42:28
+2024-01-07,Nitro Cold Brew,9,6.2,55.84,08:43:04
+2024-01-07,Matcha Espresso Fusion,9,6.85,61.66,08:43:40
+2024-01-07,Blue Pea Flower Tea,3,4.31,12.94,08:44:17
+2024-01-07,Sourdough Toast,12,6.25,75.04,08:44:53
+2024-01-07,Almond Butter Croissant,18,5.15,92.7,08:45:30
+2024-01-07,Vegan Morning Bun,14,5.96,83.37,08:46:06
+2024-01-08,Single-Origin Pour Over,11,5.8,63.76,08:46:42
+2024-01-08,Oat Milk Latte,7,6.09,42.6,08:47:19
+2024-01-08,Honey Lavender Latte,17,6.35,107.98,08:47:55
+2024-01-08,Turmeric Ginger Latte,12,6.54,78.47,08:48:32
+2024-01-08,Cold Brew Concentrate,14,5.55,77.67,08:49:08
+2024-01-08,Nitro Cold Brew,8,6.57,52.6,08:49:44
+2024-01-08,Matcha Espresso Fusion,11,6.79,74.69,08:50:21
+2024-01-08,Blue Pea Flower Tea,8,4.37,34.96,08:50:57
+2024-01-08,Sourdough Toast,12,6.03,72.4,08:51:34
+2024-01-08,Almond Butter Croissant,25,5.4,135.08,08:52:10
+2024-01-08,Vegan Morning Bun,11,5.74,63.17,08:52:46
+2024-01-09,Single-Origin Pour Over,6,5.43,32.57,08:53:23
+2024-01-09,Oat Milk Latte,13,6.27,81.5,08:53:59
+2024-01-09,Honey Lavender Latte,9,6.41,57.67,08:54:36
+2024-01-09,Turmeric Ginger Latte,9,6.31,56.81,08:55:12
+2024-01-09,Cold Brew Concentrate,5,5.94,29.71,08:55:48
+2024-01-09,Nitro Cold Brew,11,6.52,71.69,08:56:25
+2024-01-09,Matcha Espresso Fusion,20,6.75,135.08,08:57:01
+2024-01-09,Blue Pea Flower Tea,15,4.28,64.2,08:57:38
+2024-01-09,Sourdough Toast,1,6.14,6.14,08:58:14
+2024-01-09,Almond Butter Croissant,7,5.09,35.61,08:58:50
+2024-01-09,Vegan Morning Bun,15,5.67,85.08,08:59:27
+2024-01-10,Single-Origin Pour Over,9,5.52,49.65,09:00:03
+2024-01-10,Oat Milk Latte,11,5.84,64.29,09:00:40
+2024-01-10,Honey Lavender Latte,13,6.71,87.18,09:01:16
+2024-01-10,Turmeric Ginger Latte,21,6.03,126.57,09:01:52
+2024-01-10,Cold Brew Concentrate,17,5.77,98.11,09:02:29
+2024-01-10,Nitro Cold Brew,10,6.19,61.92,09:03:05
+2024-01-10,Matcha Espresso Fusion,12,7.14,85.71,09:03:42
+2024-01-10,Blue Pea Flower Tea,11,4.73,52.01,09:04:18
+2024-01-10,Sourdough Toast,14,6.16,86.26,09:04:54
+2024-01-10,Almond Butter Croissant,17,5.11,86.91,09:05:31
+2024-01-10,Vegan Morning Bun,11,6.04,66.42,09:06:07
+2024-01-11,Single-Origin Pour Over,9,5.69,51.18,09:06:44
+2024-01-11,Oat Milk Latte,21,6.05,127.03,09:07:20
+2024-01-11,Honey Lavender Latte,10,6.58,65.8,09:07:56
+2024-01-11,Turmeric Ginger Latte,13,6.57,85.36,09:08:33
+2024-01-11,Cold Brew Concentrate,13,5.72,74.42,09:09:09
+2024-01-11,Nitro Cold Brew,10,6.04,60.37,09:09:46
+2024-01-11,Matcha Espresso Fusion,8,6.98,55.82,09:10:22
+2024-01-11,Blue Pea Flower Tea,20,4.56,91.2,09:10:58
+2024-01-11,Sourdough Toast,1,5.94,5.94,09:11:35
+2024-01-11,Almond Butter Croissant,12,5.59,67.03,09:12:11
+2024-01-11,Vegan Morning Bun,17,6.08,103.4,09:12:48
+2024-01-12,Single-Origin Pour Over,15,5.41,81.19,09:13:24
+2024-01-12,Oat Milk Latte,26,5.82,151.44,09:14:00
+2024-01-12,Honey Lavender Latte,13,6.75,87.69,09:14:37
+2024-01-12,Turmeric Ginger Latte,12,6.08,72.99,09:15:13
+2024-01-12,Cold Brew Concentrate,5,5.55,27.74,09:15:50
+2024-01-12,Nitro Cold Brew,11,6.44,70.82,09:16:26
+2024-01-12,Matcha Espresso Fusion,24,7.01,168.34,09:17:02
+2024-01-12,Blue Pea Flower Tea,17,4.67,79.44,09:17:39
+2024-01-12,Sourdough Toast,21,6.1,128.16,09:18:15
+2024-01-12,Almond Butter Croissant,17,5.29,89.99,09:18:52
+2024-01-12,Vegan Morning Bun,12,5.85,70.17,09:19:28
+2024-01-13,Single-Origin Pour Over,9,5.53,49.78,09:20:04
+2024-01-13,Oat Milk Latte,13,5.82,75.61,09:20:41
+2024-01-13,Honey Lavender Latte,8,6.59,52.68,09:21:17
+2024-01-13,Turmeric Ginger Latte,8,6.37,50.97,09:21:54
+2024-01-13,Cold Brew Concentrate,11,6.08,66.87,09:22:30
+2024-01-13,Nitro Cold Brew,18,6.26,112.62,09:23:06
+2024-01-13,Matcha Espresso Fusion,13,6.91,89.77,09:23:43
+2024-01-13,Blue Pea Flower Tea,20,4.43,88.52,09:24:19
+2024-01-13,Sourdough Toast,12,6.4,76.77,09:24:56
+2024-01-13,Almond Butter Croissant,6,5.03,30.19,09:25:32
+2024-01-13,Vegan Morning Bun,17,5.53,93.93,09:26:08
+2024-01-14,Single-Origin Pour Over,7,5.74,40.15,09:26:45
+2024-01-14,Oat Milk Latte,20,6.11,122.16,09:27:21
+2024-01-14,Honey Lavender Latte,14,6.86,96.05,09:27:58
+2024-01-14,Turmeric Ginger Latte,16,6.03,96.53,09:28:34
+2024-01-14,Cold Brew Concentrate,2,5.86,11.72,09:29:10
+2024-01-14,Nitro Cold Brew,13,6.61,85.99,09:29:47
+2024-01-14,Matcha Espresso Fusion,11,6.59,72.49,09:30:23
+2024-01-14,Blue Pea Flower Tea,15,4.6,69.05,09:31:00
+2024-01-14,Sourdough Toast,7,6.1,42.68,09:31:36
+2024-01-14,Almond Butter Croissant,10,5.26,52.55,09:32:12
+2024-01-14,Vegan Morning Bun,11,6.15,67.64,09:32:49
+2024-01-15,Single-Origin Pour Over,13,5.38,69.91,09:33:25
+2024-01-15,Oat Milk Latte,18,6.35,114.27,09:34:02
+2024-01-15,Honey Lavender Latte,21,6.38,134.02,09:34:38
+2024-01-15,Turmeric Ginger Latte,5,6.21,31.07,09:35:14
+2024-01-15,Cold Brew Concentrate,6,5.51,33.09,09:35:51
+2024-01-15,Nitro Cold Brew,3,6.43,19.29,09:36:27
+2024-01-15,Matcha Espresso Fusion,13,6.9,89.74,09:37:04
+2024-01-15,Blue Pea Flower Tea,6,4.7,28.22,09:37:40
+2024-01-15,Sourdough Toast,6,6.24,37.45,09:38:16
+2024-01-15,Almond Butter Croissant,6,5.25,31.51,09:38:53
+2024-01-15,Vegan Morning Bun,7,6.14,42.95,09:39:29
+2024-01-16,Single-Origin Pour Over,4,5.53,22.14,09:40:06
+2024-01-16,Oat Milk Latte,8,6.34,50.75,09:40:42
+2024-01-16,Honey Lavender Latte,20,6.72,134.35,09:41:18
+2024-01-16,Turmeric Ginger Latte,7,6.24,43.65,09:41:55
+2024-01-16,Cold Brew Concentrate,11,5.82,64.01,09:42:31
+2024-01-16,Nitro Cold Brew,13,6.14,79.77,09:43:08
+2024-01-16,Matcha Espresso Fusion,3,6.82,20.46,09:43:44
+2024-01-16,Blue Pea Flower Tea,22,4.73,104.16,09:44:20
+2024-01-16,Sourdough Toast,13,6.22,80.92,09:44:57
+2024-01-16,Almond Butter Croissant,5,5.57,27.84,09:45:33
+2024-01-16,Vegan Morning Bun,1,5.74,5.74,09:46:10
+2024-01-17,Single-Origin Pour Over,12,5.45,65.38,09:46:46
+2024-01-17,Oat Milk Latte,15,6.15,92.32,09:47:22
+2024-01-17,Honey Lavender Latte,13,6.47,84.14,09:47:59
+2024-01-17,Turmeric Ginger Latte,21,6.3,132.22,09:48:35
+2024-01-17,Cold Brew Concentrate,10,5.59,55.94,09:49:12
+2024-01-17,Nitro Cold Brew,9,6.43,57.9,09:49:48
+2024-01-17,Matcha Espresso Fusion,12,6.54,78.48,09:50:24
+2024-01-17,Blue Pea Flower Tea,1,4.37,4.37,09:51:01
+2024-01-17,Sourdough Toast,16,6.3,100.88,09:51:37
+2024-01-17,Almond Butter Croissant,19,5.63,106.89,09:52:14
+2024-01-17,Vegan Morning Bun,18,5.79,104.24,09:52:50
+2024-01-18,Single-Origin Pour Over,4,5.58,22.31,09:53:26
+2024-01-18,Oat Milk Latte,13,6.16,80.02,09:54:03
+2024-01-18,Honey Lavender Latte,11,6.34,69.76,09:54:39
+2024-01-18,Turmeric Ginger Latte,12,6.01,72.11,09:55:16
+2024-01-18,Cold Brew Concentrate,16,6.02,96.38,09:55:52
+2024-01-18,Nitro Cold Brew,12,6.28,75.35,09:56:28
+2024-01-18,Matcha Espresso Fusion,13,6.75,87.72,09:57:05
+2024-01-18,Blue Pea Flower Tea,9,4.76,42.84,09:57:41
+2024-01-18,Sourdough Toast,13,6.07,78.96,09:58:18
+2024-01-18,Almond Butter Croissant,7,5.11,35.79,09:58:54
+2024-01-18,Vegan Morning Bun,10,6.06,60.59,09:59:30
+2024-01-19,Single-Origin Pour Over,14,5.77,80.82,10:00:07
+2024-01-19,Oat Milk Latte,9,5.81,52.26,10:00:43
+2024-01-19,Honey Lavender Latte,19,6.57,124.8,10:01:20
+2024-01-19,Turmeric Ginger Latte,10,6.56,65.63,10:01:56
+2024-01-19,Cold Brew Concentrate,19,5.64,107.14,10:02:32
+2024-01-19,Nitro Cold Brew,5,6.55,32.74,10:03:09
+2024-01-19,Matcha Espresso Fusion,13,6.71,87.23,10:03:45
+2024-01-19,Blue Pea Flower Tea,17,4.48,76.09,10:04:22
+2024-01-19,Sourdough Toast,7,6.08,42.57,10:04:58
+2024-01-19,Almond Butter Croissant,13,5.19,67.5,10:05:34
+2024-01-19,Vegan Morning Bun,5,6.04,30.21,10:06:11
+2024-01-20,Single-Origin Pour Over,6,5.36,32.18,10:06:47
+2024-01-20,Oat Milk Latte,8,5.76,46.08,10:07:24
+2024-01-20,Honey Lavender Latte,9,6.53,58.74,10:08:00
+2024-01-20,Turmeric Ginger Latte,1,6.56,6.56,10:08:36
+2024-01-20,Cold Brew Concentrate,9,5.84,52.59,10:09:13
+2024-01-20,Nitro Cold Brew,22,6.05,133.14,10:09:49
+2024-01-20,Matcha Espresso Fusion,15,7.05,105.68,10:10:26
+2024-01-20,Blue Pea Flower Tea,12,4.85,58.22,10:11:02
+2024-01-20,Sourdough Toast,7,6.11,42.75,10:11:38
+2024-01-20,Almond Butter Croissant,18,5.59,100.54,10:12:15
+2024-01-20,Vegan Morning Bun,7,5.9,41.3,10:12:51
+2024-01-21,Single-Origin Pour Over,21,5.36,112.65,10:13:28
+2024-01-21,Oat Milk Latte,13,5.91,76.82,10:14:04
+2024-01-21,Honey Lavender Latte,10,6.74,67.38,10:14:40
+2024-01-21,Turmeric Ginger Latte,8,6.45,51.61,10:15:17
+2024-01-21,Cold Brew Concentrate,15,6.02,90.24,10:15:53
+2024-01-21,Nitro Cold Brew,17,6.1,103.65,10:16:30
+2024-01-21,Matcha Espresso Fusion,10,6.82,68.2,10:17:06
+2024-01-21,Blue Pea Flower Tea,12,4.8,57.58,10:17:42
+2024-01-21,Sourdough Toast,2,5.93,11.86,10:18:19
+2024-01-21,Almond Butter Croissant,10,5.26,52.56,10:18:55
+2024-01-21,Vegan Morning Bun,8,5.78,46.26,10:19:32
+2024-01-22,Single-Origin Pour Over,16,5.72,91.52,10:20:08
+2024-01-22,Oat Milk Latte,17,6.07,103.14,10:20:44
+2024-01-22,Honey Lavender Latte,17,6.34,107.83,10:21:21
+2024-01-22,Turmeric Ginger Latte,11,6.53,71.8,10:21:57
+2024-01-22,Cold Brew Concentrate,12,5.5,66.06,10:22:34
+2024-01-22,Nitro Cold Brew,4,6.45,25.81,10:23:10
+2024-01-22,Matcha Espresso Fusion,10,6.93,69.31,10:23:46
+2024-01-22,Blue Pea Flower Tea,21,4.89,102.6,10:24:23
+2024-01-22,Sourdough Toast,10,5.81,58.11,10:24:59
+2024-01-22,Almond Butter Croissant,21,5.41,113.64,10:25:36
+2024-01-22,Vegan Morning Bun,15,5.67,85.06,10:26:12
+2024-01-23,Single-Origin Pour Over,10,5.8,57.99,10:26:48
+2024-01-23,Oat Milk Latte,14,6.06,84.78,10:27:25
+2024-01-23,Honey Lavender Latte,13,6.3,81.91,10:28:01
+2024-01-23,Turmeric Ginger Latte,10,6.52,65.17,10:28:38
+2024-01-23,Cold Brew Concentrate,16,6.02,96.35,10:29:14
+2024-01-23,Nitro Cold Brew,13,6.26,81.4,10:29:50
+2024-01-23,Matcha Espresso Fusion,9,6.5,58.51,10:30:27
+2024-01-23,Blue Pea Flower Tea,8,4.67,37.4,10:31:03
+2024-01-23,Sourdough Toast,9,6.2,55.77,10:31:40
+2024-01-23,Almond Butter Croissant,4,5.29,21.16,10:32:16
+2024-01-23,Vegan Morning Bun,7,5.72,40.04,10:32:52
+2024-01-24,Single-Origin Pour Over,12,5.38,64.61,10:33:29
+2024-01-24,Oat Milk Latte,19,6.08,115.48,10:34:05
+2024-01-24,Honey Lavender Latte,16,6.28,100.46,10:34:42
+2024-01-24,Turmeric Ginger Latte,7,6.17,43.22,10:35:18
+2024-01-24,Cold Brew Concentrate,8,5.67,45.37,10:35:54
+2024-01-24,Nitro Cold Brew,13,6.23,80.93,10:36:31
+2024-01-24,Matcha Espresso Fusion,14,7.11,99.57,10:37:07
+2024-01-24,Blue Pea Flower Tea,5,4.72,23.62,10:37:44
+2024-01-24,Sourdough Toast,11,5.92,65.1,10:38:20
+2024-01-24,Almond Butter Croissant,14,5.19,72.64,10:38:56
+2024-01-24,Vegan Morning Bun,15,5.8,86.98,10:39:33
+2024-01-25,Single-Origin Pour Over,16,5.59,89.48,10:40:09
+2024-01-25,Oat Milk Latte,18,5.89,106.01,10:40:46
+2024-01-25,Honey Lavender Latte,17,6.55,111.3,10:41:22
+2024-01-25,Turmeric Ginger Latte,6,6.47,38.8,10:41:58
+2024-01-25,Cold Brew Concentrate,6,5.56,33.39,10:42:35
+2024-01-25,Nitro Cold Brew,18,6.44,115.97,10:43:11
+2024-01-25,Matcha Espresso Fusion,16,6.58,105.3,10:43:48
+2024-01-25,Blue Pea Flower Tea,2,4.34,8.69,10:44:24
+2024-01-25,Sourdough Toast,21,5.83,122.35,10:45:00
+2024-01-25,Almond Butter Croissant,7,5.5,38.52,10:45:37
+2024-01-25,Vegan Morning Bun,14,5.99,83.82,10:46:13
+2024-01-26,Single-Origin Pour Over,16,5.41,86.48,10:46:50
+2024-01-26,Oat Milk Latte,10,5.83,58.32,10:47:26
+2024-01-26,Honey Lavender Latte,8,6.52,52.17,10:48:02
+2024-01-26,Turmeric Ginger Latte,8,6.56,52.45,10:48:39
+2024-01-26,Cold Brew Concentrate,16,5.79,92.71,10:49:15
+2024-01-26,Nitro Cold Brew,14,6.29,87.99,10:49:52
+2024-01-26,Matcha Espresso Fusion,6,6.71,40.29,10:50:28
+2024-01-26,Blue Pea Flower Tea,13,4.74,61.6,10:51:04
+2024-01-26,Sourdough Toast,12,5.94,71.29,10:51:41
+2024-01-26,Almond Butter Croissant,3,5.64,16.92,10:52:17
+2024-01-26,Vegan Morning Bun,5,5.5,27.51,10:52:54
+2024-01-27,Single-Origin Pour Over,12,5.35,64.22,10:53:30
+2024-01-27,Oat Milk Latte,22,6.17,135.68,10:54:06
+2024-01-27,Honey Lavender Latte,14,6.3,88.21,10:54:43
+2024-01-27,Turmeric Ginger Latte,15,6.52,97.75,10:55:19
+2024-01-27,Cold Brew Concentrate,16,5.87,93.85,10:55:56
+2024-01-27,Nitro Cold Brew,9,6.05,54.47,10:56:32
+2024-01-27,Matcha Espresso Fusion,14,6.79,95.11,10:57:08
+2024-01-27,Blue Pea Flower Tea,19,4.66,88.63,10:57:45
+2024-01-27,Sourdough Toast,9,6.34,57.09,10:58:21
+2024-01-27,Almond Butter Croissant,11,5.19,57.06,10:58:58
+2024-01-27,Vegan Morning Bun,14,5.8,81.21,10:59:34
+2024-01-28,Single-Origin Pour Over,13,5.78,75.13,11:00:10
+2024-01-28,Oat Milk Latte,6,5.94,35.64,11:00:47
+2024-01-28,Honey Lavender Latte,4,6.44,25.77,11:01:23
+2024-01-28,Turmeric Ginger Latte,2,6.04,12.09,11:02:00
+2024-01-28,Cold Brew Concentrate,15,5.95,89.23,11:02:36
+2024-01-28,Nitro Cold Brew,7,6.12,42.85,11:03:12
+2024-01-28,Matcha Espresso Fusion,4,6.53,26.13,11:03:49
+2024-01-28,Blue Pea Flower Tea,7,4.86,33.99,11:04:25
+2024-01-28,Sourdough Toast,21,5.76,121.01,11:05:02
+2024-01-28,Almond Butter Croissant,1,5.21,5.21,11:05:38
+2024-01-28,Vegan Morning Bun,12,6.13,73.6,11:06:14
+2024-01-29,Single-Origin Pour Over,15,5.83,87.42,11:06:51
+2024-01-29,Oat Milk Latte,12,5.97,71.65,11:07:27
+2024-01-29,Honey Lavender Latte,6,6.49,38.93,11:08:04
+2024-01-29,Turmeric Ginger Latte,14,6.45,90.23,11:08:40
+2024-01-29,Cold Brew Concentrate,7,5.55,38.86,11:09:16
+2024-01-29,Nitro Cold Brew,12,6.5,78.01,11:09:53
+2024-01-29,Matcha Espresso Fusion,16,6.64,106.3,11:10:29
+2024-01-29,Blue Pea Flower Tea,18,4.76,85.67,11:11:06
+2024-01-29,Sourdough Toast,6,5.86,35.15,11:11:42
+2024-01-29,Almond Butter Croissant,13,5.4,70.25,11:12:18
+2024-01-29,Vegan Morning Bun,12,5.69,68.3,11:12:55
+2024-01-30,Single-Origin Pour Over,13,5.72,74.3,11:13:31
+2024-01-30,Oat Milk Latte,14,6.02,84.27,11:14:08
+2024-01-30,Honey Lavender Latte,6,6.27,37.62,11:14:44
+2024-01-30,Turmeric Ginger Latte,19,6.59,125.26,11:15:20
+2024-01-30,Cold Brew Concentrate,28,5.96,166.94,11:15:57
+2024-01-30,Nitro Cold Brew,17,6.16,104.76,11:16:33
+2024-01-30,Matcha Espresso Fusion,5,6.93,34.63,11:17:10
+2024-01-30,Blue Pea Flower Tea,20,4.35,87.09,11:17:46
+2024-01-30,Sourdough Toast,19,6.21,118.03,11:18:22
+2024-01-30,Almond Butter Croissant,20,5.03,100.58,11:18:59
+2024-01-30,Vegan Morning Bun,13,5.98,77.69,11:19:35
+2024-01-31,Single-Origin Pour Over,12,5.34,64.09,11:20:12
+2024-01-31,Oat Milk Latte,14,6.35,88.91,11:20:48
+2024-01-31,Honey Lavender Latte,3,6.65,19.96,11:21:24
+2024-01-31,Turmeric Ginger Latte,14,6.56,91.82,11:22:01
+2024-01-31,Cold Brew Concentrate,12,5.91,70.94,11:22:37
+2024-01-31,Nitro Cold Brew,7,6.6,46.21,11:23:14
+2024-01-31,Matcha Espresso Fusion,12,6.98,83.71,11:23:50
+2024-01-31,Blue Pea Flower Tea,9,4.68,42.11,11:24:26
+2024-01-31,Sourdough Toast,13,6.16,80.09,11:25:03
+2024-01-31,Almond Butter Croissant,16,5.4,86.34,11:25:39
+2024-01-31,Vegan Morning Bun,13,5.84,75.86,11:26:16
+2024-02-01,Single-Origin Pour Over,10,5.26,52.64,11:26:52
+2024-02-01,Oat Milk Latte,14,6.18,86.48,11:27:28
+2024-02-01,Honey Lavender Latte,16,6.28,100.54,11:28:05
+2024-02-01,Turmeric Ginger Latte,7,6.53,45.71,11:28:41
+2024-02-01,Cold Brew Concentrate,18,5.6,100.83,11:29:18
+2024-02-01,Nitro Cold Brew,8,6.01,48.1,11:29:54
+2024-02-01,Matcha Espresso Fusion,10,6.71,67.1,11:30:30
+2024-02-01,Blue Pea Flower Tea,8,4.44,35.55,11:31:07
+2024-02-01,Sourdough Toast,20,6.36,127.17,11:31:43
+2024-02-01,Almond Butter Croissant,7,5.63,39.41,11:32:20
+2024-02-01,Vegan Morning Bun,8,5.55,44.41,11:32:56
+2024-02-02,Single-Origin Pour Over,14,5.49,76.86,11:33:32
+2024-02-02,Oat Milk Latte,20,5.94,118.84,11:34:09
+2024-02-02,Honey Lavender Latte,11,6.58,72.35,11:34:45
+2024-02-02,Turmeric Ginger Latte,8,6.16,49.29,11:35:22
+2024-02-02,Cold Brew Concentrate,15,6.07,91.11,11:35:58
+2024-02-02,Nitro Cold Brew,4,6.38,25.52,11:36:34
+2024-02-02,Matcha Espresso Fusion,16,6.84,109.5,11:37:11
+2024-02-02,Blue Pea Flower Tea,9,4.65,41.87,11:37:47
+2024-02-02,Sourdough Toast,7,6.2,43.37,11:38:24
+2024-02-02,Almond Butter Croissant,16,5.17,82.77,11:39:00
+2024-02-02,Vegan Morning Bun,5,6.02,30.09,11:39:36
+2024-02-03,Single-Origin Pour Over,15,5.48,82.14,11:40:13
+2024-02-03,Oat Milk Latte,15,6.32,94.74,11:40:49
+2024-02-03,Honey Lavender Latte,14,6.59,92.23,11:41:26
+2024-02-03,Turmeric Ginger Latte,2,6.56,13.11,11:42:02
+2024-02-03,Cold Brew Concentrate,14,6.0,83.94,11:42:38
+2024-02-03,Nitro Cold Brew,16,6.6,105.56,11:43:15
+2024-02-03,Matcha Espresso Fusion,30,6.86,205.94,11:43:51
+2024-02-03,Blue Pea Flower Tea,12,4.61,55.34,11:44:28
+2024-02-03,Sourdough Toast,19,6.03,114.6,11:45:04
+2024-02-03,Almond Butter Croissant,8,5.29,42.29,11:45:40
+2024-02-03,Vegan Morning Bun,1,5.59,5.59,11:46:17
+2024-02-04,Single-Origin Pour Over,12,5.56,66.76,11:46:53
+2024-02-04,Oat Milk Latte,11,6.35,69.85,11:47:30
+2024-02-04,Honey Lavender Latte,11,6.79,74.68,11:48:06
+2024-02-04,Turmeric Ginger Latte,1,6.43,6.43,11:48:42
+2024-02-04,Cold Brew Concentrate,9,5.91,53.15,11:49:19
+2024-02-04,Nitro Cold Brew,2,6.26,12.52,11:49:55
+2024-02-04,Matcha Espresso Fusion,8,6.98,55.85,11:50:32
+2024-02-04,Blue Pea Flower Tea,8,4.39,35.09,11:51:08
+2024-02-04,Sourdough Toast,9,6.39,57.54,11:51:44
+2024-02-04,Almond Butter Croissant,7,5.64,39.51,11:52:21
+2024-02-04,Vegan Morning Bun,4,5.79,23.15,11:52:57
+2024-02-05,Single-Origin Pour Over,11,5.82,64.06,11:53:34
+2024-02-05,Oat Milk Latte,16,6.32,101.16,11:54:10
+2024-02-05,Honey Lavender Latte,12,6.78,81.35,11:54:46
+2024-02-05,Turmeric Ginger Latte,12,6.11,73.32,11:55:23
+2024-02-05,Cold Brew Concentrate,17,6.01,102.11,11:55:59
+2024-02-05,Nitro Cold Brew,12,6.6,79.2,11:56:36
+2024-02-05,Matcha Espresso Fusion,11,7.1,78.11,11:57:12
+2024-02-05,Blue Pea Flower Tea,14,4.4,61.62,11:57:48
+2024-02-05,Sourdough Toast,12,6.12,73.48,11:58:25
+2024-02-05,Almond Butter Croissant,13,5.41,70.3,11:59:01
+2024-02-05,Vegan Morning Bun,18,5.76,103.59,11:59:38
+2024-02-06,Single-Origin Pour Over,13,5.63,73.19,12:00:14
+2024-02-06,Oat Milk Latte,10,5.98,59.83,12:00:50
+2024-02-06,Honey Lavender Latte,7,6.37,44.59,12:01:27
+2024-02-06,Turmeric Ginger Latte,9,6.43,57.91,12:02:03
+2024-02-06,Cold Brew Concentrate,7,6.05,42.35,12:02:40
+2024-02-06,Nitro Cold Brew,6,6.06,36.36,12:03:16
+2024-02-06,Matcha Espresso Fusion,11,7.04,77.42,12:03:52
+2024-02-06,Blue Pea Flower Tea,14,4.79,67.0,12:04:29
+2024-02-06,Sourdough Toast,10,6.18,61.76,12:05:05
+2024-02-06,Almond Butter Croissant,12,5.29,63.48,12:05:42
+2024-02-06,Vegan Morning Bun,12,5.93,71.18,12:06:18
+2024-02-07,Single-Origin Pour Over,2,5.5,11.01,12:06:54
+2024-02-07,Oat Milk Latte,5,5.86,29.29,12:07:31
+2024-02-07,Honey Lavender Latte,9,6.65,59.89,12:08:07
+2024-02-07,Turmeric Ginger Latte,17,6.49,110.26,12:08:44
+2024-02-07,Cold Brew Concentrate,20,5.71,114.15,12:09:20
+2024-02-07,Nitro Cold Brew,7,6.54,45.81,12:09:56
+2024-02-07,Matcha Espresso Fusion,7,7.05,49.36,12:10:33
+2024-02-07,Blue Pea Flower Tea,9,4.5,40.46,12:11:09
+2024-02-07,Sourdough Toast,16,5.94,95.02,12:11:46
+2024-02-07,Almond Butter Croissant,6,5.48,32.9,12:12:22
+2024-02-07,Vegan Morning Bun,15,6.02,90.23,12:12:58
+2024-02-08,Single-Origin Pour Over,5,5.42,27.1,12:13:35
+2024-02-08,Oat Milk Latte,12,6.12,73.42,12:14:11
+2024-02-08,Honey Lavender Latte,7,6.67,46.7,12:14:48
+2024-02-08,Turmeric Ginger Latte,15,6.59,98.86,12:15:24
+2024-02-08,Cold Brew Concentrate,14,6.12,85.72,12:16:00
+2024-02-08,Nitro Cold Brew,13,6.18,80.32,12:16:37
+2024-02-08,Matcha Espresso Fusion,12,6.75,81.04,12:17:13
+2024-02-08,Blue Pea Flower Tea,11,4.32,47.52,12:17:50
+2024-02-08,Sourdough Toast,9,5.87,52.87,12:18:26
+2024-02-08,Almond Butter Croissant,23,5.6,128.7,12:19:02
+2024-02-08,Vegan Morning Bun,13,5.68,73.88,12:19:39
+2024-02-09,Single-Origin Pour Over,11,5.29,58.18,12:20:15
+2024-02-09,Oat Milk Latte,10,6.35,63.5,12:20:52
+2024-02-09,Honey Lavender Latte,14,6.56,91.91,12:21:28
+2024-02-09,Turmeric Ginger Latte,8,6.17,49.38,12:22:04
+2024-02-09,Cold Brew Concentrate,13,5.94,77.24,12:22:41
+2024-02-09,Nitro Cold Brew,12,6.63,79.58,12:23:17
+2024-02-09,Matcha Espresso Fusion,13,6.65,86.51,12:23:54
+2024-02-09,Blue Pea Flower Tea,10,4.63,46.27,12:24:30
+2024-02-09,Sourdough Toast,9,5.99,53.92,12:25:06
+2024-02-09,Almond Butter Croissant,7,5.21,36.44,12:25:43
+2024-02-09,Vegan Morning Bun,5,5.87,29.34,12:26:19
+2024-02-10,Single-Origin Pour Over,16,5.5,87.95,12:26:56
+2024-02-10,Oat Milk Latte,14,6.36,89.04,12:27:32
+2024-02-10,Honey Lavender Latte,5,6.52,32.6,12:28:08
+2024-02-10,Turmeric Ginger Latte,2,6.5,12.99,12:28:45
+2024-02-10,Cold Brew Concentrate,9,5.72,51.5,12:29:21
+2024-02-10,Nitro Cold Brew,19,6.05,115.02,12:29:58
+2024-02-10,Matcha Espresso Fusion,10,6.72,67.16,12:30:34
+2024-02-10,Blue Pea Flower Tea,11,4.37,48.1,12:31:10
+2024-02-10,Sourdough Toast,18,6.07,109.22,12:31:47
+2024-02-10,Almond Butter Croissant,15,5.31,79.7,12:32:23
+2024-02-10,Vegan Morning Bun,13,6.15,79.89,12:33:00
+2024-02-11,Single-Origin Pour Over,11,5.67,62.34,12:33:36
+2024-02-11,Oat Milk Latte,10,6.13,61.32,12:34:12
+2024-02-11,Honey Lavender Latte,17,6.49,110.33,12:34:49
+2024-02-11,Turmeric Ginger Latte,12,6.58,78.97,12:35:25
+2024-02-11,Cold Brew Concentrate,14,5.9,82.62,12:36:02
+2024-02-11,Nitro Cold Brew,10,6.39,63.86,12:36:38
+2024-02-11,Matcha Espresso Fusion,9,7.1,63.86,12:37:14
+2024-02-11,Blue Pea Flower Tea,5,4.68,23.39,12:37:51
+2024-02-11,Sourdough Toast,18,6.16,110.9,12:38:27
+2024-02-11,Almond Butter Croissant,12,5.01,60.06,12:39:04
+2024-02-11,Vegan Morning Bun,13,6.14,79.84,12:39:40
+2024-02-12,Single-Origin Pour Over,10,5.88,58.77,12:40:16
+2024-02-12,Oat Milk Latte,7,6.19,43.31,12:40:53
+2024-02-12,Honey Lavender Latte,8,6.51,52.08,12:41:29
+2024-02-12,Turmeric Ginger Latte,21,6.2,130.14,12:42:06
+2024-02-12,Cold Brew Concentrate,8,5.58,44.65,12:42:42
+2024-02-12,Nitro Cold Brew,18,6.13,110.38,12:43:18
+2024-02-12,Matcha Espresso Fusion,7,6.93,48.48,12:43:55
+2024-02-12,Blue Pea Flower Tea,8,4.45,35.56,12:44:31
+2024-02-12,Sourdough Toast,15,6.13,92.0,12:45:08
+2024-02-12,Almond Butter Croissant,16,5.31,84.95,12:45:44
+2024-02-12,Vegan Morning Bun,7,5.96,41.72,12:46:20
+2024-02-13,Single-Origin Pour Over,1,5.29,5.29,12:46:57
+2024-02-13,Oat Milk Latte,15,6.21,93.16,12:47:33
+2024-02-13,Honey Lavender Latte,6,6.62,39.73,12:48:10
+2024-02-13,Turmeric Ginger Latte,7,6.35,44.43,12:48:46
+2024-02-13,Cold Brew Concentrate,8,5.67,45.37,12:49:22
+2024-02-13,Nitro Cold Brew,16,6.47,103.48,12:49:59
+2024-02-13,Matcha Espresso Fusion,15,6.91,103.63,12:50:35
+2024-02-13,Blue Pea Flower Tea,12,4.43,53.2,12:51:12
+2024-02-13,Sourdough Toast,16,5.9,94.47,12:51:48
+2024-02-13,Almond Butter Croissant,13,5.5,71.47,12:52:24
+2024-02-13,Vegan Morning Bun,7,5.9,41.28,12:53:01
+2024-02-14,Single-Origin Pour Over,14,5.73,80.23,12:53:37
+2024-02-14,Oat Milk Latte,8,5.99,47.92,12:54:14
+2024-02-14,Honey Lavender Latte,8,6.64,53.11,12:54:50
+2024-02-14,Turmeric Ginger Latte,12,6.01,72.15,12:55:26
+2024-02-14,Cold Brew Concentrate,17,5.91,100.45,12:56:03
+2024-02-14,Nitro Cold Brew,9,6.24,56.19,12:56:39
+2024-02-14,Matcha Espresso Fusion,13,7.1,92.36,12:57:16
+2024-02-14,Blue Pea Flower Tea,15,4.57,68.52,12:57:52
+2024-02-14,Sourdough Toast,18,5.78,104.11,12:58:28
+2024-02-14,Almond Butter Croissant,18,5.09,91.63,12:59:05
+2024-02-14,Vegan Morning Bun,10,6.14,61.42,12:59:41
+2024-02-15,Single-Origin Pour Over,10,5.69,56.87,13:00:18
+2024-02-15,Oat Milk Latte,13,5.87,76.29,13:00:54
+2024-02-15,Honey Lavender Latte,13,6.74,87.62,13:01:31
+2024-02-15,Turmeric Ginger Latte,1,6.48,6.48,13:02:07
+2024-02-15,Cold Brew Concentrate,14,6.02,84.27,13:02:43
+2024-02-15,Nitro Cold Brew,20,6.55,131.07,13:03:20
+2024-02-15,Matcha Espresso Fusion,16,6.73,107.76,13:03:56
+2024-02-15,Blue Pea Flower Tea,11,4.84,53.29,13:04:33
+2024-02-15,Sourdough Toast,18,6.22,111.9,13:05:09
+2024-02-15,Almond Butter Croissant,13,5.33,69.32,13:05:45
+2024-02-15,Vegan Morning Bun,12,5.64,67.68,13:06:22
+2024-02-16,Single-Origin Pour Over,1,5.88,5.88,13:06:58
+2024-02-16,Oat Milk Latte,14,5.87,82.12,13:07:35
+2024-02-16,Honey Lavender Latte,16,6.33,101.29,13:08:11
+2024-02-16,Turmeric Ginger Latte,22,6.45,141.96,13:08:47
+2024-02-16,Cold Brew Concentrate,4,6.12,24.48,13:09:24
+2024-02-16,Nitro Cold Brew,21,6.07,127.49,13:10:00
+2024-02-16,Matcha Espresso Fusion,4,6.82,27.29,13:10:37
+2024-02-16,Blue Pea Flower Tea,16,4.49,71.83,13:11:13
+2024-02-16,Sourdough Toast,15,5.8,87.02,13:11:49
+2024-02-16,Almond Butter Croissant,13,5.31,69.05,13:12:26
+2024-02-16,Vegan Morning Bun,7,5.72,40.03,13:13:02
+2024-02-17,Single-Origin Pour Over,17,5.86,99.69,13:13:39
+2024-02-17,Oat Milk Latte,13,6.21,80.67,13:14:15
+2024-02-17,Honey Lavender Latte,7,6.68,46.77,13:14:51
+2024-02-17,Turmeric Ginger Latte,8,6.21,49.67,13:15:28
+2024-02-17,Cold Brew Concentrate,12,6.01,72.18,13:16:04
+2024-02-17,Nitro Cold Brew,22,6.6,145.12,13:16:41
+2024-02-17,Matcha Espresso Fusion,19,6.57,124.79,13:17:17
+2024-02-17,Blue Pea Flower Tea,10,4.51,45.09,13:17:53
+2024-02-17,Sourdough Toast,16,6.16,98.62,13:18:30
+2024-02-17,Almond Butter Croissant,15,5.6,83.94,13:19:06
+2024-02-17,Vegan Morning Bun,11,5.74,63.17,13:19:43
+2024-02-18,Single-Origin Pour Over,9,5.9,53.06,13:20:19
+2024-02-18,Oat Milk Latte,5,5.95,29.74,13:20:55
+2024-02-18,Honey Lavender Latte,4,6.56,26.26,13:21:32
+2024-02-18,Turmeric Ginger Latte,11,6.62,72.81,13:22:08
+2024-02-18,Cold Brew Concentrate,11,5.9,64.91,13:22:45
+2024-02-18,Nitro Cold Brew,11,6.51,71.61,13:23:21
+2024-02-18,Matcha Espresso Fusion,8,6.73,53.88,13:23:57
+2024-02-18,Blue Pea Flower Tea,10,4.76,47.62,13:24:34
+2024-02-18,Sourdough Toast,10,6.2,62.04,13:25:10
+2024-02-18,Almond Butter Croissant,11,5.17,56.9,13:25:47
+2024-02-18,Vegan Morning Bun,1,5.63,5.63,13:26:23
+2024-02-19,Single-Origin Pour Over,19,5.51,104.63,13:26:59
+2024-02-19,Oat Milk Latte,13,5.85,76.02,13:27:36
+2024-02-19,Honey Lavender Latte,3,6.9,20.7,13:28:12
+2024-02-19,Turmeric Ginger Latte,14,6.16,86.28,13:28:49
+2024-02-19,Cold Brew Concentrate,15,6.12,91.79,13:29:25
+2024-02-19,Nitro Cold Brew,9,6.19,55.72,13:30:01
+2024-02-19,Matcha Espresso Fusion,10,7.01,70.14,13:30:38
+2024-02-19,Blue Pea Flower Tea,12,4.52,54.29,13:31:14
+2024-02-19,Sourdough Toast,13,6.23,81.03,13:31:51
+2024-02-19,Almond Butter Croissant,12,5.32,63.82,13:32:27
+2024-02-19,Vegan Morning Bun,17,5.76,97.97,13:33:03
+2024-02-20,Single-Origin Pour Over,2,5.33,10.65,13:33:40
+2024-02-20,Oat Milk Latte,2,6.36,12.71,13:34:16
+2024-02-20,Honey Lavender Latte,21,6.55,137.45,13:34:53
+2024-02-20,Turmeric Ginger Latte,13,6.51,84.6,13:35:29
+2024-02-20,Cold Brew Concentrate,14,6.12,85.72,13:36:05
+2024-02-20,Nitro Cold Brew,9,6.08,54.76,13:36:42
+2024-02-20,Matcha Espresso Fusion,9,7.0,63.04,13:37:18
+2024-02-20,Blue Pea Flower Tea,11,4.59,50.49,13:37:55
+2024-02-20,Sourdough Toast,11,6.23,68.54,13:38:31
+2024-02-20,Almond Butter Croissant,13,5.05,65.62,13:39:07
+2024-02-20,Vegan Morning Bun,5,5.52,27.58,13:39:44
+2024-02-21,Single-Origin Pour Over,17,5.45,92.61,13:40:20
+2024-02-21,Oat Milk Latte,9,6.32,56.89,13:40:57
+2024-02-21,Honey Lavender Latte,12,6.52,78.26,13:41:33
+2024-02-21,Turmeric Ginger Latte,14,6.6,92.46,13:42:09
+2024-02-21,Cold Brew Concentrate,12,5.97,71.61,13:42:46
+2024-02-21,Nitro Cold Brew,15,6.41,96.19,13:43:22
+2024-02-21,Matcha Espresso Fusion,14,6.89,96.52,13:43:59
+2024-02-21,Blue Pea Flower Tea,15,4.61,69.18,13:44:35
+2024-02-21,Sourdough Toast,5,6.11,30.53,13:45:11
+2024-02-21,Almond Butter Croissant,10,5.36,53.59,13:45:48
+2024-02-21,Vegan Morning Bun,9,5.73,51.61,13:46:24
+2024-02-22,Single-Origin Pour Over,6,5.27,31.6,13:47:01
+2024-02-22,Oat Milk Latte,21,6.26,131.54,13:47:37
+2024-02-22,Honey Lavender Latte,1,6.43,6.43,13:48:13
+2024-02-22,Turmeric Ginger Latte,12,6.56,78.77,13:48:50
+2024-02-22,Cold Brew Concentrate,8,5.76,46.06,13:49:26
+2024-02-22,Nitro Cold Brew,13,6.64,86.37,13:50:03
+2024-02-22,Matcha Espresso Fusion,9,6.54,58.9,13:50:39
+2024-02-22,Blue Pea Flower Tea,10,4.29,42.95,13:51:15
+2024-02-22,Sourdough Toast,11,6.34,69.73,13:51:52
+2024-02-22,Almond Butter Croissant,9,5.62,50.54,13:52:28
+2024-02-22,Vegan Morning Bun,10,5.95,59.46,13:53:05
+2024-02-23,Single-Origin Pour Over,15,5.29,79.34,13:53:41
+2024-02-23,Oat Milk Latte,8,6.18,49.42,13:54:17
+2024-02-23,Honey Lavender Latte,16,6.44,103.01,13:54:54
+2024-02-23,Turmeric Ginger Latte,1,6.4,6.4,13:55:30
+2024-02-23,Cold Brew Concentrate,7,5.71,39.99,13:56:07
+2024-02-23,Nitro Cold Brew,13,6.5,84.51,13:56:43
+2024-02-23,Matcha Espresso Fusion,5,6.75,33.75,13:57:19
+2024-02-23,Blue Pea Flower Tea,11,4.5,49.53,13:57:56
+2024-02-23,Sourdough Toast,14,6.0,84.04,13:58:32
+2024-02-23,Almond Butter Croissant,14,5.64,78.94,13:59:09
+2024-02-23,Vegan Morning Bun,23,5.53,127.17,13:59:45
+2024-02-24,Single-Origin Pour Over,9,5.71,51.42,14:00:21
+2024-02-24,Oat Milk Latte,14,5.97,83.52,14:00:58
+2024-02-24,Honey Lavender Latte,9,6.36,57.27,14:01:34
+2024-02-24,Turmeric Ginger Latte,9,6.59,59.33,14:02:11
+2024-02-24,Cold Brew Concentrate,2,6.03,12.06,14:02:47
+2024-02-24,Nitro Cold Brew,9,6.35,57.14,14:03:23
+2024-02-24,Matcha Espresso Fusion,5,6.63,33.13,14:04:00
+2024-02-24,Blue Pea Flower Tea,16,4.34,69.48,14:04:36
+2024-02-24,Sourdough Toast,7,6.17,43.17,14:05:13
+2024-02-24,Almond Butter Croissant,3,5.25,15.76,14:05:49
+2024-02-24,Vegan Morning Bun,5,5.76,28.78,14:06:25
+2024-02-25,Single-Origin Pour Over,9,5.61,50.48,14:07:02
+2024-02-25,Oat Milk Latte,13,6.35,82.49,14:07:38
+2024-02-25,Honey Lavender Latte,9,6.62,59.58,14:08:15
+2024-02-25,Turmeric Ginger Latte,10,6.5,65.0,14:08:51
+2024-02-25,Cold Brew Concentrate,10,6.03,60.26,14:09:27
+2024-02-25,Nitro Cold Brew,8,6.42,51.32,14:10:04
+2024-02-25,Matcha Espresso Fusion,10,6.72,67.23,14:10:40
+2024-02-25,Blue Pea Flower Tea,5,4.87,24.33,14:11:17
+2024-02-25,Sourdough Toast,12,6.38,76.59,14:11:53
+2024-02-25,Almond Butter Croissant,20,5.57,111.44,14:12:29
+2024-02-25,Vegan Morning Bun,15,6.09,91.3,14:13:06
+2024-02-26,Single-Origin Pour Over,10,5.76,57.65,14:13:42
+2024-02-26,Oat Milk Latte,8,5.93,47.43,14:14:19
+2024-02-26,Honey Lavender Latte,13,6.56,85.26,14:14:55
+2024-02-26,Turmeric Ginger Latte,11,6.37,70.11,14:15:31
+2024-02-26,Cold Brew Concentrate,9,6.09,54.8,14:16:08
+2024-02-26,Nitro Cold Brew,9,6.5,58.5,14:16:44
+2024-02-26,Matcha Espresso Fusion,10,7.07,70.72,14:17:21
+2024-02-26,Blue Pea Flower Tea,15,4.34,65.06,14:17:57
+2024-02-26,Sourdough Toast,14,6.09,85.29,14:18:33
+2024-02-26,Almond Butter Croissant,10,5.27,52.68,14:19:10
+2024-02-26,Vegan Morning Bun,7,5.62,39.31,14:19:46
+2024-02-27,Single-Origin Pour Over,8,5.54,44.35,14:20:23
+2024-02-27,Oat Milk Latte,7,6.23,43.59,14:20:59
+2024-02-27,Honey Lavender Latte,12,6.31,75.7,14:21:35
+2024-02-27,Turmeric Ginger Latte,7,6.26,43.79,14:22:12
+2024-02-27,Cold Brew Concentrate,10,5.61,56.11,14:22:48
+2024-02-27,Nitro Cold Brew,12,6.29,75.51,14:23:25
+2024-02-27,Matcha Espresso Fusion,10,6.65,66.49,14:24:01
+2024-02-27,Blue Pea Flower Tea,12,4.28,51.37,14:24:37
+2024-02-27,Sourdough Toast,17,6.0,101.98,14:25:14
+2024-02-27,Almond Butter Croissant,5,5.19,25.97,14:25:50
+2024-02-27,Vegan Morning Bun,21,5.71,119.98,14:26:27
+2024-02-28,Single-Origin Pour Over,10,5.9,58.98,14:27:03
+2024-02-28,Oat Milk Latte,2,6.35,12.7,14:27:39
+2024-02-28,Honey Lavender Latte,16,6.36,101.68,14:28:16
+2024-02-28,Turmeric Ginger Latte,12,6.41,76.91,14:28:52
+2024-02-28,Cold Brew Concentrate,9,5.86,52.78,14:29:29
+2024-02-28,Nitro Cold Brew,15,6.34,95.05,14:30:05
+2024-02-28,Matcha Espresso Fusion,17,6.52,110.76,14:30:41
+2024-02-28,Blue Pea Flower Tea,2,4.59,9.18,14:31:18
+2024-02-28,Sourdough Toast,17,5.79,98.5,14:31:54
+2024-02-28,Almond Butter Croissant,11,5.57,61.31,14:32:31
+2024-02-28,Vegan Morning Bun,14,6.0,83.95,14:33:07
+2024-02-29,Single-Origin Pour Over,10,5.64,56.42,14:33:43
+2024-02-29,Oat Milk Latte,8,6.19,49.49,14:34:20
+2024-02-29,Honey Lavender Latte,1,6.49,6.49,14:34:56
+2024-02-29,Turmeric Ginger Latte,12,6.46,77.54,14:35:33
+2024-02-29,Cold Brew Concentrate,10,5.68,56.85,14:36:09
+2024-02-29,Nitro Cold Brew,13,6.23,80.96,14:36:45
+2024-02-29,Matcha Espresso Fusion,11,6.55,72.02,14:37:22
+2024-02-29,Blue Pea Flower Tea,10,4.51,45.05,14:37:58
+2024-02-29,Sourdough Toast,14,6.12,85.64,14:38:35
+2024-02-29,Almond Butter Croissant,4,5.15,20.62,14:39:11
+2024-02-29,Vegan Morning Bun,11,5.83,64.11,14:39:47
+2024-03-01,Single-Origin Pour Over,8,5.37,42.95,14:40:24
+2024-03-01,Oat Milk Latte,9,5.88,52.89,14:41:00
+2024-03-01,Honey Lavender Latte,11,6.74,74.15,14:41:37
+2024-03-01,Turmeric Ginger Latte,16,6.54,104.58,14:42:13
+2024-03-01,Cold Brew Concentrate,13,6.03,78.44,14:42:49
+2024-03-01,Nitro Cold Brew,8,6.15,49.19,14:43:26
+2024-03-01,Matcha Espresso Fusion,12,6.84,82.04,14:44:02
+2024-03-01,Blue Pea Flower Tea,15,4.9,73.44,14:44:39
+2024-03-01,Sourdough Toast,13,5.8,75.4,14:45:15
+2024-03-01,Almond Butter Croissant,4,5.23,20.94,14:45:51
+2024-03-01,Vegan Morning Bun,15,6.14,92.15,14:46:28
+2024-03-02,Single-Origin Pour Over,8,5.35,42.79,14:47:04
+2024-03-02,Oat Milk Latte,12,6.39,76.63,14:47:41
+2024-03-02,Honey Lavender Latte,9,6.88,61.89,14:48:17
+2024-03-02,Turmeric Ginger Latte,14,6.38,89.27,14:48:53
+2024-03-02,Cold Brew Concentrate,15,5.51,82.65,14:49:30
+2024-03-02,Nitro Cold Brew,12,6.3,75.66,14:50:06
+2024-03-02,Matcha Espresso Fusion,15,6.51,97.69,14:50:43
+2024-03-02,Blue Pea Flower Tea,9,4.88,43.88,14:51:19
+2024-03-02,Sourdough Toast,6,6.17,36.99,14:51:55
+2024-03-02,Almond Butter Croissant,7,5.48,38.36,14:52:32
+2024-03-02,Vegan Morning Bun,19,5.64,107.07,14:53:08
+2024-03-03,Single-Origin Pour Over,13,5.36,69.71,14:53:45
+2024-03-03,Oat Milk Latte,3,6.32,18.97,14:54:21
+2024-03-03,Honey Lavender Latte,11,6.86,75.42,14:54:57
+2024-03-03,Turmeric Ginger Latte,3,6.24,18.72,14:55:34
+2024-03-03,Cold Brew Concentrate,20,5.78,115.66,14:56:10
+2024-03-03,Nitro Cold Brew,15,6.17,92.51,14:56:47
+2024-03-03,Matcha Espresso Fusion,19,6.77,128.57,14:57:23
+2024-03-03,Blue Pea Flower Tea,12,4.7,56.37,14:57:59
+2024-03-03,Sourdough Toast,8,6.36,50.9,14:58:36
+2024-03-03,Almond Butter Croissant,4,5.04,20.18,14:59:12
+2024-03-03,Vegan Morning Bun,9,5.96,53.6,14:59:49
+2024-03-04,Single-Origin Pour Over,17,5.4,91.8,15:00:25
+2024-03-04,Oat Milk Latte,13,6.02,78.29,15:01:01
+2024-03-04,Honey Lavender Latte,15,6.26,93.96,15:01:38
+2024-03-04,Turmeric Ginger Latte,22,6.48,142.58,15:02:14
+2024-03-04,Cold Brew Concentrate,5,5.9,29.49,15:02:51
+2024-03-04,Nitro Cold Brew,13,6.32,82.17,15:03:27
+2024-03-04,Matcha Espresso Fusion,19,6.79,129.1,15:04:03
+2024-03-04,Blue Pea Flower Tea,5,4.85,24.26,15:04:40
+2024-03-04,Sourdough Toast,9,5.94,53.43,15:05:16
+2024-03-04,Almond Butter Croissant,7,5.39,37.71,15:05:53
+2024-03-04,Vegan Morning Bun,15,5.71,85.59,15:06:29
+2024-03-05,Single-Origin Pour Over,10,5.54,55.36,15:07:05
+2024-03-05,Oat Milk Latte,2,6.04,12.07,15:07:42
+2024-03-05,Honey Lavender Latte,6,6.67,40.04,15:08:18
+2024-03-05,Turmeric Ginger Latte,12,6.5,78.0,15:08:55
+2024-03-05,Cold Brew Concentrate,4,5.58,22.32,15:09:31
+2024-03-05,Nitro Cold Brew,1,6.02,6.02,15:10:07
+2024-03-05,Matcha Espresso Fusion,9,6.57,59.15,15:10:44
+2024-03-05,Blue Pea Flower Tea,4,4.48,17.93,15:11:20
+2024-03-05,Sourdough Toast,24,6.23,149.44,15:11:57
+2024-03-05,Almond Butter Croissant,2,5.34,10.68,15:12:33
+2024-03-05,Vegan Morning Bun,9,5.78,52.06,15:13:09
+2024-03-06,Single-Origin Pour Over,7,5.6,39.22,15:13:46
+2024-03-06,Oat Milk Latte,2,6.34,12.68,15:14:22
+2024-03-06,Honey Lavender Latte,5,6.68,33.42,15:14:59
+2024-03-06,Turmeric Ginger Latte,10,6.21,62.08,15:15:35
+2024-03-06,Cold Brew Concentrate,22,5.53,121.74,15:16:11
+2024-03-06,Nitro Cold Brew,9,6.55,58.99,15:16:48
+2024-03-06,Matcha Espresso Fusion,17,6.52,110.87,15:17:24
+2024-03-06,Blue Pea Flower Tea,11,4.65,51.14,15:18:01
+2024-03-06,Sourdough Toast,9,6.17,55.56,15:18:37
+2024-03-06,Almond Butter Croissant,16,5.26,84.21,15:19:13
+2024-03-06,Vegan Morning Bun,5,5.61,28.06,15:19:50
+2024-03-07,Single-Origin Pour Over,10,5.83,58.3,15:20:26
+2024-03-07,Oat Milk Latte,9,5.93,53.38,15:21:03
+2024-03-07,Honey Lavender Latte,6,6.89,41.34,15:21:39
+2024-03-07,Turmeric Ginger Latte,12,6.58,78.98,15:22:15
+2024-03-07,Cold Brew Concentrate,9,6.07,54.65,15:22:52
+2024-03-07,Nitro Cold Brew,9,6.19,55.72,15:23:28
+2024-03-07,Matcha Espresso Fusion,13,6.6,85.75,15:24:05
+2024-03-07,Blue Pea Flower Tea,7,4.3,30.08,15:24:41
+2024-03-07,Sourdough Toast,13,5.87,76.35,15:25:17
+2024-03-07,Almond Butter Croissant,12,5.56,66.67,15:25:54
+2024-03-07,Vegan Morning Bun,16,5.72,91.45,15:26:30
+2024-03-08,Single-Origin Pour Over,13,5.48,71.2,15:27:07
+2024-03-08,Oat Milk Latte,4,5.95,23.79,15:27:43
+2024-03-08,Honey Lavender Latte,13,6.33,82.3,15:28:19
+2024-03-08,Turmeric Ginger Latte,11,6.09,67.03,15:28:56
+2024-03-08,Cold Brew Concentrate,18,6.09,109.65,15:29:32
+2024-03-08,Nitro Cold Brew,22,6.35,139.8,15:30:09
+2024-03-08,Matcha Espresso Fusion,11,6.93,76.27,15:30:45
+2024-03-08,Blue Pea Flower Tea,18,4.65,83.68,15:31:21
+2024-03-08,Sourdough Toast,10,5.88,58.82,15:31:58
+2024-03-08,Almond Butter Croissant,18,5.63,101.37,15:32:34
+2024-03-08,Vegan Morning Bun,4,5.73,22.92,15:33:11
+2024-03-09,Single-Origin Pour Over,14,5.78,80.94,15:33:47
+2024-03-09,Oat Milk Latte,6,5.95,35.7,15:34:23
+2024-03-09,Honey Lavender Latte,21,6.62,138.97,15:35:00
+2024-03-09,Turmeric Ginger Latte,12,6.58,78.9,15:35:36
+2024-03-09,Cold Brew Concentrate,14,5.55,77.72,15:36:13
+2024-03-09,Nitro Cold Brew,10,6.22,62.15,15:36:49
+2024-03-09,Matcha Espresso Fusion,12,7.1,85.24,15:37:25
+2024-03-09,Blue Pea Flower Tea,17,4.65,79.13,15:38:02
+2024-03-09,Sourdough Toast,8,6.07,48.55,15:38:38
+2024-03-09,Almond Butter Croissant,15,5.31,79.66,15:39:15
+2024-03-09,Vegan Morning Bun,10,5.93,59.25,15:39:51
+2024-03-10,Single-Origin Pour Over,2,5.85,11.71,15:40:27
+2024-03-10,Oat Milk Latte,7,6.0,41.99,15:41:04
+2024-03-10,Honey Lavender Latte,12,6.45,77.39,15:41:40
+2024-03-10,Turmeric Ginger Latte,10,6.21,62.05,15:42:17
+2024-03-10,Cold Brew Concentrate,3,6.01,18.03,15:42:53
+2024-03-10,Nitro Cold Brew,17,6.2,105.34,15:43:29
+2024-03-10,Matcha Espresso Fusion,11,7.14,78.52,15:44:06
+2024-03-10,Blue Pea Flower Tea,13,4.33,56.3,15:44:42
+2024-03-10,Sourdough Toast,7,5.9,41.27,15:45:19
+2024-03-10,Almond Butter Croissant,13,5.24,68.13,15:45:55
+2024-03-10,Vegan Morning Bun,18,5.54,99.71,15:46:31
+2024-03-11,Single-Origin Pour Over,13,5.28,68.59,15:47:08
+2024-03-11,Oat Milk Latte,16,5.99,95.78,15:47:44
+2024-03-11,Honey Lavender Latte,9,6.31,56.76,15:48:21
+2024-03-11,Turmeric Ginger Latte,12,6.42,77.02,15:48:57
+2024-03-11,Cold Brew Concentrate,10,5.53,55.26,15:49:33
+2024-03-11,Nitro Cold Brew,15,6.31,94.67,15:50:10
+2024-03-11,Matcha Espresso Fusion,15,7.02,105.3,15:50:46
+2024-03-11,Blue Pea Flower Tea,15,4.75,71.31,15:51:23
+2024-03-11,Sourdough Toast,10,6.19,61.89,15:51:59
+2024-03-11,Almond Butter Croissant,13,5.62,73.05,15:52:35
+2024-03-11,Vegan Morning Bun,3,6.07,18.2,15:53:12
+2024-03-12,Single-Origin Pour Over,11,5.75,63.21,15:53:48
+2024-03-12,Oat Milk Latte,10,6.02,60.23,15:54:25
+2024-03-12,Honey Lavender Latte,12,6.51,78.14,15:55:01
+2024-03-12,Turmeric Ginger Latte,1,6.38,6.38,15:55:37
+2024-03-12,Cold Brew Concentrate,10,5.88,58.78,15:56:14
+2024-03-12,Nitro Cold Brew,6,6.27,37.65,15:56:50
+2024-03-12,Matcha Espresso Fusion,15,7.03,105.49,15:57:27
+2024-03-12,Blue Pea Flower Tea,2,4.35,8.7,15:58:03
+2024-03-12,Sourdough Toast,19,5.87,111.55,15:58:39
+2024-03-12,Almond Butter Croissant,20,5.45,109.02,15:59:16
+2024-03-12,Vegan Morning Bun,14,5.89,82.48,15:59:52
+2024-03-13,Single-Origin Pour Over,11,5.45,59.96,16:00:29
+2024-03-13,Oat Milk Latte,7,5.75,40.27,16:01:05
+2024-03-13,Honey Lavender Latte,15,6.88,103.13,16:01:41
+2024-03-13,Turmeric Ginger Latte,12,6.08,72.95,16:02:18
+2024-03-13,Cold Brew Concentrate,15,5.85,87.69,16:02:54
+2024-03-13,Nitro Cold Brew,14,6.04,84.59,16:03:31
+2024-03-13,Matcha Espresso Fusion,10,7.14,71.38,16:04:07
+2024-03-13,Blue Pea Flower Tea,10,4.57,45.69,16:04:43
+2024-03-13,Sourdough Toast,13,5.91,76.89,16:05:20
+2024-03-13,Almond Butter Croissant,5,5.4,27.01,16:05:56
+2024-03-13,Vegan Morning Bun,23,6.03,138.6,16:06:33
+2024-03-14,Single-Origin Pour Over,8,5.57,44.58,16:07:09
+2024-03-14,Oat Milk Latte,11,6.12,67.32,16:07:45
+2024-03-14,Honey Lavender Latte,5,6.38,31.92,16:08:22
+2024-03-14,Turmeric Ginger Latte,14,6.08,85.13,16:08:58
+2024-03-14,Cold Brew Concentrate,16,6.0,96.04,16:09:35
+2024-03-14,Nitro Cold Brew,14,6.34,88.69,16:10:11
+2024-03-14,Matcha Espresso Fusion,19,6.82,129.63,16:10:47
+2024-03-14,Blue Pea Flower Tea,10,4.62,46.2,16:11:24
+2024-03-14,Sourdough Toast,18,6.17,110.98,16:12:00
+2024-03-14,Almond Butter Croissant,13,5.29,68.8,16:12:37
+2024-03-14,Vegan Morning Bun,15,5.84,87.64,16:13:13
+2024-03-15,Single-Origin Pour Over,14,5.64,79.01,16:13:49
+2024-03-15,Oat Milk Latte,10,5.79,57.93,16:14:26
+2024-03-15,Honey Lavender Latte,13,6.66,86.58,16:15:02
+2024-03-15,Turmeric Ginger Latte,14,6.64,93.02,16:15:39
+2024-03-15,Cold Brew Concentrate,9,6.06,54.58,16:16:15
+2024-03-15,Nitro Cold Brew,17,6.61,112.39,16:16:51
+2024-03-15,Matcha Espresso Fusion,1,6.85,6.85,16:17:28
+2024-03-15,Blue Pea Flower Tea,7,4.35,30.45,16:18:04
+2024-03-15,Sourdough Toast,9,6.23,56.09,16:18:41
+2024-03-15,Almond Butter Croissant,14,5.23,73.23,16:19:17
+2024-03-15,Vegan Morning Bun,15,6.14,92.05,16:19:53
+2024-03-16,Single-Origin Pour Over,9,5.48,49.28,16:20:30
+2024-03-16,Oat Milk Latte,3,6.15,18.45,16:21:06
+2024-03-16,Honey Lavender Latte,6,6.48,38.88,16:21:43
+2024-03-16,Turmeric Ginger Latte,15,6.3,94.57,16:22:19
+2024-03-16,Cold Brew Concentrate,5,5.95,29.77,16:22:55
+2024-03-16,Nitro Cold Brew,1,6.33,6.33,16:23:32
+2024-03-16,Matcha Espresso Fusion,17,7.04,119.63,16:24:08
+2024-03-16,Blue Pea Flower Tea,7,4.56,31.95,16:24:45
+2024-03-16,Sourdough Toast,18,5.77,103.87,16:25:21
+2024-03-16,Almond Butter Croissant,14,5.11,71.54,16:25:57
+2024-03-16,Vegan Morning Bun,13,5.73,74.49,16:26:34
+2024-03-17,Single-Origin Pour Over,15,5.77,86.57,16:27:10
+2024-03-17,Oat Milk Latte,1,6.32,6.32,16:27:47
+2024-03-17,Honey Lavender Latte,14,6.84,95.74,16:28:23
+2024-03-17,Turmeric Ginger Latte,10,6.4,63.99,16:28:59
+2024-03-17,Cold Brew Concentrate,6,5.62,33.74,16:29:36
+2024-03-17,Nitro Cold Brew,12,6.39,76.64,16:30:12
+2024-03-17,Matcha Espresso Fusion,7,6.7,46.9,16:30:49
+2024-03-17,Blue Pea Flower Tea,19,4.75,90.27,16:31:25
+2024-03-17,Sourdough Toast,15,6.16,92.47,16:32:01
+2024-03-17,Almond Butter Croissant,14,5.44,76.09,16:32:38
+2024-03-17,Vegan Morning Bun,1,5.9,5.9,16:33:14
+2024-03-18,Single-Origin Pour Over,10,5.64,56.41,16:33:51
+2024-03-18,Oat Milk Latte,8,5.81,46.46,16:34:27
+2024-03-18,Honey Lavender Latte,5,6.68,33.42,16:35:03
+2024-03-18,Turmeric Ginger Latte,11,6.64,73.03,16:35:40
+2024-03-18,Cold Brew Concentrate,6,6.09,36.52,16:36:16
+2024-03-18,Nitro Cold Brew,15,6.45,96.79,16:36:53
+2024-03-18,Matcha Espresso Fusion,14,7.13,99.81,16:37:29
+2024-03-18,Blue Pea Flower Tea,14,4.51,63.15,16:38:05
+2024-03-18,Sourdough Toast,6,5.99,35.94,16:38:42
+2024-03-18,Almond Butter Croissant,14,5.45,76.28,16:39:18
+2024-03-18,Vegan Morning Bun,3,5.87,17.61,16:39:55
+2024-03-19,Single-Origin Pour Over,8,5.72,45.72,16:40:31
+2024-03-19,Oat Milk Latte,11,6.23,68.48,16:41:07
+2024-03-19,Honey Lavender Latte,8,6.29,50.31,16:41:44
+2024-03-19,Turmeric Ginger Latte,11,6.46,71.11,16:42:20
+2024-03-19,Cold Brew Concentrate,14,5.74,80.42,16:42:57
+2024-03-19,Nitro Cold Brew,13,6.39,83.04,16:43:33
+2024-03-19,Matcha Espresso Fusion,17,7.12,121.07,16:44:09
+2024-03-19,Blue Pea Flower Tea,16,4.49,71.82,16:44:46
+2024-03-19,Sourdough Toast,16,6.32,101.09,16:45:22
+2024-03-19,Almond Butter Croissant,13,5.13,66.65,16:45:59
+2024-03-19,Vegan Morning Bun,8,5.67,45.37,16:46:35
+2024-03-20,Single-Origin Pour Over,5,5.4,27.0,16:47:11
+2024-03-20,Oat Milk Latte,13,6.26,81.36,16:47:48
+2024-03-20,Honey Lavender Latte,16,6.61,105.71,16:48:24
+2024-03-20,Turmeric Ginger Latte,11,6.14,67.56,16:49:01
+2024-03-20,Cold Brew Concentrate,8,5.68,45.42,16:49:37
+2024-03-20,Nitro Cold Brew,10,6.39,63.89,16:50:13
+2024-03-20,Matcha Espresso Fusion,18,6.66,119.89,16:50:50
+2024-03-20,Blue Pea Flower Tea,12,4.81,57.67,16:51:26
+2024-03-20,Sourdough Toast,16,5.94,95.02,16:52:03
+2024-03-20,Almond Butter Croissant,9,5.36,48.21,16:52:39
+2024-03-20,Vegan Morning Bun,15,5.71,85.64,16:53:15
+2024-03-21,Single-Origin Pour Over,15,5.42,81.33,16:53:52
+2024-03-21,Oat Milk Latte,4,6.2,24.8,16:54:28
+2024-03-21,Honey Lavender Latte,17,6.71,114.08,16:55:05
+2024-03-21,Turmeric Ginger Latte,12,6.56,78.72,16:55:41
+2024-03-21,Cold Brew Concentrate,6,5.72,34.33,16:56:17
+2024-03-21,Nitro Cold Brew,20,6.46,129.24,16:56:54
+2024-03-21,Matcha Espresso Fusion,15,6.63,99.41,16:57:30
+2024-03-21,Blue Pea Flower Tea,14,4.45,62.31,16:58:07
+2024-03-21,Sourdough Toast,18,6.36,114.42,16:58:43
+2024-03-21,Almond Butter Croissant,10,5.52,55.21,16:59:19
+2024-03-21,Vegan Morning Bun,16,5.62,89.84,16:59:56
+2024-03-22,Single-Origin Pour Over,21,5.72,120.12,17:00:32
+2024-03-22,Oat Milk Latte,17,6.1,103.74,17:01:09
+2024-03-22,Honey Lavender Latte,5,6.57,32.84,17:01:45
+2024-03-22,Turmeric Ginger Latte,8,6.31,50.51,17:02:21
+2024-03-22,Cold Brew Concentrate,14,5.57,77.98,17:02:58
+2024-03-22,Nitro Cold Brew,13,6.53,84.89,17:03:34
+2024-03-22,Matcha Espresso Fusion,1,6.66,6.66,17:04:11
+2024-03-22,Blue Pea Flower Tea,16,4.38,70.14,17:04:47
+2024-03-22,Sourdough Toast,14,5.8,81.17,17:05:23
+2024-03-22,Almond Butter Croissant,7,5.09,35.62,17:06:00
+2024-03-22,Vegan Morning Bun,14,5.68,79.57,17:06:36
+2024-03-23,Single-Origin Pour Over,12,5.43,65.13,17:07:13
+2024-03-23,Oat Milk Latte,23,5.78,132.9,17:07:49
+2024-03-23,Honey Lavender Latte,7,6.39,44.72,17:08:25
+2024-03-23,Turmeric Ginger Latte,17,6.37,108.25,17:09:02
+2024-03-23,Cold Brew Concentrate,7,5.64,39.46,17:09:38
+2024-03-23,Nitro Cold Brew,11,6.6,72.57,17:10:15
+2024-03-23,Matcha Espresso Fusion,9,6.68,60.08,17:10:51
+2024-03-23,Blue Pea Flower Tea,13,4.43,57.58,17:11:27
+2024-03-23,Sourdough Toast,17,6.1,103.65,17:12:04
+2024-03-23,Almond Butter Croissant,12,5.05,60.57,17:12:40
+2024-03-23,Vegan Morning Bun,21,5.91,124.16,17:13:17
+2024-03-24,Single-Origin Pour Over,9,5.45,49.05,17:13:53
+2024-03-24,Oat Milk Latte,22,5.79,127.43,17:14:29
+2024-03-24,Honey Lavender Latte,18,6.82,122.72,17:15:06
+2024-03-24,Turmeric Ginger Latte,5,6.3,31.52,17:15:42
+2024-03-24,Cold Brew Concentrate,1,6.03,6.03,17:16:19
+2024-03-24,Nitro Cold Brew,14,6.34,88.69,17:16:55
+2024-03-24,Matcha Espresso Fusion,11,6.98,76.76,17:17:31
+2024-03-24,Blue Pea Flower Tea,10,4.61,46.14,17:18:08
+2024-03-24,Sourdough Toast,12,5.85,70.19,17:18:44
+2024-03-24,Almond Butter Croissant,11,5.2,57.17,17:19:21
+2024-03-24,Vegan Morning Bun,1,6.15,6.15,17:19:57
+2024-03-25,Single-Origin Pour Over,6,5.62,33.69,17:20:33
+2024-03-25,Oat Milk Latte,5,5.91,29.54,17:21:10
+2024-03-25,Honey Lavender Latte,17,6.51,110.64,17:21:46
+2024-03-25,Turmeric Ginger Latte,13,6.27,81.51,17:22:23
+2024-03-25,Cold Brew Concentrate,15,6.01,90.22,17:22:59
+2024-03-25,Nitro Cold Brew,10,6.01,60.14,17:23:35
+2024-03-25,Matcha Espresso Fusion,11,6.85,75.35,17:24:12
+2024-03-25,Blue Pea Flower Tea,5,4.55,22.76,17:24:48
+2024-03-25,Sourdough Toast,8,5.88,47.02,17:25:25
+2024-03-25,Almond Butter Croissant,11,5.61,61.68,17:26:01
+2024-03-25,Vegan Morning Bun,6,5.69,34.15,17:26:37
+2024-03-26,Single-Origin Pour Over,19,5.29,100.57,17:27:14
+2024-03-26,Oat Milk Latte,12,6.01,72.08,17:27:50
+2024-03-26,Honey Lavender Latte,11,6.63,72.89,17:28:27
+2024-03-26,Turmeric Ginger Latte,15,6.09,91.39,17:29:03
+2024-03-26,Cold Brew Concentrate,8,5.67,45.35,17:29:39
+2024-03-26,Nitro Cold Brew,13,6.52,84.7,17:30:16
+2024-03-26,Matcha Espresso Fusion,5,6.62,33.1,17:30:52
+2024-03-26,Blue Pea Flower Tea,8,4.63,37.0,17:31:29
+2024-03-26,Sourdough Toast,9,6.39,57.48,17:32:05
+2024-03-26,Almond Butter Croissant,10,5.47,54.73,17:32:41
+2024-03-26,Vegan Morning Bun,12,5.66,67.91,17:33:18
+2024-03-27,Single-Origin Pour Over,6,5.38,32.31,17:33:54
+2024-03-27,Oat Milk Latte,3,6.13,18.39,17:34:31
+2024-03-27,Honey Lavender Latte,7,6.41,44.84,17:35:07
+2024-03-27,Turmeric Ginger Latte,10,6.54,65.38,17:35:43
+2024-03-27,Cold Brew Concentrate,9,5.57,50.14,17:36:20
+2024-03-27,Nitro Cold Brew,9,6.47,58.23,17:36:56
+2024-03-27,Matcha Espresso Fusion,12,6.57,78.85,17:37:33
+2024-03-27,Blue Pea Flower Tea,18,4.41,79.35,17:38:09
+2024-03-27,Sourdough Toast,7,5.97,41.82,17:38:45
+2024-03-27,Almond Butter Croissant,7,5.21,36.48,17:39:22
+2024-03-27,Vegan Morning Bun,8,5.6,44.8,17:39:58
+2024-03-28,Single-Origin Pour Over,13,5.76,74.91,17:40:35
+2024-03-28,Oat Milk Latte,13,6.1,79.26,17:41:11
+2024-03-28,Honey Lavender Latte,5,6.59,32.97,17:41:47
+2024-03-28,Turmeric Ginger Latte,11,6.03,66.34,17:42:24
+2024-03-28,Cold Brew Concentrate,14,5.56,77.88,17:43:00
+2024-03-28,Nitro Cold Brew,12,6.18,74.22,17:43:37
+2024-03-28,Matcha Espresso Fusion,15,6.76,101.45,17:44:13
+2024-03-28,Blue Pea Flower Tea,15,4.34,65.03,17:44:49
+2024-03-28,Sourdough Toast,6,6.14,36.86,17:45:26
+2024-03-28,Almond Butter Croissant,7,5.63,39.44,17:46:02
+2024-03-28,Vegan Morning Bun,16,5.72,91.5,17:46:39
+2024-03-29,Single-Origin Pour Over,19,5.7,108.35,17:47:15
+2024-03-29,Oat Milk Latte,10,5.8,58.01,17:47:51
+2024-03-29,Honey Lavender Latte,8,6.49,51.91,17:48:28
+2024-03-29,Turmeric Ginger Latte,3,6.32,18.96,17:49:04
+2024-03-29,Cold Brew Concentrate,13,5.65,73.4,17:49:41
+2024-03-29,Nitro Cold Brew,9,6.34,57.05,17:50:17
+2024-03-29,Matcha Espresso Fusion,7,6.92,48.44,17:50:53
+2024-03-29,Blue Pea Flower Tea,14,4.73,66.28,17:51:30
+2024-03-29,Sourdough Toast,13,6.11,79.45,17:52:06
+2024-03-29,Almond Butter Croissant,6,5.63,33.77,17:52:43
+2024-03-29,Vegan Morning Bun,10,5.94,59.45,17:53:19
+2024-03-30,Single-Origin Pour Over,18,5.52,99.27,17:53:55
+2024-03-30,Oat Milk Latte,8,5.88,47.02,17:54:32
+2024-03-30,Honey Lavender Latte,8,6.55,52.41,17:55:08
+2024-03-30,Turmeric Ginger Latte,9,6.01,54.11,17:55:45
+2024-03-30,Cold Brew Concentrate,12,5.71,68.54,17:56:21
+2024-03-30,Nitro Cold Brew,3,6.03,18.09,17:56:57
+2024-03-30,Matcha Espresso Fusion,7,6.51,45.58,17:57:34
+2024-03-30,Blue Pea Flower Tea,4,4.48,17.9,17:58:10
+2024-03-30,Sourdough Toast,9,6.28,56.54,17:58:47
+2024-03-30,Almond Butter Croissant,10,5.35,53.54,17:59:23
+2024-03-30,Vegan Morning Bun,12,5.6,67.19,18:00:00
