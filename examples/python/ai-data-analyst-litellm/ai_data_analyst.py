@@ -23,9 +23,10 @@ def main() -> None:
 
         base_dir = Path(__file__).resolve().parents[2]
         csv_path = "cafe_sales_data.csv"
+        sandbox_csv_path = csv_path
 
         # Upload the CSV file to the sandbox
-        sandbox.fs.upload_file(str(csv_path), "cafe_sales_data.csv")
+        sandbox.fs.upload_file(str(csv_path), sandbox_csv_path)
 
         # Generate the system prompt with the first few rows of data for context
         with Path(csv_path).open("r", encoding="utf-8") as f:
@@ -37,10 +38,12 @@ def main() -> None:
 
         system_prompt = (
             "\nYou are a helpful assistant that analyzes data.\n"
-            "Generate Python code when necessary. Pandas and numpy are installed.\n"
-            "You have access to cafe_sales_data.csv. The first few rows are:\n"
+            "To run Python code in a sandbox, output a single block of code.\n"
+            f"The sandbox:\n - has pandas and numpy installed.\n - contains {sandbox_csv_path}."
+            "Plot any charts that you create."
+            f"The first few rows of {sandbox_csv_path} are:\n"
             f"{csv_sample}\n"
-            "After seeing the results of the code, give your final response."
+            "After seeing the results of the code, answer the user's query."
         )
 
         # Generate the Python code with the LLM

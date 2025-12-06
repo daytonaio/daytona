@@ -19,20 +19,26 @@ async function run() {
     sb = await dt.create({ language: CodeLanguage.PYTHON })
   
     // Upload the CSV file to the sandbox
-    await sb.fs.uploadFile('cafe_sales_data.csv', 'cafe_sales_data.csv')
+    const csvPath = 'cafe_sales_data.csv'
+    const sandboxCsvPath = csvPath
+    await sb.fs.uploadFile(csvPath, sandboxCsvPath)
 
     // Define the user prompt
     const userPrompt = `Give the three highest revenue products for the month of January and show them as a bar chart.`
     console.log("Prompt:", userPrompt)
 
     // Generate the system prompt with the first few rows of data for context
-    const csvSample = fs.readFileSync('cafe_sales_data.csv', 'utf8').split('\n').slice(0, 3).join('\n')
+    const csvSample = fs.readFileSync(csvPath, 'utf8').split('\n').slice(0, 3).join('\n')
     const systemPrompt = `
 You are a helpful assistant that analyzes data.
-Generate Python code when necessary. Pandas and numpy are installed.
-You have access to cafe_sales_data.csv. The first few rows are:
+To run Python code in a sandbox, output a single block of code.
+The sandbox:
+ - has pandas and numpy installed.
+ - contains ${sandboxCsvPath}.
+Plot any charts that you create.
+The first few rows of ${sandboxCsvPath} are:
 ${csvSample}
-After seeing the results of the code, give your final response.`
+After seeing the results of the code, answer the user's query.`
 
     // Generate the Python code with the LLM
     console.log("Generating code...")
