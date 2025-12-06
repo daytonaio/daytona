@@ -28,7 +28,7 @@ class Session(BaseModel):
     """
     Session
     """ # noqa: E501
-    session_id: StrictStr = Field(description="The ID of the session", alias="sessionId")
+    session_id: StrictStr = Field(description="The ID of the session", serialization_alias="sessionId")
     commands: Optional[List[Command]] = Field(description="The list of commands executed in this session")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessionId", "commands"]
@@ -103,7 +103,7 @@ class Session(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sessionId": obj.get("sessionId"),
+            "session_id": obj.get("sessionId"),
             "commands": [Command.from_dict(_item) for _item in obj["commands"]] if obj.get("commands") is not None else None
         })
         # store additional fields in additional_properties

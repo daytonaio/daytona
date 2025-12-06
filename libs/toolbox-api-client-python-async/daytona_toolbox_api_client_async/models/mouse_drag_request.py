@@ -27,10 +27,10 @@ class MouseDragRequest(BaseModel):
     MouseDragRequest
     """ # noqa: E501
     button: Optional[StrictStr] = None
-    end_x: Optional[StrictInt] = Field(default=None, alias="endX")
-    end_y: Optional[StrictInt] = Field(default=None, alias="endY")
-    start_x: Optional[StrictInt] = Field(default=None, alias="startX")
-    start_y: Optional[StrictInt] = Field(default=None, alias="startY")
+    end_x: Optional[StrictInt] = Field(default=None, serialization_alias="endX")
+    end_y: Optional[StrictInt] = Field(default=None, serialization_alias="endY")
+    start_x: Optional[StrictInt] = Field(default=None, serialization_alias="startX")
+    start_y: Optional[StrictInt] = Field(default=None, serialization_alias="startY")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["button", "endX", "endY", "startX", "startY"]
 
@@ -93,10 +93,10 @@ class MouseDragRequest(BaseModel):
 
         _obj = cls.model_validate({
             "button": obj.get("button"),
-            "endX": obj.get("endX"),
-            "endY": obj.get("endY"),
-            "startX": obj.get("startX"),
-            "startY": obj.get("startY")
+            "end_x": obj.get("endX"),
+            "end_y": obj.get("endY"),
+            "start_x": obj.get("startX"),
+            "start_y": obj.get("startY")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

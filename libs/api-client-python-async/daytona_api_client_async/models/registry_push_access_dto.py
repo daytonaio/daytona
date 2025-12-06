@@ -29,10 +29,10 @@ class RegistryPushAccessDto(BaseModel):
     """ # noqa: E501
     username: StrictStr = Field(description="Temporary username for registry authentication")
     secret: StrictStr = Field(description="Temporary secret for registry authentication")
-    registry_url: StrictStr = Field(description="Registry URL", alias="registryUrl")
-    registry_id: StrictStr = Field(description="Registry ID", alias="registryId")
+    registry_url: StrictStr = Field(description="Registry URL", serialization_alias="registryUrl")
+    registry_id: StrictStr = Field(description="Registry ID", serialization_alias="registryId")
     project: StrictStr = Field(description="Registry project ID")
-    expires_at: StrictStr = Field(description="Token expiration time in ISO format", alias="expiresAt")
+    expires_at: StrictStr = Field(description="Token expiration time in ISO format", serialization_alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["username", "secret", "registryUrl", "registryId", "project", "expiresAt"]
 
@@ -96,10 +96,10 @@ class RegistryPushAccessDto(BaseModel):
         _obj = cls.model_validate({
             "username": obj.get("username"),
             "secret": obj.get("secret"),
-            "registryUrl": obj.get("registryUrl"),
-            "registryId": obj.get("registryId"),
+            "registry_url": obj.get("registryUrl"),
+            "registry_id": obj.get("registryId"),
             "project": obj.get("project"),
-            "expiresAt": obj.get("expiresAt")
+            "expires_at": obj.get("expiresAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

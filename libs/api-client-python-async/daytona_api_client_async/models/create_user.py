@@ -31,10 +31,10 @@ class CreateUser(BaseModel):
     id: StrictStr
     name: StrictStr
     email: Optional[StrictStr] = None
-    personal_organization_quota: Optional[CreateOrganizationQuota] = Field(default=None, alias="personalOrganizationQuota")
-    personal_organization_default_region_id: Optional[StrictStr] = Field(default=None, alias="personalOrganizationDefaultRegionId")
+    personal_organization_quota: Optional[CreateOrganizationQuota] = Field(default=None, serialization_alias="personalOrganizationQuota")
+    personal_organization_default_region_id: Optional[StrictStr] = Field(default=None, serialization_alias="personalOrganizationDefaultRegionId")
     role: Optional[StrictStr] = None
-    email_verified: Optional[StrictBool] = Field(default=None, alias="emailVerified")
+    email_verified: Optional[StrictBool] = Field(default=None, serialization_alias="emailVerified")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "email", "personalOrganizationQuota", "personalOrganizationDefaultRegionId", "role", "emailVerified"]
 
@@ -112,10 +112,10 @@ class CreateUser(BaseModel):
             "id": obj.get("id"),
             "name": obj.get("name"),
             "email": obj.get("email"),
-            "personalOrganizationQuota": CreateOrganizationQuota.from_dict(obj["personalOrganizationQuota"]) if obj.get("personalOrganizationQuota") is not None else None,
-            "personalOrganizationDefaultRegionId": obj.get("personalOrganizationDefaultRegionId"),
+            "personal_organization_quota": CreateOrganizationQuota.from_dict(obj["personalOrganizationQuota"]) if obj.get("personalOrganizationQuota") is not None else None,
+            "personal_organization_default_region_id": obj.get("personalOrganizationDefaultRegionId"),
             "role": obj.get("role"),
-            "emailVerified": obj.get("emailVerified")
+            "email_verified": obj.get("emailVerified")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

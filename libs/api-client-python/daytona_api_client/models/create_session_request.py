@@ -27,7 +27,7 @@ class CreateSessionRequest(BaseModel):
     """
     CreateSessionRequest
     """ # noqa: E501
-    session_id: StrictStr = Field(description="The ID of the session", alias="sessionId")
+    session_id: StrictStr = Field(description="The ID of the session", serialization_alias="sessionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessionId"]
 
@@ -89,7 +89,7 @@ class CreateSessionRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sessionId": obj.get("sessionId")
+            "session_id": obj.get("sessionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

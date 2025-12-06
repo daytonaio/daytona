@@ -26,8 +26,8 @@ class SessionExecuteResponse(BaseModel):
     """
     SessionExecuteResponse
     """ # noqa: E501
-    cmd_id: Optional[StrictStr] = Field(default=None, alias="cmdId")
-    exit_code: Optional[StrictInt] = Field(default=None, alias="exitCode")
+    cmd_id: StrictStr = Field(serialization_alias="cmdId")
+    exit_code: Optional[StrictInt] = Field(default=None, serialization_alias="exitCode")
     output: Optional[StrictStr] = None
     stderr: Optional[StrictStr] = None
     stdout: Optional[StrictStr] = None
@@ -92,8 +92,8 @@ class SessionExecuteResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "cmdId": obj.get("cmdId"),
-            "exitCode": obj.get("exitCode"),
+            "cmd_id": obj.get("cmdId"),
+            "exit_code": obj.get("exitCode"),
             "output": obj.get("output"),
             "stderr": obj.get("stderr"),
             "stdout": obj.get("stdout")

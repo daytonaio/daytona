@@ -26,8 +26,8 @@ class CompletionContext(BaseModel):
     """
     CompletionContext
     """ # noqa: E501
-    trigger_character: Optional[StrictStr] = Field(default=None, alias="triggerCharacter")
-    trigger_kind: StrictInt = Field(alias="triggerKind")
+    trigger_character: Optional[StrictStr] = Field(default=None, serialization_alias="triggerCharacter")
+    trigger_kind: StrictInt = Field(serialization_alias="triggerKind")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["triggerCharacter", "triggerKind"]
 
@@ -89,8 +89,8 @@ class CompletionContext(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "triggerCharacter": obj.get("triggerCharacter"),
-            "triggerKind": obj.get("triggerKind")
+            "trigger_character": obj.get("triggerCharacter"),
+            "trigger_kind": obj.get("triggerKind")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

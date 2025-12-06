@@ -31,10 +31,10 @@ class SnapshotDto(BaseModel):
     SnapshotDto
     """ # noqa: E501
     id: StrictStr
-    organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
+    organization_id: Optional[StrictStr] = Field(default=None, serialization_alias="organizationId")
     general: StrictBool
     name: StrictStr
-    image_name: Optional[StrictStr] = Field(default=None, alias="imageName")
+    image_name: Optional[StrictStr] = Field(default=None, serialization_alias="imageName")
     state: SnapshotState
     size: Optional[Union[StrictFloat, StrictInt]]
     entrypoint: Optional[List[StrictStr]]
@@ -42,12 +42,12 @@ class SnapshotDto(BaseModel):
     gpu: Union[StrictFloat, StrictInt]
     mem: Union[StrictFloat, StrictInt]
     disk: Union[StrictFloat, StrictInt]
-    error_reason: Optional[StrictStr] = Field(alias="errorReason")
-    created_at: datetime = Field(alias="createdAt")
-    updated_at: datetime = Field(alias="updatedAt")
-    last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
-    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
-    skip_validation: StrictBool = Field(alias="skipValidation")
+    error_reason: Optional[StrictStr] = Field(serialization_alias="errorReason")
+    created_at: datetime = Field(serialization_alias="createdAt")
+    updated_at: datetime = Field(serialization_alias="updatedAt")
+    last_used_at: Optional[datetime] = Field(serialization_alias="lastUsedAt")
+    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", serialization_alias="buildInfo")
+    skip_validation: StrictBool = Field(serialization_alias="skipValidation")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "skipValidation"]
 
@@ -133,10 +133,10 @@ class SnapshotDto(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
-            "organizationId": obj.get("organizationId"),
+            "organization_id": obj.get("organizationId"),
             "general": obj.get("general"),
             "name": obj.get("name"),
-            "imageName": obj.get("imageName"),
+            "image_name": obj.get("imageName"),
             "state": obj.get("state"),
             "size": obj.get("size"),
             "entrypoint": obj.get("entrypoint"),
@@ -144,12 +144,12 @@ class SnapshotDto(BaseModel):
             "gpu": obj.get("gpu"),
             "mem": obj.get("mem"),
             "disk": obj.get("disk"),
-            "errorReason": obj.get("errorReason"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "lastUsedAt": obj.get("lastUsedAt"),
-            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-            "skipValidation": obj.get("skipValidation")
+            "error_reason": obj.get("errorReason"),
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt"),
+            "last_used_at": obj.get("lastUsedAt"),
+            "build_info": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            "skip_validation": obj.get("skipValidation")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

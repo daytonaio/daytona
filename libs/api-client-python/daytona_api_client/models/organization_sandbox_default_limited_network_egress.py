@@ -27,7 +27,7 @@ class OrganizationSandboxDefaultLimitedNetworkEgress(BaseModel):
     """
     OrganizationSandboxDefaultLimitedNetworkEgress
     """ # noqa: E501
-    sandbox_default_limited_network_egress: StrictBool = Field(description="Sandbox default limited network egress", alias="sandboxDefaultLimitedNetworkEgress")
+    sandbox_default_limited_network_egress: StrictBool = Field(description="Sandbox default limited network egress", serialization_alias="sandboxDefaultLimitedNetworkEgress")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sandboxDefaultLimitedNetworkEgress"]
 
@@ -89,7 +89,7 @@ class OrganizationSandboxDefaultLimitedNetworkEgress(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sandboxDefaultLimitedNetworkEgress": obj.get("sandboxDefaultLimitedNetworkEgress")
+            "sandbox_default_limited_network_egress": obj.get("sandboxDefaultLimitedNetworkEgress")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

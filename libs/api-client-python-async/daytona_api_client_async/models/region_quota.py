@@ -27,11 +27,11 @@ class RegionQuota(BaseModel):
     """
     RegionQuota
     """ # noqa: E501
-    organization_id: StrictStr = Field(alias="organizationId")
-    region_id: StrictStr = Field(alias="regionId")
-    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
-    total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
-    total_disk_quota: Union[StrictFloat, StrictInt] = Field(alias="totalDiskQuota")
+    organization_id: StrictStr = Field(serialization_alias="organizationId")
+    region_id: StrictStr = Field(serialization_alias="regionId")
+    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalCpuQuota")
+    total_memory_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalMemoryQuota")
+    total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"]
 
@@ -93,11 +93,11 @@ class RegionQuota(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "organizationId": obj.get("organizationId"),
-            "regionId": obj.get("regionId"),
-            "totalCpuQuota": obj.get("totalCpuQuota"),
-            "totalMemoryQuota": obj.get("totalMemoryQuota"),
-            "totalDiskQuota": obj.get("totalDiskQuota")
+            "organization_id": obj.get("organizationId"),
+            "region_id": obj.get("regionId"),
+            "total_cpu_quota": obj.get("totalCpuQuota"),
+            "total_memory_quota": obj.get("totalMemoryQuota"),
+            "total_disk_quota": obj.get("totalDiskQuota")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

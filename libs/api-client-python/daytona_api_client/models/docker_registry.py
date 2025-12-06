@@ -33,9 +33,9 @@ class DockerRegistry(BaseModel):
     url: StrictStr = Field(description="Registry URL")
     username: StrictStr = Field(description="Registry username")
     project: StrictStr = Field(description="Registry project")
-    registry_type: StrictStr = Field(description="Registry type", alias="registryType")
-    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
-    updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
+    registry_type: StrictStr = Field(description="Registry type", serialization_alias="registryType")
+    created_at: datetime = Field(description="Creation timestamp", serialization_alias="createdAt")
+    updated_at: datetime = Field(description="Last update timestamp", serialization_alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "url", "username", "project", "registryType", "createdAt", "updatedAt"]
 
@@ -109,9 +109,9 @@ class DockerRegistry(BaseModel):
             "url": obj.get("url"),
             "username": obj.get("username"),
             "project": obj.get("project"),
-            "registryType": obj.get("registryType"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "registry_type": obj.get("registryType"),
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

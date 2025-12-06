@@ -27,11 +27,11 @@ class StorageAccessDto(BaseModel):
     """
     StorageAccessDto
     """ # noqa: E501
-    access_key: StrictStr = Field(description="Access key for storage authentication", alias="accessKey")
+    access_key: StrictStr = Field(description="Access key for storage authentication", serialization_alias="accessKey")
     secret: StrictStr = Field(description="Secret key for storage authentication")
-    session_token: StrictStr = Field(description="Session token for storage authentication", alias="sessionToken")
-    storage_url: StrictStr = Field(description="Storage URL", alias="storageUrl")
-    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
+    session_token: StrictStr = Field(description="Session token for storage authentication", serialization_alias="sessionToken")
+    storage_url: StrictStr = Field(description="Storage URL", serialization_alias="storageUrl")
+    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
     bucket: StrictStr = Field(description="S3 bucket name")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["accessKey", "secret", "sessionToken", "storageUrl", "organizationId", "bucket"]
@@ -94,11 +94,11 @@ class StorageAccessDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "accessKey": obj.get("accessKey"),
+            "access_key": obj.get("accessKey"),
             "secret": obj.get("secret"),
-            "sessionToken": obj.get("sessionToken"),
-            "storageUrl": obj.get("storageUrl"),
-            "organizationId": obj.get("organizationId"),
+            "session_token": obj.get("sessionToken"),
+            "storage_url": obj.get("storageUrl"),
+            "organization_id": obj.get("organizationId"),
             "bucket": obj.get("bucket")
         })
         # store additional fields in additional_properties

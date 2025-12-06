@@ -29,14 +29,14 @@ class OrganizationUser(BaseModel):
     """
     OrganizationUser
     """ # noqa: E501
-    user_id: StrictStr = Field(description="User ID", alias="userId")
-    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
+    user_id: StrictStr = Field(description="User ID", serialization_alias="userId")
+    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
     name: StrictStr = Field(description="User name")
     email: StrictStr = Field(description="User email")
     role: StrictStr = Field(description="Member role")
-    assigned_roles: List[OrganizationRole] = Field(description="Roles assigned to the user", alias="assignedRoles")
-    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
-    updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
+    assigned_roles: List[OrganizationRole] = Field(description="Roles assigned to the user", serialization_alias="assignedRoles")
+    created_at: datetime = Field(description="Creation timestamp", serialization_alias="createdAt")
+    updated_at: datetime = Field(description="Last update timestamp", serialization_alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["userId", "organizationId", "name", "email", "role", "assignedRoles", "createdAt", "updatedAt"]
 
@@ -112,14 +112,14 @@ class OrganizationUser(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "userId": obj.get("userId"),
-            "organizationId": obj.get("organizationId"),
+            "user_id": obj.get("userId"),
+            "organization_id": obj.get("organizationId"),
             "name": obj.get("name"),
             "email": obj.get("email"),
             "role": obj.get("role"),
-            "assignedRoles": [OrganizationRole.from_dict(_item) for _item in obj["assignedRoles"]] if obj.get("assignedRoles") is not None else None,
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "assigned_roles": [OrganizationRole.from_dict(_item) for _item in obj["assignedRoles"]] if obj.get("assignedRoles") is not None else None,
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

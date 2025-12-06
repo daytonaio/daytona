@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,14 +26,14 @@ class PtySessionInfo(BaseModel):
     """
     PtySessionInfo
     """ # noqa: E501
-    active: Optional[StrictBool] = None
-    cols: Optional[StrictInt] = None
-    created_at: Optional[StrictStr] = Field(default=None, alias="createdAt")
-    cwd: Optional[StrictStr] = None
-    envs: Optional[Dict[str, StrictStr]] = None
-    id: Optional[StrictStr] = None
-    lazy_start: Optional[StrictBool] = Field(default=None, description="Whether this session uses lazy start", alias="lazyStart")
-    rows: Optional[StrictInt] = None
+    active: StrictBool
+    cols: StrictInt
+    created_at: StrictStr = Field(serialization_alias="createdAt")
+    cwd: StrictStr
+    envs: Dict[str, StrictStr]
+    id: StrictStr
+    lazy_start: StrictBool = Field(description="Whether this session uses lazy start", serialization_alias="lazyStart")
+    rows: StrictInt
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["active", "cols", "createdAt", "cwd", "envs", "id", "lazyStart", "rows"]
 
@@ -97,11 +97,11 @@ class PtySessionInfo(BaseModel):
         _obj = cls.model_validate({
             "active": obj.get("active"),
             "cols": obj.get("cols"),
-            "createdAt": obj.get("createdAt"),
+            "created_at": obj.get("createdAt"),
             "cwd": obj.get("cwd"),
             "envs": obj.get("envs"),
             "id": obj.get("id"),
-            "lazyStart": obj.get("lazyStart"),
+            "lazy_start": obj.get("lazyStart"),
             "rows": obj.get("rows")
         })
         # store additional fields in additional_properties

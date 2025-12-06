@@ -28,7 +28,7 @@ class ProcessRestartResponse(BaseModel):
     ProcessRestartResponse
     """ # noqa: E501
     message: StrictStr = Field(description="A message indicating the result of restarting the process")
-    process_name: StrictStr = Field(description="The name of the VNC process that was restarted", alias="processName")
+    process_name: StrictStr = Field(description="The name of the VNC process that was restarted", serialization_alias="processName")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["message", "processName"]
 
@@ -91,7 +91,7 @@ class ProcessRestartResponse(BaseModel):
 
         _obj = cls.model_validate({
             "message": obj.get("message"),
-            "processName": obj.get("processName")
+            "process_name": obj.get("processName")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -26,8 +26,8 @@ class LspDocumentRequest(BaseModel):
     """
     LspDocumentRequest
     """ # noqa: E501
-    language_id: StrictStr = Field(alias="languageId")
-    path_to_project: StrictStr = Field(alias="pathToProject")
+    language_id: StrictStr = Field(serialization_alias="languageId")
+    path_to_project: StrictStr = Field(serialization_alias="pathToProject")
     uri: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["languageId", "pathToProject", "uri"]
@@ -90,8 +90,8 @@ class LspDocumentRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "languageId": obj.get("languageId"),
-            "pathToProject": obj.get("pathToProject"),
+            "language_id": obj.get("languageId"),
+            "path_to_project": obj.get("pathToProject"),
             "uri": obj.get("uri")
         })
         # store additional fields in additional_properties

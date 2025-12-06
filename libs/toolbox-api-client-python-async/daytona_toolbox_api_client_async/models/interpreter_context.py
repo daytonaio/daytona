@@ -27,7 +27,7 @@ class InterpreterContext(BaseModel):
     InterpreterContext
     """ # noqa: E501
     active: StrictBool
-    created_at: StrictStr = Field(alias="createdAt")
+    created_at: StrictStr = Field(serialization_alias="createdAt")
     cwd: StrictStr
     id: StrictStr
     language: StrictStr
@@ -93,7 +93,7 @@ class InterpreterContext(BaseModel):
 
         _obj = cls.model_validate({
             "active": obj.get("active"),
-            "createdAt": obj.get("createdAt"),
+            "created_at": obj.get("createdAt"),
             "cwd": obj.get("cwd"),
             "id": obj.get("id"),
             "language": obj.get("language")

@@ -28,7 +28,7 @@ class Session(BaseModel):
     Session
     """ # noqa: E501
     commands: List[Command]
-    session_id: StrictStr = Field(alias="sessionId")
+    session_id: StrictStr = Field(serialization_alias="sessionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["commands", "sessionId"]
 
@@ -98,7 +98,7 @@ class Session(BaseModel):
 
         _obj = cls.model_validate({
             "commands": [Command.from_dict(_item) for _item in obj["commands"]] if obj.get("commands") is not None else None,
-            "sessionId": obj.get("sessionId")
+            "session_id": obj.get("sessionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
