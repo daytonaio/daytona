@@ -140,9 +140,19 @@ type Error struct {
 type wsClient struct {
 	id        string
 	conn      *websocket.Conn
-	send      chan *OutputMessage
+	send      chan wsFrame
 	done      chan struct{} // signals when clientWriter exits
 	closeOnce sync.Once
+}
+
+type wsFrame struct {
+	output *OutputMessage
+	close  *closeRequest
+}
+
+type closeRequest struct {
+	code    int
+	message string
 }
 
 // OutputMessage represents output sent to WebSocket clients

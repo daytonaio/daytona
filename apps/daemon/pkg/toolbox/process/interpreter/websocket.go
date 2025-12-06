@@ -23,7 +23,7 @@ func (c *Context) attachWebSocket(ws *websocket.Conn) {
 	cl := &wsClient{
 		id:   uuid.NewString(),
 		conn: ws,
-		send: make(chan *OutputMessage, 256),
+		send: make(chan wsFrame, 256),
 		done: make(chan struct{}),
 	}
 
@@ -59,20 +59,16 @@ func (c *Context) clientWriter(cl *wsClient) {
 		select {
 		case <-c.ctx.Done():
 			return
-		case msg, ok := <-cl.send:
+		case frame, ok := <-cl.send:
 			if !ok {
 				return
 			}
-			_ = cl.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
-			data, err := json.Marshal(msg)
+			err := cl.writeFrame(frame)
 			if err != nil {
-				log.Errorf("Failed to marshal output message: %v", err)
-				return
+				log.Debugf("Failed to write frame: %v", err)
 			}
-
-			err = cl.conn.WriteMessage(websocket.TextMessage, data)
-			if err != nil {
+			if frame.close != nil {
 				return
 			}
 		}
@@ -90,12 +86,10 @@ func (c *Context) emitOutput(msg *OutputMessage) {
 	}
 
 	select {
-	case cl.send <- msg:
+	case cl.send <- wsFrame{output: msg}:
 	default:
 		log.Debug("Client send channel full - closing slow consumer")
-		closeMsg := websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "slow consumer")
-		_ = cl.conn.WriteControl(websocket.CloseMessage, closeMsg, time.Now().Add(writeWait))
-		cl.close()
+		cl.requestClose(websocket.ClosePolicyViolation, "slow consumer")
 
 		c.mu.Lock()
 		if c.client != nil && c.client.id == cl.id {
@@ -109,6 +103,61 @@ func (c *Context) emitOutput(msg *OutputMessage) {
 func (cl *wsClient) close() {
 	cl.closeOnce.Do(func() {
 		close(cl.send)
+
+		// Wait for clientWriter to drain remaining messages with a timeout
+		// This ensures close frames and other pending messages have time to be sent
+		timer := time.NewTimer(5 * time.Second)
+		select {
+		case <-cl.done:
+			// clientWriter has finished processing all messages
+			if !timer.Stop() {
+				<-timer.C
+			}
+		case <-timer.C:
+			// Timeout reached, proceed with closing
+			log.Debug("Timeout waiting for client writer to finish")
+		}
+
 		_ = cl.conn.Close()
 	})
+}
+
+func (cl *wsClient) writeFrame(frame wsFrame) error {
+	if frame.output == nil && frame.close == nil {
+		return nil
+	}
+
+	err := cl.conn.SetWriteDeadline(time.Now().Add(writeWait))
+	if err != nil {
+		return err
+	}
+
+	if frame.close != nil {
+		payload := websocket.FormatCloseMessage(frame.close.code, frame.close.message)
+		return cl.conn.WriteMessage(websocket.CloseMessage, payload)
+	}
+
+	data, err := json.Marshal(frame.output)
+	if err != nil {
+		return err
+	}
+
+	return cl.conn.WriteMessage(websocket.TextMessage, data)
+}
+
+func (cl *wsClient) requestClose(code int, message string) {
+	frame := wsFrame{
+		close: &closeRequest{
+			code:    code,
+			message: message,
+		},
+	}
+
+	select {
+	case cl.send <- frame:
+	default:
+		log.Debug("Couldn't send close frame to client - closing connection")
+	}
+
+	cl.close()
 }

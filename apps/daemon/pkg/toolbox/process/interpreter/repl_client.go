@@ -70,11 +70,7 @@ func (c *Context) closeClient(code int, message string) {
 		return
 	}
 
-	closeMsg := websocket.FormatCloseMessage(code, message)
-	_ = c.client.conn.SetWriteDeadline(time.Now().Add(writeWait))
-	_ = c.client.conn.WriteMessage(websocket.CloseMessage, closeMsg)
-
-	c.client.close()
+	c.client.requestClose(code, message)
 	c.client = nil
 }
 
