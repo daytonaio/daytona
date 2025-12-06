@@ -1457,10 +1457,6 @@ const docTemplate = `{
                 "snapshot": {
                     "type": "string"
                 },
-                "storageExpansionQuota": {
-                    "description": "Tracks additional storage added through recovery",
-                    "type": "integer"
-                },
                 "storageQuota": {
                     "type": "integer",
                     "minimum": 1

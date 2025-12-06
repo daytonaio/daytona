@@ -71,9 +71,6 @@ definitions:
         $ref: '#/definitions/RegistryDTO'
       snapshot:
         type: string
-      storageExpansionQuota:
-        description: Tracks additional storage added through recovery
-        type: integer
       storageQuota:
         minimum: 1
         type: integer

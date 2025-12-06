@@ -56,7 +56,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 
 	maxExpansion := originalStorageQuota * 0.1 // 10% of original
 	currentExpansion := currentStorage - originalStorageQuota
-	increment := 0.1 // 100MB
+	increment := 0.1 // ~107MB
 	newExpansion := currentExpansion + increment
 	newStorageQuota := originalStorageQuota + newExpansion
 

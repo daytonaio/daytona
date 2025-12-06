@@ -1202,7 +1202,8 @@ export class SandboxService {
       await runnerAdapter.recoverExpandStorage(sandboxId, originalDiskGB)
     } catch (error) {
       if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
-        const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(originalDiskGB * 0.1).toFixed(2)}GB (10% of original ${originalDiskGB.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
+        const MAX_STORAGE_EXPANSION_PERCENT = 0.1
+        const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(originalDiskGB * MAX_STORAGE_EXPANSION_PERCENT).toFixed(2)}GB (${(MAX_STORAGE_EXPANSION_PERCENT * 100).toFixed(0)}% of original ${originalDiskGB.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
         throw new ForbiddenException(errorMsg)
       }
       throw error
