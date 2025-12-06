@@ -23,7 +23,7 @@ export interface SessionExecuteResponse {
    * @type {string}
    * @memberof SessionExecuteResponse
    */
-  cmdId?: string
+  cmdId: string
   /**
    *
    * @type {number}
