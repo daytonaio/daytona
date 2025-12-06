@@ -11,16 +11,21 @@ import { STATE_ICONS } from './state-icons'
 interface SandboxStateProps {
   state?: SandboxStateType
   errorReason?: string
+  isRecoverable?: boolean
 }
 
-export function SandboxState({ state, errorReason }: SandboxStateProps) {
+export function SandboxState({ state, errorReason, isRecoverable }: SandboxStateProps) {
   if (!state) return null
-  const stateIcon = STATE_ICONS[state] || STATE_ICONS[SandboxStateType.UNKNOWN]
+  const stateIcon = isRecoverable
+    ? STATE_ICONS['RECOVERY']
+    : STATE_ICONS[state] || STATE_ICONS[SandboxStateType.UNKNOWN]
   const label = getStateLabel(state)
 
   if (state === SandboxStateType.ERROR || state === SandboxStateType.BUILD_FAILED) {
+    const errorColor = isRecoverable ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
+
     const errorContent = (
-      <div className={`flex items-center gap-1 text-red-600 dark:text-red-400`}>
+      <div className={`flex items-center gap-1 ${errorColor}`}>
         <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">{stateIcon}</div>
         <span className="truncate">{label}</span>
       </div>

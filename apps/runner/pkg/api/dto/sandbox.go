@@ -33,3 +33,7 @@ type UpdateNetworkSettingsDTO struct {
 	NetworkAllowList   *string `json:"networkAllowList,omitempty"`
 	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO
+
+type RecoverExpandStorageDTO struct {
+	StorageQuota int64 `json:"storageQuota" validate:"min=1"`
+} //	@name	RecoverExpandStorageDTO
