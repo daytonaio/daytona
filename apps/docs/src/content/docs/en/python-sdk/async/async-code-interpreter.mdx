@@ -39,12 +39,12 @@ Initialize a new AsyncCodeInterpreter instance.
 @intercept_errors(message_prefix="Failed to run code: ")
 async def run_code(code: str,
                    *,
-                   context: Optional[InterpreterContext] = None,
-                   on_stdout: Optional[OutputHandler[OutputMessage]] = None,
-                   on_stderr: Optional[OutputHandler[OutputMessage]] = None,
-                   on_error: Optional[OutputHandler[ExecutionError]] = None,
-                   envs: Optional[Dict[str, str]] = None,
-                   timeout: Optional[int] = None) -> ExecutionResult
+                   context: InterpreterContext | None = None,
+                   on_stdout: OutputHandler[OutputMessage] | None = None,
+                   on_stderr: OutputHandler[OutputMessage] | None = None,
+                   on_error: OutputHandler[ExecutionError] | None = None,
+                   envs: dict[str, str] | None = None,
+                   timeout: int | None = None) -> ExecutionResult
 ```
 
 Execute Python code in the sandbox.
@@ -56,13 +56,13 @@ create a new context with `create_context()` and pass it as `context` argument.
 **Arguments**:
 
 - `code` _str_ - Code to execute.
-- `context` _Optional[InterpreterContext]_ - Context to run code in. If not provided, uses default context.
-- `on_stdout` _Optional[OutputHandler[OutputMessage]]_ - Callback for stdout messages.
-- `on_stderr` _Optional[OutputHandler[OutputMessage]]_ - Callback for stderr messages.
-- `on_error` _Optional[OutputHandler[ExecutionError]]_ - Callback for execution errors
+- `context` _InterpreterContext | None_ - Context to run code in. If not provided, uses default context.
+- `on_stdout` _OutputHandler[OutputMessage] | None_ - Callback for stdout messages.
+- `on_stderr` _OutputHandler[OutputMessage] | None_ - Callback for stderr messages.
+- `on_error` _OutputHandler[ExecutionError] | None_ - Callback for execution errors
   (e.g., syntax errors, runtime errors).
-- `envs` _Optional[Dict[str, str]]_ - Environment variables for this execution.
-- `timeout` _Optional[int]_ - Timeout in seconds. 0 means no timeout. Default is 10 minutes.
+- `envs` _dict[str, str] | None_ - Environment variables for this execution.
+- `timeout` _int | None_ - Timeout in seconds. 0 means no timeout. Default is 10 minutes.
   
 
 **Returns**:
@@ -109,7 +109,7 @@ result = await sandbox.code_interpreter.run_code(
 
 ```python
 @intercept_errors(message_prefix="Failed to create interpreter context: ")
-async def create_context(cwd: Optional[str] = None) -> InterpreterContext
+async def create_context(cwd: str | None = None) -> InterpreterContext
 ```
 
 Create a new isolated interpreter context.
@@ -119,7 +119,7 @@ Variables, imports, and functions defined in one context don't affect others.
 
 **Arguments**:
 
-- `cwd` _Optional[str]_ - Working directory for the context. If not specified, uses sandbox working directory.
+- `cwd` _str | None_ - Working directory for the context. If not specified, uses sandbox working directory.
   
 
 **Returns**:
@@ -155,7 +155,7 @@ await sandbox.code_interpreter.delete_context(ctx)
 
 ```python
 @intercept_errors(message_prefix="Failed to list interpreter contexts: ")
-async def list_contexts() -> List[InterpreterContext]
+async def list_contexts() -> list[InterpreterContext]
 ```
 
 List all user-created interpreter contexts.
@@ -165,7 +165,7 @@ via `create_context()` are returned.
 
 **Returns**:
 
-- `List[InterpreterContext]` - List of context objects.
+- `list[InterpreterContext]` - List of context objects.
   
 
 **Raises**:
