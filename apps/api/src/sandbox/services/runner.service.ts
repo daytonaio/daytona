@@ -38,7 +38,6 @@ import * as crypto from 'crypto'
 import { RUNNER_NAME_REGEX } from '../constants/runner-name-regex.constant'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RunnerDto } from '../dto/runner.dto'
-import { Region } from '../../region/entities/region.entity'
 
 @Injectable()
 export class RunnerService {
@@ -66,10 +65,7 @@ export class RunnerService {
    * @throws {NotFoundException} If the region is not found.
    * @throws {ConflictException} If a runner with the same values already exists.
    */
-  async create(
-    createRunnerDto: CreateRunnerInternalDto,
-    region?: Region,
-  ): Promise<{
+  async create(createRunnerDto: CreateRunnerInternalDto): Promise<{
     runner: Runner
     apiKey: string
   }> {
@@ -78,14 +74,6 @@ export class RunnerService {
     }
     if (createRunnerDto.name.length < 2 || createRunnerDto.name.length > 255) {
       throw new BadRequestException('Runner name must be between 3 and 255 characters')
-    }
-
-    if (!region) {
-      region = await this.regionService.findOne(createRunnerDto.regionId)
-
-      if (!region) {
-        throw new NotFoundException('Region not found')
-      }
     }
 
     if (!this.isValidClass(createRunnerDto.class)) {
@@ -118,9 +106,7 @@ export class RunnerService {
           throw new ConflictException('This domain is already in use')
         }
         if (error.detail.includes('name')) {
-          throw new ConflictException(
-            `Runner with name ${createRunnerDto.name} already exists in the region ${region.name}`,
-          )
+          throw new ConflictException(`Runner with name ${createRunnerDto.name} already exists in this region`)
         }
         throw new ConflictException('A runner with these values already exists')
       }
@@ -133,10 +119,10 @@ export class RunnerService {
     return runners.map(RunnerDto.fromRunner)
   }
 
-  async findAllByRegion(region: Region): Promise<RunnerDto[]> {
+  async findAllByRegion(regionId: string): Promise<RunnerDto[]> {
     const runners = await this.runnerRepository.find({
       where: {
-        region: region.id,
+        region: regionId,
       },
     })
 

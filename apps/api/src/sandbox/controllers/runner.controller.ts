@@ -15,7 +15,7 @@ import {
   Delete,
   HttpCode,
   NotFoundException,
-  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { RunnerService } from '../services/runner.service'
@@ -108,28 +108,25 @@ export class RunnerController {
     }
 
     if (region.regionType !== RegionType.CUSTOM) {
-      throw new BadRequestException('Invalid region type')
+      throw new ForbiddenException('Runner can only be created in a custom region')
     }
 
     // create the runner
-    const { runner, apiKey } = await this.runnerService.create(
-      {
-        domain: createRunnerDto.domain,
-        apiUrl: createRunnerDto.apiUrl,
-        proxyUrl: createRunnerDto.proxyUrl,
-        cpu: -1,
-        memoryGiB: -1,
-        diskGiB: -1,
-        regionId: createRunnerDto.regionId,
-        name: createRunnerDto.name,
-        gpu: 0,
-        gpuType: '',
-        class: SandboxClass.SMALL,
-        // TODO
-        version: '0',
-      },
-      region,
-    )
+    const { runner, apiKey } = await this.runnerService.create({
+      domain: createRunnerDto.domain,
+      apiUrl: createRunnerDto.apiUrl,
+      proxyUrl: createRunnerDto.proxyUrl,
+      cpu: -1,
+      memoryGiB: -1,
+      diskGiB: -1,
+      regionId: createRunnerDto.regionId,
+      name: createRunnerDto.name,
+      gpu: 0,
+      gpuType: '',
+      class: SandboxClass.SMALL,
+      // TODO
+      version: '0',
+    })
 
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)
   }
@@ -178,11 +175,16 @@ export class RunnerController {
 
     // validate that the region is a custom region owned by the organization
     const region = await this.regionService.findOneByName(regionName, authContext.organizationId)
-    if (!region || region.regionType !== RegionType.CUSTOM) {
+
+    if (!region) {
       throw new NotFoundException('Region not found')
     }
 
-    return this.runnerService.findAllByRegion(region)
+    if (region.regionType !== RegionType.CUSTOM) {
+      throw new ForbiddenException('Runners can only be listed in custom regions')
+    }
+
+    return this.runnerService.findAllByRegion(region.id)
   }
 
   @Get(':id')
