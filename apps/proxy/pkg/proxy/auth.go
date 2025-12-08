@@ -82,7 +82,7 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxId string) (err error, did
 	ctx.Redirect(http.StatusTemporaryRedirect, authUrl)
 
 	// Return error with details about what failed
-	errorMsg := "authentication failed"
+	var errorMsg string
 	if len(authErrors) > 0 {
 		errorMsg = fmt.Sprintf("authentication failed:\n%s", strings.Join(authErrors, "\n;\n"))
 	} else {
