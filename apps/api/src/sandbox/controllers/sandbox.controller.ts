@@ -394,6 +394,8 @@ export class SandboxController {
 
   @Post(':sandboxIdOrName/recover')
   @HttpCode(200)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
   @ApiOperation({
     summary: 'Recover sandbox from error state',
     operationId: 'recoverSandbox',

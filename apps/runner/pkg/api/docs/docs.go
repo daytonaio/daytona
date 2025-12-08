@@ -490,7 +490,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/sandboxes/{sandboxId}/recover-expand-storage": {
+        "/sandboxes/{sandboxId}/recover/expand-storage": {
             "post": {
                 "description": "Recover sandbox from storage limit by expanding storage quota",
                 "produces": [

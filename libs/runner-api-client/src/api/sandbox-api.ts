@@ -260,7 +260,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       assertParamExists('recoverExpandStorage', 'sandboxId', sandboxId)
       // verify required parameter 'recovery' is not null or undefined
       assertParamExists('recoverExpandStorage', 'recovery', recovery)
-      const localVarPath = `/sandboxes/{sandboxId}/recover-expand-storage`.replace(
+      const localVarPath = `/sandboxes/{sandboxId}/recover/expand-storage`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
       )

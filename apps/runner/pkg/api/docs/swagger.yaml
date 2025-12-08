@@ -621,7 +621,7 @@ paths:
       summary: Update sandbox network settings
       tags:
         - sandbox
-  /sandboxes/{sandboxId}/recover-expand-storage:
+  /sandboxes/{sandboxId}/recover/expand-storage:
     post:
       description: Recover sandbox from storage limit by expanding storage quota
       operationId: RecoverExpandStorage

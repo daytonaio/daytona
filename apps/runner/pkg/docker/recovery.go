@@ -129,17 +129,19 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	newHostConfig := originalContainer.HostConfig
 	filesystem := d.getFilesystem(info)
 
-	if filesystem == "xfs" {
-		newStorageBytes := int64(newStorageQuota * 1024 * 1024 * 1024)
-		if newHostConfig.StorageOpt == nil {
-			newHostConfig.StorageOpt = make(map[string]string)
-		}
-		newHostConfig.StorageOpt["size"] = fmt.Sprintf("%d", newStorageBytes)
-		log.Infof("Setting storage to %d bytes (%.2fGB) on %s filesystem",
-			newStorageBytes, float64(newStorageBytes)/(1024*1024*1024), filesystem)
-	} else {
-		log.Warnf("Filesystem %s does not support storage-opt", filesystem)
+	if filesystem != "xfs" {
+		_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
+		common.ContainerOperationCount.WithLabelValues("recovery", string(common.PrometheusOperationStatusFailure)).Inc()
+		return fmt.Errorf("storage recovery requires XFS filesystem, current filesystem: %s", filesystem)
 	}
+
+	newStorageBytes := int64(newStorageQuota * 1024 * 1024 * 1024)
+	if newHostConfig.StorageOpt == nil {
+		newHostConfig.StorageOpt = make(map[string]string)
+	}
+	newHostConfig.StorageOpt["size"] = fmt.Sprintf("%d", newStorageBytes)
+	log.Infof("Setting storage to %d bytes (%.2fGB) on %s filesystem",
+		newStorageBytes, float64(newStorageBytes)/(1024*1024*1024), filesystem)
 
 	err = d.retryWithExponentialBackoff(
 		ctx,

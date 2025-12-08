@@ -391,7 +391,7 @@ type SandboxInfoResponse struct {
 //	@Failure		404			{object}	common_errors.ErrorResponse
 //	@Failure		409			{object}	common_errors.ErrorResponse
 //	@Failure		500			{object}	common_errors.ErrorResponse
-//	@Router			/sandboxes/{sandboxId}/recover-expand-storage [post]
+//	@Router			/sandboxes/{sandboxId}/recover/expand-storage [post]
 //
 //	@id				RecoverExpandStorage
 func RecoverExpandStorage(ctx *gin.Context) {
