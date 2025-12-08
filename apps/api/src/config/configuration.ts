@@ -254,8 +254,8 @@ const configuration = {
   sandboxOtel: {
     endpointUrl: process.env.SANDBOX_OTEL_ENDPOINT_URL,
   },
-  otelProxy: {
-    apiKey: process.env.OTEL_PROXY_API_KEY,
+  otelCollector: {
+    apiKey: process.env.OTEL_COLLECTOR_API_KEY,
   },
   encryption: {
     key: process.env.ENCRYPTION_KEY,

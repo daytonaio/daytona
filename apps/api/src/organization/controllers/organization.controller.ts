@@ -51,7 +51,7 @@ import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-d
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { OrGuard } from '../../auth/or.guard'
-import { OtelProxyGuard } from '../../auth/otel-proxy.guard'
+import { OtelCollectorGuard } from '../../auth/otel-collector.guard'
 import { OtelConfigDto } from '../dto/otel-config.dto'
 
 @ApiTags('organizations')
@@ -577,8 +577,8 @@ export class OrganizationController {
     description: 'Sandbox Auth Token',
     type: 'string',
   })
-  @RequiredApiRole([SystemRole.ADMIN, 'otel-proxy'])
-  @UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, OtelProxyGuard]))
+  @RequiredApiRole([SystemRole.ADMIN, 'otel-collector'])
+  @UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, OtelCollectorGuard]))
   async getOtelConfigBySandboxAuthToken(@Param('authToken') authToken: string): Promise<OtelConfigDto> {
     const otelConfigDto = await this.organizationService.getOtelConfigBySandboxAuthToken(authToken)
     if (!otelConfigDto) {

@@ -18,7 +18,7 @@ import { SystemRole } from '../user/enums/system-role.enum'
 import { SshGatewayContext } from '../common/interfaces/ssh-gateway-context.interface'
 import { RunnerContext } from '../common/interfaces/runner-context.interface'
 import { RunnerService } from '../sandbox/services/runner.service'
-import { OtelProxyContext } from '../common/interfaces/otel-proxy-context.interface'
+import { OtelCollectorContext } from '../common/interfaces/otel-collector-context.interface'
 
 type UserCache = {
   userId: string
@@ -47,7 +47,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
 
   async validate(
     token: string,
-  ): Promise<AuthContext | ProxyContext | SshGatewayContext | RunnerContext | OtelProxyContext> {
+  ): Promise<AuthContext | ProxyContext | SshGatewayContext | RunnerContext | OtelCollectorContext> {
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
 
@@ -65,10 +65,10 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       }
     }
 
-    const otelProxyApiKey = this.configService.get('otelProxy.apiKey')
-    if (otelProxyApiKey && otelProxyApiKey === token) {
+    const otelCollectorApiKey = this.configService.get('otelCollector.apiKey')
+    if (otelCollectorApiKey && otelCollectorApiKey === token) {
       return {
-        role: 'otel-proxy',
+        role: 'otel-collector',
       }
     }
 

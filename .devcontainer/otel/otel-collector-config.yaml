@@ -25,24 +25,19 @@ exporters:
     tls:
       insecure: true
 
-  otlp/otelproxy:
-    endpoint: api:8000
-    tls:
-      insecure: true
-
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/jaeger, otlp/otelproxy]
+      exporters: [otlp/jaeger]
 
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [prometheus, otlp/otelproxy]
+      exporters: [prometheus]
 
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, otlp/otelproxy]
+      exporters: [debug]

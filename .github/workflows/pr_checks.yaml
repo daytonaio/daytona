@@ -27,13 +27,13 @@ jobs:
         run: |
           go work sync
           git diff --exit-code -- 'go.work*' '*/go.mod' '*/go.sum' || (echo "Go workspace files are not up to date! Please run 'go work sync' and commit the changes." && exit 1)
-          
+
   golangci:
     name: Go lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, apps/otel-proxy]
+        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, apps/otel-collector/exporter]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

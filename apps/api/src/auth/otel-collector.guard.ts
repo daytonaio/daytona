@@ -5,15 +5,15 @@
 
 import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
 import { getAuthContext } from './get-auth-context'
-import { isOtelProxyContext } from '../common/interfaces/otel-proxy-context.interface'
+import { isOtelCollectorContext } from '../common/interfaces/otel-collector-context.interface'
 
 @Injectable()
-export class OtelProxyGuard implements CanActivate {
-  protected readonly logger = new Logger(OtelProxyGuard.name)
+export class OtelCollectorGuard implements CanActivate {
+  protected readonly logger = new Logger(OtelCollectorGuard.name)
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Throws if not proxy context
-    getAuthContext(context, isOtelProxyContext)
+    getAuthContext(context, isOtelCollectorContext)
     return true
   }
 }

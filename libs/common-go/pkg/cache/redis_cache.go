@@ -14,9 +14,9 @@ import (
 )
 
 type RedisConfig struct {
-	Host     *string `envconfig:"HOST"`
-	Port     *int    `envconfig:"PORT"`
-	Password *string `envconfig:"PASSWORD"`
+	Host     *string `envconfig:"HOST" mapstructure:"host"`
+	Port     *int    `envconfig:"PORT" mapstructure:"port"`
+	Password *string `envconfig:"PASSWORD" mapstructure:"password"`
 }
 
 type RedisCache[T any] struct {
