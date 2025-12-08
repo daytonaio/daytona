@@ -46,7 +46,6 @@ import {
   SquareUserRound,
   Sun,
   TextSearch,
-  TriangleAlertIcon,
   Users,
 } from 'lucide-react'
 import { useMemo } from 'react'
@@ -248,7 +247,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       <SidebarFooter>
         <SidebarMenu>
           {selectedOrganization?.suspended && (
-            <SidebarMenuItem key="suspended">
+            <SidebarMenuItem key="suspended" className="mb-3">
               <SuspensionBanner suspension={selectedOrganization} />
             </SidebarMenuItem>
           )}
@@ -360,7 +359,6 @@ function SetupRequiredBanner({ suspension }: { suspension: Suspension }) {
 
   const config = isPaymentMethodRequired
     ? {
-        icon: <CreditCard size={16} strokeWidth={1.5} />,
         title: 'Setup Required',
         description: 'Add a payment method to start creating sandboxes.',
         action: (
@@ -372,14 +370,12 @@ function SetupRequiredBanner({ suspension }: { suspension: Suspension }) {
         ),
       }
     : {
-        icon: <Mail size={16} strokeWidth={1.5} />,
         title: 'Verification Required',
         description: 'Please verify your email address to access all features.',
       }
 
   return (
     <Alert variant="info">
-      {config.icon}
       <AlertTitle> {config.title}</AlertTitle>
       <AlertDescription>
         {config.description}
@@ -401,7 +397,6 @@ function SuspensionBanner({ suspension }: { suspension: Suspension }) {
 
   return (
     <Alert variant="destructive">
-      <TriangleAlertIcon />
       <AlertTitle>Organization suspended</AlertTitle>
       <AlertDescription>
         {suspension.suspensionReason && (
