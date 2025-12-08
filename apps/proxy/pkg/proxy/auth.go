@@ -32,6 +32,7 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxId string) (err error, did
 	// Try auth key from header
 	authKey := ctx.Request.Header.Get(SANDBOX_AUTH_KEY_HEADER)
 	if authKey != "" {
+		ctx.Request.Header.Del(SANDBOX_AUTH_KEY_HEADER)
 		isValid, err := p.getSandboxAuthKeyValid(ctx, sandboxId, authKey)
 		if err != nil {
 			authErrors = append(authErrors, fmt.Sprintf("Auth key header validation error: %v", err))
