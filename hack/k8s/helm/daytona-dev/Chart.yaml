@@ -1,0 +1,10 @@
+apiVersion: v2
+name: daytona-dev
+description: A Helm chart for Daytona development environment services
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+
+
+

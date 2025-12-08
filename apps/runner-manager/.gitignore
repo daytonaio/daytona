@@ -1,0 +1,11 @@
+# Ignore any generated files or logs
+*.log
+
+# Build artifacts
+build/
+runner-manager
+
+
+
+
+

@@ -21,6 +21,7 @@ async function main() {
 
   console.log('Getting existing sandbox')
   const existingSandbox = await daytona.get(sandbox.id)
+  daytona.findOne(sandbox.id)
   console.log('Got existing sandbox')
 
   const response = await existingSandbox.process.executeCommand(

@@ -281,7 +281,7 @@ Admin user created with API key: ${value}
 
     try {
       const existingSnapshot = await this.snapshotService.getSnapshotByName(
-        this.configService.getOrThrow('defaultSnapshot'),
+        this.configService.getOrThrow('defaultSnapshot.name'),
         adminPersonalOrg.id,
       )
       if (existingSnapshot) {
@@ -291,13 +291,14 @@ Admin user created with API key: ${value}
       this.logger.log('Default snapshot not found, creating...')
     }
 
-    const defaultSnapshot = this.configService.getOrThrow('defaultSnapshot')
+    const defaultSnapshotName = this.configService.getOrThrow('defaultSnapshot.name')
+    const defaultSnapshotImageName = this.configService.getOrThrow('defaultSnapshot.imageName')
 
     await this.snapshotService.createFromPull(
       adminPersonalOrg,
       {
-        name: defaultSnapshot,
-        imageName: defaultSnapshot,
+        name: defaultSnapshotName,
+        imageName: defaultSnapshotImageName,
       },
       true,
     )

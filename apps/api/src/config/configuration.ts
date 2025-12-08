@@ -53,7 +53,10 @@ const configuration = {
     secure: process.env.SMTP_SECURE === 'true',
     from: process.env.SMTP_EMAIL_FROM || 'noreply@mail.daytona.io',
   },
-  defaultSnapshot: process.env.DEFAULT_SNAPSHOT,
+  defaultSnapshot: {
+    name: process.env.DEFAULT_SNAPSHOT_NAME,
+    imageName: process.env.DEFAULT_SNAPSHOT_IMAGE_NAME,
+  },
   dashboardUrl: process.env.DASHBOARD_URL,
   // Default to empty string - dashboard will then hit '/api'
   dashboardBaseApiUrl: process.env.DASHBOARD_BASE_API_URL || '',

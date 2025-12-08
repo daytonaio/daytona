@@ -1,0 +1,48 @@
+{{- if .Values.dex.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dex
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: dex
+spec:
+  replicas: {{ .Values.dex.replicas }}
+  selector:
+    matchLabels:
+      app: dex
+  template:
+    metadata:
+      labels:
+        app: dex
+    spec:
+      containers:
+        - name: dex
+          image: {{ .Values.dex.image }}
+          command: ['dex', 'serve', '/etc/dex/config.yaml']
+          ports:
+            - containerPort: {{ .Values.dex.service.port }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/dex
+      volumes:
+        - name: config
+          configMap:
+            name: dex-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dex
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: dex
+  ports:
+    - port: {{ .Values.dex.service.port }}
+      targetPort: {{ .Values.dex.service.port }}
+{{- end }}
+
+
+
+

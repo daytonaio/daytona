@@ -1,0 +1,16 @@
+# Telepresence Configuration for Daytona Runner Access
+# This config allows access to the runner DaemonSet on a specific node
+
+# Usage:
+# telepresence connect --namespace daytona-dev
+# telepresence intercept daytona-runner-headless --port 8080:8080 --env-file /tmp/runner-env.env
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telepresence-runner-config
+  namespace: daytona-dev
+data:
+  config: |
+    # This is a placeholder for telepresence configuration
+    # Actual intercept is done via CLI commands

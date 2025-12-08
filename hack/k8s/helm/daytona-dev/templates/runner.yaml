@@ -1,0 +1,563 @@
+{{- if .Values.runner.enabled }}
+---
+# ServiceAccount for the runner
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: daytona-runner
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: daytona-runner
+---
+# ConfigMap for non-sensitive configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: daytona-runner-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: daytona-runner
+data:
+  API_PORT: {{ .Values.runner.config.apiPort | quote }}
+  ENVIRONMENT: {{ .Values.runner.config.environment | quote }}
+  CONTAINER_RUNTIME: {{ .Values.runner.config.containerRuntime | quote }}
+  LOG_FILE_PATH: {{ .Values.runner.config.logFilePath | quote }}
+  LOG_LEVEL: {{ .Values.runner.config.logLevel | quote }}
+  SSH_GATEWAY_ENABLE: {{ .Values.runner.config.sshGatewayEnable | quote }}
+  SSH_GATEWAY_PORT: {{ .Values.runner.config.sshGatewayPort | quote }}
+  RESOURCE_LIMITS_DISABLED: {{ .Values.runner.config.resourceLimitsDisabled | quote }}
+  CACHE_RETENTION_DAYS: {{ .Values.runner.config.cacheRetentionDays | quote }}
+  DAEMON_START_TIMEOUT_SEC: {{ .Values.runner.config.daemonStartTimeoutSec | quote }}
+  SANDBOX_START_TIMEOUT_SEC: {{ .Values.runner.config.sandboxStartTimeoutSec | quote }}
+---
+# Secret for sensitive configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: daytona-runner-secrets
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: daytona-runner
+type: Opaque
+stringData:
+  SERVER_URL: {{ .Values.runner.secrets.serverUrl | quote }}
+  API_TOKEN: {{ .Values.runner.secrets.apiToken | quote }}
+  AWS_REGION: {{ .Values.runner.secrets.awsRegion | quote }}
+  AWS_ENDPOINT_URL: {{ .Values.runner.secrets.awsEndpointUrl | quote }}
+  AWS_ACCESS_KEY_ID: {{ .Values.runner.secrets.awsAccessKeyId | quote }}
+  AWS_SECRET_ACCESS_KEY: {{ .Values.runner.secrets.awsSecretAccessKey | quote }}
+  AWS_DEFAULT_BUCKET: {{ .Values.runner.secrets.awsDefaultBucket | quote }}
+  SSH_PUBLIC_KEY: {{ .Values.runner.secrets.sshPublicKey | quote }}
+---
+# DaemonSet for Daytona Runner
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daytona-runner
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: daytona-runner
+    component: runner
+spec:
+  selector:
+    matchLabels:
+      app: daytona-runner
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: daytona-runner
+        component: runner
+    spec:
+      nodeSelector:
+        {{- toYaml .Values.runner.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.runner.tolerations | nindent 8 }}
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccountName: daytona-runner
+      terminationGracePeriodSeconds: 30
+      {{- if .Values.runner.hostAliases }}
+      hostAliases:
+        {{- toYaml .Values.runner.hostAliases | nindent 8 }}
+      {{- end }}
+      containers:
+        {{- if .Values.runner.registryProxy.enabled }}
+        # Socat sidecar to forward registry -> external registry
+        - name: registry-proxy
+          image: {{ .Values.runner.registryProxy.image }}
+          args:
+            - "TCP-LISTEN:{{ .Values.runner.registryProxy.listenPort }},fork,reuseaddr"
+            - "TCP:{{ .Values.runner.registryProxy.targetHost }}:{{ .Values.runner.registryProxy.targetPort }}"
+          securityContext:
+            privileged: false
+        {{- end }}
+        {{- if .Values.runner.dockerInstaller.enabled }}
+        # Docker installer sidecar - installs Docker on the host node
+        - name: docker-installer
+          image: {{ .Values.runner.dockerInstaller.image }}
+          securityContext:
+            privileged: true
+          env:
+            - name: XFS_STORAGE_SIZE
+              value: {{ .Values.runner.dockerInstaller.xfsStorageSize | quote }}
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+              mountPropagation: Bidirectional
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Starting Docker and Sysbox installation on host node..."
+              echo "XFS Storage Size: ${XFS_STORAGE_SIZE}"
+              
+              # First, add registry host entry to host's /etc/hosts for Docker to resolve
+              echo "Adding registry host entry..."
+              nsenter -t 1 -m -u -n -i sh -c '
+                {{- range .Values.runner.hostAliases }}
+                if ! grep -q "{{ .ip }}.*{{ index .hostnames 0 }}" /etc/hosts; then
+                  echo "{{ .ip }} {{ range .hostnames }}{{ . }} {{ end }}" >> /etc/hosts
+                  echo "Added host entry: {{ .ip }} {{ range .hostnames }}{{ . }} {{ end }}"
+                else
+                  echo "Host entry already exists for {{ index .hostnames 0 }}"
+                fi
+                {{- end }}
+                cat /etc/hosts | grep -E "registry|minio" || true
+              '
+              
+              # Enter the host namespace and install Docker + Sysbox
+              nsenter -t 1 -m -u -n -i sh <<'EOF'
+              
+              # Set XFS storage size in host namespace (value injected at pod creation)
+              export XFS_STORAGE_SIZE="{{ .Values.runner.dockerInstaller.xfsStorageSize }}"
+              
+              # Function to install Docker and XFS tools
+              install_docker() {
+                if command -v docker >/dev/null 2>&1; then
+                  echo "Docker is already installed"
+                  docker version
+                  
+                  # Still check/install XFS tools even if Docker exists
+                  if ! command -v xfs_quota >/dev/null 2>&1; then
+                    echo "Installing XFS tools..."
+                    if command -v apt-get >/dev/null 2>&1; then
+                      apt-get update
+                      apt-get install -y xfsprogs
+                    elif command -v yum >/dev/null 2>&1; then
+                      yum install -y xfsprogs
+                    fi
+                  fi
+                  return 0
+                fi
+                
+                echo "Installing Docker and XFS tools..."
+                
+                if command -v apt-get >/dev/null 2>&1; then
+                  # Debian/Ubuntu based (most GKE nodes)
+                  apt-get update
+                  apt-get install -y docker.io curl gnupg apt-transport-https ca-certificates software-properties-common xfsprogs
+                  systemctl enable docker
+                elif command -v yum >/dev/null 2>&1; then
+                  # RHEL/CentOS based
+                  yum install -y docker curl xfsprogs
+                  systemctl enable docker
+                fi
+                
+                echo "Docker and XFS tools installation completed"
+                return 0
+              }
+              
+              # Function to install Sysbox
+              install_sysbox() {
+                if command -v sysbox >/dev/null 2>&1 || [ -f /usr/bin/sysbox-runc ]; then
+                  echo "Sysbox is already installed"
+                  return 0
+                fi
+                
+                echo "Installing Sysbox from GitHub releases..."
+                
+                if command -v apt-get >/dev/null 2>&1; then
+                  # Debian/Ubuntu based - install from GitHub
+                  . /etc/os-release
+                  
+                  # Determine architecture
+                  ARCH=$(uname -m)
+                  if [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "amd64" ]; then
+                    echo "Sysbox only supports x86_64 architecture"
+                    return 1
+                  fi
+                  
+                  # Download latest Sysbox release
+                  SYSBOX_VERSION="v0.6.4"
+                  echo "Downloading Sysbox ${SYSBOX_VERSION}..."
+                  
+                  cd /tmp
+                  
+                  # Download the deb package
+                  if curl -fsSLO "https://github.com/nestybox/sysbox/releases/download/${SYSBOX_VERSION}/sysbox-ce_0.6.4-0.linux_amd64.deb"; then
+                    echo "Downloaded Sysbox package successfully"
+                  else
+                    echo "Failed to download Sysbox, trying alternative download..."
+                    # Try without SSL verification as fallback
+                    curl -kLO "https://github.com/nestybox/sysbox/releases/download/${SYSBOX_VERSION}/sysbox-ce_0.6.4-0.linux_amd64.deb" || {
+                      echo "Failed to download Sysbox"
+                      return 1
+                    }
+                  fi
+                  
+                  # Stop Docker before installing Sysbox
+                  echo "Stopping Docker for Sysbox installation..."
+                  systemctl stop docker 2>/dev/null || true
+                  
+                  # Install dependencies
+                  apt-get update
+                  apt-get install -y jq fuse rsync
+                  
+                  # Install Sysbox
+                  echo "Installing Sysbox package..."
+                  dpkg -i sysbox-ce_0.6.4-0.linux_amd64.deb || {
+                    echo "Installing Sysbox dependencies..."
+                    apt-get install -f -y
+                    dpkg -i sysbox-ce_0.6.4-0.linux_amd64.deb
+                  }
+                  
+                  # Cleanup
+                  rm -f sysbox-ce_0.6.4-0.linux_amd64.deb
+                  
+                elif command -v yum >/dev/null 2>&1; then
+                  # RHEL/CentOS based - install from GitHub
+                  SYSBOX_VERSION="v0.6.4"
+                  echo "Downloading Sysbox ${SYSBOX_VERSION} for RPM..."
+                  
+                  cd /tmp
+                  curl -fsSLO "https://github.com/nestybox/sysbox/releases/download/${SYSBOX_VERSION}/sysbox-ce-0.6.4-0.linux_amd64-rpm.tar.gz"
+                  
+                  tar -xzf sysbox-ce-0.6.4-0.linux_amd64-rpm.tar.gz
+                  
+                  # Stop Docker before installing Sysbox
+                  systemctl stop docker 2>/dev/null || true
+                  
+                  # Install Sysbox
+                  yum install -y ./sysbox-ce/*.rpm
+                  
+                  # Cleanup
+                  rm -rf sysbox-ce-0.6.4-0.linux_amd64-rpm.tar.gz sysbox-ce/
+                fi
+                
+                echo "Sysbox installation completed"
+                return 0
+              }
+              
+              # Function to setup XFS for Docker storage with quota support
+              setup_xfs_storage() {
+                echo "Setting up XFS filesystem for Docker storage..."
+                
+                # Check current filesystem of /var/lib/docker
+                DOCKER_DIR="/var/lib/docker"
+                
+                # Check if already on XFS
+                if [ -d "$DOCKER_DIR" ]; then
+                  FS_TYPE=$(df -T "$DOCKER_DIR" | tail -1 | awk '{print $2}')
+                  echo "Current filesystem for $DOCKER_DIR: $FS_TYPE"
+                  
+                  if [ "$FS_TYPE" = "xfs" ]; then
+                    echo "✓ Already on XFS filesystem"
+                    
+                    # Check if quota is enabled
+                    if xfs_quota -x -c 'state' "$DOCKER_DIR" 2>/dev/null | grep -q "Project quota state on"; then
+                      echo "✓ XFS quotas already enabled"
+                      return 0
+                    else
+                      echo "⚠ XFS quotas not enabled, attempting to remount..."
+                      # Try to remount with quota options
+                      MOUNT_POINT=$(df "$DOCKER_DIR" | tail -1 | awk '{print $6}')
+                      mount -o remount,prjquota "$MOUNT_POINT" 2>/dev/null || echo "Could not enable quotas on existing mount"
+                    fi
+                    return 0
+                  fi
+                  
+                  echo "⚠ $DOCKER_DIR is on $FS_TYPE, not XFS"
+                  echo "Will attempt to migrate to XFS loopback..."
+                fi
+                
+                # Stop Docker before migration
+                systemctl stop docker 2>/dev/null || true
+                
+                # Backup existing Docker data if it exists
+                if [ -d "$DOCKER_DIR" ] && [ "$(ls -A $DOCKER_DIR)" ]; then
+                  echo "Backing up existing Docker data..."
+                  mv "$DOCKER_DIR" "${DOCKER_DIR}.backup.$(date +%s)"
+                fi
+                
+                # Create XFS loopback file for Docker storage
+                XFS_FILE="/var/lib/docker-xfs.img"
+                XFS_SIZE="${XFS_STORAGE_SIZE:-50G}"  # Default 50GB, can be configured
+                
+                if [ ! -f "$XFS_FILE" ]; then
+                  echo "Creating XFS storage file ($XFS_SIZE)..."
+                  # Create sparse file
+                  truncate -s "$XFS_SIZE" "$XFS_FILE"
+                  
+                  # Format as XFS with project quota support
+                  echo "Formatting XFS filesystem with quota support..."
+                  mkfs.xfs -f -n ftype=1 "$XFS_FILE"
+                fi
+                
+                # Create mount point
+                mkdir -p "$DOCKER_DIR"
+                
+                # Mount XFS with project quota enabled
+                echo "Mounting XFS filesystem..."
+                mount -o loop,prjquota "$XFS_FILE" "$DOCKER_DIR"
+                
+                # Add to fstab for persistence (if not already there)
+                if ! grep -q "$XFS_FILE" /etc/fstab; then
+                  echo "$XFS_FILE $DOCKER_DIR xfs loop,prjquota 0 0" >> /etc/fstab
+                fi
+                
+                # Initialize XFS quota
+                echo "Initializing XFS quota system..."
+                xfs_quota -x -c 'project -s -d 1' "$DOCKER_DIR" 2>/dev/null || true
+                
+                echo "✓ XFS storage setup completed"
+                return 0
+              }
+              
+              # Function to configure Docker to use Sysbox runtime
+              configure_docker_sysbox() {
+                echo "Configuring Docker to use Sysbox runtime..."
+                
+                mkdir -p /etc/docker
+                
+                # Create or update Docker daemon configuration
+                if [ -f /etc/docker/daemon.json ]; then
+                  # Backup existing config
+                  cp /etc/docker/daemon.json /etc/docker/daemon.json.bak
+                fi
+                
+                # Write Docker daemon config with Sysbox runtime
+                # Note: Not including storage-driver to avoid conflicts with GKE systemd flags
+                cat > /etc/docker/daemon.json << 'DOCKERCONFIG'
+              {
+                "runtimes": {
+                  "sysbox-runc": {
+                    "path": "/usr/bin/sysbox-runc"
+                  }
+                },
+                "default-runtime": "sysbox-runc",
+                "log-driver": "json-file",
+                "log-opts": {
+                  "max-size": "10m",
+                  "max-file": "3"
+                }
+              }
+              DOCKERCONFIG
+                
+                echo "Docker configuration updated"
+                return 0
+              }
+              
+              # Install Docker
+              install_docker
+              
+              # Setup XFS filesystem for Docker storage with quotas
+              setup_xfs_storage
+              
+              # Install Sysbox
+              install_sysbox
+              
+              # Configure Docker to use Sysbox
+              configure_docker_sysbox
+              
+              # Start Sysbox services
+              echo "Starting Sysbox services..."
+              systemctl enable sysbox 2>/dev/null || true
+              systemctl start sysbox 2>/dev/null || true
+              
+              # Start Docker
+              echo "Starting Docker with Sysbox runtime..."
+              systemctl start docker
+              
+              # Verify installation
+              echo "=== Verification ==="
+              echo "Docker version:"
+              docker version
+              echo ""
+              echo "Docker runtime:"
+              docker info | grep -i runtime || echo "Runtime info not available"
+              echo ""
+              echo "Sysbox status:"
+              systemctl status sysbox --no-pager -l || echo "Sysbox service status not available"
+              
+              EOF
+              
+              echo "Docker and Sysbox installer initialized. Monitoring services..."
+              
+              # Monitor and ensure Docker and Sysbox stay running
+              while true; do
+                nsenter -t 1 -m -u -n -i sh -c '
+                  # Check Sysbox
+                  if ! systemctl is-active --quiet sysbox 2>/dev/null; then
+                    echo "Sysbox service is down, restarting..."
+                    systemctl start sysbox 2>/dev/null || echo "Failed to start Sysbox"
+                  fi
+                  
+                  # Check Docker
+                  if ! systemctl is-active --quiet docker; then
+                    echo "Docker service is down, restarting..."
+                    systemctl start docker
+                  fi
+                ' || echo "Health check failed, will retry..."
+                sleep 60
+              done
+        {{- end }}
+        - name: runner
+          image: {{ .Values.runner.image }}
+          imagePullPolicy: {{ .Values.runner.imagePullPolicy }}
+          securityContext:
+            privileged: true
+          ports:
+            - name: api
+              containerPort: {{ .Values.runner.service.apiPort }}
+              hostPort: {{ .Values.runner.service.apiPort }}
+              protocol: TCP
+            - name: ssh-gateway
+              containerPort: {{ .Values.runner.service.sshGatewayPort }}
+              hostPort: {{ .Values.runner.service.sshGatewayPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: daytona-runner-config
+            - secretRef:
+                name: daytona-runner-secrets
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: DAEMON_BINARIES_DIR
+              value: "/var/lib/daytona/binaries"
+          volumeMounts:
+            {{- if eq .Values.runner.config.containerRuntime "docker" }}
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+            {{- else }}
+            - name: containerd-socket
+              mountPath: /run/containerd/containerd.sock
+            {{- end }}
+            - name: host-root
+              mountPath: /host
+              readOnly: true
+            - name: logs
+              mountPath: /home/daytona/runner
+            - name: ssh-keys
+              mountPath: /root/.ssh
+            - name: daemon-binaries
+              mountPath: /var/lib/daytona/binaries
+          resources:
+            {{- toYaml .Values.runner.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: api
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: api
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        {{- if eq .Values.runner.config.containerRuntime "docker" }}
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+        {{- else }}
+        - name: containerd-socket
+          hostPath:
+            path: /run/containerd/containerd.sock
+            type: Socket
+        {{- end }}
+        - name: host-root
+          hostPath:
+            path: /
+            type: Directory
+        - name: logs
+          hostPath:
+            path: /var/log/daytona-runner
+            type: DirectoryOrCreate
+        - name: ssh-keys
+          hostPath:
+            path: /etc/daytona/ssh
+            type: DirectoryOrCreate
+        - name: daemon-binaries
+          hostPath:
+            path: /var/lib/daytona/binaries
+            type: DirectoryOrCreate
+---
+# Headless Service for individual pod DNS discovery
+# Each pod gets: <pod-name>.daytona-runner-headless.<namespace>.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: daytona-runner-headless
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: daytona-runner
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless
+  selector:
+    app: daytona-runner
+  ports:
+    - name: api
+      port: {{ .Values.runner.service.apiPort }}
+      targetPort: {{ .Values.runner.service.apiPort }}
+      protocol: TCP
+    - name: ssh-gateway
+      port: {{ .Values.runner.service.sshGatewayPort }}
+      targetPort: {{ .Values.runner.service.sshGatewayPort }}
+      protocol: TCP
+---
+# LoadBalancer Service for external access (round-robin)
+apiVersion: v1
+kind: Service
+metadata:
+  name: daytona-runner
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: daytona-runner
+spec:
+  type: {{ .Values.runner.service.type }}
+  selector:
+    app: daytona-runner
+  ports:
+    - name: api
+      port: {{ .Values.runner.service.apiPort }}
+      targetPort: {{ .Values.runner.service.apiPort }}
+      protocol: TCP
+    - name: ssh-gateway
+      port: {{ .Values.runner.service.sshGatewayPort }}
+      targetPort: {{ .Values.runner.service.sshGatewayPort }}
+      protocol: TCP
+{{- end }}
+
+

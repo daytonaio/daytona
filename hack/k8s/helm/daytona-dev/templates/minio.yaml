@@ -1,0 +1,70 @@
+{{- if .Values.minio.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: minio
+spec:
+  replicas: {{ .Values.minio.replicas }}
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: {{ .Values.minio.image }}
+          args:
+            - server
+            - /data
+            - --console-address
+            - ":{{ .Values.minio.service.consolePort }}"
+          ports:
+            - containerPort: {{ .Values.minio.service.apiPort }}
+              name: api
+            - containerPort: {{ .Values.minio.service.consolePort }}
+              name: console
+          env:
+            - name: MINIO_ROOT_USER
+              value: {{ .Values.minio.env.MINIO_ROOT_USER | quote }}
+            - name: MINIO_ROOT_PASSWORD
+              value: {{ .Values.minio.env.MINIO_ROOT_PASSWORD | quote }}
+            - name: MINIO_IDENTITY_STS_EXPIRY
+              value: {{ .Values.minio.env.MINIO_IDENTITY_STS_EXPIRY | quote }}
+          {{- if .Values.minio.persistence.enabled }}
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+          {{- end }}
+      {{- if .Values.minio.persistence.enabled }}
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: minio-pvc
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: minio
+  ports:
+    - port: {{ .Values.minio.service.apiPort }}
+      targetPort: {{ .Values.minio.service.apiPort }}
+      name: api
+    - port: {{ .Values.minio.service.consolePort }}
+      targetPort: {{ .Values.minio.service.consolePort }}
+      name: console
+{{- end }}
+
+
+
+

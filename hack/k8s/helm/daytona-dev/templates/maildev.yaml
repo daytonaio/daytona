@@ -1,0 +1,47 @@
+{{- if .Values.maildev.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maildev
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: maildev
+spec:
+  replicas: {{ .Values.maildev.replicas }}
+  selector:
+    matchLabels:
+      app: maildev
+  template:
+    metadata:
+      labels:
+        app: maildev
+    spec:
+      containers:
+        - name: maildev
+          image: {{ .Values.maildev.image }}
+          ports:
+            - containerPort: {{ .Values.maildev.service.smtpPort }}
+              name: smtp
+            - containerPort: {{ .Values.maildev.service.webPort }}
+              name: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maildev
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: maildev
+  ports:
+    - port: {{ .Values.maildev.service.smtpPort }}
+      targetPort: {{ .Values.maildev.service.smtpPort }}
+      name: smtp
+    - port: {{ .Values.maildev.service.webPort }}
+      targetPort: {{ .Values.maildev.service.webPort }}
+      name: web
+{{- end }}
+
+
+
+

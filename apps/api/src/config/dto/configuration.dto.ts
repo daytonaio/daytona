@@ -245,7 +245,7 @@ export class ConfigurationDto {
     this.linkedAccountsEnabled = configService.get('oidc.managementApi.enabled')
     this.proxyTemplateUrl = configService.getOrThrow('proxy.templateUrl')
     this.proxyToolboxUrl = configService.getOrThrow('proxy.toolboxUrl')
-    this.defaultSnapshot = configService.getOrThrow('defaultSnapshot')
+    this.defaultSnapshot = configService.getOrThrow('defaultSnapshot.name')
     this.dashboardUrl = configService.getOrThrow('dashboardUrl')
     this.maxAutoArchiveInterval = configService.getOrThrow('maxAutoArchiveInterval')
     this.maintananceMode = configService.getOrThrow('maintananceMode')

@@ -1,0 +1,71 @@
+{{- if .Values.registry.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: registry
+spec:
+  replicas: {{ .Values.registry.replicas }}
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry
+          image: {{ .Values.registry.image }}
+          ports:
+            - containerPort: {{ .Values.registry.service.port }}
+          env:
+            {{- range $key, $value := .Values.registry.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- if .Values.registry.persistence.enabled }}
+          volumeMounts:
+            - name: registry-data
+              mountPath: /var/lib/registry
+          {{- end }}
+      {{- if .Values.registry.persistence.enabled }}
+      volumes:
+        - name: registry-data
+          persistentVolumeClaim:
+            claimName: registry-pvc
+      {{- end }}
+---
+# ClusterIP Service for internal access
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: registry
+  ports:
+    - port: {{ .Values.registry.service.port }}
+      targetPort: {{ .Values.registry.service.port }}
+---
+# LoadBalancer Service for external access (used by runner DaemonSet with hostNetwork)
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-external
+  namespace: {{ .Values.namespace }}
+spec:
+  type: LoadBalancer
+  selector:
+    app: registry
+  ports:
+    - port: {{ .Values.registry.service.port }}
+      targetPort: {{ .Values.registry.service.port }}
+{{- end }}
+
+
+
+

@@ -1,0 +1,106 @@
+{{- if .Values.dex.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dex-config
+  namespace: {{ .Values.namespace }}
+data:
+  config.yaml: |
+    issuer: http://dex:{{ .Values.dex.service.port }}/dex
+    storage:
+      type: memory
+    web:
+      http: 0.0.0.0:{{ .Values.dex.service.port }}
+      allowedOrigins: ['*']
+      allowedHeaders: ['x-requested-with']
+    staticClients:
+      - id: daytona
+        redirectURIs:
+          - 'http://localhost:3000'
+          - 'http://localhost:3000/api/oauth2-redirect.html'
+          - 'http://localhost:3009/callback'
+          - 'http://proxy.localhost:4000/callback'
+        name: 'Daytona'
+        public: true
+    enablePasswordDB: true
+    staticPasswords:
+      - email: 'dev@daytona.io'
+        hash: '$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W'
+        username: 'admin'
+        userID: '1234'
+{{- end }}
+---
+{{- if .Values.otelCollector.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: {{ .Values.namespace }}
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:{{ .Values.otelCollector.service.grpcPort }}
+          http:
+            endpoint: 0.0.0.0:{{ .Values.otelCollector.service.httpPort }}
+
+    processors:
+      batch:
+
+    exporters:
+      debug:
+        verbosity: detailed
+      prometheus:
+        endpoint: 0.0.0.0:{{ .Values.otelCollector.service.prometheusPort }}
+        namespace: otel
+      otlp/jaeger:
+        endpoint: jaeger:{{ .Values.jaeger.service.collectorGrpcPort }}
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp/jaeger]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [prometheus]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug]
+{{- end }}
+---
+{{- if .Values.pgadmin.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-config
+  namespace: {{ .Values.namespace }}
+data:
+  servers.json: |
+    {
+      "Servers": {
+        "1": {
+          "Name": "Daytona",
+          "Group": "Servers",
+          "Host": "db",
+          "Port": {{ .Values.db.service.port }},
+          "MaintenanceDB": "postgres",
+          "Username": "{{ .Values.db.env.POSTGRES_USER }}",
+          "PassFile": "/pgpass"
+        }
+      }
+    }
+  pgpass: |
+    db:{{ .Values.db.service.port }}:*:{{ .Values.db.env.POSTGRES_USER }}:{{ .Values.db.env.POSTGRES_PASSWORD }}
+{{- end }}
+
+
+
+

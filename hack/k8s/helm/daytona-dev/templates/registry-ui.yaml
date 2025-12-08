@@ -1,0 +1,45 @@
+{{- if .Values.registryUi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry-ui
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: registry-ui
+spec:
+  replicas: {{ .Values.registryUi.replicas }}
+  selector:
+    matchLabels:
+      app: registry-ui
+  template:
+    metadata:
+      labels:
+        app: registry-ui
+    spec:
+      containers:
+        - name: registry-ui
+          image: {{ .Values.registryUi.image }}
+          ports:
+            - containerPort: {{ .Values.registryUi.service.port }}
+          env:
+            {{- range $key, $value := .Values.registryUi.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-ui
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: registry-ui
+  ports:
+    - port: {{ .Values.registryUi.service.port }}
+      targetPort: {{ .Values.registryUi.service.port }}
+{{- end }}
+
+
+
+

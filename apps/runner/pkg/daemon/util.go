@@ -15,18 +15,24 @@ func WriteStaticBinary(name string) (string, error) {
 		return "", err
 	}
 
-	pwd, err := os.Getwd()
+	// Use the mounted binaries directory for Kubernetes/containerd deployments
+	// This ensures binaries are on the node filesystem for containerd to mount them into containers
+	binariesDir := os.Getenv("DAEMON_BINARIES_DIR")
+	if binariesDir == "" {
+		// Fallback for local development
+		pwd, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		binariesDir = filepath.Join(pwd, ".tmp", "binaries")
+	}
+
+	err = os.MkdirAll(binariesDir, 0755)
 	if err != nil {
 		return "", err
 	}
 
-	tmpBinariesDir := filepath.Join(pwd, ".tmp", "binaries")
-	err = os.MkdirAll(tmpBinariesDir, 0755)
-	if err != nil {
-		return "", err
-	}
-
-	daemonPath := filepath.Join(tmpBinariesDir, name)
+	daemonPath := filepath.Join(binariesDir, name)
 	_, err = os.Stat(daemonPath)
 	if err != nil && !os.IsNotExist(err) {
 		return "", err

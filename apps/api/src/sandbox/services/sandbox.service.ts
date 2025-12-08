@@ -318,7 +318,7 @@ export class SandboxService {
       let snapshotIdOrName = createSandboxDto.snapshot
 
       if (!createSandboxDto.snapshot?.trim()) {
-        snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot')
+        snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot.name')
       }
 
       const snapshotFilter: FindOptionsWhere<Snapshot>[] = [

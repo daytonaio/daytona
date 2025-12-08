@@ -1,0 +1,52 @@
+{{- if .Values.jaeger.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: jaeger
+spec:
+  replicas: {{ .Values.jaeger.replicas }}
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+    spec:
+      containers:
+        - name: jaeger
+          image: {{ .Values.jaeger.image }}
+          ports:
+            - containerPort: {{ .Values.jaeger.service.uiPort }}
+              name: ui
+            - containerPort: {{ .Values.jaeger.service.collectorGrpcPort }}
+              name: collector-grpc
+            - containerPort: {{ .Values.jaeger.service.collectorHttpPort }}
+              name: collector-http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: jaeger
+  ports:
+    - port: {{ .Values.jaeger.service.uiPort }}
+      targetPort: {{ .Values.jaeger.service.uiPort }}
+      name: ui
+    - port: {{ .Values.jaeger.service.collectorGrpcPort }}
+      targetPort: {{ .Values.jaeger.service.collectorGrpcPort }}
+      name: collector-grpc
+    - port: {{ .Values.jaeger.service.collectorHttpPort }}
+      targetPort: {{ .Values.jaeger.service.collectorHttpPort }}
+      name: collector-http
+{{- end }}
+
+
+
+

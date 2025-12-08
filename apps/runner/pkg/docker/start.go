@@ -6,19 +6,16 @@ package docker
 import (
 	"context"
 	"errors"
-	"fmt"
-	"net"
-	"net/url"
+	"slices"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/strslice"
 
 	log "github.com/sirupsen/logrus"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
@@ -72,13 +69,18 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		return errors.New("sandbox IP not found? Is the sandbox started?")
 	}
 
-	processesCtx := context.Background()
-	go func() {
-		if err := d.startDaytonaDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
-			log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
-		}
-	}()
+	if !slices.Equal(c.Config.Entrypoint, strslice.StrSlice{common.DAEMON_PATH}) {
+		processesCtx := context.Background()
+		go func() {
+			if err := d.startDaytonaDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
+				log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
+			}
+		}()
+	}
 
+	// If daemon is the sandbox entrypoint (common.DAEMON_PATH), it is started as part of the sandbox;
+	// Otherwise, the daemon is started separately above.
+	// In either case, we wait for it here.
 	err = d.waitForDaemonRunning(ctx, containerIP)
 	if err != nil {
 		return err
@@ -122,36 +124,6 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 			if c.State.Running {
 				return nil
 			}
-		}
-	}
-}
-
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string) error {
-	defer timer.Timer()()
-
-	// Build the target URL
-	targetURL := fmt.Sprintf("http://%s:2280/version", containerIP)
-	target, err := url.Parse(targetURL)
-	if err != nil {
-		return common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
-	}
-
-	timeout := time.Duration(d.daemonStartTimeoutSec) * time.Second
-	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	for {
-		select {
-		case <-timeoutCtx.Done():
-			return fmt.Errorf("timeout waiting for daemon to start")
-		default:
-			conn, err := net.DialTimeout("tcp", target.Host, 1*time.Second)
-			if err != nil {
-				time.Sleep(5 * time.Millisecond)
-				continue
-			}
-			conn.Close()
-			return nil
 		}
 	}
 }

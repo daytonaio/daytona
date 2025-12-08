@@ -1,0 +1,59 @@
+{{- if .Values.otelCollector.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: otel-collector
+spec:
+  replicas: {{ .Values.otelCollector.replicas }}
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: {{ .Values.otelCollector.image }}
+          ports:
+            - containerPort: {{ .Values.otelCollector.service.grpcPort }}
+              name: grpc
+            - containerPort: {{ .Values.otelCollector.service.httpPort }}
+              name: http
+            - containerPort: {{ .Values.otelCollector.service.prometheusPort }}
+              name: prometheus
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otelcol-contrib
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - port: {{ .Values.otelCollector.service.grpcPort }}
+      targetPort: {{ .Values.otelCollector.service.grpcPort }}
+      name: grpc
+    - port: {{ .Values.otelCollector.service.httpPort }}
+      targetPort: {{ .Values.otelCollector.service.httpPort }}
+      name: http
+    - port: {{ .Values.otelCollector.service.prometheusPort }}
+      targetPort: {{ .Values.otelCollector.service.prometheusPort }}
+      name: prometheus
+{{- end }}
+
+
+
+

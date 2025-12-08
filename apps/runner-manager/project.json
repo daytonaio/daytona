@@ -1,0 +1,71 @@
+{
+  "name": "runner-manager",
+  "$schema": "../../runner_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/runner-manager",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/runner-manager/main.go",
+        "outputPath": "dist/apps/runner-manager"
+      },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/runner-manager/internal.Version=$VERSION'\""]
+        }
+      }
+    },
+    "build-amd64": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/runner-manager/main.go",
+        "outputPath": "dist/apps/runner-manager-amd64",
+        "env": {
+          "GOARCH": "amd64",
+          "GOOS": "linux"
+        }
+      },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/runner-manager/internal.Version=$VERSION'\""]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "main": "{projectRoot}/cmd/runner-manager/main.go"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,json}\""
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "runner-manager"
+      },
+      "dependsOn": ["check-version-env"]
+    },
+    "push-manifest": {}
+  }
+}
+
+
+
+
+

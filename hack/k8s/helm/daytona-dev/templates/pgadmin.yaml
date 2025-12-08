@@ -1,0 +1,73 @@
+{{- if .Values.pgadmin.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: pgadmin
+spec:
+  replicas: {{ .Values.pgadmin.replicas }}
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      securityContext:
+        runAsUser: 0
+      initContainers:
+        - name: init-pgpass
+          image: busybox
+          command: ['sh', '-c', 'cp /config/pgpass /pgdata/pgpass && chmod 600 /pgdata/pgpass && cp /config/servers.json /pgdata/servers.json']
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: pgdata
+              mountPath: /pgdata
+      containers:
+        - name: pgadmin
+          image: {{ .Values.pgadmin.image }}
+          ports:
+            - containerPort: {{ .Values.pgadmin.service.port }}
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: {{ .Values.pgadmin.env.PGADMIN_DEFAULT_EMAIL | quote }}
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: {{ .Values.pgadmin.env.PGADMIN_DEFAULT_PASSWORD | quote }}
+            - name: PGADMIN_CONFIG_SERVER_MODE
+              value: {{ .Values.pgadmin.env.PGADMIN_CONFIG_SERVER_MODE | quote }}
+            - name: PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED
+              value: {{ .Values.pgadmin.env.PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED | quote }}
+          volumeMounts:
+            - name: pgdata
+              mountPath: /pgadmin4/servers.json
+              subPath: servers.json
+            - name: pgdata
+              mountPath: /pgpass
+              subPath: pgpass
+      volumes:
+        - name: config
+          configMap:
+            name: pgadmin-config
+        - name: pgdata
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: pgadmin
+  ports:
+    - port: {{ .Values.pgadmin.service.port }}
+      targetPort: {{ .Values.pgadmin.service.port }}
+{{- end }}
+
+
+
+

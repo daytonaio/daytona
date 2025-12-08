@@ -1,0 +1,45 @@
+{{- if .Values.sshGateway.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssh-gateway
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ssh-gateway
+spec:
+  replicas: {{ .Values.sshGateway.replicas }}
+  selector:
+    matchLabels:
+      app: ssh-gateway
+  template:
+    metadata:
+      labels:
+        app: ssh-gateway
+    spec:
+      containers:
+        - name: ssh-gateway
+          image: {{ if .Values.imageRegistry }}{{ .Values.imageRegistry }}/{{ end }}{{ .Values.sshGateway.image }}
+          imagePullPolicy: {{ .Values.sshGateway.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.sshGateway.service.port }}
+          env:
+            {{- range $key, $value := .Values.sshGateway.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssh-gateway
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: ssh-gateway
+  ports:
+    - port: {{ .Values.sshGateway.service.port }}
+      targetPort: {{ .Values.sshGateway.service.port }}
+{{- end }}
+
+
+

@@ -1,0 +1,37 @@
+# Telepresence configuration for Daytona development
+# This allows running services locally while connected to the Kubernetes cluster network
+
+# Global telepresence configuration
+timeouts:
+  agentInstall: 2m
+  intercept: 30s
+  proxyDial: 30s
+  trafficManagerConnect: 60s
+  trafficManagerAPI: 15s
+
+# Cluster configuration
+cluster:
+  # Default context (will use current kubectl context)
+  # context: ""
+  # Namespace where telepresence traffic manager runs
+  mappedNamespaces:
+    - daytona-dev
+
+# Intercept configuration
+intercepts:
+  defaultPort: 0
+  
+# DNS configuration  
+dns:
+  excludeSuffixes: []
+  includeSuffixes:
+    - .cluster.local
+  lookupTimeout: 8s
+
+# Routing configuration
+routing:
+  alsoProxySubnets: []
+  neverProxySubnets: []
+
+
+

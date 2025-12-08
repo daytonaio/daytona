@@ -20,8 +20,8 @@ RUN /bin/bash -c 'apt update && export DEBIAN_FRONTEND=noninteractive \
     && wget https://s3.amazonaws.com/mountpoint-s3-release/1.20.0/${MOUNT_S3_ARCH}/mount-s3-1.20.0-${MOUNT_S3_ARCH}.deb \
     && apt install -y ./mount-s3-1.20.0-${MOUNT_S3_ARCH}.deb \
     && rm -f mount-s3-1.20.0-${MOUNT_S3_ARCH}.deb'
-# Telepresence
-RUN curl -fL https://app.getambassador.io/download/tel2oss/releases/download/v2.17.0/telepresence-linux-${TARGETARCH} -o /usr/local/bin/telepresence && \
+# Telepresence (for local k8s development and debugging)
+RUN curl -fL https://app.getambassador.io/download/tel2oss/releases/download/v2.21.1/telepresence-linux-${TARGETARCH} -o /usr/local/bin/telepresence && \
     chmod a+x /usr/local/bin/telepresence
 
 RUN echo "address=/proxy.localhost/127.0.0.1" >> /etc/dnsmasq.conf
