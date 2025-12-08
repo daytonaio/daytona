@@ -25,6 +25,7 @@ type Config struct {
 	Redis                 *RedisConfig `envconfig:"REDIS"`
 	ToolboxOnlyMode       bool         `envconfig:"TOOLBOX_ONLY_MODE"`
 	PreviewWarningEnabled bool         `envconfig:"PREVIEW_WARNING_ENABLED"`
+	ShutdownTimeoutSec    int          `envconfig:"SHUTDOWN_TIMEOUT_SEC"`
 }
 
 type OidcConfig struct {
@@ -72,6 +73,10 @@ func GetConfig() (*Config, error) {
 
 	if config.ProxyPort == 0 {
 		config.ProxyPort = DEFAULT_PROXY_PORT
+	}
+
+	if config.ShutdownTimeoutSec == 0 {
+		config.ShutdownTimeoutSec = 60 * 60 // default to 1 hour
 	}
 
 	if config.Redis != nil {
