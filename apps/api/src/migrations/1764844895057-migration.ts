@@ -83,6 +83,11 @@ export class Migration1764844895057 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "regionType"`)
     await queryRunner.query(`DROP TYPE "public"."region_regiontype_enum"`)
 
+    // remove infrastructure admin role
+    await queryRunner.query(
+      `DELETE FROM "organization_role" WHERE "id" = '${GlobalOrganizationRolesIds.INFRASTRUCTURE_ADMIN}'`,
+    )
+
     // revert api key permission enum
     await queryRunner.query(
       `CREATE TYPE "public"."api_key_permissions_enum_old" AS ENUM('delete:registries', 'delete:sandboxes', 'delete:snapshots', 'delete:volumes', 'read:audit_logs', 'read:volumes', 'write:registries', 'write:sandboxes', 'write:snapshots', 'write:volumes')`,
@@ -103,11 +108,6 @@ export class Migration1764844895057 implements MigrationInterface {
     await queryRunner.query(`DROP TYPE "public"."organization_role_permissions_enum"`)
     await queryRunner.query(
       `ALTER TYPE "public"."organization_role_permissions_enum_old" RENAME TO "organization_role_permissions_enum"`,
-    )
-
-    // remove infrastructure admin role
-    await queryRunner.query(
-      `DELETE FROM "organization_role" WHERE "id" = '${GlobalOrganizationRolesIds.INFRASTRUCTURE_ADMIN}'`,
     )
 
     // drop runner name field
