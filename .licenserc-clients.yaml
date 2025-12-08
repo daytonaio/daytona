@@ -22,6 +22,7 @@ header:
     - 'libs/runner-api-client/**'
     - 'libs/api-client-go/**'
     - 'libs/api-client-python/**'
+    - 'libs/api-client-ruby/**'
     - 'libs/api-client-python-async/**'
     - 'apps/docs/**'
     - 'libs/computer-use/**'

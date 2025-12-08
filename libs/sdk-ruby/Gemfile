@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
+
+# Specify your gem's dependencies in daytona-sdk.gemspec
+gemspec
+
+gem 'pry', '~> 0.15'
+gem 'rake', '~> 13.0'
+gem 'rubocop', '~> 1.21'
+gem 'rubocop-rake', '~> 0.7'
+gem 'solargraph', '~> 0.57'
+gem 'webmock', '~> 3.25'
+
+gem 'daytona_api_client', path: '../api-client-ruby'
