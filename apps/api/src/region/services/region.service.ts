@@ -32,7 +32,7 @@ export class RegionService {
 
   /**
    * @param createRegionDto - The region details.
-   * @param organizationId - The ID of the organization, or null for shared regions.
+   * @param organizationId - The ID of the organization, or null for regions not associated with an organization.
    * @throws {BadRequestException} If the region name is invalid.
    * @throws {ConflictException} If the region with the same ID already exists or region with the same name already exists in the organization.
    */
