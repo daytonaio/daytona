@@ -42,7 +42,7 @@ func main() {
 				log.Info("Received shutdown, initiating graceful shutdown (press Ctrl+C again to force)")
 				cancel()
 				lastSignalTime = time.Now()
-			} else if time.Since(lastSignalTime) < time.Millisecond {
+			} else if time.Since(lastSignalTime) < 100*time.Millisecond {
 				// If started as a subprocess, the app might receive multiple signals in quick succession instead of one
 				// Debounce very closely spaced signals
 				log.Info("Received second signal, but within debounce period, ignoring")
