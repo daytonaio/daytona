@@ -164,6 +164,7 @@ const configuration = {
   runnerUsage: {
     declarativeBuildScoreThreshold: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),
     availabilityScoreThreshold: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '10', 10),
+    startScoreThreshold: parseInt(process.env.RUNNER_START_SCORE_THRESHOLD || '3', 10),
     cpuUsageWeight: parseFloat(process.env.RUNNER_CPU_USAGE_WEIGHT || '0.25'),
     memoryUsageWeight: parseFloat(process.env.RUNNER_MEMORY_USAGE_WEIGHT || '0.4'),
     diskUsageWeight: parseFloat(process.env.RUNNER_DISK_USAGE_WEIGHT || '0.4'),
