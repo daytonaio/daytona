@@ -93,7 +93,7 @@ const OrganizationSettings: React.FC = () => {
         <h1 className="text-2xl font-medium">General Settings</h1>
       </div>
 
-      <div className="flex flex-col gap-6 mt-4">
+      <div className="flex flex-col gap-6">
         <Card>
           <CardHeader className="p-4">
             <CardTitle>Organization Details</CardTitle>
