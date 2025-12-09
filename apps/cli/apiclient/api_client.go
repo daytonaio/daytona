@@ -5,16 +5,50 @@ package apiclient
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
 	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/auth"
 	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal"
+
+	log "github.com/sirupsen/logrus"
 )
+
+type versionCheckTransport struct {
+	transport http.RoundTripper
+}
+
+func (t *versionCheckTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	resp, err := t.transport.RoundTrip(req)
+	if resp != nil {
+		// Check version mismatch on all responses, not just errors
+		checkVersionsMismatch(resp)
+	}
+	return resp, err
+}
 
 var apiClient *apiclient.APIClient
 
 const DaytonaSourceHeader = "X-Daytona-Source"
+const API_VERSION_HEADER = "X-Daytona-Api-Version"
+
+func checkVersionsMismatch(res *http.Response) {
+	serverVersion := res.Header.Get(API_VERSION_HEADER)
+	if serverVersion == "" {
+		return
+	}
+
+	// Trim "v" prefix from both versions for comparison
+	cliVersion := strings.TrimPrefix(internal.Version, "v")
+	apiVersion := strings.TrimPrefix(serverVersion, "v")
+
+	if cliVersion != "0.0.0-dev" && cliVersion != apiVersion {
+		log.Warn(fmt.Sprintf("Version mismatch: Daytona CLI is on v%s and API is on v%s.\nMake sure the versions are aligned using 'brew upgrade daytonaio/cli/daytona' or by downloading the latest version from https://github.com/daytonaio/daytona/releases.", cliVersion, apiVersion))
+	}
+}
 
 func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*apiclient.APIClient, error) {
 	c, err := config.GetConfig()
@@ -72,7 +106,9 @@ func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*a
 	newApiClient = apiclient.NewAPIClient(clientConfig)
 
 	newApiClient.GetConfig().HTTPClient = &http.Client{
-		Transport: http.DefaultTransport,
+		Transport: &versionCheckTransport{
+			transport: http.DefaultTransport,
+		},
 	}
 
 	if apiClient != nil && activeProfile.Api.Key == nil {
