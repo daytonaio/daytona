@@ -6,10 +6,12 @@ package docker
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/strslice"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/system"
@@ -75,7 +77,11 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 		if len(sandboxDto.Entrypoint) != 0 {
 			cmd = append(cmd, sandboxDto.Entrypoint...)
 		} else {
-			cmd = append(cmd, image.Config.Entrypoint...)
+			if slices.Equal(image.Config.Entrypoint, strslice.StrSlice{"/usr/local/bin/daytona"}) {
+				cmd = append(cmd, image.Config.Cmd...)
+			} else {
+				cmd = append(cmd, image.Config.Entrypoint...)
+			}
 		}
 	}
 
