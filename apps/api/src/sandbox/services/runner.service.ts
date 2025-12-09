@@ -253,10 +253,10 @@ export class RunnerService {
       )
     }
 
-    const sandboxes = await this.sandboxRepository.find({
+    const sandboxCount = await this.sandboxRepository.count({
       where: { runnerId: id, state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED])) },
     })
-    if (sandboxes.length > 0) {
+    if (sandboxCount > 0) {
       throw new HttpException(
         'Cannot delete runner which has sandboxes associated with it',
         HttpStatus.PRECONDITION_REQUIRED,

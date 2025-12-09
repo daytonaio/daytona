@@ -154,13 +154,13 @@ export class RegionService {
       throw new NotFoundException('Region not found')
     }
 
-    const runners = await this.runnerRepository.find({
+    const runnerCount = await this.runnerRepository.count({
       where: {
         region: id,
       },
     })
 
-    if (runners.length > 0) {
+    if (runnerCount > 0) {
       throw new HttpException(
         'Cannot delete region which has runners associated with it',
         HttpStatus.PRECONDITION_REQUIRED,
