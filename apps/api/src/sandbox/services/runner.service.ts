@@ -8,6 +8,7 @@ import {
   ConflictException,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -21,7 +22,7 @@ import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { OnEvent } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -38,6 +39,8 @@ import * as crypto from 'crypto'
 import { RUNNER_NAME_REGEX } from '../constants/runner-name-regex.constant'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RunnerDto } from '../dto/runner.dto'
+import { RunnerEvents } from '../constants/runner-events'
+import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
 
 @Injectable()
 export class RunnerService {
@@ -54,6 +57,8 @@ export class RunnerService {
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
     private readonly regionService: RegionService,
+    @Inject(EventEmitter2)
+    private eventEmitter: EventEmitter2,
   ) {}
 
   private generateRunnerToken(): string {
@@ -286,9 +291,12 @@ export class RunnerService {
       return
     }
 
-    runner.state = newState
-    runner.lastChecked = new Date()
-    await this.runnerRepository.save(runner)
+    await this.runnerRepository.update(runnerId, {
+      state: newState,
+      lastChecked: new Date(),
+    })
+
+    this.eventEmitter.emit(RunnerEvents.STATE_UPDATED, new RunnerStateUpdatedEvent(runner, runner.state, newState))
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
@@ -401,24 +409,29 @@ export class RunnerService {
       return
     }
 
+    const updateData: Partial<Runner> = {
+      state: RunnerState.READY,
+      lastChecked: new Date(),
+    }
+
     const metrics = runnerInfo?.metrics
 
     if (metrics && typeof metrics.currentCpuUsagePercentage !== 'undefined') {
-      runner.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
-      runner.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
-      runner.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
-      runner.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
-      runner.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
-      runner.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
-      runner.currentSnapshotCount = metrics.currentSnapshotCount || 0
+      updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
+      updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
+      updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
+      updateData.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
+      updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
+      updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
+      updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
 
-      runner.availabilityScore = this.calculateAvailabilityScore(runnerId, {
-        cpuUsage: runner.currentCpuUsagePercentage,
-        memoryUsage: runner.currentMemoryUsagePercentage,
-        diskUsage: runner.currentDiskUsagePercentage,
-        allocatedCpu: runner.currentAllocatedCpu,
-        allocatedMemoryGiB: runner.currentAllocatedMemoryGiB,
-        allocatedDiskGiB: runner.currentAllocatedDiskGiB,
+      updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
+        cpuUsage: updateData.currentCpuUsagePercentage,
+        memoryUsage: updateData.currentMemoryUsagePercentage,
+        diskUsage: updateData.currentDiskUsagePercentage,
+        allocatedCpu: updateData.currentAllocatedCpu,
+        allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
+        allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
         runnerCpu: runner.cpu,
         runnerMemoryGiB: runner.memoryGiB,
         runnerDiskGiB: runner.diskGiB,
@@ -427,10 +440,12 @@ export class RunnerService {
       this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
     }
 
-    runner.state = RunnerState.READY
-    runner.lastChecked = new Date()
+    await this.runnerRepository.update(runnerId, updateData)
 
-    await this.runnerRepository.save(runner)
+    this.eventEmitter.emit(
+      RunnerEvents.STATE_UPDATED,
+      new RunnerStateUpdatedEvent(runner, runner.state, updateData.state),
+    )
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {

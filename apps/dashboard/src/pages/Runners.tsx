@@ -56,7 +56,7 @@ const Runners: React.FC = () => {
         setLoadingRunnersData(true)
       }
       try {
-        const response = (await runnersApi.listRunners(undefined, selectedOrganization.id)).data
+        const response = (await runnersApi.listRunners(selectedOrganization.id)).data
         setRunners(response || [])
       } catch (error) {
         handleApiError(error, 'Failed to fetch runners')
@@ -83,7 +83,16 @@ const Runners: React.FC = () => {
       if (!runners.some((r) => r.id === data.runner.id)) {
         setRunners((prev) => [data.runner, ...prev])
       } else {
-        setRunners((prev) => prev.map((r) => (r.id === data.runner.id ? data.runner : r)))
+        setRunners((prev) =>
+          prev.map((r) =>
+            r.id === data.runner.id
+              ? {
+                  ...r,
+                  state: data.newState,
+                }
+              : r,
+          ),
+        )
       }
     }
 
