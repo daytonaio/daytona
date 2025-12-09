@@ -243,6 +243,13 @@ export class Sandbox {
     }
   }
 
+  public applyDesiredDestroyedState(): void {
+    this.pending = true
+    this.desiredState = SandboxDesiredState.DESTROYED
+    this.backupState = BackupState.NONE
+    this.name = 'DESTROYED_' + this.name + '_' + Date.now()
+  }
+
   @BeforeUpdate()
   updateLastActivityAt() {
     this.lastActivityAt = new Date()

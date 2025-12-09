@@ -111,11 +111,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.pending = true
                 //  if auto-delete interval is 0, delete the sandbox immediately
                 if (sandbox.autoDeleteInterval === 0) {
-                  sandbox.desiredState = SandboxDesiredState.DESTROYED
+                  sandbox.applyDesiredDestroyedState()
                 } else {
+                  sandbox.pending = true
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
@@ -228,8 +228,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.pending = true
-                sandbox.desiredState = SandboxDesiredState.DESTROYED
+                sandbox.applyDesiredDestroyedState()
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
                 this.syncInstanceState(sandbox.id)
               } catch (error) {

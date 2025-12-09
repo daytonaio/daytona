@@ -1023,10 +1023,7 @@ export class SandboxService {
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
     }
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.DESTROYED
-    sandbox.backupState = BackupState.NONE
-    sandbox.name = 'DESTROYED_' + sandbox.name + '_' + Date.now()
+    sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
