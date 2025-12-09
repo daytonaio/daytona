@@ -113,32 +113,6 @@ export class OrganizationRegionController {
     return RegionDto.fromRegion(region)
   }
 
-  @Get('/by-name/:name')
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get region by name',
-    operationId: 'getRegionByName',
-  })
-  @ApiResponse({
-    status: 200,
-    type: RegionDto,
-  })
-  @ApiParam({
-    name: 'name',
-    description: 'Region name',
-    type: String,
-  })
-  async getRegionByName(
-    @AuthContext() authContext: OrganizationAuthContext,
-    @Param('name') name: string,
-  ): Promise<RegionDto> {
-    const region = await this.regionService.findOneByName(name, authContext.organizationId)
-    if (!region) {
-      throw new NotFoundException('Region not found')
-    }
-    return RegionDto.fromRegion(region)
-  }
-
   @Get(':id')
   @HttpCode(200)
   @ApiOperation({

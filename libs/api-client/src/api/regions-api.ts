@@ -181,51 +181,6 @@ export const RegionsApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Get region by name
-     * @param {string} name Region name
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRegionByName: async (
-      name: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'name' is not null or undefined
-      assertParamExists('getRegionByName', 'name', name)
-      const localVarPath = `/regions/by-name/{name}`.replace(`{${'name'}}`, encodeURIComponent(String(name)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
      * @summary List all regions
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -353,31 +308,6 @@ export const RegionsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get region by name
-     * @param {string} name Region name
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getRegionByName(
-      name: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Region>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionByName(name, xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RegionsApi.getRegionByName']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
      * @summary List all regions
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -450,23 +380,6 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
-     * @summary Get region by name
-     * @param {string} name Region name
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRegionByName(
-      name: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Region> {
-      return localVarFp
-        .getRegionByName(name, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
      * @summary List all regions
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -527,21 +440,6 @@ export class RegionsApi extends BaseAPI {
   public getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return RegionsApiFp(this.configuration)
       .getRegionById(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   *
-   * @summary Get region by name
-   * @param {string} name Region name
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RegionsApi
-   */
-  public getRegionByName(name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return RegionsApiFp(this.configuration)
-      .getRegionByName(name, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

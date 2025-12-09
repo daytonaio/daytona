@@ -1639,7 +1639,6 @@ class RunnersApi:
     @validate_call
     async def list_runners(
         self,
-        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region name")] = None,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1657,8 +1656,6 @@ class RunnersApi:
         """List all runners
 
 
-        :param region: Filter runners by region name
-        :type region: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1684,7 +1681,6 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
-            region=region,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1709,7 +1705,6 @@ class RunnersApi:
     @validate_call
     async def list_runners_with_http_info(
         self,
-        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region name")] = None,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1727,8 +1722,6 @@ class RunnersApi:
         """List all runners
 
 
-        :param region: Filter runners by region name
-        :type region: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1754,7 +1747,6 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
-            region=region,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1779,7 +1771,6 @@ class RunnersApi:
     @validate_call
     async def list_runners_without_preload_content(
         self,
-        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region name")] = None,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1797,8 +1788,6 @@ class RunnersApi:
         """List all runners
 
 
-        :param region: Filter runners by region name
-        :type region: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1824,7 +1813,6 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
-            region=region,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1844,7 +1832,6 @@ class RunnersApi:
 
     def _list_runners_serialize(
         self,
-        region,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -1868,10 +1855,6 @@ class RunnersApi:
 
         # process the path parameters
         # process the query parameters
-        if region is not None:
-            
-            _query_params.append(('region', region))
-            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id

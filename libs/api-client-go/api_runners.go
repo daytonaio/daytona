@@ -768,14 +768,7 @@ func (a *RunnersAPIService) GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunner
 type RunnersAPIListRunnersRequest struct {
 	ctx                    context.Context
 	ApiService             RunnersAPI
-	region                 *string
 	xDaytonaOrganizationID *string
-}
-
-// Filter runners by region name
-func (r RunnersAPIListRunnersRequest) Region(region string) RunnersAPIListRunnersRequest {
-	r.region = &region
-	return r
 }
 
 // Use with JWT to specify the organization ID
@@ -823,9 +816,6 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.region != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "region", r.region, "form", "")
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

@@ -303,16 +303,11 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary List all runners
-     * @param {string} [region] Filter runners by region name
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listRunners: async (
-      region?: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
+    listRunners: async (xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       const localVarPath = `/runners`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -330,10 +325,6 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
-
-      if (region !== undefined) {
-        localVarQueryParameter['region'] = region
-      }
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -551,17 +542,15 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary List all runners
-     * @param {string} [region] Filter runners by region name
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async listRunners(
-      region?: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Runner>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(region, xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['RunnersApi.listRunners']?.[localVarOperationServerIndex]?.url
@@ -683,17 +672,12 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary List all runners
-     * @param {string} [region] Filter runners by region name
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listRunners(
-      region?: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<Runner>> {
-      return localVarFp.listRunners(region, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
+    listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Runner>> {
+      return localVarFp.listRunners(xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
     },
     /**
      *
@@ -811,15 +795,14 @@ export class RunnersApi extends BaseAPI {
   /**
    *
    * @summary List all runners
-   * @param {string} [region] Filter runners by region name
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof RunnersApi
    */
-  public listRunners(region?: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
-      .listRunners(region, xDaytonaOrganizationID, options)
+      .listRunners(xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -156,35 +156,11 @@ export class RunnerController {
     status: 200,
     type: [RunnerDto],
   })
-  @ApiQuery({
-    name: 'region',
-    description: 'Filter runners by region name',
-    type: String,
-    required: false,
-  })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
-  async findAll(
-    @AuthContext() authContext: OrganizationAuthContext,
-    @Query('region') regionName?: string,
-  ): Promise<RunnerDto[]> {
-    if (!regionName) {
-      return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
-    }
-
-    // validate that the region is a custom region owned by the organization
-    const region = await this.regionService.findOneByName(regionName, authContext.organizationId)
-
-    if (!region) {
-      throw new NotFoundException('Region not found')
-    }
-
-    if (region.regionType !== RegionType.CUSTOM) {
-      throw new ForbiddenException('Runners can only be listed in custom regions')
-    }
-
-    return this.runnerService.findAllByRegion(region.id)
+  async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
+    return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
   }
 
   @Get(':id')

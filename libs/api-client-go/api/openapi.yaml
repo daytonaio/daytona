@@ -1142,42 +1142,6 @@ paths:
       summary: Create a new region
       tags:
         - regions
-  /regions/by-name/{name}:
-    get:
-      operationId: getRegionByName
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-        - description: Region name
-          explode: false
-          in: path
-          name: name
-          required: true
-          schema:
-            type: string
-          style: simple
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Region'
-          description: ''
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Get region by name
-      tags:
-        - regions
   /regions/{id}:
     delete:
       operationId: deleteRegion
@@ -2539,14 +2503,6 @@ paths:
     get:
       operationId: listRunners
       parameters:
-        - description: Filter runners by region name
-          explode: true
-          in: query
-          name: region
-          required: false
-          schema:
-            type: string
-          style: form
         - description: Use with JWT to specify the organization ID
           explode: false
           in: header
