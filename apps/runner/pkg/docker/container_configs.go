@@ -71,7 +71,12 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 		}
 
 		entrypoint = []string{"/usr/local/bin/daytona"}
-		cmd = append(cmd, sandboxDto.Entrypoint...)
+
+		if len(sandboxDto.Entrypoint) != 0 {
+			cmd = append(cmd, sandboxDto.Entrypoint...)
+		} else {
+			cmd = append(cmd, image.Config.Entrypoint...)
+		}
 	}
 
 	return &container.Config{
