@@ -70,8 +70,6 @@ func getStateLabel(state apiclient.SnapshotState) string {
 		return common.CreatingStyle.Render("PENDING")
 	case apiclient.SNAPSHOTSTATE_PULLING:
 		return common.CreatingStyle.Render("PULLING SNAPSHOT")
-	case apiclient.SNAPSHOTSTATE_VALIDATING:
-		return common.CreatingStyle.Render("VALIDATING")
 	case apiclient.SNAPSHOTSTATE_ACTIVE:
 		return common.StartedStyle.Render("ACTIVE")
 	case apiclient.SNAPSHOTSTATE_ERROR:

@@ -144,13 +144,9 @@ class AsyncSnapshotService:
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 
-        if params.skip_validation is not None:
-            create_snapshot_req.skip_validation = params.skip_validation
-
         created_snapshot = await self.__snapshots_api.create_snapshot(create_snapshot_req)
 
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
-        log_terminal_states = [*terminal_states, SnapshotState.PENDING_VALIDATION, SnapshotState.VALIDATING]
 
         async def start_log_streaming():
             _, url, *_ = self.__snapshots_api._get_snapshot_build_logs_serialize(  # pylint: disable=protected-access
@@ -165,7 +161,7 @@ class AsyncSnapshotService:
 
             async def should_terminate():
                 latest_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
-                return latest_snapshot.state in log_terminal_states
+                return latest_snapshot.state in terminal_states
 
             await process_streaming_response(
                 url=url,

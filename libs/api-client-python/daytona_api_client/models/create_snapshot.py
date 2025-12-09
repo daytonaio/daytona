@@ -37,9 +37,8 @@ class CreateSnapshot(BaseModel):
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
-    skip_validation: Optional[StrictBool] = Field(default=None, description="Whether to skip validation for the snapshot", alias="skipValidation")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk", "buildInfo", "skipValidation"]
+    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk", "buildInfo"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -110,8 +109,7 @@ class CreateSnapshot(BaseModel):
             "gpu": obj.get("gpu"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
-            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-            "skipValidation": obj.get("skipValidation")
+            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

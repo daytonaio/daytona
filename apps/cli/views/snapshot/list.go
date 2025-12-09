@@ -110,10 +110,9 @@ func getStateSortPriorities(state1, state2 apiclient.SnapshotState) (int, int) {
 
 // snapshots that have actions being performed on them have a higher priority when listing
 var snapshotListStatePriorities = map[apiclient.SnapshotState]int{
-	apiclient.SNAPSHOTSTATE_PENDING:    1,
-	apiclient.SNAPSHOTSTATE_PULLING:    1,
-	apiclient.SNAPSHOTSTATE_VALIDATING: 1,
-	apiclient.SNAPSHOTSTATE_ERROR:      2,
-	apiclient.SNAPSHOTSTATE_ACTIVE:     3,
-	apiclient.SNAPSHOTSTATE_REMOVING:   4,
+	apiclient.SNAPSHOTSTATE_PENDING:  1,
+	apiclient.SNAPSHOTSTATE_PULLING:  1,
+	apiclient.SNAPSHOTSTATE_ERROR:    2,
+	apiclient.SNAPSHOTSTATE_ACTIVE:   3,
+	apiclient.SNAPSHOTSTATE_REMOVING: 4,
 }
