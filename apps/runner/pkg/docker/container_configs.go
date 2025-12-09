@@ -16,7 +16,10 @@ import (
 )
 
 func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
-	containerConfig := d.getContainerCreateConfig(sandboxDto)
+	containerConfig, err := d.getContainerCreateConfig(ctx, sandboxDto)
+	if err != nil {
+		return nil, nil, nil, err
+	}
 
 	hostConfig, err := d.getContainerHostConfig(ctx, sandboxDto, volumeMountPathBinds)
 	if err != nil {
@@ -27,7 +30,7 @@ func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.C
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
-func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO) *container.Config {
+func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (*container.Config, error) {
 	envVars := []string{
 		"DAYTONA_SANDBOX_ID=" + sandboxDto.Id,
 		"DAYTONA_SANDBOX_SNAPSHOT=" + sandboxDto.Snapshot,
@@ -48,16 +51,40 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 		}
 	}
 
+	workingDir := ""
+	cmd := []string{}
+	entrypoint := sandboxDto.Entrypoint
+	if !d.useSnapshotEntrypoint {
+		// Inspect image
+		image, err := d.apiClient.ImageInspect(ctx, sandboxDto.Snapshot)
+		if err != nil {
+			return nil, err
+		}
+
+		if image.Config.WorkingDir != "" {
+			workingDir = image.Config.WorkingDir
+		}
+
+		// If workingDir is empty, append flag env var to envVars
+		if workingDir == "" {
+			envVars = append(envVars, "DAYTONA_USER_HOME_AS_WORKDIR=true")
+		}
+
+		entrypoint = []string{"/usr/local/bin/daytona"}
+		cmd = append(cmd, sandboxDto.Entrypoint...)
+	}
+
 	return &container.Config{
-		Hostname: sandboxDto.Id,
-		Image:    sandboxDto.Snapshot,
-		// User:         sandboxDto.OsUser,
+		Hostname:     sandboxDto.Id,
+		Image:        sandboxDto.Snapshot,
+		WorkingDir:   workingDir,
 		Env:          envVars,
-		Entrypoint:   sandboxDto.Entrypoint,
+		Entrypoint:   entrypoint,
+		Cmd:          cmd,
 		Labels:       labels,
 		AttachStdout: true,
 		AttachStderr: true,
-	}
+	}, nil
 }
 
 func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
