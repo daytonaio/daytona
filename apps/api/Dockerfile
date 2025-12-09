@@ -1,7 +1,7 @@
 FROM node:22-alpine AS daytona
 
 # Install nodejs
-RUN apk --update add --no-cache nodejs=22.16.0-r2 npm bash curl
+RUN apk --update add --no-cache bash curl
 RUN npm install -g corepack && corepack enable
 
 WORKDIR /daytona
