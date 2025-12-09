@@ -9,13 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/daytonaio/daytona/cli/internal"
-
-	log "github.com/sirupsen/logrus"
 )
-
-const API_VERSION_HEADER = "X-Daytona-Api-Version"
 
 type ApiErrorResponse struct {
 	Error   string `json:"error"`
@@ -39,8 +33,6 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 	if err != nil {
 		return err
 	}
-
-	checkVersionsMismatch(res)
 
 	errMessage := string(errResponse.Error)
 	if errMessage == "" {
@@ -66,14 +58,4 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 	}
 
 	return errors.New(errMessage)
-}
-
-func checkVersionsMismatch(res *http.Response) {
-	serverVersion := res.Header.Get(API_VERSION_HEADER)
-	if serverVersion == "" {
-		return
-	}
-	if internal.Version != "v0.0.0-dev" && internal.Version != serverVersion {
-		log.Warn(fmt.Sprintf("Version mismatch detected. Daytona CLI is on version %s and API is on version %s. To ensure maximum compatibility, please make sure the versions are aligned.", internal.Version, serverVersion))
-	}
 }
