@@ -61,18 +61,7 @@ export class OrganizationRegionController {
     type: [RegionDto],
   })
   async listRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
-    const customRegions = await this.regionService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
-
-    const dedicatedRegions = await this.regionService.findAllByRegionType(RegionType.DEDICATED)
-    const regionQuotas = await this.organizationService.getRegionQuotas(authContext.organizationId)
-    const availableDedicatedRegions = dedicatedRegions.filter((region) =>
-      regionQuotas.some((quota) => quota.regionId === region.id),
-    )
-
-    const sharedRegions = await this.regionService.findAllByRegionType(RegionType.SHARED)
-
-    const regions = [...customRegions, ...availableDedicatedRegions, ...sharedRegions]
-    return regions.map(RegionDto.fromRegion)
+    return this.organizationService.listRegions(authContext.organizationId)
   }
 
   @Post()

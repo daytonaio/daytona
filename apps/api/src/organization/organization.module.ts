@@ -27,6 +27,7 @@ import { OrganizationUsageService } from './services/organization-usage.service'
 import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
 import { OrganizationRegionController } from './controllers/region.controller'
+import { Region } from '../region/entities/region.entity'
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { OrganizationRegionController } from './controllers/region.controller'
       Volume,
       SnapshotRunner,
       RegionQuota,
+      Region,
     ]),
   ],
   controllers: [

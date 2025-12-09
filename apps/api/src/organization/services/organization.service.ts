@@ -49,6 +49,7 @@ import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { RegionDto } from '../../region/dto/region.dto'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -69,6 +70,8 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly redisLockProvider: RedisLockProvider,
     @InjectRepository(RegionQuota)
     private readonly regionQuotaRepository: Repository<RegionQuota>,
+    @InjectRepository(Region)
+    private readonly regionRepository: Repository<Region>,
     private readonly regionService: RegionService,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
@@ -204,6 +207,36 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       return null
     }
     return this.getRegionQuota(sandbox.organizationId, sandbox.region)
+  }
+
+  async listRegions(organizationId: string): Promise<RegionDto[]> {
+    const regions = await this.regionRepository
+      .createQueryBuilder('region')
+      .where('region."regionType" = :customType AND region."organizationId" = :organizationId', {
+        customType: RegionType.CUSTOM,
+        organizationId,
+      })
+      .orWhere(
+        'region."regionType" = :dedicatedType AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
+        {
+          dedicatedType: RegionType.DEDICATED,
+          organizationId,
+        },
+      )
+      .orWhere('region."regionType" = :sharedType', {
+        sharedType: RegionType.SHARED,
+      })
+      .orderBy(
+        `CASE region."regionType" 
+          WHEN '${RegionType.CUSTOM}' THEN 1 
+          WHEN '${RegionType.DEDICATED}' THEN 2 
+          WHEN '${RegionType.SHARED}' THEN 3 
+          ELSE 4 
+        END`,
+      )
+      .getMany()
+
+    return regions.map(RegionDto.fromRegion)
   }
 
   async suspend(
