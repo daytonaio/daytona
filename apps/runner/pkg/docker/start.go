@@ -69,7 +69,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		return errors.New("sandbox IP not found? Is the sandbox started?")
 	}
 
-	if !slices.Equal(c.Config.Entrypoint, strslice.StrSlice{"/usr/local/bin/daytona"}) {
+	if !slices.Equal(c.Config.Entrypoint, strslice.StrSlice{common.DAEMON_PATH}) {
 		processesCtx := context.Background()
 		go func() {
 			if err := d.startDaytonaDaemon(processesCtx, containerId, c.Config.WorkingDir); err != nil {
@@ -78,7 +78,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		}()
 	}
 
-	// If daemon is the sandbox entrypoint ("/usr/local/bin/daytona"), it is started as part of the sandbox;
+	// If daemon is the sandbox entrypoint (common.DAEMON_PATH), it is started as part of the sandbox;
 	// Otherwise, the daemon is started separately above.
 	// In either case, we wait for it here.
 	err = d.waitForDaemonRunning(ctx, containerIP)
