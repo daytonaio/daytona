@@ -12,6 +12,7 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/common-go/pkg/timer"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/docker/docker/api/types/container"
 )
 
@@ -24,7 +25,7 @@ func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId strin
 	}
 
 	execOptions := container.ExecOptions{
-		Cmd:          []string{"/usr/local/bin/daytona"},
+		Cmd:          []string{common.DAEMON_PATH},
 		AttachStdout: true,
 		AttachStderr: true,
 		WorkingDir:   workDir,

@@ -6,10 +6,13 @@ package docker
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/strslice"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/system"
@@ -70,12 +73,16 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 			envVars = append(envVars, "DAYTONA_USER_HOME_AS_WORKDIR=true")
 		}
 
-		entrypoint = []string{"/usr/local/bin/daytona"}
+		entrypoint = []string{common.DAEMON_PATH}
 
 		if len(sandboxDto.Entrypoint) != 0 {
 			cmd = append(cmd, sandboxDto.Entrypoint...)
 		} else {
-			cmd = append(cmd, image.Config.Entrypoint...)
+			if slices.Equal(image.Config.Entrypoint, strslice.StrSlice{common.DAEMON_PATH}) {
+				cmd = append(cmd, image.Config.Cmd...)
+			} else {
+				cmd = append(cmd, image.Config.Entrypoint...)
+			}
 		}
 	}
 
@@ -95,7 +102,7 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
 	var binds []string
 
-	binds = append(binds, fmt.Sprintf("%s:/usr/local/bin/daytona:ro", d.daemonPath))
+	binds = append(binds, fmt.Sprintf("%s:%s:ro", d.daemonPath, common.DAEMON_PATH))
 
 	// Mount the plugin if available
 	if d.computerUsePluginPath != "" {
