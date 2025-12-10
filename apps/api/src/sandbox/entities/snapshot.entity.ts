@@ -71,9 +71,6 @@ export class Snapshot {
   @Column({ default: false })
   hideFromUsers: boolean
 
-  @Column({ default: false })
-  skipValidation: boolean
-
   @OneToMany(() => SnapshotRunner, (runner) => runner.snapshotRef)
   runners: SnapshotRunner[]
 

@@ -40,7 +40,6 @@ type SnapshotDto struct {
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
 	// Build information for the snapshot
 	BuildInfo            *BuildInfo `json:"buildInfo,omitempty"`
-	SkipValidation       bool       `json:"skipValidation"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -50,7 +49,7 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime, skipValidation bool) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
@@ -66,7 +65,6 @@ func NewSnapshotDto(id string, general bool, name string, state SnapshotState, s
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	this.LastUsedAt = lastUsedAt
-	this.SkipValidation = skipValidation
 	return &this
 }
 
@@ -518,30 +516,6 @@ func (o *SnapshotDto) SetBuildInfo(v BuildInfo) {
 	o.BuildInfo = &v
 }
 
-// GetSkipValidation returns the SkipValidation field value
-func (o *SnapshotDto) GetSkipValidation() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.SkipValidation
-}
-
-// GetSkipValidationOk returns a tuple with the SkipValidation field value
-// and a boolean to check if the value has been set.
-func (o *SnapshotDto) GetSkipValidationOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.SkipValidation, true
-}
-
-// SetSkipValidation sets field value
-func (o *SnapshotDto) SetSkipValidation(v bool) {
-	o.SkipValidation = v
-}
-
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -577,7 +551,6 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
-	toSerialize["skipValidation"] = o.SkipValidation
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -605,7 +578,6 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		"createdAt",
 		"updatedAt",
 		"lastUsedAt",
-		"skipValidation",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -652,7 +624,6 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "lastUsedAt")
 		delete(additionalProperties, "buildInfo")
-		delete(additionalProperties, "skipValidation")
 		o.AdditionalProperties = additionalProperties
 	}
 
