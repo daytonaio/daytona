@@ -8773,6 +8773,7 @@ components:
             volumeId: volume123
             subpath: users/alice
         cpu: 2
+        recoverable: true
         env:
           NODE_ENV: production
         gpu: 0
@@ -8783,7 +8784,6 @@ components:
         target: local
         disk: 10
         name: MySandbox
-        isRecoverable: true
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -8870,8 +8870,8 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
-        isRecoverable:
-          description: Whether the sandbox error is recoverable. Computed from errorReason.
+        recoverable:
+          description: Whether the sandbox error is recoverable.
           example: true
           type: boolean
         backupState:
@@ -8975,6 +8975,7 @@ components:
                 volumeId: volume123
                 subpath: users/alice
             cpu: 2
+            recoverable: true
             env:
               NODE_ENV: production
             gpu: 0
@@ -8985,7 +8986,6 @@ components:
             target: local
             disk: 10
             name: MySandbox
-            isRecoverable: true
             backupState: None
             user: daytona
             autoArchiveInterval: 10080
@@ -9013,6 +9013,7 @@ components:
                 volumeId: volume123
                 subpath: users/alice
             cpu: 2
+            recoverable: true
             env:
               NODE_ENV: production
             gpu: 0
@@ -9023,7 +9024,6 @@ components:
             target: local
             disk: 10
             name: MySandbox
-            isRecoverable: true
             backupState: None
             user: daytona
             autoArchiveInterval: 10080
@@ -11275,6 +11275,7 @@ components:
             volumeId: volume123
             subpath: users/alice
         cpu: 2
+        recoverable: true
         env:
           NODE_ENV: production
         snapshotCreatedAt: 2024-10-01T12:00:00Z
@@ -11286,7 +11287,6 @@ components:
         target: local
         disk: 10
         name: MySandbox
-        isRecoverable: true
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -11373,8 +11373,8 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
-        isRecoverable:
-          description: Whether the sandbox error is recoverable. Computed from errorReason.
+        recoverable:
+          description: Whether the sandbox error is recoverable.
           example: true
           type: boolean
         backupState:

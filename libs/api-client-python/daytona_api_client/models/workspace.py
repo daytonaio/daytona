@@ -50,7 +50,7 @@ class Workspace(BaseModel):
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
     desired_state: Optional[SandboxDesiredState] = Field(default=None, description="The desired state of the sandbox", alias="desiredState")
     error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the sandbox", alias="errorReason")
-    is_recoverable: Optional[StrictBool] = Field(default=None, description="Whether the sandbox error is recoverable. Computed from errorReason.", alias="isRecoverable")
+    recoverable: Optional[StrictBool] = Field(default=None, description="Whether the sandbox error is recoverable.")
     backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", alias="backupState")
     backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt")
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
@@ -67,7 +67,7 @@ class Workspace(BaseModel):
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "isRecoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "image", "snapshotState", "snapshotCreatedAt", "info"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -188,7 +188,7 @@ class Workspace(BaseModel):
             "state": obj.get("state"),
             "desiredState": obj.get("desiredState"),
             "errorReason": obj.get("errorReason"),
-            "isRecoverable": obj.get("isRecoverable"),
+            "recoverable": obj.get("recoverable"),
             "backupState": obj.get("backupState"),
             "backupCreatedAt": obj.get("backupCreatedAt"),
             "autoStopInterval": obj.get("autoStopInterval"),
