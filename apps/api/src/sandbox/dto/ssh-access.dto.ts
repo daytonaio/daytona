@@ -72,12 +72,17 @@ export class SshAccessDto {
         host = hostPart
         port = portPart || '22'
       }
-    } catch (e) {
+    } catch {
       // Fallback: treat as host only
       host = sshGatewayUrl
       port = '22'
     }
-    dto.sshCommand = `ssh -p ${port} ${sshAccess.token}@${host}`
+
+    if (port === '22') {
+      dto.sshCommand = `ssh ${sshAccess.token}@${host}`
+    } else {
+      dto.sshCommand = `ssh -p ${port} ${sshAccess.token}@${host}`
+    }
 
     return dto
   }
