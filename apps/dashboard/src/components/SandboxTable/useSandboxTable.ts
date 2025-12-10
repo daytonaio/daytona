@@ -50,6 +50,7 @@ interface UseSandboxTableProps {
   onFiltersChange: (filters: SandboxFilters) => void
   regionsData: Region[]
   handleRecover: (id: string) => void
+  getRegionName: (regionId: string) => string | undefined
 }
 
 export function useSandboxTable({
@@ -74,6 +75,7 @@ export function useSandboxTable({
   onFiltersChange,
   regionsData,
   handleRecover,
+  getRegionName,
 }: UseSandboxTableProps) {
   // Column visibility state management with persistence
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
@@ -118,6 +120,7 @@ export function useSandboxTable({
         handleCreateSshAccess,
         handleRevokeSshAccess,
         handleRecover,
+        getRegionName,
       }),
     [
       handleStart,
@@ -132,6 +135,7 @@ export function useSandboxTable({
       handleCreateSshAccess,
       handleRevokeSshAccess,
       handleRecover,
+      getRegionName,
     ],
   )
 

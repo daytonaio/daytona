@@ -160,6 +160,7 @@ const configuration = {
     gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
     class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
     version: process.env.DEFAULT_RUNNER_VERSION || '0',
+    name: process.env.DEFAULT_RUNNER_NAME || 'default',
   },
   runnerUsage: {
     declarativeBuildScoreThreshold: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),

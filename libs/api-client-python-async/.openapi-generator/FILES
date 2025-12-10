@@ -45,7 +45,9 @@ daytona_api_client_async/models/create_organization.py
 daytona_api_client_async/models/create_organization_invitation.py
 daytona_api_client_async/models/create_organization_quota.py
 daytona_api_client_async/models/create_organization_role.py
+daytona_api_client_async/models/create_region.py
 daytona_api_client_async/models/create_runner.py
+daytona_api_client_async/models/create_runner_response.py
 daytona_api_client_async/models/create_sandbox.py
 daytona_api_client_async/models/create_session_request.py
 daytona_api_client_async/models/create_snapshot.py
@@ -122,11 +124,13 @@ daytona_api_client_async/models/rate_limit_entry.py
 daytona_api_client_async/models/region.py
 daytona_api_client_async/models/region_quota.py
 daytona_api_client_async/models/region_screenshot_response.py
+daytona_api_client_async/models/region_type.py
 daytona_api_client_async/models/region_usage_overview.py
 daytona_api_client_async/models/registry_push_access_dto.py
 daytona_api_client_async/models/replace_request.py
 daytona_api_client_async/models/replace_result.py
 daytona_api_client_async/models/runner.py
+daytona_api_client_async/models/runner_full.py
 daytona_api_client_async/models/runner_snapshot_dto.py
 daytona_api_client_async/models/runner_state.py
 daytona_api_client_async/models/sandbox.py

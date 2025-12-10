@@ -28,7 +28,7 @@ import { useCopyToClipboard } from 'usehooks-ts'
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { sharedRegions, loadingRegions, getRegionName } = useRegions()
+  const { getRegionName, sharedRegions: regions, loadingRegions } = useRegions()
 
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()
@@ -147,13 +147,14 @@ const OrganizationSettings: React.FC = () => {
                   readOnly
                   className="flex-1 uppercase"
                 />
-              ) : (
+              ) : authenticatedUserOrganizationMember !== null &&
+                authenticatedUserOrganizationMember.role === OrganizationUserRoleEnum.OWNER ? (
                 <div className="flex sm:justify-end">
                   <Button onClick={() => setSetDefaultRegionDialog(true)} variant="secondary">
                     Set Region
                   </Button>
                 </div>
-              )}
+              ) : null}
             </Field>
           </CardContent>
         </Card>
@@ -191,7 +192,7 @@ const OrganizationSettings: React.FC = () => {
         <SetDefaultRegionDialog
           open={showSetDefaultRegionDialog}
           onOpenChange={setSetDefaultRegionDialog}
-          regions={sharedRegions}
+          regions={regions}
           loadingRegions={loadingRegions}
           onSetDefaultRegion={handleSetDefaultRegion}
         />

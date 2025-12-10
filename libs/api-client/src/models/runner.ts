@@ -50,12 +50,6 @@ export interface Runner {
    */
   proxyUrl: string
   /**
-   * The API key for the runner
-   * @type {string}
-   * @memberof Runner
-   */
-  apiKey: string
-  /**
    * The CPU capacity of the runner
    * @type {number}
    * @memberof Runner
@@ -151,6 +145,12 @@ export interface Runner {
    * @memberof Runner
    */
   region: string
+  /**
+   * The name of the runner
+   * @type {string}
+   * @memberof Runner
+   */
+  name: string
   /**
    * The state of the runner
    * @type {RunnerState}
