@@ -1199,7 +1199,8 @@ export class SandboxService {
 
     const region = await this.regionService.findOne(sandbox.region, true)
 
-    return region.toolboxProxyUrl + '/toolbox' || this.configService.getOrThrow('proxy.toolboxUrl')
+    const baseUrl = region.toolboxProxyUrl ?? this.configService.getOrThrow('proxy.toolboxUrl')
+    return baseUrl + '/toolbox'
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, regionIdOrName?: string): Promise<string> {
