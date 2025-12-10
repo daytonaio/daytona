@@ -213,19 +213,22 @@ func TestSearchFiles_MissingParameters(t *testing.T) {
 	router.GET("/files/search", SearchFiles)
 
 	// Test missing path
-	req, _ := http.NewRequest("GET", "/files/search?pattern=*.txt", nil)
+	req, err := http.NewRequest("GET", "/files/search?pattern=*.txt", nil)
+	require.NoError(t, err)
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, req)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 
 	// Test missing pattern
-	req, _ = http.NewRequest("GET", "/files/search?path=/tmp", nil)
+	req, err = http.NewRequest("GET", "/files/search?path=/tmp", nil)
+	require.NoError(t, err)
 	recorder = httptest.NewRecorder()
 	router.ServeHTTP(recorder, req)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 
 	// Test both missing
-	req, _ = http.NewRequest("GET", "/files/search", nil)
+	req, err = http.NewRequest("GET", "/files/search", nil)
+	require.NoError(t, err)
 	recorder = httptest.NewRecorder()
 	router.ServeHTTP(recorder, req)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
