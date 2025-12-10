@@ -410,7 +410,7 @@ func Recover(ctx *gin.Context) {
 
 	// Deduce recovery type from error reason
 	recoveryType := common.DeduceRecoveryType(recoverDto.ErrorReason)
-	if recoveryType == "" {
+	if recoveryType == models.UnknownRecoveryType {
 		ctx.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("unable to deduce recovery type from error reason: %s", recoverDto.ErrorReason)))
 		return
 	}

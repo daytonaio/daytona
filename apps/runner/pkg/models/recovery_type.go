@@ -8,4 +8,5 @@ type RecoveryType string
 
 const (
 	RecoveryTypeStorageExpansion RecoveryType = "storage-expansion"
+	UnknownRecoveryType          RecoveryType = ""
 )

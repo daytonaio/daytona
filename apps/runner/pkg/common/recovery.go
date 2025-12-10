@@ -24,10 +24,10 @@ var recoverableErrorPatterns = map[models.RecoveryType][]string{
 }
 
 // DeduceRecoveryType determines if an error reason indicates a recoverable error
-// and returns the appropriate recovery type, or empty string if not recoverable
+// and returns the appropriate recovery type, or UnknownRecoveryType if not recoverable
 func DeduceRecoveryType(errorReason string) models.RecoveryType {
 	if errorReason == "" {
-		return ""
+		return models.UnknownRecoveryType
 	}
 
 	errorReasonLower := strings.ToLower(errorReason)
@@ -40,10 +40,10 @@ func DeduceRecoveryType(errorReason string) models.RecoveryType {
 		}
 	}
 
-	return ""
+	return models.UnknownRecoveryType
 }
 
 // IsRecoverable checks if an error reason is recoverable (any type)
 func IsRecoverable(errorReason string) bool {
-	return DeduceRecoveryType(errorReason) != ""
+	return DeduceRecoveryType(errorReason) != models.UnknownRecoveryType
 }

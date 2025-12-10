@@ -36,7 +36,7 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	err = d.stopContainerWithRetry(ctx, containerId)
+	err = d.stopContainerWithRetry(ctx, containerId, 2)
 	if err != nil {
 		return err
 	}
@@ -63,8 +63,8 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 }
 
 // stopContainerWithRetry attempts to stop a container with retries, falling back to kill if needed
-func (d *DockerClient) stopContainerWithRetry(ctx context.Context, containerId string) error {
-	timeout := 2 // timeout in seconds for container stop
+// timeout is the number of seconds to wait for the container to stop gracefully before forcing a kill
+func (d *DockerClient) stopContainerWithRetry(ctx context.Context, containerId string, timeout int) error {
 	// Use exponential backoff helper for container stopping
 	err := d.retryWithExponentialBackoff(
 		ctx,

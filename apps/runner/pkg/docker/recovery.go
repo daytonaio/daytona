@@ -58,7 +58,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 
 	if originalContainer.State.Running {
 		log.Info("Stopping sandbox")
-		err = d.stopContainerWithRetry(ctx, sandboxId)
+		err = d.stopContainerWithRetry(ctx, sandboxId, 2)
 		if err != nil {
 			return fmt.Errorf("failed to stop sandbox: %w", err)
 		}
