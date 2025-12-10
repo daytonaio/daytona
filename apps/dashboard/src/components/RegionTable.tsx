@@ -265,7 +265,7 @@ const getColumns = ({
       return null
     },
     cell: ({ row }) => {
-      if (row.original.regionType !== RegionType.CUSTOM || !deletePermitted || !writePermitted) {
+      if (row.original.regionType !== RegionType.CUSTOM || (!deletePermitted && !writePermitted)) {
         return <div className="flex justify-end h-8 w-8" />
       }
 
