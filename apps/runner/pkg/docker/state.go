@@ -8,22 +8,33 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/containerd/errdefs"
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
+// GetSandboxState returns the state of the sandbox with the given ID.
+// If the sandbox is not found, it returns SandboxStateUnknown and an error.
+// Note: This differs from the previous behavior, which returned SandboxStateDestroyed for missing sandboxes.
+func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
 	if sandboxId == "" {
 		return enums.SandboxStateUnknown, nil
 	}
 
 	container, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
-		if errdefs.IsNotFound(err) {
-			return enums.SandboxStateDestroyed, nil
+		if common_errors.IsNotFoundError(err) {
+			return enums.SandboxStateDestroyed, err
 		}
-		return enums.SandboxStateError, fmt.Errorf("failed to inspect sandbox: %w", err)
+		return enums.SandboxStateError, err
+	}
+
+	return d.deduceSandboxState(container)
+}
+
+func (d *DockerClient) deduceSandboxState(container *container.InspectResponse) (enums.SandboxState, error) {
+	if container == nil || container.State == nil {
+		return enums.SandboxStateUnknown, fmt.Errorf("container or container state is nil")
 	}
 
 	switch container.State.Status {

@@ -44,6 +44,15 @@ func HandlePossibleDockerError(ctx *gin.Context, err error) common_errors.ErrorR
 			Path:       ctx.Request.URL.Path,
 			Method:     ctx.Request.Method,
 		}
+	} else if errdefs.IsNotFound(err) {
+		return common_errors.ErrorResponse{
+			StatusCode: http.StatusNotFound,
+			Message:    fmt.Sprintf("not found: %s", err.Error()),
+			Code:       "NOT_FOUND",
+			Timestamp:  time.Now(),
+			Path:       ctx.Request.URL.Path,
+			Method:     ctx.Request.Method,
+		}
 	} else if errdefs.IsInternal(err) {
 		if strings.Contains(err.Error(), "unable to find user") {
 			return common_errors.ErrorResponse{

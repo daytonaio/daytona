@@ -10,7 +10,7 @@ import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox
 import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
 import { RunnerService } from '../../services/runner.service'
-import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
+import { RunnerAdapterFactory, RunnerSandboxInfo } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
@@ -45,7 +45,17 @@ export class SandboxStopAction extends SandboxAction {
       }
       case SandboxState.STOPPING: {
         // check if sandbox is stopped
-        const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+        let sandboxInfo: RunnerSandboxInfo
+        try {
+          sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+        } catch (error) {
+          if (error.response?.status === 404) {
+            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
+            return DONT_SYNC_AGAIN
+          }
+          throw error
+        }
+
         switch (sandboxInfo.state) {
           case SandboxState.STOPPED: {
             await this.updateSandboxState(
@@ -73,7 +83,17 @@ export class SandboxStopAction extends SandboxAction {
         return SYNC_AGAIN
       }
       case SandboxState.ERROR: {
-        const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+        let sandboxInfo: RunnerSandboxInfo
+        try {
+          sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+        } catch (error) {
+          if (error.response?.status === 404) {
+            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
+            return DONT_SYNC_AGAIN
+          }
+          throw error
+        }
+
         if (sandboxInfo.state === SandboxState.STOPPED) {
           await this.updateSandboxState(sandbox.id, SandboxState.STOPPED, lockCode)
         }

@@ -44,7 +44,6 @@ func Create(ctx *gin.Context) {
 
 	containerId, err := runner.Docker.Create(ctx.Request.Context(), createSandboxDto)
 	if err != nil {
-		runner.StatesCache.SetSandboxState(ctx, createSandboxDto.Id, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("create", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
 		return
@@ -78,7 +77,6 @@ func Destroy(ctx *gin.Context) {
 
 	err := runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("destroy", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
 		return
@@ -120,7 +118,7 @@ func CreateBackup(ctx *gin.Context) {
 
 	err = runner.Docker.StartBackupCreate(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
-		runner.StatesCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
+		runner.BackupInfoCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
 		ctx.Error(err)
 		return
 	}
@@ -159,7 +157,6 @@ func Resize(ctx *gin.Context) {
 
 	err = runner.Docker.Resize(ctx.Request.Context(), sandboxId, resizeDto)
 	if err != nil {
-		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
 		return
 	}
@@ -197,6 +194,10 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 
 	info, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
 	if err != nil {
+		if common_errors.IsNotFoundError(err) {
+			ctx.Error(err)
+			return
+		}
 		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
@@ -300,9 +301,7 @@ func Start(ctx *gin.Context) {
 	}
 
 	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
-
 	if err != nil {
-		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
 		return
 	}
@@ -333,7 +332,6 @@ func Stop(ctx *gin.Context) {
 
 	err := runner.Docker.Stop(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
 		return
 	}
@@ -362,7 +360,11 @@ func Info(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	info := runner.SandboxService.GetSandboxStatesInfo(ctx.Request.Context(), sandboxId)
+	info, err := runner.SandboxService.GetSandboxInfo(ctx.Request.Context(), sandboxId)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	ctx.JSON(http.StatusOK, SandboxInfoResponse{
 		State:       info.SandboxState,
@@ -376,35 +378,3 @@ type SandboxInfoResponse struct {
 	BackupState enums.BackupState  `json:"backupState"`
 	BackupError *string            `json:"backupError,omitempty"`
 } //	@name	SandboxInfoResponse
-
-// RemoveDestroyed godoc
-//
-//	@Tags			sandbox
-//	@Summary		Remove a destroyed sandbox
-//	@Description	Remove a sandbox that has been previously destroyed
-//	@Produce		json
-//	@Param			sandboxId	path		string	true	"Sandbox ID"
-//	@Success		200			{string}	string	"Sandbox removed"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
-//	@Router			/sandboxes/{sandboxId} [delete]
-//
-//	@id				RemoveDestroyed
-func RemoveDestroyed(ctx *gin.Context) {
-	sandboxId := ctx.Param("sandboxId")
-
-	runner := runner.GetInstance(nil)
-
-	err := runner.SandboxService.RemoveDestroyedSandbox(ctx.Request.Context(), sandboxId)
-	if err != nil {
-		if !common_errors.IsNotFoundError(err) {
-			ctx.Error(err)
-			return
-		}
-	}
-
-	ctx.JSON(http.StatusOK, "Sandbox removed")
-}
