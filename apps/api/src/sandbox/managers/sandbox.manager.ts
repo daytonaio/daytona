@@ -11,7 +11,6 @@ import { randomUUID } from 'crypto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
-import { RunnerState } from '../enums/runner-state.enum'
 
 import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
@@ -78,9 +77,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
 
     try {
-      // Get all ready runners
-      const allRunners = await this.runnerService.findAll()
-      const readyRunners = allRunners.filter((runner) => runner.state === RunnerState.READY)
+      const readyRunners = await this.runnerService.findAllReady()
 
       // Process all runners in parallel
       await Promise.all(
@@ -195,9 +192,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
 
     try {
-      // Get all ready runners
-      const allRunners = await this.runnerService.findAll()
-      const readyRunners = allRunners.filter((runner) => runner.state === RunnerState.READY)
+      const readyRunners = await this.runnerService.findAllReady()
 
       // Process all runners in parallel
       await Promise.all(

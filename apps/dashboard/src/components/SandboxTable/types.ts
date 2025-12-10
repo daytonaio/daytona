@@ -26,6 +26,7 @@ export interface SandboxTableProps {
   onChangeSnapshotSearchValue: (name?: string) => void
   regionsData: Region[]
   regionsDataIsLoading: boolean
+  getRegionName: (regionId: string) => string | undefined
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
