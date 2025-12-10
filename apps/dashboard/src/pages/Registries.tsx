@@ -276,7 +276,7 @@ const Registries: React.FC = () => {
         }}
       >
         <div className="mb-2 h-12 flex items-center justify-between">
-          <h1 className="text-2xl font-medium">Container Registries</h1>
+          <h1 className="text-2xl font-medium">Registries</h1>
           {writePermitted && (
             <DialogTrigger asChild disabled={loading}>
               <Button

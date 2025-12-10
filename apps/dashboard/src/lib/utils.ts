@@ -68,8 +68,8 @@ export function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-export function getMaskedApiKey(key: string) {
-  return `${key.substring(0, 3)}********************${key.slice(-3)}`
+export function getMaskedToken(token: string) {
+  return `${token.substring(0, 3)}********************${token.slice(-3)}`
 }
 
 export function formatDuration(minutes: number): string {

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsEnum, IsNumber, IsString } from 'class-validator'
-import { SandboxClass } from '../enums/sandbox-class.enum'
+import { IsString } from 'class-validator'
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'CreateRunner' })
@@ -23,42 +22,9 @@ export class CreateRunnerDto {
 
   @IsString()
   @ApiProperty()
-  apiKey: string
-
-  @IsNumber()
-  @ApiProperty()
-  cpu: number
-
-  @IsNumber()
-  @ApiProperty()
-  memoryGiB: number
-
-  @IsNumber()
-  @ApiProperty()
-  diskGiB: number
-
-  @IsNumber()
-  @ApiProperty()
-  gpu: number
+  regionId: string
 
   @IsString()
   @ApiProperty()
-  gpuType: string
-
-  @IsEnum(SandboxClass)
-  @ApiProperty({
-    enum: SandboxClass,
-    example: Object.values(SandboxClass)[0],
-  })
-  class: SandboxClass
-
-  @IsString()
-  @ApiProperty({
-    example: 'us',
-  })
-  region: string
-
-  @IsString()
-  @ApiProperty()
-  version: string
+  name: string
 }

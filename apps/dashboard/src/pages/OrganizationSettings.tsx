@@ -24,7 +24,7 @@ const OrganizationSettings: React.FC = () => {
 
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { getRegionName, sharedRegions, loadingRegions } = useRegions()
+  const { getRegionName, sharedRegions: regions, loadingRegions } = useRegions()
 
   const [loadingDeleteOrganization, setLoadingDeleteOrganization] = useState(false)
   const [loadingLeaveOrganization, setLoadingLeaveOrganization] = useState(false)
@@ -131,13 +131,14 @@ const OrganizationSettings: React.FC = () => {
               value={getRegionName(selectedOrganization.defaultRegionId) ?? selectedOrganization.defaultRegionId}
               readOnly
             />
-          ) : (
+          ) : authenticatedUserOrganizationMember !== null &&
+            authenticatedUserOrganizationMember.role === OrganizationUserRoleEnum.OWNER ? (
             <div>
               <Button onClick={() => setSetDefaultRegionDialog(true)} variant="outline">
                 Set Default Region
               </Button>
             </div>
-          )}
+          ) : null}
           <p className="text-sm text-muted-foreground mt-1 pl-1">
             The region that is used as the default target for creating sandboxes in this organization.
           </p>
@@ -165,7 +166,7 @@ const OrganizationSettings: React.FC = () => {
       <SetDefaultRegionDialog
         open={showSetDefaultRegionDialog}
         onOpenChange={setSetDefaultRegionDialog}
-        regions={sharedRegions}
+        regions={regions}
         loadingRegions={loadingRegions}
         onSetDefaultRegion={handleSetDefaultRegion}
       />
