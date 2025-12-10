@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
+import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -41,6 +41,7 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { RunnerDto } from '../dto/runner.dto'
 import { RunnerEvents } from '../constants/runner-events'
 import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
+import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 
 @Injectable()
 export class RunnerService {
@@ -59,6 +60,7 @@ export class RunnerService {
     private readonly regionService: RegionService,
     @Inject(EventEmitter2)
     private eventEmitter: EventEmitter2,
+    private readonly dataSource: DataSource,
   ) {}
 
   private generateRunnerToken(): string {
@@ -268,7 +270,10 @@ export class RunnerService {
       )
     }
 
-    await this.runnerRepository.remove(runner)
+    await this.dataSource.transaction(async (em) => {
+      await em.delete(Runner, id)
+      await this.eventEmitter.emitAsync(RunnerEvents.DELETED, new RunnerDeletedEvent(em, id))
+    })
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
