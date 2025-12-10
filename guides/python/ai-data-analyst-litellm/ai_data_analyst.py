@@ -1,12 +1,14 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import base64
 import re
 from pathlib import Path
-import base64
 
+from litellm import completion  # pylint: disable=import-error
+
+# pylint: disable=import-error
 from daytona import CreateSandboxFromSnapshotParams, Daytona
-from litellm import completion
 
 
 # Helper function to extract Python code from a given string
@@ -24,7 +26,6 @@ def main() -> None:
         # Create a Python sandbox
         sandbox = daytona.create(CreateSandboxFromSnapshotParams(language="python"))
 
-        base_dir = Path(__file__).resolve().parents[2]
         csv_path = "cafe_sales_data.csv"
         sandbox_csv_path = csv_path
 
@@ -59,10 +60,10 @@ def main() -> None:
         # LiteLLM supports a variety of model providers
         # Make sure to have the right environment variables set
         llm_output = completion(
-            #model="openai/gpt-5.1",
-            #model="mistral/mistral-large-latest",
-            #model="deepseek/deepseek-chat",
-            #model="openrouter/moonshotai/kimi-k2",
+            # model="openai/gpt-5.1",
+            # model="mistral/mistral-large-latest",
+            # model="deepseek/deepseek-chat",
+            # model="openrouter/moonshotai/kimi-k2",
             model="anthropic/claude-sonnet-4-0",
             messages=messages,
         )
@@ -94,10 +95,10 @@ def main() -> None:
 
         # Generate the final response with the LLM
         summary = completion(
-            #model="openai/gpt-4o",
-            #model="mistral/mistral-small-latest",
-            #model="deepseek/deepseek-chat",
-            #model="openrouter/moonshotai/kimi-k2",
+            # model="openai/gpt-4o",
+            # model="mistral/mistral-small-latest",
+            # model="deepseek/deepseek-chat",
+            # model="openrouter/moonshotai/kimi-k2",
             model="anthropic/claude-haiku-4-5",
             messages=messages,
         )

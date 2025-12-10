@@ -1,12 +1,14 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import base64
 import re
 from pathlib import Path
-import base64
 
-from daytona import CreateSandboxFromSnapshotParams, Daytona
 from openai import OpenAI
+
+# pylint: disable=import-error
+from daytona import CreateSandboxFromSnapshotParams, Daytona
 
 
 # Helper function to extract Python code from a given string
@@ -24,7 +26,6 @@ def main() -> None:
         # Create a Python sandbox
         sandbox = daytona.create(CreateSandboxFromSnapshotParams(language="python"))
 
-        base_dir = Path(__file__).resolve().parents[2]
         csv_path = "cafe_sales_data.csv"
         sandbox_csv_path = csv_path
 
