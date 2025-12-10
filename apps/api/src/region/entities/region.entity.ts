@@ -71,7 +71,7 @@ export class Region {
     if (id) {
       this.id = id
     } else {
-      this.id = nanoid(12)
+      this.id = name.toLowerCase() + '_' + nanoid(4)
     }
 
     if (organizationId) {
