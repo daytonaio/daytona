@@ -61,7 +61,11 @@ func SearchFiles(c *gin.Context) {
 		matched, matchErr := doublestar.Match(pattern, relativePathForMatch)
 		if matchErr != nil {
 			// If pattern is invalid, try matching against just the filename for backward compatibility
-			matched, _ = doublestar.Match(pattern, info.Name())
+			matched, matchErr2 := doublestar.Match(pattern, info.Name())
+			if matchErr2 != nil {
+				// Both pattern matches failed; abort with error
+				return errors.New("invalid glob pattern: " + pattern)
+			}
 		}
 
 		if matched {
