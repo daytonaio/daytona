@@ -1158,14 +1158,7 @@ export class SandboxService {
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    try {
-      await runnerAdapter.recover(sandbox)
-    } catch (error) {
-      // Recovery failed, make sandbox unrecoverable to prevent spam
-      sandbox.recoverable = false
-      await this.sandboxRepository.save(sandbox)
-      throw error
-    }
+    await runnerAdapter.recover(sandbox)
 
     // Clear error state
     sandbox.state = SandboxState.STOPPED

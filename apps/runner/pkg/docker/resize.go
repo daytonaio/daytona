@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 
 	"github.com/docker/docker/api/types/container"
@@ -19,8 +20,8 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 		Resources: container.Resources{
 			CPUQuota:   sandboxDto.Cpu * 100000, // Convert CPU cores to quota (1 core = 100000)
 			CPUPeriod:  100000,
-			Memory:     sandboxDto.Memory * 1024 * 1024 * 1024, // Convert GB to bytes
-			MemorySwap: sandboxDto.Memory * 1024 * 1024 * 1024, // Set swap equal to memory to disable swap
+			Memory:     common.GBToBytes(float64(sandboxDto.Memory)),
+			MemorySwap: common.GBToBytes(float64(sandboxDto.Memory)), // Set swap equal to memory to disable swap
 		},
 	})
 

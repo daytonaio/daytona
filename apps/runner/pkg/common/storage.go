@@ -31,3 +31,8 @@ func ParseStorageOptSizeGB(storageOpt map[string]string) (float64, error) {
 	// Convert bytes to GB
 	return float64(sizeBytes) / (1024 * 1024 * 1024), nil
 }
+
+// GBToBytes converts gigabytes to bytes
+func GBToBytes(gb float64) int64 {
+	return int64(gb * 1024 * 1024 * 1024)
+}

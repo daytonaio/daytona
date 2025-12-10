@@ -90,7 +90,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		return fmt.Errorf("failed to rename container: %w", err)
 	}
 
-	newStorageBytes := int64(newStorageQuota * 1024 * 1024 * 1024)
+	newStorageBytes := common.GBToBytes(newStorageQuota)
 	if newHostConfig.StorageOpt == nil {
 		newHostConfig.StorageOpt = make(map[string]string)
 	}
