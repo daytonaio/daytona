@@ -59,7 +59,12 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
 
       const region = await onCreateRegion(createRegionData)
       if (region) {
-        setCreatedRegion(region)
+        if (!region.proxyApiKey && !region.sshGatewayApiKey) {
+          setOpen(false)
+          setCreatedRegion(null)
+        } else {
+          setCreatedRegion(region)
+        }
         setFormData(DEFAULT_FORM_DATA)
       }
     } finally {
@@ -107,7 +112,7 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
           <DialogDescription>Add a new region for grouping runners and sandboxes.</DialogDescription>
         </DialogHeader>
 
-        {createdRegion ? (
+        {createdRegion && (createdRegion.proxyApiKey || createdRegion.sshGatewayApiKey) ? (
           <div className="space-y-6">
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
