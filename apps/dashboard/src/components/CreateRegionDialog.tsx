@@ -191,7 +191,9 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
                 }}
                 placeholder="https://proxy.example.com"
               />
-              <p className="text-sm text-muted-foreground mt-1 pl-1">URL of the custom proxy for this region</p>
+              <p className="text-sm text-muted-foreground mt-1 pl-1">
+                (Optional) URL of the custom proxy for this region
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -204,7 +206,9 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
                 }}
                 placeholder="https://ssh-gateway.example.com"
               />
-              <p className="text-sm text-muted-foreground mt-1 pl-1">URL of the custom SSH gateway for this region</p>
+              <p className="text-sm text-muted-foreground mt-1 pl-1">
+                (Optional) URL of the custom SSH gateway for this region
+              </p>
             </div>
           </form>
         )}
