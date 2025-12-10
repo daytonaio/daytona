@@ -36,12 +36,6 @@ export class RunnerDto {
   proxyUrl: string
 
   @ApiProperty({
-    description: 'The API key for the runner',
-    example: 'api-key-123',
-  })
-  apiKey: string
-
-  @ApiProperty({
     description: 'The CPU capacity of the runner',
     example: 8,
   })
@@ -134,6 +128,12 @@ export class RunnerDto {
   region: string
 
   @ApiProperty({
+    description: 'The name of the runner',
+    example: 'runner1',
+  })
+  name: string
+
+  @ApiProperty({
     description: 'The state of the runner',
     enum: RunnerState,
     enumName: 'RunnerState',
@@ -180,7 +180,6 @@ export class RunnerDto {
       domain: runner.domain,
       apiUrl: runner.apiUrl,
       proxyUrl: runner.proxyUrl,
-      apiKey: runner.apiKey,
       cpu: runner.cpu,
       memory: runner.memoryGiB,
       disk: runner.diskGiB,
@@ -196,6 +195,7 @@ export class RunnerDto {
       currentSnapshotCount: runner.currentSnapshotCount,
       availabilityScore: runner.availabilityScore,
       region: runner.region,
+      name: runner.name,
       state: runner.state,
       lastChecked: runner.lastChecked?.toISOString(),
       unschedulable: runner.unschedulable,

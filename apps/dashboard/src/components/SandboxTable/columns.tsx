@@ -52,6 +52,7 @@ interface GetColumnsProps {
   deletePermitted: boolean
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  getRegionName: (regionId: string) => string | undefined
 }
 
 export function getColumns({
@@ -66,6 +67,7 @@ export function getColumns({
   deletePermitted,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  getRegionName,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const handleOpenWebTerminal = async (sandboxId: string) => {
     const url = await getWebTerminalUrl(sandboxId)
@@ -193,7 +195,7 @@ export function getColumns({
       cell: ({ row }) => {
         return (
           <div className="w-full truncate">
-            <span className="truncate block">{row.original.target}</span>
+            <span className="truncate block">{getRegionName(row.original.target) ?? row.original.target}</span>
           </div>
         )
       },

@@ -4,7 +4,7 @@
  */
 
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { Region } from '@daytonaio/api-client'
+import { Region, RegionType } from '@daytonaio/api-client'
 import { IRegionsContext, RegionsContext } from '@/contexts/RegionsContext'
 import { useApi } from '@/hooks/useApi'
 import { handleApiError } from '@/lib/error-handling'
@@ -29,7 +29,7 @@ export function RegionsProvider(props: Props) {
       return []
     }
     try {
-      const regions = (await regionsApi.listRegions(selectedOrganization.id, true)).data
+      const regions = (await regionsApi.listRegions(selectedOrganization.id)).data
       setRegions(regions)
       return regions
     } catch (error) {
@@ -54,11 +54,11 @@ export function RegionsProvider(props: Props) {
   )
 
   const sharedRegions = useMemo(() => {
-    return regions.filter((region) => region.organizationId === null)
+    return regions.filter((region) => region.regionType === RegionType.SHARED)
   }, [regions])
 
-  const organizationRegions = useMemo(() => {
-    return regions.filter((region) => region.organizationId !== null)
+  const customRegions = useMemo(() => {
+    return regions.filter((region) => region.regionType === RegionType.CUSTOM)
   }, [regions])
 
   const contextValue: IRegionsContext = useMemo(() => {
@@ -66,11 +66,11 @@ export function RegionsProvider(props: Props) {
       regions,
       loadingRegions,
       sharedRegions,
-      organizationRegions,
+      customRegions,
       refreshRegions: getRegions,
       getRegionName,
     }
-  }, [regions, loadingRegions, sharedRegions, organizationRegions, getRegions, getRegionName])
+  }, [regions, loadingRegions, sharedRegions, customRegions, getRegions, getRegionName])
 
   return <RegionsContext.Provider value={contextValue}>{props.children}</RegionsContext.Provider>
 }

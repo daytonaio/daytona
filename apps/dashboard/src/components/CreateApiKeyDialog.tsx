@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input'
 import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
 import { CreateApiKeyPermissionGroup } from '@/types/CreateApiKeyPermissionGroup'
 import { Label } from '@/components/ui/label'
-import { getMaskedApiKey } from '@/lib/utils'
+import { getMaskedToken } from '@/lib/utils'
 import { DatePicker } from '@/components/ui/date-picker'
 
 interface CreateApiKeyDialogProps {
@@ -159,7 +159,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                   onMouseEnter={() => setIsCreatedKeyRevealed(true)}
                   onMouseLeave={() => setIsCreatedKeyRevealed(false)}
                 >
-                  {isCreatedKeyRevealed ? createdKey.value : getMaskedApiKey(createdKey.value)}
+                  {isCreatedKeyRevealed ? createdKey.value : getMaskedToken(createdKey.value)}
                 </span>
                 {(copied === 'API Key' && <Check className="w-4 h-4" />) || (
                   <Copy

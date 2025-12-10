@@ -94,6 +94,7 @@ import { RegionModule } from './region/region.module'
               lazyConnect: configService.get('skipConnections'),
             },
           },
+          entitySkipConstructor: true,
         }
       },
     }),
