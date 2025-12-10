@@ -91,6 +91,9 @@ export class Region {
     sshGatewayApiKeyHash?: string | null
   }) {
     this.name = params.name
+    this.enforceQuotas = params.enforceQuotas
+    this.regionType = params.regionType
+
     if (params.id) {
       this.id = params.id
     } else {
@@ -105,7 +108,6 @@ export class Region {
     this.sshGatewayUrl = params.sshGatewayUrl ?? null
     this.proxyApiKeyHash = params.proxyApiKeyHash ?? null
     this.sshGatewayApiKeyHash = params.sshGatewayApiKeyHash ?? null
-    this.enforceQuotas = params.enforceQuotas
   }
 
   @BeforeInsert()
