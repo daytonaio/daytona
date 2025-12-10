@@ -66,9 +66,6 @@ export class SnapshotDto {
   })
   buildInfo?: BuildInfoDto
 
-  @ApiProperty()
-  skipValidation: boolean
-
   static fromSnapshot(snapshot: Snapshot): SnapshotDto {
     return {
       id: snapshot.id,
@@ -87,7 +84,6 @@ export class SnapshotDto {
       createdAt: snapshot.createdAt,
       updatedAt: snapshot.updatedAt,
       lastUsedAt: snapshot.lastUsedAt,
-      skipValidation: snapshot.skipValidation,
       buildInfo: snapshot.buildInfo
         ? {
             dockerfileContent: snapshot.buildInfo.dockerfileContent,

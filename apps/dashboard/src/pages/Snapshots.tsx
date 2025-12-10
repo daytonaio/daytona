@@ -52,7 +52,6 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
-  const [skipValidation, setSkipValidation] = useState(false)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -256,7 +255,6 @@ const Snapshots: React.FC = () => {
           cpu,
           memory,
           disk,
-          skipValidation,
         },
         selectedOrganization?.id,
       )
@@ -264,7 +262,6 @@ const Snapshots: React.FC = () => {
       setNewSnapshotName('')
       setNewImageName('')
       setNewEntrypoint('')
-      setSkipValidation(false)
       toast.success(`Creating snapshot ${trimmedName}`)
 
       if (paginationParams.pageIndex !== 0) {
@@ -409,7 +406,6 @@ const Snapshots: React.FC = () => {
           setCpu(undefined)
           setMemory(undefined)
           setDisk(undefined)
-          setSkipValidation(false)
         }}
       >
         <div className="mb-2 h-12 flex items-center justify-between">
@@ -525,21 +521,6 @@ const Snapshots: React.FC = () => {
                 </div>
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
                   If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
-                </p>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="skip-validation"
-                    checked={skipValidation}
-                    onCheckedChange={(checked) => setSkipValidation(!!checked)}
-                  />
-                  <Label htmlFor="skip-validation" className="text-sm">
-                    Skip validation
-                  </Label>
-                </div>
-                <p className="text-sm text-muted-foreground pl-1">
-                  Not recommended - useful for entrypoints that require environment variables
                 </p>
               </div>
             </form>

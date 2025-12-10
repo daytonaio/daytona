@@ -63,11 +63,9 @@ class CreateSnapshotParams(BaseModel):
             it will be used to create a new image in Daytona.
         resources (Optional[Resources]): Resources of the snapshot.
         entrypoint (Optional[List[str]]): Entrypoint of the snapshot.
-        skip_validation (Optional[bool]): Whether to skip validation for the snapshot.
     """
 
     name: str
     image: Union[str, Image]
     resources: Optional[Resources] = None
     entrypoint: Optional[List[str]] = None
-    skip_validation: Optional[bool] = None

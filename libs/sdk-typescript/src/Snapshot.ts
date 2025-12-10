@@ -66,7 +66,6 @@ export type CreateSnapshotParams = {
   image: string | Image
   resources?: Resources
   entrypoint?: string[]
-  skipValidation?: boolean
 }
 
 /**
@@ -179,10 +178,6 @@ export class SnapshotService {
       createSnapshotReq.disk = params.resources.disk
     }
 
-    if (params.skipValidation !== undefined) {
-      createSnapshotReq.skipValidation = params.skipValidation
-    }
-
     let createdSnapshot = (
       await this.snapshotsApi.createSnapshot(createSnapshotReq, undefined, {
         timeout: (options.timeout || 0) * 1000,
@@ -194,11 +189,6 @@ export class SnapshotService {
     }
 
     const terminalStates: SnapshotState[] = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
-    const logTerminalStates: SnapshotState[] = [
-      ...terminalStates,
-      SnapshotState.PENDING_VALIDATION,
-      SnapshotState.VALIDATING,
-    ]
     const snapshotRef = { createdSnapshot: createdSnapshot }
     let streamPromise: Promise<void> | undefined
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -209,7 +199,7 @@ export class SnapshotService {
         streamPromise = processStreamingResponse(
           () => fetch(url, { method: 'GET', headers: this.clientConfig.baseOptions.headers }),
           (chunk) => onChunk(chunk.trimEnd()),
-          async () => logTerminalStates.includes(snapshotRef.createdSnapshot.state),
+          async () => terminalStates.includes(snapshotRef.createdSnapshot.state),
         )
       }
     }

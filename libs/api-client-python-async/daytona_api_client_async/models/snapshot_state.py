@@ -30,8 +30,6 @@ class SnapshotState(str, Enum):
     BUILDING = 'building'
     PENDING = 'pending'
     PULLING = 'pulling'
-    PENDING_VALIDATION = 'pending_validation'
-    VALIDATING = 'validating'
     ACTIVE = 'active'
     INACTIVE = 'inactive'
     ERROR = 'error'
