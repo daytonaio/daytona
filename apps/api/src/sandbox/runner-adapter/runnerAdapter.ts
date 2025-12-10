@@ -89,7 +89,8 @@ export interface RunnerAdapter {
     networkLimitEgress?: boolean,
   ): Promise<void>
 
-  recoverExpandStorage(sandboxId: string, storageQuota: number): Promise<void>
+  recover(sandbox: Sandbox): Promise<void>
+  isRecoverable(sandboxId: string, errorReason: string): Promise<boolean>
 }
 
 @Injectable()

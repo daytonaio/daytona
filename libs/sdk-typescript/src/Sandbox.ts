@@ -68,7 +68,7 @@ export interface SandboxCodeToolbox {
  * @property {number} disk - Amount of disk space allocated to the Sandbox in GiB
  * @property {SandboxState} state - Current state of the Sandbox (e.g., "started", "stopped")
  * @property {string} [errorReason] - Error message if Sandbox is in error state
- * @property {boolean} [isRecoverable] - Whether the Sandbox error is recoverable. Computed from errorReason.
+ * @property {boolean} [recoverable] - Whether the Sandbox error is recoverable.
  * @property {SandboxBackupStateEnum} [backupState] - Current state of Sandbox backup
  * @property {string} [backupCreatedAt] - When the backup was created
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes
@@ -105,7 +105,7 @@ export class Sandbox implements SandboxDto {
   public disk!: number
   public state?: SandboxState
   public errorReason?: string
-  public isRecoverable?: boolean
+  public recoverable?: boolean
   public backupState?: SandboxBackupStateEnum
   public backupCreatedAt?: string
   public autoStopInterval?: number
@@ -607,7 +607,7 @@ export class Sandbox implements SandboxDto {
     this.disk = sandboxDto.disk
     this.state = sandboxDto.state
     this.errorReason = sandboxDto.errorReason
-    this.isRecoverable = sandboxDto.isRecoverable
+    this.recoverable = sandboxDto.recoverable
     this.backupState = sandboxDto.backupState
     this.backupCreatedAt = sandboxDto.backupCreatedAt
     this.autoStopInterval = sandboxDto.autoStopInterval

@@ -23,6 +23,8 @@ import {
   PullSnapshotRequestDTO,
   ToolboxApi,
   UpdateNetworkSettingsDTO,
+  RecoverSandboxDTO,
+  IsRecoverableDTO,
 } from '@daytonaio/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
@@ -361,9 +363,33 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
   }
 
-  async recoverExpandStorage(sandboxId: string, storageQuota: number): Promise<void> {
-    await this.sandboxApiClient.recoverExpandStorage(sandboxId, {
-      storageQuota: storageQuota,
-    })
+  async recover(sandbox: Sandbox): Promise<void> {
+    const recoverSandboxDTO: RecoverSandboxDTO = {
+      userId: sandbox.organizationId,
+      snapshot: sandbox.snapshot,
+      osUser: sandbox.osUser,
+      cpuQuota: sandbox.cpu,
+      gpuQuota: sandbox.gpu,
+      memoryQuota: sandbox.mem,
+      storageQuota: sandbox.disk,
+      env: sandbox.env,
+      volumes: sandbox.volumes?.map((volume) => ({
+        volumeId: volume.volumeId,
+        mountPath: volume.mountPath,
+        subpath: volume.subpath,
+      })),
+      networkBlockAll: sandbox.networkBlockAll,
+      networkAllowList: sandbox.networkAllowList,
+      errorReason: sandbox.errorReason,
+      backupErrorReason: sandbox.backupErrorReason,
+    }
+    await this.sandboxApiClient.recover(sandbox.id, recoverSandboxDTO)
+  }
+
+  async isRecoverable(sandboxId: string, errorReason: string): Promise<boolean> {
+    const isRecoverableDTO: IsRecoverableDTO = { errorReason }
+
+    const response = await this.sandboxApiClient.isRecoverable(sandboxId, isRecoverableDTO)
+    return response.data.recoverable
   }
 }

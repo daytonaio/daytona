@@ -161,7 +161,7 @@ export function getColumns({
           <SandboxStateComponent
             state={row.original.state}
             errorReason={row.original.errorReason}
-            isRecoverable={row.original.isRecoverable}
+            recoverable={row.original.recoverable}
           />
         </div>
       ),

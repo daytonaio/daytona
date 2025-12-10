@@ -416,8 +416,7 @@ export class SandboxController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
-    const sandbox = await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
-    const recoveredSandbox = await this.sandboxService.recover(sandbox.id, authContext.organization)
+    const recoveredSandbox = await this.sandboxService.recover(sandboxIdOrName, authContext.organization)
     let sandboxDto = SandboxDto.fromSandbox(recoveredSandbox)
 
     if (sandboxDto.state !== SandboxState.STARTED) {

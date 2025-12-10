@@ -94,7 +94,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   </Button>
                 )}
                 {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) &&
-                  !sandbox.isRecoverable && (
+                  !sandbox.recoverable && (
                     <Button
                       variant="outline"
                       onClick={() => handleStart(sandbox.id)}
@@ -104,7 +104,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                       Start
                     </Button>
                   )}
-                {sandbox.state === SandboxState.ERROR && sandbox.isRecoverable && (
+                {sandbox.state === SandboxState.ERROR && sandbox.recoverable && (
                   <Button
                     variant="outline"
                     onClick={() => handleRecover(sandbox.id)}
@@ -210,7 +210,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   <SandboxStateComponent
                     state={sandbox.state}
                     errorReason={sandbox.errorReason}
-                    isRecoverable={sandbox.isRecoverable}
+                    recoverable={sandbox.recoverable}
                   />
                 </div>
               </div>

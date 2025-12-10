@@ -89,12 +89,6 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		if errdefs.IsConflict(err) {
 			return sandboxDto.Id, nil
 		}
-		// Check if this is a storage limit error
-		if isStorageLimitError(err) {
-			log.Warnf("Storage limit error detected during container create for %s: %v", sandboxDto.Id, err)
-			d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateError)
-			return "", fmt.Errorf("no space left on device - storage limit reached. Run recover-expand-storage to expand storage: %w", err)
-		}
 		return "", err
 	}
 

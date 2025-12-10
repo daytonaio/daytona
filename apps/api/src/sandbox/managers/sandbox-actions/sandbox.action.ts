@@ -32,6 +32,21 @@ export abstract class SandboxAction {
 
   abstract run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState>
 
+  protected async checkRecoverable(sandbox: Sandbox, errorReason: string | null | undefined): Promise<void> {
+    if (!errorReason || !sandbox.runnerId) {
+      sandbox.recoverable = false
+      return
+    }
+
+    try {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      sandbox.recoverable = await runnerAdapter.isRecoverable(sandbox.id, errorReason)
+    } catch (error) {
+      sandbox.recoverable = false
+    }
+  }
+
   protected async updateSandboxState(
     sandboxId: string,
     state: SandboxState,
@@ -89,10 +104,12 @@ export abstract class SandboxAction {
 
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
+      await this.checkRecoverable(sandbox, errorReason)
     }
 
     if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {
       sandbox.errorReason = 'Sandbox is in error state during update'
+      sandbox.recoverable = false
     }
 
     if (daemonVersion !== undefined) {

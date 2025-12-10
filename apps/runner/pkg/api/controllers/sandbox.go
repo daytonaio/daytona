@@ -5,6 +5,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -377,42 +378,56 @@ type SandboxInfoResponse struct {
 	BackupError *string            `json:"backupError,omitempty"`
 } //	@name	SandboxInfoResponse
 
-// RecoverExpandStorage godoc
+// Recover godoc
 //
+//	@Summary		Recover sandbox from error state
+//	@Description	Recover sandbox from error state using specified recovery type
 //	@Tags			sandbox
-//	@Summary		Recover sandbox from storage limit
-//	@Description	Recover sandbox from storage limit by expanding storage quota
+//	@Accept			json
 //	@Produce		json
-//	@Param			sandboxId	path		string						true	"Sandbox ID"
-//	@Param			recovery	body		dto.RecoverExpandStorageDTO	true	"Recovery parameters"
-//	@Success		200			{string}	string						"Sandbox storage recovered"
+//	@Param			sandboxId	path		string					true	"Sandbox ID"
+//	@Param			recovery	body		dto.RecoverSandboxDTO	true	"Recovery parameters"
+//	@Success		200			{string}	string					"Sandbox recovered"
 //	@Failure		400			{object}	common_errors.ErrorResponse
 //	@Failure		401			{object}	common_errors.ErrorResponse
 //	@Failure		404			{object}	common_errors.ErrorResponse
 //	@Failure		409			{object}	common_errors.ErrorResponse
 //	@Failure		500			{object}	common_errors.ErrorResponse
-//	@Router			/sandboxes/{sandboxId}/recover/expand-storage [post]
+//	@Router			/sandboxes/{sandboxId}/recover [post]
 //
-//	@id				RecoverExpandStorage
-func RecoverExpandStorage(ctx *gin.Context) {
-	var recoverExpandStorageDto dto.RecoverExpandStorageDTO
-	err := ctx.ShouldBindJSON(&recoverExpandStorageDto)
+//	@id				Recover
+func Recover(ctx *gin.Context) {
+	var recoverDto dto.RecoverSandboxDTO
+	err := ctx.ShouldBindJSON(&recoverDto)
 	if err != nil {
 		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
 	sandboxId := ctx.Param("sandboxId")
-
 	runner := runner.GetInstance(nil)
 
-	err = runner.Docker.RecoverFromStorageLimit(ctx.Request.Context(), sandboxId, float64(recoverExpandStorageDto.StorageQuota))
-	if err != nil {
-		ctx.Error(err)
+	// Deduce recovery type from error reason
+	recoveryType := common.DeduceRecoveryType(recoverDto.ErrorReason)
+	if recoveryType == "" {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("unable to deduce recovery type from error reason: %s", recoverDto.ErrorReason)))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "Sandbox storage recovered")
+	switch recoveryType {
+	case dto.RecoveryTypeStorageExpansion:
+		err = runner.Docker.RecoverFromStorageLimit(ctx.Request.Context(), sandboxId, float64(recoverDto.StorageQuota))
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+
+	default:
+		ctx.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("unsupported recovery type: %s", recoveryType)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "Sandbox recovered")
 }
 
 // RemoveDestroyed godoc
@@ -445,4 +460,32 @@ func RemoveDestroyed(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "Sandbox removed")
+}
+
+// IsRecoverable godoc
+//
+//	@Summary		Check if sandbox error is recoverable
+//	@Description	Check if the sandbox's error reason indicates a recoverable error
+//	@Tags			sandbox
+//	@Accept			json
+//	@Produce		json
+//	@Param			sandboxId	path		string					true	"Sandbox ID"
+//	@Param			request		body		dto.IsRecoverableDTO	true	"Error reason to check"
+//	@Success		200			{object}	dto.IsRecoverableResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/is-recoverable [post]
+//
+//	@id				IsRecoverable
+func IsRecoverable(ctx *gin.Context) {
+	var request dto.IsRecoverableDTO
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	recoverable := common.IsRecoverable(request.ErrorReason)
+
+	ctx.JSON(http.StatusOK, dto.IsRecoverableResponse{
+		Recoverable: recoverable,
+	})
 }

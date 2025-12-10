@@ -11,18 +11,16 @@ import { STATE_ICONS } from './state-icons'
 interface SandboxStateProps {
   state?: SandboxStateType
   errorReason?: string
-  isRecoverable?: boolean
+  recoverable?: boolean
 }
 
-export function SandboxState({ state, errorReason, isRecoverable }: SandboxStateProps) {
+export function SandboxState({ state, errorReason, recoverable }: SandboxStateProps) {
   if (!state) return null
-  const stateIcon = isRecoverable
-    ? STATE_ICONS['RECOVERY']
-    : STATE_ICONS[state] || STATE_ICONS[SandboxStateType.UNKNOWN]
+  const stateIcon = recoverable ? STATE_ICONS['RECOVERY'] : STATE_ICONS[state] || STATE_ICONS[SandboxStateType.UNKNOWN]
   const label = getStateLabel(state)
 
   if (state === SandboxStateType.ERROR || state === SandboxStateType.BUILD_FAILED) {
-    const errorColor = isRecoverable ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
+    const errorColor = recoverable ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
 
     const errorContent = (
       <div className={`flex items-center gap-1 ${errorColor}`}>

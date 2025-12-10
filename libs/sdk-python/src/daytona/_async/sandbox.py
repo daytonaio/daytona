@@ -60,7 +60,7 @@ class AsyncSandbox(SandboxDto):
         disk (int): Amount of disk space allocated to the Sandbox in GiB.
         state (SandboxState): Current state of the Sandbox (e.g., "started", "stopped").
         error_reason (str): Error message if Sandbox is in error state.
-        is_recoverable (bool): Whether the Sandbox error is recoverable. Computed from error_reason.
+        recoverable (bool): Whether the Sandbox error is recoverable.
         backup_state (SandboxBackupStateEnum): Current state of Sandbox backup.
         backup_created_at (str): When the backup was created.
         auto_stop_interval (int): Auto-stop interval in minutes.
@@ -594,7 +594,7 @@ class AsyncSandbox(SandboxDto):
         self.disk = sandbox_dto.disk
         self.state = sandbox_dto.state
         self.error_reason = sandbox_dto.error_reason
-        self.is_recoverable = sandbox_dto.is_recoverable
+        self.recoverable = sandbox_dto.recoverable
         self.backup_state = sandbox_dto.backup_state
         self.backup_created_at = sandbox_dto.backup_created_at
         self.auto_stop_interval = sandbox_dto.auto_stop_interval

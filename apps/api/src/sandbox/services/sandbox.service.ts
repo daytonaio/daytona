@@ -69,7 +69,6 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
-import { detectRecoveryType, RecoveryType } from '../utils/recovery-error.util'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -1137,11 +1136,8 @@ export class SandboxService {
     return sandbox
   }
 
-  async recover(sandboxId: string, organization: Organization): Promise<Sandbox> {
-    const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
+  async recover(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
     if (sandbox.state !== SandboxState.ERROR) {
       throw new BadRequestError('Sandbox must be in error state to recover')
@@ -1151,63 +1147,28 @@ export class SandboxService {
       throw new SandboxError('Sandbox state change in progress')
     }
 
-    // Use centralized recovery detection
-    const recoveryType = detectRecoveryType(sandbox.errorReason)
-
-    if (!recoveryType) {
-      throw new BadRequestError('This error is not recoverable. Please check logs or contact support.')
-    }
-
-    // Execute recovery based on type
-    switch (recoveryType) {
-      case RecoveryType.STORAGE_EXPANSION:
-        await this.recoverExpandStorage(sandboxId)
-        break
-      default:
-        throw new Error(`Unknown recovery type: ${recoveryType}`)
-    }
-
-    // Clear error state
-    sandbox.state = SandboxState.STOPPED
-    sandbox.desiredState = SandboxDesiredState.STOPPED
-    sandbox.errorReason = null
-    await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
-
-    // Now that sandbox is in STOPPED state, use the normal start flow
-    // This handles quota validation, pending usage, event emission, etc.
-    return await this.start(sandbox.id, organization)
-  }
-
-  private async recoverExpandStorage(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
+    // Validate runner exists
     if (!sandbox.runnerId) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
+      throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
     }
     const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
     if (!runner) {
       throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
     }
 
-    const originalDiskGB = sandbox.disk
-
-    this.logger.log(`Expanding storage for sandbox ${sandboxId}: original=${originalDiskGB}GB`)
-
-    // Call runner to expand storage (runner leaves container in STOPPED state)
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    await runnerAdapter.recover(sandbox)
 
-    try {
-      await runnerAdapter.recoverExpandStorage(sandboxId, originalDiskGB)
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
-        const MAX_STORAGE_EXPANSION_PERCENT = 0.1
-        const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(originalDiskGB * MAX_STORAGE_EXPANSION_PERCENT).toFixed(2)}GB (${(MAX_STORAGE_EXPANSION_PERCENT * 100).toFixed(0)}% of original ${originalDiskGB.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
-        throw new ForbiddenException(errorMsg)
-      }
-      throw error
-    }
+    // Clear error state
+    sandbox.state = SandboxState.STOPPED
+    sandbox.desiredState = SandboxDesiredState.STOPPED
+    sandbox.errorReason = null
+    sandbox.recoverable = false
+    await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
+
+    // Now that sandbox is in STOPPED state, use the normal start flow
+    // This handles quota validation, pending usage, event emission, etc.
+    return await this.start(sandbox.id, organization)
   }
 
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
@@ -1406,6 +1367,19 @@ export class SandboxService {
     sandbox.state = newState
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
+      if (newState === SandboxState.ERROR || newState === SandboxState.BUILD_FAILED) {
+        if (errorReason && sandbox.runnerId) {
+          try {
+            const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+            const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+            sandbox.recoverable = await runnerAdapter.isRecoverable(sandbox.id, errorReason)
+          } catch {
+            sandbox.recoverable = false
+          }
+        } else {
+          sandbox.recoverable = false
+        }
+      }
     }
     //  we need to update the desired state to match the new state
     const desiredState = this.getExpectedDesiredStateForState(newState)

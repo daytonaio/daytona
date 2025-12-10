@@ -11,7 +11,6 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BuildInfoDto } from './build-info.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { isRecoverableError } from '../utils/recovery-error.util'
 
 @ApiSchema({ name: 'SandboxVolume' })
 export class SandboxVolume {
@@ -162,12 +161,12 @@ export class SandboxDto {
   errorReason?: string
 
   @ApiPropertyOptional({
-    description: 'Whether the sandbox error is recoverable. Computed from errorReason.',
+    description: 'Whether the sandbox error is recoverable.',
     example: true,
     required: false,
   })
   @IsOptional()
-  isRecoverable?: boolean
+  recoverable?: boolean
 
   @ApiPropertyOptional({
     description: 'The state of the backup',
@@ -284,7 +283,7 @@ export class SandboxDto {
       state: this.getSandboxState(sandbox),
       desiredState: sandbox.desiredState,
       errorReason: sandbox.errorReason,
-      isRecoverable: isRecoverableError(sandbox.errorReason),
+      recoverable: sandbox.recoverable,
       backupState: sandbox.backupState,
       backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
       autoStopInterval: sandbox.autoStopInterval,

@@ -32,6 +32,7 @@ import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './sandbox-actions/sandbox-archive.action'
 import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
@@ -55,6 +56,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
   ) {}
 
   async onApplicationShutdown() {
@@ -446,6 +448,17 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       }
       sandbox.state = SandboxState.ERROR
       sandbox.errorReason = error.message || String(error)
+      if (sandbox.errorReason && sandbox.runnerId) {
+        try {
+          const runner = await this.runnerService.findOne(sandbox.runnerId)
+          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+          sandbox.recoverable = await runnerAdapter.isRecoverable(sandbox.id, sandbox.errorReason)
+        } catch {
+          sandbox.recoverable = false
+        }
+      } else {
+        sandbox.recoverable = false
+      }
       await this.sandboxRepository.save(sandbox)
     }
 
