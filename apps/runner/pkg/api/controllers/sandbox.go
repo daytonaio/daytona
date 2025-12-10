@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
+	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
@@ -415,7 +416,7 @@ func Recover(ctx *gin.Context) {
 	}
 
 	switch recoveryType {
-	case dto.RecoveryTypeStorageExpansion:
+	case models.RecoveryTypeStorageExpansion:
 		err = runner.Docker.RecoverFromStorageLimit(ctx.Request.Context(), sandboxId, float64(recoverDto.StorageQuota))
 		if err != nil {
 			ctx.Error(err)

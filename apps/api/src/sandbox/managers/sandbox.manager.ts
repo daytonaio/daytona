@@ -16,6 +16,7 @@ import { RunnerState } from '../enums/runner-state.enum'
 import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
+import { checkRecoverable } from '../utils/recoverable.util'
 
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
@@ -448,17 +449,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       }
       sandbox.state = SandboxState.ERROR
       sandbox.errorReason = error.message || String(error)
-      if (sandbox.errorReason && sandbox.runnerId) {
-        try {
-          const runner = await this.runnerService.findOne(sandbox.runnerId)
-          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-          sandbox.recoverable = await runnerAdapter.isRecoverable(sandbox.id, sandbox.errorReason)
-        } catch {
-          sandbox.recoverable = false
-        }
-      } else {
-        sandbox.recoverable = false
+      sandbox.recoverable = false
+
+      try {
+        await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+      } catch (err) {
+        this.logger.error(`Error checking if sandbox ${sandboxId} is recoverable:`, err)
       }
+
       await this.sandboxRepository.save(sandbox)
     }
 

@@ -13,6 +13,7 @@ import { SandboxState } from '../../enums/sandbox-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { checkRecoverable } from '../../utils/recoverable.util'
 
 export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -31,21 +32,6 @@ export abstract class SandboxAction {
   ) {}
 
   abstract run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState>
-
-  protected async checkRecoverable(sandbox: Sandbox, errorReason: string | null | undefined): Promise<void> {
-    if (!errorReason || !sandbox.runnerId) {
-      sandbox.recoverable = false
-      return
-    }
-
-    try {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-      sandbox.recoverable = await runnerAdapter.isRecoverable(sandbox.id, errorReason)
-    } catch (error) {
-      sandbox.recoverable = false
-    }
-  }
 
   protected async updateSandboxState(
     sandboxId: string,
@@ -104,7 +90,7 @@ export abstract class SandboxAction {
 
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
-      await this.checkRecoverable(sandbox, errorReason)
+      await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
     }
 
     if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {

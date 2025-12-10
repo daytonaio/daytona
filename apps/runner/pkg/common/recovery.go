@@ -6,12 +6,12 @@ package common
 import (
 	"strings"
 
-	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/models"
 )
 
 // Patterns that indicate recoverable errors mapped to their recovery types
-var recoverableErrorPatterns = map[dto.RecoveryType][]string{
-	dto.RecoveryTypeStorageExpansion: {
+var recoverableErrorPatterns = map[models.RecoveryType][]string{
+	models.RecoveryTypeStorageExpansion: {
 		"no space left on device",
 		"storage limit",
 		"disk quota exceeded",
@@ -25,7 +25,7 @@ var recoverableErrorPatterns = map[dto.RecoveryType][]string{
 
 // DeduceRecoveryType determines if an error reason indicates a recoverable error
 // and returns the appropriate recovery type, or empty string if not recoverable
-func DeduceRecoveryType(errorReason string) dto.RecoveryType {
+func DeduceRecoveryType(errorReason string) models.RecoveryType {
 	if errorReason == "" {
 		return ""
 	}

@@ -48,6 +48,7 @@ import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import { checkRecoverable } from '../utils/recoverable.util'
 import {
   SandboxSortField,
   SandboxSortDirection,
@@ -1157,7 +1158,14 @@ export class SandboxService {
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    await runnerAdapter.recover(sandbox)
+    try {
+      await runnerAdapter.recover(sandbox)
+    } catch (error) {
+      // Recovery failed, make sandbox unrecoverable to prevent spam
+      sandbox.recoverable = false
+      await this.sandboxRepository.save(sandbox)
+      throw error
+    }
 
     // Clear error state
     sandbox.state = SandboxState.STOPPED
@@ -1368,17 +1376,7 @@ export class SandboxService {
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
       if (newState === SandboxState.ERROR || newState === SandboxState.BUILD_FAILED) {
-        if (errorReason && sandbox.runnerId) {
-          try {
-            const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
-            const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-            sandbox.recoverable = await runnerAdapter.isRecoverable(sandbox.id, errorReason)
-          } catch {
-            sandbox.recoverable = false
-          }
-        } else {
-          sandbox.recoverable = false
-        }
+        await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
       }
     }
     //  we need to update the desired state to match the new state
