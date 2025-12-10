@@ -62,8 +62,16 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	return nil
 }
 
-// stopContainerWithRetry attempts to stop a container with retries, falling back to kill if needed
-// timeout is the number of seconds to wait for the container to stop gracefully before forcing a kill
+// stopContainerWithRetry attempts to stop the specified container by sending a stop signal,
+// retrying the operation with exponential backoff up to a maximum number of attempts.
+// If stopping fails after all retries, it falls back to forcefully killing the container.
+//
+// Parameters:
+//   - ctx: context for cancellation and timeout
+//   - containerId: ID of the container to stop
+//   - timeout: number of seconds to wait for graceful stop before forcing a kill
+//
+// Returns an error if the container could not be stopped or killed.
 func (d *DockerClient) stopContainerWithRetry(ctx context.Context, containerId string, timeout int) error {
 	// Use exponential backoff helper for container stopping
 	err := d.retryWithExponentialBackoff(

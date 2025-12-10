@@ -90,7 +90,7 @@ export abstract class SandboxAction {
 
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
-      await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+      sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
     }
 
     if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {

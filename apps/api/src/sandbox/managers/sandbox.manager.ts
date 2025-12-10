@@ -452,7 +452,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       sandbox.recoverable = false
 
       try {
-        await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+        sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
       } catch (err) {
         this.logger.error(`Error checking if sandbox ${sandboxId} is recoverable:`, err)
       }
