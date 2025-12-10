@@ -76,7 +76,7 @@ func (a *ApiServer) Start() error {
 	binding.Validator = new(DefaultValidator)
 
 	a.router = gin.New()
-	a.router.Use(gin.Recovery())
+	a.router.Use(common_errors.Recovery())
 
 	gin.SetMode(gin.ReleaseMode)
 	if config.GetEnvironment() == "development" {

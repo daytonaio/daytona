@@ -3,24 +3,32 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { AuthProvider, AuthProviderProps } from 'react-oidc-context'
-import { ReactNode, useMemo } from 'react'
-import { ConfigContext } from '../contexts/ConfigContext'
-import { suspendedFetch } from '../lib/suspended-fetch'
-import { InMemoryWebStorage, WebStorageStateStore } from 'oidc-client-ts'
-import { DaytonaConfiguration } from '@daytonaio/api-client'
 import { RoutePath } from '@/enums/RoutePath'
+import { queryKeys } from '@/hooks/queries/queryKeys'
+import { DaytonaConfiguration } from '@daytonaio/api-client'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { InMemoryWebStorage, WebStorageStateStore } from 'oidc-client-ts'
+import { ReactNode, useMemo } from 'react'
+import { AuthProvider, AuthProviderProps } from 'react-oidc-context'
+import { ConfigContext } from '../contexts/ConfigContext'
 
 const apiUrl = (import.meta.env.VITE_BASE_API_URL ?? window.location.origin) + '/api'
-
-const getConfig = suspendedFetch<DaytonaConfiguration>(`${apiUrl}/config`)
 
 type Props = {
   children: ReactNode
 }
 
 export function ConfigProvider(props: Props) {
-  const config = getConfig()
+  const { data: config } = useSuspenseQuery({
+    queryKey: queryKeys.config.all,
+    queryFn: async () => {
+      const res = await fetch(`${apiUrl}/config`)
+      if (!res.ok) {
+        throw res
+      }
+      return res.json() as Promise<DaytonaConfiguration>
+    },
+  })
 
   const oidcConfig: AuthProviderProps = useMemo(() => {
     const isLocalhost = window.location.hostname === 'localhost'

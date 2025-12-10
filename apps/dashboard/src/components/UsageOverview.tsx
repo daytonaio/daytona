@@ -4,7 +4,7 @@
  */
 
 import { cn } from '@/lib/utils'
-import { OrganizationUsageOverview } from '@daytonaio/api-client'
+import { RegionUsageOverview } from '@daytonaio/api-client'
 import QuotaLine from './QuotaLine'
 import { Skeleton } from './ui/skeleton'
 
@@ -12,7 +12,7 @@ export function UsageOverview({
   usageOverview,
   className,
 }: {
-  usageOverview: OrganizationUsageOverview
+  usageOverview: RegionUsageOverview
   className?: string
 }) {
   return (

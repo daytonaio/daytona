@@ -120,7 +120,6 @@ export class DockerRegistryController {
     description: 'Temporary registry access has been generated',
     type: RegistryPushAccessDto,
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGISTRIES])
   async getTransientPushAccess(@AuthContext() authContext: OrganizationAuthContext): Promise<RegistryPushAccessDto> {
     return this.dockerRegistryService.getRegistryPushAccess(authContext.organizationId, authContext.userId)
   }

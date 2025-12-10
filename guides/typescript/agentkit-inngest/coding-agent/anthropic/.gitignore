@@ -1,0 +1,44 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment files
+.env
+
+# VS Code
+.vscode/
+
+# Daytona SDK and sandbox artifacts
+.daytona/
+sandbox/
+
+# Build output
+/dist/
+/build/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Misc
+*.swp
+*.swo
+
+# Ignore coverage reports
+coverage/
+
+# Ignore generated files
+*.out
+*.tmp
+
+# Ignore Copilot agent artifacts
+copilot-agent-*

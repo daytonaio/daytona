@@ -87,6 +87,10 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ id })
   }
 
+  async findOneByDomain(domain: string): Promise<Runner | null> {
+    return this.runnerRepository.findOneBy({ domain })
+  }
+
   async findByIds(runnerIds: string[]): Promise<Runner[]> {
     if (runnerIds.length === 0) {
       return []

@@ -4,14 +4,14 @@
  */
 
 import { cn } from '@/lib/utils'
-import { OrganizationUsageOverview } from '@daytonaio/api-client/src'
+import { RegionUsageOverview } from '@daytonaio/api-client/src'
 
 export function UsageOverviewIndicator({
   usage,
   className,
   isLive,
 }: {
-  usage: OrganizationUsageOverview
+  usage: RegionUsageOverview
   className?: string
   isLive?: boolean
 }) {

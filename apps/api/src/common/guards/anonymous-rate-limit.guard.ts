@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable } from '@nestjs/common'
+import { Injectable, ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { ThrottlerGuard, ThrottlerModuleOptions, ThrottlerRequest, ThrottlerStorage } from '@nestjs/throttler'
 import { Request } from 'express'
@@ -18,6 +18,12 @@ export class AnonymousRateLimitGuard extends ThrottlerGuard {
     // For anonymous requests, use IP address as tracker
     const ip = req.ips.length ? req.ips[0] : req.ip
     return `anonymous:${ip}`
+  }
+
+  protected generateKey(context: ExecutionContext, suffix: string, name: string): string {
+    // Override to make rate limiting per-rate-limit-type, not per-route
+    // This ensures all routes share the same counter for anonymous rate limiting
+    return `${name}-${suffix}`
   }
 
   async handleRequest(requestProps: ThrottlerRequest): Promise<boolean> {

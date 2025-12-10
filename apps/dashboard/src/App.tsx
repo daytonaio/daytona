@@ -28,7 +28,6 @@ import {
   DialogTitle,
 } from './components/ui/dialog'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
-import { ThemeProvider } from './contexts/ThemeContext'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { useConfig } from './hooks/useConfig'
 import { addPylonWidget } from './lib/pylon-widget'
@@ -48,8 +47,7 @@ import Spending from './pages/Spending'
 import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
-import { BillingProvider } from './providers/BillingProvider'
-import { QueryProvider } from './providers/QueryProvider'
+import { RegionsProvider } from './providers/RegionsProvider'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -121,92 +119,86 @@ function App() {
   }
 
   return (
-    <ThemeProvider>
-      <Routes>
-        <Route path={RoutePath.LANDING} element={<LandingPage />} />
-        <Route path={RoutePath.LOGOUT} element={<Logout />} />
-        <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
-        <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
+    <Routes>
+      <Route path={RoutePath.LANDING} element={<LandingPage />} />
+      <Route path={RoutePath.LOGOUT} element={<Logout />} />
+      <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
+      <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
+      <Route
+        path={RoutePath.DASHBOARD}
+        element={
+          <Suspense fallback={<LoadingFallback />}>
+            <ApiProvider>
+              <OrganizationsProvider>
+                <SelectedOrganizationProvider>
+                  <RegionsProvider>
+                    <UserOrganizationInvitationsProvider>
+                      <NotificationSocketProvider>
+                        <Dashboard />
+                      </NotificationSocketProvider>
+                    </UserOrganizationInvitationsProvider>
+                  </RegionsProvider>
+                </SelectedOrganizationProvider>
+              </OrganizationsProvider>
+            </ApiProvider>
+          </Suspense>
+        }
+      >
+        <Route index element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />} />
+        <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
+        <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
+        <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
+        <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
         <Route
-          path={RoutePath.DASHBOARD}
+          path={getRouteSubPath(RoutePath.VOLUMES)}
           element={
-            <Suspense fallback={<LoadingFallback />}>
-              <QueryProvider>
-                <ApiProvider>
-                  <OrganizationsProvider>
-                    <SelectedOrganizationProvider>
-                      <BillingProvider>
-                        <UserOrganizationInvitationsProvider>
-                          <NotificationSocketProvider>
-                            <Dashboard />
-                          </NotificationSocketProvider>
-                        </UserOrganizationInvitationsProvider>
-                      </BillingProvider>
-                    </SelectedOrganizationProvider>
-                  </OrganizationsProvider>
-                </ApiProvider>
-              </QueryProvider>
-            </Suspense>
+            <RequiredPermissionsOrganizationPageWrapper
+              requiredPermissions={[OrganizationRolePermissionsEnum.READ_VOLUMES]}
+            >
+              <Volumes />
+            </RequiredPermissionsOrganizationPageWrapper>
           }
-        >
-          <Route
-            index
-            element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />}
-          />
-          <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
-          <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
-          <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
-          <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
-          <Route
-            path={getRouteSubPath(RoutePath.VOLUMES)}
-            element={
-              <RequiredPermissionsOrganizationPageWrapper
-                requiredPermissions={[OrganizationRolePermissionsEnum.READ_VOLUMES]}
-              >
-                <Volumes />
-              </RequiredPermissionsOrganizationPageWrapper>
-            }
-          />
-          <Route
-            path={getRouteSubPath(RoutePath.LIMITS)}
-            element={
-              <OwnerAccessOrganizationPageWrapper>
-                <Limits />
-              </OwnerAccessOrganizationPageWrapper>
-            }
-          />
-          {config.billingApiUrl && (
-            <>
-              <Route
-                path={getRouteSubPath(RoutePath.BILLING_SPENDING)}
-                element={
-                  <OwnerAccessOrganizationPageWrapper>
-                    <Spending />
-                  </OwnerAccessOrganizationPageWrapper>
-                }
-              />
-              <Route
-                path={getRouteSubPath(RoutePath.BILLING_WALLET)}
-                element={
-                  <OwnerAccessOrganizationPageWrapper>
-                    <Wallet />
-                  </OwnerAccessOrganizationPageWrapper>
-                }
-              />
-              <Route path={getRouteSubPath(RoutePath.EMAIL_VERIFY)} element={<EmailVerify />} />
-            </>
-          )}
-          <Route
-            path={getRouteSubPath(RoutePath.MEMBERS)}
-            element={
-              <NonPersonalOrganizationPageWrapper>
-                <OrganizationMembers />
-              </NonPersonalOrganizationPageWrapper>
-            }
-          />
-          {
-            // TODO: uncomment when we allow creating custom roles
-            /* <Route
+        />
+        <Route
+          path={getRouteSubPath(RoutePath.LIMITS)}
+          element={
+            <OwnerAccessOrganizationPageWrapper>
+              <Limits />
+            </OwnerAccessOrganizationPageWrapper>
+          }
+        />
+        {config.billingApiUrl && (
+          <>
+            <Route
+              path={getRouteSubPath(RoutePath.BILLING_SPENDING)}
+              element={
+                <OwnerAccessOrganizationPageWrapper>
+                  <Spending />
+                </OwnerAccessOrganizationPageWrapper>
+              }
+            />
+            <Route
+              path={getRouteSubPath(RoutePath.BILLING_WALLET)}
+              element={
+                <OwnerAccessOrganizationPageWrapper>
+                  <Wallet />
+                </OwnerAccessOrganizationPageWrapper>
+              }
+            />
+            <Route path={getRouteSubPath(RoutePath.EMAIL_VERIFY)} element={<EmailVerify />} />
+          </>
+        )}
+        <Route
+          path={getRouteSubPath(RoutePath.MEMBERS)}
+          element={
+            <NonPersonalOrganizationPageWrapper>
+              <OrganizationMembers />
+            </NonPersonalOrganizationPageWrapper>
+          }
+        />
+        {
+          // TODO: uncomment when we allow creating custom roles
+          /* <Route
           path={getRouteSubPath(RoutePath.ROLES)}
           element={
             <NonPersonalOrganizationPageWrapper>
@@ -216,28 +208,27 @@ function App() {
             </NonPersonalOrganizationPageWrapper>
           }
         /> */
+        }
+        <Route
+          path={getRouteSubPath(RoutePath.AUDIT_LOGS)}
+          element={
+            <RequiredPermissionsOrganizationPageWrapper
+              requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
+            >
+              <AuditLogs />
+            </RequiredPermissionsOrganizationPageWrapper>
           }
-          <Route
-            path={getRouteSubPath(RoutePath.AUDIT_LOGS)}
-            element={
-              <RequiredPermissionsOrganizationPageWrapper
-                requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
-              >
-                <AuditLogs />
-              </RequiredPermissionsOrganizationPageWrapper>
-            }
-          />
-          <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
-          <Route
-            path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
-            element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}
-          />
-          <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
-          <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </ThemeProvider>
+        />
+        <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
+        <Route
+          path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
+          element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}
+        />
+        <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
+        <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   )
 }
 

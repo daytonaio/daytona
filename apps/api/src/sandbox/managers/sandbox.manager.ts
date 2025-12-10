@@ -65,7 +65,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'auto-stop-check' })
   @TrackJobExecution()
   @WithInstrumentation()
   @LogExecution('auto-stop-check')
@@ -98,8 +98,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             order: {
               lastBackupAt: 'ASC',
             },
-            //  todo: increase this number when auto-stop is stable
-            take: 10,
+            take: 100,
           })
 
           await Promise.all(
@@ -111,11 +110,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.pending = true
                 //  if auto-delete interval is 0, delete the sandbox immediately
                 if (sandbox.autoDeleteInterval === 0) {
-                  sandbox.desiredState = SandboxDesiredState.DESTROYED
+                  sandbox.applyDesiredDestroyedState()
                 } else {
+                  sandbox.pending = true
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
@@ -134,7 +133,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'auto-archive-check' })
   @TrackJobExecution()
   @LogExecution('auto-archive-check')
   @WithInstrumentation()
@@ -157,7 +156,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         order: {
           lastBackupAt: 'ASC',
         },
-        take: 200,
+        take: 100,
       })
 
       await Promise.all(
@@ -184,7 +183,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-delete-check' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'auto-delete-check' })
   @TrackJobExecution()
   @LogExecution('auto-delete-check')
   @WithInstrumentation()
@@ -228,8 +227,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.pending = true
-                sandbox.desiredState = SandboxDesiredState.DESTROYED
+                sandbox.applyDesiredDestroyedState()
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
                 this.syncInstanceState(sandbox.id)
               } catch (error) {

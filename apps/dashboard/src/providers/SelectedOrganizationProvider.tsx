@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useAuth } from 'react-oidc-context'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { suspend } from 'suspend-react'
-import { Organization, OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { useApi } from '@/hooks/useApi'
 import { ISelectedOrganizationContext, SelectedOrganizationContext } from '@/contexts/SelectedOrganizationContext'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import { usePostHog } from 'posthog-js/react'
 import { handleApiError } from '@/lib/error-handling'
+import { Organization, OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { usePostHog } from 'posthog-js/react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuth } from 'react-oidc-context'
+import { toast } from 'sonner'
+import { suspend } from 'suspend-react'
 
 type Props = {
   children: ReactNode

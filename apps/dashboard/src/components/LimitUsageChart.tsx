@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/chart'
 import { FacetFilter } from '@/components/ui/facet-filter'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { OrganizationUsageOverview } from '@daytonaio/api-client'
+import type { RegionUsageOverview } from '@daytonaio/api-client'
 import { useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'
 
@@ -40,7 +40,7 @@ export function LimitUsageChart({
   defaultPeriod?: number
   defaultResources?: ResourceKey[]
   pastUsage: PastUsage[]
-  currentUsage?: OrganizationUsageOverview | null
+  currentUsage?: RegionUsageOverview | null
   title?: React.ReactNode
 }) {
   const [period, setPeriod] = useState(defaultPeriod.toString())

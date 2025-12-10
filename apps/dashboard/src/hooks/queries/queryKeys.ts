@@ -4,6 +4,9 @@
  */
 
 export const queryKeys = {
+  config: {
+    all: ['config'] as const,
+  },
   organization: {
     all: ['organization'] as const,
 
@@ -19,9 +22,14 @@ export const queryKeys = {
     tier: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'tier'] as const,
     wallet: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'wallet'] as const,
   },
-
+  user: {
+    all: ['users'] as const,
+    accountProviders: () => [...queryKeys.user.all, 'account-providers'] as const,
+  },
   billing: {
     all: ['billing'] as const,
     tiers: () => [...queryKeys.billing.all, 'tiers'] as const,
+    emails: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'emails'] as const,
+    portalUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'portal-url'] as const,
   },
 } as const

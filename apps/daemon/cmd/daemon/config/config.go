@@ -5,7 +5,6 @@ package config
 
 import (
 	"os"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
@@ -14,10 +13,15 @@ import (
 )
 
 type Config struct {
-	LogFilePath *string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
+	DaemonLogFilePath            string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
+	EntrypointLogFilePath        string `envconfig:"DAYTONA_ENTRYPOINT_LOG_FILE_PATH"`
+	EntrypointShutdownTimeoutSec int    `envconfig:"ENTRYPOINT_SHUTDOWN_TIMEOUT_SEC"`
+	SigtermShutdownTimeoutSec    int    `envconfig:"SIGTERM_SHUTDOWN_TIMEOUT_SEC"`
+	UserHomeAsWorkDir            bool   `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
 }
 
-var DEFAULT_LOG_FILE_PATH = "/tmp/daytona-daemon.log"
+var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"
+var defaultEntrypointLogFilePath = "/tmp/daytona-entrypoint.log"
 
 var config *Config
 
@@ -40,18 +44,23 @@ func GetConfig() (*Config, error) {
 		return nil, err
 	}
 
-	config.LogFilePath = GetLogFilePath()
-
-	return config, nil
-}
-
-func GetLogFilePath() *string {
-	logFilePath, ok := os.LookupEnv("DAYTONA_DAEMON_LOG_FILE_PATH")
-	if !ok {
-		return &DEFAULT_LOG_FILE_PATH
+	if config.DaemonLogFilePath == "" {
+		config.DaemonLogFilePath = defaultDaemonLogFilePath
 	}
 
-	logFilePath = strings.Replace(logFilePath, "(HOME)", os.Getenv("HOME"), 1)
+	if config.EntrypointLogFilePath == "" {
+		config.EntrypointLogFilePath = defaultEntrypointLogFilePath
+	}
 
-	return &logFilePath
+	if config.EntrypointShutdownTimeoutSec <= 0 {
+		// Default to 10 seconds
+		config.EntrypointShutdownTimeoutSec = 10
+	}
+
+	if config.SigtermShutdownTimeoutSec <= 0 {
+		// Default to 5 seconds
+		config.SigtermShutdownTimeoutSec = 5
+	}
+
+	return config, nil
 }

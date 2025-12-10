@@ -4,28 +4,28 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
+import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
-import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
-import { cn } from '@/lib/utils'
-import { useBilling } from '@/hooks/useBilling'
 import { RoutePath } from '@/enums/RoutePath'
-import { useNavigate } from 'react-router-dom'
+import { useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useConfig } from '@/hooks/useConfig'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn } from '@/lib/utils'
+import { useNavigate } from 'react-router-dom'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
-  const { wallet } = useBilling()
-  const navigate = useNavigate()
-  const location = useLocation()
   const config = useConfig()
+  useOwnerWalletQuery() // prefetch wallet
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (
@@ -41,13 +41,15 @@ const Dashboard: React.FC = () => {
       return
     }
 
-    const excludedRoutes = [RoutePath.BILLING_WALLET, RoutePath.USER_INVITATIONS, RoutePath.MEMBERS]
-    const shouldSkipRedirect = excludedRoutes.some((route) => location.pathname.startsWith(route))
-
-    if (wallet && wallet.ongoingBalanceCents <= 0 && !shouldSkipRedirect) {
-      navigate(RoutePath.BILLING_WALLET)
+    if (!selectedOrganization) {
+      return
     }
-  }, [wallet, config.billingApiUrl]) // Only depend on wallet to avoid infinite loops from navigation
+
+    if (!selectedOrganization.defaultRegionId) {
+      navigate(RoutePath.SETTINGS)
+      return
+    }
+  }, [config.billingApiUrl, selectedOrganization]) // Do not depend on navigate to avoid infinite loops
 
   const [bannerText, bannerLearnMoreUrl] = useMemo(() => {
     if (!config.announcements || Object.entries(config.announcements).length === 0) {

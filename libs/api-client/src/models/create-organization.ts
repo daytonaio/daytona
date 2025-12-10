@@ -24,4 +24,10 @@ export interface CreateOrganization {
    * @memberof CreateOrganization
    */
   name: string
+  /**
+   * The ID of the default region for the organization
+   * @type {string}
+   * @memberof CreateOrganization
+   */
+  defaultRegionId: string
 }

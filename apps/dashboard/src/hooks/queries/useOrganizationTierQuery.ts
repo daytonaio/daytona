@@ -9,13 +9,19 @@ import { useApi } from '../useApi'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
-export const useOrganizationTierQuery = ({ organizationId }: { organizationId: string }) => {
+export const useOrganizationTierQuery = ({
+  organizationId,
+  enabled = true,
+}: {
+  organizationId: string
+  enabled?: boolean
+}) => {
   const { billingApi } = useApi()
   const config = useConfig()
 
   return useQuery<OrganizationTier | null>({
     queryKey: queryKeys.organization.tier(organizationId),
     queryFn: () => billingApi.getOrganizationTier(organizationId),
-    enabled: !!organizationId && !!config.billingApiUrl,
+    enabled: Boolean(enabled && organizationId && config.billingApiUrl),
   })
 }

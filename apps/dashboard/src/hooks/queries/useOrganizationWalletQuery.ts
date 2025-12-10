@@ -9,13 +9,19 @@ import { useApi } from '../useApi'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
 
-export const useOrganizationWalletQuery = ({ organizationId }: { organizationId: string }) => {
+export const useOrganizationWalletQuery = ({
+  organizationId,
+  enabled = true,
+}: {
+  organizationId: string
+  enabled?: boolean
+}) => {
   const { billingApi } = useApi()
   const config = useConfig()
 
   return useQuery<OrganizationWallet>({
     queryKey: queryKeys.organization.wallet(organizationId),
     queryFn: () => billingApi.getOrganizationWallet(organizationId),
-    enabled: !!organizationId && !!config.billingApiUrl,
+    enabled: Boolean(enabled && config.billingApiUrl && organizationId),
   })
 }

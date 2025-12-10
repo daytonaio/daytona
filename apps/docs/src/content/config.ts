@@ -92,16 +92,16 @@ export const getSidebarConfig = (
             icon: 'terminal.svg',
           },
         },
-        {
-          type: 'link',
-          href: 'https://www.daytona.io/dotfiles/guides',
-          label: labels['sidebarconfig.guides'],
-          disablePagination: true,
-          external: true,
-          attrs: {
-            icon: 'book.svg',
-          },
-        },
+        // {
+        //   type: 'link',
+        //   href: 'https://www.daytona.io/dotfiles/guides',
+        //   label: labels['sidebarconfig.guides'],
+        //   disablePagination: true,
+        //   external: true,
+        //   attrs: {
+        //     icon: 'book.svg',
+        //   },
+        // },
       ],
     },
     {

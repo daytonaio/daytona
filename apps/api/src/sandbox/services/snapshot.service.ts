@@ -35,6 +35,10 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
 import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
+import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
+import { Region } from '../../region/entities/region.entity'
+import { Runner } from '../entities/runner.entity'
+import { RunnerState } from '../enums/runner-state.enum'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -50,6 +54,10 @@ export class SnapshotService {
     private readonly buildInfoRepository: Repository<BuildInfo>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
+    @InjectRepository(Region)
+    private readonly regionRepository: Repository<Region>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
@@ -101,34 +109,23 @@ export class SnapshotService {
     return filteredEntrypoint.length > 0 ? filteredEntrypoint : undefined
   }
 
-  private async checkForValidActiveSnapshot(
-    ref: string,
-    entrypoint: string[] | undefined,
-    skipValidation: boolean,
-  ): Promise<Snapshot | null> {
-    // Check if there is already an active snapshot with the same ref;
-    // Only check entrypoint if skipValidation is not set on the DTO
-    // We can skip the pulling and validation in that case - note: relevant only for Docker
-
-    const snapshotFindOptions: any = {
-      ref,
-      state: SnapshotState.ACTIVE,
-    }
-
-    if (!entrypoint || entrypoint.length === 0) {
-      return null
-    }
-
-    if (!skipValidation) {
-      snapshotFindOptions.entrypoint = Array.isArray(entrypoint) ? entrypoint : [entrypoint]
-    }
-
-    return await this.snapshotRepository.findOne({
-      where: snapshotFindOptions,
-    })
+  private async readySnapshotRunnerExists(ref: string, regionId: string): Promise<boolean> {
+    return await this.snapshotRunnerRepository
+      .createQueryBuilder('sr')
+      .innerJoin('runner', 'r', 'r.id::text = sr."runnerId"::text')
+      .where('sr."snapshotRef" = :ref', { ref })
+      .andWhere('sr.state = :snapshotRunnerState', { snapshotRunnerState: SnapshotRunnerState.READY })
+      .andWhere('r.region = :regionId', { regionId })
+      .andWhere('r.state = :runnerState', { runnerState: RunnerState.READY })
+      .andWhere('r.unschedulable = false')
+      .getExists()
   }
 
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
+    if (!organization.defaultRegionId) {
+      throw new DefaultRegionRequiredException()
+    }
+
     let pendingSnapshotCountIncrement: number | undefined
 
     if (!createSnapshotDto.imageName) {
@@ -196,13 +193,9 @@ export class SnapshotService {
             : imageDetails.digest
         ref = `${defaultInternalRegistry.url.replace(/^https?:\/\//, '')}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
 
-        const existingSnapshot = await this.checkForValidActiveSnapshot(
-          ref,
-          entrypoint,
-          createSnapshotDto.skipValidation,
-        )
+        const exists = await this.readySnapshotRunnerExists(ref, organization.defaultRegionId)
 
-        if (existingSnapshot) {
+        if (exists) {
           state = SnapshotState.ACTIVE
         }
       }
@@ -235,6 +228,10 @@ export class SnapshotService {
   }
 
   async createFromBuildInfo(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
+    if (!organization.defaultRegionId) {
+      throw new DefaultRegionRequiredException()
+    }
+
     let pendingSnapshotCountIncrement: number | undefined
     let entrypoint: string[] | undefined = undefined
 
@@ -300,13 +297,9 @@ export class SnapshotService {
       const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
       snapshot.ref = `${defaultInternalRegistry.url.replace(/^(https?:\/\/)/, '')}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
 
-      const existingSnapshot = await this.checkForValidActiveSnapshot(
-        snapshot.ref,
-        entrypoint,
-        createSnapshotDto.skipValidation,
-      )
+      const exists = await this.readySnapshotRunnerExists(snapshot.ref, organization.defaultRegionId)
 
-      if (existingSnapshot) {
+      if (exists) {
         snapshot.state = SnapshotState.ACTIVE
       }
 
@@ -653,6 +646,27 @@ export class SnapshotService {
     }
 
     return ['sleep', 'infinity']
+  }
+
+  /**
+   * Get all regions for snapshot propagation for an organization.
+   *
+   * Regions are considered for snapshot propagation if:
+   * - they are organization regions
+   * - they are shared regions with quotas allocated for the organization
+   *
+   * @param organizationId - The ID of the organization.
+   * @returns The regions for snapshot propagation.
+   */
+  async getRegionsForSnapshotPropagation(organizationId: string): Promise<Region[]> {
+    return await this.regionRepository
+      .createQueryBuilder('region')
+      .where('region."organizationId" = :organizationId', { organizationId })
+      .orWhere(
+        'region."organizationId" IS NULL AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
+        { organizationId },
+      )
+      .getMany()
   }
 
   @OnEvent(OrganizationEvents.SUSPENDED_SNAPSHOT_DEACTIVATED)
