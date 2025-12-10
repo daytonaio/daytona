@@ -1603,14 +1603,42 @@ export class SandboxService {
       updateData.backupState = BackupState.NONE
     }
 
-    // TODO: refactor
     if (backupState !== undefined) {
-      // Call the setter to compute the derived value
-      sandbox.setBackupState(backupState)
-      updateData.backupState = sandbox.backupState
+      this.applyBackupStateLogic(sandbox, backupState, updateData)
     }
 
     await this.sandboxRepository.update(sandbox.id, updateData)
+  }
+
+  private applyBackupStateLogic(sandbox: Sandbox, backupState: BackupState, updateData: Partial<Sandbox>): void {
+    updateData.backupState = backupState
+
+    switch (backupState) {
+      case BackupState.NONE:
+        updateData.backupSnapshot = null
+        break
+      case BackupState.COMPLETED: {
+        const now = new Date()
+        updateData.lastBackupAt = now
+        updateData.existingBackupSnapshots = [
+          ...sandbox.existingBackupSnapshots,
+          {
+            snapshotName: sandbox.backupSnapshot,
+            createdAt: now,
+          },
+        ]
+        updateData.backupErrorReason = null
+
+        // Handle archiving logic
+        if (sandbox.desiredState === SandboxDesiredState.ARCHIVED) {
+          if (sandbox.state === SandboxState.ARCHIVING || sandbox.state === SandboxState.STOPPED) {
+            updateData.state = SandboxState.ARCHIVED
+            updateData.runnerId = null
+          }
+        }
+        break
+      }
+    }
   }
 
   async updateSandboxBackupState(
@@ -1620,31 +1648,26 @@ export class SandboxService {
     backupRegistryId?: string | null,
     backupErrorReason?: string | null,
   ): Promise<Sandbox> {
-    const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
+    const sandbox = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
-    const originalState = sandboxToUpdate.state
-    const originalRunnerId = sandboxToUpdate.runnerId
 
-    sandboxToUpdate.setBackupState(backupState, backupSnapshot, backupRegistryId, backupErrorReason)
+    const updateData: Partial<Sandbox> = {}
 
-    const updateData: Partial<Sandbox> = {
-      backupState: sandboxToUpdate.backupState,
-      backupSnapshot: sandboxToUpdate.backupSnapshot,
-      backupRegistryId: sandboxToUpdate.backupRegistryId,
-      backupErrorReason: sandboxToUpdate.backupErrorReason,
-      lastBackupAt: sandboxToUpdate.lastBackupAt,
-      existingBackupSnapshots: sandboxToUpdate.existingBackupSnapshots,
+    // Apply backup state logic
+    this.applyBackupStateLogic(sandbox, backupState, updateData)
+
+    // Update optional fields if provided
+    if (backupSnapshot !== undefined) {
+      updateData.backupSnapshot = backupSnapshot
+    }
+    if (backupRegistryId !== undefined) {
+      updateData.backupRegistryId = backupRegistryId
+    }
+    if (backupErrorReason !== undefined) {
+      updateData.backupErrorReason = backupErrorReason
     }
 
-    if (sandboxToUpdate.state !== originalState) {
-      updateData.state = sandboxToUpdate.state
-    }
-
-    if (sandboxToUpdate.runnerId !== originalRunnerId) {
-      updateData.runnerId = sandboxToUpdate.runnerId
-    }
-
-    return await this.sandboxRepository.update(sandboxToUpdate.id, updateData)
+    return await this.sandboxRepository.update(sandbox.id, updateData)
   }
 }

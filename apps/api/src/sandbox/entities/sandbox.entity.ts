@@ -199,47 +199,4 @@ export class Sandbox {
     this.name = name || this.id
     this.region = region
   }
-
-  // TODO: move to sandbox service
-  public setBackupState(
-    state: BackupState,
-    backupSnapshot?: string | null,
-    backupRegistryId?: string | null,
-    backupErrorReason?: string | null,
-  ) {
-    this.backupState = state
-    switch (state) {
-      case BackupState.NONE:
-        this.backupSnapshot = null
-        break
-      case BackupState.COMPLETED: {
-        const now = new Date()
-        this.lastBackupAt = now
-        this.existingBackupSnapshots = [
-          ...this.existingBackupSnapshots,
-          {
-            snapshotName: this.backupSnapshot,
-            createdAt: now,
-          },
-        ]
-        this.backupErrorReason = null
-        if (this.desiredState === SandboxDesiredState.ARCHIVED) {
-          if (this.state === SandboxState.ARCHIVING || this.state === SandboxState.STOPPED) {
-            this.state = SandboxState.ARCHIVED
-            this.runnerId = null
-          }
-        }
-        break
-      }
-    }
-    if (backupSnapshot !== undefined) {
-      this.backupSnapshot = backupSnapshot
-    }
-    if (backupRegistryId !== undefined) {
-      this.backupRegistryId = backupRegistryId
-    }
-    if (backupErrorReason !== undefined) {
-      this.backupErrorReason = backupErrorReason
-    }
-  }
 }
