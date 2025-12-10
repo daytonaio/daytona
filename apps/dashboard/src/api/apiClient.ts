@@ -16,6 +16,7 @@ import {
   ToolboxApi,
   AuditApi,
   RegionsApi,
+  RunnersApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
@@ -34,6 +35,7 @@ export class ApiClient {
   private _toolboxApi: ToolboxApi
   private _auditApi: AuditApi
   private _regionsApi: RegionsApi
+  private _runnersApi: RunnersApi
 
   constructor(config: DashboardConfig, accessToken: string) {
     this.config = new Configuration({
@@ -71,6 +73,7 @@ export class ApiClient {
     this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
     this._auditApi = new AuditApi(this.config, undefined, axiosInstance)
     this._regionsApi = new RegionsApi(this.config, undefined, axiosInstance)
+    this._runnersApi = new RunnersApi(this.config, undefined, axiosInstance)
   }
 
   public setAccessToken(accessToken: string) {
@@ -119,6 +122,10 @@ export class ApiClient {
 
   public get regionsApi() {
     return this._regionsApi
+  }
+
+  public get runnersApi() {
+    return this._runnersApi
   }
 
   public async webhookRequest(method: string, url: string, data?: any) {

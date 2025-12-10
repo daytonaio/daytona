@@ -43,6 +43,7 @@ export function SandboxTable({
   onChangeSnapshotSearchValue,
   regionsData,
   regionsDataIsLoading,
+  getRegionName,
   handleStart,
   handleStop,
   handleDelete,
@@ -93,6 +94,7 @@ export function SandboxTable({
     onFiltersChange,
     regionsData,
     handleRecover,
+    getRegionName,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)

@@ -27,7 +27,7 @@ export const OrganizationPicker: React.FC = () => {
 
   const { organizations, refreshOrganizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()
-  const { sharedRegions, loadingRegions, getRegionName } = useRegions()
+  const { sharedRegions: regions, loadingRegions, getRegionName } = useRegions()
 
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)
@@ -139,7 +139,7 @@ export const OrganizationPicker: React.FC = () => {
       <CreateOrganizationDialog
         open={showCreateOrganizationDialog}
         onOpenChange={setShowCreateOrganizationDialog}
-        regions={sharedRegions}
+        regions={regions}
         loadingRegions={loadingRegions}
         getRegionName={getRegionName}
         onCreateOrganization={handleCreateOrganization}

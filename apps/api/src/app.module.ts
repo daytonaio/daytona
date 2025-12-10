@@ -95,6 +95,7 @@ import { BodyParserErrorModule } from './common/modules/body-parser-error.module
               lazyConnect: configService.get('skipConnections'),
             },
           },
+          entitySkipConstructor: true,
         }
       },
     }),

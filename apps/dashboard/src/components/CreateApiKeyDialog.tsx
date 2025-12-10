@@ -19,11 +19,11 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
-import { getMaskedApiKey } from '@/lib/utils'
 import { CreateApiKeyPermissionGroup } from '@/types/CreateApiKeyPermissionGroup'
 import { ApiKeyResponse, CreateApiKeyPermissionsEnum } from '@daytonaio/api-client'
 import { Check, Copy, Plus } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
+import { getMaskedToken } from '@/lib/utils'
 
 interface CreateApiKeyDialogProps {
   availablePermissions: CreateApiKeyPermissionsEnum[]
@@ -161,7 +161,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                   onMouseEnter={() => setIsCreatedKeyRevealed(true)}
                   onMouseLeave={() => setIsCreatedKeyRevealed(false)}
                 >
-                  {isCreatedKeyRevealed ? createdKey.value : getMaskedApiKey(createdKey.value)}
+                  {isCreatedKeyRevealed ? createdKey.value : getMaskedToken(createdKey.value)}
                 </span>
                 {(copied === 'API Key' && <Check className="w-4 h-4" />) || (
                   <Copy

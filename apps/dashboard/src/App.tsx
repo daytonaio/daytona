@@ -48,6 +48,8 @@ import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
+import Regions from './pages/Regions'
+import Runners from './pages/Runners'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -220,6 +222,17 @@ function App() {
           }
         />
         <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
+        <Route path={getRouteSubPath(RoutePath.REGIONS)} element={<Regions />} />
+        <Route
+          path={getRouteSubPath(RoutePath.RUNNERS)}
+          element={
+            <RequiredPermissionsOrganizationPageWrapper
+              requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
+            >
+              <Runners />
+            </RequiredPermissionsOrganizationPageWrapper>
+          }
+        />
         <Route
           path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
           element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}

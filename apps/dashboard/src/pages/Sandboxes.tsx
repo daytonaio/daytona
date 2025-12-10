@@ -302,7 +302,7 @@ const Sandboxes: React.FC = () => {
 
   // Region Filter
 
-  const { regions: regionsData, loadingRegions: regionsDataIsLoading } = useRegions()
+  const { regions: regionsData, loadingRegions: regionsDataIsLoading, getRegionName } = useRegions()
 
   // Subscribe to Sandbox Events
 
@@ -851,6 +851,7 @@ const Sandboxes: React.FC = () => {
           filters={filters}
           onFiltersChange={handleFiltersChange}
           handleRecover={handleRecover}
+          getRegionName={getRegionName}
         />
 
         {sandboxToDelete && (
@@ -1021,6 +1022,7 @@ const Sandboxes: React.FC = () => {
           writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
           deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
           handleRecover={handleRecover}
+          getRegionName={getRegionName}
         />
       </PageContent>
     </PageLayout>

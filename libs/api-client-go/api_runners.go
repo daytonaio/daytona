@@ -31,7 +31,20 @@ type RunnersAPI interface {
 	CreateRunner(ctx context.Context) RunnersAPICreateRunnerRequest
 
 	// CreateRunnerExecute executes the request
-	CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*http.Response, error)
+	//  @return CreateRunnerResponse
+	CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*CreateRunnerResponse, *http.Response, error)
+
+	/*
+		DeleteRunner Delete runner
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Runner ID
+		@return RunnersAPIDeleteRunnerRequest
+	*/
+	DeleteRunner(ctx context.Context, id string) RunnersAPIDeleteRunnerRequest
+
+	// DeleteRunnerExecute executes the request
+	DeleteRunnerExecute(r RunnersAPIDeleteRunnerRequest) (*http.Response, error)
 
 	/*
 		GetInfoForAuthenticatedRunner Get info for authenticated runner
@@ -46,6 +59,19 @@ type RunnersAPI interface {
 	GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGetInfoForAuthenticatedRunnerRequest) (*Runner, *http.Response, error)
 
 	/*
+		GetRunnerById Get runner by ID
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Runner ID
+		@return RunnersAPIGetRunnerByIdRequest
+	*/
+	GetRunnerById(ctx context.Context, id string) RunnersAPIGetRunnerByIdRequest
+
+	// GetRunnerByIdExecute executes the request
+	//  @return Runner
+	GetRunnerByIdExecute(r RunnersAPIGetRunnerByIdRequest) (*Runner, *http.Response, error)
+
+	/*
 		GetRunnerBySandboxId Get runner by sandbox ID
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -55,8 +81,8 @@ type RunnersAPI interface {
 	GetRunnerBySandboxId(ctx context.Context, sandboxId string) RunnersAPIGetRunnerBySandboxIdRequest
 
 	// GetRunnerBySandboxIdExecute executes the request
-	//  @return Runner
-	GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerBySandboxIdRequest) (*Runner, *http.Response, error)
+	//  @return RunnerFull
+	GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerBySandboxIdRequest) (*RunnerFull, *http.Response, error)
 
 	/*
 		GetRunnersBySnapshotRef Get runners by snapshot ref
@@ -79,28 +105,31 @@ type RunnersAPI interface {
 	ListRunners(ctx context.Context) RunnersAPIListRunnersRequest
 
 	// ListRunnersExecute executes the request
-	ListRunnersExecute(r RunnersAPIListRunnersRequest) (*http.Response, error)
+	//  @return []Runner
+	ListRunnersExecute(r RunnersAPIListRunnersRequest) ([]Runner, *http.Response, error)
 
 	/*
 		UpdateRunnerScheduling Update runner scheduling status
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id
+		@param id Runner ID
 		@return RunnersAPIUpdateRunnerSchedulingRequest
 	*/
 	UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest
 
 	// UpdateRunnerSchedulingExecute executes the request
-	UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*http.Response, error)
+	//  @return Runner
+	UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*Runner, *http.Response, error)
 }
 
 // RunnersAPIService RunnersAPI service
 type RunnersAPIService service
 
 type RunnersAPICreateRunnerRequest struct {
-	ctx          context.Context
-	ApiService   RunnersAPI
-	createRunner *CreateRunner
+	ctx                    context.Context
+	ApiService             RunnersAPI
+	createRunner           *CreateRunner
+	xDaytonaOrganizationID *string
 }
 
 func (r RunnersAPICreateRunnerRequest) CreateRunner(createRunner CreateRunner) RunnersAPICreateRunnerRequest {
@@ -108,7 +137,13 @@ func (r RunnersAPICreateRunnerRequest) CreateRunner(createRunner CreateRunner) R
 	return r
 }
 
-func (r RunnersAPICreateRunnerRequest) Execute() (*http.Response, error) {
+// Use with JWT to specify the organization ID
+func (r RunnersAPICreateRunnerRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RunnersAPICreateRunnerRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RunnersAPICreateRunnerRequest) Execute() (*CreateRunnerResponse, *http.Response, error) {
 	return r.ApiService.CreateRunnerExecute(r)
 }
 
@@ -126,16 +161,19 @@ func (a *RunnersAPIService) CreateRunner(ctx context.Context) RunnersAPICreateRu
 }
 
 // Execute executes the request
-func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*http.Response, error) {
+//
+//	@return CreateRunnerResponse
+func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*CreateRunnerResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CreateRunnerResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.CreateRunner")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/runners"
@@ -144,11 +182,122 @@ func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.createRunner == nil {
-		return nil, reportError("createRunner is required and must be specified")
+		return localVarReturnValue, nil, reportError("createRunner is required and must be specified")
 	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.createRunner
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type RunnersAPIDeleteRunnerRequest struct {
+	ctx                    context.Context
+	ApiService             RunnersAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r RunnersAPIDeleteRunnerRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RunnersAPIDeleteRunnerRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RunnersAPIDeleteRunnerRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteRunnerExecute(r)
+}
+
+/*
+DeleteRunner Delete runner
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Runner ID
+	@return RunnersAPIDeleteRunnerRequest
+*/
+func (a *RunnersAPIService) DeleteRunner(ctx context.Context, id string) RunnersAPIDeleteRunnerRequest {
+	return RunnersAPIDeleteRunnerRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+func (a *RunnersAPIService) DeleteRunnerExecute(r RunnersAPIDeleteRunnerRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.DeleteRunner")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/runners/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
 
 	// set Content-Type header
 	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
@@ -164,8 +313,9 @@ func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	// body params
-	localVarPostBody = r.createRunner
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
@@ -292,13 +442,125 @@ func (a *RunnersAPIService) GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGet
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type RunnersAPIGetRunnerByIdRequest struct {
+	ctx                    context.Context
+	ApiService             RunnersAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r RunnersAPIGetRunnerByIdRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RunnersAPIGetRunnerByIdRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RunnersAPIGetRunnerByIdRequest) Execute() (*Runner, *http.Response, error) {
+	return r.ApiService.GetRunnerByIdExecute(r)
+}
+
+/*
+GetRunnerById Get runner by ID
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Runner ID
+	@return RunnersAPIGetRunnerByIdRequest
+*/
+func (a *RunnersAPIService) GetRunnerById(ctx context.Context, id string) RunnersAPIGetRunnerByIdRequest {
+	return RunnersAPIGetRunnerByIdRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Runner
+func (a *RunnersAPIService) GetRunnerByIdExecute(r RunnersAPIGetRunnerByIdRequest) (*Runner, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Runner
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetRunnerById")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/runners/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type RunnersAPIGetRunnerBySandboxIdRequest struct {
 	ctx        context.Context
 	ApiService RunnersAPI
 	sandboxId  string
 }
 
-func (r RunnersAPIGetRunnerBySandboxIdRequest) Execute() (*Runner, *http.Response, error) {
+func (r RunnersAPIGetRunnerBySandboxIdRequest) Execute() (*RunnerFull, *http.Response, error) {
 	return r.ApiService.GetRunnerBySandboxIdExecute(r)
 }
 
@@ -319,13 +581,13 @@ func (a *RunnersAPIService) GetRunnerBySandboxId(ctx context.Context, sandboxId 
 
 // Execute executes the request
 //
-//	@return Runner
-func (a *RunnersAPIService) GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerBySandboxIdRequest) (*Runner, *http.Response, error) {
+//	@return RunnerFull
+func (a *RunnersAPIService) GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerBySandboxIdRequest) (*RunnerFull, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Runner
+		localVarReturnValue *RunnerFull
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetRunnerBySandboxId")
@@ -504,11 +766,18 @@ func (a *RunnersAPIService) GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunner
 }
 
 type RunnersAPIListRunnersRequest struct {
-	ctx        context.Context
-	ApiService RunnersAPI
+	ctx                    context.Context
+	ApiService             RunnersAPI
+	xDaytonaOrganizationID *string
 }
 
-func (r RunnersAPIListRunnersRequest) Execute() (*http.Response, error) {
+// Use with JWT to specify the organization ID
+func (r RunnersAPIListRunnersRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RunnersAPIListRunnersRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RunnersAPIListRunnersRequest) Execute() ([]Runner, *http.Response, error) {
 	return r.ApiService.ListRunnersExecute(r)
 }
 
@@ -526,16 +795,19 @@ func (a *RunnersAPIService) ListRunners(ctx context.Context) RunnersAPIListRunne
 }
 
 // Execute executes the request
-func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (*http.Response, error) {
+//
+//	@return []Runner
+func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) ([]Runner, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Runner
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.ListRunners")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/runners"
@@ -554,28 +826,31 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -583,19 +858,35 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type RunnersAPIUpdateRunnerSchedulingRequest struct {
-	ctx        context.Context
-	ApiService RunnersAPI
-	id         string
+	ctx                    context.Context
+	ApiService             RunnersAPI
+	id                     string
+	xDaytonaOrganizationID *string
 }
 
-func (r RunnersAPIUpdateRunnerSchedulingRequest) Execute() (*http.Response, error) {
+// Use with JWT to specify the organization ID
+func (r RunnersAPIUpdateRunnerSchedulingRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RunnersAPIUpdateRunnerSchedulingRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RunnersAPIUpdateRunnerSchedulingRequest) Execute() (*Runner, *http.Response, error) {
 	return r.ApiService.UpdateRunnerSchedulingExecute(r)
 }
 
@@ -603,7 +894,7 @@ func (r RunnersAPIUpdateRunnerSchedulingRequest) Execute() (*http.Response, erro
 UpdateRunnerScheduling Update runner scheduling status
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id
+	@param id Runner ID
 	@return RunnersAPIUpdateRunnerSchedulingRequest
 */
 func (a *RunnersAPIService) UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest {
@@ -615,16 +906,19 @@ func (a *RunnersAPIService) UpdateRunnerScheduling(ctx context.Context, id strin
 }
 
 // Execute executes the request
-func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*http.Response, error) {
+//
+//	@return Runner
+func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*Runner, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPatch
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Runner
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.UpdateRunnerScheduling")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/runners/{id}/scheduling"
@@ -644,28 +938,31 @@ func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunn
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -673,8 +970,17 @@ func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunn
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
