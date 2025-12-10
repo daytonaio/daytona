@@ -8,25 +8,23 @@ import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
 import { BackupState } from '../../enums/backup-state.enum'
-import { Repository } from 'typeorm'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { RunnerService } from '../../services/runner.service'
-import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
+import { SandboxService } from '../../services/sandbox.service'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
   constructor(
     protected runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
-    protected sandboxRepository: Repository<Sandbox>,
     protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
+    protected readonly sandboxService: SandboxService,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
+    super(runnerService, runnerAdapterFactory, redisLockProvider)
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
@@ -47,7 +45,7 @@ export class SandboxArchiveAction extends SandboxAction {
           const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
           //  if the archive error retry count is greater than 3, we need to mark the sandbox as error
           if (archiveErrorRetryCount > 3) {
-            await this.updateSandboxState(
+            await this.sandboxService.updateSandboxState(
               sandbox.id,
               SandboxState.ERROR,
               lockCode,
@@ -60,9 +58,7 @@ export class SandboxArchiveAction extends SandboxAction {
           await this.redis.setex('archive-error-retry-' + sandbox.id, 720, String(archiveErrorRetryCount + 1))
 
           //  reset the backup state to pending to retry the backup
-          await this.sandboxRepository.update(sandbox.id, {
-            backupState: BackupState.PENDING,
-          })
+          await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
 
           return DONT_SYNC_AGAIN
         }
@@ -83,7 +79,7 @@ export class SandboxArchiveAction extends SandboxAction {
               //  wait until sandbox is destroyed on runner
               return SYNC_AGAIN
             case SandboxState.DESTROYED:
-              await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
+              await this.sandboxService.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
               return DONT_SYNC_AGAIN
             default:
               await runnerAdapter.destroySandbox(sandbox.id)
@@ -101,7 +97,7 @@ export class SandboxArchiveAction extends SandboxAction {
             throw error
           }
           //  if the sandbox is already destroyed, do nothing
-          await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
+          await this.sandboxService.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
           return DONT_SYNC_AGAIN
         }
       }

@@ -24,7 +24,6 @@ import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
-import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organization/events/organization-suspended-snapshot-deactivated.event'
@@ -39,6 +38,7 @@ import { DefaultRegionRequiredException } from '../../organization/exceptions/De
 import { Region } from '../../region/entities/region.entity'
 import { Runner } from '../entities/runner.entity'
 import { RunnerState } from '../enums/runner-state.enum'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -46,8 +46,7 @@ export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
 
   constructor(
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(BuildInfo)

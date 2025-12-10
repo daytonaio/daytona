@@ -23,7 +23,6 @@ import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserEvents } from '../../user/constants/user-events.constant'
 import { UserCreatedEvent } from '../../user/events/user-created.event'
 import { UserDeletedEvent } from '../../user/events/user-deleted.event'
-import { Sandbox } from '../../sandbox/entities/sandbox.entity'
 import { Snapshot } from '../../sandbox/entities/snapshot.entity'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { EventEmitter2 } from '@nestjs/event-emitter'
@@ -49,6 +48,7 @@ import { CreateOrganizationInternalDto } from '../dto/create-organization.intern
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
+import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -60,8 +60,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   constructor(
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly eventEmitter: EventEmitter2,

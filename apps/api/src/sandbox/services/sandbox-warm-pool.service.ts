@@ -29,6 +29,7 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { isValidUuid } from '../../common/utils/uuid'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 export type FetchWarmPoolSandboxParams = {
   snapshot: string
@@ -50,8 +51,7 @@ export class SandboxWarmPoolService {
   constructor(
     @InjectRepository(WarmPool)
     private readonly warmPoolRepository: Repository<WarmPool>,
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(Runner)

@@ -5,6 +5,7 @@
 
 import { Module } from '@nestjs/common'
 import { DataSource } from 'typeorm'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxController } from './controllers/sandbox.controller'
 import { SandboxService } from './services/sandbox.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
@@ -23,7 +24,6 @@ import { SnapshotService } from './services/snapshot.service'
 import { SnapshotManager } from './managers/snapshot.manager'
 import { SnapshotRunner } from './entities/snapshot-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
-import { SandboxSubscriber } from './subscribers/sandbox.subscriber'
 import { RedisLockProvider } from './common/redis-lock.provider'
 import { OrganizationModule } from '../organization/organization.module'
 import { SandboxWarmPoolService } from './services/sandbox-warm-pool.service'
@@ -87,7 +87,6 @@ import { Region } from '../region/entities/region.entity'
     SnapshotService,
     ProxyCacheInvalidationService,
     SnapshotManager,
-    SandboxSubscriber,
     RedisLockProvider,
     SnapshotSubscriber,
     VolumeService,
@@ -100,8 +99,9 @@ import { Region } from '../region/entities/region.entity'
     SandboxArchiveAction,
     {
       provide: SandboxRepository,
-      inject: [DataSource],
-      useFactory: (dataSource: DataSource) => new SandboxRepository(dataSource),
+      inject: [DataSource, EventEmitter2],
+      useFactory: (dataSource: DataSource, eventEmitter: EventEmitter2) =>
+        new SandboxRepository(dataSource, eventEmitter),
     },
   ],
   exports: [

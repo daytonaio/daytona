@@ -11,20 +11,18 @@ import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
-import { Repository } from 'typeorm'
-import { InjectRepository } from '@nestjs/typeorm'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { SandboxService } from '../../services/sandbox.service'
 
 @Injectable()
 export class SandboxStopAction extends SandboxAction {
   constructor(
     protected runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
-    protected sandboxRepository: Repository<Sandbox>,
     protected redisLockProvider: RedisLockProvider,
+    protected sandboxService: SandboxService,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
+    super(runnerService, runnerAdapterFactory, redisLockProvider)
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
@@ -39,7 +37,7 @@ export class SandboxStopAction extends SandboxAction {
       case SandboxState.STARTED: {
         // stop sandbox
         await runnerAdapter.stopSandbox(sandbox.id)
-        await this.updateSandboxState(sandbox.id, SandboxState.STOPPING, lockCode)
+        await this.sandboxService.updateSandboxState(sandbox.id, SandboxState.STOPPING, lockCode)
         //  sync states again immediately for sandbox
         return SYNC_AGAIN
       }
@@ -48,7 +46,7 @@ export class SandboxStopAction extends SandboxAction {
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         switch (sandboxInfo.state) {
           case SandboxState.STOPPED: {
-            await this.updateSandboxState(
+            await this.sandboxService.updateSandboxState(
               sandbox.id,
               SandboxState.STOPPED,
               lockCode,
@@ -60,7 +58,7 @@ export class SandboxStopAction extends SandboxAction {
             return DONT_SYNC_AGAIN
           }
           case SandboxState.ERROR: {
-            await this.updateSandboxState(
+            await this.sandboxService.updateSandboxState(
               sandbox.id,
               SandboxState.ERROR,
               lockCode,
@@ -75,7 +73,7 @@ export class SandboxStopAction extends SandboxAction {
       case SandboxState.ERROR: {
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         if (sandboxInfo.state === SandboxState.STOPPED) {
-          await this.updateSandboxState(sandbox.id, SandboxState.STOPPED, lockCode)
+          await this.sandboxService.updateSandboxState(sandbox.id, SandboxState.STOPPED, lockCode)
         }
       }
     }
