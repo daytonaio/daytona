@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { createTool } from '@mastra/core/tools'
 import z from 'zod'
 import { getDaytonaClient, getSandboxById, createFileUploadFormat, normalizeSandboxPath } from './utils'

@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Agent } from '@mastra/core/agent'
 import { LibSQLStore, LibSQLVector } from '@mastra/libsql'
 import { Memory } from '@mastra/memory'
