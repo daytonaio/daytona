@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 
 @Entity()
+@Unique(['region', 'name'])
+@Index(['state', 'unschedulable', 'region'])
 export class Runner {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -96,6 +98,9 @@ export class Runner {
 
   @Column()
   region: string
+
+  @Column()
+  name: string
 
   @Column({
     type: 'enum',

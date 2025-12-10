@@ -51,6 +51,8 @@ import {
   TextSearch,
   TriangleAlert,
   Users,
+  Server,
+  MapPinned,
 } from 'lucide-react'
 import { usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
@@ -183,6 +185,26 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     ]
   }, [billingEnabled, authenticatedUserOrganizationMember?.role])
 
+  const infrastructureItems = useMemo(() => {
+    const arr = [
+      {
+        icon: <MapPinned size={16} strokeWidth={1.5} />,
+        label: 'Regions',
+        path: RoutePath.REGIONS,
+      },
+    ]
+
+    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_RUNNERS)) {
+      arr.push({
+        icon: <Server size={16} strokeWidth={1.5} />,
+        label: 'Runners',
+        path: RoutePath.RUNNERS,
+      })
+    }
+
+    return arr
+  }, [authenticatedUserHasPermission])
+
   const handleSignOut = () => {
     posthog?.reset()
     signoutRedirect()
@@ -193,8 +215,9 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       { label: 'Sandboxes', items: sidebarItems },
       { label: 'Settings', items: settingsItems },
       { label: 'Billing', items: billingItems },
+      { label: 'Infrastructure', items: infrastructureItems },
     ].filter((group) => group.items.length > 0)
-  }, [sidebarItems, settingsItems, billingItems])
+  }, [sidebarItems, settingsItems, billingItems, infrastructureItems])
 
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">

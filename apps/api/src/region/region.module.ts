@@ -7,9 +7,10 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Region } from './entities/region.entity'
 import { RegionService } from './services/region.service'
+import { Runner } from '../sandbox/entities/runner.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Region])],
+  imports: [TypeOrmModule.forFeature([Region, Runner])],
   controllers: [],
   providers: [RegionService],
   exports: [RegionService],

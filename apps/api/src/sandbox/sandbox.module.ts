@@ -37,6 +37,7 @@ import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
+import { RunnerSubscriber } from './subscribers/runner.subscriber'
 import { WorkspaceController } from './controllers/workspace.deprecated.controller'
 import { RunnerAdapterFactory } from './runner-adapter/runnerAdapter'
 import { SandboxStartAction } from './managers/sandbox-actions/sandbox-start.action'
@@ -93,6 +94,7 @@ import { Region } from '../region/entities/region.entity'
     VolumeService,
     VolumeManager,
     VolumeSubscriber,
+    RunnerSubscriber,
     RunnerAdapterFactory,
     SandboxStartAction,
     SandboxStopAction,

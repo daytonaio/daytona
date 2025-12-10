@@ -746,7 +746,7 @@ export class SandboxService {
       includeErroredDestroyed?: boolean
       states?: SandboxState[]
       snapshots?: string[]
-      regions?: string[]
+      regionIds?: string[]
       minCpu?: number
       maxCpu?: number
       minMemoryGiB?: number
@@ -771,7 +771,7 @@ export class SandboxService {
       includeErroredDestroyed,
       states,
       snapshots,
-      regions,
+      regionIds,
       minCpu,
       maxCpu,
       minMemoryGiB,
@@ -791,7 +791,7 @@ export class SandboxService {
       ...(name ? { name: ILike(`${name}%`) } : {}),
       ...(labels ? { labels: JsonContains(labels) } : {}),
       ...(snapshots ? { snapshot: In(snapshots) } : {}),
-      ...(regions ? { region: In(regions) } : {}),
+      ...(regionIds ? { region: In(regionIds) } : {}),
     }
 
     baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
@@ -799,21 +799,28 @@ export class SandboxService {
     baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
     baseFindOptions.lastActivityAt = createRangeFilter(lastEventAfter, lastEventBefore)
 
-    const filteredStates = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
+    const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
     const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
-    const filteredWithoutErrorStates = filteredStates.filter((state) => !errorStates.includes(state))
 
-    const where: FindOptionsWhere<Sandbox>[] = [
-      {
+    const nonErrorStatesToInclude = statesToInclude.filter((state) => !errorStates.includes(state))
+    const errorStatesToInclude = statesToInclude.filter((state) => errorStates.includes(state))
+
+    const where: FindOptionsWhere<Sandbox>[] = []
+
+    if (nonErrorStatesToInclude.length > 0) {
+      where.push({
         ...baseFindOptions,
-        state: In(filteredWithoutErrorStates),
-      },
-      {
+        state: In(nonErrorStatesToInclude),
+      })
+    }
+
+    if (errorStatesToInclude.length > 0) {
+      where.push({
         ...baseFindOptions,
-        state: In(errorStates),
+        state: In(errorStatesToInclude),
         ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
-      },
-    ]
+      })
+    }
 
     const [items, total] = await this.sandboxRepository.findAndCount({
       where,

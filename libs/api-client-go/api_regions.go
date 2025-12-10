@@ -17,9 +17,47 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type RegionsAPI interface {
+
+	/*
+		CreateRegion Create a new region
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return RegionsAPICreateRegionRequest
+	*/
+	CreateRegion(ctx context.Context) RegionsAPICreateRegionRequest
+
+	// CreateRegionExecute executes the request
+	//  @return Region
+	CreateRegionExecute(r RegionsAPICreateRegionRequest) (*Region, *http.Response, error)
+
+	/*
+		DeleteRegion Delete a region
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Region ID
+		@return RegionsAPIDeleteRegionRequest
+	*/
+	DeleteRegion(ctx context.Context, id string) RegionsAPIDeleteRegionRequest
+
+	// DeleteRegionExecute executes the request
+	DeleteRegionExecute(r RegionsAPIDeleteRegionRequest) (*http.Response, error)
+
+	/*
+		GetRegionById Get region by ID
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Region ID
+		@return RegionsAPIGetRegionByIdRequest
+	*/
+	GetRegionById(ctx context.Context, id string) RegionsAPIGetRegionByIdRequest
+
+	// GetRegionByIdExecute executes the request
+	//  @return Region
+	GetRegionByIdExecute(r RegionsAPIGetRegionByIdRequest) (*Region, *http.Response, error)
 
 	/*
 		ListRegions List all regions
@@ -37,22 +75,346 @@ type RegionsAPI interface {
 // RegionsAPIService RegionsAPI service
 type RegionsAPIService service
 
+type RegionsAPICreateRegionRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	createRegion           *CreateRegion
+	xDaytonaOrganizationID *string
+}
+
+func (r RegionsAPICreateRegionRequest) CreateRegion(createRegion CreateRegion) RegionsAPICreateRegionRequest {
+	r.createRegion = &createRegion
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r RegionsAPICreateRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPICreateRegionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPICreateRegionRequest) Execute() (*Region, *http.Response, error) {
+	return r.ApiService.CreateRegionExecute(r)
+}
+
+/*
+CreateRegion Create a new region
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RegionsAPICreateRegionRequest
+*/
+func (a *RegionsAPIService) CreateRegion(ctx context.Context) RegionsAPICreateRegionRequest {
+	return RegionsAPICreateRegionRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Region
+func (a *RegionsAPIService) CreateRegionExecute(r RegionsAPICreateRegionRequest) (*Region, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Region
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.CreateRegion")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/regions"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.createRegion == nil {
+		return localVarReturnValue, nil, reportError("createRegion is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.createRegion
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type RegionsAPIDeleteRegionRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r RegionsAPIDeleteRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIDeleteRegionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPIDeleteRegionRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteRegionExecute(r)
+}
+
+/*
+DeleteRegion Delete a region
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Region ID
+	@return RegionsAPIDeleteRegionRequest
+*/
+func (a *RegionsAPIService) DeleteRegion(ctx context.Context, id string) RegionsAPIDeleteRegionRequest {
+	return RegionsAPIDeleteRegionRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+func (a *RegionsAPIService) DeleteRegionExecute(r RegionsAPIDeleteRegionRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.DeleteRegion")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/regions/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type RegionsAPIGetRegionByIdRequest struct {
+	ctx                    context.Context
+	ApiService             RegionsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r RegionsAPIGetRegionByIdRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIGetRegionByIdRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RegionsAPIGetRegionByIdRequest) Execute() (*Region, *http.Response, error) {
+	return r.ApiService.GetRegionByIdExecute(r)
+}
+
+/*
+GetRegionById Get region by ID
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Region ID
+	@return RegionsAPIGetRegionByIdRequest
+*/
+func (a *RegionsAPIService) GetRegionById(ctx context.Context, id string) RegionsAPIGetRegionByIdRequest {
+	return RegionsAPIGetRegionByIdRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Region
+func (a *RegionsAPIService) GetRegionByIdExecute(r RegionsAPIGetRegionByIdRequest) (*Region, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Region
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.GetRegionById")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/regions/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type RegionsAPIListRegionsRequest struct {
 	ctx                    context.Context
 	ApiService             RegionsAPI
 	xDaytonaOrganizationID *string
-	includeShared          *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r RegionsAPIListRegionsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RegionsAPIListRegionsRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
-	return r
-}
-
-// Include shared regions
-func (r RegionsAPIListRegionsRequest) IncludeShared(includeShared bool) RegionsAPIListRegionsRequest {
-	r.includeShared = &includeShared
 	return r
 }
 
@@ -95,9 +457,6 @@ func (a *RegionsAPIService) ListRegionsExecute(r RegionsAPIListRegionsRequest) (
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.includeShared != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "includeShared", r.includeShared, "form", "")
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

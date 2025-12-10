@@ -33,7 +33,6 @@ class Runner(BaseModel):
     domain: StrictStr = Field(description="The domain of the runner")
     api_url: StrictStr = Field(description="The API URL of the runner", alias="apiUrl")
     proxy_url: StrictStr = Field(description="The proxy URL of the runner", alias="proxyUrl")
-    api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU capacity of the runner")
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GiB")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB")
@@ -50,6 +49,7 @@ class Runner(BaseModel):
     current_started_sandboxes: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current number of started sandboxes", alias="currentStartedSandboxes")
     availability_score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Runner availability score", alias="availabilityScore")
     region: StrictStr = Field(description="The region of the runner")
+    name: StrictStr = Field(description="The name of the runner")
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
@@ -57,7 +57,7 @@ class Runner(BaseModel):
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -121,7 +121,6 @@ class Runner(BaseModel):
             "domain": obj.get("domain"),
             "apiUrl": obj.get("apiUrl"),
             "proxyUrl": obj.get("proxyUrl"),
-            "apiKey": obj.get("apiKey"),
             "cpu": obj.get("cpu"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
@@ -138,6 +137,7 @@ class Runner(BaseModel):
             "currentStartedSandboxes": obj.get("currentStartedSandboxes"),
             "availabilityScore": obj.get("availabilityScore"),
             "region": obj.get("region"),
+            "name": obj.get("name"),
             "state": obj.get("state"),
             "lastChecked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),
