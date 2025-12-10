@@ -27,12 +27,12 @@ class WebhookInitializationStatus(BaseModel):
     """
     WebhookInitializationStatus
     """ # noqa: E501
-    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
-    svix_application_id: Optional[StrictStr] = Field(description="The ID of the Svix application", alias="svixApplicationId")
-    last_error: Optional[StrictStr] = Field(description="The error reason for the last initialization attempt", alias="lastError")
-    retry_count: Union[StrictFloat, StrictInt] = Field(description="The number of times the initialization has been attempted", alias="retryCount")
-    created_at: StrictStr = Field(description="When the webhook initialization was created", alias="createdAt")
-    updated_at: StrictStr = Field(description="When the webhook initialization was last updated", alias="updatedAt")
+    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
+    svix_application_id: Optional[StrictStr] = Field(description="The ID of the Svix application", serialization_alias="svixApplicationId")
+    last_error: Optional[StrictStr] = Field(description="The error reason for the last initialization attempt", serialization_alias="lastError")
+    retry_count: Union[StrictFloat, StrictInt] = Field(description="The number of times the initialization has been attempted", serialization_alias="retryCount")
+    created_at: StrictStr = Field(description="When the webhook initialization was created", serialization_alias="createdAt")
+    updated_at: StrictStr = Field(description="When the webhook initialization was last updated", serialization_alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["organizationId", "svixApplicationId", "lastError", "retryCount", "createdAt", "updatedAt"]
 
@@ -104,12 +104,12 @@ class WebhookInitializationStatus(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "organizationId": obj.get("organizationId"),
-            "svixApplicationId": obj.get("svixApplicationId"),
-            "lastError": obj.get("lastError"),
-            "retryCount": obj.get("retryCount"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "organization_id": obj.get("organizationId"),
+            "svix_application_id": obj.get("svixApplicationId"),
+            "last_error": obj.get("lastError"),
+            "retry_count": obj.get("retryCount"),
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

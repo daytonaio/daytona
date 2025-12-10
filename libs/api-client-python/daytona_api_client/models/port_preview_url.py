@@ -27,7 +27,7 @@ class PortPreviewUrl(BaseModel):
     """
     PortPreviewUrl
     """ # noqa: E501
-    sandbox_id: StrictStr = Field(description="ID of the sandbox", alias="sandboxId")
+    sandbox_id: StrictStr = Field(description="ID of the sandbox", serialization_alias="sandboxId")
     url: StrictStr = Field(description="Preview url")
     token: StrictStr = Field(description="Access token")
     additional_properties: Dict[str, Any] = {}
@@ -91,7 +91,7 @@ class PortPreviewUrl(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sandboxId": obj.get("sandboxId"),
+            "sandbox_id": obj.get("sandboxId"),
             "url": obj.get("url"),
             "token": obj.get("token")
         })

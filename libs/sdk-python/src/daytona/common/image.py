@@ -1,13 +1,15 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
 
 import glob
 import os
 import re
 import shlex
 import sys
+from collections.abc import Sequence
 from pathlib import Path, PurePosixPath
-from typing import List, Literal, Optional, Sequence, Union, get_args
+from typing import Literal, cast, get_args
 
 import toml
 from pydantic import BaseModel, PrivateAttr
@@ -25,11 +27,11 @@ class Context(BaseModel):
 
     Attributes:
         source_path (str): The path to the source file or directory.
-        archive_path (Optional[str]): The path inside the archive file in object storage.
+        archive_path (str | None): The path inside the archive file in object storage.
     """
 
     source_path: str
-    archive_path: Optional[str] = None
+    archive_path: str | None
 
 
 class Image(BaseModel):
@@ -38,8 +40,8 @@ class Image(BaseModel):
     such as `Image.base()`, `Image.debian_slim()`, or `Image.from_dockerfile()`.
     """
 
-    _dockerfile: Optional[str] = PrivateAttr(default=None)
-    _context_list: List[Context] = PrivateAttr(default_factory=list)
+    _dockerfile: str = PrivateAttr(default="")
+    _context_list: list[Context] = PrivateAttr(default_factory=list)
 
     def dockerfile(self) -> str:
         """Returns a generated Dockerfile for the image."""
@@ -47,10 +49,10 @@ class Image(BaseModel):
 
     def pip_install(
         self,
-        *packages: Union[str, list[str]],
-        find_links: Optional[list[str]] = None,
-        index_url: Optional[str] = None,
-        extra_index_urls: Optional[list[str]] = None,
+        *packages: str | list[str],
+        find_links: list[str] | None = None,
+        index_url: str | None = None,
+        extra_index_urls: list[str] | None = None,
         pre: bool = False,
         extra_options: str = "",
     ) -> "Image":
@@ -58,9 +60,9 @@ class Image(BaseModel):
 
         Args:
             *packages: The packages to install.
-            find_links: Optional[list[str]]: The find-links to use.
-            index_url: Optional[str]: The index URL to use.
-            extra_index_urls: Optional[list[str]]: The extra index URLs to use.
+            find_links: list[str] | None: The find-links to use.
+            index_url: str | None: The index URL to use.
+            extra_index_urls: list[str] | None: The extra index URLs to use.
             pre: bool = False: Whether to install pre-release packages.
             extra_options: str = "": Additional options to pass to pip. Given string is passed
             directly to the pip install command.
@@ -73,7 +75,7 @@ class Image(BaseModel):
             image = Image.debian_slim("3.12").pip_install("requests", "pandas")
             ```
         """
-        pkgs = self.__flatten_str_args("pip_install", "packages", packages)
+        pkgs = self.__flatten_str_args(packages)
         if not pkgs:
             return self
         extra_args = self.__format_pip_install_args(find_links, index_url, extra_index_urls, pre, extra_options)
@@ -84,9 +86,9 @@ class Image(BaseModel):
     def pip_install_from_requirements(
         self,
         requirements_txt: str,  # Path to a requirements.txt file.
-        find_links: Optional[list[str]] = None,
-        index_url: Optional[str] = None,
-        extra_index_urls: Optional[list[str]] = None,
+        find_links: list[str] | None = None,
+        index_url: str | None = None,
+        extra_index_urls: list[str] | None = None,
         pre: bool = False,
         extra_options: str = "",
     ) -> "Image":
@@ -94,9 +96,9 @@ class Image(BaseModel):
 
         Args:
             requirements_txt: str: The path to the requirements.txt file.
-            find_links: Optional[list[str]]: The find-links to use.
-            index_url: Optional[str]: The index URL to use.
-            extra_index_urls: Optional[list[str]]: The extra index URLs to use.
+            find_links: list[str] | None: The find-links to use.
+            index_url: str | None: The index URL to use.
+            extra_index_urls: list[str] | None: The extra index URLs to use.
             pre: bool = False: Whether to install pre-release packages.
             extra_options: str = "": Additional options to pass to pip.
 
@@ -125,9 +127,9 @@ class Image(BaseModel):
         self,
         pyproject_toml: str,
         optional_dependencies: list[str],
-        find_links: Optional[str] = None,
-        index_url: Optional[str] = None,
-        extra_index_url: Optional[str] = None,
+        find_links: str | None = None,
+        index_url: str | None = None,
+        extra_index_url: str | None = None,
         pre: bool = False,
         extra_options: str = "",
     ) -> "Image":
@@ -136,9 +138,9 @@ class Image(BaseModel):
         Args:
             pyproject_toml: str: The path to the pyproject.toml file.
             optional_dependencies: list[str] = []: The optional dependencies to install from the pyproject.toml file.
-            find_links: Optional[str] = None: The find-links to use.
-            index_url: Optional[str] = None: The index URL to use.
-            extra_index_url: Optional[str] = None: The extra index URL to use.
+            find_links: str | None = None: The find-links to use.
+            index_url: str | None = None: The index URL to use.
+            extra_index_url: str | None = None: The extra index URL to use.
             pre: bool = False: Whether to install pre-release packages.
             extra_options: str = "": Additional options to pass to pip. Given string is passed
             directly to the pip install command.
@@ -152,10 +154,21 @@ class Image(BaseModel):
                 .pip_install_from_pyproject("pyproject.toml", optional_dependencies=["dev"])
             ```
         """
-        toml_data = toml.load(os.path.expanduser(pyproject_toml))
-        dependencies = []
+        toml_data: dict[str, object] = toml.load(os.path.expanduser(pyproject_toml))
+        project_section = toml_data.get("project")
+        if not isinstance(project_section, dict):
+            raise DaytonaError(
+                (
+                    "No [project] section in pyproject.toml file. "
+                    "See https://packaging.python.org/en/latest/guides/writing-pyproject-toml "
+                    "for further file format guidelines."
+                )
+            )
 
-        if "project" not in toml_data or "dependencies" not in toml_data["project"]:
+        dependencies: list[str] = []
+
+        declared_dependencies = cast(list[str] | None, project_section.get("dependencies"))
+        if not isinstance(declared_dependencies, list):
             msg = (
                 "No [project.dependencies] section in pyproject.toml file. "
                 "See https://packaging.python.org/en/latest/guides/writing-pyproject-toml "
@@ -163,27 +176,34 @@ class Image(BaseModel):
             )
             raise DaytonaError(msg)
 
-        dependencies.extend(toml_data["project"]["dependencies"])
+        dependencies.extend(str(dep) for dep in declared_dependencies)
         if optional_dependencies:
-            optionals = toml_data["project"]["optional-dependencies"]
+            optionals = cast(dict[str, list[str]] | None, project_section.get("optional-dependencies", {}))
+            if not isinstance(optionals, dict):
+                raise DaytonaError("optional-dependencies must be a mapping in pyproject.toml")
             for dep_group_name in optional_dependencies:
-                if dep_group_name in optionals:
-                    dependencies.extend(optionals[dep_group_name])
+                group = optionals.get(dep_group_name)
+                if group is None:
+                    continue
+                dependencies.extend(str(dep) for dep in group)
+
+        find_links_list = [find_links] if find_links else None
+        extra_index_urls_list = [extra_index_url] if extra_index_url else None
 
         return self.pip_install(
             *dependencies,
-            find_links=find_links,
+            find_links=find_links_list,
             index_url=index_url,
-            extra_index_urls=extra_index_url,
+            extra_index_urls=extra_index_urls_list,
             pre=pre,
             extra_options=extra_options,
         )
 
-    def add_local_file(self, local_path: Union[str, Path], remote_path: str) -> "Image":
+    def add_local_file(self, local_path: str | Path, remote_path: str) -> "Image":
         """Adds a local file to the image.
 
         Args:
-            local_path: Union[str, Path]: The path to the local file.
+            local_path: str | Path: The path to the local file.
             remote_path: str: The path to the file in the image.
 
         Returns:
@@ -204,11 +224,11 @@ class Image(BaseModel):
 
         return self
 
-    def add_local_dir(self, local_path: Union[str, Path], remote_path: str) -> "Image":
+    def add_local_dir(self, local_path: str | Path, remote_path: str) -> "Image":
         """Adds a local directory to the image.
 
         Args:
-            local_path: Union[str, Path]: The path to the local directory.
+            local_path: str | Path: The path to the local directory.
             remote_path: str: The path to the directory in the image.
 
         Returns:
@@ -226,7 +246,7 @@ class Image(BaseModel):
 
         return self
 
-    def run_commands(self, *commands: Union[str, list[str]]) -> "Image":
+    def run_commands(self, *commands: str | list[str]) -> "Image":
         """Runs commands in the image.
 
         Args:
@@ -245,7 +265,7 @@ class Image(BaseModel):
         """
         for command in commands:
             if isinstance(command, list):
-                escaped = []
+                escaped: list[str] = []
                 for c in command:
                     c_escaped = c.replace('"', '\\\\\\"').replace("'", "\\'")
                     escaped.append(f'"{c_escaped}"')
@@ -269,20 +289,16 @@ class Image(BaseModel):
             image = Image.debian_slim("3.12").env({"PROJECT_ROOT": "/home/daytona"})
             ```
         """
-        non_str_keys = [key for key, val in env_vars.items() if not isinstance(val, str)]
-        if non_str_keys:
-            raise DaytonaError(f"Image ENV variables must be strings. Invalid keys: {non_str_keys}")
-
         for key, val in env_vars.items():
             self._dockerfile += f"ENV {key}={shlex.quote(val)}\n"
 
         return self
 
-    def workdir(self, path: Union[str, Path]) -> "Image":
+    def workdir(self, path: str | Path) -> "Image":
         """Sets the working directory in the image.
 
         Args:
-            path: Union[str, Path]: The path to the working directory.
+            path: str | Path: The path to the working directory.
 
         Returns:
             Image: The image with the working directory added.
@@ -309,10 +325,7 @@ class Image(BaseModel):
             image = Image.debian_slim("3.12").entrypoint(["/bin/bash"])
             ```
         """
-        if not isinstance(entrypoint_commands, list) or not all(isinstance(x, str) for x in entrypoint_commands):
-            raise DaytonaError("entrypoint_commands must be a list of strings.")
-
-        args_str = self.__flatten_str_args("entrypoint", "entrypoint_commands", entrypoint_commands)
+        args_str = self.__flatten_str_args(entrypoint_commands)
         args_str = '"' + '", "'.join(args_str) + '"' if args_str else ""
         self._dockerfile += f"ENTRYPOINT [{args_str}]\n"
 
@@ -332,9 +345,7 @@ class Image(BaseModel):
             image = Image.debian_slim("3.12").cmd(["/bin/bash"])
             ```
         """
-        if not isinstance(cmd, list) or not all(isinstance(x, str) for x in cmd):
-            raise DaytonaError("Image CMD must be a list of strings.")
-        cmd_str = self.__flatten_str_args("cmd", "cmd", cmd)
+        cmd_str = self.__flatten_str_args(cmd)
         cmd_str = '"' + '", "'.join(cmd_str) + '"' if cmd_str else ""
         self._dockerfile += f"CMD [{cmd_str}]\n"
         return self
@@ -342,13 +353,13 @@ class Image(BaseModel):
     def dockerfile_commands(
         self,
         dockerfile_commands: list[str],
-        context_dir: Optional[Union[Path, str]] = None,
+        context_dir: Path | str | None = None,
     ) -> "Image":
         """Adds arbitrary Dockerfile-like commands to the image.
 
         Args:
             *dockerfile_commands: The commands to add to the Dockerfile.
-            context_dir: Optional[Union[Path, str]]: The path to the context directory.
+            context_dir: Path | str | None: The path to the context directory.
 
         Returns:
             Image: The image with the Dockerfile commands added.
@@ -376,11 +387,11 @@ class Image(BaseModel):
         return self
 
     @staticmethod
-    def from_dockerfile(path: Union[str, Path]) -> "Image":
+    def from_dockerfile(path: str | Path) -> "Image":
         """Creates an Image from an existing Dockerfile.
 
         Args:
-            path: Union[str, Path]: The path to the Dockerfile.
+            path: str | Path: The path to the Dockerfile.
 
         Returns:
             Image: The image with the Dockerfile added.
@@ -393,7 +404,7 @@ class Image(BaseModel):
         path = Path(os.path.expanduser(path))
         dockerfile = path.read_text()
         img = Image()
-        img._dockerfile = dockerfile  # pylint: disable=protected-access
+        img._dockerfile = dockerfile
 
         # remove dockerfile filename from path
         path_prefix = str(path).removesuffix(path.name)
@@ -402,7 +413,6 @@ class Image(BaseModel):
             archive_base_path = context_path
             if not original_path.startswith(path_prefix):
                 archive_base_path = context_path.removeprefix(path_prefix)
-            # pylint: disable=protected-access
             img._context_list.append(Context(source_path=context_path, archive_path=archive_base_path))
 
         return img
@@ -423,15 +433,15 @@ class Image(BaseModel):
             ```
         """
         img = Image()
-        img._dockerfile = f"FROM {image}\n"  # pylint: disable=protected-access
+        img._dockerfile = f"FROM {image}\n"
         return img
 
     @staticmethod
-    def debian_slim(python_version: Optional[SupportedPythonSeries] = None) -> "Image":
+    def debian_slim(python_version: SupportedPythonSeries | None = None) -> "Image":
         """Creates a Debian slim image based on the official Python Docker image.
 
         Args:
-            python_version: Optional[SupportedPythonSeries]: The Python version to use.
+            python_version: SupportedPythonSeries | None: The Python version to use.
 
         Returns:
             Image: The image with the Debian slim image added.
@@ -441,21 +451,21 @@ class Image(BaseModel):
             image = Image.debian_slim("3.12")
             ```
         """
-        python_version = Image.__process_python_version(python_version)
+        resolved_version = Image.__process_python_version(python_version)
         img = Image()
         commands = [
-            f"FROM python:{python_version}-slim-bookworm",
+            f"FROM python:{resolved_version}-slim-bookworm",
             "RUN apt-get update",
             "RUN apt-get install -y gcc gfortran build-essential",
             "RUN pip install --upgrade pip",
             # Set debian front-end to non-interactive to avoid users getting stuck with input prompts.
             "RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections",
         ]
-        img._dockerfile = "\n".join(commands) + "\n"  # pylint: disable=protected-access
+        img._dockerfile = "\n".join(commands) + "\n"
         return img
 
     @staticmethod
-    def __extract_copy_sources(dockerfile_content, path_prefix="") -> list[tuple[str, str]]:
+    def __extract_copy_sources(dockerfile_content: str, path_prefix: str = "") -> list[tuple[str, str]]:
         """Extracts source files from COPY commands in a Dockerfile.
 
         Args:
@@ -465,7 +475,7 @@ class Image(BaseModel):
         Returns:
             list[tuple[str, str]]: The list of the actual file path and its corresponding COPY-command source path.
         """
-        sources = []
+        sources: list[tuple[str, str]] = []
         # Split the Dockerfile into lines
         lines = dockerfile_content.split("\n")
 
@@ -502,7 +512,7 @@ class Image(BaseModel):
         return sources
 
     @staticmethod
-    def __parse_copy_command(line):
+    def __parse_copy_command(line: str) -> dict[str, list[str] | str] | None:
         """Parses a COPY command to extract sources and destination.
 
         Args:
@@ -548,45 +558,39 @@ class Image(BaseModel):
         return {"sources": parts[sources_start_idx:-1], "dest": parts[-1]}
 
     @staticmethod
-    def __flatten_str_args(function_name: str, arg_name: str, args: Sequence[Union[str, list[str]]]) -> list[str]:
+    def __flatten_str_args(args: Sequence[str | Sequence[str]]) -> list[str]:
         """Flattens a list of strings and lists of strings into a single list of strings.
 
         Args:
-            function_name: str: The name of the function that is being called.
-            arg_name: str: The name of the argument that is being passed.
-            args: Sequence[Union[str, list[str]]]: The list of arguments to flatten.
+            args: Sequence[str | Sequence[str]]: The list of arguments to flatten.
 
         Returns:
             list[str]: A list of strings.
         """
-
-        def is_str_list(x):
-            return isinstance(x, list) and all(isinstance(y, str) for y in x)
-
         ret: list[str] = []
+
         for x in args:
             if isinstance(x, str):
                 ret.append(x)
-            elif is_str_list(x):
-                ret.extend(x)
             else:
-                raise DaytonaError(f"{function_name}: {arg_name} must only contain strings")
+                ret.extend(x)
+
         return ret
 
     @staticmethod
     def __format_pip_install_args(
-        find_links: Optional[list[str]] = None,
-        index_url: Optional[str] = None,
-        extra_index_urls: Optional[list[str]] = None,
+        find_links: list[str] | None = None,
+        index_url: str | None = None,
+        extra_index_urls: list[str] | None = None,
         pre: bool = False,
         extra_options: str = "",
     ) -> str:
         """Formats the arguments in a single string.
 
         Args:
-            find_links: Optional[list[str]]: The find-links to use.
-            index_url: Optional[str]: The index URL to use.
-            extra_index_urls: Optional[list[str]]: The extra index URLs to use.
+            find_links: list[str] | None: The find-links to use.
+            index_url: str | None: The index URL to use.
+            extra_index_urls: list[str] | None: The extra index URLs to use.
             pre: bool = False: Whether to install pre-release packages.
             extra_options: str = "": Additional options to pass to pip.
 
@@ -610,11 +614,11 @@ class Image(BaseModel):
         return extra_args
 
     @staticmethod
-    def __process_python_version(python_version: Optional[str], allow_micro_granularity: bool = True) -> str:
+    def __process_python_version(python_version: str | None, allow_micro_granularity: bool = True) -> str:
         """Processes the Python version.
 
         Args:
-            python_version: Optional[str]: The Python version to process.
+            python_version: str | None: The Python version to process.
             allow_micro_granularity: bool = True: Whether to allow micro-level granularity.
 
         Returns:
@@ -632,15 +636,19 @@ class Image(BaseModel):
             components = python_version.split(".")
             if len(components) == 3 and not allow_micro_granularity:
                 raise DaytonaError(
-                    "Python version must be specified as 'major.minor' for this interface;"
-                    f" micro-level specification ({python_version!r}) is not valid."
+                    (
+                        "Python version must be specified as 'major.minor' for this interface;"
+                        f" micro-level specification ({python_version!r}) is not valid."
+                    )
                 )
             series_version = f"{components[0]}.{components[1]}"
 
         if series_version not in SUPPORTED_PYTHON_SERIES:
             raise DaytonaError(
-                f"Unsupported Python version: {python_version!r}."
-                f" Daytona supports the following series: {SUPPORTED_PYTHON_SERIES!r}."
+                (
+                    f"Unsupported Python version: {python_version!r}. "
+                    f"Daytona supports the following series: {SUPPORTED_PYTHON_SERIES!r}."
+                )
             )
 
         # If the python version is specified as a micro version, return it as is
@@ -649,7 +657,7 @@ class Image(BaseModel):
             return python_version
 
         # If the python version is specified as a series, return the latest micro version
-        series_to_micro_version = dict(tuple(v.rsplit(".", 1)) for v in LATEST_PYTHON_MICRO_VERSIONS)
+        series_to_micro_version = dict(v.rsplit(".", 1) for v in LATEST_PYTHON_MICRO_VERSIONS)
         python_series_requested = f"{components[0]}.{components[1]}"
         micro_version = series_to_micro_version[python_series_requested]
         return f"{python_series_requested}.{micro_version}"

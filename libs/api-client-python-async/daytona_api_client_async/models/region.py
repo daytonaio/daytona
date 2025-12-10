@@ -29,9 +29,9 @@ class Region(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="Region ID")
     name: StrictStr = Field(description="Region name")
-    organization_id: Optional[StrictStr] = Field(default=None, description="Organization ID", alias="organizationId")
-    created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
-    updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
+    organization_id: Optional[StrictStr] = Field(default=None, description="Organization ID", serialization_alias="organizationId")
+    created_at: StrictStr = Field(description="Creation timestamp", serialization_alias="createdAt")
+    updated_at: StrictStr = Field(description="Last update timestamp", serialization_alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "createdAt", "updatedAt"]
 
@@ -100,9 +100,9 @@ class Region(BaseModel):
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "name": obj.get("name"),
-            "organizationId": obj.get("organizationId"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "organization_id": obj.get("organizationId"),
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

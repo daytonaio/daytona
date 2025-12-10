@@ -28,15 +28,15 @@ class CreateRunner(BaseModel):
     CreateRunner
     """ # noqa: E501
     domain: StrictStr
-    api_url: StrictStr = Field(alias="apiUrl")
-    proxy_url: StrictStr = Field(alias="proxyUrl")
-    api_key: StrictStr = Field(alias="apiKey")
+    api_url: StrictStr = Field(serialization_alias="apiUrl")
+    proxy_url: StrictStr = Field(serialization_alias="proxyUrl")
+    api_key: StrictStr = Field(serialization_alias="apiKey")
     cpu: Union[StrictFloat, StrictInt]
-    memory_gi_b: Union[StrictFloat, StrictInt] = Field(alias="memoryGiB")
-    disk_gi_b: Union[StrictFloat, StrictInt] = Field(alias="diskGiB")
+    memory_gi_b: Union[StrictFloat, StrictInt] = Field(serialization_alias="memoryGiB")
+    disk_gi_b: Union[StrictFloat, StrictInt] = Field(serialization_alias="diskGiB")
     gpu: Union[StrictFloat, StrictInt]
-    gpu_type: StrictStr = Field(alias="gpuType")
-    var_class: StrictStr = Field(alias="class")
+    gpu_type: StrictStr = Field(serialization_alias="gpuType")
+    var_class: StrictStr = Field(serialization_alias="class")
     region: StrictStr
     version: StrictStr
     additional_properties: Dict[str, Any] = {}
@@ -108,15 +108,15 @@ class CreateRunner(BaseModel):
 
         _obj = cls.model_validate({
             "domain": obj.get("domain"),
-            "apiUrl": obj.get("apiUrl"),
-            "proxyUrl": obj.get("proxyUrl"),
-            "apiKey": obj.get("apiKey"),
+            "api_url": obj.get("apiUrl"),
+            "proxy_url": obj.get("proxyUrl"),
+            "api_key": obj.get("apiKey"),
             "cpu": obj.get("cpu"),
-            "memoryGiB": obj.get("memoryGiB"),
-            "diskGiB": obj.get("diskGiB"),
+            "memory_gi_b": obj.get("memoryGiB"),
+            "disk_gi_b": obj.get("diskGiB"),
             "gpu": obj.get("gpu"),
-            "gpuType": obj.get("gpuType"),
-            "class": obj.get("class"),
+            "gpu_type": obj.get("gpuType"),
+            "var_class": obj.get("class"),
             "region": obj.get("region"),
             "version": obj.get("version")
         })

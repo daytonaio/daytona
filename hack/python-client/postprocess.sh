@@ -23,6 +23,13 @@ sed -i -E 's/(urllib3[^0-9\n]*)([0-9]+\.[0-9]+\.[0-9]+)/\12.1.0/g' \
   "$PROJECT_ROOT/setup.py" \
   "$PROJECT_ROOT/requirements.txt"
 
+# Replace all aliases with serialization_aliases in the models directory so that type checking works.
+pkg_root=$(find "$PROJECT_ROOT" -mindepth 1 -maxdepth 2 -type f -name "py.typed" -printf '%h\n' | head -n 1)
+MODELS_DIR="$pkg_root/models"
+find "$MODELS_DIR" -type f -name "*.py" | while read -r f; do
+  sed -i'' -E '/Field\(/ s/alias="([^"]+)"/serialization_alias="\1"/g' "$f"
+done
+
 echo "Postprocessed Python client at $PROJECT_ROOT"
 
 

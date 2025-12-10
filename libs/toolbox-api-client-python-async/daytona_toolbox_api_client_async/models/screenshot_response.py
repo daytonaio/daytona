@@ -27,9 +27,9 @@ class ScreenshotResponse(BaseModel):
     """
     ScreenshotResponse
     """ # noqa: E501
-    cursor_position: Optional[Position] = Field(default=None, alias="cursorPosition")
+    cursor_position: Optional[Position] = Field(default=None, serialization_alias="cursorPosition")
     screenshot: Optional[StrictStr] = None
-    size_bytes: Optional[StrictInt] = Field(default=None, alias="sizeBytes")
+    size_bytes: Optional[StrictInt] = Field(default=None, serialization_alias="sizeBytes")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["cursorPosition", "screenshot", "sizeBytes"]
 
@@ -94,9 +94,9 @@ class ScreenshotResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "cursorPosition": Position.from_dict(obj["cursorPosition"]) if obj.get("cursorPosition") is not None else None,
+            "cursor_position": Position.from_dict(obj["cursorPosition"]) if obj.get("cursorPosition") is not None else None,
             "screenshot": obj.get("screenshot"),
-            "sizeBytes": obj.get("sizeBytes")
+            "size_bytes": obj.get("sizeBytes")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -35,19 +35,19 @@ class CreateSandbox(BaseModel):
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the sandbox")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the sandbox")
     public: Optional[StrictBool] = Field(default=None, description="Whether the sandbox http preview is publicly accessible")
-    network_block_all: Optional[StrictBool] = Field(default=None, description="Whether to block all network access for the sandbox", alias="networkBlockAll")
-    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed CIDR network addresses for the sandbox", alias="networkAllowList")
-    var_class: Optional[StrictStr] = Field(default=None, description="The sandbox class type", alias="class")
+    network_block_all: Optional[StrictBool] = Field(default=None, description="Whether to block all network access for the sandbox", serialization_alias="networkBlockAll")
+    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed CIDR network addresses for the sandbox", serialization_alias="networkAllowList")
+    var_class: Optional[StrictStr] = Field(default=None, description="The sandbox class type", serialization_alias="class")
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the sandbox will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the sandbox")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
-    auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
-    auto_archive_interval: Optional[StrictInt] = Field(default=None, description="Auto-archive interval in minutes (0 means the maximum interval will be used)", alias="autoArchiveInterval")
-    auto_delete_interval: Optional[StrictInt] = Field(default=None, description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)", alias="autoDeleteInterval")
+    auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", serialization_alias="autoStopInterval")
+    auto_archive_interval: Optional[StrictInt] = Field(default=None, description="Auto-archive interval in minutes (0 means the maximum interval will be used)", serialization_alias="autoArchiveInterval")
+    auto_delete_interval: Optional[StrictInt] = Field(default=None, description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)", serialization_alias="autoDeleteInterval")
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the sandbox")
-    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the sandbox", alias="buildInfo")
+    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the sandbox", serialization_alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo"]
 
@@ -135,19 +135,19 @@ class CreateSandbox(BaseModel):
             "env": obj.get("env"),
             "labels": obj.get("labels"),
             "public": obj.get("public"),
-            "networkBlockAll": obj.get("networkBlockAll"),
-            "networkAllowList": obj.get("networkAllowList"),
-            "class": obj.get("class"),
+            "network_block_all": obj.get("networkBlockAll"),
+            "network_allow_list": obj.get("networkAllowList"),
+            "var_class": obj.get("class"),
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
-            "autoStopInterval": obj.get("autoStopInterval"),
-            "autoArchiveInterval": obj.get("autoArchiveInterval"),
-            "autoDeleteInterval": obj.get("autoDeleteInterval"),
+            "auto_stop_interval": obj.get("autoStopInterval"),
+            "auto_archive_interval": obj.get("autoArchiveInterval"),
+            "auto_delete_interval": obj.get("autoDeleteInterval"),
             "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
-            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
+            "build_info": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

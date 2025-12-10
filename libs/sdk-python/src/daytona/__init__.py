@@ -4,15 +4,7 @@
 from daytona_api_client import SandboxState
 from daytona_toolbox_api_client import SessionExecuteResponse
 
-from ._async.computer_use import (
-    AsyncComputerUse,
-    AsyncDisplay,
-    AsyncKeyboard,
-    AsyncMouse,
-    AsyncScreenshot,
-    ScreenshotOptions,
-    ScreenshotRegion,
-)
+from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
 from ._async.daytona import AsyncDaytona
 from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from ._sync.daytona import Daytona
@@ -28,6 +20,7 @@ from .common.charts import (
     ScatterChart,
 )
 from .common.code_interpreter import ExecutionError, ExecutionResult, OutputHandler, OutputMessage
+from .common.computer_use import ScreenshotOptions, ScreenshotRegion
 from .common.daytona import (
     CodeLanguage,
     CreateSandboxBaseParams,

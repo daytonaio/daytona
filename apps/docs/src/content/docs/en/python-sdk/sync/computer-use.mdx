@@ -361,7 +361,7 @@ Keyboard operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to type text: ")
-def type(text: str, delay: Optional[int] = None) -> None
+def type(text: str, delay: int | None = None) -> None
 ```
 
 Types the specified text.
@@ -398,7 +398,7 @@ except Exception as e:
 
 ```python
 @intercept_errors(message_prefix="Failed to press key: ")
-def press(key: str, modifiers: Optional[List[str]] = None) -> None
+def press(key: str, modifiers: list[str] | None = None) -> None
 ```
 
 Presses a key with optional modifiers.
@@ -406,7 +406,7 @@ Presses a key with optional modifiers.
 **Arguments**:
 
 - `key` _str_ - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A').
-- `modifiers` _List[str]_ - Modifier keys ('ctrl', 'alt', 'meta', 'shift').
+- `modifiers` _list[str]_ - Modifier keys ('ctrl', 'alt', 'meta', 'shift').
   
 
 **Raises**:
@@ -552,14 +552,14 @@ print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
 ```python
 @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
 def take_compressed(
-        options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse
+        options: ScreenshotOptions | None = None) -> ScreenshotResponse
 ```
 
 Takes a compressed screenshot of the entire screen.
 
 **Arguments**:
 
-- `options` _ScreenshotOptions_ - Compression and display options.
+- `options` _ScreenshotOptions | None_ - Compression and display options.
   
 
 **Returns**:
@@ -591,7 +591,7 @@ scaled = sandbox.computer_use.screenshot.take_compressed(
     message_prefix="Failed to take compressed region screenshot: ")
 def take_compressed_region(
         region: ScreenshotRegion,
-        options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse
+        options: ScreenshotOptions | None = None) -> ScreenshotResponse
 ```
 
 Takes a compressed screenshot of a specific region.
@@ -599,7 +599,7 @@ Takes a compressed screenshot of a specific region.
 **Arguments**:
 
 - `region` _ScreenshotRegion_ - The region to capture.
-- `options` _ScreenshotOptions_ - Compression and display options.
+- `options` _ScreenshotOptions | None_ - Compression and display options.
   
 
 **Returns**:
@@ -676,7 +676,7 @@ for window in windows.windows:
 ## ScreenshotRegion
 
 ```python
-class ScreenshotRegion()
+class ScreenshotRegion(BaseModel)
 ```
 
 Region coordinates for screenshot operations.
@@ -691,15 +691,15 @@ Region coordinates for screenshot operations.
 ## ScreenshotOptions
 
 ```python
-class ScreenshotOptions()
+class ScreenshotOptions(BaseModel)
 ```
 
 Options for screenshot compression and display.
 
 **Attributes**:
 
-- `show_cursor` _bool_ - Whether to show the cursor in the screenshot.
-- `fmt` _str_ - Image format (e.g., 'png', 'jpeg', 'webp').
-- `quality` _int_ - Compression quality (0-100).
-- `scale` _float_ - Scale factor for the screenshot.
+- `show_cursor` _bool | None_ - Whether to show the cursor in the screenshot.
+- `fmt` _str | None_ - Image format (e.g., 'png', 'jpeg', 'webp').
+- `quality` _int | None_ - Compression quality (0-100).
+- `scale` _float | None_ - Scale factor for the screenshot.
 

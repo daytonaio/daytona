@@ -28,7 +28,7 @@ class AccountProvider(BaseModel):
     AccountProvider
     """ # noqa: E501
     name: StrictStr
-    display_name: StrictStr = Field(alias="displayName")
+    display_name: StrictStr = Field(serialization_alias="displayName")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "displayName"]
 
@@ -91,7 +91,7 @@ class AccountProvider(BaseModel):
 
         _obj = cls.model_validate({
             "name": obj.get("name"),
-            "displayName": obj.get("displayName")
+            "display_name": obj.get("displayName")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

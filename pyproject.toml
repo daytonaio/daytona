@@ -28,13 +28,28 @@ black = {extras = ["jupyter"], version = ">=23.1.0,<24.0.0"}
 pylint = ">=3.0.0,<4.0.0"
 isort = ">=5.10.0,<6.0.0"
 matplotlib = ">=3.0.0,<4.0.0"
-unasync = ">=0.6.0,<0.7.0"
 docutils = "!=0.21.post1"
 deptry = "^0.23.0"
 ipykernel = "^6.30.1"
+basedpyright = "^1.34.0"
+numpy = ">=1.26,<2.0"
 
 [tool.basedpyright]
-typeCheckingMode = "off"
+typeCheckingMode = "recommended"
+pythonVersion = "3.9"
+exclude = [
+    "**/.venv",
+    "**/node_modules",
+    "libs/sdk-python/scripts",
+    "libs/*api-client*",
+    "apps",
+    "guides"
+]
+reportUnknownMemberType = "none"
+reportAny = "none"
+reportPrivateUsage = "none"
+reportMissingTypeStubs = "none"
+reportExplicitAny = "none"
 
 [tool.black]
 target-version = ['py310']
@@ -66,6 +81,15 @@ disable = [
     "C0302",  # too-many-lines
     "R0904",  # too-many-public-methods
     "E0402",  # relative-beyond-top-level
+    "W0212",  # protected-access
 ]
 const-rgx = "(([A-Z_][A-Z0-9_]*)|([a-z_][a-z0-9_]*))"
 allowed-redefined-builtins = ["id"]
+ignore-paths = [
+  "^.venv/.*$",
+  "^.*/\\.venv/.*$",
+  "^.*/build/.*$",
+  "^libs/.*api-client-python.*/.*$",
+  "^node_modules/.*$",
+  "^.*/\\node_modules/.*$",
+]

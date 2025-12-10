@@ -1,14 +1,16 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 import warnings
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import ClassVar
 
 from daytona_toolbox_api_client import SessionExecuteRequest as ApiSessionExecuteRequest
 from daytona_toolbox_api_client import SessionExecuteResponse as ApiSessionExecuteResponse
 from daytona_toolbox_api_client_async import SessionExecuteRequest as AsyncApiSessionExecuteRequest
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .charts import Chart
 
@@ -23,12 +25,12 @@ class CodeRunParams:
     """Parameters for code execution.
 
     Attributes:
-        argv (Optional[List[str]]): Command line arguments
-        env (Optional[Dict[str, str]]): Environment variables
+        argv (list[str] | None): Command line arguments
+        env (dict[str, str] | None): Environment variables
     """
 
-    argv: Optional[List[str]] = None
-    env: Optional[Dict[str, str]] = None
+    argv: list[str] | None = None
+    env: dict[str, str] | None = None
 
 
 class SessionExecuteRequest(ApiSessionExecuteRequest, AsyncApiSessionExecuteRequest):
@@ -36,13 +38,13 @@ class SessionExecuteRequest(ApiSessionExecuteRequest, AsyncApiSessionExecuteRequ
 
     Attributes:
         command (str): The command to execute.
-        run_async (Optional[bool]): Whether to execute the command asynchronously.
-        var_async (Optional[bool]): Deprecated. Use `run_async` instead.
+        run_async (bool | None): Whether to execute the command asynchronously.
+        var_async (bool | None): Deprecated. Use `run_async` instead.
     """
 
     @model_validator(mode="before")
     @classmethod
-    def __handle_deprecated_var_async(cls, values):  # pylint: disable=unused-private-member
+    def _handle_deprecated_var_async(cls, values: dict[str, object]):
         if "var_async" in values and values.get("var_async"):
             warnings.warn(
                 "'var_async' is deprecated and will be removed in a future version. Use 'run_async' instead.",
@@ -54,20 +56,17 @@ class SessionExecuteRequest(ApiSessionExecuteRequest, AsyncApiSessionExecuteRequ
         return values
 
 
+@dataclass
 class ExecutionArtifacts:
     """Artifacts from the command execution.
 
     Attributes:
         stdout (str): Standard output from the command, same as `result` in `ExecuteResponse`
-        charts (Optional[List[Chart]]): List of chart metadata from matplotlib
+        charts (list[Chart] | None): List of chart metadata from matplotlib
     """
 
-    stdout: str
-    charts: Optional[List[Chart]] = None
-
-    def __init__(self, stdout: str = "", charts: Optional[List[Chart]] = None):
-        self.stdout = stdout
-        self.charts = charts
+    stdout: str = ""
+    charts: list[Chart] | None = None
 
 
 class ExecuteResponse(BaseModel):
@@ -76,79 +75,51 @@ class ExecuteResponse(BaseModel):
     Attributes:
         exit_code (int): The exit code from the command execution
         result (str): The output from the command execution
-        artifacts (Optional[ExecutionArtifacts]): Artifacts from the command execution
+        artifacts (ExecutionArtifacts | None): Artifacts from the command execution
     """
 
     exit_code: int
     result: str
-    artifacts: Optional[ExecutionArtifacts] = None
+    artifacts: ExecutionArtifacts | None = None
+    additional_properties: dict[str, object] = Field(default_factory=dict)
 
-    # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    # pylint: disable=super-init-not-called
-    def __init__(
-        self,
-        exit_code: int,
-        result: str,
-        artifacts: Optional[ExecutionArtifacts] = None,
-        additional_properties: Dict = None,
-    ):
-        self.exit_code = exit_code
-        self.result = result
-        self.additional_properties = additional_properties or {}
-        self.artifacts = artifacts
+    model_config: ClassVar[ConfigDict] = ConfigDict(arbitrary_types_allowed=True, extra="allow")
 
 
 class SessionExecuteResponse(ApiSessionExecuteResponse):
     """Response from the session command execution.
 
     Attributes:
+        cmd_id (str): The ID of the executed command
+        stdout (str | None): The stdout from the command execution
+        stderr (str | None): The stderr from the command execution
         output (str): The output from the command execution
         exit_code (int): The exit code from the command execution
     """
 
-    stdout: Optional[str] = None
-    stderr: Optional[str] = None
+    cmd_id: str
+    stdout: str | None = None
+    stderr: str | None = None
+    output: str | None = None
+    exit_code: int | None = None
+    additional_properties: dict[str, object] = Field(default_factory=dict)
 
-    # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    # pylint: disable=super-init-not-called
-    def __init__(
-        self,
-        cmd_id: Optional[str] = None,
-        output: Optional[str] = None,
-        stdout: Optional[str] = None,
-        stderr: Optional[str] = None,
-        exit_code: Optional[int] = None,
-        additional_properties: Dict = None,
-    ):
-        self.cmd_id = cmd_id
-        self.output = output
-        self.stdout = stdout
-        self.stderr = stderr
-        self.exit_code = exit_code
-        self.additional_properties = additional_properties or {}
+    model_config: ClassVar[ConfigDict] = ConfigDict(arbitrary_types_allowed=True)
 
 
+@dataclass
 class SessionCommandLogsResponse:
     """Response from the command logs.
 
     Attributes:
-        output (str): The combined output from the command
-        stdout (str): The stdout from the command
-        stderr (str): The stderr from the command
+        output (str | None): The combined output from the command
+        stdout (str | None): The stdout from the command
+        stderr (str | None): The stderr from the command
     """
 
-    output: Optional[str] = None
-    stdout: Optional[str] = None
-    stderr: Optional[str] = None
-
-    def __init__(self, output: Optional[str] = None, stdout: Optional[str] = None, stderr: Optional[str] = None):
-        self.output = output
-        self.stdout = stdout
-        self.stderr = stderr
+    output: str | None = None
+    stdout: str | None = None
+    stderr: str | None = None
 
 
 def parse_session_command_logs(data: bytes) -> SessionCommandLogsResponse:

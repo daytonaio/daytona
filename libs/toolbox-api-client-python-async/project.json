@@ -8,7 +8,8 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g python --additional-properties=packageName=daytona_toolbox_api_client_async,projectName=daytona_toolbox_api_client_async,packageVersion=$DEFAULT_PACKAGE_VERSION,pythonPackageName=daytona_toolbox_api_client_async,disallowAdditionalPropertiesIfNotPresent=false,library=asyncio -o {projectRoot}",
+          "rm -rf {projectRoot}/daytona_toolbox_api_client_async",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g python -t hack/python-client/openapi-templates --additional-properties=packageName=daytona_toolbox_api_client_async,projectName=daytona_toolbox_api_client_async,packageVersion=$DEFAULT_PACKAGE_VERSION,pythonPackageName=daytona_toolbox_api_client_async,disallowAdditionalPropertiesIfNotPresent=false,library=asyncio -o {projectRoot}",
           "bash hack/python-client/postprocess.sh {projectRoot}"
         ],
         "parallel": false

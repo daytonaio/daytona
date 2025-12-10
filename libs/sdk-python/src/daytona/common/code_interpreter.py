@@ -1,7 +1,10 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Awaitable, Callable, Optional, TypeVar, Union
+from __future__ import annotations
+
+from collections.abc import Awaitable, Callable
+from typing import Any, TypeVar, Union
 
 from pydantic import BaseModel
 
@@ -41,7 +44,7 @@ class ExecutionResult(BaseModel):
 
     stdout: str = ""
     stderr: str = ""
-    error: Optional[ExecutionError] = None
+    error: ExecutionError | None = None
 
 
 # Type aliases for callbacks

@@ -23,5 +23,5 @@ export interface WorkDirResponse {
    * @type {string}
    * @memberof WorkDirResponse
    */
-  dir?: string
+  dir: string
 }

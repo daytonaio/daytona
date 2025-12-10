@@ -62,7 +62,7 @@ async def stateful_code_interpreter(sandbox: AsyncSandbox):
     result = await sandbox.code_interpreter.run_code("counter = 1\nprint(f'Initialized counter = {counter}')")
     print(f"[STDOUT] {result.stdout}")
 
-    await sandbox.code_interpreter.run_code(
+    _ = await sandbox.code_interpreter.run_code(
         "counter += 1\nprint(f'Counter after second call = {counter}')",
         on_stdout=handle_stdout,
         on_stderr=handle_stderr,
@@ -72,7 +72,7 @@ async def stateful_code_interpreter(sandbox: AsyncSandbox):
     print("=" * 10 + " Context isolation " + "=" * 10)
     ctx = await sandbox.code_interpreter.create_context()
     try:
-        await sandbox.code_interpreter.run_code(
+        _ = await sandbox.code_interpreter.run_code(
             "value = 'stored in isolated context'\nprint(f'Isolated context value: {value}')",
             context=ctx,
             on_stdout=handle_stdout,
@@ -88,7 +88,7 @@ async def stateful_code_interpreter(sandbox: AsyncSandbox):
         print(f"[STDOUT] {ctx_result.stdout}")
 
         print("-" * 3 + " Print value from different context " + "-" * 3)
-        await sandbox.code_interpreter.run_code(
+        _ = await sandbox.code_interpreter.run_code(
             "print(value)",
             on_stdout=handle_stdout,
             on_stderr=handle_stderr,
@@ -105,7 +105,7 @@ print('Starting long running task...')
 time.sleep(5)
 print('Finished!')
 """
-        await sandbox.code_interpreter.run_code(
+        _ = await sandbox.code_interpreter.run_code(
             code,
             timeout=1,
             on_stdout=handle_stdout,

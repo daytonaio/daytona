@@ -21,7 +21,7 @@ type SessionExecuteRequest struct {
 } // @name SessionExecuteRequest
 
 type SessionExecuteResponse struct {
-	CommandId *string `json:"cmdId" validate:"optional"`
+	CommandId string  `json:"cmdId" validate:"required"`
 	Output    *string `json:"output" validate:"optional"`
 	Stdout    *string `json:"stdout" validate:"optional"`
 	Stderr    *string `json:"stderr" validate:"optional"`

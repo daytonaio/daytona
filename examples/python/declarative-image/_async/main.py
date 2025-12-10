@@ -20,7 +20,7 @@ async def main():
 
         # Create local file with some data and add it to the image
         with open("file_example.txt", "w") as f:
-            f.write("Hello, World!")
+            _ = f.write("Hello, World!")
 
         # Create a Python image with common data science packages
         image = (
@@ -39,7 +39,7 @@ async def main():
 
         # Create the image
         print(f"=== Creating Snapshot: {snapshot_name} ===")
-        await daytona.snapshot.create(
+        _ = await daytona.snapshot.create(
             CreateSnapshotParams(
                 name=snapshot_name,
                 image=image,

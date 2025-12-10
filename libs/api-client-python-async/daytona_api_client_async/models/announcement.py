@@ -28,7 +28,7 @@ class Announcement(BaseModel):
     Announcement
     """ # noqa: E501
     text: StrictStr = Field(description="The announcement text")
-    learn_more_url: Optional[StrictStr] = Field(default=None, description="URL to learn more about the announcement", alias="learnMoreUrl")
+    learn_more_url: Optional[StrictStr] = Field(default=None, description="URL to learn more about the announcement", serialization_alias="learnMoreUrl")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["text", "learnMoreUrl"]
 
@@ -91,7 +91,7 @@ class Announcement(BaseModel):
 
         _obj = cls.model_validate({
             "text": obj.get("text"),
-            "learnMoreUrl": obj.get("learnMoreUrl")
+            "learn_more_url": obj.get("learnMoreUrl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

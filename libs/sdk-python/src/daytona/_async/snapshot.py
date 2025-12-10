@@ -1,13 +1,18 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
 
 import asyncio
-from typing import Callable, List, Optional
+from typing import Callable, cast
 
-from daytona_api_client_async import ObjectStorageApi, SnapshotsApi
-from daytona_api_client_async.models.create_build_info import CreateBuildInfo
-from daytona_api_client_async.models.create_snapshot import CreateSnapshot
-from daytona_api_client_async.models.snapshot_state import SnapshotState
+from daytona_api_client_async import (
+    CreateBuildInfo,
+    CreateSnapshot,
+    ObjectStorageApi,
+    SnapshotDto,
+    SnapshotsApi,
+    SnapshotState,
+)
 
 from .._utils.errors import intercept_errors
 from .._utils.stream import process_streaming_response
@@ -26,12 +31,12 @@ class AsyncSnapshotService:
         self.__object_storage_api = object_storage_api
 
     @intercept_errors(message_prefix="Failed to list snapshots: ")
-    async def list(self, page: Optional[int] = None, limit: Optional[int] = None) -> PaginatedSnapshots:
+    async def list(self, page: int | None = None, limit: int | None = None) -> PaginatedSnapshots:
         """Returns paginated list of Snapshots.
 
         Args:
-            page (Optional[int]): Page number for pagination (starting from 1).
-            limit (Optional[int]): Maximum number of items per page.
+            page (int | None): Page number for pagination (starting from 1).
+            limit (int | None): Maximum number of items per page.
 
         Returns:
             PaginatedSnapshots: Paginated list of Snapshots.
@@ -102,14 +107,14 @@ class AsyncSnapshotService:
         self,
         params: CreateSnapshotParams,
         *,
-        on_logs: Callable[[str], None] = None,
-        timeout: Optional[float] = 0,  # pylint: disable=unused-argument
+        on_logs: Callable[[str], None] | None = None,
+        timeout: float | None = 0,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> Snapshot:
         """Creates and registers a new snapshot from the given Image definition.
         Args:
             params (CreateSnapshotParams): Parameters for snapshot creation.
             on_logs (Callable[[str], None]): This callback function handles snapshot creation logs.
-            timeout (Optional[float]): Default is no timeout. Timeout in seconds (0 means no timeout).
+            timeout (float | None): Default is no timeout. Timeout in seconds (0 means no timeout).
         Example:
             ```python
             image = Image.debianSlim('3.12').pipInstall('numpy')
@@ -119,7 +124,6 @@ class AsyncSnapshotService:
             )
             ```
         """
-        created_snapshot = None
         create_snapshot_req = CreateSnapshot(
             name=params.name,
         )
@@ -147,13 +151,13 @@ class AsyncSnapshotService:
         if params.skip_validation is not None:
             create_snapshot_req.skip_validation = params.skip_validation
 
-        created_snapshot = await self.__snapshots_api.create_snapshot(create_snapshot_req)
+        created_snapshot: SnapshotDto = await self.__snapshots_api.create_snapshot(create_snapshot_req)
 
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
         log_terminal_states = [*terminal_states, SnapshotState.PENDING_VALIDATION, SnapshotState.VALIDATING]
 
         async def start_log_streaming():
-            _, url, *_ = self.__snapshots_api._get_snapshot_build_logs_serialize(  # pylint: disable=protected-access
+            _, url, *_ = self.__snapshots_api._get_snapshot_build_logs_serialize(
                 id=created_snapshot.id,
                 follow=True,
                 x_daytona_organization_id=None,
@@ -169,8 +173,8 @@ class AsyncSnapshotService:
 
             await process_streaming_response(
                 url=url,
-                headers=self.__snapshots_api.api_client.default_headers,
-                on_chunk=lambda chunk: on_logs(chunk.rstrip()),
+                headers=cast(dict[str, str], self.__snapshots_api.api_client.default_headers),
+                on_chunk=lambda chunk: on_logs(chunk.rstrip()) if on_logs else None,
                 should_terminate=should_terminate,
             )
 
@@ -190,7 +194,7 @@ class AsyncSnapshotService:
             await asyncio.sleep(1)
             created_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
 
-        if on_logs:
+        if on_logs and log_task:
             await log_task
             if created_snapshot.state == SnapshotState.ACTIVE:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
@@ -212,14 +216,14 @@ class AsyncSnapshotService:
         return Snapshot.from_dto(await self.__snapshots_api.activate_snapshot(snapshot.id))
 
     @staticmethod
-    async def process_image_context(object_storage_api: ObjectStorageApi, image: Image) -> List[str]:
+    async def process_image_context(object_storage_api: ObjectStorageApi, image: Image) -> list[str]:
         """Processes the image context by uploading it to object storage.
         Args:
             image (Image): The Image instance.
         Returns:
             List[str]: List of context hashes stored in object storage.
         """
-        if not image._context_list:  # pylint: disable=protected-access
+        if not image._context_list:
             return []
 
         push_access_creds = await object_storage_api.get_push_access()
@@ -231,8 +235,8 @@ class AsyncSnapshotService:
             push_access_creds.session_token,
             push_access_creds.bucket,
         )
-        context_hashes = []
-        for context in image._context_list:  # pylint: disable=protected-access
+        context_hashes: list[str] = []
+        for context in image._context_list:
             context_hash = await object_storage.upload(
                 context.source_path, push_access_creds.organization_id, context.archive_path
             )

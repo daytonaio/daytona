@@ -28,7 +28,7 @@ class UpdateOrganizationMemberAccess(BaseModel):
     UpdateOrganizationMemberAccess
     """ # noqa: E501
     role: StrictStr = Field(description="Organization member role")
-    assigned_role_ids: List[StrictStr] = Field(description="Array of assigned role IDs", alias="assignedRoleIds")
+    assigned_role_ids: List[StrictStr] = Field(description="Array of assigned role IDs", serialization_alias="assignedRoleIds")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["role", "assignedRoleIds"]
 
@@ -98,7 +98,7 @@ class UpdateOrganizationMemberAccess(BaseModel):
 
         _obj = cls.model_validate({
             "role": obj.get("role") if obj.get("role") is not None else 'member',
-            "assignedRoleIds": obj.get("assignedRoleIds")
+            "assigned_role_ids": obj.get("assignedRoleIds")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

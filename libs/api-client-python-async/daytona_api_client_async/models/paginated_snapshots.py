@@ -31,7 +31,7 @@ class PaginatedSnapshots(BaseModel):
     items: List[SnapshotDto]
     total: Union[StrictFloat, StrictInt]
     page: Union[StrictFloat, StrictInt]
-    total_pages: Union[StrictFloat, StrictInt] = Field(alias="totalPages")
+    total_pages: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalPages")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages"]
 
@@ -103,7 +103,7 @@ class PaginatedSnapshots(BaseModel):
             "items": [SnapshotDto.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None,
             "total": obj.get("total"),
             "page": obj.get("page"),
-            "totalPages": obj.get("totalPages")
+            "total_pages": obj.get("totalPages")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

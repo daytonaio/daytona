@@ -47,7 +47,7 @@ mount_dir_1 = "/home/daytona/volume"
 
 params = CreateSandboxFromSnapshotParams(
     language="python",
-    volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
+    volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1)],
 )
 sandbox = daytona.create(params)
 
@@ -59,7 +59,7 @@ sandbox.delete()
 # これは、データの分離やマルチテナントの実装に役立ちます
 params = CreateSandboxFromSnapshotParams(
     language="python",
-    volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1, subpath="users/alice")],
+    volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1, subpath="users/alice")],
 )
 sandbox2 = daytona.create(params)
 

@@ -28,7 +28,7 @@ class UpdateSandboxStateDto(BaseModel):
     UpdateSandboxStateDto
     """ # noqa: E501
     state: StrictStr = Field(description="The new state for the sandbox")
-    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", alias="errorReason")
+    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", serialization_alias="errorReason")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["state", "errorReason"]
 
@@ -98,7 +98,7 @@ class UpdateSandboxStateDto(BaseModel):
 
         _obj = cls.model_validate({
             "state": obj.get("state"),
-            "errorReason": obj.get("errorReason")
+            "error_reason": obj.get("errorReason")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

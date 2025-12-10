@@ -1,24 +1,40 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
 
 import asyncio
 import codecs
 import inspect
-from typing import Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
+from typing import TypeVar, cast
 
 import httpx
 import websockets
-from websockets.asyncio.client import Connection
+from websockets.asyncio.connection import Connection
 
+from ..common.errors import DaytonaError
 from ..common.process import MAX_PREFIX_LEN, STDERR_PREFIX, STDOUT_PREFIX
-from .errors import DaytonaError
+
+T = TypeVar("T")
+
+try:
+    from builtins import anext  # Python 3.10+  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]
+except ImportError:
+    # Python 3.9 fallback
+    async def anext(ait: AsyncIterator[T], default: T | None = None) -> T:
+        try:
+            return await ait.__anext__()  # pylint: disable=unnecessary-dunder-call
+        except StopAsyncIteration:
+            if default is not None:
+                return default
+            raise
 
 
 async def process_streaming_response(
     url: str,
-    headers: dict,
+    headers: dict[str, str],
     on_chunk: Callable[[str], None],
-    should_terminate: Callable[[], bool],
+    should_terminate: Callable[[], bool] | Callable[[], Awaitable[bool]],
     method: str = "GET",
     chunk_timeout: float = 2.0,
     require_consecutive_termination: bool = True,
@@ -39,8 +55,9 @@ async def process_streaming_response(
     """
     async with httpx.AsyncClient(timeout=None) as client:
         async with client.stream(method, url, headers=headers) as response:
-            stream = response.aiter_bytes()
-            next_chunk = None
+            stream: AsyncIterator[bytes] = response.aiter_bytes()
+            next_chunk: asyncio.Task[bytes | None] | None = None
+            timeout_task: asyncio.Task[None] | None = None
             exit_check_streak = 0
             # Use incremental decoder to properly handle UTF-8 sequences split across chunks
             decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
@@ -49,20 +66,27 @@ async def process_streaming_response(
                 while True:
                     if next_chunk is None:
                         next_chunk = asyncio.create_task(anext(stream, None))
-                    timeout_task = asyncio.create_task(asyncio.sleep(chunk_timeout))
+                    assert next_chunk is not None
 
-                    done, _ = await asyncio.wait([next_chunk, timeout_task], return_when=asyncio.FIRST_COMPLETED)
+                    timeout_task = asyncio.create_task(asyncio.sleep(chunk_timeout))
+                    assert timeout_task is not None
+
+                    done, pending = await asyncio.wait({next_chunk, timeout_task}, return_when=asyncio.FIRST_COMPLETED)
+                    # Pending tasks remain active for the next loop iteration, so keep references intact
+                    _ = pending
 
                     if next_chunk in done:
                         # Cancel timeout task and handle any cancellation errors
-                        timeout_task.cancel()
+                        _ = timeout_task.cancel()
                         try:
                             await timeout_task
                         except asyncio.CancelledError:
                             pass
+                        finally:
+                            timeout_task = None
 
                         try:
-                            chunk = next_chunk.result()
+                            chunk = cast(bytes | None, next_chunk.result())
                         except httpx.RemoteProtocolError as e:
                             if "peer closed connection without sending complete message body" in str(e):
                                 break
@@ -78,6 +102,7 @@ async def process_streaming_response(
                         exit_check_streak = 0  # Reset on activity
 
                     elif timeout_task in done:
+                        timeout_task = None
                         should_end = should_terminate()
                         if inspect.isawaitable(should_end):
                             should_end = await should_end
@@ -95,14 +120,16 @@ async def process_streaming_response(
                     on_chunk(remaining)
 
                 # Final cleanup - ensure any remaining tasks are cancelled
-                if timeout_task:
-                    timeout_task.cancel()
+                if timeout_task is not None:
+                    _ = timeout_task.cancel()
                     try:
                         await timeout_task
                     except asyncio.CancelledError:
                         pass
-                if next_chunk:
-                    next_chunk.cancel()
+                    finally:
+                        timeout_task = None
+                if next_chunk is not None:
+                    _ = next_chunk.cancel()
                     try:
                         await next_chunk
                     except asyncio.CancelledError:
