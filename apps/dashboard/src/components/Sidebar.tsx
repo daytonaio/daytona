@@ -26,7 +26,6 @@ import { useWebhooks } from '@/hooks/useWebhooks'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { addHours, formatRelative } from 'date-fns'
 import {
-  ArrowRightIcon,
   BookOpen,
   Box,
   ChartColumn,
@@ -46,14 +45,16 @@ import {
   SquareUserRound,
   Sun,
   TextSearch,
+  TriangleAlert,
   Users,
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation } from 'react-router-dom'
-import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Button } from './ui/button'
+import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -247,8 +248,64 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       <SidebarFooter>
         <SidebarMenu>
           {selectedOrganization?.suspended && (
-            <SidebarMenuItem key="suspended" className="mb-3">
-              <SuspensionBanner suspension={selectedOrganization} />
+            <SidebarMenuItem key="suspended">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Card className="w-full m-0 p-0 mb-4 cursor-pointer border-red-600 bg-red-100/80 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                      <CardHeader className="py-2 pl-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <TriangleAlert className="w-4 h-4 flex-shrink-0" />
+                          <div className="overflow-hidden">
+                            Organization suspended
+                            {selectedOrganization.suspensionReason && (
+                              <div className="text-xs text-muted-foreground text-ellipsis overflow-hidden">
+                                ({selectedOrganization.suspensionReason})
+                              </div>
+                            )}
+                          </div>
+                        </CardTitle>
+                      </CardHeader>
+                    </Card>
+                  </TooltipTrigger>
+                  <TooltipContent className="mb-2 flex flex-col gap-2 max-w-[400px]" side="right">
+                    <p>
+                      <strong>Organization suspended</strong>
+                      <br />
+                      Starting and creating sandboxes is disabled.
+                    </p>
+                    {selectedOrganization.suspensionReason && (
+                      <p>
+                        <strong>Suspension reason:</strong> <br />
+                        {selectedOrganization.suspensionReason}
+                      </p>
+                    )}
+                    {selectedOrganization.suspendedAt && (
+                      <p>
+                        <strong>Suspended at:</strong> <br />
+                        {new Date(selectedOrganization.suspendedAt).toLocaleString('en-US', {
+                          timeZone: 'UTC',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        })}
+                        <br />
+                        Started sandboxes will be stopped{' '}
+                        {formatRelative(
+                          addHours(
+                            new Date(selectedOrganization.suspendedAt),
+                            selectedOrganization.suspensionCleanupGracePeriodHours,
+                          ),
+                          new Date(selectedOrganization.suspendedAt),
+                        )}
+                      </p>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </SidebarMenuItem>
           )}
           <SidebarMenuItem key="theme-toggle">
@@ -344,72 +401,5 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         </SidebarMenu>
       </SidebarFooter>
     </SidebarComponent>
-  )
-}
-
-interface Suspension {
-  suspensionReason: string
-  suspendedUntil: Date
-  suspendedAt: Date
-  suspensionCleanupGracePeriodHours: number
-}
-
-function SetupRequiredBanner({ suspension }: { suspension: Suspension }) {
-  const isPaymentMethodRequired = suspension.suspensionReason === 'Payment method required'
-
-  const config = isPaymentMethodRequired
-    ? {
-        title: 'Setup Required',
-        description: 'Add a payment method to start creating sandboxes.',
-        action: (
-          <Button size="sm" className="mt-2" asChild>
-            <Link to={RoutePath.BILLING_WALLET}>
-              Go to Billing <ArrowRightIcon size={16} strokeWidth={1.5} />
-            </Link>
-          </Button>
-        ),
-      }
-    : {
-        title: 'Verification Required',
-        description: 'Please verify your email address to access all features.',
-      }
-
-  return (
-    <Alert variant="info">
-      <AlertTitle> {config.title}</AlertTitle>
-      <AlertDescription>
-        {config.description}
-        {config.action}
-      </AlertDescription>
-    </Alert>
-  )
-}
-
-// todo: enumerate
-function isSetupRequiredSuspension(reason: string) {
-  return reason === 'Payment method required' || reason === 'Please verify your email address'
-}
-
-function SuspensionBanner({ suspension }: { suspension: Suspension }) {
-  if (isSetupRequiredSuspension(suspension.suspensionReason)) {
-    return <SetupRequiredBanner suspension={suspension} />
-  }
-
-  return (
-    <Alert variant="destructive">
-      <AlertTitle>Organization suspended</AlertTitle>
-      <AlertDescription>
-        {suspension.suspensionReason && (
-          <div className="text-ellipsis overflow-hidden">{suspension.suspensionReason}</div>
-        )}
-        <div className="text-xs">
-          Sandboxes will be stopped{' '}
-          {formatRelative(
-            addHours(new Date(suspension.suspendedAt), suspension.suspensionCleanupGracePeriodHours),
-            new Date(suspension.suspendedAt),
-          )}
-        </div>
-      </AlertDescription>
-    </Alert>
   )
 }
