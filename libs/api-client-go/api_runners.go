@@ -55,8 +55,8 @@ type RunnersAPI interface {
 	GetInfoForAuthenticatedRunner(ctx context.Context) RunnersAPIGetInfoForAuthenticatedRunnerRequest
 
 	// GetInfoForAuthenticatedRunnerExecute executes the request
-	//  @return Runner
-	GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGetInfoForAuthenticatedRunnerRequest) (*Runner, *http.Response, error)
+	//  @return RunnerFull
+	GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGetInfoForAuthenticatedRunnerRequest) (*RunnerFull, *http.Response, error)
 
 	/*
 		GetRunnerById Get runner by ID
@@ -349,7 +349,7 @@ type RunnersAPIGetInfoForAuthenticatedRunnerRequest struct {
 	ApiService RunnersAPI
 }
 
-func (r RunnersAPIGetInfoForAuthenticatedRunnerRequest) Execute() (*Runner, *http.Response, error) {
+func (r RunnersAPIGetInfoForAuthenticatedRunnerRequest) Execute() (*RunnerFull, *http.Response, error) {
 	return r.ApiService.GetInfoForAuthenticatedRunnerExecute(r)
 }
 
@@ -368,13 +368,13 @@ func (a *RunnersAPIService) GetInfoForAuthenticatedRunner(ctx context.Context) R
 
 // Execute executes the request
 //
-//	@return Runner
-func (a *RunnersAPIService) GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGetInfoForAuthenticatedRunnerRequest) (*Runner, *http.Response, error) {
+//	@return RunnerFull
+func (a *RunnersAPIService) GetInfoForAuthenticatedRunnerExecute(r RunnersAPIGetInfoForAuthenticatedRunnerRequest) (*RunnerFull, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Runner
+		localVarReturnValue *RunnerFull
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetInfoForAuthenticatedRunner")

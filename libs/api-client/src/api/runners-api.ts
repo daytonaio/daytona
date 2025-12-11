@@ -455,7 +455,7 @@ export const RunnersApiFp = function (configuration?: Configuration) {
      */
     async getInfoForAuthenticatedRunner(
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerFull>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getInfoForAuthenticatedRunner(options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -635,7 +635,7 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
+    getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
       return localVarFp.getInfoForAuthenticatedRunner(options).then((request) => request(axios, basePath))
     },
     /**

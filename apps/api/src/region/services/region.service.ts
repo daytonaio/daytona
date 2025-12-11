@@ -12,7 +12,7 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { IsNull, Repository } from 'typeorm'
+import { In, IsNull, Repository } from 'typeorm'
 import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
 import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
@@ -180,6 +180,22 @@ export class RegionService {
       },
       order: {
         name: 'ASC',
+      },
+    })
+  }
+
+  /**
+   * @param ids - The IDs of the regions to find.
+   * @returns The regions found.
+   */
+  async findByIds(ids: string[]): Promise<Region[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
+    return this.regionRepository.find({
+      where: {
+        id: In(ids),
       },
     })
   }

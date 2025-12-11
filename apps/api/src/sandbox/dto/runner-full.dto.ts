@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsEnum, IsOptional } from 'class-validator'
 import { Runner } from '../entities/runner.entity'
 import { RunnerDto } from './runner.dto'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 @ApiSchema({ name: 'RunnerFull' })
 export class RunnerFullDto extends RunnerDto {
@@ -15,10 +17,21 @@ export class RunnerFullDto extends RunnerDto {
   })
   apiKey: string
 
-  static fromRunner(runner: Runner): RunnerFullDto {
+  @ApiPropertyOptional({
+    description: 'The region type of the runner',
+    enum: RegionType,
+    enumName: 'RegionType',
+    example: Object.values(RegionType)[0],
+  })
+  @IsOptional()
+  @IsEnum(RegionType)
+  regionType?: RegionType
+
+  static fromRunner(runner: Runner, regionType?: RegionType): RunnerFullDto {
     return {
       ...RunnerDto.fromRunner(runner),
       apiKey: runner.apiKey,
+      regionType,
     }
   }
 }

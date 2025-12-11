@@ -19,6 +19,7 @@ __version__ = "0.0.0-dev"
 
 # import apis into sdk package
 from daytona_api_client.api.health_api import HealthApi
+from daytona_api_client.api.admin_api import AdminApi
 from daytona_api_client.api.api_keys_api import ApiKeysApi
 from daytona_api_client.api.audit_api import AuditApi
 from daytona_api_client.api.config_api import ConfigApi
@@ -49,6 +50,7 @@ from daytona_api_client.exceptions import ApiException
 
 # import models into sdk package
 from daytona_api_client.models.account_provider import AccountProvider
+from daytona_api_client.models.admin_create_runner import AdminCreateRunner
 from daytona_api_client.models.announcement import Announcement
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
