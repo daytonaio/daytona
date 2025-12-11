@@ -328,6 +328,60 @@ export class RunnerService {
     }
   }
 
+  async updateRunnerHealth(
+    runnerId: string,
+    metrics?: {
+      currentCpuUsagePercentage: number
+      currentMemoryUsagePercentage: number
+      currentDiskUsagePercentage: number
+      currentAllocatedCpu: number
+      currentAllocatedMemoryGiB: number
+      currentAllocatedDiskGiB: number
+      currentSnapshotCount: number
+    },
+  ): Promise<void> {
+    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    if (!runner) {
+      this.logger.error(`Runner ${runnerId} not found when trying to update health`)
+      return
+    }
+
+    if (runner.state === RunnerState.DECOMMISSIONED) {
+      this.logger.debug(`Runner ${runnerId} is decommissioned, not updating health`)
+      return
+    }
+
+    const updateData: Partial<Runner> = {
+      state: RunnerState.READY,
+      lastChecked: new Date(),
+    }
+
+    if (metrics) {
+      updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
+      updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
+      updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
+      updateData.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
+      updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
+      updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
+      updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
+
+      updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
+        cpuUsage: updateData.currentCpuUsagePercentage,
+        memoryUsage: updateData.currentMemoryUsagePercentage,
+        diskUsage: updateData.currentDiskUsagePercentage,
+        allocatedCpu: updateData.currentAllocatedCpu,
+        allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
+        allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
+        runnerCpu: runner.cpu,
+        runnerMemoryGiB: runner.memoryGiB,
+        runnerDiskGiB: runner.diskGiB,
+      })
+    }
+
+    await this.runnerRepository.update(runnerId, updateData)
+    this.logger.debug(`Updated health for runner ${runnerId}`)
+  }
+
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
     const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
     if (!runner) {
@@ -375,6 +429,13 @@ export class RunnerService {
 
       await Promise.allSettled(
         runners.map(async (runner) => {
+          // v2 runners report health via healthcheck endpoint, check based on lastChecked timestamp
+          if (runner.version === '2') {
+            await this.checkRunnerV2Health(runner)
+            return
+          }
+
+          // v0 runners: imperative health check via adapter
           const shouldRetry = runner.state === RunnerState.READY
           const retryDelays = shouldRetry ? [500, 1000] : []
 
@@ -444,6 +505,37 @@ export class RunnerService {
       )
     } finally {
       await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  /**
+   * Check v2 runner health based on lastChecked timestamp.
+   * v2 runners report health via the healthcheck endpoint, so we check if lastChecked is within threshold.
+   */
+  private async checkRunnerV2Health(runner: Runner): Promise<void> {
+    // v2 runners report health every ~10 seconds via the healthcheck endpoint
+    // Allow 60 seconds (6 missed healthchecks) before marking as UNRESPONSIVE
+    const healthCheckThresholdMs = 60 * 1000
+
+    if (!runner.lastChecked) {
+      this.logger.debug(`v2 Runner ${runner.id} has never reported health, marking as UNRESPONSIVE`)
+      await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+      return
+    }
+
+    const timeSinceLastCheck = Date.now() - runner.lastChecked.getTime()
+
+    if (timeSinceLastCheck > healthCheckThresholdMs) {
+      this.logger.warn(
+        `v2 Runner ${runner.id} health check stale (last: ${Math.round(timeSinceLastCheck / 1000)}s ago), marking as UNRESPONSIVE`,
+      )
+      await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+    } else {
+      this.logger.debug(`v2 Runner ${runner.id} health OK (last: ${Math.round(timeSinceLastCheck / 1000)}s ago)`)
+      // If runner was UNRESPONSIVE but now has recent lastChecked, mark as READY
+      if (runner.state === RunnerState.UNRESPONSIVE) {
+        await this.updateRunnerState(runner.id, RunnerState.READY)
+      }
     }
   }
 

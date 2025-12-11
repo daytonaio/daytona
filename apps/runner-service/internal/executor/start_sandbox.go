@@ -1,0 +1,87 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
+package executor
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/docker/docker/api/types/container"
+
+	apiclient "github.com/daytonaio/apiclient"
+)
+
+func (e *Executor) startSandbox(ctx context.Context, job *apiclient.Job) error {
+	sandboxId := job.GetResourceId()
+	e.log.Info("starting sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
+
+	// Check if container is already running
+	containerInfo, err := e.dockerClient.ContainerInspect(ctx, sandboxId)
+	if err != nil {
+		return fmt.Errorf("inspect container: %w", err)
+	}
+
+	if !containerInfo.State.Running {
+		// Start the container
+		if err := e.dockerClient.ContainerStart(ctx, sandboxId, container.StartOptions{}); err != nil {
+			return fmt.Errorf("start container: %w", err)
+		}
+		e.log.Info("container started", "sandbox_id", sandboxId)
+
+		// Start Daytona daemon inside the container
+		daemonCmd := "/usr/local/bin/daytona"
+		execConfig := container.ExecOptions{
+			Cmd:          []string{"sh", "-c", daemonCmd},
+			AttachStdout: true,
+			AttachStderr: true,
+			Detach:       true, // Run in background
+		}
+
+		execResp, err := e.dockerClient.ContainerExecCreate(ctx, sandboxId, execConfig)
+		if err != nil {
+			e.log.Error("failed to create daemon exec", "error", err)
+			return fmt.Errorf("create daemon exec: %w", err)
+		}
+
+		if err := e.dockerClient.ContainerExecStart(ctx, execResp.ID, container.ExecStartOptions{Detach: true}); err != nil {
+			e.log.Error("failed to start daemon", "error", err)
+			return fmt.Errorf("start daemon: %w", err)
+		}
+
+		e.log.Info("daemon exec started", "sandbox_id", sandboxId)
+
+		// Re-inspect to get updated network info
+		containerInfo, err = e.dockerClient.ContainerInspect(ctx, sandboxId)
+		if err != nil {
+			return fmt.Errorf("inspect container after start: %w", err)
+		}
+	} else {
+		e.log.Info("container already running", "sandbox_id", sandboxId)
+	}
+
+	// Get container IP for daemon health check
+	containerIP := ""
+	for _, network := range containerInfo.NetworkSettings.Networks {
+		containerIP = network.IPAddress
+		break
+	}
+
+	if containerIP == "" {
+		return fmt.Errorf("no IP address found for container")
+	}
+
+	// Wait for daemon to be ready
+	e.log.Info("waiting for daemon to be ready", "sandbox_id", sandboxId, "ip", containerIP)
+	if err := e.waitForDaemonRunning(ctx, containerIP, 10*time.Second); err != nil {
+		e.log.Error("daemon failed to start", "error", err)
+		return fmt.Errorf("daemon not ready: %w", err)
+	}
+
+	e.log.Info("daemon is ready", "sandbox_id", sandboxId)
+	e.log.Info("sandbox started successfully", "sandbox_id", sandboxId)
+	return nil
+}

@@ -69,6 +69,11 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
+import { Transactional } from 'typeorm-transactional'
+import { JobService } from './job.service'
+import { JobType } from '../enums/job-type.enum'
+import { ResourceType } from '../enums/resource-type.enum'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -99,6 +104,8 @@ export class SandboxService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly regionService: RegionService,
+    private readonly jobService: JobService,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -301,6 +308,7 @@ export class SandboxService {
     return sandbox
   }
 
+  @Transactional()
   async createFromSnapshot(
     createSandboxDto: CreateSandboxDto,
     organization: Organization,
@@ -464,6 +472,12 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      // For v2 runners, create CREATE_SANDBOX job
+      if (runner.version === '2') {
+        await this.createSandboxJobForV2Runner(sandbox, snapshot, runner, organization)
+      }
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -1048,6 +1062,7 @@ export class SandboxService {
     }
   }
 
+  @Transactional()
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1057,10 +1072,20 @@ export class SandboxService {
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
+    // For v2 runners, create job in the same transaction
+    if (sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner && runner.version === '2') {
+        await this.jobService.createJob(null, JobType.DESTROY_SANDBOX, runner.id, ResourceType.SANDBOX, sandbox.id)
+        this.logger.debug(`Created DESTROY_SANDBOX job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
+      }
+    }
+
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     return sandbox
   }
 
+  @Transactional()
   async start(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
@@ -1117,7 +1142,75 @@ export class SandboxService {
     sandbox.authToken = nanoid(32).toLocaleLowerCase()
 
     try {
+      const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
+
+      if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
+        return sandbox
+      }
+
+      if (String(sandbox.state) !== String(sandbox.desiredState)) {
+        // Allow start of stopped | archived and archiving | archived sandboxes
+        if (
+          sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
+          (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
+        ) {
+          throw new SandboxError('State change in progress')
+        }
+      }
+
+      if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
+        throw new SandboxError('Sandbox is not in valid state')
+      }
+
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(
+          organization,
+          sandbox.region,
+          sandbox.cpu,
+          sandbox.mem,
+          sandbox.disk,
+          sandbox.id,
+        )
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = sandbox.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = sandbox.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sandbox.disk
+      }
+
+      sandbox.pending = true
+      sandbox.desiredState = SandboxDesiredState.STARTED
+      sandbox.authToken = nanoid(32).toLocaleLowerCase()
+
       await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+      // For v2 runners, create job in the same transaction
+      if (sandbox.runnerId) {
+        const runner = await this.runnerService.findOne(sandbox.runnerId)
+        if (runner && runner.version === '2') {
+          const metadata = {
+            limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
+          }
+          await this.jobService.createJob(null, JobType.START_SANDBOX, runner.id, ResourceType.SANDBOX, sandbox.id, {
+            metadata,
+          })
+          this.logger.debug(`Created START_SANDBOX job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
+        }
+      }
+
+      this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
+
+      return sandbox
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -1128,12 +1221,9 @@ export class SandboxService {
       )
       throw error
     }
-
-    this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
-
-    return sandbox
   }
 
+  @Transactional()
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1158,6 +1248,16 @@ export class SandboxService {
     }
 
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+    // For v2 runners, create job in the same transaction
+    if (sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner && runner.version === '2') {
+        const jobType = sandbox.autoDeleteInterval === 0 ? JobType.DESTROY_SANDBOX : JobType.STOP_SANDBOX
+        await this.jobService.createJob(null, jobType, runner.id, ResourceType.SANDBOX, sandbox.id)
+        this.logger.debug(`Created ${jobType} job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
+      }
+    }
 
     if (sandbox.autoDeleteInterval === 0) {
       this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
@@ -1600,5 +1700,53 @@ export class SandboxService {
     if (!updateResult.affected) {
       throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
     }
+  }
+
+  /**
+   * Create a CREATE_SANDBOX job for v2 runners
+   * This method handles registry lookup and payload construction
+   */
+  private async createSandboxJobForV2Runner(
+    sandbox: Sandbox,
+    snapshot: Snapshot,
+    runner: Runner,
+    organization: Organization,
+  ): Promise<void> {
+    const registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshot.ref, organization.id)
+    if (!registry) {
+      throw new BadRequestError('No registry found for snapshot')
+    }
+
+    const payload = {
+      snapshot: snapshot.ref,
+      cpu: sandbox.cpu,
+      mem: sandbox.mem,
+      disk: sandbox.disk,
+      gpu: sandbox.gpu,
+      osUser: sandbox.osUser,
+      env: sandbox.env,
+      labels: sandbox.labels,
+      volumes: sandbox.volumes,
+      authToken: sandbox.authToken,
+      entrypoint: snapshot.entrypoint,
+      registry: {
+        url: registry.url,
+        username: registry.username,
+        password: registry.password,
+        project: registry.project,
+      },
+      networkBlockAll: sandbox.networkBlockAll,
+      networkAllowList: sandbox.networkAllowList,
+      metadata: {
+        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
+        organizationId: organization.id,
+        organizationName: organization.name,
+        sandboxName: sandbox.name,
+      },
+    }
+
+    await this.jobService.createJob(null, JobType.CREATE_SANDBOX, runner.id, ResourceType.SANDBOX, sandbox.id, payload)
+
+    this.logger.debug(`Created CREATE_SANDBOX job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
   }
 }

@@ -1,0 +1,69 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsNumber, IsOptional } from 'class-validator'
+
+@ApiSchema({ name: 'RunnerHealthMetrics' })
+export class RunnerHealthMetricsDto {
+  @ApiProperty({
+    description: 'Current CPU usage percentage',
+    example: 45.5,
+  })
+  @IsNumber()
+  currentCpuUsagePercentage: number
+
+  @ApiProperty({
+    description: 'Current memory usage percentage',
+    example: 60.2,
+  })
+  @IsNumber()
+  currentMemoryUsagePercentage: number
+
+  @ApiProperty({
+    description: 'Current disk usage percentage',
+    example: 35.8,
+  })
+  @IsNumber()
+  currentDiskUsagePercentage: number
+
+  @ApiProperty({
+    description: 'Currently allocated CPU cores',
+    example: 8,
+  })
+  @IsNumber()
+  currentAllocatedCpu: number
+
+  @ApiProperty({
+    description: 'Currently allocated memory in GiB',
+    example: 16,
+  })
+  @IsNumber()
+  currentAllocatedMemoryGiB: number
+
+  @ApiProperty({
+    description: 'Currently allocated disk in GiB',
+    example: 100,
+  })
+  @IsNumber()
+  currentAllocatedDiskGiB: number
+
+  @ApiProperty({
+    description: 'Number of snapshots currently stored',
+    example: 5,
+  })
+  @IsNumber()
+  currentSnapshotCount: number
+}
+
+@ApiSchema({ name: 'RunnerHealthcheck' })
+export class RunnerHealthcheckDto {
+  @ApiPropertyOptional({
+    description: 'Runner metrics',
+    type: RunnerHealthMetricsDto,
+  })
+  @IsOptional()
+  metrics?: RunnerHealthMetricsDto
+}

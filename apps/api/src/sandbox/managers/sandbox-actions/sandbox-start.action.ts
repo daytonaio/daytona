@@ -76,6 +76,12 @@ export class SandboxStartAction extends SandboxAction {
       }
       case SandboxState.ERROR: {
         const runner = await this.runnerService.findOne(sandbox.runnerId)
+
+        // v2 runners handle sandbox state via jobs - don't poll the runner adapter
+        if (runner.version === '2') {
+          return DONT_SYNC_AGAIN
+        }
+
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
@@ -322,6 +328,12 @@ export class SandboxStartAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
+    // v2 runners handle sandbox creation via jobs - jobs are created in sandbox.service.ts
+    // JobStateHandlerService handles state updates when CREATE_SANDBOX job completes
+    if (runner.version === '2') {
+      return DONT_SYNC_AGAIN
+    }
+
     const organization = await this.organizationService.findOne(sandbox.organizationId)
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
@@ -366,6 +378,15 @@ export class SandboxStartAction extends SandboxAction {
     sandbox: Sandbox,
     lockCode: LockCode,
   ): Promise<SyncState> {
+    // v2 runners use job-based start - jobs are created in sandbox.service.ts
+    // JobStateHandlerService handles state updates when job completes
+    if (sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner.version === '2') {
+        return DONT_SYNC_AGAIN
+      }
+    }
+
     const organization = await this.organizationService.findOne(sandbox.organizationId)
 
     //  check if sandbox is assigned to a runner and if that runner is unschedulable
@@ -495,6 +516,13 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     const runner = await this.runnerService.findOne(sandbox.runnerId)
+
+    // v2 runners handle sandbox creation via jobs - wait for job completion
+    // The sandbox state will be updated by JobStateHandlerService when CREATE_SANDBOX job completes
+    if (runner.version === '2') {
+      return DONT_SYNC_AGAIN
+    }
+
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
@@ -521,6 +549,13 @@ export class SandboxStartAction extends SandboxAction {
   //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
   private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
+
+    // v2 runners handle sandbox state via jobs - wait for job completion
+    // The sandbox state will be updated by JobStateHandlerService when job completes
+    if (runner.version === '2') {
+      return DONT_SYNC_AGAIN
+    }
+
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 

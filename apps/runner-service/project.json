@@ -1,0 +1,89 @@
+{
+  "name": "runner-service",
+  "$schema": "../../runner_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/runner-service",
+  "tags": [],
+  "targets": {
+    "copy-daemon-bin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp dist/apps/daemon-amd64 {projectRoot}/internal/daemon/static/daemon-amd64"
+      },
+      "dependsOn": [
+        {
+          "target": "build-amd64",
+          "projects": "daemon"
+        }
+      ]
+    },
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/runner-service/main.go",
+        "outputPath": "dist/apps/runner-service/bin/runner"
+      },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/runner-service/internal.Version=$VERSION'\""]
+        }
+      },
+      "dependsOn": ["copy-daemon-bin"]
+    },
+    "build-amd64": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/runner-service/main.go",
+        "outputPath": "dist/apps/runner-service/bin/runner-amd64",
+        "env": {
+          "GOARCH": "amd64"
+        }
+      },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/runner-service/internal.Version=$VERSION'\""]
+        }
+      },
+      "dependsOn": ["copy-daemon-bin"]
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "main": "{projectRoot}/cmd/runner-service/main.go"
+      },
+      "configurations": {
+        "production": {}
+      },
+      "dependsOn": ["copy-daemon-bin"]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,json}\""
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "package-deb": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p dist/apps/runner-service/deb/opt/daytona",
+          "mkdir -p dist/apps/runner-service/deb/etc/systemd/system",
+          "mkdir -p dist/apps/runner-service/deb/DEBIAN",
+          "cp dist/apps/runner-service/bin/runner dist/apps/runner-service/deb/opt/daytona/runner",
+          "cp {projectRoot}/packaging/systemd/daytona-runner.service dist/apps/runner-service/deb/etc/systemd/system/",
+          "cp {projectRoot}/packaging/deb/DEBIAN/postinst {projectRoot}/packaging/deb/DEBIAN/prerm {projectRoot}/packaging/deb/DEBIAN/postrm dist/apps/runner-service/deb/DEBIAN/",
+          "VERSION=${VERSION:-0.1.0} envsubst < {projectRoot}/packaging/deb/DEBIAN/control > dist/apps/runner-service/deb/DEBIAN/control",
+          "dpkg-deb --build dist/apps/runner-service/deb dist/apps/runner-service/daytona-runner_${VERSION:-0.0.0-dev}_amd64.deb"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    }
+  }
+}

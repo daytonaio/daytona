@@ -2850,6 +2850,26 @@ paths:
       summary: Get runners by snapshot ref
       tags:
         - runners
+  /runner-service/healthcheck:
+    post:
+      description: Endpoint for version 3 runners to send healthcheck and metrics.
+        Updates lastChecked timestamp and runner metrics.
+      operationId: runnerHealthcheck
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunnerHealthcheck'
+        required: true
+      responses:
+        '200':
+          description: Healthcheck received
+      security:
+        - bearer: []
+      summary: Runner healthcheck
+      tags:
+        - runner-service
   /toolbox/{sandboxId}/toolbox/project-dir:
     get:
       deprecated: true
@@ -7072,6 +7092,106 @@ paths:
       summary: Get volume details by name
       tags:
         - volumes
+  /jobs/poll:
+    get:
+      description: "Long poll endpoint for runners to fetch pending jobs. Returns\
+        \ immediately if jobs are available, otherwise waits up to timeout seconds."
+      operationId: pollJobs
+      parameters:
+        - description: 'Timeout in seconds for long polling (default: 30, max: 60)'
+          explode: true
+          in: query
+          name: timeout
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: 'Maximum number of jobs to return (default: 10, max: 100)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PollJobsResponse'
+          description: List of jobs for the runner
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Long poll for jobs
+      tags:
+        - jobs
+  /jobs/{jobId}:
+    get:
+      operationId: getJob
+      parameters:
+        - description: ID of the job
+          explode: false
+          in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: Job details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get job details
+      tags:
+        - jobs
+  /jobs/{jobId}/status:
+    post:
+      operationId: updateJobStatus
+      parameters:
+        - description: ID of the job
+          explode: false
+          in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobStatus'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: Job status updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update job status
+      tags:
+        - jobs
   /docker-registry:
     get:
       operationId: listRegistries
@@ -10246,6 +10366,54 @@ components:
         - runnerId
         - runnerSnapshotId
       type: object
+    RunnerHealthMetrics:
+      properties:
+        currentCpuUsagePercentage:
+          description: Current CPU usage percentage
+          example: 45.5
+          type: number
+        currentMemoryUsagePercentage:
+          description: Current memory usage percentage
+          example: 60.2
+          type: number
+        currentDiskUsagePercentage:
+          description: Current disk usage percentage
+          example: 35.8
+          type: number
+        currentAllocatedCpu:
+          description: Currently allocated CPU cores
+          example: 8
+          type: number
+        currentAllocatedMemoryGiB:
+          description: Currently allocated memory in GiB
+          example: 16
+          type: number
+        currentAllocatedDiskGiB:
+          description: Currently allocated disk in GiB
+          example: 100
+          type: number
+        currentSnapshotCount:
+          description: Number of snapshots currently stored
+          example: 5
+          type: number
+      required:
+        - currentAllocatedCpu
+        - currentAllocatedDiskGiB
+        - currentAllocatedMemoryGiB
+        - currentCpuUsagePercentage
+        - currentDiskUsagePercentage
+        - currentMemoryUsagePercentage
+        - currentSnapshotCount
+      type: object
+    RunnerHealthcheck:
+      example:
+        metrics: ''
+      properties:
+        metrics:
+          allOf:
+            - $ref: '#/components/schemas/RunnerHealthMetrics'
+          description: Runner metrics
+      type: object
     ProjectDirResponse:
       example:
         dir: dir
@@ -12332,6 +12500,146 @@ components:
           type: string
       required:
         - name
+      type: object
+    Job:
+      example:
+        createdAt: 2024-10-01T12:00:00Z
+        resourceId: sandbox123
+        payload:
+          key: ''
+        errorMessage: Failed to create sandbox
+        id: job123
+        type: CREATE_SANDBOX
+        traceContext:
+          traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+        status: PENDING
+        resourceType: SANDBOX
+        updatedAt: 2024-10-01T12:00:00Z
+      properties:
+        id:
+          description: The ID of the job
+          example: job123
+          type: string
+        type:
+          description: The type of the job
+          enum:
+            - CREATE_SANDBOX
+            - START_SANDBOX
+            - STOP_SANDBOX
+            - DESTROY_SANDBOX
+            - CREATE_BACKUP
+            - BUILD_SNAPSHOT
+            - PULL_SNAPSHOT
+            - REMOVE_SNAPSHOT
+          example: CREATE_SANDBOX
+          type: string
+        status:
+          description: The status of the job
+          enum:
+            - PENDING
+            - IN_PROGRESS
+            - COMPLETED
+            - FAILED
+          example: PENDING
+          type: string
+        resourceType:
+          description: The type of resource this job operates on
+          enum:
+            - SANDBOX
+            - SNAPSHOT
+            - BACKUP
+          example: SANDBOX
+          type: string
+        resourceId:
+          description: "The ID of the resource this job operates on (sandboxId, snapshotRef,\
+            \ etc.)"
+          example: sandbox123
+          type: string
+        payload:
+          additionalProperties: true
+          description: Job-specific payload data (operational metadata)
+          type: object
+        traceContext:
+          additionalProperties: true
+          description: OpenTelemetry trace context for distributed tracing (W3C Trace
+            Context format)
+          example:
+            traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+          type: object
+        errorMessage:
+          description: Error message if the job failed
+          example: Failed to create sandbox
+          type: string
+        createdAt:
+          description: The creation timestamp of the job
+          example: 2024-10-01T12:00:00Z
+          type: string
+        updatedAt:
+          description: The last update timestamp of the job
+          example: 2024-10-01T12:00:00Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - status
+        - type
+      type: object
+    PollJobsResponse:
+      example:
+        jobs:
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload:
+              key: ''
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload:
+              key: ''
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+      properties:
+        jobs:
+          description: List of jobs
+          items:
+            $ref: '#/components/schemas/Job'
+          type: array
+      required:
+        - jobs
+      type: object
+    UpdateJobStatus:
+      example:
+        errorMessage: Failed to create sandbox
+        status: IN_PROGRESS
+      properties:
+        status:
+          description: The new status of the job
+          enum:
+            - PENDING
+            - IN_PROGRESS
+            - COMPLETED
+            - FAILED
+          example: IN_PROGRESS
+          type: string
+        errorMessage:
+          description: Error message if the job failed
+          example: Failed to create sandbox
+          type: string
+      required:
+        - status
       type: object
     CreateDockerRegistry:
       example:

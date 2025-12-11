@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, LessThan, Not, Repository } from 'typeorm'
+import { FindOptionsWhere, In, LessThan, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -38,6 +38,9 @@ import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotService } from '../services/snapshot.service'
+import { JobService } from '../services/job.service'
+import { JobType } from '../enums/job-type.enum'
+import { ResourceType } from '../enums/resource-type.enum'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -69,6 +72,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly organizationService: OrganizationService,
     private readonly configService: TypedConfigService,
     private readonly snapshotService: SnapshotService,
+    private readonly jobService: JobService,
   ) {}
 
   async onApplicationShutdown() {
@@ -216,6 +220,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       )
       return
     }
+
     if (runner.state !== RunnerState.READY) {
       //  todo: handle timeout policy
       //  for now just remove the snapshot runner record if the runner is not ready
@@ -224,6 +229,16 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       throw new RunnerNotReadyError(`Runner ${runner.id} is not ready`)
     }
 
+    // v2 runners handle PULLING_SNAPSHOT and BUILDING_SNAPSHOT states via job completions
+    // Only REMOVING state needs to be processed here to create the remove job
+    if (runner.version === '2') {
+      if (snapshotRunner.state === SnapshotRunnerState.REMOVING) {
+        await this.handleSnapshotRunnerStateRemoving(snapshotRunner, runner)
+      }
+      return
+    }
+
+    // v0 runners use imperative adapter calls
     switch (snapshotRunner.state) {
       case SnapshotRunnerState.PULLING_SNAPSHOT:
         await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
@@ -246,6 +261,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           state: RunnerState.READY,
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
+          version: '0',
         },
       })
 
@@ -550,6 +566,20 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       return
     }
 
+    // v2 runners: create REMOVE_SNAPSHOT job and delete the snapshot runner record
+    if (runner.version === '2') {
+      await this.jobService.createJob(
+        null,
+        JobType.REMOVE_SNAPSHOT,
+        runner.id,
+        ResourceType.SNAPSHOT,
+        snapshotRunner.snapshotRef,
+      )
+      await this.snapshotRunnerRepository.delete(snapshotRunner.id)
+      return
+    }
+
+    // v0 runners: use adapter to check and remove snapshot
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const exists = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
     if (!exists) {
@@ -584,7 +614,21 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleCheckInitialRunnerSnapshot(snapshot: Snapshot): Promise<SyncState> {
-    // Check for timeout - allow up to 30 minutes
+    const runner = await this.runnerRepository.findOneOrFail({
+      where: {
+        id: snapshot.initialRunnerId,
+      },
+    })
+
+    // v2 runners handle snapshot building/pulling via jobs - wait for job completion
+    // Check this BEFORE timeout check since v2 jobs manage their own timeouts
+    if (runner.version === '2') {
+      // For v2 runners, the snapshot processing is handled by the runner via jobs
+      // The snapshot state will be updated by JobStateHandlerService when job completes
+      return DONT_SYNC_AGAIN
+    }
+
+    // Check for timeout - allow up to 30 minutes (v0 runners only)
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
@@ -608,12 +652,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
       return DONT_SYNC_AGAIN
     }
-
-    const runner = await this.runnerRepository.findOneOrFail({
-      where: {
-        id: snapshot.initialRunnerId,
-      },
-    })
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
@@ -792,6 +830,88 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     snapshot.initialRunnerId = initialRunner.id
     await this.snapshotRepository.save(snapshot)
 
+    // v2 runners use job-based snapshot building/pulling
+    if (initialRunner.version === '2') {
+      if (snapshot.buildInfo) {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+        // Create BUILD_SNAPSHOT job for v2 runner
+        await this.runnerService.createSnapshotRunnerEntry(
+          initialRunner.id,
+          snapshot.buildInfo.snapshotRef,
+          SnapshotRunnerState.BUILDING_SNAPSHOT,
+        )
+        const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        await this.jobService.createJob(
+          null,
+          JobType.BUILD_SNAPSHOT,
+          initialRunner.id,
+          ResourceType.SANDBOX,
+          snapshot.buildInfo.snapshotRef,
+          {
+            buildInfo: snapshot.buildInfo,
+            organizationId: snapshot.organizationId,
+            registry: registry
+              ? {
+                  url: registry.url.replace(/^(https?:\/\/)/, ''),
+                  username: registry.username,
+                  password: registry.password,
+                  project: registry.project,
+                }
+              : undefined,
+          },
+        )
+      } else {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+        // Generate the internal snapshot tag if not already set
+        const destinationRef = snapshot.ref || this.getInitialRunnerSnapshotTag(snapshot)
+        // Save the ref back to the snapshot so we can find it when the job completes
+        if (!snapshot.ref) {
+          snapshot.ref = destinationRef
+          await this.snapshotRepository.save(snapshot)
+        }
+        // Create PULL_SNAPSHOT job for v2 runner
+        await this.runnerService.createSnapshotRunnerEntry(
+          initialRunner.id,
+          destinationRef,
+          SnapshotRunnerState.PULLING_SNAPSHOT,
+        )
+        const sourceRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
+          snapshot.imageName,
+          snapshot.organizationId,
+        )
+        const destinationRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        await this.jobService.createJob(
+          null,
+          JobType.PULL_SNAPSHOT,
+          initialRunner.id,
+          ResourceType.SNAPSHOT,
+          destinationRef,
+          {
+            sourceImage: snapshot.imageName,
+            destinationRef: destinationRef,
+            registry: sourceRegistry
+              ? {
+                  url: sourceRegistry.url,
+                  username: sourceRegistry.username,
+                  password: sourceRegistry.password,
+                  project: sourceRegistry.project,
+                }
+              : undefined,
+            destinationRegistry: destinationRegistry
+              ? {
+                  url: destinationRegistry.url.replace(/^(https?:\/\/)/, ''),
+                  username: destinationRegistry.username,
+                  password: destinationRegistry.password,
+                  project: destinationRegistry.project,
+                }
+              : undefined,
+          },
+        )
+      }
+      return SYNC_AGAIN
+    }
+
+    // v0 runners use imperative calls
     if (snapshot.buildInfo) {
       await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
       await this.processBuildOnRunner(snapshot, initialRunner)
