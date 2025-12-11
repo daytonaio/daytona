@@ -43,7 +43,13 @@ export class SshAccessDto {
   })
   updatedAt: Date
 
-  static fromSshAccess(sshAccess: SshAccess): SshAccessDto {
+  @ApiProperty({
+    description: 'SSH command to connect to the sandbox',
+    example: 'ssh -p 2222 token@localhost',
+  })
+  sshCommand: string
+
+  static fromSshAccess(sshAccess: SshAccess, sshGatewayUrl: string): SshAccessDto {
     const dto = new SshAccessDto()
     dto.id = sshAccess.id
     dto.sandboxId = sshAccess.sandboxId
@@ -51,6 +57,33 @@ export class SshAccessDto {
     dto.expiresAt = sshAccess.expiresAt
     dto.createdAt = sshAccess.createdAt
     dto.updatedAt = sshAccess.updatedAt
+    // Robustly extract host and port from sshGatewayUrl
+    let host: string
+    let port: string
+    try {
+      // If protocol is present, use URL
+      if (sshGatewayUrl.includes('://')) {
+        const url = new URL(sshGatewayUrl)
+        host = url.hostname
+        port = url.port || '22'
+      } else {
+        // No protocol, parse manually
+        const [hostPart, portPart] = sshGatewayUrl.split(':')
+        host = hostPart
+        port = portPart || '22'
+      }
+    } catch {
+      // Fallback: treat as host only
+      host = sshGatewayUrl
+      port = '22'
+    }
+
+    if (port === '22') {
+      dto.sshCommand = `ssh ${sshAccess.token}@${host}`
+    } else {
+      dto.sshCommand = `ssh -p ${port} ${sshAccess.token}@${host}`
+    }
+
     return dto
   }
 }

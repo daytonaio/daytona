@@ -146,8 +146,7 @@ const OrganizationSettings: React.FC = () => {
                   readOnly
                   className="flex-1 uppercase"
                 />
-              ) : authenticatedUserOrganizationMember !== null &&
-                authenticatedUserOrganizationMember.role === OrganizationUserRoleEnum.OWNER ? (
+              ) : isOwner ? (
                 <div className="flex sm:justify-end">
                   <Button onClick={() => setSetDefaultRegionDialog(true)} variant="secondary">
                     Set Region
