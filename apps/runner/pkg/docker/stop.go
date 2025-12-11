@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/runner/internal/constants"
+	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 
@@ -38,13 +38,12 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 
 	timeout := 2 // seconds
 	// Use exponential backoff helper for container stopping
-	err = d.retryWithExponentialBackoff(
+	err = utils.RetryWithExponentialBackoff(
 		ctx,
-		"stop",
-		containerId,
-		constants.DEFAULT_MAX_RETRIES,
-		constants.DEFAULT_BASE_DELAY,
-		constants.DEFAULT_MAX_DELAY,
+		fmt.Sprintf("stop sandbox %s", containerId),
+		utils.DEFAULT_MAX_RETRIES,
+		utils.DEFAULT_BASE_DELAY,
+		utils.DEFAULT_MAX_DELAY,
 		func() error {
 			return d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
 				Signal:  "SIGKILL",
@@ -53,7 +52,7 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		},
 	)
 	if err != nil {
-		log.Warnf("Failed to stop sandbox %s for %d attempts: %v", containerId, constants.DEFAULT_MAX_RETRIES, err)
+		log.Warnf("Failed to stop sandbox %s for %d attempts: %v", containerId, utils.DEFAULT_MAX_RETRIES, err)
 		log.Warnf("Trying to kill sandbox %s", containerId)
 		err = d.apiClient.ContainerKill(ctx, containerId, "KILL")
 		if err != nil {
