@@ -14,17 +14,24 @@ import (
 	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+
 	log "github.com/sirupsen/logrus"
 )
+
+type MonitorOptions struct {
+	OnStartEvent func(ctx context.Context, containerName string)
+	OnStopEvent  func(ctx context.Context, containerName string)
+}
 
 type DockerMonitor struct {
 	apiClient       client.APIClient
 	ctx             context.Context
 	cancel          context.CancelFunc
 	netRulesManager *netrules.NetRulesManager
+	opts            MonitorOptions
 }
 
-func NewDockerMonitor(apiClient client.APIClient, netRulesManager *netrules.NetRulesManager) *DockerMonitor {
+func NewDockerMonitor(apiClient client.APIClient, netRulesManager *netrules.NetRulesManager, opts MonitorOptions) *DockerMonitor {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &DockerMonitor{
@@ -32,6 +39,7 @@ func NewDockerMonitor(apiClient client.APIClient, netRulesManager *netrules.NetR
 		ctx:             ctx,
 		cancel:          cancel,
 		netRulesManager: netRulesManager,
+		opts:            opts,
 	}
 }
 
@@ -140,12 +148,38 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 			log.Errorf("Error inspecting container: %v", err)
 			return
 		}
+
 		shortContainerID := containerID[:12]
 		err = dm.netRulesManager.AssignNetworkRules(shortContainerID, common.GetContainerIpAddress(dm.ctx, ct))
 		if err != nil {
 			log.Errorf("Error assigning network rules: %v", err)
 		}
+
+		sandboxId := strings.TrimPrefix(ct.Name, "/")
+		if dm.opts.OnStartEvent != nil {
+			go dm.opts.OnStartEvent(dm.ctx, sandboxId)
+		}
 	case "stop":
+		shortContainerID := containerID[:12]
+		err := dm.netRulesManager.UnassignNetworkRules(shortContainerID)
+		if err != nil {
+			log.Errorf("Error unassigning network rules: %v", err)
+		}
+		err = dm.netRulesManager.RemoveNetworkLimiter(shortContainerID)
+		if err != nil {
+			log.Errorf("Error removing network limiter: %v", err)
+		}
+
+		ct, err := dm.apiClient.ContainerInspect(dm.ctx, containerID)
+		if err != nil {
+			log.Errorf("Error inspecting container: %v", err)
+			return
+		}
+
+		sandboxId := strings.TrimPrefix(ct.Name, "/")
+		if dm.opts.OnStopEvent != nil {
+			go dm.opts.OnStopEvent(dm.ctx, sandboxId)
+		}
 	case "kill":
 		shortContainerID := containerID[:12]
 		err := dm.netRulesManager.UnassignNetworkRules(shortContainerID)

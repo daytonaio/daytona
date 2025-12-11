@@ -52,6 +52,8 @@ func main() {
 		return
 	}
 
+	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
+
 	// Initialize net rules manager
 	persistent := cfg.Environment != "development"
 	netRulesManager, err := netrules.NewNetRulesManager(persistent)
@@ -66,8 +68,15 @@ func main() {
 		return
 	}
 
+	stateChangeService := services.NewSandboxStateChangeService(statesCache)
+
+	opts := docker.MonitorOptions{
+		OnStartEvent: stateChangeService.OnStartEvent,
+		OnStopEvent:  stateChangeService.OnStopEvent,
+	}
+
 	// Start Docker events monitor
-	monitor := docker.NewDockerMonitor(cli, netRulesManager)
+	monitor := docker.NewDockerMonitor(cli, netRulesManager, opts)
 	go func() {
 		err = monitor.Start()
 		if err != nil {
@@ -92,8 +101,6 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
-
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:              cli,
 		StatesCache:            statesCache,
@@ -116,13 +123,6 @@ func main() {
 		Interval: 15 * time.Second,
 	})
 	metricsService.StartMetricsCollection(ctx)
-
-	// Initialize sandbox state synchronization service
-	sandboxSyncService := services.NewSandboxSyncService(services.SandboxSyncServiceConfig{
-		Docker:   dockerClient,
-		Interval: 10 * time.Second, // Sync every 10 seconds
-	})
-	sandboxSyncService.StartSyncProcess(ctx)
 
 	// Initialize SSH Gateway if enabled
 	var sshGatewayService *sshgateway.Service

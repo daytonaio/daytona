@@ -5,7 +5,6 @@ package docker
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/containerd/errdefs"
@@ -15,8 +14,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
@@ -112,44 +109,6 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	}()
 
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
-
-	return nil
-}
-
-func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) error {
-	// Check if container exists and is in destroyed state
-	state, err := d.DeduceSandboxState(ctx, containerId)
-	if err != nil {
-		return err
-	}
-
-	if state != enums.SandboxStateDestroyed {
-		return common_errors.NewBadRequestError(fmt.Errorf("sandbox %s is not in destroyed state", containerId))
-	}
-
-	// Use exponential backoff helper for container removal
-	err = d.retryWithExponentialBackoff(
-		ctx,
-		"remove",
-		containerId,
-		constants.DEFAULT_MAX_RETRIES,
-		constants.DEFAULT_BASE_DELAY,
-		constants.DEFAULT_MAX_DELAY,
-		func() error {
-			return d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
-				Force: true,
-			})
-		},
-	)
-	if err != nil {
-		// Handle NotFound error case
-		if errdefs.IsNotFound(err) {
-			return nil
-		}
-		return err
-	}
-
-	log.Debugf("Destroyed sandbox %s removed successfully", containerId)
 
 	return nil
 }
