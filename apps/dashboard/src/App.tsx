@@ -13,7 +13,7 @@ import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
 import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
 import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { usePostHog } from 'posthog-js/react'
+import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
@@ -50,6 +50,7 @@ import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 import Regions from './pages/Regions'
 import Runners from './pages/Runners'
+import { FeatureFlags } from './enums/FeatureFlags'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -75,7 +76,7 @@ function App() {
   const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
 
   useEffect(() => {
-    if (import.meta.env.PROD && isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
+    if (isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
       posthog?.identify(user.profile.sub, {
         email: user.profile.email,
         name: user.profile.name,
@@ -222,15 +223,24 @@ function App() {
           }
         />
         <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
-        <Route path={getRouteSubPath(RoutePath.REGIONS)} element={<Regions />} />
+        <Route
+          path={getRouteSubPath(RoutePath.REGIONS)}
+          element={
+            <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
+              <Regions />
+            </RequiredFeatureFlagWrapper>
+          }
+        />
         <Route
           path={getRouteSubPath(RoutePath.RUNNERS)}
           element={
-            <RequiredPermissionsOrganizationPageWrapper
-              requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
-            >
-              <Runners />
-            </RequiredPermissionsOrganizationPageWrapper>
+            <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
+              <RequiredPermissionsOrganizationPageWrapper
+                requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
+              >
+                <Runners />
+              </RequiredPermissionsOrganizationPageWrapper>
+            </RequiredFeatureFlagWrapper>
           }
         />
         <Route
@@ -275,6 +285,16 @@ function RequiredPermissionsOrganizationPageWrapper({
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   if (!requiredPermissions.every((permission) => authenticatedUserHasPermission(permission))) {
+    return <Navigate to={RoutePath.DASHBOARD} replace />
+  }
+
+  return children
+}
+
+function RequiredFeatureFlagWrapper({ children, flagKey }: { children: React.ReactNode; flagKey: FeatureFlags }) {
+  const flagEnabled = useFeatureFlagEnabled(flagKey)
+
+  if (!flagEnabled) {
     return <Navigate to={RoutePath.DASHBOARD} replace />
   }
 

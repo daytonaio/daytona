@@ -58,6 +58,8 @@ import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { RunnerFullDto } from '../dto/runner-full.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionService } from '../../region/services/region.service'
+import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
+import { FeatureFlags } from '../../common/constants/feature-flags'
 
 @ApiTags('runners')
 @Controller('runners')
@@ -97,6 +99,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async create(
     @Body() createRunnerDto: CreateRunnerDto,
     @AuthContext() authContext: OrganizationAuthContext,
@@ -160,6 +163,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
     return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
   }
@@ -215,6 +219,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async updateSchedulingStatus(
     @Param('id') id: string,
     @Body('unschedulable') unschedulable: boolean,
@@ -245,6 +250,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async delete(@Param('id') id: string): Promise<void> {
     return this.runnerService.remove(id)
   }
