@@ -10,6 +10,11 @@ import { isRunnerContext, RunnerContext } from '../../common/interfaces/runner-c
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
 import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
+import { isRegionProxyContext, RegionProxyContext } from '../../common/interfaces/region-proxy.interface'
+import {
+  isRegionSSHGatewayContext,
+  RegionSSHGatewayContext,
+} from '../../common/interfaces/region-ssh-gateway.interface'
 
 @Injectable()
 export class SandboxAccessGuard implements CanActivate {
@@ -32,6 +37,16 @@ export class SandboxAccessGuard implements CanActivate {
           const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxIdOrName)
           if (sandboxRunnerId !== runnerContext.runnerId) {
             throw new ForbiddenException('Runner ID does not match sandbox runner ID')
+          }
+          break
+        }
+        case isRegionProxyContext(authContext):
+        case isRegionSSHGatewayContext(authContext): {
+          // For region proxy/ssh gateway authentication, verify that the runner's region ID matches the region ID
+          const regionContext = authContext as RegionProxyContext | RegionSSHGatewayContext
+          const sandboxRegionId = await this.sandboxService.getRegionId(sandboxIdOrName)
+          if (sandboxRegionId !== regionContext.regionId) {
+            throw new ForbiddenException(`Sandbox region ID does not match region ${regionContext.role} region ID`)
           }
           break
         }

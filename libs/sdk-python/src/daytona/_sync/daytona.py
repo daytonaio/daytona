@@ -195,8 +195,9 @@ class Daytona:
         self._sandbox_api = SandboxApi(self._api_client)
         self._object_storage_api = ObjectStorageApi(self._api_client)
         self._config_api = ConfigApi(self._api_client)
-        self._proxy_toolbox_url_future: Optional[Future] = None
-        self._proxy_toolbox_url_future_lock = threading.Lock()
+        # Toolbox proxy cache per region
+        self._proxy_toolbox_url_futures: Dict[str, Future] = {}
+        self._proxy_toolbox_url_lock = threading.Lock()
         self._toolbox_api_client = self._clone_api_client_to_toolbox_api_client()
 
         # Initialize services
@@ -653,17 +654,17 @@ class Daytona:
 
         return toolbox_api_client
 
-    def _get_proxy_toolbox_url(self):
-        if self._proxy_toolbox_url_future is not None:
-            return self._proxy_toolbox_url_future.result()
+    def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
+        if self._proxy_toolbox_url_futures[region_id] is not None:
+            return self._proxy_toolbox_url_futures[region_id].result()
 
-        with self._proxy_toolbox_url_future_lock:
+        with self._proxy_toolbox_url_lock:
             # Double-check: another thread might have created the future
             # Create local variable "future" so that the thread knows if it created the future
             # and should do the API call and set the result
-            if self._proxy_toolbox_url_future is None:
+            if self._proxy_toolbox_url_futures[region_id] is None:
                 future = Future()
-                self._proxy_toolbox_url_future = future
+                self._proxy_toolbox_url_futures[region_id] = future
             else:
                 future = None
 
@@ -671,11 +672,11 @@ class Daytona:
         # This allows other threads to wait on the future instead of blocking on the lock
         if future is not None:
             try:
-                config = self._config_api.config_controller_get_config()
-                future.set_result(config.proxy_toolbox_url)
+                response = self._sandbox_api.get_toolbox_proxy_url(sandbox_id)
+                future.set_result(response.url)
             except Exception as e:
                 future.set_exception(e)
                 raise
 
         # Allows other threads to wait on the same future in parallel
-        return self._proxy_toolbox_url_future.result()
+        return self._proxy_toolbox_url_futures[region_id].result()
