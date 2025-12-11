@@ -195,6 +195,7 @@ class Daytona:
         self._sandbox_api = SandboxApi(self._api_client)
         self._object_storage_api = ObjectStorageApi(self._api_client)
         self._config_api = ConfigApi(self._api_client)
+        # Toolbox proxy cache per region
         self._toolbox_proxy_cache = {}
 
         # Initialize services
@@ -645,8 +646,8 @@ class Daytona:
         self._api_clients.append(new_client)
         return new_client
 
-    def _get_proxy_toolbox_url(self, sandbox_id: str) -> str:
-        if sandbox_id not in self._toolbox_proxy_cache:
+    def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
+        if region_id not in self._toolbox_proxy_cache:
             response = self._sandbox_api.get_toolbox_proxy_url(sandbox_id)
-            self._toolbox_proxy_cache[sandbox_id] = response.url
-        return self._toolbox_proxy_cache[sandbox_id]
+            self._toolbox_proxy_cache[region_id] = response.url
+        return self._toolbox_proxy_cache[region_id]

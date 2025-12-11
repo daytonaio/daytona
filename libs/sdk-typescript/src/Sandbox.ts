@@ -132,7 +132,7 @@ export class Sandbox implements SandboxDto {
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
     private readonly codeToolbox: SandboxCodeToolbox,
-    private readonly getToolboxBaseUrl: (sandboxId: string) => Promise<string>,
+    private readonly getToolboxBaseUrl: (sandboxId: string, regionId: string) => Promise<string>,
   ) {
     this.processSandboxDto(sandboxDto)
 
@@ -613,7 +613,7 @@ export class Sandbox implements SandboxDto {
     if (this.axiosInstance.defaults.baseURL !== TOOLBOX_URL_PLACEHOLDER) {
       return
     }
-    this.axiosInstance.defaults.baseURL = await this.getToolboxBaseUrl(this.id)
+    this.axiosInstance.defaults.baseURL = await this.getToolboxBaseUrl(this.id, this.target)
     if (!this.axiosInstance.defaults.baseURL.endsWith('/')) {
       this.axiosInstance.defaults.baseURL += '/'
     }
