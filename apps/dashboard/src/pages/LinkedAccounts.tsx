@@ -72,7 +72,7 @@ const LinkedAccounts: React.FC = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4">
         <CardTitle>Linked Accounts</CardTitle>
         <CardDescription>Link your accounts to your Daytona account for a seamless login.</CardDescription>
       </CardHeader>
@@ -83,7 +83,7 @@ const LinkedAccounts: React.FC = () => {
           ))}
         </CardContent>
       ) : (
-        <CardContent className="p-0 mt-5">
+        <CardContent className="p-0">
           {accountProviders.map((provider) => (
             <LinkedAccount key={provider.name} provider={provider} linkingUserManager={linkingUserManager} />
           ))}

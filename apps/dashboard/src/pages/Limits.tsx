@@ -4,6 +4,7 @@
  */
 
 import { LiveIndicator } from '@/components/LiveIndicator'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { TierComparisonTable, TierComparisonTableSkeleton } from '@/components/TierComparisonTable'
 import { TierUpgradeCard } from '@/components/TierUpgradeCard'
 import { Badge } from '@/components/ui/badge'
@@ -97,12 +98,12 @@ export default function Limits() {
   }
 
   return (
-    <div className="px-6 py-2 max-w-3xl p-5">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Limits</h1>
-      </div>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Limits</PageTitle>
+      </PageHeader>
 
-      <div className="flex flex-col gap-6">
+      <PageContent>
         {isError ? (
           <Card>
             <CardHeader>
@@ -234,8 +235,8 @@ export default function Limits() {
             )}
           </>
         )}
-      </div>
-    </div>
+      </PageContent>
+    </PageLayout>
   )
 }
 
