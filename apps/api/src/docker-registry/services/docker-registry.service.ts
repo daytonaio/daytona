@@ -45,7 +45,7 @@ export class DockerRegistryService {
     private readonly dockerRegistryRepository: Repository<DockerRegistry>,
     @Inject(DOCKER_REGISTRY_PROVIDER)
     private readonly dockerRegistryProvider: IDockerRegistryProvider,
-  ) {}
+  ) { }
 
   async create(
     createDto: CreateDockerRegistryDto,
@@ -198,9 +198,9 @@ export class DockerRegistryService {
   async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     const whereCondition = organizationId
       ? [
-          { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
-          { organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
-        ]
+        { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
+        { organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
+      ]
       : [{ organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) }]
 
     const registries = await this.dockerRegistryRepository.find({
@@ -484,16 +484,22 @@ export class DockerRegistryService {
 
       let manifestResponse = await sendWithHeaders(manifestUrl, baseHeaders)
 
-      // Handle Bearer challenge (e.g., AWS ECR Public)
+      // Handle Bearer challenge (e.g., AWS ECR Public, Azure CR)
       if (manifestResponse.status === 401 && manifestResponse.headers['www-authenticate']) {
         const authHeader = String(manifestResponse.headers['www-authenticate'])
         const challenge = parseWwwAuthenticate(authHeader)
         if (challenge?.scheme?.toLowerCase() === 'bearer' && challenge.realm) {
           try {
-            const token = await fetchBearerToken(challenge, {
-              repoPath,
-              registryHost: registryHost,
-            })
+            const token = await fetchBearerToken(
+              challenge,
+              {
+                repoPath,
+                registryHost: registryHost,
+              },
+              registry.username && registry.password
+                ? { username: registry.username, password: registry.password }
+                : undefined,
+            )
             if (token) {
               bearerToken = token
               const headersWithBearer = AxiosHeaders.from(baseHeaders)
@@ -833,10 +839,11 @@ function parseWwwAuthenticate(header: string): {
   return { scheme, realm: params.realm, service: params.service, scope: params.scope }
 }
 
-// Fetches a Bearer token using the auth challenge parameters (works for Docker Registry and AWS ECR Public)
+// Fetches a Bearer token using the auth challenge parameters (works for Docker Registry, AWS ECR Public, and Azure CR)
 async function fetchBearerToken(
   challenge: { realm?: string; service?: string; scope?: string },
   ctx: { repoPath: string; registryHost: string },
+  auth?: { username: string; password: string },
 ): Promise<string | null> {
   if (!challenge.realm) return null
   const params = new URLSearchParams()
@@ -846,7 +853,17 @@ async function fetchBearerToken(
   params.set('scope', scope)
   try {
     const url = `${challenge.realm}?${params.toString()}`
-    const resp = await axios.get(url, { timeout: 10000, validateStatus: (s) => s < 500 })
+    const requestConfig: any = { timeout: 10000, validateStatus: (s) => s < 500 }
+
+    // Azure Container Registry and some other registries require Basic auth for the token endpoint
+    if (auth?.username && auth?.password) {
+      requestConfig.auth = {
+        username: auth.username,
+        password: auth.password,
+      }
+    }
+
+    const resp = await axios.get(url, requestConfig)
     if (resp.status >= 300) return null
     return resp.data?.token || resp.data?.access_token || null
   } catch {
