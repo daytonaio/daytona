@@ -3,16 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
-import { useApi } from '@/hooks/useApi'
-import { PaginatedAuditLogs } from '@daytonaio/api-client'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { AuditLogTable } from '@/components/AuditLogTable'
-import { Switch } from '@/components/ui/switch'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { DateRangePicker, DateRangePickerRef, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useApi } from '@/hooks/useApi'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { DateRangePicker, QuickRangesConfig, DateRangePickerRef } from '@/components/ui/date-range-picker'
+import { PaginatedAuditLogs } from '@daytonaio/api-client'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 import { useInterval } from 'usehooks-ts'
 
@@ -171,41 +172,43 @@ const AuditLogs: React.FC = () => {
   }, [])
 
   return (
-    <div className="p-6 pt-2">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Audit Logs</h1>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Audit Logs</PageTitle>
         <div className="flex items-center gap-2">
           <Label htmlFor="auto-refresh">Auto Refresh</Label>
           <Switch id="auto-refresh" checked={autoRefresh} onCheckedChange={handleAutoRefreshChange} />
         </div>
-      </div>
+      </PageHeader>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center mb-4">
-        <div className="flex gap-2 items-center">
-          <DateRangePicker
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            quickRangesEnabled={true}
-            quickRanges={auditLogQuickRanges}
-            timeSelection={true}
-            ref={dateRangePickerRef}
-            disabled={loadingData}
-          />
+      <PageContent size="full">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex gap-2 items-center">
+            <DateRangePicker
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              quickRangesEnabled={true}
+              quickRanges={auditLogQuickRanges}
+              timeSelection={true}
+              ref={dateRangePickerRef}
+              disabled={loadingData}
+            />
+          </div>
         </div>
-      </div>
 
-      <AuditLogTable
-        data={data.items}
-        loading={loadingData}
-        pageCount={data.totalPages}
-        totalItems={data.total}
-        onPaginationChange={handlePaginationChange}
-        pagination={{
-          pageIndex: paginationParams.pageIndex,
-          pageSize: paginationParams.pageSize,
-        }}
-      />
-    </div>
+        <AuditLogTable
+          data={data.items}
+          loading={loadingData}
+          pageCount={data.totalPages}
+          totalItems={data.total}
+          onPaginationChange={handlePaginationChange}
+          pagination={{
+            pageIndex: paginationParams.pageIndex,
+            pageSize: paginationParams.pageSize,
+          }}
+        />
+      </PageContent>
+    </PageLayout>
   )
 }
 
