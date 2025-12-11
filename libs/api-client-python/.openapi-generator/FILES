@@ -46,6 +46,7 @@ daytona_api_client/models/create_organization_invitation.py
 daytona_api_client/models/create_organization_quota.py
 daytona_api_client/models/create_organization_role.py
 daytona_api_client/models/create_region.py
+daytona_api_client/models/create_region_response.py
 daytona_api_client/models/create_runner.py
 daytona_api_client/models/create_runner_response.py
 daytona_api_client/models/create_sandbox.py
@@ -121,6 +122,7 @@ daytona_api_client/models/pty_session_info.py
 daytona_api_client/models/range.py
 daytona_api_client/models/rate_limit_config.py
 daytona_api_client/models/rate_limit_entry.py
+daytona_api_client/models/regenerate_api_key_response.py
 daytona_api_client/models/region.py
 daytona_api_client/models/region_quota.py
 daytona_api_client/models/region_screenshot_response.py
@@ -152,6 +154,7 @@ daytona_api_client/models/snapshot_state.py
 daytona_api_client/models/ssh_access_dto.py
 daytona_api_client/models/ssh_access_validation_dto.py
 daytona_api_client/models/storage_access_dto.py
+daytona_api_client/models/toolbox_proxy_url.py
 daytona_api_client/models/update_docker_registry.py
 daytona_api_client/models/update_organization_default_region.py
 daytona_api_client/models/update_organization_invitation.py

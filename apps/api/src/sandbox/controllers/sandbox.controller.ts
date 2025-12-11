@@ -74,6 +74,7 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 import { SkipThrottle } from '@nestjs/throttler'
 import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
 import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
+import { ToolboxProxyUrlDto } from '../dto/toolbox-proxy-url.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -996,12 +997,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
     @Query('expiresInMinutes') expiresInMinutes?: number,
   ): Promise<SshAccessDto> {
-    const sshAccess = await this.sandboxService.createSshAccess(
-      sandboxIdOrName,
-      expiresInMinutes,
-      authContext.organizationId,
-    )
-    return SshAccessDto.fromSshAccess(sshAccess)
+    return await this.sandboxService.createSshAccess(sandboxIdOrName, expiresInMinutes, authContext.organizationId)
   }
 
   @Delete(':sandboxIdOrName/ssh-access')
@@ -1067,6 +1063,27 @@ export class SandboxController {
   async validateSshAccess(@Query('token') token: string): Promise<SshAccessValidationDto> {
     const result = await this.sandboxService.validateSshAccess(token)
     return SshAccessValidationDto.fromValidationResult(result.valid, result.sandboxId)
+  }
+
+  @Get(':sandboxId/toolbox-proxy-url')
+  @ApiOperation({
+    summary: 'Get toolbox proxy URL for a sandbox',
+    operationId: 'getToolboxProxyUrl',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Toolbox proxy URL for the specified sandbox',
+    type: ToolboxProxyUrlDto,
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getToolboxProxyUrl(@Param('sandboxId') sandboxId: string): Promise<ToolboxProxyUrlDto> {
+    const url = await this.sandboxService.getToolboxProxyUrl(sandboxId)
+    return new ToolboxProxyUrlDto(url)
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox

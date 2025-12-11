@@ -40,6 +40,8 @@ export class OrganizationAccessGuard implements CanActivate {
       authContext.role !== 'ssh-gateway' &&
       authContext.role !== 'runner' &&
       authContext.role !== 'proxy' &&
+      authContext.role !== 'region-proxy' &&
+      authContext.role !== 'region-ssh-gateway' &&
       !organizationIdParam &&
       !authContext.organizationId
     ) {

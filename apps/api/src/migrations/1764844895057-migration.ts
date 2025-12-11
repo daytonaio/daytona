@@ -76,9 +76,25 @@ export class Migration1764844895057 implements MigrationInterface {
     await queryRunner.query(
       `CREATE INDEX "runner_state_unschedulable_region_index" ON "runner" ("state", "unschedulable", "region") `,
     )
+
+    // add region proxy and ssh gateway fields
+    await queryRunner.query(`ALTER TABLE "region" ADD "proxyUrl" character varying`)
+    await queryRunner.query(`ALTER TABLE "region" ADD "toolboxProxyUrl" character varying`)
+    await queryRunner.query(`ALTER TABLE "region" ADD "proxyApiKeyHash" character varying`)
+    await queryRunner.query(`ALTER TABLE "region" ADD "sshGatewayUrl" character varying`)
+    await queryRunner.query(`ALTER TABLE "region" ADD "sshGatewayApiKeyHash" character varying`)
+    await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "proxyUrl" DROP DEFAULT`)
+    await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "region" DROP DEFAULT`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // remove region proxy and ssh gateway fields
+    await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "sshGatewayApiKeyHash"`)
+    await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "sshGatewayUrl"`)
+    await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "proxyApiKeyHash"`)
+    await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "toolboxProxyUrl"`)
+    await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "proxyUrl"`)
+
     // drop region type field
     await queryRunner.query(`ALTER TABLE "region" DROP COLUMN "regionType"`)
     await queryRunner.query(`DROP TYPE "public"."region_regiontype_enum"`)

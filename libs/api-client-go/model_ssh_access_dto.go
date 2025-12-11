@@ -33,7 +33,9 @@ type SshAccessDto struct {
 	// When the SSH access was created
 	CreatedAt time.Time `json:"createdAt"`
 	// When the SSH access was last updated
-	UpdatedAt            time.Time `json:"updatedAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	// SSH command to connect to the sandbox
+	SshCommand           string `json:"sshCommand"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -43,7 +45,7 @@ type _SshAccessDto SshAccessDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSshAccessDto(id string, sandboxId string, token string, expiresAt time.Time, createdAt time.Time, updatedAt time.Time) *SshAccessDto {
+func NewSshAccessDto(id string, sandboxId string, token string, expiresAt time.Time, createdAt time.Time, updatedAt time.Time, sshCommand string) *SshAccessDto {
 	this := SshAccessDto{}
 	this.Id = id
 	this.SandboxId = sandboxId
@@ -51,6 +53,7 @@ func NewSshAccessDto(id string, sandboxId string, token string, expiresAt time.T
 	this.ExpiresAt = expiresAt
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
+	this.SshCommand = sshCommand
 	return &this
 }
 
@@ -206,6 +209,30 @@ func (o *SshAccessDto) SetUpdatedAt(v time.Time) {
 	o.UpdatedAt = v
 }
 
+// GetSshCommand returns the SshCommand field value
+func (o *SshAccessDto) GetSshCommand() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.SshCommand
+}
+
+// GetSshCommandOk returns a tuple with the SshCommand field value
+// and a boolean to check if the value has been set.
+func (o *SshAccessDto) GetSshCommandOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.SshCommand, true
+}
+
+// SetSshCommand sets field value
+func (o *SshAccessDto) SetSshCommand(v string) {
+	o.SshCommand = v
+}
+
 func (o SshAccessDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -222,6 +249,7 @@ func (o SshAccessDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["expiresAt"] = o.ExpiresAt
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+	toSerialize["sshCommand"] = o.SshCommand
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -241,6 +269,7 @@ func (o *SshAccessDto) UnmarshalJSON(data []byte) (err error) {
 		"expiresAt",
 		"createdAt",
 		"updatedAt",
+		"sshCommand",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -276,6 +305,7 @@ func (o *SshAccessDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "expiresAt")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "sshCommand")
 		o.AdditionalProperties = additionalProperties
 	}
 

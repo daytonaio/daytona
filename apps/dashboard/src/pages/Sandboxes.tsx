@@ -6,6 +6,13 @@
 import { OrganizationSuspendedError } from '@/api/errors'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
+import {
+  OrganizationUserRoleEnum,
+  Sandbox,
+  SandboxDesiredState,
+  SandboxState,
+  SshAccessDto,
+} from '@daytonaio/api-client'
 import { SandboxTable } from '@/components/SandboxTable'
 import {
   AlertDialog,
@@ -40,7 +47,6 @@ import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshot
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { formatDuration } from '@/lib/utils'
-import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
 import { Check, Copy } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -256,7 +262,7 @@ const Sandboxes: React.FC = () => {
 
   const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
   const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
-  const [sshToken, setSshToken] = useState<string>('')
+  const [sshAccess, setSshAccess] = useState<SshAccessDto | null>(null)
   const [sshExpiryMinutes, setSshExpiryMinutes] = useState<number>(60)
   const [revokeSshToken, setRevokeSshToken] = useState<string>('')
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
@@ -709,7 +715,7 @@ const Sandboxes: React.FC = () => {
     setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
     try {
       const response = await sandboxApi.createSshAccess(id, selectedOrganization?.id, sshExpiryMinutes)
-      setSshToken(response.data.token)
+      setSshAccess(response.data)
       setSshSandboxId(id)
       setShowCreateSshDialog(true)
       toast.success('SSH access created successfully')
@@ -891,7 +897,7 @@ const Sandboxes: React.FC = () => {
           onOpenChange={(isOpen) => {
             setShowCreateSshDialog(isOpen)
             if (!isOpen) {
-              setSshToken('')
+              setSshAccess(null)
               setSshExpiryMinutes(60)
               setSshSandboxId('')
             }
@@ -901,13 +907,13 @@ const Sandboxes: React.FC = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Create SSH Access</AlertDialogTitle>
               <AlertDialogDescription>
-                {sshToken
+                {sshAccess
                   ? 'SSH access has been created successfully. Use the token below to connect:'
                   : 'Set the expiration time for SSH access:'}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-4">
-              {!sshToken ? (
+              {!sshAccess ? (
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">Expiry (minutes):</Label>
                   <input
@@ -921,27 +927,18 @@ const Sandboxes: React.FC = () => {
                 </div>
               ) : (
                 <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                  <span className="overflow-x-auto pr-2 cursor-text select-all">
-                    {config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
-                      `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`}
-                  </span>
+                  <span className="overflow-x-auto pr-2 cursor-text select-all">{sshAccess.sshCommand}</span>
                   {(copied === 'SSH Command' && <Check className="w-4 h-4" />) || (
                     <Copy
                       className="w-4 h-4 cursor-pointer"
-                      onClick={() =>
-                        copyToClipboard(
-                          config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
-                            `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`,
-                          'SSH Command',
-                        )
-                      }
+                      onClick={() => copyToClipboard(sshAccess.sshCommand, 'SSH Command')}
                     />
                   )}
                 </div>
               )}
             </div>
             <AlertDialogFooter>
-              {!sshToken ? (
+              {!sshAccess ? (
                 <>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction

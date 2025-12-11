@@ -69,8 +69,6 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxId string) (err error, did
 			authErrors = append(authErrors, fmt.Sprintf("Cookie decoding error: %v", err))
 		} else if decodedValue == sandboxId {
 			return nil, false
-		} else {
-			authErrors = append(authErrors, "Cookie sandbox ID mismatch")
 		}
 	}
 

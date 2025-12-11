@@ -192,8 +192,9 @@ class AsyncDaytona:
         self._sandbox_api = SandboxApi(self._api_client)
         self._object_storage_api = ObjectStorageApi(self._api_client)
         self._config_api = ConfigApi(self._api_client)
-        self._proxy_toolbox_url_task: Optional[asyncio.Task] = None
-        self._proxy_toolbox_url_task_lock = asyncio.Lock()
+        # Toolbox proxy cache per region
+        self._proxy_toolbox_url_tasks: Dict[str, asyncio.Task] = {}
+        self._proxy_toolbox_url_lock = asyncio.Lock()
         self._toolbox_api_client = self._clone_api_client_to_toolbox_api_client()
 
         # Initialize services
@@ -695,19 +696,19 @@ class AsyncDaytona:
 
         return toolbox_api_client
 
-    async def _get_proxy_toolbox_url(self):
-        if self._proxy_toolbox_url_task is not None:
-            return await self._proxy_toolbox_url_task
+    async def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
+        if self._proxy_toolbox_url_tasks[region_id] is not None:
+            return await self._proxy_toolbox_url_tasks[region_id]
 
-        async with self._proxy_toolbox_url_task_lock:
+        async with self._proxy_toolbox_url_lock:
             # Double-check: another coroutine might have created the task
-            if self._proxy_toolbox_url_task is None:
+            if self._proxy_toolbox_url_tasks[region_id] is None:
 
                 async def _fetch():
-                    config = await self._config_api.config_controller_get_config()
-                    return config.proxy_toolbox_url
+                    response = await self._sandbox_api.get_toolbox_proxy_url(sandbox_id)
+                    return response.url
 
-                self._proxy_toolbox_url_task = asyncio.create_task(_fetch())
+                self._proxy_toolbox_url_tasks[region_id] = asyncio.create_task(_fetch())
 
         # All coroutines that made it here can now await the same task in parallel
-        return await self._proxy_toolbox_url_task
+        return await self._proxy_toolbox_url_tasks[region_id]

@@ -54,6 +54,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { CreateRunnerResponseDto } from '../dto/create-runner-response.dto'
+import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { RunnerFullDto } from '../dto/runner-full.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionService } from '../../region/services/region.service'
@@ -258,8 +259,8 @@ export class RunnerController {
     status: 200,
     type: RunnerFullDto,
   })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
+  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, SandboxAccessGuard]))
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
   async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
     return RunnerFullDto.fromRunner(runner)
