@@ -23,6 +23,12 @@ import type { RateLimitEntry } from './rate-limit-entry'
  */
 export interface RateLimitConfig {
   /**
+   * Failed authentication rate limit
+   * @type {RateLimitEntry}
+   * @memberof RateLimitConfig
+   */
+  failedAuth?: RateLimitEntry
+  /**
    * Authenticated rate limit
    * @type {RateLimitEntry}
    * @memberof RateLimitConfig
