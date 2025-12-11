@@ -34,13 +34,6 @@ type UpdateNetworkSettingsDTO struct {
 	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO
 
-// RecoveryType represents the type of recovery operation
-type RecoveryType string
-
-const (
-	RecoveryTypeStorageExpansion RecoveryType = "storage-expansion"
-)
-
 type RecoverSandboxDTO struct {
 	FromVolumeId      string            `json:"fromVolumeId,omitempty"`
 	UserId            string            `json:"userId" validate:"required"`
