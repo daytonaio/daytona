@@ -117,7 +117,7 @@ func GetConfig() (*Config, error) {
 		time.Second,
 		10*time.Second,
 		func() error {
-			apiConfig, _, err := config.ApiClient.ConfigAPI.ConfigControllerGetConfig(context.Background()).Execute()
+			apiConfig, _, err := config.ApiClient.ConfigAPI.ConfigControllerGetConfig(ctx).Execute()
 			if err != nil {
 				return err
 			}
