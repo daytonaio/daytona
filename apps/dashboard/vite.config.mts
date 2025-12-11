@@ -1,10 +1,13 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import checker from 'vite-plugin-checker'
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin'
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
+import react from '@vitejs/plugin-react'
+import fs from 'fs'
 import path from 'path'
+import { defineConfig } from 'vite'
+import checker from 'vite-plugin-checker'
+
+const outDir = '../../dist/apps/dashboard'
 
 export default defineConfig((mode) => ({
   root: __dirname,
@@ -32,6 +35,21 @@ export default defineConfig((mode) => ({
           tsconfigPath: './tsconfig.app.json',
         },
       }),
+
+    {
+      name: 'exclude-msw',
+      apply: 'build',
+      writeBundle() {
+        if (mode.mode === 'production') {
+          const mswPath = path.resolve(__dirname, outDir, 'mockServiceWorker.js')
+
+          if (fs.existsSync(mswPath)) {
+            fs.rmSync(mswPath)
+            console.log('Removed mockServiceWorker.js from production build.')
+          }
+        }
+      },
+    },
   ],
   resolve: {
     alias: {
@@ -43,7 +61,7 @@ export default defineConfig((mode) => ({
   //  plugins: [ nxViteTsPaths() ],
   // },
   build: {
-    outDir: '../../dist/apps/dashboard',
+    outDir,
     emptyOutDir: true,
     reportCompressedSize: true,
     commonjsOptions: {
