@@ -91,7 +91,7 @@ class Sandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         code_toolbox: SandboxCodeToolbox,
-        get_toolbox_base_url: Callable[[], str],
+        get_toolbox_base_url: Callable[[str, str], str],
     ):
         """Initialize a new Sandbox instance.
 
@@ -593,7 +593,7 @@ class Sandbox(SandboxDto):
         """Ensures the toolbox API URL for the sandbox is initialized."""
         if self._toolbox_api.configuration.host != "":
             return
-        self._toolbox_api.configuration.host = self._get_toolbox_base_url()
+        self._toolbox_api.configuration.host = self._get_toolbox_base_url(self.id, self.target)
         if not self._toolbox_api.configuration.host.endswith("/"):
             self._toolbox_api.configuration.host += "/"
         self._toolbox_api.configuration.host += self.id

@@ -5,9 +5,9 @@
 
 import React, { useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
-import { Plus } from 'lucide-react'
-import { Region, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { Region, OrganizationRolePermissionsEnum, CreateRegion, CreateRegionResponse } from '@daytonaio/api-client'
 import { RegionTable } from '@/components/RegionTable'
+import { CreateRegionDialog } from '@/components/CreateRegionDialog'
 import {
   Dialog,
   DialogClose,
@@ -16,15 +16,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 import { useRegions } from '@/hooks/useRegions'
+import { Check, Copy } from 'lucide-react'
 
 const Regions: React.FC = () => {
   const { regionsApi } = useApi()
@@ -33,30 +41,25 @@ const Regions: React.FC = () => {
 
   const [regionIsLoading, setRegionIsLoading] = useState<Record<string, boolean>>({})
 
-  const [createRegionDialogIsOpen, setCreateRegionDialogIsOpen] = useState(false)
-  const [newRegionName, setNewRegionName] = useState('')
-  const [loadingCreateRegion, setLoadingCreateDialog] = useState(false)
-
   const [regionToDelete, setRegionToDelete] = useState<Region | null>(null)
   const [deleteRegionDialogIsOpen, setDeleteRegionDialogIsOpen] = useState(false)
 
-  const handleCreate = async () => {
-    setLoadingCreateDialog(true)
+  // Regenerate API Key state
+  const [showRegenerateProxyApiKeyDialog, setShowRegenerateProxyApiKeyDialog] = useState(false)
+  const [showRegenerateSshGatewayApiKeyDialog, setShowRegenerateSshGatewayApiKeyDialog] = useState(false)
+  const [regeneratedApiKey, setRegeneratedApiKey] = useState<string | null>(null)
+  const [regionForRegenerate, setRegionForRegenerate] = useState<Region | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const handleCreateRegion = async (createRegionData: CreateRegion): Promise<CreateRegionResponse | null> => {
     try {
-      await regionsApi.createRegion(
-        {
-          name: newRegionName,
-        },
-        selectedOrganization?.id,
-      )
-      setCreateRegionDialogIsOpen(false)
-      setNewRegionName('')
-      toast.success(`Creating region ${newRegionName}`)
+      const response = (await regionsApi.createRegion(createRegionData, selectedOrganization?.id)).data
+      toast.success(`Creating region ${createRegionData.name}`)
       await refreshRegions()
+      return response
     } catch (error) {
       handleApiError(error, 'Failed to create region')
-    } finally {
-      setLoadingCreateDialog(false)
+      return null
     }
   }
 
@@ -86,97 +89,91 @@ const Regions: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
+  const handleRegenerateProxyApiKey = async (region: Region) => {
+    setRegionForRegenerate(region)
+    setRegeneratedApiKey(null)
+    setShowRegenerateProxyApiKeyDialog(true)
+  }
+
+  const handleRegenerateSshGatewayApiKey = async (region: Region) => {
+    setRegionForRegenerate(region)
+    setRegeneratedApiKey(null)
+    setShowRegenerateSshGatewayApiKeyDialog(true)
+  }
+
+  const confirmRegenerateProxyApiKey = async () => {
+    if (!regionForRegenerate) return
+
+    setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
+
+    try {
+      const response = await regionsApi.regenerateProxyApiKey(regionForRegenerate.id, selectedOrganization?.id)
+      setRegeneratedApiKey(response.data.apiKey)
+      setShowRegenerateProxyApiKeyDialog(true)
+      toast.success('Proxy API key regenerated successfully')
+    } catch (error) {
+      handleApiError(error, 'Failed to regenerate proxy API key')
+      setShowRegenerateProxyApiKeyDialog(false)
+      setRegionForRegenerate(null)
+    } finally {
+      setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: false }))
+    }
+  }
+
+  const confirmRegenerateSshGatewayApiKey = async () => {
+    if (!regionForRegenerate) return
+
+    setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
+
+    try {
+      const response = await regionsApi.regenerateSshGatewayApiKey(regionForRegenerate.id, selectedOrganization?.id)
+      setRegeneratedApiKey(response.data.apiKey)
+      setShowRegenerateSshGatewayApiKeyDialog(true)
+      toast.success('SSH Gateway API key regenerated successfully')
+    } catch (error) {
+      handleApiError(error, 'Failed to regenerate SSH Gateway API key')
+      setShowRegenerateSshGatewayApiKeyDialog(false)
+      setRegionForRegenerate(null)
+    } finally {
+      setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: false }))
+    }
+  }
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+      toast.success('Copied to clipboard')
+    } catch (err) {
+      console.error('Failed to copy text:', err)
+      toast.error('Failed to copy to clipboard')
+    }
+  }
+
   return (
     <div className="px-6 py-2">
-      <Dialog
-        open={createRegionDialogIsOpen}
-        onOpenChange={(isOpen) => {
-          setCreateRegionDialogIsOpen(isOpen)
-          if (isOpen) {
-            return
-          }
-          setNewRegionName('')
-        }}
-      >
-        <div className="mb-2 h-12 flex items-center justify-between">
-          <h1 className="text-2xl font-medium">Regions</h1>
-          {writePermitted && (
-            <DialogTrigger asChild>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={loadingRegions}
-                className="w-auto px-4"
-                title="Create Region"
-              >
-                <Plus className="w-4 h-4" />
-                Create Region
-              </Button>
-            </DialogTrigger>
-          )}
-        </div>
-
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Region</DialogTitle>
-            <DialogDescription>Add a new region for grouping runners and sandboxes.</DialogDescription>
-          </DialogHeader>
-          <form
-            id="create-region-form"
-            className="space-y-6 overflow-y-auto px-1 pb-1"
-            onSubmit={async (e) => {
-              e.preventDefault()
-              await handleCreate()
-            }}
-          >
-            <div className="space-y-3">
-              <Label htmlFor="name">Region Name</Label>
-              <Input
-                id="name"
-                value={newRegionName}
-                onChange={(e) => {
-                  setNewRegionName(e.target.value)
-                }}
-                placeholder="us-east-1"
-              />
-              <p className="text-sm text-muted-foreground mt-1 pl-1">
-                Region name must contain only letters, numbers, underscores, periods, and hyphens.
-              </p>
-            </div>
-          </form>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cancel
-              </Button>
-            </DialogClose>
-            {loadingCreateRegion ? (
-              <Button type="button" variant="default" disabled>
-                Creating...
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                form="create-region-form"
-                variant="default"
-                disabled={!newRegionName.trim() || loadingCreateRegion}
-              >
-                Create
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div className="mb-2 h-12 flex items-center justify-between">
+        <h1 className="text-2xl font-medium">Regions</h1>
+        <CreateRegionDialog
+          onCreateRegion={handleCreateRegion}
+          writePermitted={writePermitted}
+          loadingData={loadingRegions}
+        />
+      </div>
 
       <RegionTable
         data={regions}
         loading={loadingRegions}
         isLoadingRegion={(region) => regionIsLoading[region.id] || false}
         deletePermitted={deletePermitted}
+        writePermitted={writePermitted}
         onDelete={(region) => {
           setRegionToDelete(region)
           setDeleteRegionDialogIsOpen(true)
         }}
+        onRegenerateProxyApiKey={handleRegenerateProxyApiKey}
+        onRegenerateSshGatewayApiKey={handleRegenerateSshGatewayApiKey}
       />
 
       {regionToDelete && (
@@ -213,6 +210,146 @@ const Regions: React.FC = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Regenerate Proxy API Key Dialog */}
+      <AlertDialog
+        open={showRegenerateProxyApiKeyDialog}
+        onOpenChange={(isOpen) => {
+          setShowRegenerateProxyApiKeyDialog(isOpen)
+          if (!isOpen) {
+            setRegionForRegenerate(null)
+            setRegeneratedApiKey(null)
+            setCopied(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {regeneratedApiKey ? 'Proxy API Key Regenerated' : 'Regenerate Proxy API Key'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {regeneratedApiKey ? (
+                'The new API key has been generated. Copy it now as it will not be shown again.'
+              ) : (
+                <>
+                  <strong>Warning:</strong> This will immediately invalidate the current proxy API key. The proxy will
+                  need to be redeployed with the new API key.
+                </>
+              )}
+              {regeneratedApiKey && (
+                <div className="space-y-4 mt-4">
+                  <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                    <span className="overflow-x-auto pr-2 cursor-text select-all">{regeneratedApiKey}</span>
+                    {copied ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4 cursor-pointer" onClick={() => copyToClipboard(regeneratedApiKey)} />
+                    )}
+                  </div>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            {!regeneratedApiKey ? (
+              <>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={confirmRegenerateProxyApiKey}
+                  disabled={!regionForRegenerate || regionIsLoading[regionForRegenerate?.id || '']}
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                >
+                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] ? 'Regenerating...' : 'Regenerate'}
+                </AlertDialogAction>
+              </>
+            ) : (
+              <AlertDialogAction
+                onClick={() => {
+                  setShowRegenerateProxyApiKeyDialog(false)
+                  setRegionForRegenerate(null)
+                  setRegeneratedApiKey(null)
+                  setCopied(false)
+                }}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              >
+                Close
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Regenerate SSH Gateway API Key Dialog */}
+      <AlertDialog
+        open={showRegenerateSshGatewayApiKeyDialog}
+        onOpenChange={(isOpen) => {
+          setShowRegenerateSshGatewayApiKeyDialog(isOpen)
+          if (!isOpen) {
+            setRegionForRegenerate(null)
+            setRegeneratedApiKey(null)
+            setCopied(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {regeneratedApiKey ? 'SSH Gateway API Key Regenerated' : 'Regenerate SSH Gateway API Key'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {regeneratedApiKey ? (
+                'The new API key has been generated. Copy it now as it will not be shown again.'
+              ) : (
+                <>
+                  <strong>Warning:</strong> This will immediately invalidate the current SSH gateway API key. The SSH
+                  gateway will need to be redeployed with the new API key.
+                </>
+              )}
+              {regeneratedApiKey && (
+                <div className="space-y-4 mt-4">
+                  <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                    <span className="overflow-x-auto pr-2 cursor-text select-all">{regeneratedApiKey}</span>
+                    {copied ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4 cursor-pointer" onClick={() => copyToClipboard(regeneratedApiKey)} />
+                    )}
+                  </div>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            {!regeneratedApiKey ? (
+              <>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={confirmRegenerateSshGatewayApiKey}
+                  disabled={!regionForRegenerate || regionIsLoading[regionForRegenerate?.id || '']}
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                >
+                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] ? 'Regenerating...' : 'Regenerate'}
+                </AlertDialogAction>
+              </>
+            ) : (
+              <AlertDialogAction
+                onClick={() => {
+                  setShowRegenerateSshGatewayApiKeyDialog(false)
+                  setRegionForRegenerate(null)
+                  setRegeneratedApiKey(null)
+                  setCopied(false)
+                }}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              >
+                Close
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

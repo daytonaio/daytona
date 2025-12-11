@@ -10,4 +10,6 @@ export class CreateRegionInternalDto {
   name: string
   enforceQuotas: boolean
   regionType: RegionType
+  proxyUrl?: string | null
+  sshGatewayUrl?: string | null
 }

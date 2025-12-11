@@ -34,8 +34,9 @@ class SshAccessDto(BaseModel):
     expires_at: datetime = Field(description="When the SSH access expires", alias="expiresAt")
     created_at: datetime = Field(description="When the SSH access was created", alias="createdAt")
     updated_at: datetime = Field(description="When the SSH access was last updated", alias="updatedAt")
+    ssh_command: StrictStr = Field(description="SSH command to connect to the sandbox", alias="sshCommand")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "sandboxId", "token", "expiresAt", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "sandboxId", "token", "expiresAt", "createdAt", "updatedAt", "sshCommand"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -100,7 +101,8 @@ class SshAccessDto(BaseModel):
             "token": obj.get("token"),
             "expiresAt": obj.get("expiresAt"),
             "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "updatedAt": obj.get("updatedAt"),
+            "sshCommand": obj.get("sshCommand")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

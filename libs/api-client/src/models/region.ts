@@ -58,4 +58,16 @@ export interface Region {
    * @memberof Region
    */
   updatedAt: string
+  /**
+   * Proxy URL for the region
+   * @type {string}
+   * @memberof Region
+   */
+  proxyUrl?: string | null
+  /**
+   * SSH Gateway URL for the region
+   * @type {string}
+   * @memberof Region
+   */
+  sshGatewayUrl?: string | null
 }
