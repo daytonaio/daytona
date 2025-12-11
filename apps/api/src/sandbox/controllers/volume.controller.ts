@@ -146,7 +146,7 @@ export class VolumeController {
     name: 'force',
     required: false,
     type: Boolean,
-    description: 'Force deletion of volume even if it contains data',
+    description: 'Force deletion of volume even if it contains data or is in ERROR state',
   })
   @ApiResponse({
     status: 200,
