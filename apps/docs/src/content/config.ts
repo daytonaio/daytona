@@ -442,10 +442,19 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/langchain-data-analysis', locale),
-          label: labels['sidebarconfig.langchainIntegrations'],
+          label: labels['sidebarconfig.langchain'],
           disablePagination: true,
           attrs: {
             icon: 'langchain.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/mastra-coding-agent', locale),
+          label: labels['sidebarconfig.mastra'],
+          disablePagination: true,
+          attrs: {
+            icon: 'mastra.svg',
           },
         },
       ],
