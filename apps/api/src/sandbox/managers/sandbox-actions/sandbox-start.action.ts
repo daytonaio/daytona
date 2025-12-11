@@ -623,7 +623,12 @@ export class SandboxStartAction extends SandboxAction {
     ) {
       sandbox.state = SandboxState.ERROR
       sandbox.errorReason = errorReason
-      sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+      sandbox.recoverable = false
+      try {
+        sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+      } catch (err) {
+        this.logger.error(`Error checking if sandbox ${sandbox.id} is recoverable:`, err)
+      }
       await this.sandboxRepository.save(sandbox)
       return true
     }

@@ -1377,8 +1377,13 @@ export class SandboxService {
     sandbox.state = newState
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
-      if (newState === SandboxState.ERROR || newState === SandboxState.BUILD_FAILED) {
-        sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+      if (newState === SandboxState.ERROR) {
+        sandbox.recoverable = false
+        try {
+          sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+        } catch (err) {
+          this.logger.error(`Error checking if sandbox ${sandboxId} is recoverable:`, err)
+        }
       }
     }
     //  we need to update the desired state to match the new state
