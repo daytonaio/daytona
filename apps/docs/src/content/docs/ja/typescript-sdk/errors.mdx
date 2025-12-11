@@ -3,101 +3,170 @@ title: "エラー"
 hideTitleOnPage: true
 ---
 
+## DaytonaError \{#daytonaerror\}
 
-## DaytonaError
+Daytona SDK の基底エラークラス。
 
-Daytona SDKの基底エラー。
+**プロパティ**:
 
-**継承:**
-
-- `Error`
-
-### 派生クラス
-
-- `DaytonaNotFoundError`
-
-### コンストラクタ
-
-#### new DaytonaError()
-
-_継承元_: `Error.constructor`
-
-```ts
-new DaytonaError(message?: string): DaytonaError
-```
-
-**パラメータ**:
-
-- `message?` _string_
-
-
-**戻り値**:
-
-- `DaytonaError`
-
-#### new DaytonaError()
-
-_継承元_: `Error.constructor`
-
-```ts
-new DaytonaError(message?: string, options?: ErrorOptions): DaytonaError
-```
-
-**パラメータ**:
-
-- `message?` _string_
-- `options?` _ErrorOptions_
-
-
-**戻り値**:
-
-- `DaytonaError`
-
-***
-
-
-## DaytonaNotFoundError
-
-Daytona SDK の基本となるエラー。
+* `headers?` *AxiosHeaders* - 存在する場合のレスポンスヘッダー
+* `statusCode?` *number* - 存在する場合の HTTP ステータスコード
 
 **継承:**
 
-- `DaytonaError`
+* `Error`
 
-### コンストラクタ
+### 次のクラスにより拡張されます \{#extended-by\}
 
-#### new DaytonaNotFoundError()
+* `DaytonaNotFoundError`
+* `DaytonaRateLimitError`
+* `DaytonaTimeoutError`
 
-_継承元_: `DaytonaError.constructor`
+### コンストラクタ \{#constructors\}
+
+#### new DaytonaError() \{#new-daytonaerror\}
 
 ```ts
-new DaytonaNotFoundError(message?: string): DaytonaNotFoundError
+new DaytonaError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaError
 ```
 
 **パラメータ**:
 
-- `message?` _string_
-
+* `message` *string*
+* `statusCode?` *number*
+* `headers?` *AxiosHeaders*
 
 **戻り値**:
 
-- `DaytonaNotFoundError`
+* `DaytonaError`
 
-#### new DaytonaNotFoundError()
-
-_継承元_: `DaytonaError.constructor`
+##### オーバーライド \{#overrides\}
 
 ```ts
-new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFoundError
+Error.constructor
+```
+
+## DaytonaNotFoundError \{#daytonanotfounderror\}
+
+Daytona SDK における基本となるエラークラスです。
+
+**プロパティ**:
+
+* `headers?` *AxiosHeaders* - 利用可能な場合のレスポンスヘッダー
+  * *継承元*: `DaytonaError.headers`
+* `statusCode?` *number* - 利用可能な場合の HTTP ステータスコード
+
+  * *継承元*: `DaytonaError.statusCode`
+
+**継承元:**
+
+* `DaytonaError`
+
+### コンストラクタ \{#constructors\}
+
+#### new DaytonaNotFoundError() \{#new-daytonanotfounderror\}
+
+```ts
+new DaytonaNotFoundError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaNotFoundError
 ```
 
 **パラメータ**:
 
-- `message?` _string_
-- `options?` _ErrorOptions_
-
+* `message` *string*
+* `statusCode?` *number*
+* `headers?` *AxiosHeaders*
 
 **戻り値**:
 
-- `DaytonaNotFoundError`
+* `DaytonaNotFoundError`
 
+##### オーバーライド \{#overrides\}
+
+`DaytonaError`.`constructor`
+
+## DaytonaRateLimitError \{#daytonaratelimiterror\}
+
+レート制限を超えた場合にスローされるエラー。
+
+**プロパティ**:
+
+* `headers?` *AxiosHeaders* - 取得可能な場合のレスポンスヘッダー
+  * *継承元*: `DaytonaError.headers`
+* `statusCode?` *number* - 取得可能な場合の HTTP ステータスコード
+
+  * *継承元*: `DaytonaError.statusCode`
+
+**継承元:**
+
+* `DaytonaError`
+
+### コンストラクタ \{#constructors\}
+
+#### new DaytonaRateLimitError() \{#new-daytonaratelimiterror\}
+
+```ts
+new DaytonaRateLimitError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaRateLimitError
+```
+
+**パラメータ**:
+
+* `message` *string*
+* `statusCode?` *number*
+* `headers?` *AxiosHeaders*
+
+**戻り値**:
+
+* `DaytonaRateLimitError`
+
+##### オーバーライド \{#overrides\}
+
+`DaytonaError`.`constructor`
+
+## DaytonaTimeoutError \{#daytonatimeouterror\}
+
+タイムアウトが発生した場合に送出されるエラーです。
+
+**プロパティ**:
+
+* `headers?` *AxiosHeaders* - 存在する場合のレスポンスヘッダー
+  * *継承元*: `DaytonaError.headers`
+* `statusCode?` *number* - 存在する場合の HTTP ステータスコード
+  * *継承元*: `DaytonaError.statusCode`
+
+**継承:**
+
+* `DaytonaError`
+
+### コンストラクタ \{#constructors\}
+
+#### new DaytonaTimeoutError() \{#new-daytonatimeouterror\}
+
+```ts
+new DaytonaTimeoutError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaTimeoutError
+```
+
+**パラメータ**:
+
+* `message` *string*
+* `statusCode?` *number*
+* `headers?` *AxiosHeaders*
+
+**戻り値**:
+
+* `DaytonaTimeoutError`
+
+##### オーバーライド \{#overrides\}
+
+`DaytonaError`.`constructor`
