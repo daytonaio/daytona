@@ -1158,7 +1158,16 @@ export class SandboxService {
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    await runnerAdapter.recover(sandbox)
+
+    try {
+      await runnerAdapter.recover(sandbox)
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
+        const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(sandbox.disk * 0.1).toFixed(2)}GB (10% of original ${sandbox.disk.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
+        throw new ForbiddenException(errorMsg)
+      }
+      throw error
+    }
 
     // Clear error state
     sandbox.state = SandboxState.STOPPED
