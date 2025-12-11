@@ -7,6 +7,7 @@ api/audit-api.ts
 api/config-api.ts
 api/docker-registry-api.ts
 api/health-api.ts
+api/jobs-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
 api/preview-api.ts
@@ -79,6 +80,9 @@ models/health-controller-check200-response-info-value.ts
 models/health-controller-check200-response.ts
 models/health-controller-check503-response.ts
 models/index.ts
+models/job-status.ts
+models/job-type.ts
+models/job.ts
 models/keyboard-hotkey-request.ts
 models/keyboard-press-request.ts
 models/keyboard-type-request.ts
@@ -107,8 +111,10 @@ models/organization-usage-overview.ts
 models/organization-user.ts
 models/organization.ts
 models/paginated-audit-logs.ts
+models/paginated-jobs.ts
 models/paginated-sandboxes.ts
 models/paginated-snapshots.ts
+models/poll-jobs-response.ts
 models/port-preview-url.ts
 models/position.ts
 models/posthog-config.ts
@@ -135,6 +141,8 @@ models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts
 models/runner-full.ts
+models/runner-health-metrics.ts
+models/runner-healthcheck.ts
 models/runner-snapshot-dto.ts
 models/runner-state.ts
 models/runner.ts
@@ -159,6 +167,7 @@ models/ssh-access-validation-dto.ts
 models/storage-access-dto.ts
 models/toolbox-proxy-url.ts
 models/update-docker-registry.ts
+models/update-job-status.ts
 models/update-organization-default-region.ts
 models/update-organization-invitation.ts
 models/update-organization-member-access.ts

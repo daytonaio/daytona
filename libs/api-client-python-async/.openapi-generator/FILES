@@ -7,6 +7,7 @@ daytona_api_client_async/api/audit_api.py
 daytona_api_client_async/api/config_api.py
 daytona_api_client_async/api/docker_registry_api.py
 daytona_api_client_async/api/health_api.py
+daytona_api_client_async/api/jobs_api.py
 daytona_api_client_async/api/object_storage_api.py
 daytona_api_client_async/api/organizations_api.py
 daytona_api_client_async/api/preview_api.py
@@ -78,6 +79,9 @@ daytona_api_client_async/models/git_status.py
 daytona_api_client_async/models/health_controller_check200_response.py
 daytona_api_client_async/models/health_controller_check200_response_info_value.py
 daytona_api_client_async/models/health_controller_check503_response.py
+daytona_api_client_async/models/job.py
+daytona_api_client_async/models/job_status.py
+daytona_api_client_async/models/job_type.py
 daytona_api_client_async/models/keyboard_hotkey_request.py
 daytona_api_client_async/models/keyboard_press_request.py
 daytona_api_client_async/models/keyboard_type_request.py
@@ -106,8 +110,10 @@ daytona_api_client_async/models/organization_suspension.py
 daytona_api_client_async/models/organization_usage_overview.py
 daytona_api_client_async/models/organization_user.py
 daytona_api_client_async/models/paginated_audit_logs.py
+daytona_api_client_async/models/paginated_jobs.py
 daytona_api_client_async/models/paginated_sandboxes.py
 daytona_api_client_async/models/paginated_snapshots.py
+daytona_api_client_async/models/poll_jobs_response.py
 daytona_api_client_async/models/port_preview_url.py
 daytona_api_client_async/models/position.py
 daytona_api_client_async/models/posthog_config.py
@@ -135,6 +141,8 @@ daytona_api_client_async/models/replace_request.py
 daytona_api_client_async/models/replace_result.py
 daytona_api_client_async/models/runner.py
 daytona_api_client_async/models/runner_full.py
+daytona_api_client_async/models/runner_health_metrics.py
+daytona_api_client_async/models/runner_healthcheck.py
 daytona_api_client_async/models/runner_snapshot_dto.py
 daytona_api_client_async/models/runner_state.py
 daytona_api_client_async/models/sandbox.py
@@ -158,6 +166,7 @@ daytona_api_client_async/models/ssh_access_validation_dto.py
 daytona_api_client_async/models/storage_access_dto.py
 daytona_api_client_async/models/toolbox_proxy_url.py
 daytona_api_client_async/models/update_docker_registry.py
+daytona_api_client_async/models/update_job_status.py
 daytona_api_client_async/models/update_organization_default_region.py
 daytona_api_client_async/models/update_organization_invitation.py
 daytona_api_client_async/models/update_organization_member_access.py

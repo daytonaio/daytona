@@ -36,19 +36,19 @@ export interface Runner {
    * @type {string}
    * @memberof Runner
    */
-  domain: string
+  domain?: string
   /**
    * The API URL of the runner
    * @type {string}
    * @memberof Runner
    */
-  apiUrl: string
+  apiUrl?: string
   /**
    * The proxy URL of the runner
    * @type {string}
    * @memberof Runner
    */
-  proxyUrl: string
+  proxyUrl?: string
   /**
    * The CPU capacity of the runner
    * @type {number}
@@ -72,13 +72,13 @@ export interface Runner {
    * @type {number}
    * @memberof Runner
    */
-  gpu: number
+  gpu?: number
   /**
    * The type of GPU
    * @type {string}
    * @memberof Runner
    */
-  gpuType: string
+  gpuType?: string
   /**
    * The class of the runner
    * @type {SandboxClass}
@@ -176,9 +176,24 @@ export interface Runner {
    */
   updatedAt: string
   /**
-   * The version of the runner
+   * The version of the runner (deprecated in favor of apiVersion)
    * @type {string}
    * @memberof Runner
+   * @deprecated
    */
   version: string
+  /**
+   * The api version of the runner
+   * @type {string}
+   * @memberof Runner
+   * @deprecated
+   */
+  apiVersion: string
+  /**
+   * The app version of the runner
+   * @type {string}
+   * @memberof Runner
+   * @deprecated
+   */
+  appVersion?: string
 }

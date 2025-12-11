@@ -157,10 +157,10 @@ definitions:
     type: object
   RunnerInfoResponseDTO:
     properties:
+      appVersion:
+        type: string
       metrics:
         $ref: '#/definitions/RunnerMetrics'
-      version:
-        type: string
     type: object
   RunnerMetrics:
     properties:
@@ -185,6 +185,8 @@ definitions:
         type: string
       backupState:
         $ref: '#/definitions/enums.BackupState'
+      daemonVersion:
+        type: string
       state:
         $ref: '#/definitions/enums.SandboxState'
     type: object
@@ -221,6 +223,11 @@ definitions:
       sizeGB:
         example: 0.13
         type: number
+    type: object
+  StartSandboxResponse:
+    properties:
+      daemonVersion:
+        type: string
     type: object
   TagImageRequestDTO:
     properties:
@@ -341,7 +348,7 @@ paths:
         '201':
           description: Created
           schema:
-            type: string
+            $ref: '#/definitions/StartSandboxResponse'
         '400':
           description: Bad Request
           schema:
@@ -678,11 +685,12 @@ paths:
             type: object
       produces:
         - application/json
+        - application/json
       responses:
         '200':
           description: Sandbox started
           schema:
-            type: string
+            $ref: '#/definitions/StartSandboxResponse'
         '400':
           description: Bad Request
           schema:

@@ -6,6 +6,7 @@ api_audit.go
 api_config.go
 api_docker_registry.go
 api_health.go
+api_jobs.go
 api_object_storage.go
 api_organizations.go
 api_preview.go
@@ -76,6 +77,9 @@ model_git_status.go
 model_health_controller_check_200_response.go
 model_health_controller_check_200_response_info_value.go
 model_health_controller_check_503_response.go
+model_job.go
+model_job_status.go
+model_job_type.go
 model_keyboard_hotkey_request.go
 model_keyboard_press_request.go
 model_keyboard_type_request.go
@@ -104,8 +108,10 @@ model_organization_suspension.go
 model_organization_usage_overview.go
 model_organization_user.go
 model_paginated_audit_logs.go
+model_paginated_jobs.go
 model_paginated_sandboxes.go
 model_paginated_snapshots.go
+model_poll_jobs_response.go
 model_port_preview_url.go
 model_position.go
 model_posthog_config.go
@@ -133,6 +139,8 @@ model_replace_request.go
 model_replace_result.go
 model_runner.go
 model_runner_full.go
+model_runner_health_metrics.go
+model_runner_healthcheck.go
 model_runner_snapshot_dto.go
 model_runner_state.go
 model_sandbox.go
@@ -156,6 +164,7 @@ model_ssh_access_validation_dto.go
 model_storage_access_dto.go
 model_toolbox_proxy_url.go
 model_update_docker_registry.go
+model_update_job_status.go
 model_update_organization_default_region.go
 model_update_organization_invitation.go
 model_update_organization_member_access.go

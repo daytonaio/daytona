@@ -24,6 +24,7 @@ from daytona_api_client.api.api_keys_api import ApiKeysApi
 from daytona_api_client.api.audit_api import AuditApi
 from daytona_api_client.api.config_api import ConfigApi
 from daytona_api_client.api.docker_registry_api import DockerRegistryApi
+from daytona_api_client.api.jobs_api import JobsApi
 from daytona_api_client.api.object_storage_api import ObjectStorageApi
 from daytona_api_client.api.organizations_api import OrganizationsApi
 from daytona_api_client.api.preview_api import PreviewApi
@@ -103,6 +104,9 @@ from daytona_api_client.models.git_status import GitStatus
 from daytona_api_client.models.health_controller_check200_response import HealthControllerCheck200Response
 from daytona_api_client.models.health_controller_check200_response_info_value import HealthControllerCheck200ResponseInfoValue
 from daytona_api_client.models.health_controller_check503_response import HealthControllerCheck503Response
+from daytona_api_client.models.job import Job
+from daytona_api_client.models.job_status import JobStatus
+from daytona_api_client.models.job_type import JobType
 from daytona_api_client.models.keyboard_hotkey_request import KeyboardHotkeyRequest
 from daytona_api_client.models.keyboard_press_request import KeyboardPressRequest
 from daytona_api_client.models.keyboard_type_request import KeyboardTypeRequest
@@ -131,8 +135,10 @@ from daytona_api_client.models.organization_suspension import OrganizationSuspen
 from daytona_api_client.models.organization_usage_overview import OrganizationUsageOverview
 from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
+from daytona_api_client.models.paginated_jobs import PaginatedJobs
 from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
 from daytona_api_client.models.paginated_snapshots import PaginatedSnapshots
+from daytona_api_client.models.poll_jobs_response import PollJobsResponse
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
 from daytona_api_client.models.posthog_config import PosthogConfig
@@ -160,6 +166,8 @@ from daytona_api_client.models.replace_request import ReplaceRequest
 from daytona_api_client.models.replace_result import ReplaceResult
 from daytona_api_client.models.runner import Runner
 from daytona_api_client.models.runner_full import RunnerFull
+from daytona_api_client.models.runner_health_metrics import RunnerHealthMetrics
+from daytona_api_client.models.runner_healthcheck import RunnerHealthcheck
 from daytona_api_client.models.runner_snapshot_dto import RunnerSnapshotDto
 from daytona_api_client.models.runner_state import RunnerState
 from daytona_api_client.models.sandbox import Sandbox
@@ -183,6 +191,7 @@ from daytona_api_client.models.ssh_access_validation_dto import SshAccessValidat
 from daytona_api_client.models.storage_access_dto import StorageAccessDto
 from daytona_api_client.models.toolbox_proxy_url import ToolboxProxyUrl
 from daytona_api_client.models.update_docker_registry import UpdateDockerRegistry
+from daytona_api_client.models.update_job_status import UpdateJobStatus
 from daytona_api_client.models.update_organization_default_region import UpdateOrganizationDefaultRegion
 from daytona_api_client.models.update_organization_invitation import UpdateOrganizationInvitation
 from daytona_api_client.models.update_organization_member_access import UpdateOrganizationMemberAccess

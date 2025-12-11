@@ -109,6 +109,19 @@ type RunnersAPI interface {
 	ListRunnersExecute(r RunnersAPIListRunnersRequest) ([]Runner, *http.Response, error)
 
 	/*
+		RunnerHealthcheck Runner healthcheck
+
+		Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return RunnersAPIRunnerHealthcheckRequest
+	*/
+	RunnerHealthcheck(ctx context.Context) RunnersAPIRunnerHealthcheckRequest
+
+	// RunnerHealthcheckExecute executes the request
+	RunnerHealthcheckExecute(r RunnersAPIRunnerHealthcheckRequest) (*http.Response, error)
+
+	/*
 		UpdateRunnerScheduling Update runner scheduling status
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -871,6 +884,105 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type RunnersAPIRunnerHealthcheckRequest struct {
+	ctx               context.Context
+	ApiService        RunnersAPI
+	runnerHealthcheck *RunnerHealthcheck
+}
+
+func (r RunnersAPIRunnerHealthcheckRequest) RunnerHealthcheck(runnerHealthcheck RunnerHealthcheck) RunnersAPIRunnerHealthcheckRequest {
+	r.runnerHealthcheck = &runnerHealthcheck
+	return r
+}
+
+func (r RunnersAPIRunnerHealthcheckRequest) Execute() (*http.Response, error) {
+	return r.ApiService.RunnerHealthcheckExecute(r)
+}
+
+/*
+RunnerHealthcheck Runner healthcheck
+
+Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RunnersAPIRunnerHealthcheckRequest
+*/
+func (a *RunnersAPIService) RunnerHealthcheck(ctx context.Context) RunnersAPIRunnerHealthcheckRequest {
+	return RunnersAPIRunnerHealthcheckRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+func (a *RunnersAPIService) RunnerHealthcheckExecute(r RunnersAPIRunnerHealthcheckRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.RunnerHealthcheck")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/runners/healthcheck"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.runnerHealthcheck == nil {
+		return nil, reportError("runnerHealthcheck is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.runnerHealthcheck
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type RunnersAPIUpdateRunnerSchedulingRequest struct {

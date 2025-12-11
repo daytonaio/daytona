@@ -118,8 +118,12 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 		return nil, err
 	}
 
+	if runner.ProxyUrl == nil {
+		return nil, errors.New("runner proxy URL not found")
+	}
+
 	info := RunnerInfo{
-		ApiUrl: runner.ProxyUrl,
+		ApiUrl: *runner.ProxyUrl,
 		ApiKey: runner.ApiKey,
 	}
 

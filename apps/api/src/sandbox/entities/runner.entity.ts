@@ -14,32 +14,52 @@ export class Runner {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column({ unique: true })
-  domain: string
+  @Column({
+    nullable: true,
+    unique: true,
+  })
+  domain: string | null
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   apiUrl: string
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   proxyUrl: string
 
   @Column()
   apiKey: string
 
-  @Column()
+  @Column({
+    type: 'float',
+    default: 0,
+  })
   cpu: number
 
-  @Column()
+  @Column({
+    type: 'float',
+    default: 0,
+  })
   memoryGiB: number
 
-  @Column()
+  @Column({
+    type: 'float',
+    default: 0,
+  })
   diskGiB: number
 
-  @Column()
-  gpu: number
+  @Column({
+    nullable: true,
+  })
+  gpu: number | null
 
-  @Column()
-  gpuType: string
+  @Column({
+    nullable: true,
+  })
+  gpuType: string | null
 
   @Column({
     type: 'enum',
@@ -105,9 +125,15 @@ export class Runner {
   state: RunnerState
 
   @Column({
+    default: 'v0.0.0-dev',
+    nullable: true,
+  })
+  appVersion: string | null
+
+  @Column({
     default: '0',
   })
-  version: string
+  apiVersion: string
 
   @Column({
     nullable: true,
@@ -129,4 +155,33 @@ export class Runner {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(params: {
+    region: string
+    name: string
+    apiKey: string
+    apiVersion: string
+    cpu?: number
+    memoryGiB?: number
+    diskGiB?: number
+    domain?: string | null
+    apiUrl?: string
+    proxyUrl?: string
+    appVersion?: string | null
+  }) {
+    this.region = params.region
+    this.name = params.name
+    this.apiKey = params.apiKey
+    this.cpu = params.cpu ?? 0
+    this.memoryGiB = params.memoryGiB ?? 0
+    this.diskGiB = params.diskGiB ?? 0
+    this.domain = params.domain ?? null
+    this.apiUrl = params.apiUrl
+    this.proxyUrl = params.proxyUrl
+    this.class = SandboxClass.SMALL
+    this.apiVersion = params.apiVersion
+    this.appVersion = params.appVersion ?? null
+    this.gpu = null
+    this.gpuType = null
+  }
 }
