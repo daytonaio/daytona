@@ -18,22 +18,33 @@ import { QueryProvider } from './providers/QueryProvider'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
-root.render(
-  <React.StrictMode>
-    <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
-      <QueryProvider>
-        <ThemeProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <ConfigProvider>
-              <PostHogProviderWrapper>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
-              </PostHogProviderWrapper>
-            </ConfigProvider>
-          </Suspense>
-        </ThemeProvider>
-      </QueryProvider>
-    </ErrorBoundary>
-  </React.StrictMode>,
+async function enableMocking() {
+  if (import.meta.env.VITE_ENABLE_MOCKING !== 'true') {
+    return
+  }
+
+  const { worker } = await import('./mocks/browser')
+  return worker.start()
+}
+
+enableMocking().then(() =>
+  root.render(
+    <React.StrictMode>
+      <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
+        <QueryProvider>
+          <ThemeProvider>
+            <Suspense fallback={<LoadingFallback />}>
+              <ConfigProvider>
+                <PostHogProviderWrapper>
+                  <BrowserRouter>
+                    <App />
+                  </BrowserRouter>
+                </PostHogProviderWrapper>
+              </ConfigProvider>
+            </Suspense>
+          </ThemeProvider>
+        </QueryProvider>
+      </ErrorBoundary>
+    </React.StrictMode>,
+  ),
 )
