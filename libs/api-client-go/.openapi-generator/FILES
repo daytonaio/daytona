@@ -98,6 +98,7 @@ model_organization_sandbox_default_limited_network_egress.go
 model_organization_suspension.go
 model_organization_usage_overview.go
 model_organization_user.go
+model_otel_config.go
 model_paginated_audit_logs.go
 model_paginated_sandboxes.go
 model_paginated_snapshots.go
