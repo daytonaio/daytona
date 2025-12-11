@@ -3,10 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Plus } from 'lucide-react'
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
-import { toast } from 'sonner'
-import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -22,9 +19,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { VolumeTable } from '@/components/VolumeTable'
 import { useApi } from '@/hooks/useApi'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
+import { Plus } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 const Volumes: React.FC = () => {
   const { volumeApi } = useApi()
@@ -186,19 +187,19 @@ const Volumes: React.FC = () => {
   )
 
   return (
-    <div className="px-6 py-2">
-      <Dialog
-        open={showCreateDialog}
-        onOpenChange={(isOpen) => {
-          setShowCreateDialog(isOpen)
-          if (isOpen) {
-            return
-          }
-          setNewVolumeName('')
-        }}
-      >
-        <div className="mb-2 h-12 flex items-center justify-between">
-          <h1 className="text-2xl font-medium">Volumes</h1>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Volumes</PageTitle>
+        <Dialog
+          open={showCreateDialog}
+          onOpenChange={(isOpen) => {
+            setShowCreateDialog(isOpen)
+            if (isOpen) {
+              return
+            }
+            setNewVolumeName('')
+          }}
+        >
           {writePermitted && (
             <DialogTrigger asChild>
               <Button
@@ -259,55 +260,68 @@ const Volumes: React.FC = () => {
               )}
             </DialogFooter>
           </DialogContent>
-        </div>
+        </Dialog>
+      </PageHeader>
 
-        <VolumeTable
-          data={volumes}
-          loading={loadingVolumes}
-          processingVolumeAction={processingVolumeAction}
-          onDelete={(volume) => {
-            setVolumeToDelete(volume)
-            setShowDeleteDialog(true)
-          }}
-          onBulkDelete={handleBulkDelete}
-        />
-      </Dialog>
-
-      {volumeToDelete && (
+      <PageContent size="full">
         <Dialog
-          open={showDeleteDialog}
+          open={showCreateDialog}
           onOpenChange={(isOpen) => {
-            setShowDeleteDialog(isOpen)
-            if (!isOpen) {
-              setVolumeToDelete(null)
+            setShowCreateDialog(isOpen)
+            if (isOpen) {
+              return
             }
+            setNewVolumeName('')
           }}
         >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirm Volume Deletion</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete this Volume? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button
-                variant="destructive"
-                onClick={() => handleDelete(volumeToDelete)}
-                disabled={processingVolumeAction[volumeToDelete.id]}
-              >
-                {processingVolumeAction[volumeToDelete.id] ? 'Deleting...' : 'Delete'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
+          <VolumeTable
+            data={volumes}
+            loading={loadingVolumes}
+            processingVolumeAction={processingVolumeAction}
+            onDelete={(volume) => {
+              setVolumeToDelete(volume)
+              setShowDeleteDialog(true)
+            }}
+            onBulkDelete={handleBulkDelete}
+          />
         </Dialog>
-      )}
-    </div>
+
+        {volumeToDelete && (
+          <Dialog
+            open={showDeleteDialog}
+            onOpenChange={(isOpen) => {
+              setShowDeleteDialog(isOpen)
+              if (!isOpen) {
+                setVolumeToDelete(null)
+              }
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Volume Deletion</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this Volume? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(volumeToDelete)}
+                  disabled={processingVolumeAction[volumeToDelete.id]}
+                >
+                  {processingVolumeAction[volumeToDelete.id] ? 'Deleting...' : 'Delete'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </PageContent>
+    </PageLayout>
   )
 }
 

@@ -89,7 +89,7 @@ const Dashboard: React.FC = () => {
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
         <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
         <SidebarInset className="overflow-hidden">
-          <div className="relative md:hidden px-6 pt-4">
+          <div className="relative md:hidden px-5 pt-4">
             <SidebarTrigger className="[&_svg]:size-5" />
           </div>
           <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>

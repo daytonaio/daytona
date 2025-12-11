@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useApi } from '@/hooks/useApi'
-import { Plus } from 'lucide-react'
-import { SnapshotDto, SnapshotState, OrganizationRolePermissionsEnum, PaginatedSnapshots } from '@daytonaio/api-client'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { SnapshotTable } from '@/components/SnapshotTable'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -18,15 +16,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { toast } from 'sonner'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useApi } from '@/hooks/useApi'
+import { useNotificationSocket } from '@/hooks/useNotificationSocket'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
+import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
+import { Plus } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 
@@ -392,24 +392,24 @@ const Snapshots: React.FC = () => {
   }
 
   return (
-    <div className="px-6 py-2">
-      <Dialog
-        open={showCreateDialog}
-        onOpenChange={(isOpen) => {
-          setShowCreateDialog(isOpen)
-          if (isOpen) {
-            return
-          }
-          setNewSnapshotName('')
-          setNewImageName('')
-          setNewEntrypoint('')
-          setCpu(undefined)
-          setMemory(undefined)
-          setDisk(undefined)
-        }}
-      >
-        <div className="mb-2 h-12 flex items-center justify-between">
-          <h1 className="text-2xl font-medium">Snapshots</h1>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Snapshots</PageTitle>
+        <Dialog
+          open={showCreateDialog}
+          onOpenChange={(isOpen) => {
+            setShowCreateDialog(isOpen)
+            if (isOpen) {
+              return
+            }
+            setNewSnapshotName('')
+            setNewImageName('')
+            setNewEntrypoint('')
+            setCpu(undefined)
+            setMemory(undefined)
+            setDisk(undefined)
+          }}
+        >
           {writePermitted && (
             <DialogTrigger asChild>
               <Button
@@ -551,8 +551,10 @@ const Snapshots: React.FC = () => {
               )}
             </DialogFooter>
           </DialogContent>
-        </div>
+        </Dialog>
+      </PageHeader>
 
+      <PageContent size="full">
         <SnapshotTable
           data={snapshotsData.items}
           loading={loadingTable}
@@ -572,43 +574,43 @@ const Snapshots: React.FC = () => {
             pageSize: paginationParams.pageSize,
           }}
         />
-      </Dialog>
 
-      {snapshotToDelete && (
-        <Dialog
-          open={showDeleteDialog}
-          onOpenChange={(isOpen) => {
-            setShowDeleteDialog(isOpen)
-            if (!isOpen) {
-              setSnapshotToDelete(null)
-            }
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirm Snapshot Deletion</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete this snapshot? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Cancel
+        {snapshotToDelete && (
+          <Dialog
+            open={showDeleteDialog}
+            onOpenChange={(isOpen) => {
+              setShowDeleteDialog(isOpen)
+              if (!isOpen) {
+                setSnapshotToDelete(null)
+              }
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Snapshot Deletion</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this snapshot? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(snapshotToDelete)}
+                  disabled={loadingSnapshots[snapshotToDelete.id]}
+                >
+                  {loadingSnapshots[snapshotToDelete.id] ? 'Deleting...' : 'Delete'}
                 </Button>
-              </DialogClose>
-              <Button
-                variant="destructive"
-                onClick={() => handleDelete(snapshotToDelete)}
-                disabled={loadingSnapshots[snapshotToDelete.id]}
-              >
-                {loadingSnapshots[snapshotToDelete.id] ? 'Deleting...' : 'Delete'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </PageContent>
+    </PageLayout>
   )
 }
 

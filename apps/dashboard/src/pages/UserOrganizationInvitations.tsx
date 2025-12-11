@@ -3,16 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { OrganizationInvitationActionDialog } from '@/components/UserOrganizationInvitations/OrganizationInvitationActionDialog'
+import { UserOrganizationInvitationTable } from '@/components/UserOrganizationInvitations/UserOrganizationInvitationTable'
+import { useApi } from '@/hooks/useApi'
+import { useOrganizations } from '@/hooks/useOrganizations'
+import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
+import { handleApiError } from '@/lib/error-handling'
+import { OrganizationInvitation } from '@daytonaio/api-client'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useApi } from '@/hooks/useApi'
-import { OrganizationInvitation } from '@daytonaio/api-client'
-import { UserOrganizationInvitationTable } from '@/components/UserOrganizationInvitations/UserOrganizationInvitationTable'
-import { useOrganizations } from '@/hooks/useOrganizations'
-import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
-import { OrganizationInvitationActionDialog } from '@/components/UserOrganizationInvitations/OrganizationInvitationActionDialog'
-import { handleApiError } from '@/lib/error-handling'
 
 const UserOrganizationInvitations: React.FC = () => {
   const { organizationsApi } = useApi()
@@ -100,29 +101,31 @@ const UserOrganizationInvitations: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Invitations</h1>
-      </div>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Invitations</PageTitle>
+      </PageHeader>
 
-      <UserOrganizationInvitationTable
-        data={invitations}
-        loadingData={loadingInvitations}
-        onAcceptInvitation={handleAcceptInvitation}
-        onDeclineInvitation={handleDeclineInvitation}
-        loadingInvitationAction={loadingInvitationAction}
-      />
-
-      {selectedInvitation && (
-        <OrganizationInvitationActionDialog
-          invitation={selectedInvitation}
-          open={invitationActionDialogOpen}
-          onOpenChange={setInvitationActionDialogOpen}
-          onAccept={handleAcceptInvitation}
-          onDecline={handleDeclineInvitation}
+      <PageContent size="full">
+        <UserOrganizationInvitationTable
+          data={invitations}
+          loadingData={loadingInvitations}
+          onAcceptInvitation={handleAcceptInvitation}
+          onDeclineInvitation={handleDeclineInvitation}
+          loadingInvitationAction={loadingInvitationAction}
         />
-      )}
-    </div>
+
+        {selectedInvitation && (
+          <OrganizationInvitationActionDialog
+            invitation={selectedInvitation}
+            open={invitationActionDialogOpen}
+            onOpenChange={setInvitationActionDialogOpen}
+            onAccept={handleAcceptInvitation}
+            onDecline={handleDeclineInvitation}
+          />
+        )}
+      </PageContent>
+    </PageLayout>
   )
 }
 
