@@ -6,7 +6,6 @@ package docker
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/url"
 	"time"
 
@@ -49,14 +48,14 @@ func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId strin
 	return nil
 }
 
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string) error {
+func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string) (string, error) {
 	defer timer.Timer()()
 
 	// Build the target URL
 	targetURL := fmt.Sprintf("http://%s:2280/version", containerIP)
 	target, err := url.Parse(targetURL)
 	if err != nil {
-		return common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
+		return "", common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
 	}
 
 	timeout := time.Duration(d.daemonStartTimeoutSec) * time.Second
@@ -66,15 +65,14 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 	for {
 		select {
 		case <-timeoutCtx.Done():
-			return fmt.Errorf("timeout waiting for daemon to start")
+			return "", fmt.Errorf("timeout waiting for daemon to start")
 		default:
-			conn, err := net.DialTimeout("tcp", target.Host, 1*time.Second)
+			version, err := d.getDaemonVersion(ctx, target)
 			if err != nil {
 				time.Sleep(5 * time.Millisecond)
 				continue
 			}
-			conn.Close()
-			return nil
+			return version, nil
 		}
 	}
 }

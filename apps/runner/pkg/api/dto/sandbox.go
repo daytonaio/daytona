@@ -33,3 +33,7 @@ type UpdateNetworkSettingsDTO struct {
 	NetworkAllowList   *string `json:"networkAllowList,omitempty"`
 	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO
+
+type StartSandboxResponse struct {
+	DaemonVersion string `json:"daemonVersion"`
+} //	@name	StartSandboxResponse

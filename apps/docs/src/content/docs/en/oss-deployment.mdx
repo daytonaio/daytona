@@ -168,10 +168,7 @@ Below is a full list of environment variables with their default values:
 | `DEFAULT_RUNNER_CPU`                       | number  | `4`                                                  | Default runner CPU allocation                                                                        |
 | `DEFAULT_RUNNER_MEMORY`                    | number  | `8`                                                  | Default runner memory allocation (GB)                                                                |
 | `DEFAULT_RUNNER_DISK`                      | number  | `50`                                                 | Default runner disk allocation (GB)                                                                  |
-| `DEFAULT_RUNNER_GPU`                       | number  | `0`                                                  | Default runner GPU allocation                                                                        |
-| `DEFAULT_RUNNER_GPU_TYPE`                  | string  | `none`                                               | Default runner GPU type                                                                              |
-| `DEFAULT_RUNNER_CAPACITY`                  | number  | `100`                                                | Default runner capacity                                                                              |
-| `DEFAULT_RUNNER_CLASS`                     | string  | `small`                                              | Default runner class                                                                                 |
+| `DEFAULT_RUNNER_API_VERSION`               | string  | `0`                                                  | Default runner API version                                                                           |
 | `DEFAULT_ORG_QUOTA_TOTAL_CPU_QUOTA`        | number  | `10000`                                              | Default organization total CPU quota                                                                 |
 | `DEFAULT_ORG_QUOTA_TOTAL_MEMORY_QUOTA`     | number  | `10000`                                              | Default organization total memory quota                                                              |
 | `DEFAULT_ORG_QUOTA_TOTAL_DISK_QUOTA`       | number  | `100000`                                             | Default organization total disk quota                                                                |
@@ -217,23 +214,29 @@ Below is a full list of environment variables with their default values:
 
 ### Runner
 
-| Variable                    | Type    | Default Value                     | Description                           |
-| --------------------------- | ------- | --------------------------------- | ------------------------------------- |
-| `VERSION`                   | string  | `0.0.1`                           | Runner service version                |
-| `ENVIRONMENT`               | string  | `development`                     | Application environment               |
-| `API_PORT`                  | number  | `3003`                            | Runner API service port               |
-| `API_TOKEN`                 | string  | `secret_api_token`                | Runner API authentication token       |
-| `LOG_FILE_PATH`             | string  | `/home/daytona/runner/runner.log` | Path to runner log file               |
-| `RESOURCE_LIMITS_DISABLED`  | boolean | `true`                            | Disable resource limits for sandboxes |
-| `AWS_ENDPOINT_URL`          | string  | `http://minio:9000`               | AWS S3-compatible storage endpoint    |
-| `AWS_REGION`                | string  | `us-east-1`                       | AWS region                            |
-| `AWS_ACCESS_KEY_ID`         | string  | `minioadmin`                      | AWS access key ID                     |
-| `AWS_SECRET_ACCESS_KEY`     | string  | `minioadmin`                      | AWS secret access key                 |
-| `AWS_DEFAULT_BUCKET`        | string  | `daytona`                         | AWS default bucket name               |
-| `SERVER_URL`                | string  | `http://api:3000/api`             | Daytona API server URL                |
-| `DAEMON_START_TIMEOUT_SEC`  | number  | `60`                              | Daemon start timeout in seconds       |
-| `SANDBOX_START_TIMEOUT_SEC` | number  | `30`                              | Sandbox start timeout in seconds      |
-| `USE_SNAPSHOT_ENTRYPOINT`   | boolean | `false`                           | Use snapshot entrypoint for sandbox   |
+| Variable                    | Type    | Default Value                     | Description                                          |
+| --------------------------- | ------- | --------------------------------- | ---------------------------------------------------- |
+| `VERSION`                   | string  | `0.0.1`                           | Runner service version                               |
+| `ENVIRONMENT`               | string  | `development`                     | Application environment                              |
+| `API_PORT`                  | number  | `3003`                            | Runner API service port                              |
+| `API_TOKEN`                 | string  | `secret_api_token`                | Runner API authentication token                      |
+| `LOG_FILE_PATH`             | string  | `/home/daytona/runner/runner.log` | Path to runner log file                              |
+| `RESOURCE_LIMITS_DISABLED`  | boolean | `true`                            | Disable resource limits for sandboxes                |
+| `AWS_ENDPOINT_URL`          | string  | `http://minio:9000`               | AWS S3-compatible storage endpoint                   |
+| `AWS_REGION`                | string  | `us-east-1`                       | AWS region                                           |
+| `AWS_ACCESS_KEY_ID`         | string  | `minioadmin`                      | AWS access key ID                                    |
+| `AWS_SECRET_ACCESS_KEY`     | string  | `minioadmin`                      | AWS secret access key                                |
+| `AWS_DEFAULT_BUCKET`        | string  | `daytona`                         | AWS default bucket name                              |
+| `SERVER_URL`                | string  | `http://api:3000/api`             | Daytona API server URL                               |
+| `DAEMON_START_TIMEOUT_SEC`  | number  | `60`                              | Daemon start timeout in seconds                      |
+| `SANDBOX_START_TIMEOUT_SEC` | number  | `30`                              | Sandbox start timeout in seconds                     |
+| `USE_SNAPSHOT_ENTRYPOINT`   | boolean | `false`                           | Use snapshot entrypoint for sandbox                  |
+| `RUNNER_DOMAIN`             | string  | (none)                            | Runner domain name (hostname for runner URLs)        |
+| `POLL_TIMEOUT`              | string  | `30s`                             | Poller service timeout duration (e.g., `30s`, `1m`)  |
+| `POLL_LIMIT`                | number  | `10`                              | Maximum poll attempts per request (min: 1, max: 100) |
+| `HEALTHCHECK_INTERVAL`      | string  | `30s`                             | Interval between health checks (minimum: 10s)        |
+| `HEALTHCHECK_TIMEOUT`       | string  | `10s`                             | Health check timeout duration                        |
+| `API_VERSION`               | number  | `2`                               | Runner API version (default: 2)                      |
 
 ### SSH Gateway
 

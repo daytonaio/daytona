@@ -19,7 +19,7 @@ import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
-import { OnEvent } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
@@ -44,6 +44,8 @@ import { RunnerEvents } from '../constants/runner-events'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { SnapshotRegion } from '../entities/snapshot-region.entity'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SnapshotEvents } from '../constants/snapshot-events'
+import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -67,6 +69,7 @@ export class SnapshotService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly dockerRegistryService: DockerRegistryService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -221,6 +224,8 @@ export class SnapshotService {
           general,
           snapshotRegions: [{ snapshotId, regionId }],
         })
+
+        await this.eventEmitter.emitAsync(SnapshotEvents.CREATED, new SnapshotCreatedEvent(snapshot))
 
         return await this.snapshotRepository.save(snapshot)
       } catch (error) {

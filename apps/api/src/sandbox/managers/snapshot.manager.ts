@@ -28,14 +28,13 @@ import { RunnerService } from '../services/runner.service'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout as sleep } from 'timers/promises'
-import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RunnerAdapterFactory, RunnerSnapshotInfo } from '../runner-adapter/runnerAdapter'
-import { OnEvent } from '@nestjs/event-emitter'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotService } from '../services/snapshot.service'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -65,7 +64,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
-    private readonly configService: TypedConfigService,
     private readonly snapshotService: SnapshotService,
   ) {}
 
@@ -196,6 +194,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       )
       return
     }
+
     if (runner.state !== RunnerState.READY) {
       //  todo: handle timeout policy
       //  for now just remove the snapshot runner record if the runner is not ready
@@ -538,7 +537,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       //  just in case the snapshot is still there
       runnerAdapter.removeSnapshot(snapshotRunner.snapshotRef).catch((err) => {
         //  this should not happen, and is not critical
-        //  if the runner can not remote the snapshot, just delete the runner record
+        //  if the runner can not remove the snapshot, just delete the snapshot runner record
         this.snapshotRunnerRepository.delete(snapshotRunner.id).catch((err) => {
           this.logger.error(fromAxiosError(err))
         })
@@ -564,6 +563,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleCheckInitialRunnerSnapshot(snapshot: Snapshot): Promise<SyncState> {
+    const runner = await this.runnerRepository.findOneOrFail({
+      where: {
+        id: snapshot.initialRunnerId,
+      },
+    })
+
     // Check for timeout - allow up to 30 minutes
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
@@ -583,17 +588,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     if (snapshot.ref && snapshotRunner) {
       if (snapshotRunner.state === SnapshotRunnerState.READY) {
         await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+        return DONT_SYNC_AGAIN
       } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
         await this.snapshotRunnerRepository.delete(snapshotRunner.id)
       }
-      return DONT_SYNC_AGAIN
     }
-
-    const runner = await this.runnerRepository.findOneOrFail({
-      where: {
-        id: snapshot.initialRunnerId,
-      },
-    })
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
@@ -618,8 +617,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     } catch (error) {
       this.logger.error(`Failed to remove snapshot ${snapshot.imageName}: ${fromAxiosError(error)}`)
     }
-
-    await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
+    if (snapshotRunner) {
+      snapshotRunner.state = SnapshotRunnerState.READY
+      await this.snapshotRunnerRepository.save(snapshotRunner)
+    } else {
+      await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
+    }
     await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
 
     // Best effort removal of old snapshot from transient registry
@@ -769,9 +772,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     if (snapshot.buildInfo) {
       await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+      await this.runnerService.createSnapshotRunnerEntry(
+        initialRunner.id,
+        snapshot.buildInfo.snapshotRef,
+        SnapshotRunnerState.BUILDING_SNAPSHOT,
+      )
       await this.processBuildOnRunner(snapshot, initialRunner)
     } else {
       await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+      await this.runnerService.createSnapshotRunnerEntry(
+        initialRunner.id,
+        snapshot.ref,
+        SnapshotRunnerState.PULLING_SNAPSHOT,
+      )
       await this.processPullOnInitialRunner(snapshot, initialRunner)
     }
 
@@ -1019,8 +1032,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     return `${baseImageName}-${snapshot.id}-${snapshot.createdAt.getTime()}:daytona`
   }
 
-  @OnEvent(SnapshotEvents.CREATED)
+  @OnAsyncEvent({
+    event: SnapshotEvents.CREATED,
+  })
   private async handleSnapshotCreatedEvent(event: SnapshotCreatedEvent) {
-    this.syncSnapshotState(event.snapshot.id).catch(this.logger.error)
+    await this.syncSnapshotState(event.snapshot.id)
   }
 }

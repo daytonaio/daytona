@@ -64,7 +64,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/StartSandboxResponse"
             }
           },
           "400": {
@@ -518,7 +518,7 @@
     "/sandboxes/{sandboxId}/start": {
       "post": {
         "description": "Start sandbox",
-        "produces": ["application/json"],
+        "produces": ["application/json", "application/json"],
         "tags": ["sandbox"],
         "summary": "Start sandbox",
         "operationId": "Start",
@@ -543,7 +543,7 @@
           "200": {
             "description": "Sandbox started",
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/StartSandboxResponse"
             }
           },
           "400": {
@@ -1401,11 +1401,11 @@
     "RunnerInfoResponseDTO": {
       "type": "object",
       "properties": {
+        "appVersion": {
+          "type": "string"
+        },
         "metrics": {
           "$ref": "#/definitions/RunnerMetrics"
-        },
-        "version": {
-          "type": "string"
         }
       }
     },
@@ -1443,6 +1443,9 @@
         },
         "backupState": {
           "$ref": "#/definitions/enums.BackupState"
+        },
+        "daemonVersion": {
+          "type": "string"
         },
         "state": {
           "$ref": "#/definitions/enums.SandboxState"
@@ -1486,6 +1489,14 @@
         "sizeGB": {
           "type": "number",
           "example": 0.13
+        }
+      }
+    },
+    "StartSandboxResponse": {
+      "type": "object",
+      "properties": {
+        "daemonVersion": {
+          "type": "string"
         }
       }
     },

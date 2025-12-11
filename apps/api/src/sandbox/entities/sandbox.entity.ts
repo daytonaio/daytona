@@ -223,12 +223,13 @@ export class Sandbox {
           },
         ]
         this.backupErrorReason = null
-        if (this.desiredState === SandboxDesiredState.ARCHIVED) {
-          if (this.state === SandboxState.ARCHIVING || this.state === SandboxState.STOPPED) {
-            this.state = SandboxState.ARCHIVED
-            this.runnerId = null
-          }
-        }
+        // TODO: test this - probably don't need it - state sync will update this and clean up
+        // if (this.desiredState === SandboxDesiredState.ARCHIVED) {
+        //   if (this.state === SandboxState.ARCHIVING || this.state === SandboxState.STOPPED) {
+        //     this.state = SandboxState.ARCHIVED
+        //     this.runnerId = null
+        //   }
+        // }
         break
       }
     }

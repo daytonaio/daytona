@@ -21,9 +21,7 @@ import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
-import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
@@ -80,26 +78,38 @@ export class RunnerService {
       throw new BadRequestException('Runner name must be between 3 and 255 characters')
     }
 
-    if (!this.isValidClass(createRunnerDto.class)) {
-      throw new BadRequestException('Invalid class')
-    }
-
     const apiKey = createRunnerDto.apiKey ?? generateApiKeyValue()
 
-    const runner = new Runner()
-    runner.domain = createRunnerDto.domain
-    runner.apiUrl = createRunnerDto.apiUrl
-    runner.proxyUrl = createRunnerDto.proxyUrl
-    runner.apiKey = apiKey
-    runner.cpu = createRunnerDto.cpu
-    runner.memoryGiB = createRunnerDto.memoryGiB
-    runner.diskGiB = createRunnerDto.diskGiB
-    runner.gpu = createRunnerDto.gpu
-    runner.gpuType = createRunnerDto.gpuType
-    runner.region = createRunnerDto.regionId
-    runner.name = createRunnerDto.name
-    runner.class = createRunnerDto.class
-    runner.version = createRunnerDto.version
+    let runner: Runner
+
+    switch (createRunnerDto.apiVersion) {
+      case '0':
+        runner = new Runner({
+          region: createRunnerDto.regionId,
+          name: createRunnerDto.name,
+          apiVersion: createRunnerDto.apiVersion,
+          apiKey: apiKey,
+          cpu: createRunnerDto.cpu,
+          memoryGiB: createRunnerDto.memoryGiB,
+          diskGiB: createRunnerDto.diskGiB,
+          domain: createRunnerDto.domain,
+          apiUrl: createRunnerDto.apiUrl,
+          proxyUrl: createRunnerDto.proxyUrl,
+          appVersion: createRunnerDto.appVersion,
+        })
+        break
+      case '2':
+        runner = new Runner({
+          region: createRunnerDto.regionId,
+          name: createRunnerDto.name,
+          apiVersion: createRunnerDto.apiVersion,
+          apiKey: apiKey,
+          appVersion: createRunnerDto.appVersion,
+        })
+        break
+      default:
+        throw new BadRequestException('Invalid runner version')
+    }
 
     try {
       const savedRunner = await this.runnerRepository.save(runner)
@@ -321,11 +331,84 @@ export class RunnerService {
     })
   }
 
-  @OnEvent(SandboxEvents.STATE_UPDATED)
-  async handleSandboxStateUpdate(event: SandboxStateUpdatedEvent) {
-    if (![SandboxState.DESTROYED, SandboxState.CREATING, SandboxState.ARCHIVED].includes(event.newState)) {
+  async updateRunnerHealth(
+    runnerId: string,
+    domain?: string,
+    proxyUrl?: string,
+    metrics?: {
+      currentCpuUsagePercentage?: number
+      currentMemoryUsagePercentage?: number
+      currentDiskUsagePercentage?: number
+      currentAllocatedCpu?: number
+      currentAllocatedMemoryGiB?: number
+      currentAllocatedDiskGiB?: number
+      currentSnapshotCount?: number
+      cpu?: number
+      memoryGiB?: number
+      diskGiB?: number
+    },
+    appVersion?: string,
+  ): Promise<void> {
+    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    if (!runner) {
+      this.logger.error(`Runner ${runnerId} not found when trying to update health`)
       return
     }
+
+    if (runner.state === RunnerState.DECOMMISSIONED) {
+      this.logger.debug(`Runner ${runnerId} is decommissioned, not updating health`)
+      return
+    }
+
+    const updateData: Partial<Runner> = {
+      state: RunnerState.READY,
+      lastChecked: new Date(),
+    }
+
+    if (domain) {
+      updateData.domain = domain
+    }
+
+    if (proxyUrl) {
+      updateData.proxyUrl = proxyUrl
+    }
+
+    if (appVersion) {
+      updateData.appVersion = appVersion
+    }
+
+    if (metrics) {
+      updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
+      updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
+      updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
+      updateData.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
+      updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
+      updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
+      updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
+      updateData.cpu = metrics.cpu
+      updateData.memoryGiB = metrics.memoryGiB
+      updateData.diskGiB = metrics.diskGiB
+
+      updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
+        cpuUsage: updateData.currentCpuUsagePercentage,
+        memoryUsage: updateData.currentMemoryUsagePercentage,
+        diskUsage: updateData.currentDiskUsagePercentage,
+        allocatedCpu: updateData.currentAllocatedCpu,
+        allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
+        allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
+        runnerCpu: updateData.cpu || runner.cpu,
+        runnerMemoryGiB: updateData.memoryGiB || runner.memoryGiB,
+        runnerDiskGiB: updateData.diskGiB || runner.diskGiB,
+      })
+    }
+
+    await this.runnerRepository.update(runnerId, updateData)
+    this.logger.debug(`Updated health for runner ${runnerId}`)
+
+    this.eventEmitter.emit(
+      RunnerEvents.STATE_UPDATED,
+      new RunnerStateUpdatedEvent(runner, runner.state, updateData.state),
+    )
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
@@ -361,9 +444,16 @@ export class RunnerService {
 
     try {
       const runners = await this.runnerRepository.find({
-        where: {
-          state: Not(RunnerState.DECOMMISSIONED),
-        },
+        where: [
+          {
+            apiVersion: '0',
+            state: Not(RunnerState.DECOMMISSIONED),
+          },
+          {
+            apiVersion: '2',
+            state: Not(In([RunnerState.DECOMMISSIONED, RunnerState.INITIALIZING])),
+          },
+        ],
         order: {
           lastChecked: {
             direction: 'ASC',
@@ -375,6 +465,13 @@ export class RunnerService {
 
       await Promise.allSettled(
         runners.map(async (runner) => {
+          // v2 runners report health via healthcheck endpoint, check based on lastChecked timestamp
+          if (runner.apiVersion === '2') {
+            await this.checkRunnerV2Health(runner)
+            return
+          }
+
+          // v0 runners: imperative health check via adapter
           const shouldRetry = runner.state === RunnerState.READY
           const retryDelays = shouldRetry ? [500, 1000] : []
 
@@ -403,7 +500,13 @@ export class RunnerService {
                     this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
                   }
 
-                  await this.updateRunnerStatus(runner.id, runnerInfo)
+                  await this.updateRunnerHealth(
+                    runner.id,
+                    undefined,
+                    undefined,
+                    runnerInfo?.metrics,
+                    runnerInfo?.appVersion,
+                  )
                 })(),
                 new Promise((_, reject) => {
                   timeoutId = setTimeout(() => {
@@ -447,59 +550,28 @@ export class RunnerService {
     }
   }
 
-  private async updateRunnerStatus(runnerId: string, runnerInfo?: RunnerInfo) {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
-    if (!runner) {
-      this.logger.error(`Runner ${runnerId} not found when trying to update status`)
+  /**
+   * Check v2 runner health based on lastChecked timestamp.
+   * v2 runners report health via the healthcheck endpoint, so we check if lastChecked is within threshold.
+   */
+  private async checkRunnerV2Health(runner: Runner): Promise<void> {
+    if (!runner.lastChecked) {
       return
     }
 
-    if (runner.state === RunnerState.DECOMMISSIONED) {
-      this.logger.debug(`Runner ${runnerId} is decommissioned, not updating status`)
-      return
+    // v2 runners report health every ~10 seconds via the healthcheck endpoint
+    // Allow 60 seconds (6 missed healthchecks) before marking as UNRESPONSIVE
+    const healthCheckThresholdMs = 60 * 1000
+
+    const timeSinceLastCheck = Date.now() - runner.lastChecked.getTime()
+
+    if (timeSinceLastCheck > healthCheckThresholdMs) {
+      this.logger.warn(
+        `v2 Runner ${runner.id} health check stale (last: ${Math.round(timeSinceLastCheck / 1000)}s ago), marking as UNRESPONSIVE`,
+      )
+      // TODO: if api is restarted, all runners will go unresponsive
+      await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
     }
-
-    const updateData: Partial<Runner> = {
-      state: RunnerState.READY,
-      lastChecked: new Date(),
-    }
-
-    const metrics = runnerInfo?.metrics
-
-    if (metrics && typeof metrics.currentCpuUsagePercentage !== 'undefined') {
-      updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
-      updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
-      updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
-      updateData.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
-      updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
-      updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
-      updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
-
-      updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
-        cpuUsage: updateData.currentCpuUsagePercentage,
-        memoryUsage: updateData.currentMemoryUsagePercentage,
-        diskUsage: updateData.currentDiskUsagePercentage,
-        allocatedCpu: updateData.currentAllocatedCpu,
-        allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
-        allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
-        runnerCpu: runner.cpu,
-        runnerMemoryGiB: runner.memoryGiB,
-        runnerDiskGiB: runner.diskGiB,
-      })
-    } else {
-      this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
-    }
-
-    await this.runnerRepository.update(runnerId, updateData)
-
-    this.eventEmitter.emit(
-      RunnerEvents.STATE_UPDATED,
-      new RunnerStateUpdatedEvent(runner, runner.state, updateData.state),
-    )
-  }
-
-  private isValidClass(sandboxClass: SandboxClass): boolean {
-    return Object.values(SandboxClass).includes(sandboxClass)
   }
 
   async updateSchedulingStatus(id: string, unschedulable: boolean): Promise<Runner> {

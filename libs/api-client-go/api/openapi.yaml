@@ -2872,6 +2872,30 @@ paths:
       summary: Get runners by snapshot ref
       tags:
         - runners
+  /runners/healthcheck:
+    post:
+      description: Endpoint for version 2 runners to send healthcheck and metrics.
+        Updates lastChecked timestamp and runner metrics.
+      operationId: runnerHealthcheck
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunnerHealthcheck'
+        required: true
+      responses:
+        '200':
+          description: Healthcheck received
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Runner healthcheck
+      tags:
+        - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
     get:
       deprecated: true
@@ -7094,6 +7118,165 @@ paths:
       summary: Get volume details by name
       tags:
         - volumes
+  /jobs:
+    get:
+      description: "Returns a paginated list of jobs for the runner, optionally filtered\
+        \ by status."
+      operationId: listJobs
+      parameters:
+        - description: Page number of the results
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+          style: form
+        - description: 'Maximum number of jobs to return (default: 100, max: 500)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            maximum: 200
+            minimum: 1
+            type: number
+          style: form
+        - description: Filter jobs by status
+          explode: true
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/JobStatus'
+          style: form
+        - description: 'Number of jobs to skip for pagination (default: 0)'
+          explode: true
+          in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobs'
+          description: List of jobs for the runner
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List jobs for the runner
+      tags:
+        - jobs
+  /jobs/poll:
+    get:
+      description: "Long poll endpoint for runners to fetch pending jobs. Returns\
+        \ immediately if jobs are available, otherwise waits up to timeout seconds."
+      operationId: pollJobs
+      parameters:
+        - description: 'Timeout in seconds for long polling (default: 30, max: 60)'
+          explode: true
+          in: query
+          name: timeout
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: 'Maximum number of jobs to return (default: 10, max: 100)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PollJobsResponse'
+          description: List of jobs for the runner
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Long poll for jobs
+      tags:
+        - jobs
+  /jobs/{jobId}:
+    get:
+      operationId: getJob
+      parameters:
+        - description: ID of the job
+          explode: false
+          in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: Job details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get job details
+      tags:
+        - jobs
+  /jobs/{jobId}/status:
+    post:
+      operationId: updateJobStatus
+      parameters:
+        - description: ID of the job
+          explode: false
+          in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobStatus'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: Job status updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update job status
+      tags:
+        - jobs
   /docker-registry:
     get:
       operationId: listRegistries
@@ -9873,27 +10056,15 @@ components:
       type: object
     CreateRunner:
       example:
-        apiUrl: apiUrl
         regionId: regionId
-        proxyUrl: proxyUrl
-        domain: domain
         name: name
       properties:
-        domain:
-          type: string
-        apiUrl:
-          type: string
-        proxyUrl:
-          type: string
         regionId:
           type: string
         name:
           type: string
       required:
-        - apiUrl
-        - domain
         - name
-        - proxyUrl
         - regionId
       type: object
     CreateRunnerResponse:
@@ -9931,6 +10102,7 @@ components:
       type: string
     RunnerFull:
       example:
+        appVersion: v0.0.0-dev
         memory: 16
         currentMemoryUsagePercentage: 68.2
         apiKey: dtn_1234567890
@@ -9938,6 +10110,7 @@ components:
         currentDiskUsagePercentage: 33.8
         currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
+        apiVersion: '0'
         apiUrl: https://api.runner1.example.com
         regionType: shared
         id: runner123
@@ -10062,8 +10235,19 @@ components:
           example: 2023-10-01T12:00:00Z
           type: string
         version:
-          description: The version of the runner
+          deprecated: true
+          description: The version of the runner (deprecated in favor of apiVersion)
           example: '0'
+          type: string
+        apiVersion:
+          deprecated: true
+          description: The api version of the runner
+          example: '0'
+          type: string
+        appVersion:
+          deprecated: true
+          description: The app version of the runner
+          example: v0.0.0-dev
           type: string
         apiKey:
           description: The API key for the runner
@@ -10076,18 +10260,14 @@ components:
           example: shared
       required:
         - apiKey
-        - apiUrl
+        - apiVersion
         - class
         - cpu
         - createdAt
         - disk
-        - domain
-        - gpu
-        - gpuType
         - id
         - memory
         - name
-        - proxyUrl
         - region
         - state
         - unschedulable
@@ -10096,12 +10276,14 @@ components:
       type: object
     Runner:
       example:
+        appVersion: v0.0.0-dev
         memory: 16
         currentMemoryUsagePercentage: 68.2
         availabilityScore: 85
         currentDiskUsagePercentage: 33.8
         currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
+        apiVersion: '0'
         apiUrl: https://api.runner1.example.com
         id: runner123
         state: initializing
@@ -10225,22 +10407,29 @@ components:
           example: 2023-10-01T12:00:00Z
           type: string
         version:
-          description: The version of the runner
+          deprecated: true
+          description: The version of the runner (deprecated in favor of apiVersion)
           example: '0'
           type: string
+        apiVersion:
+          deprecated: true
+          description: The api version of the runner
+          example: '0'
+          type: string
+        appVersion:
+          deprecated: true
+          description: The app version of the runner
+          example: v0.0.0-dev
+          type: string
       required:
-        - apiUrl
+        - apiVersion
         - class
         - cpu
         - createdAt
         - disk
-        - domain
-        - gpu
-        - gpuType
         - id
         - memory
         - name
-        - proxyUrl
         - region
         - state
         - unschedulable
@@ -10269,6 +10458,86 @@ components:
         - runnerDomain
         - runnerId
         - runnerSnapshotId
+      type: object
+    RunnerHealthMetrics:
+      properties:
+        currentCpuUsagePercentage:
+          description: Current CPU usage percentage
+          example: 45.5
+          type: number
+        currentMemoryUsagePercentage:
+          description: Current memory usage percentage
+          example: 60.2
+          type: number
+        currentDiskUsagePercentage:
+          description: Current disk usage percentage
+          example: 35.8
+          type: number
+        currentAllocatedCpu:
+          description: Currently allocated CPU cores
+          example: 8
+          type: number
+        currentAllocatedMemoryGiB:
+          description: Currently allocated memory in GiB
+          example: 16
+          type: number
+        currentAllocatedDiskGiB:
+          description: Currently allocated disk in GiB
+          example: 100
+          type: number
+        currentSnapshotCount:
+          description: Number of snapshots currently stored
+          example: 5
+          type: number
+        cpu:
+          description: Total CPU cores on the runner
+          example: 8
+          type: number
+        memoryGiB:
+          description: Total RAM in GiB on the runner
+          example: 16
+          type: number
+        diskGiB:
+          description: Total disk space in GiB on the runner
+          example: 100
+          type: number
+      required:
+        - cpu
+        - currentAllocatedCpu
+        - currentAllocatedDiskGiB
+        - currentAllocatedMemoryGiB
+        - currentCpuUsagePercentage
+        - currentDiskUsagePercentage
+        - currentMemoryUsagePercentage
+        - currentSnapshotCount
+        - diskGiB
+        - memoryGiB
+      type: object
+    RunnerHealthcheck:
+      example:
+        appVersion: v0.0.0-dev
+        proxyUrl: http://proxy.daytona.example.com:8080
+        domain: runner-123.daytona.example.com
+        metrics: ''
+      properties:
+        metrics:
+          allOf:
+            - $ref: '#/components/schemas/RunnerHealthMetrics'
+          description: Runner metrics
+        domain:
+          description: Runner domain
+          example: runner-123.daytona.example.com
+          type: string
+        proxyUrl:
+          description: Runner proxy URL
+          example: http://proxy.daytona.example.com:8080
+          type: string
+        appVersion:
+          description: Runner app version
+          example: v0.0.0-dev
+          type: string
+      required:
+        - appVersion
       type: object
     ProjectDirResponse:
       example:
@@ -12376,6 +12645,197 @@ components:
       required:
         - name
       type: object
+    JobStatus:
+      enum:
+        - PENDING
+        - IN_PROGRESS
+        - COMPLETED
+        - FAILED
+      type: string
+    JobType:
+      description: The type of the job
+      enum:
+        - CREATE_SANDBOX
+        - START_SANDBOX
+        - STOP_SANDBOX
+        - DESTROY_SANDBOX
+        - CREATE_BACKUP
+        - BUILD_SNAPSHOT
+        - PULL_SNAPSHOT
+        - REMOVE_SNAPSHOT
+        - UPDATE_SANDBOX_NETWORK_SETTINGS
+      type: string
+    Job:
+      example:
+        createdAt: 2024-10-01T12:00:00Z
+        resourceId: sandbox123
+        payload: payload
+        errorMessage: Failed to create sandbox
+        id: job123
+        type: CREATE_SANDBOX
+        traceContext:
+          traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+        status: PENDING
+        resourceType: SANDBOX
+        updatedAt: 2024-10-01T12:00:00Z
+      properties:
+        id:
+          description: The ID of the job
+          example: job123
+          type: string
+        type:
+          allOf:
+            - $ref: '#/components/schemas/JobType'
+          description: The type of the job
+          example: CREATE_SANDBOX
+        status:
+          allOf:
+            - $ref: '#/components/schemas/JobStatus'
+          description: The status of the job
+          example: PENDING
+        resourceType:
+          description: The type of resource this job operates on
+          enum:
+            - SANDBOX
+            - SNAPSHOT
+            - BACKUP
+          example: SANDBOX
+          type: string
+        resourceId:
+          description: "The ID of the resource this job operates on (sandboxId, snapshotRef,\
+            \ etc.)"
+          example: sandbox123
+          type: string
+        payload:
+          description: Job-specific JSON-encoded payload data (operational metadata)
+          type: string
+        traceContext:
+          additionalProperties: true
+          description: OpenTelemetry trace context for distributed tracing (W3C Trace
+            Context format)
+          example:
+            traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+          type: object
+        errorMessage:
+          description: Error message if the job failed
+          example: Failed to create sandbox
+          type: string
+        createdAt:
+          description: The creation timestamp of the job
+          example: 2024-10-01T12:00:00Z
+          type: string
+        updatedAt:
+          description: The last update timestamp of the job
+          example: 2024-10-01T12:00:00Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - resourceId
+        - resourceType
+        - status
+        - type
+      type: object
+    PaginatedJobs:
+      example:
+        total: 0.8008281904610115
+        totalPages: 1.4658129805029452
+        page: 6.027456183070403
+        items:
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload: payload
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload: payload
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Job'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
+    PollJobsResponse:
+      example:
+        jobs:
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload: payload
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload: payload
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+      properties:
+        jobs:
+          description: List of jobs
+          items:
+            $ref: '#/components/schemas/Job'
+          type: array
+      required:
+        - jobs
+      type: object
+    UpdateJobStatus:
+      example:
+        resultMetadata: resultMetadata
+        errorMessage: Failed to create sandbox
+        status: IN_PROGRESS
+      properties:
+        status:
+          allOf:
+            - $ref: '#/components/schemas/JobStatus'
+          description: The new status of the job
+          example: IN_PROGRESS
+        errorMessage:
+          description: Error message if the job failed
+          example: Failed to create sandbox
+          type: string
+        resultMetadata:
+          description: Result metadata for the job
+          type: string
+      required:
+        - status
+      type: object
     CreateDockerRegistry:
       example:
         registryType: organization
@@ -12551,45 +13011,57 @@ components:
       type: object
     AdminCreateRunner:
       example:
-        apiUrl: apiUrl
+        diskGiB: 100
+        apiVersion: '2'
         apiKey: apiKey
+        apiUrl: https://api.runner1.example.com
         regionId: regionId
-        proxyUrl: proxyUrl
-        domain: domain
+        proxyUrl: https://proxy.runner1.example.com
+        memoryGiB: 16
+        domain: runner1.example.com
         name: name
-        class: small
-        version: version
+        cpu: 8
       properties:
-        domain:
-          type: string
-        apiUrl:
-          type: string
-        proxyUrl:
-          type: string
         regionId:
           type: string
         name:
           type: string
         apiKey:
           type: string
-        class:
-          enum:
-            - small
-            - medium
-            - large
-          example: small
+        apiVersion:
+          description: The api version of the runner to create
+          example: '2'
+          pattern: ^(0|2)$
           type: string
-        version:
+        domain:
+          description: The domain of the runner
+          example: runner1.example.com
           type: string
+        apiUrl:
+          description: The API URL of the runner
+          example: https://api.runner1.example.com
+          type: string
+        proxyUrl:
+          description: The proxy URL of the runner
+          example: https://proxy.runner1.example.com
+          type: string
+        cpu:
+          description: The CPU capacity of the runner
+          example: 8
+          type: number
+        memoryGiB:
+          description: The memory capacity of the runner in GiB
+          example: 16
+          type: number
+        diskGiB:
+          description: The disk capacity of the runner in GiB
+          example: 100
+          type: number
       required:
         - apiKey
-        - apiUrl
-        - class
-        - domain
+        - apiVersion
         - name
-        - proxyUrl
         - regionId
-        - version
       type: object
     WebhookAppPortalAccess:
       example:

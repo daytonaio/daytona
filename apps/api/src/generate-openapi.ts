@@ -5,8 +5,11 @@ import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
 import { getOpenApiConfig } from './openapi.config'
 import { addWebhookDocumentation } from './openapi-webhooks'
+import { initializeTransactionalContext } from 'typeorm-transactional'
 
 async function generateOpenAPI() {
+  initializeTransactionalContext()
+
   const app = await NestFactory.create(AppModule, {
     logger: ['error'], // Reduce logging noise
   })
