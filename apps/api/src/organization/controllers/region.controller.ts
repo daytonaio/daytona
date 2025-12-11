@@ -35,6 +35,8 @@ import { RegionService } from '../../region/services/region.service'
 import { RegionAccessGuard } from '../../region/guards/region-access.guard'
 import { RegenerateApiKeyResponseDto } from '../../region/dto/regenerate-api-key.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
+import { FeatureFlags } from '../../common/constants/feature-flags'
 
 @ApiTags('regions')
 @Controller('regions')
@@ -88,6 +90,7 @@ export class OrganizationRegionController {
     },
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async createRegion(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createRegionDto: CreateRegionDto,
@@ -147,6 +150,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGIONS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async deleteRegion(@Param('id') id: string): Promise<void> {
     await this.regionService.delete(id)
   }
@@ -175,6 +179,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async regenerateProxyApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
     const apiKey = await this.regionService.regenerateProxyApiKey(id)
     return new RegenerateApiKeyResponseDto(apiKey)
@@ -204,6 +209,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async regenerateSshGatewayApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
     const apiKey = await this.regionService.regenerateSshGatewayApiKey(id)
     return new RegenerateApiKeyResponseDto(apiKey)
