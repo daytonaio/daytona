@@ -26,9 +26,11 @@ In this example, the agent analyzes a cafe sales dataset to find the three highe
 To run this example, you need to set the following environment variables:
 
 ### Required
+
 - `DAYTONA_API_KEY`: Required for access to Daytona sandboxes. Get it from [Daytona Dashboard](https://app.daytona.io/dashboard/keys)
 
 ### LLM Provider API Keys (choose one based on your provider)
+
 - `ANTHROPIC_API_KEY`: Required if using Anthropic models (default)
 - `OPENAI_API_KEY`: Required if using OpenAI models
 - `MISTRAL_API_KEY`: Required if using Mistral AI models
@@ -43,17 +45,20 @@ Create a `.env` file in the project directory with the appropriate variables for
 ### Setup and Run
 
 1. Create and activate a virtual environment:
+
    ```bash
    python3.10 -m venv venv  
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. Install dependencies:
+
    ```bash
    pip install -e .
    ```
 
 3. Run the example:
+
    ```bash
    python ai_data_analyst.py
    ```

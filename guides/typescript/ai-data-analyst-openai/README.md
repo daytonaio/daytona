@@ -32,11 +32,13 @@ Create a `.env` file in the project directory with these variables.
 ### Setup and Run
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Run the example:
+
    ```bash
    npm run start
    ```

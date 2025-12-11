@@ -34,17 +34,20 @@ Create a `.env` file in the project directory with these variables.
 ### Setup and Run
 
 1. Create and activate a virtual environment:
+
    ```bash
    python3.10 -m venv venv  
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. Install dependencies:
+
    ```bash
    pip install -e .
    ```
 
 3. Run the example:
+
    ```bash
    python ai_data_analyst.py
    ```
