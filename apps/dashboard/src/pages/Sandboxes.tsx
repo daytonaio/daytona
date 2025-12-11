@@ -435,7 +435,7 @@ const Sandboxes: React.FC = () => {
 
     try {
       await sandboxApi.recoverSandbox(id, selectedOrganization?.id)
-      toast.success('Sandbox storage recovered. Restarting...')
+      toast.success('Sandbox recovered. Restarting...')
       await markAllSandboxQueriesAsStale()
     } catch (error) {
       handleApiError(error, 'Failed to recover sandbox')
