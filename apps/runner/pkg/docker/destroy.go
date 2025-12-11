@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/containerd/errdefs"
-	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
@@ -17,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/utils"
 )
 
 func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
@@ -81,13 +81,12 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	}
 
 	// Use exponential backoff helper for container removal
-	err = d.retryWithExponentialBackoff(
+	err = utils.RetryWithExponentialBackoff(
 		ctx,
-		"remove",
-		containerId,
-		constants.DEFAULT_MAX_RETRIES,
-		constants.DEFAULT_BASE_DELAY,
-		constants.DEFAULT_MAX_DELAY,
+		fmt.Sprintf("remove sandbox %s", containerId),
+		utils.DEFAULT_MAX_RETRIES,
+		utils.DEFAULT_BASE_DELAY,
+		utils.DEFAULT_MAX_DELAY,
 		func() error {
 			return d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
 				Force: true,
@@ -128,13 +127,12 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 	}
 
 	// Use exponential backoff helper for container removal
-	err = d.retryWithExponentialBackoff(
+	err = utils.RetryWithExponentialBackoff(
 		ctx,
-		"remove",
-		containerId,
-		constants.DEFAULT_MAX_RETRIES,
-		constants.DEFAULT_BASE_DELAY,
-		constants.DEFAULT_MAX_DELAY,
+		fmt.Sprintf("remove sandbox %s", containerId),
+		utils.DEFAULT_MAX_RETRIES,
+		utils.DEFAULT_BASE_DELAY,
+		utils.DEFAULT_MAX_DELAY,
 		func() error {
 			return d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
 				Force: true,

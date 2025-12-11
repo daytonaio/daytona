@@ -68,20 +68,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 	cookieDomain = fmt.Sprintf(".%s", cookieDomain)
 	proxy.cookieDomain = cookieDomain
 
-	clientConfig := apiclient.NewConfiguration()
-	clientConfig.Servers = apiclient.ServerConfigurations{
-		{
-			URL: config.DaytonaApiUrl,
-		},
-	}
-
-	clientConfig.AddDefaultHeader("Authorization", "Bearer "+config.ProxyApiKey)
-
-	proxy.apiclient = apiclient.NewAPIClient(clientConfig)
-
-	proxy.apiclient.GetConfig().HTTPClient = &http.Client{
-		Transport: http.DefaultTransport,
-	}
+	proxy.apiclient = config.ApiClient
 
 	if config.Redis != nil {
 		var err error
