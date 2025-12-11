@@ -9,15 +9,14 @@ import { Strategy } from 'passport-http-bearer'
 import { ApiKeyService } from '../api-key/api-key.service'
 import { ApiKey } from '../api-key/api-key.entity'
 import { UserService } from '../user/user.service'
-import { AuthContext } from '../common/interfaces/auth-context.interface'
+import { AuthContextType } from '../common/interfaces/auth-context.interface'
 import { TypedConfigService } from '../config/typed-config.service'
-import { ProxyContext } from '../common/interfaces/proxy-context.interface'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { SystemRole } from '../user/enums/system-role.enum'
-import { SshGatewayContext } from '../common/interfaces/ssh-gateway-context.interface'
-import { RunnerContext } from '../common/interfaces/runner-context.interface'
 import { RunnerService } from '../sandbox/services/runner.service'
+import { generateApiKeyHash } from '../common/utils/api-key'
+import { RegionService } from '../region/services/region.service'
 
 type UserCache = {
   userId: string
@@ -35,6 +34,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     private readonly userService: UserService,
     private readonly configService: TypedConfigService,
     private readonly runnerService: RunnerService,
+    private readonly regionService: RegionService,
   ) {
     super()
     this.logger.log('ApiKeyStrategy constructor called')
@@ -44,7 +44,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     this.logger.log('ApiKeyStrategy initialized')
   }
 
-  async validate(token: string): Promise<AuthContext | ProxyContext | SshGatewayContext | RunnerContext> {
+  async validate(token: string): Promise<AuthContextType> {
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
 
@@ -130,6 +130,32 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       this.logger.debug('Error checking runner API key:', error)
     }
 
+    try {
+      const region = await this.regionService.findOneByProxyApiKey(token)
+      if (region) {
+        this.logger.debug(`Region proxy API key found for region: ${region.id}`)
+        return {
+          role: 'region-proxy',
+          regionId: region.id,
+        }
+      }
+    } catch (error) {
+      this.logger.debug('Error checking region proxy API key:', error)
+    }
+
+    try {
+      const region = await this.regionService.findOneBySshGatewayApiKey(token)
+      if (region) {
+        this.logger.debug(`Region SSH gateway API key found for region: ${region.id}`)
+        return {
+          role: 'region-ssh-gateway',
+          regionId: region.id,
+        }
+      }
+    } catch (error) {
+      this.logger.debug('Error checking region SSH gateway API key:', error)
+    }
+
     throw new UnauthorizedException('Invalid API key')
   }
 
@@ -173,7 +199,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
   }
 
   private generateValidationCacheKey(token: string): string {
-    return `api-key:validation:${this.apiKeyService.generateApiKeyHash(token)}`
+    return `api-key:validation:${generateApiKeyHash(token)}`
   }
 
   private generateUserCacheKey(userId: string): string {

@@ -44,6 +44,7 @@ model_create_organization_invitation.go
 model_create_organization_quota.go
 model_create_organization_role.go
 model_create_region.go
+model_create_region_response.go
 model_create_runner.go
 model_create_runner_response.go
 model_create_sandbox.go
@@ -119,6 +120,7 @@ model_pty_session_info.go
 model_range.go
 model_rate_limit_config.go
 model_rate_limit_entry.go
+model_regenerate_api_key_response.go
 model_region.go
 model_region_quota.go
 model_region_screenshot_response.go
@@ -150,6 +152,7 @@ model_snapshot_state.go
 model_ssh_access_dto.go
 model_ssh_access_validation_dto.go
 model_storage_access_dto.go
+model_toolbox_proxy_url.go
 model_update_docker_registry.go
 model_update_organization_default_region.go
 model_update_organization_invitation.go

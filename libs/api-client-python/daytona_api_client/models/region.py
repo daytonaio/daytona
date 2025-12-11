@@ -34,8 +34,10 @@ class Region(BaseModel):
     region_type: RegionType = Field(description="The type of the region", alias="regionType")
     created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
     updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", alias="proxyUrl")
+    ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", alias="sshGatewayUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "regionType", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "regionType", "createdAt", "updatedAt", "proxyUrl", "sshGatewayUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -88,6 +90,16 @@ class Region(BaseModel):
         if self.organization_id is None and "organization_id" in self.model_fields_set:
             _dict['organizationId'] = None
 
+        # set to None if proxy_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.proxy_url is None and "proxy_url" in self.model_fields_set:
+            _dict['proxyUrl'] = None
+
+        # set to None if ssh_gateway_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.ssh_gateway_url is None and "ssh_gateway_url" in self.model_fields_set:
+            _dict['sshGatewayUrl'] = None
+
         return _dict
 
     @classmethod
@@ -105,7 +117,9 @@ class Region(BaseModel):
             "organizationId": obj.get("organizationId"),
             "regionType": obj.get("regionType"),
             "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "updatedAt": obj.get("updatedAt"),
+            "proxyUrl": obj.get("proxyUrl"),
+            "sshGatewayUrl": obj.get("sshGatewayUrl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
