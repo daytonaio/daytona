@@ -63,6 +63,9 @@ import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { FeatureFlags } from '@/enums/FeatureFlags'
+
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -87,6 +90,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
+  const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
+
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [
       {
@@ -186,6 +191,10 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   }, [billingEnabled, authenticatedUserOrganizationMember?.role])
 
   const infrastructureItems = useMemo(() => {
+    if (!orgInfraEnabled) {
+      return []
+    }
+
     const arr = [
       {
         icon: <MapPinned size={16} strokeWidth={1.5} />,
@@ -203,7 +212,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     }
 
     return arr
-  }, [authenticatedUserHasPermission])
+  }, [authenticatedUserHasPermission, orgInfraEnabled])
 
   const handleSignOut = () => {
     posthog?.reset()
