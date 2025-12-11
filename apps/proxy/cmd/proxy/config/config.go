@@ -47,6 +47,7 @@ type RedisConfig struct {
 	Host     *string `envconfig:"HOST"`
 	Port     *int    `envconfig:"PORT"`
 	Password *string `envconfig:"PASSWORD"`
+	TLS      *bool   `envconfig:"TLS"`
 }
 
 var DEFAULT_PROXY_PORT int = 4000
