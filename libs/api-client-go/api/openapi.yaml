@@ -7445,6 +7445,10 @@ components:
       type: object
     RateLimitConfig:
       properties:
+        failedAuth:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Failed authentication rate limit
         authenticated:
           allOf:
             - $ref: '#/components/schemas/RateLimitEntry'
