@@ -21,7 +21,7 @@ const DefaultSuggestionsMinDistance = 2
 // GetParentCmdRunE returns a RunE function for parent commands that shows suggestions
 // when an unknown subcommand is provided. This enables "Did you mean?" functionality
 // for typos in subcommands (e.g., "daytona sandbox lst" -> "Did you mean list?").
-func GetParentCmdRunE(cmd *cobra.Command) func(*cobra.Command, []string) error {
+func GetParentCmdRunE() func(*cobra.Command, []string) error {
 	return func(c *cobra.Command, args []string) error {
 		if len(args) > 0 {
 			// Set suggestion distance threshold for Cobra's SuggestionsFor
