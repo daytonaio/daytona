@@ -20,6 +20,10 @@ export const useRedeemCouponMutation = () => {
     mutationFn: ({ organizationId, couponCode }) => billingApi.redeemCoupon(organizationId, couponCode),
     onSuccess: (_data, { organizationId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organization.wallet(organizationId) })
+
+      // a coupon can upgrade the tier
+      queryClient.invalidateQueries({ queryKey: queryKeys.organization.tier(organizationId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.organization.usage.overview(organizationId) })
     },
   })
 }
