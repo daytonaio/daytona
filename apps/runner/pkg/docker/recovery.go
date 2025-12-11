@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/runner/internal/constants"
+	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
@@ -98,13 +98,12 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	log.Infof("Setting storage to %d bytes (%.2fGB) on %s filesystem",
 		newStorageBytes, float64(newStorageBytes)/(1024*1024*1024), filesystem)
 
-	err = d.retryWithExponentialBackoff(
+	err = utils.RetryWithExponentialBackoff(
 		ctx,
-		"create",
-		sandboxId,
-		constants.DEFAULT_MAX_RETRIES,
-		constants.DEFAULT_BASE_DELAY,
-		constants.DEFAULT_MAX_DELAY,
+		fmt.Sprintf("create sandbox %s", sandboxId),
+		utils.DEFAULT_MAX_RETRIES,
+		utils.DEFAULT_BASE_DELAY,
+		utils.DEFAULT_MAX_DELAY,
 		func() error {
 			_, createErr := d.apiClient.ContainerCreate(
 				ctx,
