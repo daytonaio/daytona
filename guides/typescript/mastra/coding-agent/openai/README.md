@@ -195,3 +195,12 @@ src/mastra/
           utils.ts                   # Daytona helper functions
       index.ts                       # Mastra configuration with storage and logging
 ```
+
+## License
+
+See the main project LICENSE file for details.
+
+## References
+
+- [Mastra](https://mastra.ai/)
+- [Daytona](https://daytona.io)
