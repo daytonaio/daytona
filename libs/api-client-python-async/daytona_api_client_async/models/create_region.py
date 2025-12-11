@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,8 +28,10 @@ class CreateRegion(BaseModel):
     CreateRegion
     """ # noqa: E501
     name: StrictStr = Field(description="Region name")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", alias="proxyUrl")
+    ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", alias="sshGatewayUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name"]
+    __properties: ClassVar[List[str]] = ["name", "proxyUrl", "sshGatewayUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -77,6 +79,16 @@ class CreateRegion(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if proxy_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.proxy_url is None and "proxy_url" in self.model_fields_set:
+            _dict['proxyUrl'] = None
+
+        # set to None if ssh_gateway_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.ssh_gateway_url is None and "ssh_gateway_url" in self.model_fields_set:
+            _dict['sshGatewayUrl'] = None
+
         return _dict
 
     @classmethod
@@ -89,7 +101,9 @@ class CreateRegion(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name")
+            "name": obj.get("name"),
+            "proxyUrl": obj.get("proxyUrl"),
+            "sshGatewayUrl": obj.get("sshGatewayUrl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

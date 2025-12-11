@@ -48,9 +48,16 @@ class AsyncToolboxApiClientProxyLazyBaseUrl(_ToolboxApiClientProxy[AsyncApiClien
     While delegating all other attributes and methods to the underlying async API client.
     """
 
-    def __init__(self, api_client: AsyncApiClient, sandbox_id: str, get_toolbox_base_url: Callable[[], Awaitable[str]]):
+    def __init__(
+        self,
+        api_client: AsyncApiClient,
+        sandbox_id: str,
+        region_id: str,
+        get_toolbox_base_url: Callable[[str, str], Awaitable[str]],
+    ):
         super().__init__(api_client, sandbox_id)
         self._get_toolbox_base_url = get_toolbox_base_url
+        self._region_id = region_id
 
     async def call_api(self, *args, **kwargs):
         url = str(args[1])
@@ -64,7 +71,7 @@ class AsyncToolboxApiClientProxyLazyBaseUrl(_ToolboxApiClientProxy[AsyncApiClien
 
     async def load_toolbox_base_url(self):
         if self._toolbox_base_url is None:
-            self._toolbox_base_url = await self._get_toolbox_base_url()
+            self._toolbox_base_url = await self._get_toolbox_base_url(self._sandbox_id, self._region_id)
 
 
 class ToolboxApiClientProxyLazyBaseUrl(_ToolboxApiClientProxy[ApiClient]):
@@ -74,9 +81,12 @@ class ToolboxApiClientProxyLazyBaseUrl(_ToolboxApiClientProxy[ApiClient]):
     While delegating all other attributes and methods to the underlying sync API client.
     """
 
-    def __init__(self, api_client: ApiClient, sandbox_id: str, get_toolbox_base_url: Callable[[], str]):
+    def __init__(
+        self, api_client: ApiClient, sandbox_id: str, region_id: str, get_toolbox_base_url: Callable[[str, str], str]
+    ):
         super().__init__(api_client, sandbox_id)
         self._get_toolbox_base_url = get_toolbox_base_url
+        self._region_id = region_id
 
     def call_api(self, *args, **kwargs):
         url = str(args[1])
@@ -90,4 +100,4 @@ class ToolboxApiClientProxyLazyBaseUrl(_ToolboxApiClientProxy[ApiClient]):
 
     def load_toolbox_base_url(self):
         if self._toolbox_base_url is None:
-            self._toolbox_base_url = self._get_toolbox_base_url()
+            self._toolbox_base_url = self._get_toolbox_base_url(self._sandbox_id, self._region_id)

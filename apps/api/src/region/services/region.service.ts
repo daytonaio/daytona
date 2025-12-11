@@ -18,6 +18,8 @@ import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
 import { Runner } from '../../sandbox/entities/runner.entity'
 import { RegionType } from '../enums/region-type.enum'
+import { CreateRegionResponseDto } from '../dto/create-region.dto'
+import { generateApiKeyHash, generateApiKeyValue } from '../../common/utils/api-key'
 
 @Injectable()
 export class RegionService {
@@ -36,7 +38,10 @@ export class RegionService {
    * @throws {BadRequestException} If the region name is invalid.
    * @throws {ConflictException} If the region with the same ID already exists or region with the same name already exists in the organization.
    */
-  async create(createRegionDto: CreateRegionInternalDto, organizationId: string | null): Promise<Region> {
+  async create(
+    createRegionDto: CreateRegionInternalDto,
+    organizationId: string | null,
+  ): Promise<CreateRegionResponseDto> {
     if (!REGION_NAME_REGEX.test(createRegionDto.name)) {
       throw new BadRequestException('Region name must contain only letters, numbers, underscores, periods, and hyphens')
     }
@@ -52,14 +57,24 @@ export class RegionService {
     }
 
     try {
-      const region = new Region(
-        createRegionDto.name,
-        createRegionDto.enforceQuotas,
-        createRegionDto.regionType,
-        createRegionDto.id,
+      const proxyApiKey = createRegionDto.proxyUrl ? generateApiKeyValue() : undefined
+      const sshGatewayApiKey = createRegionDto.sshGatewayUrl ? generateApiKeyValue() : undefined
+
+      const region = new Region({
+        name: createRegionDto.name,
+        enforceQuotas: createRegionDto.enforceQuotas,
+        regionType: createRegionDto.regionType,
+        id: createRegionDto.id,
         organizationId,
-      )
-      return await this.regionRepository.save(region)
+        proxyUrl: createRegionDto.proxyUrl,
+        sshGatewayUrl: createRegionDto.sshGatewayUrl,
+        proxyApiKeyHash: proxyApiKey ? generateApiKeyHash(proxyApiKey) : null,
+        sshGatewayApiKeyHash: sshGatewayApiKey ? generateApiKeyHash(sshGatewayApiKey) : null,
+      })
+
+      await this.regionRepository.save(region)
+
+      return new CreateRegionResponseDto({ id: region.id, proxyApiKey, sshGatewayApiKey })
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Region with name ${createRegionDto.name} already exists`)
@@ -72,11 +87,17 @@ export class RegionService {
    * @param id - The ID of the region.
    * @returns The region if found, or null otherwise.
    */
-  async findOne(id: string): Promise<Region | null> {
+  async findOne(id: string, cache = false): Promise<Region | null> {
     return await this.regionRepository.findOne({
       where: {
         id,
       },
+      cache: cache
+        ? {
+            id: `region:${id}`,
+            milliseconds: 30000,
+          }
+        : undefined,
     })
   }
 
@@ -88,6 +109,26 @@ export class RegionService {
   async findOneByName(name: string, organizationId: string | null): Promise<Region | null> {
     return await this.regionRepository.findOne({
       where: [{ name, organizationId: organizationId ?? IsNull() }],
+    })
+  }
+
+  /**
+   * @param proxyApiKey - The proxy API key.
+   * @returns The region if found, or null otherwise.
+   */
+  async findOneByProxyApiKey(proxyApiKey: string): Promise<Region | null> {
+    return await this.regionRepository.findOne({
+      where: { proxyApiKeyHash: generateApiKeyHash(proxyApiKey) },
+    })
+  }
+
+  /**
+   * @param sshGatewayApiKey - The SSH gateway API key.
+   * @returns The region if found, or null otherwise.
+   */
+  async findOneBySshGatewayApiKey(sshGatewayApiKey: string): Promise<Region | null> {
+    return await this.regionRepository.findOne({
+      where: { sshGatewayApiKeyHash: generateApiKeyHash(sshGatewayApiKey) },
     })
   }
 
@@ -168,5 +209,55 @@ export class RegionService {
     }
 
     await this.regionRepository.remove(region)
+  }
+
+  /**
+   * @param regionId - The ID of the region.
+   * @throws {NotFoundException} If the region is not found.
+   * @throws {BadRequestException} If the region does not have a proxy URL configured.
+   * @returns The newly generated proxy API key.
+   */
+  async regenerateProxyApiKey(regionId: string): Promise<string> {
+    const region = await this.findOne(regionId)
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    if (!region.proxyUrl) {
+      throw new BadRequestException('Region does not have a proxy URL configured')
+    }
+
+    const newApiKey = generateApiKeyValue()
+    region.proxyApiKeyHash = generateApiKeyHash(newApiKey)
+
+    await this.regionRepository.save(region)
+
+    return newApiKey
+  }
+
+  /**
+   * @param regionId - The ID of the region.
+   * @throws {NotFoundException} If the region is not found.
+   * @throws {BadRequestException} If the region does not have an SSH gateway URL configured.
+   * @returns The newly generated SSH gateway API key.
+   */
+  async regenerateSshGatewayApiKey(regionId: string): Promise<string> {
+    const region = await this.findOne(regionId)
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    if (!region.sshGatewayUrl) {
+      throw new BadRequestException('Region does not have an SSH gateway URL configured')
+    }
+
+    const newApiKey = generateApiKeyValue()
+    region.sshGatewayApiKeyHash = generateApiKeyHash(newApiKey)
+
+    await this.regionRepository.save(region)
+
+    return newApiKey
   }
 }

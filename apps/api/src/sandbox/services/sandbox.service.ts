@@ -45,7 +45,7 @@ import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
-import { SshAccessValidationDto } from '../dto/ssh-access.dto'
+import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { checkRecoverable } from '../utils/recoverable.util'
@@ -991,6 +991,22 @@ export class SandboxService {
     return sandbox.runnerId || null
   }
 
+  async getRegionId(sandboxId: string): Promise<string> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: {
+        id: sandboxId,
+      },
+      select: ['region'],
+      loadEagerRelations: false,
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    return sandbox.region
+  }
+
   async getPortPreviewUrl(sandboxIdOrName: string, organizationId: string, port: number): Promise<PortPreviewUrlDto> {
     if (port < 1 || port > 65535) {
       throw new BadRequestError('Invalid port')
@@ -1025,9 +1041,17 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
+    let url = `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+    if (region && region.proxyUrl) {
+      // Insert port and sandbox.id into the custom proxy URL
+      url = region.proxyUrl.replace(/(https?:\/)(\/)/, `$1/${port}-${sandbox.id}.`)
+    }
+
     return {
       sandboxId: sandbox.id,
-      url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
+      url,
       token: sandbox.authToken,
     }
   }
@@ -1217,6 +1241,18 @@ export class SandboxService {
     if (!result.affected) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
+  }
+
+  async getToolboxProxyUrl(sandboxId: string): Promise<string> {
+    const sandbox = await this.findOne(sandboxId)
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+
+    if (region && region.toolboxProxyUrl) {
+      return region.toolboxProxyUrl + '/toolbox'
+    }
+
+    return this.configService.getOrThrow('proxy.toolboxUrl')
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, regionIdOrName?: string): Promise<string> {
@@ -1516,7 +1552,11 @@ export class SandboxService {
     return volumes
   }
 
-  async createSshAccess(sandboxIdOrName: string, expiresInMinutes = 60, organizationId?: string): Promise<SshAccess> {
+  async createSshAccess(
+    sandboxIdOrName: string,
+    expiresInMinutes = 60,
+    organizationId?: string,
+  ): Promise<SshAccessDto> {
     //  check if sandbox exists
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1529,7 +1569,14 @@ export class SandboxService {
     sshAccess.token = customNanoid(urlAlphabet.replace('_', '').replace('-', ''))(32)
     sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
 
-    return await this.sshAccessRepository.save(sshAccess)
+    await this.sshAccessRepository.save(sshAccess)
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+    if (region && region.sshGatewayUrl) {
+      return SshAccessDto.fromSshAccess(sshAccess, region.sshGatewayUrl)
+    }
+
+    return SshAccessDto.fromSshAccess(sshAccess, this.configService.getOrThrow('sshGateway.url'))
   }
 
   async revokeSshAccess(sandboxIdOrName: string, token?: string, organizationId?: string): Promise<Sandbox> {

@@ -92,7 +92,7 @@ class Sandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         code_toolbox: SandboxCodeToolbox,
-        get_toolbox_base_url: Callable[[], str],
+        get_toolbox_base_url: Callable[[str, str], str],
     ):
         """Initialize a new Sandbox instance.
 
@@ -108,7 +108,7 @@ class Sandbox(SandboxDto):
         self._sandbox_api = sandbox_api
         self._code_toolbox = code_toolbox
         # Wrap the toolbox API client to inject the sandbox ID into the resource path and lazy load the base URL
-        self._toolbox_api = ToolboxApiClientProxyLazyBaseUrl(toolbox_api, self.id, get_toolbox_base_url)
+        self._toolbox_api = ToolboxApiClientProxyLazyBaseUrl(toolbox_api, self.id, self.target, get_toolbox_base_url)
 
         self._fs = FileSystem(FileSystemApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
         self._git = Git(GitApi(self._toolbox_api))

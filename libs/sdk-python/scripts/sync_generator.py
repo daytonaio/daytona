@@ -69,8 +69,8 @@ ADDITIONAL_REPLACEMENTS = {
     "aioboto3": "boto3",
     "async_pty_handle": "pty_handle",
     # Task/Future replacements
-    "_task: Optional[asyncio.Task]": "_future: Optional[Future]",
-    "_task_lock = asyncio.Lock()": "_future_lock = threading.Lock()",
+    "_tasks: Dict[str, asyncio.Task]": "_futures: Dict[str, Future]",
+    "_lock = asyncio.Lock()": "_lock = threading.Lock()",
     "asyncio.Task": "Future",
 }
 
@@ -119,14 +119,14 @@ POST_REPLACEMENTS = [
     (re.compile(r"^import aiofiles(?:\.[\w_]+)?\s*$", flags=re.MULTILINE), ""),
     (re.compile(r"^from aiofiles(?:\.[\w_]+)? import .+$", flags=re.MULTILINE), ""),
     # Task/Future pattern replacements - make these more specific to avoid false positives
-    (re.compile(r"\bself\._(\w+)_task:"), r"self._\1_future:"),
+    (re.compile(r"\bself\._(\w+)_tasks:"), r"self._\1_futures:"),
     (re.compile(r"\bself\._(\w+)_task_lock\b"), r"self._\1_future_lock"),
-    (re.compile(r"\b_task:"), r"_future:"),
+    (re.compile(r"\b_tasks:"), r"_futures:"),
     (re.compile(r"\b_task_lock\b"), r"_future_lock"),
     # Fix asyncio.Lock() -> threading.Lock()
     (re.compile(r"asyncio\.Lock\(\)"), r"threading.Lock()"),
     # Fix asyncio.Task type hints
-    (re.compile(r": Optional\[asyncio\.Task\]"), r": Optional[Future]"),
+    (re.compile(r": Dict\[str, asyncio\.Task\]"), r": Dict[str, Future]"),
 ]
 
 # Auto-generation banner
@@ -782,7 +782,10 @@ def convert_proxy_toolbox_url_method(text: str) -> str:
     instead of asyncio.Task for thread-safe lazy initialization.
     """
     # Find the method and extract it
-    method_pattern = re.compile(r"(    def _get_proxy_toolbox_url\(self\):.*?)(?=\n    def |\n\nclass |\Z)", re.DOTALL)
+    method_pattern = re.compile(
+        r"(    def _get_proxy_toolbox_url\(self, sandbox_id: str, region_id: str\) -> str:.*?)(?=\n    def |\n\nclass |\Z)",
+        re.DOTALL,
+    )
 
     match = method_pattern.search(text)
     if not match:
@@ -794,17 +797,17 @@ def convert_proxy_toolbox_url_method(text: str) -> str:
         # Already converted or doesn't need conversion
         return text
 
-    sync_method = """    def _get_proxy_toolbox_url(self):
-        if self._proxy_toolbox_url_future is not None:
-            return self._proxy_toolbox_url_future.result()
+    sync_method = """    def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
+        if self._proxy_toolbox_url_futures[region_id] is not None:
+            return self._proxy_toolbox_url_futures[region_id].result()
 
-        with self._proxy_toolbox_url_future_lock:
+        with self._proxy_toolbox_url_lock:
             # Double-check: another thread might have created the future
             # Create local variable "future" so that the thread knows if it created the future
             # and should do the API call and set the result
-            if self._proxy_toolbox_url_future is None:
+            if self._proxy_toolbox_url_futures[region_id] is None:
                 future = Future()
-                self._proxy_toolbox_url_future = future
+                self._proxy_toolbox_url_futures[region_id] = future
             else:
                 future = None
 
@@ -812,14 +815,14 @@ def convert_proxy_toolbox_url_method(text: str) -> str:
         # This allows other threads to wait on the future instead of blocking on the lock
         if future is not None:
             try:
-                config = self._config_api.config_controller_get_config()
-                future.set_result(config.proxy_toolbox_url)
+                response = self._sandbox_api.get_toolbox_proxy_url(sandbox_id)
+                future.set_result(response.url)
             except Exception as e:
                 future.set_exception(e)
                 raise
 
         # Allows other threads to wait on the same future in parallel
-        return self._proxy_toolbox_url_future.result()"""
+        return self._proxy_toolbox_url_futures[region_id].result()"""
 
     # Replace the method
     text = method_pattern.sub(sync_method, text, count=1)
