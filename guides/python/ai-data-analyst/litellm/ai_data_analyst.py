@@ -10,6 +10,9 @@ from litellm import completion  # pylint: disable=import-error
 # pylint: disable=import-error
 from daytona import CreateSandboxFromSnapshotParams, Daytona
 
+CODING_MODEL = "anthropic/claude-sonnet-4-0"
+SUMMARY_MODEL = "anthropic/claude-haiku-4-5"
+
 
 # Helper function to extract Python code from a given string
 def extract_python(text: str) -> str:
@@ -60,16 +63,13 @@ def main() -> None:
         # LiteLLM supports a variety of model providers
         # Make sure to have the right environment variables set
         llm_output = completion(
-            # model="openai/gpt-5.1",
-            # model="mistral/mistral-large-latest",
-            # model="deepseek/deepseek-chat",
-            # model="openrouter/moonshotai/kimi-k2",
-            model="anthropic/claude-sonnet-4-0",
+            model=CODING_MODEL,
             messages=messages,
         )
 
         first_message = llm_output.choices[0].message
-        messages.append({"role": "assistant", "content": first_message.content})
+        print("LLM output:", first_message)
+        messages.append({"role": first_message.role, "content": first_message.content})
 
         # Extract and execute Python code from the LLM's response
         print("Running code...")
@@ -95,11 +95,7 @@ def main() -> None:
 
         # Generate the final response with the LLM
         summary = completion(
-            # model="openai/gpt-4o",
-            # model="mistral/mistral-small-latest",
-            # model="deepseek/deepseek-chat",
-            # model="openrouter/moonshotai/kimi-k2",
-            model="anthropic/claude-haiku-4-5",
+            model=SUMMARY_MODEL,
             messages=messages,
         )
 

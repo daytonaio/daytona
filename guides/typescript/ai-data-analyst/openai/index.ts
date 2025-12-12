@@ -7,6 +7,9 @@ import { Daytona, CodeLanguage, Sandbox } from '@daytonaio/sdk'
 import OpenAI from 'openai'
 import * as fs from 'fs'
 
+const CODING_MODEL = "gpt-5.1"
+const SUMMARY_MODEL = "gpt-4o"
+
 // Helper function to extract Python code from a given string
 function extractPython(text: string): string {
   const m = text.match(/```python([\s\S]*?)```/)
@@ -52,7 +55,7 @@ After seeing the results of the code, answer the user's query.`
       { role: 'user', content: userPrompt },
     ]
     const llmOutput = await openai.chat.completions.create({
-      model: 'gpt-5.1',
+      model: CODING_MODEL,
       messages: messages,
     })
     messages.push(llmOutput.choices[0].message)
@@ -75,7 +78,7 @@ After seeing the results of the code, answer the user's query.`
 
     // Generate the final response with the LLM
     const summaryOutput = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: SUMMARY_MODEL,
       messages: messages,
     })
     console.log('Response:', summaryOutput.choices[0].message.content)

@@ -71,11 +71,9 @@ const userPrompt = `Give the three highest revenue products for the month of Jan
 
 By default, the example uses `gpt-4`. To switch to a different model, modify the `model` parameter in `index.ts`:
 
-```typescript
-const llmOutput = await openai.chat.completions.create({
-  model: 'gpt-4',  // Change to your preferred model, e.g., 'gpt-3.5-turbo'
-  messages: messages,
-});
+```python
+const CODING_MODEL = "gpt-5.1"
+const SUMMARY_MODEL = "gpt-4o"
 ```
 
 ## Example Output

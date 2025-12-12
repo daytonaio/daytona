@@ -76,12 +76,8 @@ Create a `.env` file in the project directory with the appropriate variables for
 By default, the example uses Anthropic's Claude Sonnet 4.0. To switch to a different LLM provider, modify the `model` parameter in `ai_data_analyst.py`:
 
 ```python
-# Example model configurations (uncomment the one you want to use)
-# model = "openai/gpt-4o"
-# model = "mistral/mistral-large-latest"
-# model = "deepseek/deepseek-chat"
-# model = "openrouter/moonshotai/kimi-k2"
-model = "anthropic/claude-sonnet-4.0"  # Default
+CODING_MODEL = "anthropic/claude-sonnet-4-0"
+SUMMARY_MODEL = "anthropic/claude-haiku-4-5"
 ```
 
 See [Providers](https://docs.litellm.ai/docs/providers) for all supported models

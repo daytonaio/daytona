@@ -10,6 +10,8 @@ from openai import OpenAI
 # pylint: disable=import-error
 from daytona import CreateSandboxFromSnapshotParams, Daytona
 
+CODING_MODEL = "gpt-5.1"
+SUMMARY_MODEL = "gpt-4o"
 
 # Helper function to extract Python code from a given string
 def extract_python(text: str) -> str:
@@ -59,12 +61,12 @@ def main() -> None:
         ]
 
         completion = client.chat.completions.create(
-            model="gpt-5.1",
+            model=CODING_MODEL,
             messages=messages,
         )
 
         first_message = completion.choices[0].message
-        messages.append({"role": "assistant", "content": first_message.content})
+        messages.append({"role": first_message.role, "content": first_message.content})
 
         # Extract and execute Python code from the LLM's response
         print("Running code...")
@@ -90,7 +92,7 @@ def main() -> None:
 
         # Generate the final response with the LLM
         summary = client.chat.completions.create(
-            model="gpt-4o",
+            model=SUMMARY_MODEL,
             messages=messages,
         )
 
