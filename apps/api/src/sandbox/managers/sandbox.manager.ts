@@ -39,6 +39,8 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
+import { JobService } from '../services/job.service'
+import { JobType, ResourceType } from '../dto/job.dto'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -54,6 +56,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
+    private readonly jobService: JobService,
   ) {}
 
   async onApplicationShutdown() {
@@ -115,7 +118,18 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-                this.syncInstanceState(sandbox.id)
+
+                // For v2 runners, create job to execute the action
+                if (runner.version === '2') {
+                  const jobType = sandbox.autoDeleteInterval === 0 ? JobType.DESTROY_SANDBOX : JobType.STOP_SANDBOX
+                  await this.jobService.createJob(null, jobType, runner.id, ResourceType.SANDBOX, sandbox.id)
+                  this.logger.debug(
+                    `Created ${jobType} job for autostop on v2 runner ${runner.id}, sandbox ${sandbox.id}`,
+                  )
+                } else {
+                  // For v0 runners, use syncInstanceState with imperative adapter calls
+                  this.syncInstanceState(sandbox.id)
+                }
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -224,7 +238,23 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               try {
                 sandbox.applyDesiredDestroyedState()
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-                this.syncInstanceState(sandbox.id)
+
+                // For v2 runners, create job to execute the action
+                if (runner.version === '2') {
+                  await this.jobService.createJob(
+                    null,
+                    JobType.DESTROY_SANDBOX,
+                    runner.id,
+                    ResourceType.SANDBOX,
+                    sandbox.id,
+                  )
+                  this.logger.debug(
+                    `Created DESTROY_SANDBOX job for autodelete on v2 runner ${runner.id}, sandbox ${sandbox.id}`,
+                  )
+                } else {
+                  // For v0 runners, use syncInstanceState with imperative adapter calls
+                  this.syncInstanceState(sandbox.id)
+                }
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
