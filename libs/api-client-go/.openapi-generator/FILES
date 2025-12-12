@@ -1,5 +1,6 @@
 .gitignore
 api/openapi.yaml
+api_admin.go
 api_api_keys.go
 api_audit.go
 api_config.go
@@ -22,6 +23,7 @@ configuration.go
 go.mod
 go.sum
 model_account_provider.go
+model_admin_create_runner.go
 model_announcement.go
 model_api_key_list.go
 model_api_key_response.go
