@@ -78,7 +78,7 @@ def main() -> None:
 
         messages.append(
             {
-                "role": "assistant",
+                "role": "user",
                 "content": f"Code execution result:\n{exec_result.result}.",
             },
         )
