@@ -284,6 +284,24 @@ class AsyncProcess:
         """
         return await self._api_client.get_session(session_id=session_id)
 
+    @intercept_errors(message_prefix="Failed to get sandbox entrypoint session: ")
+    async def get_entrypoint_session(self) -> Session:
+        """Gets the sandbox entrypoint session.
+
+        Returns:
+            Session: Session information including:
+                - session_id: The session's unique identifier
+                - commands: List of commands executed in the session
+
+        Example:
+            ```python
+            session = await sandbox.process.get_entrypoint_session()
+            for cmd in session.commands:
+                print(f"Command: {cmd.command}")
+            ```
+        """
+        return await self._api_client.get_entrypoint_session()
+
     @intercept_errors(message_prefix="Failed to get session command: ")
     async def get_session_command(self, session_id: str, command_id: str) -> Command:
         """Gets information about a specific command executed in a session.
