@@ -45,36 +45,38 @@ Create a `.env` file in the project directory with these variables.
 
 ## How It Works
 
-1. The script reads the cafe sales data from `cafe_sales_data.csv`
-2. It sends the data and your natural language query to OpenAI's API
-3. The AI generates Python code to analyze the data
-4. The code executes in a secure Daytona sandbox
-5. Results are processed and any generated charts are saved as PNG files
-
-## Customization
-
-Modify the `userPrompt` in `index.ts` to ask different questions about your data:
-
-```typescript
-const userPrompt = `Give the three highest revenue products for the month of January and show them as a bar chart.`;
-```
+1. An LLM call generates Python code based on the data format and prompt
+2. A new Daytona sandbox is created, containing the data file
+3. The Python code is executed in the sandbox
+4. Any generated charts are saved as PNG files
+5. A second LLM call summarizes the code execution results
 
 ## Configuration
 
 ### Analysis Customization
 
-- **Analysis Prompt:** The main prompt is configured in the `userPrompt` variable in `index.ts`. You can modify this to analyze different aspects of the data or try different visualization types.
+The main prompt is configured in the `userPrompt` variable in `index.ts`:
 
-- **Dataset:** The example includes `cafe_sales_data.csv`. To use your own dataset, replace this file and update the filename in the script if needed.
+```typescript
+const userPrompt = `Give the three highest revenue products for the month of January and show them as a bar chart.`;
+```
+
+You can modify this to analyze different aspects of the data or try different visualization types.
+
+The example uses `cafe_sales_data.csv`. To use your own dataset, replace this file and update the filename in the script if needed.
 
 ### OpenAI Model Configuration
 
-By default, the example uses `gpt-4`. To switch to a different model, modify the `model` parameter in `index.ts`:
+By default, the example uses the following models, as specified in `index.ts`:
 
 ```python
 const CODING_MODEL = "gpt-5.1"
 const SUMMARY_MODEL = "gpt-4o"
 ```
+
+The coding model is used for high accuracy code generation, and the summary model is used for fast summarization.
+
+See [Models](https://platform.openai.com/docs/models) for all supported models
 
 ## Example Output
 

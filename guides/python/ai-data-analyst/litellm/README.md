@@ -63,22 +63,45 @@ Create a `.env` file in the project directory with the appropriate variables for
    python ai_data_analyst.py
    ```
 
+## How It Works
+
+1. An LLM call generates Python code based on the data format and prompt
+2. A new Daytona sandbox is created, containing the data file
+3. The Python code is executed in the sandbox
+4. Any generated charts are saved as PNG files
+5. A second LLM call summarizes the code execution results
+
 ## Configuration
 
 ### Analysis Customization
 
-- **Analysis Prompt:** The main prompt is configured in the `user_prompt` variable in `ai_data_analyst.py`. You can modify this to analyze different aspects of the data or try different visualization types.
+The main prompt is configured in the `user_prompt` variable in `ai_data_analyst.py`:
 
-- **Dataset:** The example includes `cafe_sales_data.csv`. To use your own dataset, replace this file and update the filename in the script if needed.
+```typescript
+const userPrompt = `Give the three highest revenue products for the month of January and show them as a bar chart.`;
+```
+
+You can modify this to analyze different aspects of the data or try different visualization types.
+
+The example uses `cafe_sales_data.csv`. To use your own dataset, replace this file and update the filename in the script if needed.
 
 ### LLM Provider Configuration
 
-By default, the example uses Anthropic's Claude Sonnet 4.0. To switch to a different LLM provider, modify the `model` parameter in `ai_data_analyst.py`:
+By default, the example uses the following models, as specified in `ai_data_analyst.py`:
 
 ```python
 CODING_MODEL = "anthropic/claude-sonnet-4-0"
 SUMMARY_MODEL = "anthropic/claude-haiku-4-5"
 ```
+
+The coding model is used for high accuracy code generation, and the summary model is used for fast summarization.
+
+Other suggested models include:
+
+- `openai/gpt-5.1`
+- `mistral/mistral-large-latest`
+- `deepseek/deepseek-chat`
+- `openrouter/moonshotai/kimi-k2`
 
 See [Providers](https://docs.litellm.ai/docs/providers) for all supported models
 
