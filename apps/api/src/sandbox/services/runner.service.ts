@@ -441,9 +441,16 @@ export class RunnerService {
 
     try {
       const runners = await this.runnerRepository.find({
-        where: {
-          state: Not(RunnerState.DECOMMISSIONED),
-        },
+        where: [
+          {
+            version: '0',
+            state: Not(RunnerState.DECOMMISSIONED),
+          },
+          {
+            version: '2',
+            state: Not(In([RunnerState.DECOMMISSIONED, RunnerState.INITIALIZING])),
+          },
+        ],
         order: {
           lastChecked: {
             direction: 'ASC',
@@ -544,8 +551,6 @@ export class RunnerService {
     const healthCheckThresholdMs = 60 * 1000
 
     if (!runner.lastChecked) {
-      this.logger.debug(`v2 Runner ${runner.id} has never reported health, marking as UNRESPONSIVE`)
-      await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
       return
     }
 
