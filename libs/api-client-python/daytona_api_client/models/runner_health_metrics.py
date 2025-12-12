@@ -34,8 +34,11 @@ class RunnerHealthMetrics(BaseModel):
     current_allocated_memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Currently allocated memory in GiB", alias="currentAllocatedMemoryGiB")
     current_allocated_disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Currently allocated disk in GiB", alias="currentAllocatedDiskGiB")
     current_snapshot_count: Union[StrictFloat, StrictInt] = Field(description="Number of snapshots currently stored", alias="currentSnapshotCount")
+    cpu: Union[StrictFloat, StrictInt] = Field(description="Total CPU cores on the runner")
+    ram: Union[StrictFloat, StrictInt] = Field(description="Total RAM in GiB on the runner")
+    disk: Union[StrictFloat, StrictInt] = Field(description="Total disk space in GiB on the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount"]
+    __properties: ClassVar[List[str]] = ["currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "cpu", "ram", "disk"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -101,7 +104,10 @@ class RunnerHealthMetrics(BaseModel):
             "currentAllocatedCpu": obj.get("currentAllocatedCpu"),
             "currentAllocatedMemoryGiB": obj.get("currentAllocatedMemoryGiB"),
             "currentAllocatedDiskGiB": obj.get("currentAllocatedDiskGiB"),
-            "currentSnapshotCount": obj.get("currentSnapshotCount")
+            "currentSnapshotCount": obj.get("currentSnapshotCount"),
+            "cpu": obj.get("cpu"),
+            "ram": obj.get("ram"),
+            "disk": obj.get("disk")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

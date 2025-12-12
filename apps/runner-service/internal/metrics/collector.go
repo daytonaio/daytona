@@ -23,6 +23,9 @@ type Metrics struct {
 	AllocatedMemoryGiB    float32
 	AllocatedDiskGiB      float32
 	SnapshotCount         float32
+	TotalCPU              float32
+	TotalRAMGiB           float32
+	TotalDiskGiB          float32
 }
 
 // Collector collects system metrics
@@ -52,6 +55,14 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 		SnapshotCount:      c.snapshotCount,
 	}
 
+	// Collect CPU count
+	cpuCount, err := cpu.CountsWithContext(ctx, true)
+	if err != nil {
+		c.log.Warn("Failed to collect CPU count", slog.Any("error", err))
+	} else {
+		metrics.TotalCPU = float32(cpuCount)
+	}
+
 	// Collect CPU usage
 	cpuPercent, err := cpu.PercentWithContext(ctx, 0, false)
 	if err != nil {
@@ -60,20 +71,24 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 		metrics.CPUUsagePercentage = float32(cpuPercent[0])
 	}
 
-	// Collect memory usage
+	// Collect memory usage and total
 	memStats, err := mem.VirtualMemoryWithContext(ctx)
 	if err != nil {
 		c.log.Warn("Failed to collect memory metrics", slog.Any("error", err))
 	} else {
 		metrics.MemoryUsagePercentage = float32(memStats.UsedPercent)
+		// Convert bytes to GiB (1 GiB = 1024^3 bytes)
+		metrics.TotalRAMGiB = float32(memStats.Total) / (1024 * 1024 * 1024)
 	}
 
-	// Collect disk usage
+	// Collect disk usage and total
 	diskStats, err := disk.UsageWithContext(ctx, "/")
 	if err != nil {
 		c.log.Warn("Failed to collect disk metrics", slog.Any("error", err))
 	} else {
 		metrics.DiskUsagePercentage = float32(diskStats.UsedPercent)
+		// Convert bytes to GiB (1 GiB = 1024^3 bytes)
+		metrics.TotalDiskGiB = float32(diskStats.Total) / (1024 * 1024 * 1024)
 	}
 
 	return metrics, nil

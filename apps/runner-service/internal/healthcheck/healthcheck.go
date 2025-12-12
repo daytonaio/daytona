@@ -77,6 +77,9 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 			CurrentAllocatedMemoryGiB:    m.AllocatedMemoryGiB,
 			CurrentAllocatedDiskGiB:      m.AllocatedDiskGiB,
 			CurrentSnapshotCount:         m.SnapshotCount,
+			Cpu:                          m.TotalCPU,
+			Ram:                          m.TotalRAMGiB,
+			Disk:                         m.TotalDiskGiB,
 		}
 	}
 

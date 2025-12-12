@@ -35,6 +35,12 @@ type RunnerHealthMetrics struct {
 	CurrentAllocatedDiskGiB float32 `json:"currentAllocatedDiskGiB"`
 	// Number of snapshots currently stored
 	CurrentSnapshotCount float32 `json:"currentSnapshotCount"`
+	// Total CPU cores on the runner
+	Cpu float32 `json:"cpu"`
+	// Total RAM in GiB on the runner
+	Ram float32 `json:"ram"`
+	// Total disk space in GiB on the runner
+	Disk                 float32 `json:"disk"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -44,7 +50,7 @@ type _RunnerHealthMetrics RunnerHealthMetrics
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerHealthMetrics(currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemoryGiB float32, currentAllocatedDiskGiB float32, currentSnapshotCount float32) *RunnerHealthMetrics {
+func NewRunnerHealthMetrics(currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemoryGiB float32, currentAllocatedDiskGiB float32, currentSnapshotCount float32, cpu float32, ram float32, disk float32) *RunnerHealthMetrics {
 	this := RunnerHealthMetrics{}
 	this.CurrentCpuUsagePercentage = currentCpuUsagePercentage
 	this.CurrentMemoryUsagePercentage = currentMemoryUsagePercentage
@@ -53,6 +59,9 @@ func NewRunnerHealthMetrics(currentCpuUsagePercentage float32, currentMemoryUsag
 	this.CurrentAllocatedMemoryGiB = currentAllocatedMemoryGiB
 	this.CurrentAllocatedDiskGiB = currentAllocatedDiskGiB
 	this.CurrentSnapshotCount = currentSnapshotCount
+	this.Cpu = cpu
+	this.Ram = ram
+	this.Disk = disk
 	return &this
 }
 
@@ -232,6 +241,78 @@ func (o *RunnerHealthMetrics) SetCurrentSnapshotCount(v float32) {
 	o.CurrentSnapshotCount = v
 }
 
+// GetCpu returns the Cpu field value
+func (o *RunnerHealthMetrics) GetCpu() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.Cpu
+}
+
+// GetCpuOk returns a tuple with the Cpu field value
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthMetrics) GetCpuOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Cpu, true
+}
+
+// SetCpu sets field value
+func (o *RunnerHealthMetrics) SetCpu(v float32) {
+	o.Cpu = v
+}
+
+// GetRam returns the Ram field value
+func (o *RunnerHealthMetrics) GetRam() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.Ram
+}
+
+// GetRamOk returns a tuple with the Ram field value
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthMetrics) GetRamOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Ram, true
+}
+
+// SetRam sets field value
+func (o *RunnerHealthMetrics) SetRam(v float32) {
+	o.Ram = v
+}
+
+// GetDisk returns the Disk field value
+func (o *RunnerHealthMetrics) GetDisk() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.Disk
+}
+
+// GetDiskOk returns a tuple with the Disk field value
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthMetrics) GetDiskOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Disk, true
+}
+
+// SetDisk sets field value
+func (o *RunnerHealthMetrics) SetDisk(v float32) {
+	o.Disk = v
+}
+
 func (o RunnerHealthMetrics) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -249,6 +330,9 @@ func (o RunnerHealthMetrics) ToMap() (map[string]interface{}, error) {
 	toSerialize["currentAllocatedMemoryGiB"] = o.CurrentAllocatedMemoryGiB
 	toSerialize["currentAllocatedDiskGiB"] = o.CurrentAllocatedDiskGiB
 	toSerialize["currentSnapshotCount"] = o.CurrentSnapshotCount
+	toSerialize["cpu"] = o.Cpu
+	toSerialize["ram"] = o.Ram
+	toSerialize["disk"] = o.Disk
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -269,6 +353,9 @@ func (o *RunnerHealthMetrics) UnmarshalJSON(data []byte) (err error) {
 		"currentAllocatedMemoryGiB",
 		"currentAllocatedDiskGiB",
 		"currentSnapshotCount",
+		"cpu",
+		"ram",
+		"disk",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -305,6 +392,9 @@ func (o *RunnerHealthMetrics) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "currentAllocatedMemoryGiB")
 		delete(additionalProperties, "currentAllocatedDiskGiB")
 		delete(additionalProperties, "currentSnapshotCount")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "ram")
+		delete(additionalProperties, "disk")
 		o.AdditionalProperties = additionalProperties
 	}
 

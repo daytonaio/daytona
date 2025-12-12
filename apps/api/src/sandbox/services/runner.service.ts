@@ -338,6 +338,9 @@ export class RunnerService {
       currentAllocatedMemoryGiB: number
       currentAllocatedDiskGiB: number
       currentSnapshotCount: number
+      cpu: number
+      ram: number
+      disk: number
     },
   ): Promise<void> {
     const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
@@ -364,6 +367,9 @@ export class RunnerService {
       updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
       updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
       updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
+      updateData.cpu = metrics.cpu
+      updateData.memoryGiB = metrics.ram
+      updateData.diskGiB = metrics.disk
 
       updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
         cpuUsage: updateData.currentCpuUsagePercentage,

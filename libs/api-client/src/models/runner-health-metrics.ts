@@ -60,4 +60,22 @@ export interface RunnerHealthMetrics {
    * @memberof RunnerHealthMetrics
    */
   currentSnapshotCount: number
+  /**
+   * Total CPU cores on the runner
+   * @type {number}
+   * @memberof RunnerHealthMetrics
+   */
+  cpu: number
+  /**
+   * Total RAM in GiB on the runner
+   * @type {number}
+   * @memberof RunnerHealthMetrics
+   */
+  ram: number
+  /**
+   * Total disk space in GiB on the runner
+   * @type {number}
+   * @memberof RunnerHealthMetrics
+   */
+  disk: number
 }

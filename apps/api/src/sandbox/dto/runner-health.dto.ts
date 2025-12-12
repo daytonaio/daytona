@@ -56,6 +56,27 @@ export class RunnerHealthMetricsDto {
   })
   @IsNumber()
   currentSnapshotCount: number
+
+  @ApiProperty({
+    description: 'Total CPU cores on the runner',
+    example: 8,
+  })
+  @IsNumber()
+  cpu: number
+
+  @ApiProperty({
+    description: 'Total RAM in GiB on the runner',
+    example: 16,
+  })
+  @IsNumber()
+  ram: number
+
+  @ApiProperty({
+    description: 'Total disk space in GiB on the runner',
+    example: 100,
+  })
+  @IsNumber()
+  disk: number
 }
 
 @ApiSchema({ name: 'RunnerHealthcheck' })
