@@ -32,7 +32,7 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
-import type { Command } from '../models'
+import type { CommandDTO } from '../models'
 // @ts-ignore
 import type { CreateSessionRequest } from '../models'
 // @ts-ignore
@@ -50,7 +50,7 @@ import type { PtyResizeRequest } from '../models'
 // @ts-ignore
 import type { PtySessionInfo } from '../models'
 // @ts-ignore
-import type { Session } from '../models'
+import type { SessionDTO } from '../models'
 // @ts-ignore
 import type { SessionExecuteRequest } from '../models'
 // @ts-ignore
@@ -738,7 +738,7 @@ export const ProcessApiFp = function (configuration?: Configuration) {
     async getSession(
       sessionId: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionDTO>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSession(sessionId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -763,7 +763,7 @@ export const ProcessApiFp = function (configuration?: Configuration) {
       sessionId: string,
       commandId: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Command>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CommandDTO>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommand(sessionId, commandId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -837,7 +837,7 @@ export const ProcessApiFp = function (configuration?: Configuration) {
      */
     async listSessions(
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Session>>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<SessionDTO>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listSessions(options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -987,7 +987,7 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getSession(sessionId: string, options?: RawAxiosRequestConfig): AxiosPromise<Session> {
+    getSession(sessionId: string, options?: RawAxiosRequestConfig): AxiosPromise<SessionDTO> {
       return localVarFp.getSession(sessionId, options).then((request) => request(axios, basePath))
     },
     /**
@@ -998,7 +998,7 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getSessionCommand(sessionId: string, commandId: string, options?: RawAxiosRequestConfig): AxiosPromise<Command> {
+    getSessionCommand(sessionId: string, commandId: string, options?: RawAxiosRequestConfig): AxiosPromise<CommandDTO> {
       return localVarFp.getSessionCommand(sessionId, commandId, options).then((request) => request(axios, basePath))
     },
     /**
@@ -1035,7 +1035,7 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listSessions(options?: RawAxiosRequestConfig): AxiosPromise<Array<Session>> {
+    listSessions(options?: RawAxiosRequestConfig): AxiosPromise<Array<SessionDTO>> {
       return localVarFp.listSessions(options).then((request) => request(axios, basePath))
     },
     /**

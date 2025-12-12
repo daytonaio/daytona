@@ -14,7 +14,7 @@ common.ts
 configuration.ts
 git_push.sh
 index.ts
-models/command.ts
+models/command-dto.ts
 models/completion-context.ts
 models/completion-item.ts
 models/completion-list.ts
@@ -80,9 +80,9 @@ models/replace-result.ts
 models/screenshot-response.ts
 models/scroll-response.ts
 models/search-files-response.ts
+models/session-dto.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
-models/session.ts
 models/status.ts
 models/user-home-dir-response.ts
 models/window-info.ts

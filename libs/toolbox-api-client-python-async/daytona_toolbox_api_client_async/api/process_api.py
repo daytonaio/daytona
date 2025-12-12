@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictBool, StrictStr
 from typing import Any, Dict, List, Optional
 from typing_extensions import Annotated
-from daytona_toolbox_api_client_async.models.command import Command
+from daytona_toolbox_api_client_async.models.command_dto import CommandDTO
 from daytona_toolbox_api_client_async.models.create_session_request import CreateSessionRequest
 from daytona_toolbox_api_client_async.models.execute_request import ExecuteRequest
 from daytona_toolbox_api_client_async.models.execute_response import ExecuteResponse
@@ -28,7 +28,7 @@ from daytona_toolbox_api_client_async.models.pty_create_response import PtyCreat
 from daytona_toolbox_api_client_async.models.pty_list_response import PtyListResponse
 from daytona_toolbox_api_client_async.models.pty_resize_request import PtyResizeRequest
 from daytona_toolbox_api_client_async.models.pty_session_info import PtySessionInfo
-from daytona_toolbox_api_client_async.models.session import Session
+from daytona_toolbox_api_client_async.models.session_dto import SessionDTO
 from daytona_toolbox_api_client_async.models.session_execute_request import SessionExecuteRequest
 from daytona_toolbox_api_client_async.models.session_execute_response import SessionExecuteResponse
 
@@ -1904,7 +1904,7 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Session:
+    ) -> SessionDTO:
         """Get session details
 
         Get details of a specific session including its commands
@@ -1942,7 +1942,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
+            '200': "SessionDTO",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1971,7 +1971,7 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Session]:
+    ) -> ApiResponse[SessionDTO]:
         """Get session details
 
         Get details of a specific session including its commands
@@ -2009,7 +2009,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
+            '200': "SessionDTO",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2076,7 +2076,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
+            '200': "SessionDTO",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2165,7 +2165,7 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Command:
+    ) -> CommandDTO:
         """Get session command details
 
         Get details of a specific command within a session
@@ -2206,7 +2206,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Command",
+            '200': "CommandDTO",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2236,7 +2236,7 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Command]:
+    ) -> ApiResponse[CommandDTO]:
         """Get session command details
 
         Get details of a specific command within a session
@@ -2277,7 +2277,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Command",
+            '200': "CommandDTO",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2348,7 +2348,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Command",
+            '200': "CommandDTO",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2975,7 +2975,7 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Session]:
+    ) -> List[SessionDTO]:
         """List all sessions
 
         Get a list of all active shell sessions
@@ -3010,7 +3010,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Session]",
+            '200': "List[SessionDTO]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3038,7 +3038,7 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Session]]:
+    ) -> ApiResponse[List[SessionDTO]]:
         """List all sessions
 
         Get a list of all active shell sessions
@@ -3073,7 +3073,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Session]",
+            '200': "List[SessionDTO]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3136,7 +3136,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Session]",
+            '200': "List[SessionDTO]",
         }
         response_data = await self.api_client.call_api(
             *_param,

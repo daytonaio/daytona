@@ -14,7 +14,7 @@
 
 
 # import models into model package
-from daytona_toolbox_api_client_async.models.command import Command
+from daytona_toolbox_api_client_async.models.command_dto import CommandDTO
 from daytona_toolbox_api_client_async.models.completion_context import CompletionContext
 from daytona_toolbox_api_client_async.models.completion_item import CompletionItem
 from daytona_toolbox_api_client_async.models.completion_list import CompletionList
@@ -79,7 +79,7 @@ from daytona_toolbox_api_client_async.models.replace_result import ReplaceResult
 from daytona_toolbox_api_client_async.models.screenshot_response import ScreenshotResponse
 from daytona_toolbox_api_client_async.models.scroll_response import ScrollResponse
 from daytona_toolbox_api_client_async.models.search_files_response import SearchFilesResponse
-from daytona_toolbox_api_client_async.models.session import Session
+from daytona_toolbox_api_client_async.models.session_dto import SessionDTO
 from daytona_toolbox_api_client_async.models.session_execute_request import SessionExecuteRequest
 from daytona_toolbox_api_client_async.models.session_execute_response import SessionExecuteResponse
 from daytona_toolbox_api_client_async.models.status import Status
