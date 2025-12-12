@@ -16,6 +16,7 @@ export class Runner {
 
   @Column({
     nullable: true,
+    unique: true,
   })
   domain: string | null
 
@@ -33,16 +34,19 @@ export class Runner {
   apiKey: string
 
   @Column({
+    type: 'float',
     default: 0,
   })
   cpu: number
 
   @Column({
+    type: 'float',
     default: 0,
   })
   memoryGiB: number
 
   @Column({
+    type: 'float',
     default: 0,
   })
   diskGiB: number

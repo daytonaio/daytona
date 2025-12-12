@@ -40,7 +40,7 @@ import type { RunnerHealthcheck } from '../models'
 export const RunnerServiceApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
     /**
-     * Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
      * @summary Runner healthcheck
      * @param {RunnerHealthcheck} runnerHealthcheck
      * @param {*} [options] Override http request option.
@@ -91,7 +91,7 @@ export const RunnerServiceApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = RunnerServiceApiAxiosParamCreator(configuration)
   return {
     /**
-     * Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
      * @summary Runner healthcheck
      * @param {RunnerHealthcheck} runnerHealthcheck
      * @param {*} [options] Override http request option.
@@ -128,7 +128,7 @@ export const RunnerServiceApiFactory = function (
   const localVarFp = RunnerServiceApiFp(configuration)
   return {
     /**
-     * Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
      * @summary Runner healthcheck
      * @param {RunnerHealthcheck} runnerHealthcheck
      * @param {*} [options] Override http request option.
@@ -148,7 +148,7 @@ export const RunnerServiceApiFactory = function (
  */
 export class RunnerServiceApi extends BaseAPI {
   /**
-   * Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+   * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
    * @summary Runner healthcheck
    * @param {RunnerHealthcheck} runnerHealthcheck
    * @param {*} [options] Override http request option.

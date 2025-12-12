@@ -21,7 +21,11 @@ var _ MappedNullable = &RunnerHealthcheck{}
 // RunnerHealthcheck struct for RunnerHealthcheck
 type RunnerHealthcheck struct {
 	// Runner metrics
-	Metrics              *RunnerHealthMetrics `json:"metrics,omitempty"`
+	Metrics *RunnerHealthMetrics `json:"metrics,omitempty"`
+	// Runner domain
+	Domain *string `json:"domain,omitempty"`
+	// Runner proxy URL
+	ProxyUrl             *string `json:"proxyUrl,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -76,6 +80,70 @@ func (o *RunnerHealthcheck) SetMetrics(v RunnerHealthMetrics) {
 	o.Metrics = &v
 }
 
+// GetDomain returns the Domain field value if set, zero value otherwise.
+func (o *RunnerHealthcheck) GetDomain() string {
+	if o == nil || IsNil(o.Domain) {
+		var ret string
+		return ret
+	}
+	return *o.Domain
+}
+
+// GetDomainOk returns a tuple with the Domain field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthcheck) GetDomainOk() (*string, bool) {
+	if o == nil || IsNil(o.Domain) {
+		return nil, false
+	}
+	return o.Domain, true
+}
+
+// HasDomain returns a boolean if a field has been set.
+func (o *RunnerHealthcheck) HasDomain() bool {
+	if o != nil && !IsNil(o.Domain) {
+		return true
+	}
+
+	return false
+}
+
+// SetDomain gets a reference to the given string and assigns it to the Domain field.
+func (o *RunnerHealthcheck) SetDomain(v string) {
+	o.Domain = &v
+}
+
+// GetProxyUrl returns the ProxyUrl field value if set, zero value otherwise.
+func (o *RunnerHealthcheck) GetProxyUrl() string {
+	if o == nil || IsNil(o.ProxyUrl) {
+		var ret string
+		return ret
+	}
+	return *o.ProxyUrl
+}
+
+// GetProxyUrlOk returns a tuple with the ProxyUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthcheck) GetProxyUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.ProxyUrl) {
+		return nil, false
+	}
+	return o.ProxyUrl, true
+}
+
+// HasProxyUrl returns a boolean if a field has been set.
+func (o *RunnerHealthcheck) HasProxyUrl() bool {
+	if o != nil && !IsNil(o.ProxyUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetProxyUrl gets a reference to the given string and assigns it to the ProxyUrl field.
+func (o *RunnerHealthcheck) SetProxyUrl(v string) {
+	o.ProxyUrl = &v
+}
+
 func (o RunnerHealthcheck) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -88,6 +156,12 @@ func (o RunnerHealthcheck) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Metrics) {
 		toSerialize["metrics"] = o.Metrics
+	}
+	if !IsNil(o.Domain) {
+		toSerialize["domain"] = o.Domain
+	}
+	if !IsNil(o.ProxyUrl) {
+		toSerialize["proxyUrl"] = o.ProxyUrl
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -112,6 +186,8 @@ func (o *RunnerHealthcheck) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "metrics")
+		delete(additionalProperties, "domain")
+		delete(additionalProperties, "proxyUrl")
 		o.AdditionalProperties = additionalProperties
 	}
 

@@ -71,11 +71,11 @@ export interface RunnerHealthMetrics {
    * @type {number}
    * @memberof RunnerHealthMetrics
    */
-  ram: number
+  memoryGiB: number
   /**
    * Total disk space in GiB on the runner
    * @type {number}
    * @memberof RunnerHealthMetrics
    */
-  disk: number
+  diskGiB: number
 }

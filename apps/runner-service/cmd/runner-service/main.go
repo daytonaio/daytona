@@ -36,7 +36,7 @@ func main() {
 	log := logger.NewLogger()
 
 	log.Info("Starting Daytona Runner",
-		slog.String("version", "3"),
+		slog.String("version", "2"),
 		slog.String("type", "job-based"))
 
 	// Load configuration
@@ -52,7 +52,7 @@ func main() {
 		slog.Int("poll_limit", cfg.PollLimit),
 		slog.Duration("healthcheck_interval", cfg.HealthcheckInterval),
 		slog.Bool("otel_enabled", cfg.OtelEnabled),
-		slog.String("proxy_addr", cfg.ProxyAddr))
+		slog.Int("proxy_port", int(cfg.ProxyPort)))
 
 	// Initialize OpenTelemetry tracing if enabled
 	var tp trace.TracerProvider
@@ -130,7 +130,7 @@ func main() {
 
 	// Create proxy server
 	proxyServer := proxy.NewProxyServer(proxy.ProxyServerConfig{
-		Addr:         cfg.ProxyAddr,
+		Port:         cfg.ProxyPort,
 		Log:          log,
 		UseTLS:       cfg.ProxyTLSEnabled,
 		CertFile:     cfg.ProxyTLSCertFile,

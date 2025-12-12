@@ -340,6 +340,8 @@ export class RunnerService {
 
   async updateRunnerHealth(
     runnerId: string,
+    domain?: string,
+    proxyUrl?: string,
     metrics?: {
       currentCpuUsagePercentage: number
       currentMemoryUsagePercentage: number
@@ -349,8 +351,8 @@ export class RunnerService {
       currentAllocatedDiskGiB: number
       currentSnapshotCount: number
       cpu: number
-      ram: number
-      disk: number
+      memoryGiB: number
+      diskGiB: number
     },
   ): Promise<void> {
     const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
@@ -369,6 +371,14 @@ export class RunnerService {
       lastChecked: new Date(),
     }
 
+    if (domain) {
+      updateData.domain = domain
+    }
+
+    if (proxyUrl) {
+      updateData.proxyUrl = proxyUrl
+    }
+
     if (metrics) {
       updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
       updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
@@ -378,8 +388,8 @@ export class RunnerService {
       updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
       updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
       updateData.cpu = metrics.cpu
-      updateData.memoryGiB = metrics.ram
-      updateData.diskGiB = metrics.disk
+      updateData.memoryGiB = metrics.memoryGiB
+      updateData.diskGiB = metrics.diskGiB
 
       updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
         cpuUsage: updateData.currentCpuUsagePercentage,
@@ -388,9 +398,9 @@ export class RunnerService {
         allocatedCpu: updateData.currentAllocatedCpu,
         allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
         allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
-        runnerCpu: runner.cpu,
-        runnerMemoryGiB: runner.memoryGiB,
-        runnerDiskGiB: runner.diskGiB,
+        runnerCpu: updateData.cpu,
+        runnerMemoryGiB: updateData.memoryGiB,
+        runnerDiskGiB: updateData.diskGiB,
       })
     }
 

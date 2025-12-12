@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client_async.models.runner_health_metrics import RunnerHealthMetrics
 from typing import Optional, Set
@@ -29,8 +29,10 @@ class RunnerHealthcheck(BaseModel):
     RunnerHealthcheck
     """ # noqa: E501
     metrics: Optional[RunnerHealthMetrics] = Field(default=None, description="Runner metrics")
+    domain: Optional[StrictStr] = Field(default=None, description="Runner domain")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", alias="proxyUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["metrics"]
+    __properties: ClassVar[List[str]] = ["metrics", "domain", "proxyUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,7 +95,9 @@ class RunnerHealthcheck(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "metrics": RunnerHealthMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None
+            "metrics": RunnerHealthMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None,
+            "domain": obj.get("domain"),
+            "proxyUrl": obj.get("proxyUrl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

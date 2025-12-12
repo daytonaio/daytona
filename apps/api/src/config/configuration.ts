@@ -158,7 +158,7 @@ const configuration = {
     memory: parseInt(process.env.DEFAULT_RUNNER_MEMORY || '8', 10),
     disk: parseInt(process.env.DEFAULT_RUNNER_DISK || '50', 10),
     version: (process.env.DEFAULT_RUNNER_VERSION || '0') as '0' | '2',
-    name: process.env.DEFAULT_RUNNER_NAME || 'default',
+    name: process.env.DEFAULT_RUNNER_NAME,
   },
   runnerUsage: {
     declarativeBuildScoreThreshold: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),

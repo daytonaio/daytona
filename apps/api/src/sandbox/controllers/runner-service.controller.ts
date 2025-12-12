@@ -26,7 +26,7 @@ export class RunnerServiceController {
     summary: 'Runner healthcheck',
     operationId: 'runnerHealthcheck',
     description:
-      'Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.',
+      'Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.',
   })
   @ApiResponse({
     status: 200,
@@ -36,6 +36,11 @@ export class RunnerServiceController {
     @RunnerContextDecorator() runnerContext: RunnerContext,
     @Body() healthcheck: RunnerHealthcheckDto,
   ): Promise<void> {
-    await this.runnerService.updateRunnerHealth(runnerContext.runnerId, healthcheck.metrics)
+    await this.runnerService.updateRunnerHealth(
+      runnerContext.runnerId,
+      healthcheck.domain,
+      healthcheck.proxyUrl,
+      healthcheck.metrics,
+    )
   }
 }

@@ -56,7 +56,7 @@ class RunnerServiceApi:
     ) -> None:
         """Runner healthcheck
 
-        Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+        Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
 
         :param runner_healthcheck: (required)
         :type runner_healthcheck: RunnerHealthcheck
@@ -123,7 +123,7 @@ class RunnerServiceApi:
     ) -> ApiResponse[None]:
         """Runner healthcheck
 
-        Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+        Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
 
         :param runner_healthcheck: (required)
         :type runner_healthcheck: RunnerHealthcheck
@@ -190,7 +190,7 @@ class RunnerServiceApi:
     ) -> RESTResponseType:
         """Runner healthcheck
 
-        Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+        Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
 
         :param runner_healthcheck: (required)
         :type runner_healthcheck: RunnerHealthcheck

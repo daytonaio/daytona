@@ -24,7 +24,7 @@ type RunnerServiceAPI interface {
 	/*
 		RunnerHealthcheck Runner healthcheck
 
-		Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+		Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@return RunnerServiceAPIRunnerHealthcheckRequest
@@ -56,7 +56,7 @@ func (r RunnerServiceAPIRunnerHealthcheckRequest) Execute() (*http.Response, err
 /*
 RunnerHealthcheck Runner healthcheck
 
-Endpoint for version 3 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return RunnerServiceAPIRunnerHealthcheckRequest

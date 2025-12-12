@@ -2852,7 +2852,7 @@ paths:
         - runners
   /runner-service/healthcheck:
     post:
-      description: Endpoint for version 3 runners to send healthcheck and metrics.
+      description: Endpoint for version 2 runners to send healthcheck and metrics.
         Updates lastChecked timestamp and runner metrics.
       operationId: runnerHealthcheck
       parameters: []
@@ -10380,11 +10380,11 @@ components:
           description: Total CPU cores on the runner
           example: 8
           type: number
-        ram:
+        memoryGiB:
           description: Total RAM in GiB on the runner
           example: 16
           type: number
-        disk:
+        diskGiB:
           description: Total disk space in GiB on the runner
           example: 100
           type: number
@@ -10397,17 +10397,27 @@ components:
         - currentDiskUsagePercentage
         - currentMemoryUsagePercentage
         - currentSnapshotCount
-        - disk
-        - ram
+        - diskGiB
+        - memoryGiB
       type: object
     RunnerHealthcheck:
       example:
+        proxyUrl: http://proxy.daytona.example.com:8080
+        domain: runner-123.daytona.example.com
         metrics: ''
       properties:
         metrics:
           allOf:
             - $ref: '#/components/schemas/RunnerHealthMetrics'
           description: Runner metrics
+        domain:
+          description: Runner domain
+          example: runner-123.daytona.example.com
+          type: string
+        proxyUrl:
+          description: Runner proxy URL
+          example: http://proxy.daytona.example.com:8080
+          type: string
       type: object
     ProjectDirResponse:
       example:

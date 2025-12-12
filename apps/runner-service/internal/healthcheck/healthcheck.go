@@ -7,6 +7,7 @@ package healthcheck
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -78,8 +79,8 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 			CurrentAllocatedDiskGiB:      m.AllocatedDiskGiB,
 			CurrentSnapshotCount:         m.SnapshotCount,
 			Cpu:                          m.TotalCPU,
-			Ram:                          m.TotalRAMGiB,
-			Disk:                         m.TotalDiskGiB,
+			MemoryGiB:                    m.TotalRAMGiB,
+			DiskGiB:                      m.TotalDiskGiB,
 		}
 	}
 
@@ -88,6 +89,15 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	if metricsPtr != nil {
 		healthcheck.SetMetrics(*metricsPtr)
 	}
+
+	healthcheck.SetDomain(s.cfg.Domain)
+	proxyUrl := ""
+	if s.cfg.ProxyTLSEnabled {
+		proxyUrl = fmt.Sprintf("https://%s:%d", s.cfg.Domain, s.cfg.ProxyPort)
+	} else {
+		proxyUrl = fmt.Sprintf("http://%s:%d", s.cfg.Domain, s.cfg.ProxyPort)
+	}
+	healthcheck.SetProxyUrl(proxyUrl)
 
 	// Send healthcheck using the new RunnerServiceAPI
 	req := s.client.RunnerServiceAPI.RunnerHealthcheck(reqCtx).RunnerHealthcheck(*healthcheck)

@@ -18,6 +18,8 @@ type Config struct {
 	ApiUrl   string `envconfig:"DAYTONA_API_URL" validate:"required"`
 	ApiToken string `envconfig:"DAYTONA_RUNNER_TOKEN" validate:"required"`
 
+	Domain string `envconfig:"RUNNER_DOMAIN" validate:"required,hostname"`
+
 	// Job Polling Configuration
 	PollTimeout time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
 	PollLimit   int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
@@ -30,7 +32,7 @@ type Config struct {
 	OtelEnabled bool `envconfig:"OTEL_ENABLED" default:"false"`
 
 	// Proxy Configuration
-	ProxyAddr        string        `envconfig:"PROXY_ADDR" default:":8080"`
+	ProxyPort        uint          `envconfig:"PROXY_PORT" default:"8080"`
 	ProxyTLSEnabled  bool          `envconfig:"PROXY_TLS_ENABLED" default:"false"`
 	ProxyTLSCertFile string        `envconfig:"PROXY_TLS_CERT_FILE"`
 	ProxyTLSKeyFile  string        `envconfig:"PROXY_TLS_KEY_FILE"`

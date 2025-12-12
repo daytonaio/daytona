@@ -5,12 +5,11 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Migration1765538824750 implements MigrationInterface {
-  name = 'Migration1765538824750'
+export class Migration1765544432484 implements MigrationInterface {
+  name = 'Migration1765544432484'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "domain" DROP NOT NULL`)
-    await queryRunner.query(`ALTER TABLE "runner" DROP CONSTRAINT "UQ_330d74ac3d0e349b4c73c62ad6d"`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "apiUrl" DROP NOT NULL`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "proxyUrl" DROP NOT NULL`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "cpu" SET DEFAULT '0'`)
@@ -28,7 +27,6 @@ export class Migration1765538824750 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "cpu" DROP DEFAULT`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "proxyUrl" SET NOT NULL`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "apiUrl" SET NOT NULL`)
-    await queryRunner.query(`ALTER TABLE "runner" ADD CONSTRAINT "UQ_330d74ac3d0e349b4c73c62ad6d" UNIQUE ("domain")`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "domain" SET NOT NULL`)
   }
 }

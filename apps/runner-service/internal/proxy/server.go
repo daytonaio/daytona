@@ -5,6 +5,7 @@ package proxy
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
@@ -19,7 +20,7 @@ type ProxyCacheItem struct {
 }
 
 type ProxyServer struct {
-	addr         string
+	port         uint
 	mux          *http.ServeMux
 	dockerClient *client.Client
 	cache        *ttlcache.Cache[string, *ProxyCacheItem]
@@ -35,7 +36,7 @@ type ProxyServer struct {
 }
 
 type ProxyServerConfig struct {
-	Addr         string
+	Port         uint
 	Log          *slog.Logger
 	UseTLS       bool
 	CertFile     string
@@ -79,7 +80,7 @@ func NewProxyServer(config ProxyServerConfig) *ProxyServer {
 	log := config.Log.With("service", "proxy")
 	s := &ProxyServer{
 		cache:        cache,
-		addr:         config.Addr,
+		port:         config.Port,
 		transport:    transport,
 		log:          log,
 		useTLS:       config.UseTLS,
@@ -101,11 +102,11 @@ func NewProxyServer(config ProxyServerConfig) *ProxyServer {
 
 func (s *ProxyServer) Start() error {
 	s.server = &http.Server{
-		Addr:    s.addr,
+		Addr:    fmt.Sprintf(":%d", s.port),
 		Handler: s.mux,
 	}
 
-	s.log.Info("Starting proxy server", "addr", s.addr)
+	s.log.Info("Starting proxy server", "port", s.port)
 	if s.useTLS {
 		return s.server.ListenAndServeTLS(s.certFile, s.keyFile)
 	}

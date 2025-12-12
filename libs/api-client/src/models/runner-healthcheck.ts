@@ -28,4 +28,16 @@ export interface RunnerHealthcheck {
    * @memberof RunnerHealthcheck
    */
   metrics?: RunnerHealthMetrics
+  /**
+   * Runner domain
+   * @type {string}
+   * @memberof RunnerHealthcheck
+   */
+  domain?: string
+  /**
+   * Runner proxy URL
+   * @type {string}
+   * @memberof RunnerHealthcheck
+   */
+  proxyUrl?: string
 }

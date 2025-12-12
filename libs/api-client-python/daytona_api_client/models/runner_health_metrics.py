@@ -35,10 +35,10 @@ class RunnerHealthMetrics(BaseModel):
     current_allocated_disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Currently allocated disk in GiB", alias="currentAllocatedDiskGiB")
     current_snapshot_count: Union[StrictFloat, StrictInt] = Field(description="Number of snapshots currently stored", alias="currentSnapshotCount")
     cpu: Union[StrictFloat, StrictInt] = Field(description="Total CPU cores on the runner")
-    ram: Union[StrictFloat, StrictInt] = Field(description="Total RAM in GiB on the runner")
-    disk: Union[StrictFloat, StrictInt] = Field(description="Total disk space in GiB on the runner")
+    memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total RAM in GiB on the runner", alias="memoryGiB")
+    disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total disk space in GiB on the runner", alias="diskGiB")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "cpu", "ram", "disk"]
+    __properties: ClassVar[List[str]] = ["currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "cpu", "memoryGiB", "diskGiB"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -106,8 +106,8 @@ class RunnerHealthMetrics(BaseModel):
             "currentAllocatedDiskGiB": obj.get("currentAllocatedDiskGiB"),
             "currentSnapshotCount": obj.get("currentSnapshotCount"),
             "cpu": obj.get("cpu"),
-            "ram": obj.get("ram"),
-            "disk": obj.get("disk")
+            "memoryGiB": obj.get("memoryGiB"),
+            "diskGiB": obj.get("diskGiB")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

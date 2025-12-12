@@ -69,14 +69,14 @@ export class RunnerHealthMetricsDto {
     example: 16,
   })
   @IsNumber()
-  ram: number
+  memoryGiB: number
 
   @ApiProperty({
     description: 'Total disk space in GiB on the runner',
     example: 100,
   })
   @IsNumber()
-  disk: number
+  diskGiB: number
 }
 
 @ApiSchema({ name: 'RunnerHealthcheck' })
@@ -87,4 +87,18 @@ export class RunnerHealthcheckDto {
   })
   @IsOptional()
   metrics?: RunnerHealthMetricsDto
+
+  @ApiPropertyOptional({
+    description: 'Runner domain',
+    example: 'runner-123.daytona.example.com',
+  })
+  @IsOptional()
+  domain?: string
+
+  @ApiPropertyOptional({
+    description: 'Runner proxy URL',
+    example: 'http://proxy.daytona.example.com:8080',
+  })
+  @IsOptional()
+  proxyUrl?: string
 }
