@@ -14,6 +14,9 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
+import type { RegionType } from './region-type'
+// May contain unused imports in some cases
+// @ts-ignore
 import type { RunnerState } from './runner-state'
 // May contain unused imports in some cases
 // @ts-ignore
@@ -193,4 +196,10 @@ export interface RunnerFull {
    * @memberof RunnerFull
    */
   apiKey: string
+  /**
+   * The region type of the runner
+   * @type {RegionType}
+   * @memberof RunnerFull
+   */
+  regionType?: RegionType
 }

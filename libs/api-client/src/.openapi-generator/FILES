@@ -1,6 +1,7 @@
 .gitignore
 .npmignore
 api.ts
+api/admin-api.ts
 api/api-keys-api.ts
 api/audit-api.ts
 api/config-api.ts
@@ -24,6 +25,7 @@ configuration.ts
 git_push.sh
 index.ts
 models/account-provider.ts
+models/admin-create-runner.ts
 models/announcement.ts
 models/api-key-list.ts
 models/api-key-response.ts
