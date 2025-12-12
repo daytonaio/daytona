@@ -12,19 +12,13 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"syscall"
-	"time"
 
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
-	"github.com/shirou/gopsutil/v4/process"
 
 	log "github.com/sirupsen/logrus"
 )
-
-const TERMINATION_GRACE_PERIOD = 5 * time.Second
-const TERMINATION_CHECK_INTERVAL = 100 * time.Millisecond
 
 var sessions = map[string]*session{}
 
@@ -293,80 +287,6 @@ func (s *SessionController) terminateSession(ctx context.Context, session *sessi
 		return nil
 	}
 
-	pid := session.cmd.Process.Pid
-
-	_ = s.signalProcessTree(pid, syscall.SIGTERM)
-
-	err := session.cmd.Process.Signal(syscall.SIGTERM)
-	if err != nil {
-		// If SIGTERM fails, try SIGKILL immediately
-		log.Warnf("SIGTERM failed for session %s, trying SIGKILL: %v", session.id, err)
-		_ = s.signalProcessTree(pid, syscall.SIGKILL)
-		return session.cmd.Process.Kill()
-	}
-
-	// Wait for graceful termination
-	if s.waitForTermination(ctx, pid, TERMINATION_GRACE_PERIOD, TERMINATION_CHECK_INTERVAL) {
-		log.Debugf("Session %s terminated gracefully", session.id)
-		return nil
-	}
-
-	log.Debugf("Session %s timeout, sending SIGKILL to process tree", session.id)
-	_ = s.signalProcessTree(pid, syscall.SIGKILL)
-	return session.cmd.Process.Kill()
-}
-
-func (s *SessionController) signalProcessTree(pid int, sig syscall.Signal) error {
-	parent, err := process.NewProcess(int32(pid))
-	if err != nil {
-		return err
-	}
-
-	descendants, err := parent.Children()
-	if err != nil {
-		return err
-	}
-
-	for _, child := range descendants {
-		childPid := int(child.Pid)
-		_ = s.signalProcessTree(childPid, sig)
-	}
-
-	for _, child := range descendants {
-		// Convert to OS process to send custom signal
-		if childProc, err := os.FindProcess(int(child.Pid)); err == nil {
-			_ = childProc.Signal(sig)
-		}
-	}
-
-	return nil
-}
-
-func (s *SessionController) waitForTermination(ctx context.Context, pid int, timeout, interval time.Duration) bool {
-	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-timeoutCtx.Done():
-			return false
-		case <-ticker.C:
-			parent, err := process.NewProcess(int32(pid))
-			if err != nil {
-				// Process doesn't exist anymore
-				return true
-			}
-			children, err := parent.Children()
-			if err != nil {
-				// Unable to enumerate children - likely process is dying/dead
-				return true
-			}
-			if len(children) == 0 {
-				return true
-			}
-		}
-	}
+	log.Debugf("Terminating session %s (PID: %d)", session.id, session.cmd.Process.Pid)
+	return common.TerminateProcessTreeGracefully(ctx, session.cmd.Process, nil)
 }

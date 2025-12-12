@@ -5,14 +5,17 @@ package process
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"os/exec"
+	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 // ExecuteCommand godoc
@@ -40,65 +43,88 @@ func ExecuteCommand(c *gin.Context) {
 		return
 	}
 
-	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-	if request.Cwd != nil {
-		cmd.Dir = *request.Cwd
-	}
-
 	// set maximum execution time
 	timeout := 360 * time.Second
 	if request.Timeout != nil && *request.Timeout > 0 {
 		timeout = time.Duration(*request.Timeout) * time.Second
 	}
 
-	timeoutReached := false
-	timer := time.AfterFunc(timeout, func() {
-		timeoutReached = true
-		if cmd.Process != nil {
-			// kill the process group
-			err := cmd.Process.Kill()
-			if err != nil {
-				log.Error(err)
+	// Create a context with timeout
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...)
+	if request.Cwd != nil {
+		cmd.Dir = *request.Cwd
+	}
+
+	// Set up process group so we can kill all child processes on timeout
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
+	var outputBuf bytes.Buffer
+	cmd.Stdout = &outputBuf
+	cmd.Stderr = &outputBuf
+
+	if err := cmd.Start(); err != nil {
+		c.JSON(http.StatusOK, ExecuteResponse{
+			ExitCode: -1,
+			Result:   err.Error(),
+		})
+		return
+	}
+
+	// Wait for command
+	done := make(chan error, 1)
+	go func() {
+		done <- cmd.Wait()
+	}()
+
+	// Wait for either completion or context timeout
+	select {
+	case <-ctx.Done():
+		// Context timed out - gracefully terminate the process tree
+		err := common.TerminateProcessTreeGracefully(context.Background(), cmd.Process, util.Pointer(2*time.Second))
+		if err != nil {
+			log.Errorf("Failed to terminate process group: %v", err)
+		}
+		<-done // Wait for process cleanup
+		c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
+		return
+	case err := <-done:
+		// Command completed normally
+		output := outputBuf.Bytes()
+		if err != nil {
+			if exitError, ok := err.(*exec.ExitError); ok {
+				exitCode := exitError.ExitCode()
+				c.JSON(http.StatusOK, ExecuteResponse{
+					ExitCode: exitCode,
+					Result:   string(output),
+				})
 				return
 			}
-		}
-	})
-	defer timer.Stop()
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		if timeoutReached {
-			c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
-			return
-		}
-		if exitError, ok := err.(*exec.ExitError); ok {
-			exitCode := exitError.ExitCode()
 			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: exitCode,
+				ExitCode: -1,
 				Result:   string(output),
 			})
 			return
 		}
+
+		if cmd.ProcessState == nil {
+			c.JSON(http.StatusOK, ExecuteResponse{
+				ExitCode: -1,
+				Result:   string(output),
+			})
+			return
+		}
+
+		exitCode := cmd.ProcessState.ExitCode()
 		c.JSON(http.StatusOK, ExecuteResponse{
-			ExitCode: -1,
+			ExitCode: exitCode,
 			Result:   string(output),
 		})
-		return
 	}
-
-	if cmd.ProcessState == nil {
-		c.JSON(http.StatusOK, ExecuteResponse{
-			ExitCode: -1,
-			Result:   string(output),
-		})
-		return
-	}
-
-	exitCode := cmd.ProcessState.ExitCode()
-	c.JSON(http.StatusOK, ExecuteResponse{
-		ExitCode: exitCode,
-		Result:   string(output),
-	})
 }
 
 // parseCommand splits a command string properly handling quotes
