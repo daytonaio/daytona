@@ -309,7 +309,7 @@ const Snapshots: React.FC = () => {
     // Optimistically update the snapshot state
     setSnapshotsData((prev) => ({
       ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.ACTIVE } : i)),
+      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.PENDING } : i)),
     }))
 
     try {

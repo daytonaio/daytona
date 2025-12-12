@@ -544,8 +544,7 @@ export class SnapshotService {
         pendingSnapshotCountIncrement = activatedSnapshotCount
       }
 
-      snapshot.state = SnapshotState.ACTIVE
-      snapshot.lastUsedAt = new Date()
+      snapshot.state = SnapshotState.PENDING
       return await this.snapshotRepository.save(snapshot)
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
