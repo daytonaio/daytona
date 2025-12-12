@@ -16,7 +16,7 @@ import (
 
 func (e *Executor) destroySandbox(ctx context.Context, job *apiclient.Job) error {
 	sandboxId := job.GetResourceId()
-	e.log.Info("destroying sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
+	e.log.Debug("destroying sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
 
 	payload := job.GetPayload()
 	cpu, _ := payload["cpu"].(float64)

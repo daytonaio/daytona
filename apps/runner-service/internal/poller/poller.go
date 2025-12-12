@@ -54,7 +54,7 @@ func (s *Service) Start(ctx context.Context) {
 
 			// Process jobs
 			if len(jobs) > 0 {
-				s.log.Info("Received jobs", slog.Int("count", len(jobs)))
+				s.log.Debug("Received jobs", slog.Int("count", len(jobs)))
 				for _, job := range jobs {
 					// Execute job in goroutine for parallel processing
 					go s.executor.Execute(ctx, &job)

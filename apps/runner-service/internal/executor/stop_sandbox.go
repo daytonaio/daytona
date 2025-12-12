@@ -16,7 +16,7 @@ import (
 
 func (e *Executor) stopSandbox(ctx context.Context, job *apiclient.Job) error {
 	sandboxId := job.GetResourceId()
-	e.log.Info("stopping sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
+	e.log.Debug("stopping sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
 
 	timeout := 10
 	if err := e.dockerClient.ContainerStop(ctx, sandboxId, container.StopOptions{

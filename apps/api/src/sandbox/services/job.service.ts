@@ -63,7 +63,7 @@ export class JobService {
     // Log with context-specific info
     const contextInfo = resourceId ? `${resourceType} ${resourceId}` : 'N/A'
 
-    this.logger.log(`Created job ${savedJob.id} of type ${type} for ${contextInfo} on runner ${runnerId}`)
+    this.logger.debug(`Created job ${savedJob.id} of type ${type} for ${contextInfo} on runner ${runnerId}`)
 
     // Notify runner via Redis - happens outside transaction
     // If transaction rolls back, notification is harmless (runner will poll and find nothing)
@@ -162,7 +162,7 @@ export class JobService {
         claimedJobs = await this.claimPendingJobs(runnerId, limit)
 
         if (claimedJobs.length > 0) {
-          this.logger.log(`Claimed ${claimedJobs.length} jobs after Redis notification for runner ${runnerId}`)
+          this.logger.debug(`Claimed ${claimedJobs.length} jobs after Redis notification for runner ${runnerId}`)
           return claimedJobs
         }
 
@@ -191,7 +191,7 @@ export class JobService {
     claimedJobs = await this.claimPendingJobs(runnerId, limit)
 
     if (claimedJobs.length > 0) {
-      this.logger.log(`Claimed ${claimedJobs.length} pending jobs in fallback for runner ${runnerId}`)
+      this.logger.debug(`Claimed ${claimedJobs.length} pending jobs in fallback for runner ${runnerId}`)
     }
 
     return claimedJobs
@@ -217,7 +217,7 @@ export class JobService {
     }
 
     const updatedJob = await this.jobRepository.save(job)
-    this.logger.log(`Updated job ${jobId} status to ${status}`)
+    this.logger.debug(`Updated job ${jobId} status to ${status}`)
 
     // Handle job completion for v2 runners - update sandbox/snapshot/backup state
     if (status === JobStatus.COMPLETED || status === JobStatus.FAILED) {
@@ -397,7 +397,7 @@ export class JobService {
     }
 
     if (claimedJobs.length > 0) {
-      this.logger.log(`Claimed ${claimedJobs.length} existing pending jobs for runner ${runnerId}`)
+      this.logger.debug(`Claimed ${claimedJobs.length} existing pending jobs for runner ${runnerId}`)
     }
 
     return claimedJobs

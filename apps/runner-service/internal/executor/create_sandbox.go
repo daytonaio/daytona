@@ -24,7 +24,7 @@ import (
 
 func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error {
 	sandboxId := job.GetResourceId()
-	e.log.Info("creating sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
+	e.log.Debug("creating sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
 
 	// Parse payload
 	payload := job.GetPayload()
@@ -86,7 +86,7 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 	}
 	if len(imageExists) == 0 {
 		// Pull image
-		e.log.Info("pulling image", "image", snapshot)
+		e.log.Debug("pulling image", "image", snapshot)
 		reader, err := e.dockerClient.ImagePull(ctx, snapshot, image.PullOptions{RegistryAuth: authStr})
 		if err != nil {
 			return fmt.Errorf("pull image: %w", err)
@@ -100,7 +100,7 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 		}
 		reader.Close()
 	} else {
-		e.log.Info("image exists", "image", snapshot)
+		e.log.Debug("image exists", "image", snapshot)
 	}
 
 	// Inspect image to get working directory
@@ -116,7 +116,7 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 		envMap["DAYTONA_USER_HOME_AS_WORKDIR"] = "true"
 	}
 
-	e.log.Info("container config prepared",
+	e.log.Debug("container config prepared",
 		"entrypoint", DAEMON_PATH,
 		"cmd", entrypointStr,
 		"working_dir", workingDir)
@@ -161,14 +161,14 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 		return fmt.Errorf("create container: %w", err)
 	}
 
-	e.log.Info("container created", "container_id", resp.ID[:12])
+	e.log.Debug("container created", "container_id", resp.ID[:12])
 
 	// Start container
 	if err := e.dockerClient.ContainerStart(ctx, sandboxId, container.StartOptions{}); err != nil {
 		return fmt.Errorf("start container: %w", err)
 	}
 
-	e.log.Info("container started", "sandbox_id", sandboxId)
+	e.log.Debug("container started", "sandbox_id", sandboxId)
 
 	// Get container IP for daemon health check
 	containerInfo, err := e.dockerClient.ContainerInspect(ctx, sandboxId)
@@ -190,13 +190,13 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 	// Daemon is the entrypoint, so it's already started with the container
 
 	// Wait for daemon to be ready
-	e.log.Info("waiting for daemon to be ready", "sandbox_id", sandboxId, "ip", containerIP)
+	e.log.Debug("waiting for daemon to be ready", "sandbox_id", sandboxId, "ip", containerIP)
 	if err := e.waitForDaemonRunning(ctx, containerIP, 10*time.Second); err != nil {
 		e.log.Error("daemon failed to start", "error", err)
 		return fmt.Errorf("daemon not ready: %w", err)
 	}
 
-	e.log.Info("daemon is ready", "sandbox_id", sandboxId)
+	e.log.Debug("daemon is ready", "sandbox_id", sandboxId)
 
 	// Update allocations
 	e.collector.IncrementAllocations(float32(cpu), float32(mem), 0)
