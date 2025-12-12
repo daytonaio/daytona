@@ -16,6 +16,7 @@ import {
   HttpCode,
   NotFoundException,
   ForbiddenException,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { RunnerService } from '../services/runner.service'
@@ -144,28 +145,10 @@ export class RunnerController {
   @ApiResponse({
     status: 200,
     description: 'Runner info',
-    type: RunnerDto,
+    type: RunnerFullDto,
   })
-  async getInfoForAuthenticatedRunner(@RunnerContextDecorator() runnerContext: RunnerContext): Promise<RunnerDto> {
-    return RunnerDto.fromRunner(runnerContext.runner)
-  }
-
-  @Get()
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'List all runners',
-    operationId: 'listRunners',
-  })
-  @ApiResponse({
-    status: 200,
-    type: [RunnerDto],
-  })
-  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard)
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
-  async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
-    return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
+  async getInfoForAuthenticatedRunner(@RunnerContextDecorator() runnerContext: RunnerContext): Promise<RunnerFullDto> {
+    return this.runnerService.findOneFullOrFail(runnerContext.runnerId)
   }
 
   @Get(':id')
@@ -186,9 +169,32 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
-  async getRunnerById(@Param('id') id: string): Promise<RunnerDto> {
+  async getRunnerById(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerDto> {
     const runner = await this.runnerService.findOne(id)
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
     return RunnerDto.fromRunner(runner)
+  }
+
+  @Get()
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'List all runners',
+    operationId: 'listRunners',
+  })
+  @ApiResponse({
+    status: 200,
+    type: [RunnerDto],
+  })
+  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
+  @UseGuards(OrganizationResourceActionGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
+    return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
   }
 
   @Patch(':id/scheduling')
@@ -221,7 +227,7 @@ export class RunnerController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async updateSchedulingStatus(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body('unschedulable') unschedulable: boolean,
   ): Promise<RunnerDto> {
     const updatedRunner = await this.runnerService.updateSchedulingStatus(id, unschedulable)
@@ -251,7 +257,7 @@ export class RunnerController {
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.runnerService.remove(id)
   }
 
@@ -267,8 +273,13 @@ export class RunnerController {
   })
   @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, SandboxAccessGuard]))
   @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
-  async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerFullDto> {
+  async getRunnerBySandboxId(@Param('sandboxId', ParseUUIDPipe) sandboxId: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
     return RunnerFullDto.fromRunner(runner)
   }
 

@@ -7307,6 +7307,139 @@ paths:
       summary: Set default registry
       tags:
         - docker-registry
+  /admin/runners:
+    get:
+      operationId: adminListRunners
+      parameters:
+        - description: Filter runners by region ID
+          explode: true
+          in: query
+          name: regionId
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RunnerFull'
+                type: array
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all runners
+      tags:
+        - admin
+    post:
+      operationId: adminCreateRunner
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateRunner'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateRunnerResponse'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create runner
+      tags:
+        - admin
+  /admin/runners/{id}:
+    delete:
+      operationId: adminDeleteRunner
+      parameters:
+        - description: Runner ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete runner
+      tags:
+        - admin
+    get:
+      operationId: adminGetRunnerById
+      parameters:
+        - description: Runner ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunnerFull'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get runner by ID
+      tags:
+        - admin
+  /admin/runners/{id}/scheduling:
+    patch:
+      operationId: adminUpdateRunnerScheduling
+      parameters:
+        - explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunnerFull'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update runner scheduling status
+      tags:
+        - admin
   /webhooks/organizations/{organizationId}/app-portal-access:
     post:
       operationId: WebhookController_getAppPortalAccess
@@ -12372,6 +12505,48 @@ components:
         - name
         - url
         - username
+      type: object
+    AdminCreateRunner:
+      example:
+        apiUrl: apiUrl
+        apiKey: apiKey
+        regionId: regionId
+        proxyUrl: proxyUrl
+        domain: domain
+        name: name
+        class: small
+        version: version
+      properties:
+        domain:
+          type: string
+        apiUrl:
+          type: string
+        proxyUrl:
+          type: string
+        regionId:
+          type: string
+        name:
+          type: string
+        apiKey:
+          type: string
+        class:
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
+        version:
+          type: string
+      required:
+        - apiKey
+        - apiUrl
+        - class
+        - domain
+        - name
+        - proxyUrl
+        - regionId
+        - version
       type: object
     WebhookAppPortalAccess:
       example:

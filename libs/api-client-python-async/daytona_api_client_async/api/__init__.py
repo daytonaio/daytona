@@ -2,6 +2,7 @@
 
 # import apis into api package
 from daytona_api_client_async.api.health_api import HealthApi
+from daytona_api_client_async.api.admin_api import AdminApi
 from daytona_api_client_async.api.api_keys_api import ApiKeysApi
 from daytona_api_client_async.api.audit_api import AuditApi
 from daytona_api_client_async.api.config_api import ConfigApi

@@ -42,6 +42,7 @@ import { RunnerEvents } from '../constants/runner-events'
 import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
+import { RunnerFullDto } from '../dto/runner-full.dto'
 
 @Injectable()
 export class RunnerService {
@@ -117,9 +118,18 @@ export class RunnerService {
     }
   }
 
-  async findAll(): Promise<RunnerDto[]> {
+  async findAllFull(): Promise<RunnerFullDto[]> {
     const runners = await this.runnerRepository.find()
-    return runners.map(RunnerDto.fromRunner)
+
+    const regionIds = new Set(runners.map((runner) => runner.region))
+    const regions = await this.regionService.findByIds(Array.from(regionIds))
+
+    const regionTypeMap = new Map<string, RegionType>()
+    regions.forEach((region) => {
+      regionTypeMap.set(region.id, region.regionType)
+    })
+
+    return runners.map((runner) => RunnerFullDto.fromRunner(runner, regionTypeMap.get(runner.region)))
   }
 
   async findAllByRegion(regionId: string): Promise<RunnerDto[]> {
@@ -130,6 +140,18 @@ export class RunnerService {
     })
 
     return runners.map(RunnerDto.fromRunner)
+  }
+
+  async findAllByRegionFull(regionId: string): Promise<RunnerFullDto[]> {
+    const runners = await this.runnerRepository.find({
+      where: {
+        region: regionId,
+      },
+    })
+
+    const region = await this.regionService.findOne(regionId)
+
+    return runners.map((runner) => RunnerFullDto.fromRunner(runner, region?.regionType))
   }
 
   async findAllByOrganization(organizationId: string, regionType?: RegionType): Promise<RunnerDto[]> {
@@ -155,6 +177,17 @@ export class RunnerService {
 
   async findOne(id: string): Promise<Runner | null> {
     return this.runnerRepository.findOneBy({ id })
+  }
+
+  async findOneFullOrFail(id: string): Promise<RunnerFullDto> {
+    const runner = await this.findOne(id)
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    const region = await this.regionService.findOne(runner.region)
+
+    return RunnerFullDto.fromRunner(runner, region?.regionType)
   }
 
   async findOneByDomain(domain: string): Promise<Runner | null> {
