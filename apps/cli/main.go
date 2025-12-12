@@ -4,7 +4,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -69,6 +71,15 @@ func main() {
 
 	err := rootCmd.Execute()
 	if err != nil {
+		errStr := err.Error()
+		// Check if it's an unknown command error (Cobra includes suggestions)
+		if strings.Contains(errStr, "unknown command") {
+			// Print the error message cleanly to stderr
+			fmt.Fprintln(os.Stderr, errStr)
+			fmt.Fprintln(os.Stderr, "\nRun 'daytona --help' for usage.")
+			os.Exit(1)
+		}
+		// For other errors, use the standard logging
 		log.Fatal(err)
 	}
 }
