@@ -32,29 +32,7 @@ func (e *Executor) startSandbox(ctx context.Context, job *apiclient.Job) error {
 		}
 		e.log.Info("container started", "sandbox_id", sandboxId)
 
-		// Start Daytona daemon inside the container
-		daemonCmd := "/usr/local/bin/daytona"
-		execConfig := container.ExecOptions{
-			Cmd:          []string{"sh", "-c", daemonCmd},
-			AttachStdout: true,
-			AttachStderr: true,
-			Detach:       true, // Run in background
-		}
-
-		execResp, err := e.dockerClient.ContainerExecCreate(ctx, sandboxId, execConfig)
-		if err != nil {
-			e.log.Error("failed to create daemon exec", "error", err)
-			return fmt.Errorf("create daemon exec: %w", err)
-		}
-
-		if err := e.dockerClient.ContainerExecStart(ctx, execResp.ID, container.ExecStartOptions{Detach: true}); err != nil {
-			e.log.Error("failed to start daemon", "error", err)
-			return fmt.Errorf("start daemon: %w", err)
-		}
-
-		e.log.Info("daemon exec started", "sandbox_id", sandboxId)
-
-		// Re-inspect to get updated network info
+		// Re-inspect to get updated network info and entrypoint
 		containerInfo, err = e.dockerClient.ContainerInspect(ctx, sandboxId)
 		if err != nil {
 			return fmt.Errorf("inspect container after start: %w", err)

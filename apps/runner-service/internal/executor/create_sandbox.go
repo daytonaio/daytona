@@ -103,15 +103,33 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 		e.log.Info("image exists", "image", snapshot)
 	}
 
-	// Prepare container config
+	// Inspect image to get working directory
+	imageInspect, err := e.dockerClient.ImageInspect(ctx, snapshot)
+	if err != nil {
+		return fmt.Errorf("inspect image: %w", err)
+	}
+
+	workingDir := imageInspect.Config.WorkingDir
+
+	// Add environment variable if no working dir
+	if workingDir == "" {
+		envMap["DAYTONA_USER_HOME_AS_WORKDIR"] = "true"
+	}
+
+	e.log.Info("container config prepared",
+		"entrypoint", DAEMON_PATH,
+		"cmd", entrypointStr,
+		"working_dir", workingDir)
+
+	// Prepare container config with daemon as entrypoint
+	// The payload entrypoint is passed as CMD to the daemon
 	containerConfig := &container.Config{
 		Image:      snapshot,
-		Entrypoint: entrypointStr,
+		Entrypoint: []string{DAEMON_PATH},
+		Cmd:        entrypointStr,
+		WorkingDir: workingDir,
 		Env:        envMapToSlice(envMap),
 		Labels:     labelsMap,
-		// User and WorkingDir are not set initially - the daemon/entrypoint will create the user
-		// WorkingDir: fmt.Sprintf("/home/%s", osUser),
-		// User:       osUser,
 	}
 
 	// Prepare binds - mount daemon binary
@@ -152,28 +170,6 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 
 	e.log.Info("container started", "sandbox_id", sandboxId)
 
-	// Start Daytona daemon inside the container
-	daemonCmd := "/usr/local/bin/daytona"
-	execConfig := container.ExecOptions{
-		Cmd:          []string{"sh", "-c", daemonCmd},
-		AttachStdout: true,
-		AttachStderr: true,
-		Detach:       true, // Run in background
-	}
-
-	execResp, err := e.dockerClient.ContainerExecCreate(ctx, sandboxId, execConfig)
-	if err != nil {
-		e.log.Error("failed to create daemon exec", "error", err)
-		return fmt.Errorf("create daemon exec: %w", err)
-	}
-
-	if err := e.dockerClient.ContainerExecStart(ctx, execResp.ID, container.ExecStartOptions{Detach: true}); err != nil {
-		e.log.Error("failed to start daemon", "error", err)
-		return fmt.Errorf("start daemon: %w", err)
-	}
-
-	e.log.Info("daemon exec started", "sandbox_id", sandboxId)
-
 	// Get container IP for daemon health check
 	containerInfo, err := e.dockerClient.ContainerInspect(ctx, sandboxId)
 	if err != nil {
@@ -190,6 +186,8 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 	if containerIP == "" {
 		return fmt.Errorf("no IP address found for container")
 	}
+
+	// Daemon is the entrypoint, so it's already started with the container
 
 	// Wait for daemon to be ready
 	e.log.Info("waiting for daemon to be ready", "sandbox_id", sandboxId, "ip", containerIP)
