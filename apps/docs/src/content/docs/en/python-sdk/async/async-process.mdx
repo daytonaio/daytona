@@ -208,6 +208,30 @@ for cmd in session.commands:
     print(f"Command: {cmd.command}")
 ```
 
+#### AsyncProcess.get\_entrypoint\_session
+
+```python
+@intercept_errors(message_prefix="Failed to get sandbox entrypoint session: ")
+async def get_entrypoint_session() -> Session
+```
+
+Gets the sandbox entrypoint session.
+
+**Returns**:
+
+- `Session` - Session information including:
+  - session_id: The session's unique identifier
+  - commands: List of commands executed in the session
+  
+
+**Example**:
+
+```python
+session = await sandbox.process.get_entrypoint_session()
+for cmd in session.commands:
+    print(f"Command: {cmd.command}")
+```
+
 #### AsyncProcess.get\_session\_command
 
 ```python

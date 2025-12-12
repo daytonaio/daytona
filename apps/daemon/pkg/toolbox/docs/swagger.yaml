@@ -2481,6 +2481,40 @@ paths:
       summary: Execute command in session
       tags:
         - process
+  /process/session/entrypoint:
+    get:
+      description: Get details of an entrypoint session including its commands
+      operationId: GetEntrypointSession
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Session'
+      summary: Get entrypoint session details
+      tags:
+        - process
+  /process/session/entrypoint/logs:
+    get:
+      description: Get logs for a sandbox entrypoint session. Supports both HTTP and
+        WebSocket streaming.
+      operationId: GetEntrypointLogs
+      parameters:
+        - description: Follow logs in real-time (WebSocket only)
+          in: query
+          name: follow
+          type: boolean
+      produces:
+        - text/plain
+      responses:
+        '200':
+          description: Entrypoint log content
+          schema:
+            type: string
+      summary: Get entrypoint logs
+      tags:
+        - process
   /user-home-dir:
     get:
       description: Get the current user home directory path.

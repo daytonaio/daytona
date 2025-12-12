@@ -4,6 +4,7 @@
 package session
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -63,6 +64,11 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 //	@id				DeleteSession
 func (s *SessionController) DeleteSession(c *gin.Context) {
 	sessionId := c.Param("sessionId")
+
+	if sessionId == util.EntrypointSessionID {
+		c.Error(common_errors.NewBadRequestError(errors.New("can't delete entrypoint session")))
+		return
+	}
 
 	err := s.sessionService.Delete(c.Request.Context(), sessionId)
 	if err != nil {
@@ -144,4 +150,24 @@ func (s *SessionController) GetSessionCommand(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, CommandToDTO(command))
+}
+
+// GetEntrypointSession godoc
+//
+//	@Summary		Get entrypoint session details
+//	@Description	Get details of an entrypoint session including its commands
+//	@Tags			process
+//	@Produce		json
+//	@Success		200	{object}	SessionDTO
+//	@Router			/process/session/entrypoint [get]
+//
+//	@id				GetEntrypointSession
+func (s *SessionController) GetEntrypointSession(c *gin.Context) {
+	session, err := s.sessionService.Get(util.EntrypointSessionID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, SessionToDTO(session))
 }
