@@ -9,36 +9,67 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gin-gonic/gin"
 )
 
 // SearchFiles godoc
 //
 //	@Summary		Search files by pattern
-//	@Description	Search for files matching a specific pattern in a directory
+//	@Description	Search for files matching a specific pattern in a directory. Supports standard glob patterns including * (match within directory), ** (recursive directory traversal), ? (single character wildcard), and {a,b} (group patterns).
 //	@Tags			file-system
 //	@Produce		json
 //	@Param			path	query		string	true	"Directory path to search in"
-//	@Param			pattern	query		string	true	"File pattern to match (e.g., *.txt, *.go)"
+//	@Param			pattern	query		string	true	"Glob pattern to match (e.g., *.txt, **/*.go, src/**/*.ts)"
 //	@Success		200		{object}	SearchFilesResponse
 //	@Router			/files/search [get]
 //
 //	@id				SearchFiles
 func SearchFiles(c *gin.Context) {
-	path := c.Query("path")
+	basePath := c.Query("path")
 	pattern := c.Query("pattern")
-	if path == "" || pattern == "" {
+	if basePath == "" || pattern == "" {
 		c.AbortWithError(http.StatusBadRequest, errors.New("path and pattern are required"))
 		return
 	}
 
-	var matches []string
-	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	// Initialize matches as an empty slice (not nil) to ensure JSON returns [] instead of null
+	matches := []string{}
+
+	// Walk through the directory tree and match files using doublestar glob patterns
+	err := filepath.Walk(basePath, func(currentPath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return filepath.SkipDir
 		}
-		if matched, _ := filepath.Match(pattern, info.Name()); matched {
-			matches = append(matches, path)
+
+		// Skip directories from results (only return files)
+		if info.IsDir() {
+			return nil
+		}
+
+		// Get the relative path from the base path for pattern matching
+		relativePath, relErr := filepath.Rel(basePath, currentPath)
+		if relErr != nil {
+			return nil
+		}
+
+		// Use forward slashes for consistent glob pattern matching across platforms
+		relativePathForMatch := filepath.ToSlash(relativePath)
+
+		// Match the pattern against the relative path using doublestar
+		// This supports **, *, ?, and {a,b} glob patterns
+		matched, matchErr := doublestar.Match(pattern, relativePathForMatch)
+		if matchErr != nil {
+			// If pattern is invalid, try matching against just the filename for backward compatibility
+			matched, matchErr2 := doublestar.Match(pattern, info.Name())
+			if matchErr2 != nil {
+				// Both pattern matches failed; abort with error
+				return errors.New("invalid glob pattern: " + pattern)
+			}
+		}
+
+		if matched {
+			matches = append(matches, currentPath)
 		}
 		return nil
 	})
