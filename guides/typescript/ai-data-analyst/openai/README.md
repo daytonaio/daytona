@@ -96,4 +96,9 @@ The chart will be saved as `chart-0.png` in your project directory, showing a ba
 
 ## License
 
-This project is licensed under the terms of the [MIT License](LICENSE).
+See the main project LICENSE file for details.
+
+## References
+
+- [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
+- [Daytona Documentation](https://www.daytona.io/docs)
