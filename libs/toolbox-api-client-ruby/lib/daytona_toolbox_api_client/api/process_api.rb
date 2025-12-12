@@ -406,6 +406,123 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Get entrypoint logs
+    # Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+    # @param [Hash] opts the optional parameters
+    # @option opts [Boolean] :follow Follow logs in real-time (WebSocket only)
+    # @return [String]
+    def get_entrypoint_logs(opts = {})
+      data, _status_code, _headers = get_entrypoint_logs_with_http_info(opts)
+      data
+    end
+
+    # Get entrypoint logs
+    # Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+    # @param [Hash] opts the optional parameters
+    # @option opts [Boolean] :follow Follow logs in real-time (WebSocket only)
+    # @return [Array<(String, Integer, Hash)>] String data, response status code and response headers
+    def get_entrypoint_logs_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ProcessApi.get_entrypoint_logs ...'
+      end
+      # resource path
+      local_var_path = '/process/session/entrypoint/logs'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'follow'] = opts[:'follow'] if !opts[:'follow'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['text/plain']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'String'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ProcessApi.get_entrypoint_logs",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ProcessApi#get_entrypoint_logs\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get entrypoint session details
+    # Get details of an entrypoint session including its commands
+    # @param [Hash] opts the optional parameters
+    # @return [Session]
+    def get_entrypoint_session(opts = {})
+      data, _status_code, _headers = get_entrypoint_session_with_http_info(opts)
+      data
+    end
+
+    # Get entrypoint session details
+    # Get details of an entrypoint session including its commands
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Session, Integer, Hash)>] Session data, response status code and response headers
+    def get_entrypoint_session_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ProcessApi.get_entrypoint_session ...'
+      end
+      # resource path
+      local_var_path = '/process/session/entrypoint'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Session'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ProcessApi.get_entrypoint_session",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ProcessApi#get_entrypoint_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get PTY session information
     # Get detailed information about a specific pseudo-terminal session
     # @param session_id [String] PTY session ID

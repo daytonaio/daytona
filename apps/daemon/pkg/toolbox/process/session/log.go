@@ -53,3 +53,34 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 
 	c.String(http.StatusOK, string(logBytes))
 }
+
+// GetEntrypointLogs godoc
+//
+//	@Summary		Get entrypoint logs
+//	@Description	Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+//	@Tags			process
+//	@Produce		text/plain
+//	@Param			follow	query		boolean	false	"Follow logs in real-time (WebSocket only)"
+//	@Success		200		{string}	string	"Entrypoint log content"
+//	@Router			/process/session/entrypoint/logs [get]
+//
+//	@id				GetEntrypointLogs
+func (s *SessionController) GetEntrypointLogs(c *gin.Context) {
+	opts := session.FetchLogsOptions{
+		IsCombinedOutput:   false,
+		IsWebsocketUpgrade: c.Request.Header.Get("Upgrade") == "websocket",
+		Follow:             c.Query("follow") == "true",
+	}
+
+	logBytes, err := s.sessionService.GetSessionCommandLogs(util.EntrypointSessionID, util.EntrypointCommandID, c.Request, c.Writer, opts)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	if logBytes == nil {
+		return
+	}
+
+	c.String(http.StatusOK, string(logBytes))
+}
