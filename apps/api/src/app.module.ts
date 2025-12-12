@@ -40,6 +40,7 @@ import { Redis } from 'ioredis'
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { RegionModule } from './region/region.module'
 import { BodyParserErrorModule } from './common/modules/body-parser-error.module'
+import { AdminModule } from './admin/admin.module'
 
 @Module({
   imports: [
@@ -185,6 +186,7 @@ import { BodyParserErrorModule } from './common/modules/body-parser-error.module
     AnalyticsModule,
     OrganizationModule,
     RegionModule,
+    AdminModule,
     EmailModule.forRootAsync({
       inject: [TypedConfigService],
       useFactory: (configService: TypedConfigService) => {

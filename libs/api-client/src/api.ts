@@ -12,6 +12,7 @@
  * Do not edit the class manually.
  */
 
+export * from './api/admin-api'
 export * from './api/api-keys-api'
 export * from './api/audit-api'
 export * from './api/config-api'

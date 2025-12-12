@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client_async.models.region_type import RegionType
 from daytona_api_client_async.models.runner_state import RunnerState
 from daytona_api_client_async.models.sandbox_class import SandboxClass
 from typing import Optional, Set
@@ -57,8 +58,9 @@ class RunnerFull(BaseModel):
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner")
     api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
+    region_type: Optional[RegionType] = Field(default=None, description="The region type of the runner", alias="regionType")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiKey"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiKey", "regionType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -145,7 +147,8 @@ class RunnerFull(BaseModel):
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
             "version": obj.get("version"),
-            "apiKey": obj.get("apiKey")
+            "apiKey": obj.get("apiKey"),
+            "regionType": obj.get("regionType")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

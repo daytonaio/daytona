@@ -76,7 +76,9 @@ type RunnerFull struct {
 	// The version of the runner
 	Version string `json:"version"`
 	// The API key for the runner
-	ApiKey               string `json:"apiKey"`
+	ApiKey string `json:"apiKey"`
+	// The region type of the runner
+	RegionType           *RegionType `json:"regionType,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -869,6 +871,38 @@ func (o *RunnerFull) SetApiKey(v string) {
 	o.ApiKey = v
 }
 
+// GetRegionType returns the RegionType field value if set, zero value otherwise.
+func (o *RunnerFull) GetRegionType() RegionType {
+	if o == nil || IsNil(o.RegionType) {
+		var ret RegionType
+		return ret
+	}
+	return *o.RegionType
+}
+
+// GetRegionTypeOk returns a tuple with the RegionType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RunnerFull) GetRegionTypeOk() (*RegionType, bool) {
+	if o == nil || IsNil(o.RegionType) {
+		return nil, false
+	}
+	return o.RegionType, true
+}
+
+// HasRegionType returns a boolean if a field has been set.
+func (o *RunnerFull) HasRegionType() bool {
+	if o != nil && !IsNil(o.RegionType) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegionType gets a reference to the given RegionType and assigns it to the RegionType field.
+func (o *RunnerFull) SetRegionType(v RegionType) {
+	o.RegionType = &v
+}
+
 func (o RunnerFull) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -927,6 +961,9 @@ func (o RunnerFull) ToMap() (map[string]interface{}, error) {
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["version"] = o.Version
 	toSerialize["apiKey"] = o.ApiKey
+	if !IsNil(o.RegionType) {
+		toSerialize["regionType"] = o.RegionType
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -1015,6 +1052,7 @@ func (o *RunnerFull) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "version")
 		delete(additionalProperties, "apiKey")
+		delete(additionalProperties, "regionType")
 		o.AdditionalProperties = additionalProperties
 	}
 
