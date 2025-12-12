@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
-import { Region, OrganizationRolePermissionsEnum, CreateRegion, CreateRegionResponse } from '@daytonaio/api-client'
+import {
+  Region,
+  OrganizationRolePermissionsEnum,
+  CreateRegion,
+  CreateRegionResponse,
+  DockerRegistry,
+} from '@daytonaio/api-client'
 import { RegionTable } from '@/components/RegionTable'
 import { CreateRegionDialog } from '@/components/CreateRegionDialog'
 import {
@@ -35,7 +41,7 @@ import { useRegions } from '@/hooks/useRegions'
 import { Check, Copy } from 'lucide-react'
 
 const Regions: React.FC = () => {
-  const { regionsApi } = useApi()
+  const { regionsApi, dockerRegistryApi } = useApi()
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
   const { regions, loadingRegions, refreshRegions } = useRegions()
 
@@ -44,12 +50,34 @@ const Regions: React.FC = () => {
   const [regionToDelete, setRegionToDelete] = useState<Region | null>(null)
   const [deleteRegionDialogIsOpen, setDeleteRegionDialogIsOpen] = useState(false)
 
+  const [registries, setRegistries] = useState<DockerRegistry[]>([])
+  const [loadingRegistries, setLoadingRegistries] = useState(false)
+
   // Regenerate API Key state
   const [showRegenerateProxyApiKeyDialog, setShowRegenerateProxyApiKeyDialog] = useState(false)
   const [showRegenerateSshGatewayApiKeyDialog, setShowRegenerateSshGatewayApiKeyDialog] = useState(false)
   const [regeneratedApiKey, setRegeneratedApiKey] = useState<string | null>(null)
   const [regionForRegenerate, setRegionForRegenerate] = useState<Region | null>(null)
   const [copied, setCopied] = useState(false)
+
+  const fetchRegistries = useCallback(async () => {
+    if (!selectedOrganization) {
+      return
+    }
+    setLoadingRegistries(true)
+    try {
+      const response = await dockerRegistryApi.listRegistries(selectedOrganization.id)
+      setRegistries(response.data)
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch registries')
+    } finally {
+      setLoadingRegistries(false)
+    }
+  }, [dockerRegistryApi, selectedOrganization])
+
+  useEffect(() => {
+    fetchRegistries()
+  }, [fetchRegistries])
 
   const handleCreateRegion = async (createRegionData: CreateRegion): Promise<CreateRegionResponse | null> => {
     try {
@@ -159,6 +187,8 @@ const Regions: React.FC = () => {
           onCreateRegion={handleCreateRegion}
           writePermitted={writePermitted}
           loadingData={loadingRegions}
+          registries={registries}
+          loadingRegistries={loadingRegistries}
         />
       </div>
 

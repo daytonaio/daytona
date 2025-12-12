@@ -20,6 +20,7 @@ import { parseDockerImage } from '../../common/utils/docker-image.util'
 import axios from 'axios'
 import type { AxiosRequestHeaders } from 'axios'
 import { AxiosHeaders } from 'axios'
+import { RegionService } from '../../region/services/region.service'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
@@ -45,6 +46,7 @@ export class DockerRegistryService {
     private readonly dockerRegistryRepository: Repository<DockerRegistry>,
     @Inject(DOCKER_REGISTRY_PROVIDER)
     private readonly dockerRegistryProvider: IDockerRegistryProvider,
+    private readonly regionService: RegionService,
   ) {}
 
   async create(
@@ -166,6 +168,18 @@ export class DockerRegistryService {
   }
 
   async getAvailableBackupRegistry(preferredRegion: string): Promise<DockerRegistry | null> {
+    // Check if the region has a specific registry configured
+    const region = await this.regionService.findOne(preferredRegion)
+    if (region?.registryId) {
+      const regionRegistry = await this.findOne(region.registryId)
+      if (regionRegistry) {
+        return regionRegistry
+      } else {
+        throw new NotFoundException(`Registry with id ${region.registryId} not found`)
+      }
+    }
+
+    // Fallback to default backup registry
     const registries = await this.dockerRegistryRepository.find({
       where: { registryType: RegistryType.BACKUP, isDefault: true },
     })

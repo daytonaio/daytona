@@ -36,4 +36,10 @@ export interface CreateRegion {
    * @memberof CreateRegion
    */
   sshGatewayUrl?: string | null
+  /**
+   * Registry ID for the region
+   * @type {string}
+   * @memberof CreateRegion
+   */
+  registryId?: string | null
 }

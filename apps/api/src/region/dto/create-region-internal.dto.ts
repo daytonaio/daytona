@@ -12,4 +12,5 @@ export class CreateRegionInternalDto {
   regionType: RegionType
   proxyUrl?: string | null
   sshGatewayUrl?: string | null
+  registryId?: string
 }

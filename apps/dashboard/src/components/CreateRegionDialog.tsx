@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react'
-import { CreateRegion, CreateRegionResponse } from '@daytonaio/api-client'
+import { CreateRegion, CreateRegionResponse, DockerRegistry } from '@daytonaio/api-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Plus, Copy } from 'lucide-react'
 import { getMaskedToken } from '@/lib/utils'
@@ -26,18 +27,23 @@ const DEFAULT_FORM_DATA = {
   name: '',
   proxyUrl: '',
   sshGatewayUrl: '',
+  registryId: '',
 }
 
 interface CreateRegionDialogProps {
   onCreateRegion: (data: CreateRegion) => Promise<CreateRegionResponse | null>
   writePermitted: boolean
   loadingData: boolean
+  registries: DockerRegistry[]
+  loadingRegistries: boolean
 }
 
 export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
   onCreateRegion,
   writePermitted,
   loadingData,
+  registries,
+  loadingRegistries,
 }) => {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -55,6 +61,7 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
         name: formData.name,
         proxyUrl: formData.proxyUrl.trim() || null,
         sshGatewayUrl: formData.sshGatewayUrl.trim() || null,
+        registryId: formData.registryId || undefined,
       }
 
       const region = await onCreateRegion(createRegionData)
@@ -214,6 +221,37 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
               <p className="text-sm text-muted-foreground mt-1 pl-1">
                 (Optional) URL of the custom SSH gateway for this region
               </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="registry-select">Registry</Label>
+              <Select
+                value={formData.registryId}
+                onValueChange={(value) => {
+                  setFormData((prev) => ({ ...prev, registryId: value }))
+                }}
+              >
+                <SelectTrigger
+                  className="h-8"
+                  id="registry-select"
+                  disabled={loadingRegistries}
+                  loading={loadingRegistries}
+                >
+                  <SelectValue placeholder={loadingRegistries ? 'Loading registries...' : 'Select a registry'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {registries.length === 0 ? (
+                    <div className="px-2 py-6 text-center text-sm text-muted-foreground">No registries available</div>
+                  ) : (
+                    registries.map((registry) => (
+                      <SelectItem key={registry.id} value={registry.id}>
+                        {registry.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground mt-1 pl-1">(Optional) Preferred registry for this region</p>
             </div>
           </form>
         )}
