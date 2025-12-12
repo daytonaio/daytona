@@ -46,7 +46,6 @@ import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
 import { RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerAccessGuard } from '../guards/runner-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
@@ -89,9 +88,6 @@ export class RunnerController {
     targetIdFromResult: (result: CreateRunnerResponseDto) => result?.id,
     requestMetadata: {
       body: (req: TypedRequest<CreateRunnerDto>) => ({
-        domain: req.body?.domain,
-        apiUrl: req.body?.apiUrl,
-        proxyUrl: req.body?.proxyUrl,
         regionId: req.body?.regionId,
         name: req.body?.name,
       }),
@@ -118,19 +114,9 @@ export class RunnerController {
 
     // create the runner
     const { runner, apiKey } = await this.runnerService.create({
-      domain: createRunnerDto.domain,
-      apiUrl: createRunnerDto.apiUrl,
-      proxyUrl: createRunnerDto.proxyUrl,
-      cpu: -1,
-      memoryGiB: -1,
-      diskGiB: -1,
       regionId: createRunnerDto.regionId,
       name: createRunnerDto.name,
-      gpu: 0,
-      gpuType: '',
-      class: SandboxClass.SMALL,
-      // TODO
-      version: '0',
+      version: '2',
     })
 
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)

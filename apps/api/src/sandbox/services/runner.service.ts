@@ -80,26 +80,36 @@ export class RunnerService {
       throw new BadRequestException('Runner name must be between 3 and 255 characters')
     }
 
-    if (!this.isValidClass(createRunnerDto.class)) {
-      throw new BadRequestException('Invalid class')
-    }
-
     const apiKey = createRunnerDto.apiKey ?? generateApiKeyValue()
 
-    const runner = new Runner()
-    runner.domain = createRunnerDto.domain
-    runner.apiUrl = createRunnerDto.apiUrl
-    runner.proxyUrl = createRunnerDto.proxyUrl
-    runner.apiKey = apiKey
-    runner.cpu = createRunnerDto.cpu
-    runner.memoryGiB = createRunnerDto.memoryGiB
-    runner.diskGiB = createRunnerDto.diskGiB
-    runner.gpu = createRunnerDto.gpu
-    runner.gpuType = createRunnerDto.gpuType
-    runner.region = createRunnerDto.regionId
-    runner.name = createRunnerDto.name
-    runner.class = createRunnerDto.class
-    runner.version = createRunnerDto.version
+    let runner: Runner
+
+    switch (createRunnerDto.version) {
+      case '0':
+        runner = new Runner({
+          region: createRunnerDto.regionId,
+          name: createRunnerDto.name,
+          version: createRunnerDto.version,
+          apiKey: apiKey,
+          cpu: createRunnerDto.cpu,
+          memoryGiB: createRunnerDto.memoryGiB,
+          diskGiB: createRunnerDto.diskGiB,
+          domain: createRunnerDto.domain,
+          apiUrl: createRunnerDto.apiUrl,
+          proxyUrl: createRunnerDto.proxyUrl,
+        })
+        break
+      case '2':
+        runner = new Runner({
+          region: createRunnerDto.regionId,
+          name: createRunnerDto.name,
+          version: createRunnerDto.version,
+          apiKey: apiKey,
+        })
+        break
+      default:
+        throw new BadRequestException('Invalid runner version')
+    }
 
     try {
       const savedRunner = await this.runnerRepository.save(runner)

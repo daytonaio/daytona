@@ -20,20 +20,26 @@ export class RunnerDto {
   @ApiProperty({
     description: 'The domain of the runner',
     example: 'runner1.example.com',
+    required: false,
   })
-  domain: string
+  @IsOptional()
+  domain?: string
 
   @ApiProperty({
     description: 'The API URL of the runner',
     example: 'https://api.runner1.example.com',
+    required: false,
   })
-  apiUrl: string
+  @IsOptional()
+  apiUrl?: string
 
   @ApiProperty({
     description: 'The proxy URL of the runner',
     example: 'https://proxy.runner1.example.com',
+    required: false,
   })
-  proxyUrl: string
+  @IsOptional()
+  proxyUrl?: string
 
   @ApiProperty({
     description: 'The CPU capacity of the runner',
@@ -56,13 +62,17 @@ export class RunnerDto {
   @ApiProperty({
     description: 'The GPU capacity of the runner',
     example: 1,
+    required: false,
   })
-  gpu: number
+  @IsOptional()
+  gpu?: number
 
   @ApiProperty({
     description: 'The type of GPU',
+    required: false,
   })
-  gpuType: string
+  @IsOptional()
+  gpuType?: string
 
   @ApiProperty({
     description: 'The class of the runner',

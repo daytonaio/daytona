@@ -157,10 +157,7 @@ const configuration = {
     cpu: parseInt(process.env.DEFAULT_RUNNER_CPU || '4', 10),
     memory: parseInt(process.env.DEFAULT_RUNNER_MEMORY || '8', 10),
     disk: parseInt(process.env.DEFAULT_RUNNER_DISK || '50', 10),
-    gpu: parseInt(process.env.DEFAULT_RUNNER_GPU || '0', 10),
-    gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
-    class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
-    version: process.env.DEFAULT_RUNNER_VERSION || '0',
+    version: (process.env.DEFAULT_RUNNER_VERSION || '0') as '0' | '2',
     name: process.env.DEFAULT_RUNNER_NAME || 'default',
   },
   runnerUsage: {

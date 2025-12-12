@@ -24,11 +24,11 @@ type Runner struct {
 	// The ID of the runner
 	Id string `json:"id"`
 	// The domain of the runner
-	Domain string `json:"domain"`
+	Domain *string `json:"domain,omitempty"`
 	// The API URL of the runner
-	ApiUrl string `json:"apiUrl"`
+	ApiUrl *string `json:"apiUrl,omitempty"`
 	// The proxy URL of the runner
-	ProxyUrl string `json:"proxyUrl"`
+	ProxyUrl *string `json:"proxyUrl,omitempty"`
 	// The CPU capacity of the runner
 	Cpu float32 `json:"cpu"`
 	// The memory capacity of the runner in GiB
@@ -36,9 +36,9 @@ type Runner struct {
 	// The disk capacity of the runner in GiB
 	Disk float32 `json:"disk"`
 	// The GPU capacity of the runner
-	Gpu float32 `json:"gpu"`
+	Gpu *float32 `json:"gpu,omitempty"`
 	// The type of GPU
-	GpuType string `json:"gpuType"`
+	GpuType *string `json:"gpuType,omitempty"`
 	// The class of the runner
 	Class SandboxClass `json:"class"`
 	// Current CPU usage percentage
@@ -82,17 +82,12 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, proxyUrl string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
+func NewRunner(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
 	this := Runner{}
 	this.Id = id
-	this.Domain = domain
-	this.ApiUrl = apiUrl
-	this.ProxyUrl = proxyUrl
 	this.Cpu = cpu
 	this.Memory = memory
 	this.Disk = disk
-	this.Gpu = gpu
-	this.GpuType = gpuType
 	this.Class = class
 	this.Region = region
 	this.Name = name
@@ -136,76 +131,100 @@ func (o *Runner) SetId(v string) {
 	o.Id = v
 }
 
-// GetDomain returns the Domain field value
+// GetDomain returns the Domain field value if set, zero value otherwise.
 func (o *Runner) GetDomain() string {
-	if o == nil {
+	if o == nil || IsNil(o.Domain) {
 		var ret string
 		return ret
 	}
-
-	return o.Domain
+	return *o.Domain
 }
 
-// GetDomainOk returns a tuple with the Domain field value
+// GetDomainOk returns a tuple with the Domain field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Runner) GetDomainOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Domain) {
 		return nil, false
 	}
-	return &o.Domain, true
+	return o.Domain, true
 }
 
-// SetDomain sets field value
+// HasDomain returns a boolean if a field has been set.
+func (o *Runner) HasDomain() bool {
+	if o != nil && !IsNil(o.Domain) {
+		return true
+	}
+
+	return false
+}
+
+// SetDomain gets a reference to the given string and assigns it to the Domain field.
 func (o *Runner) SetDomain(v string) {
-	o.Domain = v
+	o.Domain = &v
 }
 
-// GetApiUrl returns the ApiUrl field value
+// GetApiUrl returns the ApiUrl field value if set, zero value otherwise.
 func (o *Runner) GetApiUrl() string {
-	if o == nil {
+	if o == nil || IsNil(o.ApiUrl) {
 		var ret string
 		return ret
 	}
-
-	return o.ApiUrl
+	return *o.ApiUrl
 }
 
-// GetApiUrlOk returns a tuple with the ApiUrl field value
+// GetApiUrlOk returns a tuple with the ApiUrl field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Runner) GetApiUrlOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ApiUrl) {
 		return nil, false
 	}
-	return &o.ApiUrl, true
+	return o.ApiUrl, true
 }
 
-// SetApiUrl sets field value
+// HasApiUrl returns a boolean if a field has been set.
+func (o *Runner) HasApiUrl() bool {
+	if o != nil && !IsNil(o.ApiUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetApiUrl gets a reference to the given string and assigns it to the ApiUrl field.
 func (o *Runner) SetApiUrl(v string) {
-	o.ApiUrl = v
+	o.ApiUrl = &v
 }
 
-// GetProxyUrl returns the ProxyUrl field value
+// GetProxyUrl returns the ProxyUrl field value if set, zero value otherwise.
 func (o *Runner) GetProxyUrl() string {
-	if o == nil {
+	if o == nil || IsNil(o.ProxyUrl) {
 		var ret string
 		return ret
 	}
-
-	return o.ProxyUrl
+	return *o.ProxyUrl
 }
 
-// GetProxyUrlOk returns a tuple with the ProxyUrl field value
+// GetProxyUrlOk returns a tuple with the ProxyUrl field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Runner) GetProxyUrlOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ProxyUrl) {
 		return nil, false
 	}
-	return &o.ProxyUrl, true
+	return o.ProxyUrl, true
 }
 
-// SetProxyUrl sets field value
+// HasProxyUrl returns a boolean if a field has been set.
+func (o *Runner) HasProxyUrl() bool {
+	if o != nil && !IsNil(o.ProxyUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetProxyUrl gets a reference to the given string and assigns it to the ProxyUrl field.
 func (o *Runner) SetProxyUrl(v string) {
-	o.ProxyUrl = v
+	o.ProxyUrl = &v
 }
 
 // GetCpu returns the Cpu field value
@@ -280,52 +299,68 @@ func (o *Runner) SetDisk(v float32) {
 	o.Disk = v
 }
 
-// GetGpu returns the Gpu field value
+// GetGpu returns the Gpu field value if set, zero value otherwise.
 func (o *Runner) GetGpu() float32 {
-	if o == nil {
+	if o == nil || IsNil(o.Gpu) {
 		var ret float32
 		return ret
 	}
-
-	return o.Gpu
+	return *o.Gpu
 }
 
-// GetGpuOk returns a tuple with the Gpu field value
+// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Runner) GetGpuOk() (*float32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Gpu) {
 		return nil, false
 	}
-	return &o.Gpu, true
+	return o.Gpu, true
 }
 
-// SetGpu sets field value
+// HasGpu returns a boolean if a field has been set.
+func (o *Runner) HasGpu() bool {
+	if o != nil && !IsNil(o.Gpu) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpu gets a reference to the given float32 and assigns it to the Gpu field.
 func (o *Runner) SetGpu(v float32) {
-	o.Gpu = v
+	o.Gpu = &v
 }
 
-// GetGpuType returns the GpuType field value
+// GetGpuType returns the GpuType field value if set, zero value otherwise.
 func (o *Runner) GetGpuType() string {
-	if o == nil {
+	if o == nil || IsNil(o.GpuType) {
 		var ret string
 		return ret
 	}
-
-	return o.GpuType
+	return *o.GpuType
 }
 
-// GetGpuTypeOk returns a tuple with the GpuType field value
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *Runner) GetGpuTypeOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.GpuType) {
 		return nil, false
 	}
-	return &o.GpuType, true
+	return o.GpuType, true
 }
 
-// SetGpuType sets field value
+// HasGpuType returns a boolean if a field has been set.
+func (o *Runner) HasGpuType() bool {
+	if o != nil && !IsNil(o.GpuType) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given string and assigns it to the GpuType field.
 func (o *Runner) SetGpuType(v string) {
-	o.GpuType = v
+	o.GpuType = &v
 }
 
 // GetClass returns the Class field value
@@ -819,14 +854,24 @@ func (o Runner) MarshalJSON() ([]byte, error) {
 func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
-	toSerialize["domain"] = o.Domain
-	toSerialize["apiUrl"] = o.ApiUrl
-	toSerialize["proxyUrl"] = o.ProxyUrl
+	if !IsNil(o.Domain) {
+		toSerialize["domain"] = o.Domain
+	}
+	if !IsNil(o.ApiUrl) {
+		toSerialize["apiUrl"] = o.ApiUrl
+	}
+	if !IsNil(o.ProxyUrl) {
+		toSerialize["proxyUrl"] = o.ProxyUrl
+	}
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["memory"] = o.Memory
 	toSerialize["disk"] = o.Disk
-	toSerialize["gpu"] = o.Gpu
-	toSerialize["gpuType"] = o.GpuType
+	if !IsNil(o.Gpu) {
+		toSerialize["gpu"] = o.Gpu
+	}
+	if !IsNil(o.GpuType) {
+		toSerialize["gpuType"] = o.GpuType
+	}
 	toSerialize["class"] = o.Class
 	if !IsNil(o.CurrentCpuUsagePercentage) {
 		toSerialize["currentCpuUsagePercentage"] = o.CurrentCpuUsagePercentage
@@ -876,14 +921,9 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"id",
-		"domain",
-		"apiUrl",
-		"proxyUrl",
 		"cpu",
 		"memory",
 		"disk",
-		"gpu",
-		"gpuType",
 		"class",
 		"region",
 		"name",

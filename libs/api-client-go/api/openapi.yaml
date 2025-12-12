@@ -9971,27 +9971,15 @@ components:
       type: object
     CreateRunner:
       example:
-        apiUrl: apiUrl
         regionId: regionId
-        proxyUrl: proxyUrl
-        domain: domain
         name: name
       properties:
-        domain:
-          type: string
-        apiUrl:
-          type: string
-        proxyUrl:
-          type: string
         regionId:
           type: string
         name:
           type: string
       required:
-        - apiUrl
-        - domain
         - name
-        - proxyUrl
         - regionId
       type: object
     CreateRunnerResponse:
@@ -10174,18 +10162,13 @@ components:
           example: shared
       required:
         - apiKey
-        - apiUrl
         - class
         - cpu
         - createdAt
         - disk
-        - domain
-        - gpu
-        - gpuType
         - id
         - memory
         - name
-        - proxyUrl
         - region
         - state
         - unschedulable
@@ -10327,18 +10310,13 @@ components:
           example: '0'
           type: string
       required:
-        - apiUrl
         - class
         - cpu
         - createdAt
         - disk
-        - domain
-        - gpu
-        - gpuType
         - id
         - memory
         - name
-        - proxyUrl
         - region
         - state
         - unschedulable
@@ -12833,43 +12811,55 @@ components:
       type: object
     AdminCreateRunner:
       example:
-        apiUrl: apiUrl
+        diskGiB: 100
         apiKey: apiKey
+        apiUrl: https://api.runner1.example.com
         regionId: regionId
-        proxyUrl: proxyUrl
-        domain: domain
+        proxyUrl: https://proxy.runner1.example.com
+        memoryGiB: 16
+        domain: runner1.example.com
         name: name
-        class: small
-        version: version
+        cpu: 8
+        version: '2'
       properties:
-        domain:
-          type: string
-        apiUrl:
-          type: string
-        proxyUrl:
-          type: string
         regionId:
           type: string
         name:
           type: string
         apiKey:
           type: string
-        class:
-          enum:
-            - small
-            - medium
-            - large
-          example: small
-          type: string
         version:
+          description: The version of the runner to create
+          example: '2'
+          pattern: ^(0|2)$
           type: string
+        domain:
+          description: The domain of the runner
+          example: runner1.example.com
+          type: string
+        apiUrl:
+          description: The API URL of the runner
+          example: https://api.runner1.example.com
+          type: string
+        proxyUrl:
+          description: The proxy URL of the runner
+          example: https://proxy.runner1.example.com
+          type: string
+        cpu:
+          description: The CPU capacity of the runner
+          example: 8
+          type: number
+        memoryGiB:
+          description: The memory capacity of the runner in GiB
+          example: 16
+          type: number
+        diskGiB:
+          description: The disk capacity of the runner in GiB
+          example: 100
+          type: number
       required:
         - apiKey
-        - apiUrl
-        - class
-        - domain
         - name
-        - proxyUrl
         - regionId
         - version
       type: object

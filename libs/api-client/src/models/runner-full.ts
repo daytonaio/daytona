@@ -39,19 +39,19 @@ export interface RunnerFull {
    * @type {string}
    * @memberof RunnerFull
    */
-  domain: string
+  domain?: string
   /**
    * The API URL of the runner
    * @type {string}
    * @memberof RunnerFull
    */
-  apiUrl: string
+  apiUrl?: string
   /**
    * The proxy URL of the runner
    * @type {string}
    * @memberof RunnerFull
    */
-  proxyUrl: string
+  proxyUrl?: string
   /**
    * The CPU capacity of the runner
    * @type {number}
@@ -75,13 +75,13 @@ export interface RunnerFull {
    * @type {number}
    * @memberof RunnerFull
    */
-  gpu: number
+  gpu?: number
   /**
    * The type of GPU
    * @type {string}
    * @memberof RunnerFull
    */
-  gpuType: string
+  gpuType?: string
   /**
    * The class of the runner
    * @type {SandboxClass}
