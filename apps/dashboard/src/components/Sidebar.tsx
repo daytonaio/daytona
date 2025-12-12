@@ -50,7 +50,7 @@ import {
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
@@ -64,7 +64,6 @@ interface SidebarProps {
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
-  const navigate = useNavigate()
   const { pathname } = useLocation()
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
@@ -82,7 +81,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         label: 'Sandboxes',
         path: RoutePath.SANDBOXES,
       },
-      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'Keys', path: RoutePath.KEYS },
       {
         icon: <Box size={16} strokeWidth={1.5} />,
         label: 'Snapshots',
@@ -101,6 +99,38 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         path: RoutePath.VOLUMES,
       })
     }
+
+    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_AUDIT_LOGS)) {
+      arr.push({
+        icon: <TextSearch size={16} strokeWidth={1.5} />,
+        label: 'Audit Logs',
+        path: RoutePath.AUDIT_LOGS,
+      })
+    }
+
+    // Add Webhooks link if webhooks are initialized
+    if (webhooksInitialized) {
+      arr.push({
+        icon: <Mail size={16} strokeWidth={1.5} />,
+        label: 'Webhooks',
+        path: '#webhooks' as any, // This will be handled by onClick
+        onClick: () => openAppPortal(),
+      })
+    }
+
+    return arr
+  }, [authenticatedUserHasPermission, webhooksInitialized, openAppPortal])
+
+  const settingsItems = useMemo(() => {
+    const arr = [
+      {
+        icon: <Settings size={16} strokeWidth={1.5} />,
+        label: 'General',
+        path: RoutePath.SETTINGS,
+      },
+      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
+    ]
+
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({
         icon: <LockKeyhole size={16} strokeWidth={1.5} />,
@@ -119,36 +149,9 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
     }
-    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_AUDIT_LOGS)) {
-      arr.push({
-        icon: <TextSearch size={16} strokeWidth={1.5} />,
-        label: 'Audit Logs',
-        path: RoutePath.AUDIT_LOGS,
-      })
-    }
 
-    // Add Webhooks link if webhooks are initialized
-    if (webhooksInitialized) {
-      arr.push({
-        icon: <Mail size={16} strokeWidth={1.5} />,
-        label: 'Webhooks',
-        path: '#webhooks' as any, // This will be handled by onClick
-        onClick: () => openAppPortal(),
-      })
-    }
-    arr.push({
-      icon: <Settings size={16} strokeWidth={1.5} />,
-      label: 'Settings',
-      path: RoutePath.SETTINGS,
-    })
     return arr
-  }, [
-    authenticatedUserOrganizationMember?.role,
-    selectedOrganization?.personal,
-    authenticatedUserHasPermission,
-    webhooksInitialized,
-    openAppPortal,
-  ])
+  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal])
 
   const billingItems = useMemo(() => {
     if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
@@ -201,6 +204,23 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                         <span>{item.label}</span>
                       </Link>
                     )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {settingsItems.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
+                    <Link to={item.path}>
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
