@@ -39,7 +39,6 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 		log.Error(err)
 		versionComparison = util.Pointer(1)
 	}
-
 	isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
 
 	err = s.sessionService.Create(request.SessionId, isLegacy)
