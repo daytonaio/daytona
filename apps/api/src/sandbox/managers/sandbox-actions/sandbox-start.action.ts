@@ -25,6 +25,7 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { checkRecoverable } from '../../utils/recoverable.util'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -622,6 +623,12 @@ export class SandboxStartAction extends SandboxAction {
     ) {
       sandbox.state = SandboxState.ERROR
       sandbox.errorReason = errorReason
+      sandbox.recoverable = false
+      try {
+        sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+      } catch (err) {
+        this.logger.error(`Error checking if sandbox ${sandbox.id} is recoverable:`, err)
+      }
       await this.sandboxRepository.save(sandbox)
       return true
     }

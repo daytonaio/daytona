@@ -48,6 +48,7 @@ import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import { checkRecoverable } from '../utils/recoverable.util'
 import {
   SandboxSortField,
   SandboxSortDirection,
@@ -1136,6 +1137,50 @@ export class SandboxService {
     return sandbox
   }
 
+  async recover(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
+
+    if (sandbox.state !== SandboxState.ERROR) {
+      throw new BadRequestError('Sandbox must be in error state to recover')
+    }
+
+    if (sandbox.pending) {
+      throw new SandboxError('Sandbox state change in progress')
+    }
+
+    // Validate runner exists
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
+    }
+    const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
+    }
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    try {
+      await runnerAdapter.recover(sandbox)
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
+        const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(sandbox.disk * 0.1).toFixed(2)}GB (10% of original ${sandbox.disk.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
+        throw new ForbiddenException(errorMsg)
+      }
+      throw error
+    }
+
+    // Clear error state
+    sandbox.state = SandboxState.STOPPED
+    sandbox.desiredState = SandboxDesiredState.STOPPED
+    sandbox.errorReason = null
+    sandbox.recoverable = false
+    await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
+
+    // Now that sandbox is in STOPPED state, use the normal start flow
+    // This handles quota validation, pending usage, event emission, etc.
+    return await this.start(sandbox.id, organization)
+  }
+
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1332,6 +1377,14 @@ export class SandboxService {
     sandbox.state = newState
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
+      if (newState === SandboxState.ERROR) {
+        sandbox.recoverable = false
+        try {
+          sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
+        } catch (err) {
+          this.logger.error(`Error checking if sandbox ${sandboxId} is recoverable:`, err)
+        }
+      }
     }
     //  we need to update the desired state to match the new state
     const desiredState = this.getExpectedDesiredStateForState(newState)

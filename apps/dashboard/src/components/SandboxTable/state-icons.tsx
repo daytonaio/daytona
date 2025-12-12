@@ -18,7 +18,7 @@ function Square({ color }: SquareProps) {
   )
 }
 
-export const STATE_ICONS: Record<SandboxState, React.ReactNode> = {
+export const STATE_ICONS: Record<SandboxState | 'RECOVERY', React.ReactNode> = {
   [SandboxState.UNKNOWN]: <Square color="bg-muted-foreground/20" />,
   [SandboxState.CREATING]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.STARTING]: <Loader2 className="w-3 h-3 animate-spin" />,
@@ -35,4 +35,5 @@ export const STATE_ICONS: Record<SandboxState, React.ReactNode> = {
   [SandboxState.ARCHIVED]: <Square color="bg-muted-foreground/20" />,
   [SandboxState.ARCHIVING]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.RESTORING]: <Loader2 className="w-3 h-3 animate-spin" />,
+  RECOVERY: <Square color="bg-yellow-600" />,
 }

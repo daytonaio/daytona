@@ -1765,6 +1765,42 @@ paths:
       summary: Get sandbox details
       tags:
         - sandbox
+  /sandbox/{sandboxIdOrName}/recover:
+    post:
+      operationId: recoverSandbox
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Recovery initiated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Recover sandbox from error state
+      tags:
+        - sandbox
   /sandbox/{sandboxIdOrName}/start:
     post:
       operationId: startSandbox
@@ -8741,6 +8777,7 @@ components:
             volumeId: volume123
             subpath: users/alice
         cpu: 2
+        recoverable: true
         env:
           NODE_ENV: production
         gpu: 0
@@ -8837,6 +8874,10 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
+        recoverable:
+          description: Whether the sandbox error is recoverable.
+          example: true
+          type: boolean
         backupState:
           description: The state of the backup
           enum:
@@ -8938,6 +8979,7 @@ components:
                 volumeId: volume123
                 subpath: users/alice
             cpu: 2
+            recoverable: true
             env:
               NODE_ENV: production
             gpu: 0
@@ -8975,6 +9017,7 @@ components:
                 volumeId: volume123
                 subpath: users/alice
             cpu: 2
+            recoverable: true
             env:
               NODE_ENV: production
             gpu: 0
@@ -11236,6 +11279,7 @@ components:
             volumeId: volume123
             subpath: users/alice
         cpu: 2
+        recoverable: true
         env:
           NODE_ENV: production
         snapshotCreatedAt: 2024-10-01T12:00:00Z
@@ -11333,6 +11377,10 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
+        recoverable:
+          description: Whether the sandbox error is recoverable.
+          example: true
+          type: boolean
         backupState:
           description: The state of the backup
           enum:

@@ -36,28 +36,8 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	timeout := 2 // seconds
-	// Use exponential backoff helper for container stopping
-	err = utils.RetryWithExponentialBackoff(
-		ctx,
-		fmt.Sprintf("stop sandbox %s", containerId),
-		utils.DEFAULT_MAX_RETRIES,
-		utils.DEFAULT_BASE_DELAY,
-		utils.DEFAULT_MAX_DELAY,
-		func() error {
-			return d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
-				Signal:  "SIGKILL",
-				Timeout: &timeout,
-			})
-		},
-	)
+	err = d.stopContainerWithRetry(ctx, containerId, 2)
 	if err != nil {
-		log.Warnf("Failed to stop sandbox %s for %d attempts: %v", containerId, utils.DEFAULT_MAX_RETRIES, err)
-		log.Warnf("Trying to kill sandbox %s", containerId)
-		err = d.apiClient.ContainerKill(ctx, containerId, "KILL")
-		if err != nil {
-			log.Warnf("Failed to kill sandbox %s: %v", containerId, err)
-		}
 		return err
 	}
 
@@ -79,5 +59,42 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	log.Debugf("Sandbox %s stopped successfully", containerId)
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 
+	return nil
+}
+
+// stopContainerWithRetry attempts to stop the specified container by sending a stop signal,
+// retrying the operation with exponential backoff up to a maximum number of attempts.
+// If stopping fails after all retries, it falls back to forcefully killing the container.
+//
+// Parameters:
+//   - ctx: context for cancellation and timeout
+//   - containerId: ID of the container to stop
+//   - timeout: number of seconds to wait for graceful stop before forcing a kill
+//
+// Returns an error if the container could not be stopped or killed.
+func (d *DockerClient) stopContainerWithRetry(ctx context.Context, containerId string, timeout int) error {
+	// Use exponential backoff helper for container stopping
+	err := utils.RetryWithExponentialBackoff(
+		ctx,
+		fmt.Sprintf("stop sandbox %s", containerId),
+		utils.DEFAULT_MAX_RETRIES,
+		utils.DEFAULT_BASE_DELAY,
+		utils.DEFAULT_MAX_DELAY,
+		func() error {
+			return d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
+				Signal:  "SIGKILL",
+				Timeout: &timeout,
+			})
+		},
+	)
+	if err != nil {
+		log.Warnf("Failed to stop sandbox %s for %d attempts: %v", containerId, utils.DEFAULT_MAX_RETRIES, err)
+		log.Warnf("Trying to kill sandbox %s", containerId)
+		err = d.apiClient.ContainerKill(ctx, containerId, "KILL")
+		if err != nil {
+			log.Warnf("Failed to kill sandbox %s: %v", containerId, err)
+		}
+		return err
+	}
 	return nil
 }

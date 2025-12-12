@@ -423,6 +423,31 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const handleRecover = async (id: string) => {
+    setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
+    setSandboxStateIsTransitioning((prev) => ({ ...prev, [id]: true }))
+
+    const sandboxToRecover = sandboxesData?.items.find((s) => s.id === id)
+    const previousState = sandboxToRecover?.state
+
+    await cancelQueryRefetches(queryKey)
+    performSandboxStateOptimisticUpdate(id, SandboxState.STARTING)
+
+    try {
+      await sandboxApi.recoverSandbox(id, selectedOrganization?.id)
+      toast.success('Sandbox recovered. Restarting...')
+      await markAllSandboxQueriesAsStale()
+    } catch (error) {
+      handleApiError(error, 'Failed to recover sandbox')
+      revertSandboxStateOptimisticUpdate(id, previousState)
+    } finally {
+      setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
+      setTimeout(() => {
+        setSandboxStateIsTransitioning((prev) => ({ ...prev, [id]: false }))
+      }, 2000)
+    }
+  }
+
   const handleStop = async (id: string) => {
     setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
     setSandboxStateIsTransitioning((prev) => ({ ...prev, [id]: true }))
@@ -824,6 +849,7 @@ const Sandboxes: React.FC = () => {
         onSortingChange={handleSortingChange}
         filters={filters}
         onFiltersChange={handleFiltersChange}
+        handleRecover={handleRecover}
       />
 
       {sandboxToDelete && (
@@ -993,6 +1019,7 @@ const Sandboxes: React.FC = () => {
         getWebTerminalUrl={getWebTerminalUrl}
         writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
         deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
+        handleRecover={handleRecover}
       />
     </div>
   )

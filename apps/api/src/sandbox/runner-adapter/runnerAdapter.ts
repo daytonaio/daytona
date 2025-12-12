@@ -88,6 +88,9 @@ export interface RunnerAdapter {
     networkAllowList?: string,
     networkLimitEgress?: boolean,
   ): Promise<void>
+
+  recover(sandbox: Sandbox): Promise<void>
+  isRecoverable(sandboxId: string, errorReason: string): Promise<boolean>
 }
 
 @Injectable()

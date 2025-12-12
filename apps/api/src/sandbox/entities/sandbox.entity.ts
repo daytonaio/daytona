@@ -83,6 +83,9 @@ export class Sandbox {
   @Column({ nullable: true })
   errorReason?: string
 
+  @Column({ default: false })
+  recoverable: boolean
+
   @Column({
     type: 'jsonb',
     default: {},
