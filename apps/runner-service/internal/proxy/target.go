@@ -31,7 +31,7 @@ func (s *ProxyServer) getProxyTarget(ctx context.Context, sandboxId string) (*ur
 
 		sandboxIp = network.IPAddress
 		if sandboxIp == "" {
-			return nil, errors.New("sandbox has no IP address")
+			return nil, errors.New("no IP address found. Is the Sandbox started?")
 		}
 
 		s.cache.Set(sandboxId, &ProxyCacheItem{IP: sandboxIp}, s.cacheTTL)

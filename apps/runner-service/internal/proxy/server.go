@@ -33,6 +33,7 @@ type ProxyServer struct {
 	cacheTTL     time.Duration
 	targetPort   int
 	network      string
+	apiToken     string
 }
 
 type ProxyServerConfig struct {
@@ -45,6 +46,7 @@ type ProxyServerConfig struct {
 	TargetPort   int
 	Network      string
 	DockerClient *client.Client
+	ApiToken     string
 }
 
 func NewProxyServer(config ProxyServerConfig) *ProxyServer {
@@ -90,10 +92,12 @@ func NewProxyServer(config ProxyServerConfig) *ProxyServer {
 		targetPort:   targetPort,
 		network:      network,
 		dockerClient: config.DockerClient,
+		apiToken:     config.ApiToken,
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/sandboxes/{id}/toolbox/{path...}", s.proxyRequest)
+	// Apply bearer auth middleware to proxy endpoint
+	mux.HandleFunc("/sandboxes/{id}/toolbox/{path...}", withBearerAuth(s.proxyRequest, config.ApiToken))
 
 	s.mux = mux
 

@@ -139,6 +139,7 @@ func main() {
 		TargetPort:   cfg.ProxyTargetPort,
 		Network:      cfg.ProxyNetwork,
 		DockerClient: dockerClient,
+		ApiToken:     cfg.ApiToken,
 	})
 
 	// Start all services
