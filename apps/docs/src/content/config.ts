@@ -397,9 +397,9 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/regions', locale),
-          label: labels['sidebarconfig.regions'],
-          description: labels['sidebarconfig.regionsDescription'],
+          href: localizePath('/docs/regions-and-runners', locale),
+          label: labels['sidebarconfig.regionsAndRunners'],
+          description: labels['sidebarconfig.regionsAndRunnersDescription'],
           attrs: {
             icon: 'globe.svg',
           },
