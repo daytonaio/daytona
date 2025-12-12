@@ -261,7 +261,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           state: RunnerState.READY,
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
-          version: '0',
         },
       })
 
@@ -341,7 +340,28 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                 snapshot.ref,
                 SnapshotRunnerState.PULLING_SNAPSHOT,
               )
-              await this.pullSnapshotRunnerWithRetries(runner, snapshot.ref, dockerRegistry)
+              if (runner.version === '2') {
+                await this.jobService.createJob(
+                  null,
+                  JobType.PULL_SNAPSHOT,
+                  runner.id,
+                  ResourceType.SNAPSHOT,
+                  snapshot.ref,
+                  {
+                    sourceImage: snapshot.ref,
+                    registry: dockerRegistry
+                      ? {
+                          url: dockerRegistry.url,
+                          username: dockerRegistry.username,
+                          password: dockerRegistry.password,
+                          project: dockerRegistry.project,
+                        }
+                      : undefined,
+                  },
+                )
+              } else {
+                await this.pullSnapshotRunnerWithRetries(runner, snapshot.ref, dockerRegistry)
+              }
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
               await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
             }
