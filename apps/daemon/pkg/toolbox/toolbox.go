@@ -18,6 +18,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
+	session_service "github.com/daytonaio/daemon/pkg/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse/manager"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
@@ -42,10 +43,10 @@ import (
 )
 
 type Server struct {
-	WorkDir                              string
-	ComputerUse                          computeruse.IComputerUse
-	TerminationGracePeriodSeconds        int
-	TerminationCheckIntervalMilliseconds int
+	WorkDir        string
+	ConfigDir      string
+	ComputerUse    computeruse.IComputerUse
+	SessionService *session_service.SessionService
 }
 
 type WorkDirResponse struct {
@@ -146,18 +147,7 @@ func (s *Server) Start() error {
 	r.GET("/user-home-dir", s.GetUserHomeDir)
 	r.GET("/work-dir", s.GetWorkDir)
 
-	dirname, err := os.UserHomeDir()
-	if err != nil {
-		return fmt.Errorf("failed to get user home directory: %w", err)
-	}
-
-	configDir := path.Join(dirname, ".daytona")
-	err = os.MkdirAll(configDir, 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
-	}
-
-	log.Println("configDir", configDir)
+	log.Println("configDir", s.ConfigDir)
 
 	fsController := r.Group("/files")
 	{
@@ -185,7 +175,7 @@ func (s *Server) Start() error {
 	{
 		processController.POST("/execute", process.ExecuteCommand)
 
-		sessionController := session.NewSessionController(configDir, s.WorkDir, s.TerminationGracePeriodSeconds, s.TerminationCheckIntervalMilliseconds)
+		sessionController := session.NewSessionController(s.ConfigDir, s.WorkDir, s.SessionService)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
@@ -255,13 +245,15 @@ func (s *Server) Start() error {
 	pluginPath := "/usr/local/lib/daytona-computer-use"
 	// Fallback to local config directory for development
 	if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
-		pluginPath = path.Join(configDir, "daytona-computer-use")
+		pluginPath = path.Join(s.ConfigDir, "daytona-computer-use")
 	}
-	s.ComputerUse, err = manager.GetComputerUse(pluginPath)
+
+	computerUse, err := manager.GetComputerUse(pluginPath)
 	if err != nil {
 		log.Errorf("Failed to initialize computer-use plugin: %v", err)
 		log.Info("Continuing without computer-use functionality...")
 	}
+	s.ComputerUse = computerUse
 
 	// Always register computer-use endpoints, but handle the case when plugin is nil
 	computerUseController := r.Group("/computeruse")

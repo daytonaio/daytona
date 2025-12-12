@@ -24,13 +24,15 @@ var (
 	STDERR_PREFIX = []byte{0x02, 0x02, 0x02}
 )
 
-func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
+func (s *SessionService) Execute(sessionId string, cmdId *string, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
 	session, ok := s.sessions[sessionId]
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
 	}
 
-	cmdId := util.Pointer(uuid.NewString())
+	if cmdId == nil {
+		cmdId = util.Pointer(uuid.NewString())
+	}
 
 	command := &Command{
 		Id:      *cmdId,

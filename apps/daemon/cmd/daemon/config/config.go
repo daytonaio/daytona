@@ -14,7 +14,6 @@ import (
 
 type Config struct {
 	DaemonLogFilePath                    string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
-	EntrypointLogFilePath                string `envconfig:"DAYTONA_ENTRYPOINT_LOG_FILE_PATH"`
 	EntrypointShutdownTimeoutSec         int    `envconfig:"ENTRYPOINT_SHUTDOWN_TIMEOUT_SEC"`
 	SigtermShutdownTimeoutSec            int    `envconfig:"SIGTERM_SHUTDOWN_TIMEOUT_SEC"`
 	UserHomeAsWorkDir                    bool   `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
@@ -23,7 +22,6 @@ type Config struct {
 }
 
 var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"
-var defaultEntrypointLogFilePath = "/tmp/daytona-entrypoint.log"
 
 var config *Config
 
@@ -48,10 +46,6 @@ func GetConfig() (*Config, error) {
 
 	if config.DaemonLogFilePath == "" {
 		config.DaemonLogFilePath = defaultDaemonLogFilePath
-	}
-
-	if config.EntrypointLogFilePath == "" {
-		config.EntrypointLogFilePath = defaultEntrypointLogFilePath
 	}
 
 	if config.EntrypointShutdownTimeoutSec <= 0 {
