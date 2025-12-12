@@ -1033,14 +1033,21 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   private getInitialRunnerSnapshotTag(snapshot: Snapshot) {
     // Extract the base image name without any tag or digest
     let baseImageName = snapshot.imageName
-    const colonIndex = baseImageName.indexOf(':')
-    if (colonIndex !== -1) {
-      baseImageName = baseImageName.substring(0, colonIndex)
-    }
+
+    // Remove digest if present (e.g., @sha256:...)
     const atIndex = baseImageName.indexOf('@')
     if (atIndex !== -1) {
       baseImageName = baseImageName.substring(0, atIndex)
     }
+
+    // Remove tag if present (use lastIndexOf to handle registry:port/image:tag format)
+    const lastSlashIndex = baseImageName.lastIndexOf('/')
+    const lastColonIndex = baseImageName.lastIndexOf(':')
+    // Only remove the part after colon if the colon comes after the last slash (i.e., it's a tag, not a registry port)
+    if (lastColonIndex > lastSlashIndex) {
+      baseImageName = baseImageName.substring(0, lastColonIndex)
+    }
+
     return `${baseImageName}-${snapshot.id}-${snapshot.createdAt.getTime()}:daytona`
   }
 

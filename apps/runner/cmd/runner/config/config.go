@@ -79,8 +79,13 @@ func GetEnvironment() string {
 
 func GetBuildLogFilePath(snapshotRef string) (string, error) {
 	buildId := snapshotRef
-	if colonIndex := strings.Index(snapshotRef, ":"); colonIndex != -1 {
-		buildId = snapshotRef[:colonIndex]
+	// Use LastIndex to find the last colon (the one before the tag)
+	// This properly handles image names like "registry:5000/project/image:tag"
+	lastSlashIndex := strings.LastIndex(snapshotRef, "/")
+	lastColonIndex := strings.LastIndex(snapshotRef, ":")
+	// Only remove the part after colon if the colon comes after the last slash (i.e., it's a tag, not a registry port)
+	if lastColonIndex > lastSlashIndex {
+		buildId = snapshotRef[:lastColonIndex]
 	}
 
 	c, err := GetConfig()

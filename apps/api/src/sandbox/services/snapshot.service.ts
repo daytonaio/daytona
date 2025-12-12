@@ -84,7 +84,7 @@ export class SnapshotService {
     }
 
     if (!IMAGE_NAME_REGEX.test(name)) {
-      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+      return 'Invalid image name format. May contain letters, digits, dots, colons, dashes, and slashes'
     }
 
     return null
@@ -168,7 +168,7 @@ export class SnapshotService {
       try {
         imageDetails = await this.dockerRegistryService.getImageDetails(createSnapshotDto.imageName, organization.id)
       } catch (error) {
-        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
+        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error.message || error}`)
       }
 
       if (imageDetails) {
