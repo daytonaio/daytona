@@ -183,7 +183,7 @@ sandbox.process.delete_session(session_id)
 
 ```python
 @intercept_errors(message_prefix="Failed to get session: ")
-def get_session(session_id: str) -> Session
+def get_session(session_id: str) -> SessionDTO
 ```
 
 Gets a session in the Sandbox.
@@ -195,7 +195,7 @@ Gets a session in the Sandbox.
 
 **Returns**:
 
-- `Session` - Session information including:
+- `SessionDTO` - SessionDTO information including:
   - session_id: The session's unique identifier
   - commands: List of commands executed in the session
   
@@ -212,7 +212,7 @@ for cmd in session.commands:
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command: ")
-def get_session_command(session_id: str, command_id: str) -> Command
+def get_session_command(session_id: str, command_id: str) -> CommandDTO
 ```
 
 Gets information about a specific command executed in a session.
@@ -225,7 +225,7 @@ Gets information about a specific command executed in a session.
 
 **Returns**:
 
-- `Command` - Command information including:
+- `CommandDTO` - CommandDTO information including:
   - id: The command's unique identifier
   - command: The executed command string
   - exit_code: Command's exit status (if completed)
@@ -359,14 +359,14 @@ await sandbox.process.get_session_command_logs_async(
 
 ```python
 @intercept_errors(message_prefix="Failed to list sessions: ")
-def list_sessions() -> List[Session]
+def list_sessions() -> List[SessionDTO]
 ```
 
 Lists all sessions in the Sandbox.
 
 **Returns**:
 
-- `List[Session]` - List of all sessions in the Sandbox.
+- `List[SessionDTO]` - List of all sessions in the Sandbox.
   
 
 **Example**:

@@ -3,12 +3,18 @@
 
 package session
 
+import (
+	"github.com/daytonaio/daemon/pkg/session"
+)
+
 type SessionController struct {
-	configDir string
+	configDir      string
+	sessionService *session.SessionService
 }
 
-func NewSessionController(configDir, workDir string) *SessionController {
+func NewSessionController(configDir, workDir string, sessionService *session.SessionService) *SessionController {
 	return &SessionController{
-		configDir: configDir,
+		configDir:      configDir,
+		sessionService: sessionService,
 	}
 }

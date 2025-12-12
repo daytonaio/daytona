@@ -14,7 +14,7 @@ daytona_toolbox_api_client/api_response.py
 daytona_toolbox_api_client/configuration.py
 daytona_toolbox_api_client/exceptions.py
 daytona_toolbox_api_client/models/__init__.py
-daytona_toolbox_api_client/models/command.py
+daytona_toolbox_api_client/models/command_dto.py
 daytona_toolbox_api_client/models/completion_context.py
 daytona_toolbox_api_client/models/completion_item.py
 daytona_toolbox_api_client/models/completion_list.py
@@ -79,7 +79,7 @@ daytona_toolbox_api_client/models/replace_result.py
 daytona_toolbox_api_client/models/screenshot_response.py
 daytona_toolbox_api_client/models/scroll_response.py
 daytona_toolbox_api_client/models/search_files_response.py
-daytona_toolbox_api_client/models/session.py
+daytona_toolbox_api_client/models/session_dto.py
 daytona_toolbox_api_client/models/session_execute_request.py
 daytona_toolbox_api_client/models/session_execute_response.py
 daytona_toolbox_api_client/models/status.py

@@ -80,6 +80,15 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 					Path:       ctx.Request.URL.Path,
 					Method:     ctx.Request.Method,
 				}
+			case *ForbiddenError:
+				errorResponse = ErrorResponse{
+					StatusCode: http.StatusForbidden,
+					Message:    err.Err.Error(),
+					Code:       "FORBIDDEN",
+					Timestamp:  time.Now(),
+					Path:       ctx.Request.URL.Path,
+					Method:     ctx.Request.Method,
+				}
 			default:
 				errorResponse = defaultErrorHandler(ctx, err)
 			}

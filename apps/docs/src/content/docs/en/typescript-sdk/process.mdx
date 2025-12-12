@@ -446,7 +446,7 @@ if (session.processId) {
 #### getSession()
 
 ```ts
-getSession(sessionId: string): Promise<Session>
+getSession(sessionId: string): Promise<SessionDTO>
 ```
 
 Get a session in the sandbox.
@@ -458,7 +458,7 @@ Get a session in the sandbox.
 
 **Returns**:
 
-- `Promise<Session>` - Session information including:
+- `Promise<SessionDTO>` - SessionDTO information including:
     - sessionId: The session's unique identifier
     - commands: List of commands executed in the session
 
@@ -476,7 +476,7 @@ session.commands.forEach(cmd => {
 #### getSessionCommand()
 
 ```ts
-getSessionCommand(sessionId: string, commandId: string): Promise<Command>
+getSessionCommand(sessionId: string, commandId: string): Promise<CommandDTO>
 ```
 
 Gets information about a specific command executed in a session.
@@ -489,7 +489,7 @@ Gets information about a specific command executed in a session.
 
 **Returns**:
 
-- `Promise<Command>` - Command information including:
+- `Promise<CommandDTO>` - CommandDTO information including:
     - id: The command's unique identifier
     - command: The executed command string
     - exitCode: Command's exit status (if completed)
@@ -647,14 +647,14 @@ for (const session of sessions) {
 #### listSessions()
 
 ```ts
-listSessions(): Promise<Session[]>
+listSessions(): Promise<SessionDTO[]>
 ```
 
 Lists all active sessions in the Sandbox.
 
 **Returns**:
 
-- `Promise<Session[]>` - Array of active sessions
+- `Promise<SessionDTO[]>` - Array of active sessions
 
 **Example:**
 
