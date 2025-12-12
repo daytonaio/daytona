@@ -1888,7 +1888,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Session"
+                "$ref": "#/definitions/SessionDTO"
               }
             }
           }
@@ -1939,7 +1939,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/Session"
+              "$ref": "#/definitions/SessionDTO"
             }
           }
         }
@@ -1992,7 +1992,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/Command"
+              "$ref": "#/definitions/CommandDTO"
             }
           }
         }
@@ -2135,7 +2135,7 @@
     }
   },
   "definitions": {
-    "Command": {
+    "CommandDTO": {
       "type": "object",
       "required": ["command", "id"],
       "properties": {
@@ -3085,14 +3085,14 @@
         }
       }
     },
-    "Session": {
+    "SessionDTO": {
       "type": "object",
       "required": ["commands", "sessionId"],
       "properties": {
         "commands": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Command"
+            "$ref": "#/definitions/CommandDTO"
           }
         },
         "sessionId": {

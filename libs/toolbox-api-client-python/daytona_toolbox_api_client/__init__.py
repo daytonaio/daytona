@@ -38,7 +38,7 @@ from daytona_toolbox_api_client.exceptions import ApiAttributeError
 from daytona_toolbox_api_client.exceptions import ApiException
 
 # import models into sdk package
-from daytona_toolbox_api_client.models.command import Command
+from daytona_toolbox_api_client.models.command_dto import CommandDTO
 from daytona_toolbox_api_client.models.completion_context import CompletionContext
 from daytona_toolbox_api_client.models.completion_item import CompletionItem
 from daytona_toolbox_api_client.models.completion_list import CompletionList
@@ -103,7 +103,7 @@ from daytona_toolbox_api_client.models.replace_result import ReplaceResult
 from daytona_toolbox_api_client.models.screenshot_response import ScreenshotResponse
 from daytona_toolbox_api_client.models.scroll_response import ScrollResponse
 from daytona_toolbox_api_client.models.search_files_response import SearchFilesResponse
-from daytona_toolbox_api_client.models.session import Session
+from daytona_toolbox_api_client.models.session_dto import SessionDTO
 from daytona_toolbox_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_toolbox_api_client.models.session_execute_response import SessionExecuteResponse
 from daytona_toolbox_api_client.models.status import Status
