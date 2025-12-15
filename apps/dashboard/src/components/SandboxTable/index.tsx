@@ -3,10 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { flexRender } from '@tanstack/react-table'
-import { useState } from 'react'
-import { Button } from '../ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { useSidebar } from '@/components/ui/sidebar'
+import { RoutePath } from '@/enums/RoutePath'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn, pluralize } from '@/lib/utils'
+import { OrganizationRolePermissionsEnum, SandboxState } from '@daytonaio/api-client'
+import { flexRender, Table as TableType } from '@tanstack/react-table'
+import { CheckIcon, CommandIcon, Container, SquareIcon, Trash2Icon } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useRegisterCommands, type CommandConfig } from '../CommandPalette'
+import { Pagination } from '../Pagination'
+import { TableEmptyState } from '../TableEmptyState'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,21 +25,64 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '../ui/alert-dialog'
-import { Pagination } from '../Pagination'
-import { TableEmptyState } from '../TableEmptyState'
+import { Button } from '../ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { SandboxTableHeader } from './SandboxTableHeader'
 import { SandboxTableProps } from './types'
 import { useSandboxTable } from './useSandboxTable'
-import { SandboxTableHeader } from './SandboxTableHeader'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { OrganizationRolePermissionsEnum, SandboxState } from '@daytonaio/api-client'
-import { cn } from '@/lib/utils'
-import { Container, Trash2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import { RoutePath } from '@/enums/RoutePath'
-import { AnimatePresence, motion } from 'motion/react'
-import { useSidebar } from '@/components/ui/sidebar'
+
+function useSandboxCommands({
+  table,
+  writePermitted,
+  deletePermitted,
+  onDelete,
+}: {
+  table: TableType<any>
+  writePermitted: boolean
+  deletePermitted: boolean
+  onDelete: () => void
+}) {
+  const selectedCount = table.getRowModel().rows.filter((row) => row.getIsSelected()).length
+  const totalCount = table.getRowModel().rows.length
+
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    const commands: CommandConfig[] = []
+
+    if (totalCount !== selectedCount) {
+      commands.push({
+        id: 'select-all-sandboxes',
+        label: 'Select All Sandboxes',
+        icon: <CheckIcon className="w-4 h-4" />,
+        onSelect: () => table.toggleAllRowsSelected(true),
+        chainable: true,
+      })
+    }
+
+    if (selectedCount > 0) {
+      commands.push({
+        id: 'deselect-all-sandboxes',
+        label: 'Deselect All Sandboxes',
+        icon: <SquareIcon className="w-4 h-4" />,
+        onSelect: () => table.toggleAllRowsSelected(false),
+        chainable: true,
+      })
+    }
+
+    if (deletePermitted && selectedCount > 0) {
+      commands.push({
+        id: 'delete-sandboxes',
+        label: `Delete ${pluralize(selectedCount, 'Sandbox', 'Sandboxes')}`,
+        icon: <Trash2Icon className="w-4 h-4" />,
+        onSelect: onDelete,
+      })
+    }
+
+    return commands
+  }, [table, selectedCount, deletePermitted, onDelete, totalCount])
+
+  useRegisterCommands(rootCommands, { groupId: 'sandbox-actions', groupLabel: 'Sandbox actions', groupOrder: 0 })
+}
 
 export function SandboxTable({
   data,
@@ -111,6 +163,8 @@ export function SandboxTable({
 
     table.toggleAllRowsSelected(false)
   }
+
+  useSandboxCommands({ table, writePermitted, deletePermitted, onDelete: () => setBulkDeleteDialogOpen(true) })
 
   return (
     <>
@@ -219,7 +273,7 @@ export function SandboxTable({
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end relative">
         <Pagination
           className="pb-2 pt-6"
           table={table}
@@ -227,58 +281,50 @@ export function SandboxTable({
           entityName="Sandboxes"
           totalItems={totalItems}
         />
+
+        <AnimatePresence>
+          {hasSelection && (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
+              animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
+              exit={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
+              className="dark absolute bottom-5 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs"
+            >
+              <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-1 py-1 flex items-center justify-between gap-4">
+                <div className="text-sm text-muted-foreground">
+                  {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
+                </div>
+
+                <Button variant="secondary" size="sm" className="h-8">
+                  <CommandIcon className="w-4 h-4" />
+                  <span className="text-sm text-muted-foreground">Actions</span>
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Floating Action Bar */}
-      <AnimatePresence>
-        {hasSelection && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
-            animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
-            exit={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
-            className="dark fixed bottom-5 z-50 w-full max-w-md"
-            style={{
-              left:
-                sidebarState === 'collapsed'
-                  ? 'calc(50% + var(--sidebar-width-icon, 65px) / 2)'
-                  : 'calc(50% + var(--sidebar-width, 16rem) / 2)',
-            }}
-          >
-            <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-2 py-1 flex items-center justify-between gap-4">
-              <div className="text-sm text-muted-foreground">
-                {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
-              </div>
-              <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8">
-                    <Trash2 className="w-4 h-4" />
-                    Delete {selectedCount > 1 ? 'All' : ''}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Sandboxes</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete{' '}
-                      {selectedCount === 1 ? 'this item' : `these ${selectedCount} items`}? This action cannot be
-                      undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleBulkDeleteConfirm}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Sandboxes</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedCount === 1 ? 'this item' : `these ${selectedCount} items`}? This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

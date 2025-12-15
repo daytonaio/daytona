@@ -1,0 +1,261 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
+import {
+  useCommandPalette,
+  useCommandPaletteActions,
+  useRegisterCommands,
+  useRegisterPage,
+  type CommandConfig,
+} from '@/components/CommandPalette'
+import { cn } from '@/lib/utils'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { liteClient as algoliasearch } from 'algoliasearch/lite'
+import { BookOpen, Code2, Container, Layers, Terminal } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+
+const ALGOLIA_APP_ID = import.meta.env.PUBLIC_ALGOLIA_APP_ID
+const ALGOLIA_API_KEY = import.meta.env.PUBLIC_ALGOLIA_API_KEY
+const DOCS_INDEX = import.meta.env.PUBLIC_ALGOLIA_DOCS_INDEX_NAME || 'docs_test'
+const CLI_INDEX = import.meta.env.PUBLIC_ALGOLIA_CLI_INDEX_NAME || 'cli_test'
+const SDK_INDEX = import.meta.env.PUBLIC_ALGOLIA_SDK_INDEX_NAME || 'sdk_test'
+
+const client = ALGOLIA_APP_ID && ALGOLIA_API_KEY ? algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY) : null
+
+export type AlgoliaHit = {
+  objectID: string
+  url: string
+  slug: string
+  title: string
+  description?: string
+  content?: string
+  _highlightResult?: {
+    title?: { value: string; matchLevel: string }
+    description?: { value: string; matchLevel: string }
+  }
+}
+
+export type SearchResults = {
+  docs: AlgoliaHit[]
+  cli: AlgoliaHit[]
+  sdk: AlgoliaHit[]
+}
+
+export const searchDocumentation = async (query: string): Promise<SearchResults> => {
+  if (!client || !query.trim()) {
+    return { docs: [], cli: [], sdk: [] }
+  }
+
+  const commonParams = {
+    hitsPerPage: 3,
+    attributesToHighlight: ['title', 'description'],
+    highlightPreTag: '<em>',
+    highlightPostTag: '</em>',
+  }
+
+  const { results } = await client.search({
+    requests: [
+      { indexName: DOCS_INDEX, query, ...commonParams },
+      { indexName: CLI_INDEX, query, ...commonParams },
+      { indexName: SDK_INDEX, query, ...commonParams },
+    ],
+  })
+
+  const getHits = (index: number) =>
+    results[index] && 'hits' in results[index] ? (results[index].hits as AlgoliaHit[]) : []
+
+  return {
+    docs: getHits(0),
+    cli: getHits(1),
+    sdk: getHits(2),
+  }
+}
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
+  }, [value, delay])
+  return debouncedValue
+}
+
+export const useDocsSearchQuery = ({ search, enabled }: { search: string; enabled: boolean }) => {
+  return useQuery({
+    queryKey: ['algolia-search', search],
+    queryFn: () => searchDocumentation(search),
+    enabled: enabled && search.length > 1,
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
+  })
+}
+
+const openDocs = (path = '') => {
+  window.open(`https://www.daytona.io/docs/${path}`, '_blank')
+}
+
+const SearchSnippet = ({
+  hit,
+  attribute,
+  className,
+}: {
+  hit: AlgoliaHit
+  attribute: 'title' | 'description'
+  className?: string
+}) => {
+  const content = hit._highlightResult?.[attribute]?.value || hit[attribute] || ''
+
+  return (
+    <span
+      className={cn(
+        '[&_em]:not-italic [&_em]:rounded-[2px] [&_em]:bg-[#2fcc712b] [&_em]:text-[#058157] dark:[&_em]:text-[#2fcc71]',
+        className,
+      )}
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
+  )
+}
+
+const ResultRow = ({ hit }: { hit: AlgoliaHit }) => (
+  <div className="flex flex-col overflow-hidden">
+    <SearchSnippet
+      hit={hit}
+      attribute="title"
+      className="font-medium truncate [&_em]:not-italic [&_em]:rounded-[2px] [&_em]:text-[#058157] dark:[&_em]:text-[#2fcc71] [&_em]:bg-[#2fcc712b]"
+    />
+    {hit.description && (
+      <SearchSnippet
+        hit={hit}
+        attribute="description"
+        className="text-xs text-muted-foreground truncate font-normal line-clamp-1 [&_em]:not-italic [&_em]:rounded-[2px] [&_em]:bg-[#2fcc712b] [&_em]:text-[#058157] dark:[&_em]:text-[#2fcc71]"
+      />
+    )}
+  </div>
+)
+
+export function useDocsSearchCommands() {
+  const { search, activePageId } = useCommandPalette()
+  const { setShouldFilter, setBarMode } = useCommandPaletteActions()
+  const isActive = activePageId === 'search-docs'
+  const debouncedQuery = useDebounce(search, 300)
+
+  const { data, isError, isFetching } = useDocsSearchQuery({
+    search: debouncedQuery,
+    enabled: isActive,
+  })
+
+  useRegisterPage({ id: 'search-docs', label: 'Search Docs', placeholder: 'Search documentation...' })
+
+  useEffect(() => {
+    if (!isActive) {
+      return
+    }
+    setShouldFilter(false)
+    return () => setShouldFilter(true)
+  }, [isActive, setShouldFilter])
+
+  useEffect(() => {
+    if (!isActive) {
+      return
+    }
+    setBarMode(isFetching ? 'pulse' : 'flash')
+  }, [isActive, isFetching, setBarMode])
+
+  const commands: CommandConfig[] = useMemo(() => {
+    const handleSelect = (hit: AlgoliaHit) => {
+      const url = hit.url || `https://www.daytona.io/${hit.slug}`
+      window.open(url, '_blank')
+    }
+
+    if (!search || !data) {
+      return [
+        {
+          id: 'suggestion-quickstart',
+          label: 'Quick Start',
+          icon: <BookOpen className="w-4 h-4" />,
+          onSelect: () => openDocs(),
+          chainable: true,
+        },
+        {
+          id: 'suggestion-sandboxes',
+          label: 'Sandboxes',
+          icon: <Container className="w-4 h-4" />,
+          onSelect: () => openDocs('/en/sandboxes'),
+        },
+        {
+          id: 'suggestion-snapshots',
+          label: 'Snapshots',
+          icon: <Layers className="w-4 h-4" />,
+          onSelect: () => openDocs('/en/snapshots'),
+          chainable: true,
+        },
+        {
+          id: 'suggestion-limits',
+          label: 'Limits',
+          icon: <Terminal className="w-4 h-4" />,
+          onSelect: () => openDocs('/en/limits'),
+          chainable: true,
+        },
+      ]
+    }
+
+    if (isError) {
+      return [
+        {
+          id: 'error',
+          label: 'Failed to load documentation. Try again.',
+          disabled: true,
+        },
+      ]
+    }
+
+    const results: CommandConfig[] = []
+
+    for (const hit of data.docs) {
+      results.push({
+        id: `docs-${hit.objectID}`,
+        label: <ResultRow hit={hit} />,
+        value: `docs ${hit.title} ${hit.description || ''}`,
+        icon: <BookOpen className="w-4 h-4" />,
+        onSelect: () => handleSelect(hit),
+        chainable: true,
+        className: 'py-2',
+      })
+    }
+
+    for (const hit of data.cli) {
+      results.push({
+        id: `cli-${hit.objectID}`,
+        label: <ResultRow hit={hit} />,
+        value: `cli ${hit.title} ${hit.description || ''}`,
+        icon: <Terminal className="w-4 h-4" />,
+        onSelect: () => handleSelect(hit),
+        chainable: true,
+        className: 'py-2',
+      })
+    }
+
+    for (const hit of data.sdk) {
+      results.push({
+        id: `sdk-${hit.objectID}`,
+        label: <ResultRow hit={hit} />,
+        value: `sdk ${hit.title} ${hit.description || ''}`,
+        icon: <Code2 className="w-4 h-4" />,
+        onSelect: () => handleSelect(hit),
+        chainable: true,
+        className: 'py-2',
+      })
+    }
+
+    return results
+  }, [search, data, isError])
+
+  useRegisterCommands(commands, {
+    pageId: 'search-docs',
+    groupId: 'docs-results',
+    groupLabel: !search ? 'Suggestions' : data?.docs.length ? 'Results' : undefined,
+    groupOrder: 0,
+  })
+}

@@ -18549,7 +18549,7 @@ __metadata:
     jwks-rsa: "npm:^3.1.0"
     kafkajs: "npm:^2.2.4"
     lint-staged: "npm:^15.5.0"
-    lucide-react: "npm:^0.487.0"
+    lucide-react: "npm:0.561.0"
     markdownlint-cli2: "npm:^0.17.2"
     motion: "npm:^12.23.0"
     msw: "npm:^2.12.2"
@@ -18600,6 +18600,7 @@ __metadata:
     svix: "npm:^1.73.0"
     tailwind: "npm:^4.0.0"
     tailwind-merge: "npm:^3.0.1"
+    tailwind-scrollbar: "npm:^3.1.0"
     tailwindcss: "npm:3.4.3"
     tailwindcss-animate: "npm:^1.0.7"
     tar: "npm:^6.2.0"
@@ -18623,6 +18624,7 @@ __metadata:
     webpack-cli: "npm:^5.1.4"
     xml2js: "npm:^0.6.2"
     yaml: "npm:^2.8.0"
+    zustand: "npm:^5.0.9"
   languageName: unknown
   linkType: soft
 
@@ -26368,12 +26370,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.487.0":
-  version: 0.487.0
-  resolution: "lucide-react@npm:0.487.0"
+"lucide-react@npm:0.561.0":
+  version: 0.561.0
+  resolution: "lucide-react@npm:0.561.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/7177778c584b8e9545957bef28e95841c4be1b3bf473f9e2e64454c3e183d7ed0bc977c9f7b5446088023c7000151b7a3b27398d4f70025bf343782192f653ca
+  checksum: 10c0/d23c96a543bdb1e11cec1f05a631f86f961f2ee17a10da42e7c297bb06c5f1587a1b66927f58082c67d8edc0749b0a5e44e543b461deab9db19d22fb9ca93cd7
   languageName: node
   linkType: hard
 
@@ -34964,6 +34966,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tailwind-scrollbar@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "tailwind-scrollbar@npm:3.1.0"
+  peerDependencies:
+    tailwindcss: 3.x
+  checksum: 10c0/dad4d5dcc37f09806cb1b5380d7908d113d139638ac606644ba0c689dffb2d72250f6997c0091c2ba596346390b31742859a20933c2d8543f8103e2ddfc3fb82
+  languageName: node
+  linkType: hard
+
 "tailwind@npm:^4.0.0":
   version: 4.0.0
   resolution: "tailwind@npm:4.0.0"
@@ -37987,6 +37998,27 @@ __metadata:
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.9":
+  version: 5.0.9
+  resolution: "zustand@npm:5.0.9"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10c0/552849e4546c7760704d6509a5c412d57c62a1fa9e53169c939ba5e3d75f8cb3df50a64c3a22e6c3f1c8cc00de7543e4edd61ab5ae0c9169ba9a98e28303aba6
   languageName: node
   linkType: hard
 

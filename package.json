@@ -142,7 +142,7 @@
     "jose": "~5.10.0",
     "jwks-rsa": "^3.1.0",
     "kafkajs": "^2.2.4",
-    "lucide-react": "^0.487.0",
+    "lucide-react": "0.561.0",
     "motion": "^12.23.0",
     "msw": "^2.12.2",
     "nestjs-opensearch": "^1.4.1",
@@ -184,6 +184,7 @@
     "svix": "^1.73.0",
     "tailwind": "^4.0.0",
     "tailwind-merge": "^3.0.1",
+    "tailwind-scrollbar": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
     "tar": "^6.2.0",
     "typeorm": "^0.3.20",
@@ -191,7 +192,8 @@
     "uuid": "^11.0.3",
     "vite-plugin-svgr": "^4.3.0",
     "xml2js": "^0.6.2",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.0",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.22.0",

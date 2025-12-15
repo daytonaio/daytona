@@ -17,6 +17,7 @@ import { usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { CommandPaletteProvider } from './components/CommandPalette'
 import LoadingFallback from './components/LoadingFallback'
 import { Button } from './components/ui/button'
 import {
@@ -134,7 +135,9 @@ function App() {
                   <RegionsProvider>
                     <UserOrganizationInvitationsProvider>
                       <NotificationSocketProvider>
-                        <Dashboard />
+                        <CommandPaletteProvider>
+                          <Dashboard />
+                        </CommandPaletteProvider>
                       </NotificationSocketProvider>
                     </UserOrganizationInvitationsProvider>
                   </RegionsProvider>

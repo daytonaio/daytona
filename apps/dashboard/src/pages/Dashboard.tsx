@@ -7,23 +7,73 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
+import { CommandPalette, useRegisterCommands, type CommandConfig } from '@/components/CommandPalette'
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
+import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
+import { useTheme } from '@/contexts/ThemeContext'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
 import { useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useConfig } from '@/hooks/useConfig'
+import { useDocsSearchCommands } from '@/hooks/useDocsSearchCommands'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
+import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+
+function useDashboardCommands() {
+  const { theme, setTheme } = useTheme()
+
+  useRegisterCommands(
+    [
+      {
+        id: 'open-slack',
+        label: 'Open Slack',
+        icon: <SlackIcon className="w-4 h-4" />,
+        onSelect: () => window.open(DAYTONA_SLACK_URL, '_blank'),
+      },
+      {
+        id: 'open-docs',
+        label: 'Open Docs',
+        icon: <BookOpen className="w-4 h-4" />,
+        onSelect: () => window.open(DAYTONA_DOCS_URL, '_blank'),
+      },
+      {
+        id: 'search-docs',
+        label: 'Search Docs',
+        icon: <BookSearchIcon className="w-4 h-4" />,
+        page: 'search-docs',
+      },
+    ],
+    { groupId: 'help', groupLabel: 'Help', groupOrder: 2 },
+  )
+
+  const globalCommands: CommandConfig[] = useMemo(
+    () => [
+      {
+        id: 'toggle-theme',
+        label: 'Toggle Theme',
+        icon: <SunMoon className="w-4 h-4" />,
+        onSelect: () => setTheme(theme === 'dark' ? 'light' : 'dark'),
+      },
+    ],
+    [theme, setTheme],
+  )
+
+  useRegisterCommands(globalCommands, { groupId: 'global', groupLabel: 'Global', groupOrder: 5 })
+}
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const config = useConfig()
   useOwnerWalletQuery() // prefetch wallet
+
+  useDashboardCommands()
+  useDocsSearchCommands()
 
   const navigate = useNavigate()
 
@@ -91,9 +141,9 @@ const Dashboard: React.FC = () => {
         <SidebarInset className="overflow-y-auto">
           <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
             <Outlet />
+            <CommandPalette />
           </div>
         </SidebarInset>
-
         <Toaster />
         <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
       </SidebarProvider>
