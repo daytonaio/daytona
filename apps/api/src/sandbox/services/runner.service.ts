@@ -546,13 +546,13 @@ export class RunnerService {
    * v2 runners report health via the healthcheck endpoint, so we check if lastChecked is within threshold.
    */
   private async checkRunnerV2Health(runner: Runner): Promise<void> {
-    // v2 runners report health every ~10 seconds via the healthcheck endpoint
-    // Allow 60 seconds (6 missed healthchecks) before marking as UNRESPONSIVE
-    const healthCheckThresholdMs = 60 * 1000
-
     if (!runner.lastChecked) {
       return
     }
+
+    // v2 runners report health every ~10 seconds via the healthcheck endpoint
+    // Allow 60 seconds (6 missed healthchecks) before marking as UNRESPONSIVE
+    const healthCheckThresholdMs = 60 * 1000
 
     const timeSinceLastCheck = Date.now() - runner.lastChecked.getTime()
 
@@ -561,12 +561,6 @@ export class RunnerService {
         `v2 Runner ${runner.id} health check stale (last: ${Math.round(timeSinceLastCheck / 1000)}s ago), marking as UNRESPONSIVE`,
       )
       await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
-    } else {
-      this.logger.debug(`v2 Runner ${runner.id} health OK (last: ${Math.round(timeSinceLastCheck / 1000)}s ago)`)
-      // If runner was UNRESPONSIVE but now has recent lastChecked, mark as READY
-      if (runner.state === RunnerState.UNRESPONSIVE) {
-        await this.updateRunnerState(runner.id, RunnerState.READY)
-      }
     }
   }
 
