@@ -237,6 +237,24 @@ export class Process {
   }
 
   /**
+   * Get the sandbox entrypoint session
+   *
+   * @returns {Promise<SessionDTO>} SessionDTO information including:
+   *                            - sessionId: The session's unique identifier
+   *                            - commands: List of commands executed in the session
+   *
+   * @example
+   * const session = await process.getEntrypointSession();
+   * session.commands.forEach(cmd => {
+   *   console.log(`Command: ${cmd.command}`);
+   * });
+   */
+  public async getEntrypointSession(): Promise<SessionDTO> {
+    const response = await this.apiClient.getEntrypointSession()
+    return response.data
+  }
+
+  /**
    * Gets information about a specific command executed in a session.
    *
    * @param {string} sessionId - Unique identifier of the session
@@ -378,6 +396,65 @@ export class Process {
 
     await this.ensureToolboxUrl()
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
+
+    const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
+
+    await stdDemuxStream(ws, onStdout, onStderr)
+  }
+
+  /**
+   * Get the logs for the sandbox entrypoint session.
+   *
+   * @returns {Promise<SessionCommandLogsResponse>} Command logs containing: output (combined stdout and stderr), stdout and stderr
+   *
+   * @example
+   * const logs = await process.getEntrypointLogs();
+   * console.log('[STDOUT]:', logs.stdout);
+   * console.log('[STDERR]:', logs.stderr);
+   */
+  public async getEntrypointLogs(): Promise<SessionCommandLogsResponse>
+  /**
+   * Asynchronously retrieve and process the logs for the entrypoint session as they become available.
+   *
+   * @param {function} onStdout - Callback function to handle stdout log chunks
+   * @param {function} onStderr - Callback function to handle stderr log chunks
+   * @returns {Promise<void>}
+   *
+   * @example
+   * const logs = await process.getEntrypointLogs((chunk) => {
+   *   console.log('[STDOUT]:', chunk);
+   * }, (chunk) => {
+   *   console.log('[STDERR]:', chunk);
+   * });
+   */
+  public async getEntrypointLogs(onStdout: (chunk: string) => void, onStderr: (chunk: string) => void): Promise<void>
+  public async getEntrypointLogs(
+    onStdout?: (chunk: string) => void,
+    onStderr?: (chunk: string) => void,
+  ): Promise<SessionCommandLogsResponse | void> {
+    if (!onStdout && !onStderr) {
+      const response = await this.apiClient.getEntrypointLogs()
+
+      // Parse the response data if it's available
+      if (response.data) {
+        // Convert string to bytes for demuxing
+        const outputBytes = new TextEncoder().encode(response.data || '')
+        const demuxedCommandLogs = parseSessionCommandLogs(outputBytes)
+
+        return {
+          output: response.data,
+          stdout: demuxedCommandLogs.stdout,
+          stderr: demuxedCommandLogs.stderr,
+        }
+      }
+
+      return {
+        output: response.data,
+      }
+    }
+
+    await this.ensureToolboxUrl()
+    const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/session/entrypoint/logs?follow=true`
 
     const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
 

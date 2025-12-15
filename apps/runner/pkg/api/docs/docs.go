@@ -411,6 +411,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/sandboxes/{sandboxId}/logs": {
+            "get": {
+                "description": "Get the entire log output of a sandbox",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "sandbox"
+                ],
+                "summary": "Get sandbox logs",
+                "operationId": "Logs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Whether to include timestamps in the logs",
+                        "name": "timestamps",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sandbox logs",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/sandboxes/{sandboxId}/network-settings": {
             "get": {
                 "description": "Get sandbox network settings",

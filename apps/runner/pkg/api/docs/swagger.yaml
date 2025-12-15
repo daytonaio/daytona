@@ -21,8 +21,8 @@ definitions:
           $ref: '#/definitions/RegistryDTO'
         type: array
     required:
-      - dockerfile
-      - organizationId
+    - dockerfile
+    - organizationId
     type: object
   CreateBackupDTO:
     properties:
@@ -31,8 +31,8 @@ definitions:
       snapshot:
         type: string
     required:
-      - registry
-      - snapshot
+    - registry
+    - snapshot
     type: object
   CreateSandboxDTO:
     properties:
@@ -81,10 +81,10 @@ definitions:
           $ref: '#/definitions/dto.VolumeDTO'
         type: array
     required:
-      - id
-      - osUser
-      - snapshot
-      - userId
+    - id
+    - osUser
+    - snapshot
+    - userId
     type: object
   ErrorResponse:
     description: Error response
@@ -105,22 +105,22 @@ definitions:
         example: 400
         type: integer
       timestamp:
-        example: '2023-01-01T12:00:00Z'
+        example: "2023-01-01T12:00:00Z"
         type: string
     required:
-      - code
-      - message
-      - method
-      - path
-      - statusCode
-      - timestamp
+    - code
+    - message
+    - method
+    - path
+    - statusCode
+    - timestamp
     type: object
   IsRecoverableDTO:
     properties:
       errorReason:
         type: string
     required:
-      - errorReason
+    - errorReason
     type: object
   IsRecoverableResponse:
     properties:
@@ -138,7 +138,7 @@ definitions:
       snapshot:
         type: string
     required:
-      - snapshot
+    - snapshot
     type: object
   RecoverSandboxDTO:
     properties:
@@ -179,10 +179,10 @@ definitions:
           $ref: '#/definitions/dto.VolumeDTO'
         type: array
     required:
-      - errorReason
-      - osUser
-      - snapshot
-      - userId
+    - errorReason
+    - osUser
+    - snapshot
+    - userId
     type: object
   RegistryDTO:
     properties:
@@ -195,9 +195,9 @@ definitions:
       username:
         type: string
     required:
-      - password
-      - url
-      - username
+    - password
+    - url
+    - username
     type: object
   ResizeSandboxDTO:
     properties:
@@ -254,17 +254,17 @@ definitions:
     properties:
       cmd:
         example:
-          - '["nginx"'
-          - '"-g"'
-          - '"daemon off;"]'
+        - '["nginx"'
+        - '"-g"'
+        - '"daemon off;"]'
         items:
           type: string
         type: array
       entrypoint:
         example:
-          - '["nginx"'
-          - '"-g"'
-          - '"daemon off;"]'
+        - '["nginx"'
+        - '"-g"'
+        - '"daemon off;"]'
         items:
           type: string
         type: array
@@ -285,8 +285,8 @@ definitions:
       targetImage:
         type: string
     required:
-      - sourceImage
-      - targetImage
+    - sourceImage
+    - targetImage
     type: object
   UpdateNetworkSettingsDTO:
     properties:
@@ -308,46 +308,46 @@ definitions:
     type: object
   enums.BackupState:
     enum:
-      - NONE
-      - PENDING
-      - IN_PROGRESS
-      - COMPLETED
-      - FAILED
+    - NONE
+    - PENDING
+    - IN_PROGRESS
+    - COMPLETED
+    - FAILED
     type: string
     x-enum-varnames:
-      - BackupStateNone
-      - BackupStatePending
-      - BackupStateInProgress
-      - BackupStateCompleted
-      - BackupStateFailed
+    - BackupStateNone
+    - BackupStatePending
+    - BackupStateInProgress
+    - BackupStateCompleted
+    - BackupStateFailed
   enums.SandboxState:
     enum:
-      - creating
-      - restoring
-      - destroyed
-      - destroying
-      - started
-      - stopped
-      - starting
-      - stopping
-      - resizing
-      - error
-      - unknown
-      - pulling_snapshot
+    - creating
+    - restoring
+    - destroyed
+    - destroying
+    - started
+    - stopped
+    - starting
+    - stopping
+    - resizing
+    - error
+    - unknown
+    - pulling_snapshot
     type: string
     x-enum-varnames:
-      - SandboxStateCreating
-      - SandboxStateRestoring
-      - SandboxStateDestroyed
-      - SandboxStateDestroying
-      - SandboxStateStarted
-      - SandboxStateStopped
-      - SandboxStateStarting
-      - SandboxStateStopping
-      - SandboxStateResizing
-      - SandboxStateError
-      - SandboxStateUnknown
-      - SandboxStatePullingSnapshot
+    - SandboxStateCreating
+    - SandboxStateRestoring
+    - SandboxStateDestroyed
+    - SandboxStateDestroying
+    - SandboxStateStarted
+    - SandboxStateStopped
+    - SandboxStateStarting
+    - SandboxStateStopping
+    - SandboxStateResizing
+    - SandboxStateError
+    - SandboxStateUnknown
+    - SandboxStatePullingSnapshot
 info:
   contact: {}
   description: Daytona Runner API
@@ -359,9 +359,9 @@ paths:
       description: Health check
       operationId: HealthCheck
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: OK
           schema:
             additionalProperties:
@@ -373,9 +373,9 @@ paths:
       description: Runner info with system metrics
       operationId: RunnerInfo
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: OK
           schema:
             $ref: '#/definitions/RunnerInfoResponseDTO'
@@ -385,902 +385,942 @@ paths:
       description: Create a sandbox
       operationId: Create
       parameters:
-        - description: Create sandbox
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/CreateSandboxDTO'
+      - description: Create sandbox
+        in: body
+        name: sandbox
+        required: true
+        schema:
+          $ref: '#/definitions/CreateSandboxDTO'
       produces:
-        - application/json
+      - application/json
       responses:
-        '201':
+        "201":
           description: Created
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Create a sandbox
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}:
     delete:
       description: Remove a sandbox that has been previously destroyed
       operationId: RemoveDestroyed
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Sandbox removed
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Remove a destroyed sandbox
       tags:
-        - sandbox
+      - sandbox
     get:
       description: Get sandbox info
       operationId: Info
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Sandbox info
           schema:
             $ref: '#/definitions/SandboxInfoResponse'
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Get sandbox info
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/backup:
     post:
       description: Create sandbox backup
       operationId: CreateBackup
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Create backup
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/CreateBackupDTO'
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Create backup
+        in: body
+        name: sandbox
+        required: true
+        schema:
+          $ref: '#/definitions/CreateBackupDTO'
       produces:
-        - application/json
+      - application/json
       responses:
-        '201':
+        "201":
           description: Backup started
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Create sandbox backup
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/destroy:
     post:
       description: Destroy sandbox
       operationId: Destroy
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Sandbox destroyed
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Destroy sandbox
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/is-recoverable:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Check if the sandbox's error reason indicates a recoverable error
       operationId: IsRecoverable
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Error reason to check
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/IsRecoverableDTO'
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Error reason to check
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/IsRecoverableDTO'
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: OK
           schema:
             $ref: '#/definitions/IsRecoverableResponse'
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Check if sandbox error is recoverable
       tags:
-        - sandbox
+      - sandbox
+  /sandboxes/{sandboxId}/logs:
+    get:
+      description: Get the entire log output of a sandbox
+      operationId: Logs
+      parameters:
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Whether to include timestamps in the logs
+        in: query
+        name: timestamps
+        type: boolean
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Sandbox logs
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get sandbox logs
+      tags:
+      - sandbox
   /sandboxes/{sandboxId}/network-settings:
     get:
       description: Get sandbox network settings
       operationId: GetNetworkSettings
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Network settings
           schema:
             $ref: '#/definitions/UpdateNetworkSettingsDTO'
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Get sandbox network settings
       tags:
-        - sandbox
+      - sandbox
     post:
       description: Update sandbox network settings
       operationId: UpdateNetworkSettings
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Update network settings
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/UpdateNetworkSettingsDTO'
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Update network settings
+        in: body
+        name: sandbox
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateNetworkSettingsDTO'
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Network settings updated
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Update sandbox network settings
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/recover:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Recover sandbox from error state using specified recovery type
       operationId: Recover
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Recovery parameters
-          in: body
-          name: recovery
-          required: true
-          schema:
-            $ref: '#/definitions/RecoverSandboxDTO'
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Recovery parameters
+        in: body
+        name: recovery
+        required: true
+        schema:
+          $ref: '#/definitions/RecoverSandboxDTO'
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Sandbox recovered
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Recover sandbox from error state
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/resize:
     post:
       description: Resize sandbox
       operationId: Resize
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Resize sandbox
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/ResizeSandboxDTO'
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Resize sandbox
+        in: body
+        name: sandbox
+        required: true
+        schema:
+          $ref: '#/definitions/ResizeSandboxDTO'
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Sandbox resized
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Resize sandbox
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/start:
     post:
       description: Start sandbox
       operationId: Start
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Metadata
-          in: body
-          name: metadata
-          schema:
-            type: object
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Metadata
+        in: body
+        name: metadata
+        schema:
+          type: object
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Sandbox started
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Start sandbox
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/stop:
     post:
       description: Stop sandbox
       operationId: Stop
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Sandbox stopped
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Stop sandbox
       tags:
-        - sandbox
+      - sandbox
   /sandboxes/{sandboxId}/toolbox/{path}:
     delete:
       description: Forwards the request to the specified sandbox's container
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Path to forward
-          in: path
-          name: path
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Path to forward
+        in: path
+        name: path
+        required: true
+        type: string
       responses:
-        '200':
+        "200":
           description: Proxied response
           schema: {}
-        '400':
+        "400":
           description: Bad request
           schema:
             type: string
-        '401':
+        "401":
           description: Unauthorized
           schema:
             type: string
-        '404':
+        "404":
           description: Sandbox container not found
           schema:
             type: string
-        '409':
+        "409":
           description: Sandbox container conflict
           schema:
             type: string
-        '500':
+        "500":
           description: Internal server error
           schema:
             type: string
       summary: Proxy requests to the sandbox toolbox
       tags:
-        - toolbox
+      - toolbox
     get:
       description: Forwards the request to the specified sandbox's container
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Path to forward
-          in: path
-          name: path
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Path to forward
+        in: path
+        name: path
+        required: true
+        type: string
       responses:
-        '200':
+        "200":
           description: Proxied response
           schema: {}
-        '400':
+        "400":
           description: Bad request
           schema:
             type: string
-        '401':
+        "401":
           description: Unauthorized
           schema:
             type: string
-        '404':
+        "404":
           description: Sandbox container not found
           schema:
             type: string
-        '409':
+        "409":
           description: Sandbox container conflict
           schema:
             type: string
-        '500':
+        "500":
           description: Internal server error
           schema:
             type: string
       summary: Proxy requests to the sandbox toolbox
       tags:
-        - toolbox
+      - toolbox
     post:
       description: Forwards the request to the specified sandbox's container
       parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Path to forward
-          in: path
-          name: path
-          required: true
-          type: string
+      - description: Sandbox ID
+        in: path
+        name: sandboxId
+        required: true
+        type: string
+      - description: Path to forward
+        in: path
+        name: path
+        required: true
+        type: string
       responses:
-        '200':
+        "200":
           description: Proxied response
           schema: {}
-        '400':
+        "400":
           description: Bad request
           schema:
             type: string
-        '401':
+        "401":
           description: Unauthorized
           schema:
             type: string
-        '404':
+        "404":
           description: Sandbox container not found
           schema:
             type: string
-        '409':
+        "409":
           description: Sandbox container conflict
           schema:
             type: string
-        '500':
+        "500":
           description: Internal server error
           schema:
             type: string
       summary: Proxy requests to the sandbox toolbox
       tags:
-        - toolbox
+      - toolbox
   /snapshots/build:
     post:
       description: Build a snapshot from a Dockerfile and context hashes
       operationId: BuildSnapshot
       parameters:
-        - description: Build snapshot request
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/BuildSnapshotRequestDTO'
+      - description: Build snapshot request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/BuildSnapshotRequestDTO'
       responses:
-        '200':
+        "200":
           description: Snapshot successfully built
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Build a snapshot
       tags:
-        - snapshots
+      - snapshots
   /snapshots/exists:
     get:
       description: Check if a specified snapshot exists locally
       operationId: SnapshotExists
       parameters:
-        - description: Snapshot name and tag
-          in: query
-          name: snapshot
-          required: true
-          type: string
+      - description: Snapshot name and tag
+        in: query
+        name: snapshot
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: OK
           schema:
             $ref: '#/definitions/SnapshotExistsResponse'
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Check if a snapshot exists
       tags:
-        - snapshots
+      - snapshots
   /snapshots/info:
     get:
       description: Get information about a specified snapshot including size and entrypoint
       operationId: GetSnapshotInfo
       parameters:
-        - description: Snapshot name and tag
-          in: query
-          name: snapshot
-          required: true
-          type: string
+      - description: Snapshot name and tag
+        in: query
+        name: snapshot
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: OK
           schema:
             $ref: '#/definitions/SnapshotInfoResponse'
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Get snapshot information
       tags:
-        - snapshots
+      - snapshots
   /snapshots/logs:
     get:
       description: Stream build logs
       operationId: GetBuildLogs
       parameters:
-        - description: Snapshot ref
-          in: query
-          name: snapshotRef
-          required: true
-          type: string
-        - description: Whether to follow the log output
-          in: query
-          name: follow
-          type: boolean
+      - description: Snapshot ref
+        in: query
+        name: snapshotRef
+        required: true
+        type: string
+      - description: Whether to follow the log output
+        in: query
+        name: follow
+        type: boolean
       responses:
-        '200':
+        "200":
           description: Build logs stream
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Get build logs
       tags:
-        - snapshots
+      - snapshots
   /snapshots/pull:
     post:
       description: Pull a snapshot from a registry and optionally push to another
         registry
       operationId: PullSnapshot
       parameters:
-        - description: Pull snapshot
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/PullSnapshotRequestDTO'
+      - description: Pull snapshot
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/PullSnapshotRequestDTO'
       responses:
-        '200':
+        "200":
           description: Snapshot successfully pulled
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Pull a snapshot
       tags:
-        - snapshots
+      - snapshots
   /snapshots/remove:
     post:
       description: Remove a specified snapshot from the local system
       operationId: RemoveSnapshot
       parameters:
-        - description: Snapshot name and tag
-          in: query
-          name: snapshot
-          required: true
-          type: string
+      - description: Snapshot name and tag
+        in: query
+        name: snapshot
+        required: true
+        type: string
       produces:
-        - application/json
+      - application/json
       responses:
-        '200':
+        "200":
           description: Snapshot successfully removed
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Remove a snapshot
       tags:
-        - snapshots
+      - snapshots
   /snapshots/tag:
     post:
       description: Tag an existing local image with a new target reference
       operationId: TagImage
       parameters:
-        - description: Tag image request
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/TagImageRequestDTO'
+      - description: Tag image request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/TagImageRequestDTO'
       responses:
-        '200':
+        "200":
           description: Image successfully tagged
           schema:
             type: string
-        '400':
+        "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '401':
+        "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '404':
+        "404":
           description: Not Found
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '409':
+        "409":
           description: Conflict
           schema:
             $ref: '#/definitions/ErrorResponse'
-        '500':
+        "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Tag an image
       tags:
-        - snapshots
+      - snapshots
 security:
-  - Bearer: []
+- Bearer: []
 securityDefinitions:
   Bearer:
     description: Type "Bearer" followed by a space and an API token.
     in: header
     name: Authorization
     type: apiKey
-swagger: '2.0'
+swagger: "2.0"

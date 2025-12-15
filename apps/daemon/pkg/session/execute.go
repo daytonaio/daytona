@@ -24,13 +24,19 @@ var (
 	STDERR_PREFIX = []byte{0x02, 0x02, 0x02}
 )
 
-func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
+func (s *SessionService) Execute(sessionId string, cmdId *string, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
 	session, ok := s.sessions[sessionId]
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
 	}
 
-	cmdId := util.Pointer(uuid.NewString())
+	if cmdId == nil {
+		cmdId = util.Pointer(uuid.NewString())
+	} else {
+		if _, ok := session.commands[*cmdId]; ok {
+			return nil, common_errors.NewConflictError(errors.New("command with the given ID already exists"))
+		}
+	}
 
 	command := &Command{
 		Id:      *cmdId,

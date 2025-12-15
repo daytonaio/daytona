@@ -279,6 +279,24 @@ class AsyncProcess:
         """
         return await self._api_client.get_session(session_id=session_id)
 
+    @intercept_errors(message_prefix="Failed to get sandbox entrypoint session: ")
+    async def get_entrypoint_session(self) -> SessionDTO:
+        """Gets the sandbox entrypoint session.
+
+        Returns:
+            SessionDTO: SessionDTO information including:
+                - session_id: The session's unique identifier
+                - commands: List of commands executed in the session
+
+        Example:
+            ```python
+            session = await sandbox.process.get_entrypoint_session()
+            for cmd in session.commands:
+                print(f"Command: {cmd.command}")
+            ```
+        """
+        return await self._api_client.get_entrypoint_session()
+
     @intercept_errors(message_prefix="Failed to get session command: ")
     async def get_session_command(self, session_id: str, command_id: str) -> CommandDTO:
         """Gets information about a specific command executed in a session.
@@ -425,6 +443,69 @@ class AsyncProcess:
         _, url, headers, *_ = self._api_client._get_session_command_logs_serialize(  # pylint: disable=protected-access
             session_id=session_id,
             command_id=command_id,
+            follow=True,
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
+        )
+
+        url = re.sub(r"^http", "ws", url)
+
+        # unasync: preserve start
+        async with websockets.connect(url, additional_headers=headers) as ws:
+            await std_demux_stream(ws, on_stdout, on_stderr)
+
+    # unasync: preserve end
+
+    @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
+    async def get_entrypoint_logs(self) -> SessionCommandLogsResponse:
+        """Get the logs for the entrypoint session.
+
+        Returns:
+            SessionCommandLogsResponse: Command logs including:
+                - output: Combined command output (stdout and stderr)
+                - stdout: Standard output from the command
+                - stderr: Standard error from the command
+
+        Example:
+            ```python
+            logs = await sandbox.process.get_entrypoint_logs()
+            print(f"Command stdout: {logs.stdout}")
+            print(f"Command stderr: {logs.stderr}")
+            ```
+        """
+        response = await self._api_client.get_entrypoint_logs_without_preload_content()
+
+        # unasync: delete start
+        response.data = await response.content.read()
+        # unasync: delete end
+
+        return parse_session_command_logs(response.data)
+
+    # unasync: preserve start
+    @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
+    async def get_entrypoint_logs_async(
+        self, on_stdout: Callable[[str], None], on_stderr: Callable[[str], None]
+    ) -> None:
+        """Asynchronously retrieves and processes the logs for the entrypoint session as they become available.
+
+        Args:
+            on_stdout (Callable[[str], None]): Callback function to handle stdout log chunks as they arrive.
+            on_stderr (Callable[[str], None]): Callback function to handle stderr log chunks as they arrive.
+
+        Example:
+            ```python
+            await sandbox.process.get_entrypoint_logs_async(
+                lambda log: print(f"[STDOUT]: {log}"),
+                lambda log: print(f"[STDERR]: {log}"),
+            )
+            ```
+        """
+        # unasync: preserve end
+
+        await self._ensure_toolbox_url()
+        _, url, headers, *_ = self._api_client._get_entrypoint_logs_serialize(  # pylint: disable=protected-access
             follow=True,
             _request_auth=None,
             _content_type=None,

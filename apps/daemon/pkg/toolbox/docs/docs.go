@@ -2247,6 +2247,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/process/session/entrypoint": {
+            "get": {
+                "description": "Get details of an entrypoint session including its commands",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "process"
+                ],
+                "summary": "Get entrypoint session details",
+                "operationId": "GetEntrypointSession",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SessionDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/process/session/entrypoint/logs": {
+            "get": {
+                "description": "Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "process"
+                ],
+                "summary": "Get entrypoint logs",
+                "operationId": "GetEntrypointLogs",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Follow logs in real-time (WebSocket only)",
+                        "name": "follow",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Entrypoint log content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/process/session/{sessionId}": {
             "get": {
                 "description": "Get details of a specific session including its commands",

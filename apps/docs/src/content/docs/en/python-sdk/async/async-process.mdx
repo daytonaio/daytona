@@ -208,6 +208,30 @@ for cmd in session.commands:
     print(f"Command: {cmd.command}")
 ```
 
+#### AsyncProcess.get\_entrypoint\_session
+
+```python
+@intercept_errors(message_prefix="Failed to get sandbox entrypoint session: ")
+async def get_entrypoint_session() -> SessionDTO
+```
+
+Gets the sandbox entrypoint session.
+
+**Returns**:
+
+- `SessionDTO` - SessionDTO information including:
+  - session_id: The session's unique identifier
+  - commands: List of commands executed in the session
+  
+
+**Example**:
+
+```python
+session = await sandbox.process.get_entrypoint_session()
+for cmd in session.commands:
+    print(f"Command: {cmd.command}")
+```
+
 #### AsyncProcess.get\_session\_command
 
 ```python
@@ -350,6 +374,56 @@ Asynchronously retrieves and processes the logs for a command executed in a sess
 await sandbox.process.get_session_command_logs_async(
     "my-session",
     "cmd-123",
+    lambda log: print(f"[STDOUT]: {log}"),
+    lambda log: print(f"[STDERR]: {log}"),
+)
+```
+
+#### AsyncProcess.get\_entrypoint\_logs
+
+```python
+@intercept_errors(message_prefix="Failed to get entrypoint logs: ")
+async def get_entrypoint_logs() -> SessionCommandLogsResponse
+```
+
+Get the logs for the entrypoint session.
+
+**Returns**:
+
+- `SessionCommandLogsResponse` - Command logs including:
+  - output: Combined command output (stdout and stderr)
+  - stdout: Standard output from the command
+  - stderr: Standard error from the command
+  
+
+**Example**:
+
+```python
+logs = await sandbox.process.get_entrypoint_logs()
+print(f"Command stdout: {logs.stdout}")
+print(f"Command stderr: {logs.stderr}")
+```
+
+#### AsyncProcess.get\_entrypoint\_logs\_async
+
+```python
+@intercept_errors(message_prefix="Failed to get entrypoint logs: ")
+async def get_entrypoint_logs_async(on_stdout: Callable[[str], None],
+                                    on_stderr: Callable[[str], None]) -> None
+```
+
+Asynchronously retrieves and processes the logs for the entrypoint session as they become available.
+
+**Arguments**:
+
+- `on_stdout` _Callable[[str], None]_ - Callback function to handle stdout log chunks as they arrive.
+- `on_stderr` _Callable[[str], None]_ - Callback function to handle stderr log chunks as they arrive.
+  
+
+**Example**:
+
+```python
+await sandbox.process.get_entrypoint_logs_async(
     lambda log: print(f"[STDOUT]: {log}"),
     lambda log: print(f"[STDERR]: {log}"),
 )

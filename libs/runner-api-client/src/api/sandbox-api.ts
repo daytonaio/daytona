@@ -295,6 +295,52 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Get the entire log output of a sandbox
+     * @summary Get sandbox logs
+     * @param {string} sandboxId Sandbox ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    logs: async (
+      sandboxId: string,
+      timestamps?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('logs', 'sandboxId', sandboxId)
+      const localVarPath = `/sandboxes/{sandboxId}/logs`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication Bearer required
+      await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
+
+      if (timestamps !== undefined) {
+        localVarQueryParameter['timestamps'] = timestamps
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Recover sandbox from error state using specified recovery type
      * @summary Recover sandbox from error state
      * @param {string} sandboxId Sandbox ID
@@ -699,6 +745,30 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Get the entire log output of a sandbox
+     * @summary Get sandbox logs
+     * @param {string} sandboxId Sandbox ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async logs(
+      sandboxId: string,
+      timestamps?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.logs(sandboxId, timestamps, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath = operationServerMap['SandboxApi.logs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Recover sandbox from error state using specified recovery type
      * @summary Recover sandbox from error state
      * @param {string} sandboxId Sandbox ID
@@ -920,6 +990,17 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       return localVarFp.isRecoverable(sandboxId, request, options).then((request) => request(axios, basePath))
     },
     /**
+     * Get the entire log output of a sandbox
+     * @summary Get sandbox logs
+     * @param {string} sandboxId Sandbox ID
+     * @param {boolean} [timestamps] Whether to include timestamps in the logs
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    logs(sandboxId: string, timestamps?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.logs(sandboxId, timestamps, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Recover sandbox from error state using specified recovery type
      * @summary Recover sandbox from error state
      * @param {string} sandboxId Sandbox ID
@@ -1080,6 +1161,21 @@ export class SandboxApi extends BaseAPI {
   public isRecoverable(sandboxId: string, request: IsRecoverableDTO, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
       .isRecoverable(sandboxId, request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get the entire log output of a sandbox
+   * @summary Get sandbox logs
+   * @param {string} sandboxId Sandbox ID
+   * @param {boolean} [timestamps] Whether to include timestamps in the logs
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public logs(sandboxId: string, timestamps?: boolean, options?: RawAxiosRequestConfig) {
+    return SandboxApiFp(this.configuration)
+      .logs(sandboxId, timestamps, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

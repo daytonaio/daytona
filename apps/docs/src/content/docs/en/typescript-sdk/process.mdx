@@ -401,6 +401,82 @@ console.log('[STDERR]:', result.stderr);
 
 ***
 
+#### getEntrypointLogs()
+
+##### Call Signature
+
+```ts
+getEntrypointLogs(): Promise<SessionCommandLogsResponse>
+```
+
+Get the logs for the sandbox entrypoint session.
+
+**Returns**:
+
+- `Promise<SessionCommandLogsResponse>` - Command logs containing: output (combined stdout and stderr), stdout and stderr
+
+**Example:**
+
+```ts
+const logs = await process.getEntrypointLogs();
+console.log('[STDOUT]:', logs.stdout);
+console.log('[STDERR]:', logs.stderr);
+```
+
+##### Call Signature
+
+```ts
+getEntrypointLogs(onStdout: (chunk: string) => void, onStderr: (chunk: string) => void): Promise<void>
+```
+
+Asynchronously retrieve and process the logs for the entrypoint session as they become available.
+
+**Parameters**:
+
+- `onStdout` _\(chunk: string\) =\> void_ - Callback function to handle stdout log chunks
+- `onStderr` _\(chunk: string\) =\> void_ - Callback function to handle stderr log chunks
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+const logs = await process.getEntrypointLogs((chunk) => {
+  console.log('[STDOUT]:', chunk);
+}, (chunk) => {
+  console.log('[STDERR]:', chunk);
+});
+```
+
+***
+
+#### getEntrypointSession()
+
+```ts
+getEntrypointSession(): Promise<SessionDTO>
+```
+
+Get the sandbox entrypoint session
+
+**Returns**:
+
+- `Promise<SessionDTO>` - SessionDTO information including:
+    - sessionId: The session's unique identifier
+    - commands: List of commands executed in the session
+
+**Example:**
+
+```ts
+const session = await process.getEntrypointSession();
+session.commands.forEach(cmd => {
+  console.log(`Command: ${cmd.command}`);
+});
+```
+
+***
+
 #### getPtySessionInfo()
 
 ```ts

@@ -263,6 +263,67 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+     * @summary Get entrypoint logs
+     * @param {boolean} [follow] Follow logs in real-time (WebSocket only)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getEntrypointLogs: async (follow?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/process/session/entrypoint/logs`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (follow !== undefined) {
+        localVarQueryParameter['follow'] = follow
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get details of an entrypoint session including its commands
+     * @summary Get entrypoint session details
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getEntrypointSession: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/process/session/entrypoint`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Get detailed information about a specific pseudo-terminal session
      * @summary Get PTY session information
      * @param {string} sessionId PTY session ID
@@ -706,6 +767,50 @@ export const ProcessApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+     * @summary Get entrypoint logs
+     * @param {boolean} [follow] Follow logs in real-time (WebSocket only)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getEntrypointLogs(
+      follow?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getEntrypointLogs(follow, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ProcessApi.getEntrypointLogs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get details of an entrypoint session including its commands
+     * @summary Get entrypoint session details
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getEntrypointSession(
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionDTO>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getEntrypointSession(options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ProcessApi.getEntrypointSession']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Get detailed information about a specific pseudo-terminal session
      * @summary Get PTY session information
      * @param {string} sessionId PTY session ID
@@ -971,6 +1076,25 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
       return localVarFp.executeCommand(request, options).then((request) => request(axios, basePath))
     },
     /**
+     * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+     * @summary Get entrypoint logs
+     * @param {boolean} [follow] Follow logs in real-time (WebSocket only)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getEntrypointLogs(follow?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.getEntrypointLogs(follow, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Get details of an entrypoint session including its commands
+     * @summary Get entrypoint session details
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getEntrypointSession(options?: RawAxiosRequestConfig): AxiosPromise<SessionDTO> {
+      return localVarFp.getEntrypointSession(options).then((request) => request(axios, basePath))
+    },
+    /**
      * Get detailed information about a specific pseudo-terminal session
      * @summary Get PTY session information
      * @param {string} sessionId PTY session ID
@@ -1159,6 +1283,33 @@ export class ProcessApi extends BaseAPI {
   public executeCommand(request: ExecuteRequest, options?: RawAxiosRequestConfig) {
     return ProcessApiFp(this.configuration)
       .executeCommand(request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+   * @summary Get entrypoint logs
+   * @param {boolean} [follow] Follow logs in real-time (WebSocket only)
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ProcessApi
+   */
+  public getEntrypointLogs(follow?: boolean, options?: RawAxiosRequestConfig) {
+    return ProcessApiFp(this.configuration)
+      .getEntrypointLogs(follow, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get details of an entrypoint session including its commands
+   * @summary Get entrypoint session details
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ProcessApi
+   */
+  public getEntrypointSession(options?: RawAxiosRequestConfig) {
+    return ProcessApiFp(this.configuration)
+      .getEntrypointSession(options)
       .then((request) => request(this.axios, this.basePath))
   }
 

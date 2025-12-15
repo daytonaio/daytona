@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"os/signal"
-	"sync"
+	"path"
+	"strings"
 	"syscall"
-	"time"
 
 	golog "log"
 
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/session"
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
@@ -28,13 +28,6 @@ func main() {
 	c, err := config.GetConfig()
 	if err != nil {
 		panic(err)
-	}
-
-	// Check if user wants to read entrypoint logs
-	args := os.Args[1:]
-	if len(args) == 2 && args[0] == "entrypoint" && args[1] == "logs" {
-		util.ReadEntrypointLogs(c.EntrypointLogFilePath)
-		return
 	}
 
 	var logWriter io.Writer
@@ -50,59 +43,62 @@ func main() {
 
 	initLogs(logWriter)
 
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Errorf("failed to get user home directory: %w", err))
+	}
+
+	configDir := path.Join(homeDir, ".daytona")
+	err = os.MkdirAll(configDir, 0755)
+	if err != nil {
+		panic(fmt.Errorf("failed to create config directory: %w", err))
+	}
+
 	// If workdir in image is not set, use user home as workdir
 	if c.UserHomeAsWorkDir {
-		homeDir, err := os.UserHomeDir()
+		err = os.Chdir(homeDir)
 		if err != nil {
-			log.Warnf("failed to get home directory: %v", err)
-		} else {
-			err = os.Chdir(homeDir)
-			if err != nil {
-				log.Warnf("failed to change working directory to home directory: %v", err)
-			}
+			log.Warnf("failed to change working directory to home directory: %v", err)
 		}
 	}
 
-	// Execute passed arguments as command
-	var entrypointCmd *exec.Cmd
-	var entrypointWg sync.WaitGroup
-	if len(args) > 0 {
-		// used for logging in case of errors starting/waiting for the command
-		entrypointLogWriter := os.Stdout
-		entrypointErrLogWriter := os.Stderr
+	sessionService := session.NewSessionService(configDir, c.TerminationGracePeriodSeconds, c.TerminationCheckIntervalMilliseconds)
 
-		if c.EntrypointLogFilePath != "" {
-			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				log.Errorf("Failed to open log file at %s due to %v, fallback to STDOUT and STDERR", c.EntrypointLogFilePath, err)
-			} else {
-				defer entrypointLogFile.Close()
-				entrypointLogWriter = entrypointLogFile
-				entrypointErrLogWriter = entrypointLogFile
-			}
+	// Check if user wants to read entrypoint logs
+	args := os.Args[1:]
+	if len(args) == 2 && args[0] == "entrypoint" && args[1] == "logs" {
+		entrypointLogFilePath := path.Join(configDir, "sessions", util.EntrypointSessionID, util.EntrypointCommandID, "output.log")
+		logBytes, err := os.ReadFile(entrypointLogFilePath)
+		if err != nil {
+			log.Errorf("Failed to read entrypoint log file: %v", err)
+			os.Exit(1)
 		}
 
-		entrypointCmd = exec.Command(args[0], args[1:]...)
-		entrypointCmd.Env = os.Environ()
-		entrypointCmd.Stdout = entrypointLogWriter
-		entrypointCmd.Stderr = entrypointErrLogWriter
+		fmt.Print(string(logBytes))
+		return
+	}
 
-		// Start the command and wait for it in a background goroutine.
-		// This ensures the child process is properly reaped (preventing zombies)
-		// while allowing the daemon to continue initialization without blocking.
-		startErr := entrypointCmd.Start()
-		if startErr != nil {
-			fmt.Fprintf(entrypointErrLogWriter, "failed to start command: %v\n", startErr)
+	// Execute passed arguments as command in entrypoint session
+	if len(args) > 0 {
+		// Create entrypoint session
+		err = sessionService.Create(util.EntrypointSessionID, false)
+		if err != nil {
+			log.Errorf("Failed to create entrypoint session: %v", err)
 		} else {
-			entrypointWg.Add(1)
-			go func() {
-				defer entrypointWg.Done()
-				if err := entrypointCmd.Wait(); err != nil {
-					fmt.Fprintf(entrypointErrLogWriter, "command exited with error: %v\n", err)
-				} else {
-					fmt.Fprint(entrypointLogWriter, "Entrypoint command completed successfully\n")
-				}
-			}()
+			log.Infof("Created entrypoint session with ID: %s", util.EntrypointSessionID)
+		}
+
+		// Execute command asynchronously via session
+		command := strings.Join(args, " ")
+		_, err := sessionService.Execute(
+			util.EntrypointSessionID,
+			util.Pointer(util.EntrypointCommandID),
+			command,
+			true,  // async=true for non-blocking
+			false, // isCombinedOutput=false
+		)
+		if err != nil {
+			log.Errorf("Failed to execute entrypoint command: %v", err)
 		}
 	}
 
@@ -114,9 +110,9 @@ func main() {
 	}
 
 	toolBoxServer := &toolbox.Server{
-		WorkDir:                              workDir,
-		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
-		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,
+		WorkDir:        workDir,
+		ConfigDir:      configDir,
+		SessionService: sessionService,
 	}
 
 	// Start the toolbox server in a go routine
@@ -166,51 +162,13 @@ func main() {
 	}
 
 	// Handle entrypoint command shutdown
-	if entrypointCmd != nil && entrypointCmd.Process != nil {
-		log.Info("Waiting for entrypoint command to complete...")
-
-		// Create a channel to signal when WaitGroup is done
-		done := make(chan struct{})
-		go func() {
-			entrypointWg.Wait()
-			close(done)
-		}()
-
-		// Wait with timeout for graceful completion
-		timer := time.NewTimer(time.Duration(c.EntrypointShutdownTimeoutSec) * time.Second)
-		select {
-		case <-done:
-			log.Info("Entrypoint command completed")
-			if !timer.Stop() {
-				<-timer.C
-			}
-		case <-timer.C:
-			log.Warn("Entrypoint command did not complete within timeout, sending SIGTERM...")
-			if err := entrypointCmd.Process.Signal(syscall.SIGTERM); err != nil {
-				log.Errorf("Failed to send SIGTERM to entrypoint command: %v", err)
-			}
-
-			// Wait a bit more for SIGTERM to take effect
-			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.SigtermShutdownTimeoutSec)*time.Second)
-			defer cancel()
-
-			gracefulDone := make(chan struct{})
-			go func() {
-				entrypointWg.Wait()
-				close(gracefulDone)
-			}()
-
-			select {
-			case <-gracefulDone:
-				log.Info("Entrypoint command terminated gracefully")
-			case <-ctx.Done():
-				log.Warn("Entrypoint command did not respond to SIGTERM, sending SIGKILL...")
-				if err := entrypointCmd.Process.Kill(); err != nil {
-					log.Errorf("Failed to kill entrypoint command: %v", err)
-				}
-				entrypointWg.Wait()
-				log.Info("Entrypoint command killed")
-			}
+	_, err = sessionService.Get(util.EntrypointSessionID)
+	if err != nil {
+		log.Errorf("Failed to get entrypoint session: %v", err)
+	} else {
+		delErr := sessionService.Delete(context.Background(), util.EntrypointSessionID)
+		if delErr != nil {
+			log.Errorf("Failed to delete entrypoint session: %v", delErr)
 		}
 	}
 
