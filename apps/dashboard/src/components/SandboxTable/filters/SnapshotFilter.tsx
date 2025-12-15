@@ -3,13 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SnapshotDto } from '@daytonaio/api-client'
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandInputButton,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Check, Loader2, Search, X } from 'lucide-react'
+import { SnapshotDto } from '@daytonaio/api-client'
+import { Check, Loader2, X } from 'lucide-react'
 import { useState } from 'react'
-import { DebouncedInput } from '@/components/DebouncedInput'
 
 interface SnapshotFilterProps {
   value: string[]
@@ -81,18 +88,8 @@ export function SnapshotFilter({
 
   return (
     <Command>
-      <div className="flex items-center gap-2 justify-between p-2">
-        <div className="flex items-center border border-border rounded-md h-8 flex-1 px-3">
-          <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-          <DebouncedInput
-            placeholder="Search..."
-            className="border-0 h-auto p-0 flex-1 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-            value={searchValue}
-            onChange={handleSearchChange}
-          />
-        </div>
-        <button
-          className="text-sm text-muted-foreground hover:text-primary px-2"
+      <CommandInput placeholder="Search..." className="" value={searchValue} onValueChange={setSearchValue}>
+        <CommandInputButton
           onClick={() => {
             onFilterChange(undefined)
             setSearchValue('')
@@ -102,10 +99,10 @@ export function SnapshotFilter({
           }}
         >
           Clear
-        </button>
-      </div>
+        </CommandInputButton>
+      </CommandInput>
       {hasMore && (
-        <div className="px-2 pb-2">
+        <div className="px-2 pb-2 mt-2">
           <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
             Please refine your search to see more Snapshots.
           </div>

@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { addHours, formatRelative } from 'date-fns'
 import {
+  ArrowRightIcon,
   BookOpen,
   Box,
   ChartColumn,
@@ -44,6 +45,7 @@ import {
   Mail,
   Moon,
   PackageOpen,
+  SearchIcon,
   Settings,
   Slack,
   SquareUserRound,
@@ -57,10 +59,12 @@ import {
 import { usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
@@ -77,6 +81,26 @@ interface SidebarItem {
   label: string
   path: RoutePath | string
   onClick?: () => void
+}
+
+const useNavCommands = (items: { label: string; path: RoutePath | string; onClick?: () => void }[]) => {
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
+  const navCommands: CommandConfig[] = useMemo(
+    () =>
+      items
+        .filter((item) => item.path !== pathname)
+        .map((item) => ({
+          id: `nav-${item.path}`,
+          label: `Go to ${item.label}`,
+          icon: <ArrowRightIcon className="w-4 h-4" />,
+          onSelect: () => navigate(item.path),
+        })),
+    [pathname, navigate, items],
+  )
+
+  useRegisterCommands(navCommands, { groupId: 'navigation', groupLabel: 'Navigation', groupOrder: 1 })
 }
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
@@ -228,6 +252,32 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     ].filter((group) => group.items.length > 0)
   }, [sidebarItems, settingsItems, billingItems, infrastructureItems])
 
+  const { setIsOpen } = useCommandPaletteActions()
+
+  const commandItems = useMemo(() => {
+    return sidebarGroups
+      .flatMap((group) => group.items)
+      .concat(
+        {
+          path: RoutePath.ACCOUNT_SETTINGS,
+          label: 'Account Settings',
+          icon: <Settings size={16} strokeWidth={1.5} />,
+        },
+        {
+          path: RoutePath.USER_INVITATIONS,
+          label: 'Invitations',
+          icon: <Mail size={16} strokeWidth={1.5} />,
+        },
+        {
+          path: RoutePath.ONBOARDING,
+          label: 'Onboarding',
+          icon: <ListChecks size={16} strokeWidth={1.5} />,
+        },
+      )
+  }, [sidebarGroups])
+
+  useNavCommands(commandItems)
+
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarHeader>
@@ -242,8 +292,29 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           </div>
           <SidebarTrigger className="p-2 [&_svg]:size-5" />
         </div>
-        <SidebarMenu>
-          <OrganizationPicker />
+        <SidebarMenu className="mb-2">
+          <SidebarMenuItem className="mb-1">
+            <button
+              onClick={() => setIsOpen(true)}
+              className={cn(
+                'bg-background/30 border-input h-8 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] flex items-center gap-2 justify-between text-muted-foreground hover:text-foreground w-full pr-1.5 hover:bg-background/50',
+                {
+                  'px-2 justify-center': !sidebar.open,
+                },
+              )}
+            >
+              {!sidebar.open ? (
+                <SearchIcon className="w-4 h-4" />
+              ) : (
+                <>
+                  Search <Kbd>⌘ K</Kbd>
+                </>
+              )}
+            </button>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <OrganizationPicker />
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
