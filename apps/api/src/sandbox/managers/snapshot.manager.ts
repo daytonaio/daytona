@@ -630,7 +630,42 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     // Process snapshot info in case it had failed or it's a build snapshot
     if (!snapshot.ref) {
-      await this.processSnapshotInfo(snapshot, snapshotInfoResponse)
+      const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      const sanitizedUrl = defaultInternalRegistry.url.replace(/^https?:\/\//, '')
+      snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${snapshotInfoResponse.hash}:daytona`
+
+      const organization = await this.organizationService.findOne(snapshot.organizationId)
+      if (!organization) {
+        throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
+      }
+
+      const MAX_SIZE_GB = organization.maxSnapshotSize
+
+      if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
+        await this.updateSnapshotState(
+          snapshot.id,
+          SnapshotState.ERROR,
+          `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(
+            2,
+          )}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
+        )
+        return DONT_SYNC_AGAIN
+      }
+
+      snapshot.size = snapshotInfoResponse.sizeGB
+
+      // If entrypoint is not explicitly set, set it from snapshotInfoResponse
+      if (!snapshot.entrypoint) {
+        if (snapshotInfoResponse.entrypoint && snapshotInfoResponse.entrypoint.length > 0) {
+          if (Array.isArray(snapshotInfoResponse.entrypoint)) {
+            snapshot.entrypoint = snapshotInfoResponse.entrypoint
+          } else {
+            snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
+          }
+        } else {
+          snapshot.entrypoint = ['sleep', 'infinity']
+        }
+      }
     }
 
     try {
@@ -640,7 +675,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
-    await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+    await this.snapshotRepository.save(snapshot)
 
     // Best effort removal of old snapshot from transient registry
     const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
@@ -990,43 +1025,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       this.logger.error(`Failed to cleanup inactive snapshots from runners: ${fromAxiosError(error)}`)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
-    }
-  }
-
-  private async processSnapshotInfo(snapshot: Snapshot, snapshotInfoResponse: RunnerSnapshotInfo) {
-    const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-    const sanitizedUrl = defaultInternalRegistry.url.replace(/^https?:\/\//, '')
-    snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${snapshotInfoResponse.hash}:daytona`
-
-    const organization = await this.organizationService.findOne(snapshot.organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
-    }
-
-    const MAX_SIZE_GB = organization.maxSnapshotSize
-
-    if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
-      await this.updateSnapshotState(
-        snapshot.id,
-        SnapshotState.ERROR,
-        `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
-      )
-      return DONT_SYNC_AGAIN
-    }
-
-    snapshot.size = snapshotInfoResponse.sizeGB
-
-    // If entrypoint is not explicitly set, set it from snapshotInfoResponse
-    if (!snapshot.entrypoint) {
-      if (snapshotInfoResponse.entrypoint && snapshotInfoResponse.entrypoint.length > 0) {
-        if (Array.isArray(snapshotInfoResponse.entrypoint)) {
-          snapshot.entrypoint = snapshotInfoResponse.entrypoint
-        } else {
-          snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
-        }
-      } else {
-        snapshot.entrypoint = ['sleep', 'infinity']
-      }
     }
   }
 
