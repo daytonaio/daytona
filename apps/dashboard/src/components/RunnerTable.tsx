@@ -243,7 +243,7 @@ const getColumns = ({
     {
       accessorKey: 'id',
       header: 'ID',
-      size: 180,
+      size: 240,
       cell: ({ row }) => (
         <div className="w-full truncate flex items-center gap-2">
           <span className="truncate block text-sm">{row.original.id}</span>
@@ -263,7 +263,7 @@ const getColumns = ({
     {
       accessorKey: 'name',
       header: 'Name',
-      size: 180,
+      size: 240,
       cell: ({ row }) => (
         <div className="w-full truncate flex items-center gap-2">
           <span className="truncate block text-sm">{row.original.name}</span>
