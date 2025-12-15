@@ -307,7 +307,7 @@ const Sandboxes: React.FC = () => {
 
   // Region Filter
 
-  const { regions: regionsData, loadingRegions: regionsDataIsLoading, getRegionName } = useRegions()
+  const { availableRegions: regionsData, loadingRegions: regionsDataIsLoading, getRegionName } = useRegions()
 
   // Subscribe to Sandbox Events
 

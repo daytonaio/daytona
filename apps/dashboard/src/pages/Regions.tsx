@@ -35,9 +35,9 @@ import { useRegions } from '@/hooks/useRegions'
 import { Check, Copy } from 'lucide-react'
 
 const Regions: React.FC = () => {
-  const { regionsApi } = useApi()
+  const { organizationsApi } = useApi()
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
-  const { regions, loadingRegions, refreshRegions } = useRegions()
+  const { availableRegions: regions, loadingRegions, refreshAvailableRegions: refreshRegions } = useRegions()
 
   const [regionIsLoading, setRegionIsLoading] = useState<Record<string, boolean>>({})
 
@@ -52,8 +52,12 @@ const Regions: React.FC = () => {
   const [copied, setCopied] = useState(false)
 
   const handleCreateRegion = async (createRegionData: CreateRegion): Promise<CreateRegionResponse | null> => {
+    if (!selectedOrganization) {
+      return null
+    }
+
     try {
-      const response = (await regionsApi.createRegion(createRegionData, selectedOrganization?.id)).data
+      const response = (await organizationsApi.createRegion(selectedOrganization.id, createRegionData)).data
       toast.success(`Creating region ${createRegionData.name}`)
       await refreshRegions()
       return response
@@ -64,10 +68,14 @@ const Regions: React.FC = () => {
   }
 
   const handleDelete = async (region: Region) => {
+    if (!selectedOrganization) {
+      return
+    }
+
     setRegionIsLoading((prev) => ({ ...prev, [region.id]: true }))
 
     try {
-      await regionsApi.deleteRegion(region.id, selectedOrganization?.id)
+      await organizationsApi.deleteRegion(selectedOrganization.id, region.id)
       setRegionToDelete(null)
       setDeleteRegionDialogIsOpen(false)
       toast.success(`Deleting region ${region.name}`)
@@ -102,12 +110,14 @@ const Regions: React.FC = () => {
   }
 
   const confirmRegenerateProxyApiKey = async () => {
-    if (!regionForRegenerate) return
+    if (!regionForRegenerate || !selectedOrganization) {
+      return
+    }
 
     setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
 
     try {
-      const response = await regionsApi.regenerateProxyApiKey(regionForRegenerate.id, selectedOrganization?.id)
+      const response = await organizationsApi.regenerateProxyApiKey(selectedOrganization.id, regionForRegenerate.id)
       setRegeneratedApiKey(response.data.apiKey)
       setShowRegenerateProxyApiKeyDialog(true)
       toast.success('Proxy API key regenerated successfully')
@@ -121,12 +131,17 @@ const Regions: React.FC = () => {
   }
 
   const confirmRegenerateSshGatewayApiKey = async () => {
-    if (!regionForRegenerate) return
+    if (!regionForRegenerate || !selectedOrganization) {
+      return
+    }
 
     setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
 
     try {
-      const response = await regionsApi.regenerateSshGatewayApiKey(regionForRegenerate.id, selectedOrganization?.id)
+      const response = await organizationsApi.regenerateSshGatewayApiKey(
+        selectedOrganization.id,
+        regionForRegenerate.id,
+      )
       setRegeneratedApiKey(response.data.apiKey)
       setShowRegenerateSshGatewayApiKeyDialog(true)
       toast.success('SSH Gateway API key regenerated successfully')

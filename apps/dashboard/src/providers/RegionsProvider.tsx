@@ -15,62 +15,69 @@ type Props = {
 }
 
 export function RegionsProvider(props: Props) {
-  const { regionsApi } = useApi()
+  const { regionsApi, organizationsApi } = useApi()
 
   const { selectedOrganization } = useSelectedOrganization()
 
-  const [regions, setRegions] = useState<Region[]>([])
+  const [sharedRegions, setSharedRegions] = useState<Region[]>([])
+  const [availableRegions, setAvailableRegions] = useState<Region[]>([])
   const [loadingRegions, setLoadingRegions] = useState(true)
 
-  const getRegions = useCallback(async () => {
+  const getSharedRegions = useCallback(async () => {
+    try {
+      const regions = (await regionsApi.listSharedRegions()).data
+      setSharedRegions(regions)
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch shared regions')
+      setSharedRegions([])
+      throw error
+    }
+  }, [regionsApi])
+
+  const getAvailableRegions = useCallback(async () => {
     if (!selectedOrganization) {
-      setRegions([])
-      setLoadingRegions(false)
+      setAvailableRegions([])
       return []
     }
     try {
-      const regions = (await regionsApi.listRegions(selectedOrganization.id)).data
-      setRegions(regions)
+      const regions = (await organizationsApi.listAvailableRegions(selectedOrganization.id)).data
+      setAvailableRegions(regions)
       return regions
     } catch (error) {
-      handleApiError(error, 'Failed to fetch regions')
-      setRegions([])
+      handleApiError(error, 'Failed to fetch available regions')
+      setAvailableRegions([])
       throw error
-    } finally {
-      setLoadingRegions(false)
     }
-  }, [regionsApi, selectedOrganization])
+  }, [organizationsApi, selectedOrganization])
 
   useEffect(() => {
-    getRegions()
-  }, [getRegions])
+    Promise.allSettled([getSharedRegions(), getAvailableRegions()]).finally(() => {
+      setLoadingRegions(false)
+    })
+  }, [getSharedRegions, getAvailableRegions])
 
   const getRegionName = useCallback(
     (regionId: string): string | undefined => {
-      const region = regions.find((region) => region.id === regionId)
+      const region = [...availableRegions, ...sharedRegions].find((region) => region.id === regionId)
       return region?.name
     },
-    [regions],
+    [availableRegions, sharedRegions],
   )
 
-  const sharedRegions = useMemo(() => {
-    return regions.filter((region) => region.regionType === RegionType.SHARED)
-  }, [regions])
-
   const customRegions = useMemo(() => {
-    return regions.filter((region) => region.regionType === RegionType.CUSTOM)
-  }, [regions])
+    return availableRegions.filter((region) => region.regionType === RegionType.CUSTOM)
+  }, [availableRegions])
 
   const contextValue: IRegionsContext = useMemo(() => {
     return {
-      regions,
       loadingRegions,
       sharedRegions,
+      availableRegions,
       customRegions,
-      refreshRegions: getRegions,
+      refreshAvailableRegions: getAvailableRegions,
       getRegionName,
     }
-  }, [regions, loadingRegions, sharedRegions, customRegions, getRegions, getRegionName])
+  }, [loadingRegions, sharedRegions, availableRegions, customRegions, getAvailableRegions, getRegionName])
 
   return <RegionsContext.Provider value={contextValue}>{props.children}</RegionsContext.Provider>
 }

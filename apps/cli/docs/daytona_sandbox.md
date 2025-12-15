@@ -15,6 +15,7 @@ Commands for managing Daytona sandboxes
 ### SEE ALSO
 
 - [daytona](daytona.md) - Daytona CLI
+- [daytona sandbox archive](daytona_sandbox_archive.md)  - Archive a sandbox
 - [daytona sandbox create](daytona_sandbox_create.md) - Create a new sandbox
 - [daytona sandbox delete](daytona_sandbox_delete.md) - Delete a sandbox
 - [daytona sandbox info](daytona_sandbox_info.md) - Get sandbox info

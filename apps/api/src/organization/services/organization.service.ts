@@ -209,23 +209,20 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return this.getRegionQuota(sandbox.organizationId, sandbox.region)
   }
 
-  async listRegions(organizationId: string): Promise<RegionDto[]> {
+  async listAvailableRegions(organizationId: string): Promise<RegionDto[]> {
     const regions = await this.regionRepository
       .createQueryBuilder('region')
-      .where('region."regionType" = :customType AND region."organizationId" = :organizationId', {
-        customType: RegionType.CUSTOM,
+      .where('region."regionType" = :customRegionType AND region."organizationId" = :organizationId', {
+        customRegionType: RegionType.CUSTOM,
         organizationId,
       })
       .orWhere(
-        'region."regionType" = :dedicatedType AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
+        'region."regionType" IN (:...quotaRequiredRegionTypes) AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
         {
-          dedicatedType: RegionType.DEDICATED,
+          quotaRequiredRegionTypes: [RegionType.DEDICATED, RegionType.SHARED],
           organizationId,
         },
       )
-      .orWhere('region."regionType" = :sharedType', {
-        sharedType: RegionType.SHARED,
-      })
       .orderBy(
         `CASE region."regionType" 
           WHEN '${RegionType.CUSTOM}' THEN 1 

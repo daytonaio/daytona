@@ -16,6 +16,7 @@ daytona snapshot create [SNAPSHOT] [flags]
   -e, --entrypoint string     The entrypoint command for the snapshot
   -i, --image string          The image name for the snapshot
       --memory int32          Memory that will be allocated to the underlying sandboxes in GB (default: 1)
+      --region string         ID of the region where the snapshot will be available (defaults to organization default region)
 ```
 
 ### Options inherited from parent commands

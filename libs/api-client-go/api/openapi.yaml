@@ -1079,15 +1079,15 @@ paths:
       summary: Cancel organization invitation
       tags:
         - organizations
-  /regions:
+  /organizations/{organizationId}/regions:
     get:
-      operationId: listRegions
+      operationId: listAvailableRegions
       parameters:
-        - description: Use with JWT to specify the organization ID
+        - description: Organization ID
           explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
+          in: path
+          name: organizationId
+          required: true
           schema:
             type: string
           style: simple
@@ -1099,24 +1099,24 @@ paths:
                 items:
                   $ref: '#/components/schemas/Region'
                 type: array
-          description: List of all regions
+          description: List of all available regions
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: List all regions
+      summary: List all available regions for the organization
       tags:
-        - regions
+        - organizations
     post:
       operationId: createRegion
       parameters:
-        - description: Use with JWT to specify the organization ID
+        - description: Organization ID
           explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
+          in: path
+          name: organizationId
+          required: true
           schema:
             type: string
           style: simple
@@ -1141,23 +1141,23 @@ paths:
             - email
       summary: Create a new region
       tags:
-        - regions
-  /regions/{id}:
+        - organizations
+  /organizations/{organizationId}/regions/{id}:
     delete:
       operationId: deleteRegion
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1173,22 +1173,22 @@ paths:
             - email
       summary: Delete a region
       tags:
-        - regions
+        - organizations
     get:
       operationId: getRegionById
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1208,23 +1208,23 @@ paths:
             - email
       summary: Get region by ID
       tags:
-        - regions
-  /regions/{id}/regenerate-proxy-api-key:
+        - organizations
+  /organizations/{organizationId}/regions/{id}/regenerate-proxy-api-key:
     post:
       operationId: regenerateProxyApiKey
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1244,23 +1244,23 @@ paths:
             - email
       summary: Regenerate proxy API key for a region
       tags:
-        - regions
-  /regions/{id}/regenerate-ssh-gateway-api-key:
+        - organizations
+  /organizations/{organizationId}/regions/{id}/regenerate-ssh-gateway-api-key:
     post:
       operationId: regenerateSshGatewayApiKey
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1280,7 +1280,7 @@ paths:
             - email
       summary: Regenerate SSH gateway API key for a region
       tags:
-        - regions
+        - organizations
   /users/me:
     get:
       operationId: getAuthenticatedUser
@@ -1482,6 +1482,28 @@ paths:
       summary: Get user by ID
       tags:
         - users
+  /regions:
+    get:
+      operationId: listSharedRegions
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Region'
+                type: array
+          description: List of all shared regions
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all shared regions
+      tags:
+        - regions
   /sandbox:
     get:
       operationId: listSandboxes
@@ -2679,7 +2701,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Runner'
+                $ref: '#/components/schemas/RunnerFull'
           description: Runner info
       security:
         - bearer: []
@@ -7425,11 +7447,7 @@ paths:
             type: string
           style: simple
       responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RunnerFull'
+        '204':
           description: ''
       security:
         - bearer: []
@@ -9911,6 +9929,171 @@ components:
         - decommissioned
         - unresponsive
       type: string
+    RunnerFull:
+      example:
+        memory: 16
+        currentMemoryUsagePercentage: 68.2
+        apiKey: dtn_1234567890
+        availabilityScore: 85
+        currentDiskUsagePercentage: 33.8
+        currentCpuUsagePercentage: 45.6
+        createdAt: 2023-10-01T12:00:00Z
+        apiUrl: https://api.runner1.example.com
+        regionType: shared
+        id: runner123
+        state: initializing
+        unschedulable: false
+        class: small
+        currentAllocatedDiskGiB: 50000
+        currentAllocatedMemoryGiB: 8000
+        gpuType: gpuType
+        currentAllocatedCpu: 4000
+        updatedAt: 2023-10-01T12:00:00Z
+        proxyUrl: https://proxy.runner1.example.com
+        cpu: 8
+        gpu: 1
+        currentSnapshotCount: 12
+        version: '0'
+        disk: 100
+        domain: runner1.example.com
+        name: runner1
+        region: us
+        lastChecked: 2024-10-01T12:00:00Z
+      properties:
+        id:
+          description: The ID of the runner
+          example: runner123
+          type: string
+        domain:
+          description: The domain of the runner
+          example: runner1.example.com
+          type: string
+        apiUrl:
+          description: The API URL of the runner
+          example: https://api.runner1.example.com
+          type: string
+        proxyUrl:
+          description: The proxy URL of the runner
+          example: https://proxy.runner1.example.com
+          type: string
+        cpu:
+          description: The CPU capacity of the runner
+          example: 8
+          type: number
+        memory:
+          description: The memory capacity of the runner in GiB
+          example: 16
+          type: number
+        disk:
+          description: The disk capacity of the runner in GiB
+          example: 100
+          type: number
+        gpu:
+          description: The GPU capacity of the runner
+          example: 1
+          type: number
+        gpuType:
+          description: The type of GPU
+          type: string
+        class:
+          allOf:
+            - $ref: '#/components/schemas/SandboxClass'
+          description: The class of the runner
+          example: small
+        currentCpuUsagePercentage:
+          description: Current CPU usage percentage
+          example: 45.6
+          type: number
+        currentMemoryUsagePercentage:
+          description: Current RAM usage percentage
+          example: 68.2
+          type: number
+        currentDiskUsagePercentage:
+          description: Current disk usage percentage
+          example: 33.8
+          type: number
+        currentAllocatedCpu:
+          description: Current allocated CPU
+          example: 4000
+          type: number
+        currentAllocatedMemoryGiB:
+          description: Current allocated memory in GiB
+          example: 8000
+          type: number
+        currentAllocatedDiskGiB:
+          description: Current allocated disk in GiB
+          example: 50000
+          type: number
+        currentSnapshotCount:
+          description: Current snapshot count
+          example: 12
+          type: number
+        availabilityScore:
+          description: Runner availability score
+          example: 85
+          type: number
+        region:
+          description: The region of the runner
+          example: us
+          type: string
+        name:
+          description: The name of the runner
+          example: runner1
+          type: string
+        state:
+          allOf:
+            - $ref: '#/components/schemas/RunnerState'
+          description: The state of the runner
+          example: initializing
+        lastChecked:
+          description: The last time the runner was checked
+          example: 2024-10-01T12:00:00Z
+          type: string
+        unschedulable:
+          description: Whether the runner is unschedulable
+          example: false
+          type: boolean
+        createdAt:
+          description: The creation timestamp of the runner
+          example: 2023-10-01T12:00:00Z
+          type: string
+        updatedAt:
+          description: The last update timestamp of the runner
+          example: 2023-10-01T12:00:00Z
+          type: string
+        version:
+          description: The version of the runner
+          example: '0'
+          type: string
+        apiKey:
+          description: The API key for the runner
+          example: dtn_1234567890
+          type: string
+        regionType:
+          allOf:
+            - $ref: '#/components/schemas/RegionType'
+          description: The region type of the runner
+          example: shared
+      required:
+        - apiKey
+        - apiUrl
+        - class
+        - cpu
+        - createdAt
+        - disk
+        - domain
+        - gpu
+        - gpuType
+        - id
+        - memory
+        - name
+        - proxyUrl
+        - region
+        - state
+        - unschedulable
+        - updatedAt
+        - version
+      type: object
     Runner:
       example:
         memory: 16
@@ -10046,165 +10229,6 @@ components:
           example: '0'
           type: string
       required:
-        - apiUrl
-        - class
-        - cpu
-        - createdAt
-        - disk
-        - domain
-        - gpu
-        - gpuType
-        - id
-        - memory
-        - name
-        - proxyUrl
-        - region
-        - state
-        - unschedulable
-        - updatedAt
-        - version
-      type: object
-    RunnerFull:
-      example:
-        memory: 16
-        currentMemoryUsagePercentage: 68.2
-        apiKey: dtn_1234567890
-        availabilityScore: 85
-        currentDiskUsagePercentage: 33.8
-        currentCpuUsagePercentage: 45.6
-        createdAt: 2023-10-01T12:00:00Z
-        apiUrl: https://api.runner1.example.com
-        id: runner123
-        state: initializing
-        unschedulable: false
-        class: small
-        currentAllocatedDiskGiB: 50000
-        currentAllocatedMemoryGiB: 8000
-        gpuType: gpuType
-        currentAllocatedCpu: 4000
-        updatedAt: 2023-10-01T12:00:00Z
-        proxyUrl: https://proxy.runner1.example.com
-        cpu: 8
-        gpu: 1
-        currentSnapshotCount: 12
-        version: '0'
-        disk: 100
-        domain: runner1.example.com
-        name: runner1
-        region: us
-        lastChecked: 2024-10-01T12:00:00Z
-      properties:
-        id:
-          description: The ID of the runner
-          example: runner123
-          type: string
-        domain:
-          description: The domain of the runner
-          example: runner1.example.com
-          type: string
-        apiUrl:
-          description: The API URL of the runner
-          example: https://api.runner1.example.com
-          type: string
-        proxyUrl:
-          description: The proxy URL of the runner
-          example: https://proxy.runner1.example.com
-          type: string
-        cpu:
-          description: The CPU capacity of the runner
-          example: 8
-          type: number
-        memory:
-          description: The memory capacity of the runner in GiB
-          example: 16
-          type: number
-        disk:
-          description: The disk capacity of the runner in GiB
-          example: 100
-          type: number
-        gpu:
-          description: The GPU capacity of the runner
-          example: 1
-          type: number
-        gpuType:
-          description: The type of GPU
-          type: string
-        class:
-          allOf:
-            - $ref: '#/components/schemas/SandboxClass'
-          description: The class of the runner
-          example: small
-        currentCpuUsagePercentage:
-          description: Current CPU usage percentage
-          example: 45.6
-          type: number
-        currentMemoryUsagePercentage:
-          description: Current RAM usage percentage
-          example: 68.2
-          type: number
-        currentDiskUsagePercentage:
-          description: Current disk usage percentage
-          example: 33.8
-          type: number
-        currentAllocatedCpu:
-          description: Current allocated CPU
-          example: 4000
-          type: number
-        currentAllocatedMemoryGiB:
-          description: Current allocated memory in GiB
-          example: 8000
-          type: number
-        currentAllocatedDiskGiB:
-          description: Current allocated disk in GiB
-          example: 50000
-          type: number
-        currentSnapshotCount:
-          description: Current snapshot count
-          example: 12
-          type: number
-        availabilityScore:
-          description: Runner availability score
-          example: 85
-          type: number
-        region:
-          description: The region of the runner
-          example: us
-          type: string
-        name:
-          description: The name of the runner
-          example: runner1
-          type: string
-        state:
-          allOf:
-            - $ref: '#/components/schemas/RunnerState'
-          description: The state of the runner
-          example: initializing
-        lastChecked:
-          description: The last time the runner was checked
-          example: 2024-10-01T12:00:00Z
-          type: string
-        unschedulable:
-          description: Whether the runner is unschedulable
-          example: false
-          type: boolean
-        createdAt:
-          description: The creation timestamp of the runner
-          example: 2023-10-01T12:00:00Z
-          type: string
-        updatedAt:
-          description: The last update timestamp of the runner
-          example: 2023-10-01T12:00:00Z
-          type: string
-        version:
-          description: The version of the runner
-          example: '0'
-          type: string
-        apiKey:
-          description: The API key for the runner
-          example: dtn_1234567890
-          type: string
-      required:
-        - apiKey
         - apiUrl
         - class
         - cpu
@@ -11687,6 +11711,7 @@ components:
         imageName: ubuntu:22.04
         memory: 1
         buildInfo: ''
+        regionId: regionId
         entrypoint: sleep infinity
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
@@ -11729,6 +11754,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
+        regionId:
+          description: ID of the region where the snapshot will be available. Defaults
+            to organization default region if not specified.
+          type: string
       required:
         - name
       type: object
@@ -11748,6 +11777,9 @@ components:
         imageName: imageName
         buildInfo: ''
         cpu: 6.027456183070403
+        regionIds:
+          - regionIds
+          - regionIds
         gpu: 1.4658129805029452
         organizationId: organizationId
         general: true
@@ -11811,6 +11843,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the snapshot
+        regionIds:
+          description: IDs of regions where the snapshot is available
+          items:
+            type: string
+          type: array
       required:
         - cpu
         - createdAt
@@ -11836,6 +11873,9 @@ components:
           - imageName: imageName
             buildInfo: ''
             cpu: 6.027456183070403
+            regionIds:
+              - regionIds
+              - regionIds
             gpu: 1.4658129805029452
             organizationId: organizationId
             general: true
@@ -11855,6 +11895,9 @@ components:
           - imageName: imageName
             buildInfo: ''
             cpu: 6.027456183070403
+            regionIds:
+              - regionIds
+              - regionIds
             gpu: 1.4658129805029452
             organizationId: organizationId
             general: true

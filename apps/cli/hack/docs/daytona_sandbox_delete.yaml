@@ -1,6 +1,6 @@
 name: daytona sandbox delete
 synopsis: Delete a sandbox
-usage: daytona sandbox delete [SANDBOX_ID] [flags]
+usage: daytona sandbox delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 options:
   - name: all
     shorthand: a
