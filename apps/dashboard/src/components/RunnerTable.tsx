@@ -300,28 +300,28 @@ const getColumns = ({
         </div>
       ),
     },
-    {
-      accessorKey: 'domain',
-      header: 'Domain',
-      size: 180,
-      cell: ({ row }) => (
-        <div className="w-full truncate flex items-center gap-2">
-          <span className="truncate block text-sm">{row.original.domain || '/'}</span>
-          {row.original.domain && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                copyToClipboard(row.original.domain!)
-              }}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Copy Domain"
-            >
-              <Copy className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-      ),
-    },
+    // {
+    //   accessorKey: 'domain',
+    //   header: 'Domain',
+    //   size: 180,
+    //   cell: ({ row }) => (
+    //     <div className="w-full truncate flex items-center gap-2">
+    //       <span className="truncate block text-sm">{row.original.domain || '/'}</span>
+    //       {row.original.domain && (
+    //         <button
+    //           onClick={(e) => {
+    //             e.stopPropagation()
+    //             copyToClipboard(row.original.domain!)
+    //           }}
+    //           className="text-muted-foreground hover:text-foreground transition-colors"
+    //           aria-label="Copy Domain"
+    //         >
+    //           <Copy className="w-3 h-3" />
+    //         </button>
+    //       )}
+    //     </div>
+    //   ),
+    // },
     {
       accessorKey: 'state',
       header: 'State',
