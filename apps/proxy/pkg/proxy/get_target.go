@@ -52,21 +52,21 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 		return nil, nil, errors.New("sandbox ID is required")
 	}
 
-	isPublic, err := p.getSandboxPublic(ctx, sandboxID)
-	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get sandbox public status: %w", err)))
-		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
-	}
+	// isPublic, err := p.getSandboxPublic(ctx, sandboxID)
+	// if err != nil {
+	// 	ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get sandbox public status: %w", err)))
+	// 	return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
+	// }
 
-	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT {
-		err, didRedirect := p.Authenticate(ctx, sandboxID)
-		if err != nil {
-			if !didRedirect {
-				ctx.Error(common_errors.NewUnauthorizedError(err))
-			}
-			return nil, nil, err
-		}
-	}
+	// if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT {
+	// 	err, didRedirect := p.Authenticate(ctx, sandboxID)
+	// 	if err != nil {
+	// 		if !didRedirect {
+	// 			ctx.Error(common_errors.NewUnauthorizedError(err))
+	// 		}
+	// 		return nil, nil, err
+	// 	}
+	// }
 
 	runnerInfo, err := p.getRunnerInfo(ctx, sandboxID)
 	if err != nil {
