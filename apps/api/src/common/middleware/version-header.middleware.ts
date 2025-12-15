@@ -9,12 +9,15 @@ import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class VersionHeaderMiddleware implements NestMiddleware {
-  constructor(private readonly configService: TypedConfigService) {}
+  private readonly version: string | undefined
+
+  constructor(private readonly configService: TypedConfigService) {
+    this.version = this.configService.get('version')
+  }
 
   use(req: Request, res: Response, next: NextFunction) {
-    const version = this.configService.get('version')
-    if (version) {
-      res.setHeader('X-Daytona-Api-Version', `${version}`)
+    if (this.version) {
+      res.setHeader('X-Daytona-Api-Version', `${this.version}`)
     }
     next()
   }
