@@ -88,7 +88,7 @@ func GetConfig() (*Config, error) {
 	}
 
 	if config.Redis != nil {
-		if config.Redis.Host == nil {
+		if config.Redis.Host == nil || *config.Redis.Host == "" {
 			config.Redis = nil
 		}
 	}
