@@ -264,27 +264,16 @@ const Volumes: React.FC = () => {
       </PageHeader>
 
       <PageContent size="full">
-        <Dialog
-          open={showCreateDialog}
-          onOpenChange={(isOpen) => {
-            setShowCreateDialog(isOpen)
-            if (isOpen) {
-              return
-            }
-            setNewVolumeName('')
+        <VolumeTable
+          data={volumes}
+          loading={loadingVolumes}
+          processingVolumeAction={processingVolumeAction}
+          onDelete={(volume) => {
+            setVolumeToDelete(volume)
+            setShowDeleteDialog(true)
           }}
-        >
-          <VolumeTable
-            data={volumes}
-            loading={loadingVolumes}
-            processingVolumeAction={processingVolumeAction}
-            onDelete={(volume) => {
-              setVolumeToDelete(volume)
-              setShowDeleteDialog(true)
-            }}
-            onBulkDelete={handleBulkDelete}
-          />
-        </Dialog>
+          onBulkDelete={handleBulkDelete}
+        />
 
         {volumeToDelete && (
           <Dialog
