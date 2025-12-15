@@ -354,6 +354,10 @@ export class SandboxService {
         throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
       }
 
+      if (!snapshot.ref) {
+        throw new BadRequestError('Snapshot ref is not defined')
+      }
+
       let cpu = snapshot.cpu
       let mem = snapshot.mem
       let disk = snapshot.disk
