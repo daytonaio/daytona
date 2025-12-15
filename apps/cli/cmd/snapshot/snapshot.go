@@ -14,6 +14,7 @@ var SnapshotsCmd = &cobra.Command{
 	Long:    "Commands for managing Daytona snapshots",
 	Aliases: []string{"snapshots"},
 	GroupID: internal.SANDBOX_GROUP,
+	RunE:    internal.GetParentCmdRunE(),
 }
 
 func init() {

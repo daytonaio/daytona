@@ -4,6 +4,7 @@
 package mcp
 
 import (
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -11,6 +12,7 @@ var MCPCmd = &cobra.Command{
 	Use:   "mcp",
 	Short: "Manage Daytona MCP Server",
 	Long:  "Commands for managing Daytona MCP Server",
+	RunE:  internal.GetParentCmdRunE(),
 }
 
 func init() {
