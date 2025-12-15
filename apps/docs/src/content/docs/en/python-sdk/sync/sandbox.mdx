@@ -34,6 +34,7 @@ Represents a Daytona Sandbox.
 - `disk` _int_ - Amount of disk space allocated to the Sandbox in GiB.
 - `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped").
 - `error_reason` _str_ - Error message if Sandbox is in error state.
+- `recoverable` _bool_ - Whether the Sandbox error is recoverable.
 - `backup_state` _SandboxBackupStateEnum_ - Current state of Sandbox backup.
 - `backup_created_at` _str_ - When the backup was created.
 - `auto_stop_interval` _int_ - Auto-stop interval in minutes.
@@ -212,9 +213,39 @@ Starts the Sandbox and waits for it to be ready.
 **Example**:
 
 ```python
-sandbox = daytona.get_current_sandbox("my-sandbox")
+sandbox = daytona.get("my-sandbox-id")
 sandbox.start(timeout=40)  # Wait up to 40 seconds
 print("Sandbox started successfully")
+```
+
+#### Sandbox.recover
+
+```python
+@intercept_errors(message_prefix="Failed to recover sandbox: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {self.id} failed to recover within the {timeout} seconds timeout period"
+))
+def recover(timeout: Optional[float] = 60)
+```
+
+Recovers the Sandbox from a recoverable error and waits for it to be ready.
+
+**Arguments**:
+
+- `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+  
+
+**Raises**:
+
+- `DaytonaError` - If timeout is negative. If sandbox fails to recover or times out.
+  
+
+**Example**:
+
+```python
+sandbox = daytona.get("my-sandbox-id")
+sandbox.recover(timeout=40)  # Wait up to 40 seconds
+print("Sandbox recovered successfully")
 ```
 
 #### Sandbox.stop
@@ -242,7 +273,7 @@ Stops the Sandbox and waits for it to be fully stopped.
 **Example**:
 
 ```python
-sandbox = daytona.get_current_sandbox("my-sandbox")
+sandbox = daytona.get("my-sandbox-id")
 sandbox.stop()
 print("Sandbox stopped successfully")
 ```

@@ -277,7 +277,7 @@ class AsyncSandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             sandbox.start(timeout=40)  # Wait up to 40 seconds
             print("Sandbox started successfully")
             ```
@@ -305,7 +305,7 @@ class AsyncSandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             await sandbox.recover(timeout=40)  # Wait up to 40 seconds
             print("Sandbox recovered successfully")
             ```
@@ -333,7 +333,7 @@ class AsyncSandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             sandbox.stop()
             print("Sandbox stopped successfully")
             ```

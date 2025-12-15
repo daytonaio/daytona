@@ -185,7 +185,7 @@ async def start(timeout: Optional[float] = 60)
 **例**:
 
 ```python
-sandbox = daytona.get_current_sandbox("my-sandbox")
+sandbox = daytona.get("my-sandbox-id")
 sandbox.start(timeout=40)  # 最大 40 秒待機
 print("Sandbox started successfully")
 ```
@@ -215,7 +215,7 @@ async def stop(timeout: Optional[float] = 60)
 **例**:
 
 ```python
-sandbox = daytona.get_current_sandbox("my-sandbox")
+sandbox = daytona.get("my-sandbox-id")
 sandbox.stop()
 print("Sandbox stopped successfully")
 ```

@@ -280,7 +280,7 @@ class Sandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             sandbox.start(timeout=40)  # Wait up to 40 seconds
             print("Sandbox started successfully")
             ```
@@ -308,7 +308,7 @@ class Sandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             sandbox.recover(timeout=40)  # Wait up to 40 seconds
             print("Sandbox recovered successfully")
             ```
@@ -336,7 +336,7 @@ class Sandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             sandbox.stop()
             print("Sandbox stopped successfully")
             ```

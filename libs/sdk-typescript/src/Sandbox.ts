@@ -289,8 +289,8 @@ export class Sandbox implements SandboxDto {
    * @throws {DaytonaError} - `DaytonaError` - If Sandbox fails to recover or times out
    *
    * @example
-   * const sandbox = await daytona.getCurrentSandbox('my-sandbox');
-   * await sandbox.recover(40);  // Wait up to 40 seconds
+   * const sandbox = await daytona.get('my-sandbox-id');
+   * await sandbox.recover();
    * console.log('Sandbox recovered successfully');
    */
   public async recover(timeout = 60): Promise<void> {
@@ -315,7 +315,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<void>}
    *
    * @example
-   * const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+   * const sandbox = await daytona.get('my-sandbox-id');
    * await sandbox.stop();
    * console.log('Sandbox stopped successfully');
    */
