@@ -136,7 +136,8 @@ const ResultRow = ({ hit }: { hit: AlgoliaHit }) => (
 )
 
 export function useDocsSearchCommands() {
-  const { search, activePageId } = useCommandPalette()
+  const activePageId = useCommandPalette((state) => state.activePageId)
+  const search = useCommandPalette((state) => state.searchByPage.get(state.activePageId) ?? '')
   const { setShouldFilter, setBarMode } = useCommandPaletteActions()
   const isActive = activePageId === 'search-docs'
   const debouncedQuery = useDebounce(search, 300)

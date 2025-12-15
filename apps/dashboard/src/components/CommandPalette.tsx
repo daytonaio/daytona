@@ -67,7 +67,7 @@ type CommandPaletteState = {
   isOpen: boolean
   activePageId: string
   pageStack: string[]
-  search: string
+  searchByPage: Map<string, string>
   shouldFilter: boolean
   barMode: 'flash' | 'pulse'
   pages: Map<string, PageData>
@@ -94,7 +94,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
     isOpen: false,
     activePageId: defaultPage,
     pageStack: [defaultPage],
-    search: '',
+    searchByPage: new Map(),
     shouldFilter: true,
     barMode: 'flash',
     pages: new Map([
@@ -109,7 +109,12 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
 
     actions: {
       setIsOpen: (isOpen) => set({ isOpen }),
-      setSearch: (value) => set({ search: value }),
+      setSearch: (value) =>
+        set((state) => {
+          const newSearchByPage = new Map(state.searchByPage)
+          newSearchByPage.set(state.activePageId, value)
+          return { searchByPage: newSearchByPage }
+        }),
       setShouldFilter: (value) => set({ shouldFilter: value }),
       setBarMode: (mode) => set({ barMode: mode }),
 
@@ -122,7 +127,6 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
           return {
             pageStack: [...state.pageStack, pageId],
             activePageId: pageId,
-            search: '',
           }
         }),
 
@@ -133,7 +137,6 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
           return {
             pageStack: newStack,
             activePageId: newStack[newStack.length - 1],
-            search: '',
           }
         }),
 
@@ -144,7 +147,6 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
             return {
               pageStack: state.pageStack.slice(0, pageIndex + 1),
               activePageId: pageId,
-              search: '',
             }
           }
           return state
@@ -154,7 +156,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
         set({
           pageStack: [defaultPage],
           activePageId: defaultPage,
-          search: '',
+          searchByPage: new Map(),
         }),
 
       registerPage: (config) =>
@@ -327,12 +329,12 @@ export function CommandPalette({ className, overlay }: CommandPaletteProps) {
   const pages = useCommandPalette((state) => state.pages)
   const activePageId = useCommandPalette((state) => state.activePageId)
   const isOpen = useCommandPalette((state) => state.isOpen)
-  const search = useCommandPalette((state) => state.search)
+  const search = useCommandPalette((state) => state.searchByPage.get(state.activePageId) ?? '')
   const shouldFilter = useCommandPalette((state) => state.shouldFilter)
   const barMode = useCommandPalette((state) => state.barMode)
   const pageStack = useCommandPalette((state) => state.pageStack)
 
-  const { setIsOpen, setSearch, popPage } = useCommandPaletteActions()
+  const { setIsOpen, setSearch, popPage, popToRoot } = useCommandPaletteActions()
 
   const activePage = pages.get(activePageId)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -341,19 +343,21 @@ export function CommandPalette({ className, overlay }: CommandPaletteProps) {
 
   useEffect(() => {
     if (isOpen) {
-      setSearch('')
+      popToRoot()
       requestAnimationFrame(() => inputRef.current?.focus())
     }
-  }, [isOpen, setSearch])
+  }, [isOpen, popToRoot])
 
   useEffect(() => {
     if (isOpen && scope.current) {
-      animate(scope.current, { scale: [0.975, 1] }, { duration: 0.25 })
+      animate(scope.current, { scale: [0.975, 1] }, { duration: 0.3 })
     }
   }, [activePageId, isOpen, animate, scope])
 
   const sortedGroups = useMemo(() => {
-    if (!activePage) return []
+    if (!activePage) {
+      return []
+    }
     return Array.from(activePage.groups.values()).sort((a, b) => a.order - b.order)
   }, [activePage])
 
