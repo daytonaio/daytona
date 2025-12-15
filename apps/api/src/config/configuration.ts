@@ -4,6 +4,12 @@
  */
 
 import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
+import * as yaml from 'js-yaml'
+import { join } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { mergeWith } from 'es-toolkit'
+
+const YAML_CONFIG_PATH = process.env.YAML_CONFIG_PATH || 'config.yaml'
 
 const configuration = {
   production: process.env.NODE_ENV === 'production',
@@ -259,4 +265,29 @@ const configuration = {
   runnerHealthTimeout: parseInt(process.env.RUNNER_HEALTH_TIMEOUT_SECONDS || '3', 10),
 }
 
-export { configuration }
+type DaytonaConfiguration = typeof configuration
+
+const loadConfiguration = (): DaytonaConfiguration => {
+  try {
+    const yamlConfig = yaml.load(
+      readFileSync(join(__dirname, YAML_CONFIG_PATH), 'utf8'),
+    ) as Partial<DaytonaConfiguration>
+    return mergeWith(configuration, yamlConfig, (configValue, yamlValue) => {
+      // Use yaml value only if defined and config value is undefined or NaN
+      if (
+        yamlValue !== undefined &&
+        (configValue === undefined || (typeof configValue === 'number' && isNaN(configValue)))
+      ) {
+        return yamlValue
+      }
+      // Otherwise config takes precedence
+      return configValue
+    }) as DaytonaConfiguration
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    // if the yaml config file is not found, return the default configuration
+    return configuration
+  }
+}
+
+export { configuration, loadConfiguration, DaytonaConfiguration }
