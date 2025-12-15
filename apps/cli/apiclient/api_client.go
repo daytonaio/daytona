@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/auth"
@@ -20,6 +21,8 @@ import (
 type versionCheckTransport struct {
 	transport http.RoundTripper
 }
+
+var versionMismatchWarningOnce sync.Once
 
 func (t *versionCheckTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err := t.transport.RoundTrip(req)
@@ -52,7 +55,9 @@ func checkVersionsMismatch(res *http.Response) {
 	apiVersion := strings.TrimPrefix(serverVersion, "v")
 
 	if cliVersion != "0.0.0-dev" && cliVersion != apiVersion {
-		log.Warn(fmt.Sprintf("Version mismatch: Daytona CLI is on v%s and API is on v%s.\nMake sure the versions are aligned using 'brew upgrade daytonaio/cli/daytona' or by downloading the latest version from https://github.com/daytonaio/daytona/releases.", cliVersion, apiVersion))
+		versionMismatchWarningOnce.Do(func() {
+			log.Warn(fmt.Sprintf("Version mismatch: Daytona CLI is on v%s and API is on v%s.\nMake sure the versions are aligned using 'brew upgrade daytonaio/cli/daytona' or by downloading the latest version from https://github.com/daytonaio/daytona/releases.", cliVersion, apiVersion))
+		})
 	}
 }
 
