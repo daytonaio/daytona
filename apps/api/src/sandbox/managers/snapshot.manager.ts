@@ -587,7 +587,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     // Check for timeout - allow up to 30 minutes
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
+    if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
       await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
       return DONT_SYNC_AGAIN
     }
