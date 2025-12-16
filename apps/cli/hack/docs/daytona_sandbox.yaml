@@ -7,7 +7,7 @@ inherited_options:
     usage: help for daytona
 see_also:
   - daytona - Daytona CLI
-    - daytona sandbox archive - Archive a sandbox
+  - daytona sandbox archive - Archive a sandbox
   - daytona sandbox create - Create a new sandbox
   - daytona sandbox delete - Delete a sandbox
   - daytona sandbox info - Get sandbox info
