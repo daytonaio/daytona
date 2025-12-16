@@ -61,6 +61,13 @@ interface SidebarProps {
   version: string
 }
 
+interface SidebarItem {
+  icon: React.ReactElement
+  label: string
+  path: RoutePath | string
+  onClick?: () => void
+}
+
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
@@ -70,12 +77,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
   const sidebarItems = useMemo(() => {
-    const arr: Array<{
-      icon: React.ReactElement
-      label: string
-      path: RoutePath | string
-      onClick?: () => void
-    }> = [
+    const arr: SidebarItem[] = [
       {
         icon: <Container size={16} strokeWidth={1.5} />,
         label: 'Sandboxes',
@@ -108,6 +110,19 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       })
     }
 
+    return arr
+  }, [authenticatedUserHasPermission])
+
+  const settingsItems = useMemo(() => {
+    const arr: SidebarItem[] = [
+      {
+        icon: <Settings size={16} strokeWidth={1.5} />,
+        label: 'Settings',
+        path: RoutePath.SETTINGS,
+      },
+      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
+    ]
+
     // Add Webhooks link if webhooks are initialized
     if (webhooksInitialized) {
       arr.push({
@@ -117,19 +132,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         onClick: () => openAppPortal(),
       })
     }
-
-    return arr
-  }, [authenticatedUserHasPermission, webhooksInitialized, openAppPortal])
-
-  const settingsItems = useMemo(() => {
-    const arr = [
-      {
-        icon: <Settings size={16} strokeWidth={1.5} />,
-        label: 'Settings',
-        path: RoutePath.SETTINGS,
-      },
-      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
-    ]
 
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({
@@ -151,7 +153,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     }
 
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal])
+  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized, openAppPortal])
 
   const billingItems = useMemo(() => {
     if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
