@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { SidebarMenuButton } from '@/components/ui/sidebar'
+import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useRegions } from '@/hooks/useRegions'
@@ -95,12 +95,13 @@ export const OrganizationPicker: React.FC = () => {
   }
 
   return (
-    <>
+    <SidebarMenuItem>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
             disabled={loadingSelectOrganization}
-            className="outline outline-1 outline-border outline-offset-0 mb-2 bg-muted px-3"
+            className="outline outline-1 outline-border outline-offset-0 mb-2 bg-muted"
+            tooltip={optimisticSelectedOrganization.name}
           >
             <div className="w-4 h-4 flex-shrink-0 bg-black rounded-full text-white flex items-center justify-center text-[10px] font-bold">
               {optimisticSelectedOrganization.name[0].toUpperCase()}
@@ -143,6 +144,6 @@ export const OrganizationPicker: React.FC = () => {
         getRegionName={getRegionName}
         onCreateOrganization={handleCreateOrganization}
       />
-    </>
+    </SidebarMenuItem>
   )
 }
