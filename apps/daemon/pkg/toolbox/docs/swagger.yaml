@@ -740,6 +740,13 @@ definitions:
       stdout:
         type: string
     type: object
+  SessionSendInputRequest:
+    properties:
+      data:
+        type: string
+    required:
+      - data
+    type: object
   Status:
     enum:
       - Unmodified
@@ -2361,6 +2368,36 @@ paths:
           schema:
             $ref: '#/definitions/CommandDTO'
       summary: Get session command details
+      tags:
+        - process
+  /process/session/{sessionId}/command/{commandId}/input:
+    post:
+      consumes:
+        - application/json
+      description: Send input data to a running command in a session for interactive
+        execution
+      operationId: SendInput
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          type: string
+        - description: Command ID
+          in: path
+          name: commandId
+          required: true
+          type: string
+        - description: Input send request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/SessionSendInputRequest'
+      responses:
+        '204':
+          description: No Content
+      summary: Send input to command
       tags:
         - process
   /process/session/{sessionId}/command/{commandId}/logs:

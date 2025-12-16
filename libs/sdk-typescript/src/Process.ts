@@ -12,6 +12,7 @@ import {
   SessionExecuteResponse as ApiSessionExecuteResponse,
   PtyCreateRequest,
   PtySessionInfo,
+  SessionSendInputRequest,
 } from '@daytonaio/toolbox-api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
@@ -382,6 +383,18 @@ export class Process {
     const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
 
     await stdDemuxStream(ws, onStdout, onStderr)
+  }
+
+  /**
+   * Sends input data to a command executed in a session.
+   *
+   * @param {string} sessionId - Unique identifier of the session
+   * @param {string} commandId - Unique identifier of the command
+   * @param {string} data - Input data to send
+   * @returns {Promise<void>}
+   */
+  public async sendSessionCommandInput(sessionId: string, commandId: string, data: string): Promise<void> {
+    await this.apiClient.sendInput(sessionId, commandId, { data })
   }
 
   /**

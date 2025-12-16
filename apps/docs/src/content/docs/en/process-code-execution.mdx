@@ -259,6 +259,75 @@ for (const session of sessions) {
 
 See: [get_session (Python SDK)](/docs/python-sdk/sync/process/#processget_session), [list_sessions (Python SDK)](/docs/python-sdk/sync/process/#processlist_sessions), [getSession (TypeScript SDK)](/docs/typescript-sdk/process/#getsession), [listSessions (TypeScript SDK)](/docs/typescript-sdk/process/#listsessions)
 
+### Interactive Session Commands
+
+Session commands can be interactive, allowing you to send input to running commands that expect user interaction,
+such as confirmations or interactive tools (e.g., database CLIs or package managers).
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+session_id = "interactive-session"
+sandbox.process.create_session(session_id)
+
+# Execute command that requires confirmation
+command = sandbox.process.execute_session_command(
+    session_id,
+    SessionExecuteRequest(
+        command='pip uninstall requests',
+        run_async=True,
+    ),
+)
+
+# Stream logs asynchronously
+logs_task = asyncio.create_task(
+    sandbox.process.get_session_command_logs_async(
+        session_id,
+        command.cmd_id,
+        lambda log: print(f"[STDOUT]: {log}"),
+        lambda log: print(f"[STDERR]: {log}"),
+    )
+)
+
+await asyncio.sleep(1)
+# Send input to the command
+sandbox.process.send_session_command_input(session_id, command.cmd_id, "y")
+
+# Wait for logs to complete
+await logs_task
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const sessionId = 'interactive-session'
+await sandbox.process.createSession(sessionId)
+
+// Execute command that requires confirmation
+const command = await sandbox.process.executeSessionCommand(sessionId, {
+    command: 'pip uninstall requests',
+    runAsync: true,
+})
+
+// Stream logs asynchronously
+const logPromise = sandbox.process.getSessionCommandLogs(
+    sessionId,
+    command.cmdId!,
+    (stdout) => console.log('[STDOUT]:', stdout),
+    (stderr) => console.log('[STDERR]:', stderr),
+)
+
+await new Promise((resolve) => setTimeout(resolve, 1000))
+// Send input to the command
+await sandbox.process.sendSessionCommandInput(sessionId, command.cmdId!, 'y')
+
+// Wait for logs to complete
+await logPromise
+```
+</TabItem>
+</Tabs>
+
+See: [send_session_command_input (Python SDK)](/docs/python-sdk/sync/process/#processsend_session_command_input), [sendSessionCommandInput (TypeScript SDK)](/docs/typescript-sdk/process/#sendsessioncommandinput)
+
 ## Best Practices
 
 Use the following best practices when working with process and code execution in Daytona SDK.

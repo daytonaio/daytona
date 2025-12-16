@@ -2336,6 +2336,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/process/session/{sessionId}/command/{commandId}/input": {
+            "post": {
+                "description": "Send input data to a running command in a session for interactive execution",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "process"
+                ],
+                "summary": "Send input to command",
+                "operationId": "SendInput",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Command ID",
+                        "name": "commandId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Input send request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SessionSendInputRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/process/session/{sessionId}/command/{commandId}/logs": {
             "get": {
                 "description": "Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.",
@@ -3606,6 +3649,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "stdout": {
+                    "type": "string"
+                }
+            }
+        },
+        "SessionSendInputRequest": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
                     "type": "string"
                 }
             }

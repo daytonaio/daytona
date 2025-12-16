@@ -19,16 +19,14 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-var (
-	STDOUT_PREFIX = []byte{0x01, 0x01, 0x01}
-	STDERR_PREFIX = []byte{0x02, 0x02, 0x02}
-)
-
 func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
 	session, ok := s.sessions[sessionId]
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
 	}
+
+	// Strip whitespace and newlines from command to avoid issues
+	cmd = strings.TrimSpace(cmd)
 
 	cmdId := util.Pointer(uuid.NewString())
 
@@ -53,13 +51,13 @@ func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput 
 	defer logFile.Close()
 
 	cmdToExec := fmt.Sprintf(cmdWrapperFormat+"\n",
-		logFilePath,    // %q  -> log
-		logDir,         // %q  -> dir
-		*cmdId, *cmdId, // %s  %s -> fifo names
-		toOctalEscapes(STDOUT_PREFIX), // %s  -> stdout prefix
-		toOctalEscapes(STDERR_PREFIX), // %s  -> stderr prefix
-		cmd,                           // %s  -> verbatim script body
-		exitCodeFilePath,              // %q
+		logFilePath, // %q  -> log
+		logDir,      // %q  -> dir
+		command.InputFilePath(session.Dir(s.configDir)), // %q  -> input
+		toOctalEscapes(STDOUT_PREFIX),                   // %s  -> stdout prefix
+		toOctalEscapes(STDERR_PREFIX),                   // %s  -> stderr prefix
+		cmd,                                             // %s  -> verbatim script body
+		exitCodeFilePath,                                // %q
 	)
 
 	_, err = session.stdinWriter.Write([]byte(cmdToExec))
@@ -132,18 +130,49 @@ var cmdWrapperFormat string = `
 	dir=%q
 
 	# per-command FIFOs
-	sp="$dir/stdout.pipe.%s.$$"; ep="$dir/stderr.pipe.%s.$$"
-	rm -f "$sp" "$ep" && mkfifo "$sp" "$ep" || exit 1
+	sp="$dir/stdout.pipe"
+	ep="$dir/stderr.pipe"
+	ip=%q
+	
+	rm -f "$sp" "$ep" "$ip" && mkfifo "$sp" "$ep" "$ip" || exit 1
 
-	cleanup() { rm -f "$sp" "$ep"; }
+	cleanup() { rm -f "$sp" "$ep" "$ip"; }
 	trap 'cleanup' EXIT HUP INT TERM
 
-	# prefix each stream and append to shared log
-	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$sp" ) >> "$log" & r1=$!
-	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$ep" ) >> "$log" & r2=$!
+	# Timeout-based pipe reader: reads line-by-line when available, flushes partial lines after 0.5s timeout
+  read_pipe() {
+    local pipe=$1
+    local prefix=$2
+    while true; do
+      if IFS= read -r -t 0.5 line; then
+        # Got a complete line with newline
+        printf "$prefix%%s\n" "$line" >> "$log"
+      else
+        read_status=$?
+        if [ $read_status -gt 128 ] && [ -n "$line" ]; then
+          # Timeout occurred (status > 128) and we have partial data - flush it
+          printf "$prefix%%s" "$line" >> "$log"
+          line=""
+        elif [ $read_status -eq 0 ] || [ $read_status -gt 128 ]; then
+          # Either EOF (0) or timeout (>128) with no data - continue or break
+          [ -p "$pipe" ] || break
+        else
+          # Pipe closed or error
+          break
+        fi
+      fi
+    done < "$pipe"
+  }
+
+  # Start readers for stdout and stderr
+  read_pipe "$sp" '%s' & r1=$!
+  read_pipe "$ep" '%s' & r2=$!
+
+	# Keep input FIFO open to prevent blocking when command opens stdin
+	sleep infinity > "$ip" &
 
 	# Run your command
-	{ %s; } > "$sp" 2> "$ep"
+	{ %s; } < "$ip" > "$sp" 2> "$ep"
 	echo "$?" >> %s
 
 	# drain labelers (cleanup via trap)

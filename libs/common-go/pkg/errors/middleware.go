@@ -89,6 +89,33 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 					Path:       ctx.Request.URL.Path,
 					Method:     ctx.Request.Method,
 				}
+			case *RequestTimeoutError:
+				errorResponse = ErrorResponse{
+					StatusCode: http.StatusRequestTimeout,
+					Message:    err.Err.Error(),
+					Code:       "REQUEST_TIMEOUT",
+					Timestamp:  time.Now(),
+					Path:       ctx.Request.URL.Path,
+					Method:     ctx.Request.Method,
+				}
+			case *GoneError:
+				errorResponse = ErrorResponse{
+					StatusCode: http.StatusGone,
+					Message:    err.Err.Error(),
+					Code:       "GONE",
+					Timestamp:  time.Now(),
+					Path:       ctx.Request.URL.Path,
+					Method:     ctx.Request.Method,
+				}
+			case *InternalServerError:
+				errorResponse = ErrorResponse{
+					StatusCode: http.StatusInternalServerError,
+					Message:    err.Err.Error(),
+					Code:       "INTERNAL_SERVER_ERROR",
+					Timestamp:  time.Now(),
+					Path:       ctx.Request.URL.Path,
+					Method:     ctx.Request.Method,
+				}
 			default:
 				errorResponse = defaultErrorHandler(ctx, err)
 			}

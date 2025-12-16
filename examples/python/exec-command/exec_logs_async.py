@@ -15,7 +15,8 @@ async def main():
             session_id,
             SessionExecuteRequest(
                 command=(
-                    'counter=1; while (( counter <= 3 )); do echo "Count: $counter";'
+                    'printf "Enter your name: \\n" && read name && printf "Hello, %s\\n" "$name"; '
+                    'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; '
                     "((counter++)); sleep 2; done; non-existent-command"
                 ),
                 run_async=True,
@@ -33,6 +34,9 @@ async def main():
 
         print("Continuing execution while logs are streaming...")
         await asyncio.sleep(1)
+        print("Sending input to the command")
+        sandbox.process.send_session_command_input(session_id, command.cmd_id, "Alice")
+        print("Input sent to the command")
         print("Other operations completed!")
 
         print("Now waiting for logs to complete...")

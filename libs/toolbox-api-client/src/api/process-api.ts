@@ -55,6 +55,8 @@ import type { SessionDTO } from '../models'
 import type { SessionExecuteRequest } from '../models'
 // @ts-ignore
 import type { SessionExecuteResponse } from '../models'
+// @ts-ignore
+import type { SessionSendInputRequest } from '../models'
 /**
  * ProcessApi - axios parameter creator
  * @export
@@ -514,6 +516,53 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Send input data to a running command in a session for interactive execution
+     * @summary Send input to command
+     * @param {string} sessionId Session ID
+     * @param {string} commandId Command ID
+     * @param {SessionSendInputRequest} request Input send request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    sendInput: async (
+      sessionId: string,
+      commandId: string,
+      request: SessionSendInputRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sessionId' is not null or undefined
+      assertParamExists('sendInput', 'sessionId', sessionId)
+      // verify required parameter 'commandId' is not null or undefined
+      assertParamExists('sendInput', 'commandId', commandId)
+      // verify required parameter 'request' is not null or undefined
+      assertParamExists('sendInput', 'request', request)
+      const localVarPath = `/process/session/{sessionId}/command/{commandId}/input`
+        .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
+        .replace(`{${'commandId'}}`, encodeURIComponent(String(commandId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Execute a command within an existing shell session
      * @summary Execute command in session
      * @param {string} sessionId Session ID
@@ -876,6 +925,33 @@ export const ProcessApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Send input data to a running command in a session for interactive execution
+     * @summary Send input to command
+     * @param {string} sessionId Session ID
+     * @param {string} commandId Command ID
+     * @param {SessionSendInputRequest} request Input send request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async sendInput(
+      sessionId: string,
+      commandId: string,
+      request: SessionSendInputRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.sendInput(sessionId, commandId, request, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ProcessApi.sendInput']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Execute a command within an existing shell session
      * @summary Execute command in session
      * @param {string} sessionId Session ID
@@ -1052,6 +1128,23 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PtySessionInfo> {
       return localVarFp.resizePtySession(sessionId, request, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Send input data to a running command in a session for interactive execution
+     * @summary Send input to command
+     * @param {string} sessionId Session ID
+     * @param {string} commandId Command ID
+     * @param {SessionSendInputRequest} request Input send request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    sendInput(
+      sessionId: string,
+      commandId: string,
+      request: SessionSendInputRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp.sendInput(sessionId, commandId, request, options).then((request) => request(axios, basePath))
     },
     /**
      * Execute a command within an existing shell session
@@ -1264,6 +1357,27 @@ export class ProcessApi extends BaseAPI {
   public resizePtySession(sessionId: string, request: PtyResizeRequest, options?: RawAxiosRequestConfig) {
     return ProcessApiFp(this.configuration)
       .resizePtySession(sessionId, request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Send input data to a running command in a session for interactive execution
+   * @summary Send input to command
+   * @param {string} sessionId Session ID
+   * @param {string} commandId Command ID
+   * @param {SessionSendInputRequest} request Input send request
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ProcessApi
+   */
+  public sendInput(
+    sessionId: string,
+    commandId: string,
+    request: SessionSendInputRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ProcessApiFp(this.configuration)
+      .sendInput(sessionId, commandId, request, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

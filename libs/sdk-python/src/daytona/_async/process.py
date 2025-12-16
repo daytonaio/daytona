@@ -16,6 +16,7 @@ from daytona_toolbox_api_client_async import (
     PtyResizeRequest,
     PtySessionInfo,
     SessionDTO,
+    SessionSendInputRequest,
 )
 from websockets.asyncio.client import connect
 
@@ -439,6 +440,19 @@ class AsyncProcess:
             await std_demux_stream(ws, on_stdout, on_stderr)
 
     # unasync: preserve end
+
+    @intercept_errors(message_prefix="Failed to send session command input: ")
+    async def send_session_command_input(self, session_id: str, command_id: str, data: str) -> None:
+        """Sends input data to a command executed in a session.
+
+        Args:
+            session_id (str): Unique identifier of the session.
+            command_id (str): Unique identifier of the command.
+            data (str): Input data to send.
+        """
+        await self._api_client.send_input(
+            session_id=session_id, command_id=command_id, request=SessionSendInputRequest(data=data)
+        )
 
     @intercept_errors(message_prefix="Failed to list sessions: ")
     async def list_sessions(self) -> List[SessionDTO]:

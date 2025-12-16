@@ -10,6 +10,12 @@ import (
 	"path/filepath"
 )
 
+// Stream prefixes for multiplexing stdout/stderr in logs
+var (
+	STDOUT_PREFIX = []byte{0x01, 0x01, 0x01}
+	STDERR_PREFIX = []byte{0x02, 0x02, 0x02}
+)
+
 type session struct {
 	id          string
 	cmd         *exec.Cmd
@@ -31,6 +37,10 @@ type Command struct {
 
 func (c *Command) LogFilePath(sessionDir string) (string, string) {
 	return filepath.Join(sessionDir, c.Id, "output.log"), filepath.Join(sessionDir, c.Id, "exit_code")
+}
+
+func (c *Command) InputFilePath(sessionDir string) string {
+	return filepath.Join(sessionDir, c.Id, "input.pipe")
 }
 
 type Session struct {
