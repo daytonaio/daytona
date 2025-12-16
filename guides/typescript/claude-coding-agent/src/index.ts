@@ -35,8 +35,8 @@ async function main() {
   }
 
   // Check for Anthropic API key
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('Error: ANTHROPIC_API_KEY environment variable is not set')
+  if (!process.env.SANDBOX_ANTHROPIC_API_KEY) {
+    console.error('Error: SANDBOX_ANTHROPIC_API_KEY environment variable is not set')
     console.error('Please create a .env file with your Anthropic API key')
     process.exit(1)
   }
@@ -50,7 +50,7 @@ async function main() {
     console.log('Creating sandbox...')
     const sandbox = await daytona.create({
       envVars: {
-        ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+        ANTHROPIC_API_KEY: process.env.SANDBOX_ANTHROPIC_API_KEY,
       },
     })
 
