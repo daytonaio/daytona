@@ -79,7 +79,7 @@ const Regions: React.FC = () => {
     setRegionIsLoading((prev) => ({ ...prev, [region.id]: true }))
 
     try {
-      await organizationsApi.deleteRegion(selectedOrganization.id, region.id)
+      await organizationsApi.deleteRegion(region.id, selectedOrganization.id)
       setRegionToDelete(null)
       setDeleteRegionDialogIsOpen(false)
       toast.success(`Deleting region ${region.name}`)
@@ -121,7 +121,7 @@ const Regions: React.FC = () => {
     setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
 
     try {
-      const response = await organizationsApi.regenerateProxyApiKey(selectedOrganization.id, regionForRegenerate.id)
+      const response = await organizationsApi.regenerateProxyApiKey(regionForRegenerate.id, selectedOrganization.id)
       setRegeneratedApiKey(response.data.apiKey)
       setShowRegenerateProxyApiKeyDialog(true)
       toast.success('Proxy API key regenerated successfully')
@@ -143,8 +143,8 @@ const Regions: React.FC = () => {
 
     try {
       const response = await organizationsApi.regenerateSshGatewayApiKey(
-        selectedOrganization.id,
         regionForRegenerate.id,
+        selectedOrganization.id,
       )
       setRegeneratedApiKey(response.data.apiKey)
       setShowRegenerateSshGatewayApiKeyDialog(true)
