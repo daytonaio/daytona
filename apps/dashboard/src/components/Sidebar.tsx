@@ -11,10 +11,10 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
@@ -125,7 +125,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     const arr = [
       {
         icon: <Settings size={16} strokeWidth={1.5} />,
-        label: 'General',
+        label: 'Settings',
         path: RoutePath.SETTINGS,
       },
       { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
@@ -187,7 +187,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </div>
             <SidebarTrigger className="p-2 [&_svg]:size-5" />
           </div>
-          <OrganizationPicker />
+          <SidebarMenu>
+            <SidebarMenuItem className="mb-2">
+              <OrganizationPicker />
+            </SidebarMenuItem>
+          </SidebarMenu>
           <SidebarGroupContent>
             <SidebarMenu>
               {sidebarItems.map((item) => (
@@ -210,8 +214,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarSeparator />
         <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
@@ -227,8 +231,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <SidebarSeparator />
         <SidebarGroup>
-          {billingItems.length > 0 && <SidebarGroupLabel>Billing</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {billingItems.map((item) => (
