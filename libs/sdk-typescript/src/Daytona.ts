@@ -692,7 +692,6 @@ export class Daytona {
         return response
       },
       (error) => {
-        console.log('error', error)
         let errorMessage: string
 
         if (error instanceof AxiosError && error.message.includes('timeout of')) {
