@@ -97,7 +97,7 @@ func (d *DockerClient) Destroy(ctx context.Context, sandboxId string) error {
 	if err != nil {
 		// Handle NotFound error case
 		if errdefs.IsNotFound(err) {
-			// not returning not found error here because not found indicates it is already destroyed
+			// Not returning not found error here because not found indicates it is already destroyed.
 			return nil
 		}
 		return err
