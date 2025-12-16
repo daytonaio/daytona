@@ -83,20 +83,10 @@ export class SandboxStopAction extends SandboxAction {
         return SYNC_AGAIN
       }
       case SandboxState.ERROR: {
-        let sandboxInfo: RunnerSandboxInfo
-        try {
-          sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-        } catch (error) {
-          if (error.response?.status === 404) {
-            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
-            return DONT_SYNC_AGAIN
-          }
-          throw error
-        }
-
-        if (sandboxInfo.state === SandboxState.STOPPED) {
-          await this.updateSandboxState(sandbox.id, SandboxState.STOPPED, lockCode)
-        }
+        // This can happen if the sandbox was forcefully stopped/deleted outside of Daytona
+        // Logging appropriately when this occurs until resolved
+        this.logger.warn(`Sandbox ${sandbox.id} is in ERROR state during stop action`)
+        return DONT_SYNC_AGAIN
       }
     }
 

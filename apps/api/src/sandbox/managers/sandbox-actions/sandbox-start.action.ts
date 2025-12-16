@@ -76,39 +76,9 @@ export class SandboxStartAction extends SandboxAction {
         return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
       }
       case SandboxState.ERROR: {
-        const runner = await this.runnerService.findOne(sandbox.runnerId)
-        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-        let sandboxInfo: RunnerSandboxInfo
-        try {
-          sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-        } catch (error) {
-          if (error.response?.status === 404) {
-            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, lockCode, undefined, error)
-            return DONT_SYNC_AGAIN
-          }
-          throw error
-        }
-
-        if (sandboxInfo.state === SandboxState.STARTED) {
-          let daemonVersion: string | undefined
-          try {
-            daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
-          } catch (error) {
-            this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, error)
-          }
-
-          await this.updateSandboxState(
-            sandbox.id,
-            SandboxState.STARTED,
-            lockCode,
-            undefined,
-            undefined,
-            daemonVersion,
-            BackupState.NONE,
-          )
-          return DONT_SYNC_AGAIN
-        }
+        // This should not happen, logging appropriately if it does occur
+        this.logger.warn(`Sandbox ${sandbox.id} is in ERROR state during start action`)
+        return DONT_SYNC_AGAIN
       }
     }
 
