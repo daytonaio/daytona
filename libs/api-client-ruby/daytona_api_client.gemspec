@@ -32,8 +32,8 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rspec', '~> 3.6', '>= 3.6.0'
 
-  s.files         = `find *`.split("\n").uniq.sort.select { |f| !f.empty? }
-  s.test_files    = Dir.exist?('spec') ? `find spec/*`.split("\n") : []
+  s.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) || f.end_with?('.gem') }
+  s.test_files    = Dir.exist?('spec') ? Dir.glob('spec/**/*') : []
   s.executables   = []
   s.require_paths = ["lib"]
 end

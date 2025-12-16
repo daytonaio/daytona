@@ -17,14 +17,19 @@ on:
         description: 'NPM tag (default: latest)'
         required: false
         default: 'latest'
+      rubygems_pkg_version:
+        description: 'RubyGems package version (default: version)'
+        required: false
 
 env:
   VERSION: ${{ inputs.version }}
   PYPI_PKG_VERSION: ${{ inputs.pypi_pkg_version || inputs.version}}
   NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
+  RUBYGEMS_PKG_VERSION: ${{ inputs.rubygems_pkg_version || inputs.version}}
   NPM_TAG: ${{ inputs.npm_tag }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+  RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
 
 jobs:
@@ -51,6 +56,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
       - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
 
       - name: System dependencies
@@ -65,6 +74,13 @@ jobs:
           git config --global --add safe.directory $GITHUB_WORKSPACE
           git config --global user.name "Daytona Release Bot"
           git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Configure RubyGems credentials
+        run: |
+          mkdir -p ~/.gem
+          echo "---" > ~/.gem/credentials
+          echo ":rubygems_api_key: $RUBYGEMS_API_KEY" >> ~/.gem/credentials
+          chmod 0600 ~/.gem/credentials
 
       - name: Project dependencies
         run: |

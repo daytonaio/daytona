@@ -1,8 +1,8 @@
 {
-  "name": "api-client-ruby",
+  "name": "sdk-ruby",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "libs/api-client-ruby",
+  "sourceRoot": "libs/sdk-ruby",
   "tags": [],
   "targets": {
     "build": {
@@ -19,10 +19,11 @@
         "command": "bundle exec rubocop"
       }
     },
-    "generate:api-client": {
+    "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn run openapi-generator-cli generate -i dist/apps/api/openapi.json -g ruby --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemName=daytona_api_client -o libs/api-client-ruby"
+        "cwd": "{projectRoot}",
+        "command": "bundle exec rake spec"
       }
     },
     "format": {
@@ -30,8 +31,7 @@
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
-          "bundle exec rubocop -a --fail-level=E",
-          "prettier --write \"**/*.yml\""
+          "bundle exec rubocop -a --fail-level=E"
         ],
         "parallel": false
       }
@@ -41,11 +41,18 @@
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
-          "gem build daytona_api_client.gemspec",
-          "gem push daytona_api_client-*.gem --key rubygems --host https://rubygems.org"
+          "gem build daytona-sdk.gemspec",
+          "gem push daytona-sdk-*.gem --key rubygems --host https://rubygems.org"
         ],
         "parallel": false
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "publish",
+          "projects": ["api-client-ruby"]
+        }
+      ]
     }
   }
 }
+

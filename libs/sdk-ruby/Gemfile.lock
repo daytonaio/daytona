@@ -7,7 +7,7 @@ PATH
 PATH
   remote: .
   specs:
-    daytona-sdk (0.0.0.pre.dev)
+    daytona-sdk (0.125.0)
       aws-sdk-s3 (~> 1.0)
       daytona_api_client (>= 1.0.0)
       dotenv
