@@ -14,6 +14,7 @@ var VolumeCmd = &cobra.Command{
 	Long:    "Commands for managing Daytona volumes",
 	Aliases: []string{"volumes"},
 	GroupID: internal.SANDBOX_GROUP,
+	RunE:    internal.GetParentCmdRunE(),
 }
 
 func init() {

@@ -24,6 +24,7 @@ var OrganizationCmd = &cobra.Command{
 
 		return nil
 	},
+	RunE: internal.GetParentCmdRunE(),
 }
 
 func init() {

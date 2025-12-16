@@ -14,6 +14,7 @@ var SandboxCmd = &cobra.Command{
 	Long:    "Commands for managing Daytona sandboxes",
 	Aliases: []string{"sandboxes"},
 	GroupID: internal.SANDBOX_GROUP,
+	RunE:    internal.GetParentCmdRunE(),
 }
 
 func init() {
