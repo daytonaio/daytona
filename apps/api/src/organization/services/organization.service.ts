@@ -209,6 +209,16 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return this.getRegionQuota(sandbox.organizationId, sandbox.region)
   }
 
+  /**
+   * Lists all available regions for the organization.
+   *
+   * A region is available for the organization if either:
+   * - It is directly associated with the organization, or
+   * - It is not associated with any organization, but the organization has quotas allocated for the region or quotas are not enforced for the region
+   *
+   * @param organizationId - The organization ID.
+   * @returns The available regions
+   */
   async listAvailableRegions(organizationId: string): Promise<RegionDto[]> {
     const regions = await this.regionRepository
       .createQueryBuilder('region')

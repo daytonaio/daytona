@@ -669,10 +669,6 @@ export class SnapshotService {
   /**
    * Validates and returns a region ID for snapshot availability.
    *
-   * A region can be used for a snapshot if either:
-   * - It is directly associated with the organization, or
-   * - It is not associated with any organization, but the organization has quotas allocated for the region
-   *
    * @param organization - The organization which is creating the snapshot.
    * @param regionId - The requested region ID. If omitted, the organization's default region is used.
    * @returns The validated region ID
