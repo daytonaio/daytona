@@ -33,7 +33,7 @@ import { useRegions } from '@/hooks/useRegions'
 const Runners: React.FC = () => {
   const { runnersApi } = useApi()
   const { notificationSocket } = useNotificationSocket()
-  const { customRegions: regions, loadingRegions, getRegionName } = useRegions()
+  const { customRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
 
   const [runners, setRunners] = useState<Runner[]>([])
   const [loadingRunnersData, setLoadingRunnersData] = useState(false)

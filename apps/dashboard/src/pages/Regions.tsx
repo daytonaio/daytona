@@ -37,7 +37,11 @@ import { Check, Copy } from 'lucide-react'
 const Regions: React.FC = () => {
   const { organizationsApi } = useApi()
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
-  const { availableRegions: regions, loadingRegions, refreshAvailableRegions: refreshRegions } = useRegions()
+  const {
+    availableRegions: regions,
+    loadingAvailableRegions: loadingRegions,
+    refreshAvailableRegions: refreshRegions,
+  } = useRegions()
 
   const [regionIsLoading, setRegionIsLoading] = useState<Record<string, boolean>>({})
 

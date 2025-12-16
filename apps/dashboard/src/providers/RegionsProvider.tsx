@@ -20,8 +20,10 @@ export function RegionsProvider(props: Props) {
   const { selectedOrganization } = useSelectedOrganization()
 
   const [sharedRegions, setSharedRegions] = useState<Region[]>([])
+  const [loadingSharedRegions, setLoadingSharedRegions] = useState(true)
+
   const [availableRegions, setAvailableRegions] = useState<Region[]>([])
-  const [loadingRegions, setLoadingRegions] = useState(true)
+  const [loadingAvailableRegions, setLoadingAvailableRegions] = useState(true)
 
   const getSharedRegions = useCallback(async () => {
     try {
@@ -30,13 +32,15 @@ export function RegionsProvider(props: Props) {
     } catch (error) {
       handleApiError(error, 'Failed to fetch shared regions')
       setSharedRegions([])
-      throw error
+    } finally {
+      setLoadingSharedRegions(false)
     }
   }, [regionsApi])
 
   const getAvailableRegions = useCallback(async () => {
     if (!selectedOrganization) {
       setAvailableRegions([])
+      setLoadingAvailableRegions(false)
       return []
     }
     try {
@@ -46,14 +50,15 @@ export function RegionsProvider(props: Props) {
     } catch (error) {
       handleApiError(error, 'Failed to fetch available regions')
       setAvailableRegions([])
-      throw error
+      return []
+    } finally {
+      setLoadingAvailableRegions(false)
     }
   }, [organizationsApi, selectedOrganization])
 
   useEffect(() => {
-    Promise.allSettled([getSharedRegions(), getAvailableRegions()]).finally(() => {
-      setLoadingRegions(false)
-    })
+    getSharedRegions()
+    getAvailableRegions()
   }, [getSharedRegions, getAvailableRegions])
 
   const getRegionName = useCallback(
@@ -70,14 +75,23 @@ export function RegionsProvider(props: Props) {
 
   const contextValue: IRegionsContext = useMemo(() => {
     return {
-      loadingRegions,
       sharedRegions,
+      loadingSharedRegions,
       availableRegions,
+      loadingAvailableRegions,
       customRegions,
       refreshAvailableRegions: getAvailableRegions,
       getRegionName,
     }
-  }, [loadingRegions, sharedRegions, availableRegions, customRegions, getAvailableRegions, getRegionName])
+  }, [
+    loadingSharedRegions,
+    loadingAvailableRegions,
+    sharedRegions,
+    availableRegions,
+    customRegions,
+    getAvailableRegions,
+    getRegionName,
+  ])
 
   return <RegionsContext.Provider value={contextValue}>{props.children}</RegionsContext.Provider>
 }

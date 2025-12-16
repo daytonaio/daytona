@@ -36,7 +36,7 @@ const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
 
   const { snapshotApi } = useApi()
-  const { availableRegions: regions, loadingRegions, getRegionName } = useRegions()
+  const { availableRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
   const [snapshotsData, setSnapshotsData] = useState<PaginatedSnapshots>({
     items: [],
     total: 0,
