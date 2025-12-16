@@ -226,7 +226,7 @@ module Daytona
         api_config.host = uri.host
         api_config.base_path = uri.path
 
-        api_config.access_token_getter = proc { config.api_key }
+        api_config.access_token_getter = proc { config.api_key || config.jwt_token }
         api_config
       end
     end
