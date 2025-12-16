@@ -5,6 +5,7 @@
 
 'use client'
 
+import { useDeepCompareMemo } from '@/hooks/useDeepCompareMemo'
 import { cn, pluralize } from '@/lib/utils'
 import { useCommandState } from 'cmdk'
 import { AlertCircle, ChevronRight, Loader2 } from 'lucide-react'
@@ -307,21 +308,22 @@ export function CommandPaletteProvider({
 export function useRegisterCommands(commands: CommandConfig[], options?: RegisterCommandsOptions) {
   const { registerCommands } = useCommandPaletteActions()
 
-  const commandIds = commands.map((c) => c.id).join(',')
-  const optionsKey = options ? `${options.pageId}-${options.groupId}-${options.groupOrder}` : ''
+  const optionsMemo = useDeepCompareMemo(options)
 
   useEffect(() => {
-    const unregister = registerCommands(commands, options)
+    const unregister = registerCommands(commands, optionsMemo)
     return () => unregister()
-  }, [registerCommands, commandIds, optionsKey])
+  }, [commands, optionsMemo, registerCommands])
 }
 
 export function useRegisterPage(config: PageConfig) {
   const { registerPage } = useCommandPaletteActions()
 
+  const configMemo = useDeepCompareMemo(config)
+
   useEffect(() => {
-    registerPage(config)
-  }, [registerPage, config.id, config.label, config.placeholder])
+    registerPage(configMemo)
+  }, [configMemo, registerPage])
 }
 
 export type CommandPaletteProps = {
