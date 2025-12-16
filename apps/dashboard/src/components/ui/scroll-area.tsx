@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 'use client'
 
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
