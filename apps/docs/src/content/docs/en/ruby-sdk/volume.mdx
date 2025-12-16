@@ -1,0 +1,173 @@
+---
+title: "Volume"
+hideTitleOnPage: true
+---
+
+## VolumeService
+
+Service for managing Daytona Volumes.
+
+This service provides methods to list, get, create, and delete Volumes.
+
+Volumes can be mounted to Sandboxes with an optional subpath parameter to mount
+only a specific S3 prefix within the volume. When no subpath is specified,
+the entire volume is mounted.
+
+### Methods
+
+#### create()
+
+```ruby
+def create(name)
+```
+
+Creates a new Volume with the specified name.
+
+**Parameters**:
+
+- `name` _String_ - Name for the new Volume
+
+**Returns**:
+
+- `Daytona::Volume` - The newly created Volume
+
+**Example:**
+
+```ruby
+daytona = Daytona::Daytona.new
+volume = daytona.volume.create('my-data-volume')
+puts "Created volume #{volume.name} with ID #{volume.id}"
+```
+
+***
+
+#### get()
+
+```ruby
+def get(name, create: false)
+```
+
+Gets a Volume by its name.
+
+**Parameters**:
+
+- `name` _String_ - Name of the Volume to retrieve
+- `create` _Boolean_ - Whether to create the Volume if it does not exist. Defaults to false.
+
+**Returns**:
+
+- `Daytona::Volume` - The requested Volume
+
+**Example:**
+
+```ruby
+daytona = Daytona::Daytona.new
+volume = daytona.volume.get('volume-name', create: true)
+puts "Volume #{volume.name} is in state #{volume.state}"
+```
+
+***
+
+#### delete()
+
+```ruby
+def delete(volume)
+```
+
+Deletes a Volume.
+
+**Parameters**:
+
+- `volume` _Daytona::Volume_ - Volume to delete
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+daytona = Daytona::Daytona.new
+volume = daytona.volume.get('volume-name')
+daytona.volume.delete(volume)
+puts 'Volume deleted successfully'
+```
+
+***
+
+#### list()
+
+```ruby
+def list
+```
+
+Lists all available Volumes.
+
+**Returns**:
+
+- `Array<Daytona::Volume>` - List of all Volumes accessible to the user
+
+**Example:**
+
+```ruby
+daytona = Daytona::Daytona.new
+volumes = daytona.volume.list
+puts "Found #{volumes.length} volumes"
+volumes.each { |vol| puts "#{vol.name} (#{vol.id})" }
+```
+
+## Volume
+
+Represents a Daytona Volume which is a shared storage volume for Sandboxes.
+
+**Attributes**:
+
+- `id` _String_ - Unique identifier for the Volume
+- `name` _String_ - Name of the Volume
+- `organization_id` _String_ - Organization ID of the Volume
+- `state` _String_ - Current state of the Volume
+- `created_at` _String_ - Timestamp when the Volume was created
+- `updated_at` _String_ - Timestamp when the Volume was last updated
+- `last_used_at` _String_ - Timestamp when the Volume was last used
+- `error_reason` _String, nil_ - Error reason if the Volume is in an error state
+
+## Using Volumes with Sandboxes
+
+To mount a volume to a sandbox, use the `volumes` parameter when creating a sandbox:
+
+```ruby
+# Create or get a volume
+volume = daytona.volume.get('my-volume', create: true)
+
+# Create a sandbox with the volume mounted
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [
+    DaytonaApiClient::SandboxVolume.new(
+      volume_id: volume.id,
+      mount_path: '/data'
+    )
+  ]
+)
+sandbox = daytona.create(params)
+
+# Files in /data will persist across sandbox restarts
+sandbox.process.exec(command: "echo 'Persistent data' > /data/file.txt")
+```
+
+You can also mount a subpath of a volume:
+
+```ruby
+# Mount only a specific prefix within the volume
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [
+    DaytonaApiClient::SandboxVolume.new(
+      volume_id: volume.id,
+      mount_path: '/project-data',
+      subpath: 'projects/my-project'
+    )
+  ]
+)
+```
+

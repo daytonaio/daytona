@@ -1,0 +1,247 @@
+---
+title: "LspServer"
+hideTitleOnPage: true
+---
+
+## LspServer
+
+Provides Language Server Protocol (LSP) operations for code intelligence features
+like code completion, diagnostics, and symbol search within a Sandbox.
+
+**Attributes**:
+
+- `language_id` _Symbol_ - The language server type
+- `path_to_project` _String_ - Path to the project root directory
+- `sandbox_id` _String_ - The Sandbox ID
+
+### Methods
+
+#### completions()
+
+```ruby
+def completions(path:, position:)
+```
+
+Gets completion suggestions at a position in a file.
+
+**Parameters**:
+
+- `path` _String_ - Path to the file
+- `position` _Daytona::LspServer::Position_ - Position in the file (line and character)
+
+**Returns**:
+
+- `DaytonaApiClient::CompletionList` - List of completion suggestions
+
+**Example:**
+
+```ruby
+lsp = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::TYPESCRIPT,
+  path_to_project: 'workspace/project'
+)
+lsp.start
+lsp.did_open('workspace/project/src/index.ts')
+
+# Get completions at line 10, character 5
+position = Daytona::LspServer::Position.new(line: 10, character: 5)
+completions = lsp.completions(path: 'workspace/project/src/index.ts', position: position)
+completions.items.each do |item|
+  puts "#{item.label}: #{item.detail}"
+end
+```
+
+***
+
+#### did_close()
+
+```ruby
+def did_close(path)
+```
+
+Notify the language server that a file has been closed.
+This method should be called when a file is closed in the editor to allow
+the language server to clean up any resources associated with that file.
+
+**Parameters**:
+
+- `path` _String_ - Path to the file
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+lsp.did_close('workspace/project/src/index.ts')
+```
+
+***
+
+#### did_open()
+
+```ruby
+def did_open(path)
+```
+
+Notifies the language server that a file has been opened.
+This method should be called when a file is opened in the editor to enable
+language features like diagnostics and completions for that file. The server
+will begin tracking the file's contents and providing language features.
+
+**Parameters**:
+
+- `path` _String_ - Path to the file
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+lsp.did_open('workspace/project/src/index.ts')
+```
+
+***
+
+#### document_symbols()
+
+```ruby
+def document_symbols(path)
+```
+
+Gets symbol information (functions, classes, variables, etc.) from a document.
+
+**Parameters**:
+
+- `path` _String_ - Path to the file
+
+**Returns**:
+
+- `Array<DaytonaApiClient::LspSymbol>` - List of symbols in the document
+
+**Example:**
+
+```ruby
+symbols = lsp.document_symbols('workspace/project/src/index.ts')
+symbols.each do |symbol|
+  puts "#{symbol.kind}: #{symbol.name}"
+end
+```
+
+***
+
+#### sandbox_symbols()
+
+```ruby
+def sandbox_symbols(query)
+```
+
+Searches for symbols matching the query string across all files
+in the Sandbox.
+
+**Parameters**:
+
+- `query` _String_ - Search query
+
+**Returns**:
+
+- `Array<DaytonaApiClient::LspSymbol>` - List of matching symbols
+
+**Example:**
+
+```ruby
+# Search for all symbols containing "User"
+symbols = lsp.sandbox_symbols('User')
+symbols.each do |symbol|
+  puts "#{symbol.name} in #{symbol.location}"
+end
+```
+
+***
+
+#### start()
+
+```ruby
+def start
+```
+
+Starts the language server.
+This method must be called before using any other LSP functionality.
+It initializes the language server for the specified language and project.
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+lsp = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::PYTHON,
+  path_to_project: 'workspace/project'
+)
+lsp.start
+# Now you can use other LSP methods
+```
+
+***
+
+#### stop()
+
+```ruby
+def stop
+```
+
+Stops the language server.
+This method should be called when the LSP server is no longer needed to
+free up system resources.
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+lsp.stop
+```
+
+## Language
+
+Supported language server types.
+
+**Module Members**:
+
+- `PYTHON` (`:python`)
+- `TYPESCRIPT` (`:typescript`)
+- `JAVASCRIPT` (`:javascript`)
+
+**Example:**
+
+```ruby
+lsp = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::PYTHON,
+  path_to_project: 'workspace/project'
+)
+```
+
+## Position
+
+Represents a zero-based position in a text document,
+specified by line number and character offset.
+
+**Attributes**:
+
+- `line` _Integer_ - Zero-based line number
+- `character` _Integer_ - Zero-based character offset
+
+**Example:**
+
+```ruby
+# Position at line 10, character 5
+position = Daytona::LspServer::Position.new(line: 10, character: 5)
+```
+

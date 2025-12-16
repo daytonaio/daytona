@@ -1,0 +1,217 @@
+---
+title: "Errors"
+hideTitleOnPage: true
+---
+
+## Error Handling
+
+The Daytona Ruby SDK uses a single error class for all SDK-related errors: `Daytona::Sdk::Error`.
+
+This class extends Ruby's standard `StandardError` and is raised when operations fail.
+
+## Daytona::Sdk::Error
+
+The main error class used throughout the SDK.
+
+```ruby
+module Daytona
+  module Sdk
+    class Error < StandardError; end
+  end
+end
+```
+
+## Common Error Scenarios
+
+### Authentication Errors
+
+Raised when API key or JWT token is missing:
+
+```ruby
+begin
+  # Missing API key
+  daytona = Daytona::Daytona.new(Daytona::Config.new(api_key: nil))
+rescue Daytona::Sdk::Error => e
+  puts "Authentication error: #{e.message}"
+  # => "API key or JWT token is required"
+end
+```
+
+### Validation Errors
+
+Raised when invalid parameters are provided:
+
+```ruby
+begin
+  # Negative timeout
+  params = Daytona::CreateSandboxFromSnapshotParams.new(
+    auto_stop_interval: -1
+  )
+  daytona.create(params)
+rescue Daytona::Sdk::Error => e
+  puts "Validation error: #{e.message}"
+  # => "auto_stop_interval must be a non-negative integer"
+end
+```
+
+### Sandbox Lifecycle Errors
+
+Raised when sandbox operations fail or timeout:
+
+```ruby
+begin
+  sandbox = daytona.get('my-sandbox-id')
+  sandbox.start(timeout: 5)  # Very short timeout
+rescue Daytona::Sdk::Error => e
+  puts "Lifecycle error: #{e.message}"
+  # => "Sandbox my-sandbox-id failed to become ready within the 5 seconds timeout period"
+end
+```
+
+### File System Errors
+
+Raised when file operations fail:
+
+```ruby
+begin
+  sandbox.fs.create_folder('invalid/path', '755')
+rescue Daytona::Sdk::Error => e
+  puts "File system error: #{e.message}"
+  # => "Failed to create folder: ..."
+end
+```
+
+### Git Errors
+
+Raised when Git operations fail:
+
+```ruby
+begin
+  sandbox.git.clone(
+    url: 'https://invalid-url.com/repo.git',
+    path: 'workspace/repo'
+  )
+rescue Daytona::Sdk::Error => e
+  puts "Git error: #{e.message}"
+  # => "Failed to clone repository: ..."
+end
+```
+
+### PTY Errors
+
+Raised when PTY session operations fail:
+
+```ruby
+begin
+  pty_handle = sandbox.process.create_pty_session(id: 'my-pty')
+  pty_handle.wait_for_connection(timeout: 0.1)  # Very short timeout
+rescue Daytona::Sdk::Error => e
+  puts "PTY error: #{e.message}"
+  # => "PTY connection timeout"
+end
+```
+
+### Computer Use Errors
+
+Raised when desktop automation operations fail:
+
+```ruby
+begin
+  sandbox.computer_use.start
+  sandbox.computer_use.mouse.click(x: 100, y: 200)
+rescue Daytona::Sdk::Error => e
+  puts "Computer use error: #{e.message}"
+  # => "Failed to click mouse: ..."
+end
+```
+
+## Best Practices
+
+### Rescue Specific Errors
+
+Always rescue `Daytona::Sdk::Error` specifically to handle SDK errors:
+
+```ruby
+begin
+  sandbox = daytona.create
+  response = sandbox.process.exec(command: 'some-command')
+rescue Daytona::Sdk::Error => e
+  puts "SDK error: #{e.message}"
+  # Handle SDK-specific errors
+rescue StandardError => e
+  puts "Unexpected error: #{e.message}"
+  # Handle other errors
+end
+```
+
+### Clean Up Resources
+
+Use `ensure` blocks to clean up resources even when errors occur:
+
+```ruby
+sandbox = nil
+begin
+  sandbox = daytona.create
+  # ... use sandbox ...
+rescue Daytona::Sdk::Error => e
+  puts "Error: #{e.message}"
+ensure
+  daytona.delete(sandbox) if sandbox
+end
+```
+
+### Retry Transient Errors
+
+Some errors may be transient and can be retried:
+
+```ruby
+MAX_RETRIES = 3
+
+def with_retry
+  retries = 0
+  begin
+    yield
+  rescue Daytona::Sdk::Error => e
+    retries += 1
+    if retries < MAX_RETRIES
+      sleep(2 ** retries)  # Exponential backoff
+      retry
+    else
+      raise
+    end
+  end
+end
+
+with_retry do
+  sandbox = daytona.create
+end
+```
+
+## Logging
+
+The SDK provides a logger for debugging:
+
+```ruby
+# Access the SDK logger
+logger = Daytona::Sdk.logger
+
+# The logger outputs to stdout at INFO level by default
+# You can change the level if needed
+logger.level = Logger::DEBUG
+```
+
+## API Client Errors
+
+In addition to `Daytona::Sdk::Error`, the underlying API client may raise `DaytonaApiClient::ApiError` for HTTP-level errors:
+
+```ruby
+begin
+  sandbox = daytona.get('non-existent-id')
+rescue DaytonaApiClient::ApiError => e
+  puts "API error: #{e.code} - #{e.message}"
+  # => "API error: 404 - Sandbox not found"
+rescue Daytona::Sdk::Error => e
+  puts "SDK error: #{e.message}"
+end
+```
+

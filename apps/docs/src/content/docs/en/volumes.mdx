@@ -37,6 +37,12 @@ The following snippets demonstrate how to create a volume using the Daytona SDK:
     ```
 
   </TabItem>
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    daytona = Daytona::Daytona.new
+    volume = daytona.volume.create("my-awesome-volume")
+    ```
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -44,6 +50,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript
 > [**volume.get (Python SDK)**](/docs/python-sdk/sync/volume/#volumeserviceget)
 >
 > [**volume.get (TypeScript SDK)**](/docs/typescript-sdk/volume/#get)
+>
+> [**volume.get (Ruby SDK)**](/docs/ruby-sdk/volume/#get)
 
 ## Mount Volumes
 
@@ -120,11 +128,13 @@ const sandbox2 = await daytona.create({
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/) and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**CreateSandboxFromSnapshotParams (Python SDK)**](/docs/python-sdk/sync/daytona#createSandboxBaseParams)
 >
 > [**CreateSandboxFromSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createSandboxBaseParams)
+>
+> [**CreateSandboxFromSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromsnapshotparams)
 
 ## Work with Volumes
 
@@ -251,6 +261,12 @@ const volume = await daytona.volume.get('my-volume', true)
 await daytona.volume.delete(volume)
 ```
 
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+volume = daytona.volume.get('my-volume', create: true)
+daytona.volume.delete(volume)
+```
 </TabItem>
 </Tabs>
 

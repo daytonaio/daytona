@@ -1,0 +1,250 @@
+---
+title: "Charts"
+hideTitleOnPage: true
+---
+
+## Charts
+
+The Charts module provides classes for parsing and working with chart data from matplotlib
+when executing Python code in a Sandbox.
+
+When you run Python code that generates matplotlib charts, the chart data is automatically
+captured and returned as part of the execution response.
+
+### Parsing Charts
+
+```ruby
+Daytona::Charts.parse(data)
+```
+
+Parses chart data and returns the appropriate chart type.
+
+**Parameters**:
+
+- `data` _Hash\<Symbol, Object\>_ - The chart data to parse
+
+**Returns**:
+
+- `Daytona::Charts::Chart` - The appropriate chart subclass based on the data
+
+**Example:**
+
+```ruby
+response = sandbox.process.code_run(code: <<~PYTHON)
+  import matplotlib.pyplot as plt
+  import numpy as np
+
+  x = np.linspace(0, 10, 100)
+  y = np.sin(x)
+
+  plt.plot(x, y)
+  plt.title('Sine Wave')
+  plt.xlabel('X')
+  plt.ylabel('Y')
+  plt.show()
+PYTHON
+
+response.artifacts.charts.each do |chart|
+  puts "Chart type: #{chart.type}"
+  puts "Title: #{chart.title}"
+end
+```
+
+## Chart
+
+Base class for all chart types.
+
+**Attributes**:
+
+- `type` _String, nil_ - The type of chart
+- `title` _String, nil_ - The title of the chart
+- `elements` _Array\<Object\>_ - The elements of the chart
+- `png` _String, nil_ - The PNG representation of the chart encoded in base64
+
+### Methods
+
+#### to_h()
+
+```ruby
+def to_h
+```
+
+Returns a hash representation of the chart.
+
+**Returns**:
+
+- `Hash<Symbol, Object>` - Original chart data
+
+## Chart2D
+
+Base class for 2D charts with axis labels.
+
+Inherits from `Chart`.
+
+**Additional Attributes**:
+
+- `x_label` _String, nil_ - The label of the x-axis
+- `y_label` _String, nil_ - The label of the y-axis
+
+## LineChart
+
+Represents a line chart.
+
+Inherits from `PointChart`.
+
+**Attributes**:
+
+- All attributes from `PointChart`
+- `elements` _Array\<PointData\>_ - The line series data
+
+## ScatterChart
+
+Represents a scatter chart.
+
+Inherits from `PointChart`.
+
+**Attributes**:
+
+- All attributes from `PointChart`
+- `elements` _Array\<PointData\>_ - The scatter point data
+
+## PointChart
+
+Base class for point-based charts (line, scatter).
+
+Inherits from `Chart2D`.
+
+**Attributes**:
+
+- `x_ticks` _Array\<Object\>_ - The ticks of the x-axis
+- `x_tick_labels` _Array\<String\>_ - The labels of the x-axis ticks
+- `x_scale` _String, nil_ - The scale of the x-axis
+- `y_ticks` _Array\<Object\>_ - The ticks of the y-axis
+- `y_tick_labels` _Array\<String\>_ - The labels of the y-axis ticks
+- `y_scale` _String, nil_ - The scale of the y-axis
+- `elements` _Array\<PointData\>_ - The point series data
+
+## PointData
+
+Represents a series of points for line or scatter charts.
+
+**Attributes**:
+
+- `label` _String_ - The label of the point series
+- `points` _Array\<Array\<Object\>\>_ - Array of [x, y] points
+
+## BarChart
+
+Represents a bar chart.
+
+Inherits from `Chart2D`.
+
+**Attributes**:
+
+- `elements` _Array\<BarData\>_ - The bar data
+
+## BarData
+
+Represents a single bar in a bar chart.
+
+**Attributes**:
+
+- `label` _String_ - The label of the bar
+- `value` _String_ - The value of the bar
+- `group` _String_ - The group of the bar
+
+## PieChart
+
+Represents a pie chart.
+
+Inherits from `Chart`.
+
+**Attributes**:
+
+- `elements` _Array\<PieData\>_ - The pie slice data
+
+## PieData
+
+Represents a single slice in a pie chart.
+
+**Attributes**:
+
+- `label` _String_ - The label of the pie slice
+- `angle` _Float_ - The angle of the pie slice
+- `radius` _Float_ - The radius of the pie slice
+- `autopct` _Float_ - The autopct value of the pie slice
+
+## BoxAndWhiskerChart
+
+Represents a box and whisker chart.
+
+Inherits from `Chart2D`.
+
+**Attributes**:
+
+- `elements` _Array\<BoxAndWhiskerData\>_ - The box and whisker data
+
+## BoxAndWhiskerData
+
+Represents a single box and whisker in a chart.
+
+**Attributes**:
+
+- `label` _String_ - The label of the box and whisker
+- `min` _Float_ - The minimum value
+- `first_quartile` _Float_ - The first quartile (Q1)
+- `median` _Float_ - The median value
+- `third_quartile` _Float_ - The third quartile (Q3)
+- `max` _Float_ - The maximum value
+- `outliers` _Array\<Float\>_ - The outlier values
+
+## CompositeChart
+
+Represents a composite chart containing multiple sub-charts.
+
+Inherits from `Chart`.
+
+**Attributes**:
+
+- `elements` _Array\<Chart\>_ - The sub-charts in the composite
+
+## ChartType
+
+Module containing chart type constants.
+
+**Constants**:
+
+- `LINE` - 'line'
+- `SCATTER` - 'scatter'
+- `BAR` - 'bar'
+- `PIE` - 'pie'
+- `BOX_AND_WHISKER` - 'box_and_whisker'
+- `COMPOSITE_CHART` - 'composite_chart'
+- `UNKNOWN` - 'unknown'
+
+## Working with Chart Images
+
+Charts include a base64-encoded PNG representation that can be saved to a file:
+
+```ruby
+require 'base64'
+
+response = sandbox.process.code_run(code: <<~PYTHON)
+  import matplotlib.pyplot as plt
+
+  plt.figure(figsize=(10, 6))
+  plt.bar(['A', 'B', 'C'], [1, 2, 3])
+  plt.title('Sample Bar Chart')
+  plt.show()
+PYTHON
+
+response.artifacts.charts.each_with_index do |chart, index|
+  if chart.png
+    # Decode and save the PNG image
+    png_data = Base64.decode64(chart.png)
+    File.binwrite("chart_#{index}.png", png_data)
+    puts "Saved chart_#{index}.png"
+  end
+end
+```
+

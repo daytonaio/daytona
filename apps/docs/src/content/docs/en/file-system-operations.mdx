@@ -8,13 +8,13 @@ The Daytona SDK provides comprehensive file system operations through the `fs` m
 
 ## Basic Operations
 
-Daytona SDK provides an option to interact with the file system in Sandboxes. You can perform various operations like listing files, creating directories, reading and writing files, and more.
+Daytona SDK provides an option to interact with the file system in Sandboxes using Python, TypeScript, and Ruby. You can perform various operations like listing files, creating directories, reading and writing files, and more.
 
 File operations assume you are operating in the Sandbox user's home directory (e.g. `workspace` implies `/home/[username]/workspace`). Use a leading `/` when providing absolute paths.
 
 ### Listing Files and Directories
 
-Daytona SDK provides an option to list files and directories in a Sandbox using Python and TypeScript.
+Daytona SDK provides an option to list files and directories in a Sandbox using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -44,13 +44,27 @@ files.forEach(file => {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# List files in a directory
+files = sandbox.fs.list_files('workspace')
+
+files.each do |file|
+  puts "Name: #{file.name}"
+  puts "Is directory: #{file.is_dir}"
+  puts "Size: #{file.size}"
+  puts "Modified: #{file.mod_time}"
+end
+```
+
+</TabItem>
 </Tabs>
 
-See: [list_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemlist_files), [listFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#listfiles)
+See: [list_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemlist_files), [listFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#listfiles), [list_files (Ruby SDK)](/docs/ruby-sdk/file-system/#list_files)
 
 ### Creating Directories
 
-Daytona SDK provides an option to create directories with specific permissions using Python and TypeScript.
+Daytona SDK provides an option to create directories with specific permissions using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -66,13 +80,20 @@ await sandbox.fs.createFolder("workspace/new-dir", "755")
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create with specific permissions
+sandbox.fs.create_folder('workspace/new-dir', '755')
+```
+
+</TabItem>
 </Tabs>
 
-See: [create_folder (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemcreate_folder), [createFolder (TypeScript SDK)](/docs/typescript-sdk/file-system/#createfolder)
+See: [create_folder (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemcreate_folder), [createFolder (TypeScript SDK)](/docs/typescript-sdk/file-system/#createfolder), [create_folder (Ruby SDK)](/docs/ruby-sdk/file-system/#create_folder)
 
 ### Uploading Files
 
-Daytona SDK provides options to read, write, upload, download, and delete files in Sandboxes using Python and TypeScript.
+Daytona SDK provides options to read, write, upload, download, and delete files in Sandboxes using Python, TypeScript, and Ruby.
 
 #### Uploading a Single File
 
@@ -95,9 +116,17 @@ await sandbox.fs.uploadFile(fileContent, "data.txt")
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Upload a single file
+content = 'Hello, World!'
+sandbox.fs.upload_file(content, 'data.txt')
+```
+
+</TabItem>
 </Tabs>
 
-See: [upload_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_file), [uploadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfile)
+See: [upload_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_file), [uploadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfile), [upload_file (Ruby SDK)](/docs/ruby-sdk/file-system/#upload_file)
 
 #### Uploading Multiple Files
 

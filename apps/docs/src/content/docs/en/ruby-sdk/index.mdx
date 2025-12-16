@@ -1,0 +1,80 @@
+---
+title: Ruby SDK Reference
+description: Interact with Daytona Sandboxes using the Ruby SDK
+next: /docs/ruby-sdk/daytona
+---
+
+The Daytona Ruby SDK provides a robust interface for programmatically interacting with Daytona Sandboxes.
+
+## Installation
+
+Install the Daytona Ruby SDK using Bundler by adding it to your Gemfile:
+
+```ruby
+gem 'daytona-sdk'
+```
+
+Then run:
+
+```bash
+bundle install
+```
+
+Or install it directly:
+
+```bash
+gem install daytona-sdk
+```
+
+## Getting Started
+
+Here's a simple example to help you get started with the Daytona Ruby SDK:
+
+```ruby
+require 'daytona'
+
+# Initialize the SDK (uses environment variables by default)
+daytona = Daytona::Daytona.new
+
+# Create a new sandbox
+sandbox = daytona.create
+
+# Execute a command
+response = sandbox.process.exec(command: "echo 'Hello, World!'")
+puts response.result
+
+# Clean up
+daytona.delete(sandbox)
+```
+
+## Configuration
+
+The SDK can be configured using environment variables or by passing options to the constructor:
+
+```ruby
+require 'daytona'
+
+# Using environment variables (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+daytona = Daytona::Daytona.new
+
+# Using explicit configuration
+config = Daytona::Config.new(
+  api_key: 'your-api-key',
+  api_url: 'https://app.daytona.io/api',
+  target: 'us'
+)
+daytona = Daytona::Daytona.new(config)
+```
+
+## Environment Variables
+
+The SDK supports the following environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `DAYTONA_API_KEY` | API key for authentication |
+| `DAYTONA_API_URL` | URL of the Daytona API (defaults to `https://app.daytona.io/api`) |
+| `DAYTONA_TARGET` | Target location for Sandboxes |
+| `DAYTONA_JWT_TOKEN` | JWT token for authentication (alternative to API key) |
+| `DAYTONA_ORGANIZATION_ID` | Organization ID (required when using JWT token) |
+

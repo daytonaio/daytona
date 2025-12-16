@@ -1,0 +1,721 @@
+---
+title: "ComputerUse"
+hideTitleOnPage: true
+---
+
+## ComputerUse
+
+Provides computer use operations for desktop automation within a Sandbox,
+including mouse control, keyboard input, screenshots, and display information.
+
+**Attributes**:
+
+- `sandbox_id` _String_ - The ID of the sandbox
+- `mouse` _Daytona::ComputerUse::Mouse_ - Mouse operations interface
+- `keyboard` _Daytona::ComputerUse::Keyboard_ - Keyboard operations interface
+- `screenshot` _Daytona::ComputerUse::Screenshot_ - Screenshot operations interface
+- `display` _Daytona::ComputerUse::Display_ - Display operations interface
+
+### Methods
+
+#### start()
+
+```ruby
+def start
+```
+
+Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).
+
+**Returns**:
+
+- `DaytonaApiClient::ComputerUseStartResponse` - Computer use start response
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+result = sandbox.computer_use.start
+puts "Computer use processes started: #{result.message}"
+```
+
+***
+
+#### stop()
+
+```ruby
+def stop
+```
+
+Stops all computer use processes.
+
+**Returns**:
+
+- `DaytonaApiClient::ComputerUseStopResponse` - Computer use stop response
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+result = sandbox.computer_use.stop
+puts "Computer use processes stopped: #{result.message}"
+```
+
+***
+
+#### status()
+
+```ruby
+def status
+```
+
+Gets the status of all computer use processes.
+
+**Returns**:
+
+- `DaytonaApiClient::ComputerUseStatusResponse` - Status information about all VNC desktop processes
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+response = sandbox.computer_use.status
+puts "Computer use status: #{response.status}"
+```
+
+***
+
+#### get_process_status()
+
+```ruby
+def get_process_status(process_name:)
+```
+
+Gets the status of a specific VNC process.
+
+**Parameters**:
+
+- `process_name` _String_ - Name of the process to check
+
+**Returns**:
+
+- `DaytonaApiClient::ProcessStatusResponse` - Status information about the specific process
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+xvfb_status = sandbox.computer_use.get_process_status(process_name: 'xvfb')
+no_vnc_status = sandbox.computer_use.get_process_status(process_name: 'novnc')
+```
+
+***
+
+#### restart_process()
+
+```ruby
+def restart_process(process_name:)
+```
+
+Restarts a specific VNC process.
+
+**Parameters**:
+
+- `process_name` _String_ - Name of the process to restart
+
+**Returns**:
+
+- `DaytonaApiClient::ProcessRestartResponse` - Process restart response
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+result = sandbox.computer_use.restart_process(process_name: 'xfce4')
+puts "XFCE4 process restarted: #{result.message}"
+```
+
+***
+
+#### get_process_logs()
+
+```ruby
+def get_process_logs(process_name:)
+```
+
+Gets logs for a specific VNC process.
+
+**Parameters**:
+
+- `process_name` _String_ - Name of the process to get logs for
+
+**Returns**:
+
+- `DaytonaApiClient::ProcessLogsResponse` - Process logs
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+logs = sandbox.computer_use.get_process_logs(process_name: 'novnc')
+puts "NoVNC logs: #{logs}"
+```
+
+***
+
+#### get_process_errors()
+
+```ruby
+def get_process_errors(process_name:)
+```
+
+Gets error logs for a specific VNC process.
+
+**Parameters**:
+
+- `process_name` _String_ - Name of the process to get error logs for
+
+**Returns**:
+
+- `DaytonaApiClient::ProcessErrorsResponse` - Process error logs
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+errors = sandbox.computer_use.get_process_errors(process_name: 'x11vnc')
+puts "X11VNC errors: #{errors}"
+```
+
+## Mouse
+
+Mouse operations for computer use functionality.
+
+### Methods
+
+#### position()
+
+```ruby
+def position
+```
+
+Gets the current mouse cursor position.
+
+**Returns**:
+
+- `DaytonaApiClient::MousePosition` - Current mouse position with x and y coordinates
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+position = sandbox.computer_use.mouse.position
+puts "Mouse is at: #{position.x}, #{position.y}"
+```
+
+***
+
+#### move()
+
+```ruby
+def move(x:, y:)
+```
+
+Moves the mouse cursor to the specified coordinates.
+
+**Parameters**:
+
+- `x` _Integer_ - The x coordinate to move to
+- `y` _Integer_ - The y coordinate to move to
+
+**Returns**:
+
+- `DaytonaApiClient::MouseMoveResponse` - Move operation result
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+result = sandbox.computer_use.mouse.move(x: 100, y: 200)
+puts "Mouse moved to: #{result.x}, #{result.y}"
+```
+
+***
+
+#### click()
+
+```ruby
+def click(x:, y:, button: 'left', double: false)
+```
+
+Clicks the mouse at the specified coordinates.
+
+**Parameters**:
+
+- `x` _Integer_ - The x coordinate to click at
+- `y` _Integer_ - The y coordinate to click at
+- `button` _String_ - The mouse button to click ('left', 'right', 'middle'). Defaults to 'left'
+- `double` _Boolean_ - Whether to perform a double-click. Defaults to false
+
+**Returns**:
+
+- `DaytonaApiClient::MouseClickResponse` - Click operation result
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+# Single left click
+result = sandbox.computer_use.mouse.click(x: 100, y: 200)
+
+# Double click
+double_click = sandbox.computer_use.mouse.click(x: 100, y: 200, button: 'left', double: true)
+
+# Right click
+right_click = sandbox.computer_use.mouse.click(x: 100, y: 200, button: 'right')
+```
+
+***
+
+#### drag()
+
+```ruby
+def drag(start_x:, start_y:, end_x:, end_y:, button: 'left')
+```
+
+Drags the mouse from start coordinates to end coordinates.
+
+**Parameters**:
+
+- `start_x` _Integer_ - The starting x coordinate
+- `start_y` _Integer_ - The starting y coordinate
+- `end_x` _Integer_ - The ending x coordinate
+- `end_y` _Integer_ - The ending y coordinate
+- `button` _String_ - The mouse button to use for dragging. Defaults to 'left'
+
+**Returns**:
+
+- `DaytonaApiClient::MouseDragResponse` - Drag operation result
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+result = sandbox.computer_use.mouse.drag(start_x: 50, start_y: 50, end_x: 150, end_y: 150)
+puts "Dragged from #{result.from_x},#{result.from_y} to #{result.to_x},#{result.to_y}"
+```
+
+***
+
+#### scroll()
+
+```ruby
+def scroll(x:, y:, direction:, amount: 1)
+```
+
+Scrolls the mouse wheel at the specified coordinates.
+
+**Parameters**:
+
+- `x` _Integer_ - The x coordinate to scroll at
+- `y` _Integer_ - The y coordinate to scroll at
+- `direction` _String_ - The direction to scroll ('up' or 'down')
+- `amount` _Integer_ - The amount to scroll. Defaults to 1
+
+**Returns**:
+
+- `Boolean` - Whether the scroll operation was successful
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+# Scroll up
+scroll_up = sandbox.computer_use.mouse.scroll(x: 100, y: 200, direction: 'up', amount: 3)
+
+# Scroll down
+scroll_down = sandbox.computer_use.mouse.scroll(x: 100, y: 200, direction: 'down', amount: 5)
+```
+
+## Keyboard
+
+Keyboard operations for computer use functionality.
+
+### Methods
+
+#### type()
+
+```ruby
+def type(text:, delay: nil)
+```
+
+Types the specified text.
+
+**Parameters**:
+
+- `text` _String_ - The text to type
+- `delay` _Integer, nil_ - Delay between characters in milliseconds
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+sandbox.computer_use.keyboard.type(text: 'Hello, World!')
+
+# With delay between characters
+sandbox.computer_use.keyboard.type(text: 'Slow typing', delay: 100)
+```
+
+***
+
+#### press()
+
+```ruby
+def press(key:, modifiers: nil)
+```
+
+Presses a key with optional modifiers.
+
+**Parameters**:
+
+- `key` _String_ - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A')
+- `modifiers` _Array\<String\>, nil_ - Modifier keys ('ctrl', 'alt', 'meta', 'shift')
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+# Press Enter
+sandbox.computer_use.keyboard.press(key: 'Return')
+
+# Press Ctrl+C
+sandbox.computer_use.keyboard.press(key: 'c', modifiers: ['ctrl'])
+
+# Press Ctrl+Shift+T
+sandbox.computer_use.keyboard.press(key: 't', modifiers: ['ctrl', 'shift'])
+```
+
+***
+
+#### hotkey()
+
+```ruby
+def hotkey(keys:)
+```
+
+Presses a hotkey combination.
+
+**Parameters**:
+
+- `keys` _String_ - The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t')
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+# Copy
+sandbox.computer_use.keyboard.hotkey(keys: 'ctrl+c')
+
+# Paste
+sandbox.computer_use.keyboard.hotkey(keys: 'ctrl+v')
+
+# Alt+Tab
+sandbox.computer_use.keyboard.hotkey(keys: 'alt+tab')
+```
+
+## Screenshot
+
+Screenshot operations for computer use functionality.
+
+### Methods
+
+#### take_full_screen()
+
+```ruby
+def take_full_screen(show_cursor: false)
+```
+
+Takes a screenshot of the entire screen.
+
+**Parameters**:
+
+- `show_cursor` _Boolean_ - Whether to show the cursor in the screenshot. Defaults to false
+
+**Returns**:
+
+- `DaytonaApiClient::ScreenshotResponse` - Screenshot data with base64 encoded image
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+screenshot = sandbox.computer_use.screenshot.take_full_screen
+puts "Screenshot size: #{screenshot.width}x#{screenshot.height}"
+
+# With cursor visible
+with_cursor = sandbox.computer_use.screenshot.take_full_screen(show_cursor: true)
+```
+
+***
+
+#### take_region()
+
+```ruby
+def take_region(region:, show_cursor: false)
+```
+
+Takes a screenshot of a specific region.
+
+**Parameters**:
+
+- `region` _ScreenshotRegion_ - The region to capture
+- `show_cursor` _Boolean_ - Whether to show the cursor in the screenshot. Defaults to false
+
+**Returns**:
+
+- `DaytonaApiClient::RegionScreenshotResponse` - Screenshot data with base64 encoded image
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+region = Daytona::ComputerUse::ScreenshotRegion.new(x: 100, y: 100, width: 300, height: 200)
+screenshot = sandbox.computer_use.screenshot.take_region(region: region)
+puts "Captured region: #{screenshot.region.width}x#{screenshot.region.height}"
+```
+
+***
+
+#### take_compressed()
+
+```ruby
+def take_compressed(options: nil)
+```
+
+Takes a compressed screenshot of the entire screen.
+
+**Parameters**:
+
+- `options` _ScreenshotOptions, nil_ - Compression and display options
+
+**Returns**:
+
+- `DaytonaApiClient::CompressedScreenshotResponse` - Compressed screenshot data
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+# Default compression
+screenshot = sandbox.computer_use.screenshot.take_compressed
+
+# High quality JPEG
+jpeg = sandbox.computer_use.screenshot.take_compressed(
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: 'jpeg', quality: 95, show_cursor: true)
+)
+
+# Scaled down PNG
+scaled = sandbox.computer_use.screenshot.take_compressed(
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: 'png', scale: 0.5)
+)
+```
+
+***
+
+#### take_compressed_region()
+
+```ruby
+def take_compressed_region(region:, options: nil)
+```
+
+Takes a compressed screenshot of a specific region.
+
+**Parameters**:
+
+- `region` _ScreenshotRegion_ - The region to capture
+- `options` _ScreenshotOptions, nil_ - Compression and display options
+
+**Returns**:
+
+- `DaytonaApiClient::CompressedScreenshotResponse` - Compressed screenshot data
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+region = Daytona::ComputerUse::ScreenshotRegion.new(x: 0, y: 0, width: 800, height: 600)
+screenshot = sandbox.computer_use.screenshot.take_compressed_region(
+  region: region,
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: 'webp', quality: 80, show_cursor: true)
+)
+puts "Compressed size: #{screenshot.size_bytes} bytes"
+```
+
+## Display
+
+Display operations for computer use functionality.
+
+### Methods
+
+#### info()
+
+```ruby
+def info
+```
+
+Gets information about the displays.
+
+**Returns**:
+
+- `DaytonaApiClient::DisplayInfoResponse` - Display information including primary display and all available displays
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+info = sandbox.computer_use.display.info
+puts "Primary display: #{info.primary_display.width}x#{info.primary_display.height}"
+puts "Total displays: #{info.total_displays}"
+info.displays.each_with_index do |display, i|
+  puts "Display #{i}: #{display.width}x#{display.height} at #{display.x},#{display.y}"
+end
+```
+
+***
+
+#### windows()
+
+```ruby
+def windows
+```
+
+Gets the list of open windows.
+
+**Returns**:
+
+- `DaytonaApiClient::WindowsResponse` - List of open windows with their IDs and titles
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the operation fails
+
+**Example:**
+
+```ruby
+windows = sandbox.computer_use.display.windows
+puts "Found #{windows.count} open windows:"
+windows.windows.each do |window|
+  puts "- #{window.title} (ID: #{window.id})"
+end
+```
+
+## ScreenshotRegion
+
+Region coordinates for screenshot operations.
+
+**Attributes**:
+
+- `x` _Integer_ - X coordinate of the region
+- `y` _Integer_ - Y coordinate of the region
+- `width` _Integer_ - Width of the region
+- `height` _Integer_ - Height of the region
+
+**Example:**
+
+```ruby
+region = Daytona::ComputerUse::ScreenshotRegion.new(x: 100, y: 100, width: 300, height: 200)
+```
+
+## ScreenshotOptions
+
+Options for screenshot compression and display.
+
+**Attributes**:
+
+- `show_cursor` _Boolean, nil_ - Whether to show the cursor in the screenshot
+- `fmt` _String, nil_ - Image format (e.g., 'png', 'jpeg', 'webp')
+- `quality` _Integer, nil_ - Compression quality (0-100)
+- `scale` _Float, nil_ - Scale factor for the screenshot
+
+**Example:**
+
+```ruby
+options = Daytona::ComputerUse::ScreenshotOptions.new(
+  format: 'jpeg',
+  quality: 85,
+  scale: 0.75,
+  show_cursor: true
+)
+```
+

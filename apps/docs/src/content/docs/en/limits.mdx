@@ -141,6 +141,15 @@ All errors include [**`headers`**](#rate-limit-headers) and [**`statusCode`**](#
       print(e.headers['X-RateLimit-Remaining-Sandbox-Create'])  # also works
     ```
   </TabItem>
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    begin
+      daytona.create
+    rescue Daytona::Sdk::Error => e
+      puts "Error: #{e.message}"
+    end
+    ```
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/python-sdk/common/errors) and [TypeScript SDK](/docs/typescript-sdk/errors) references.
@@ -148,6 +157,8 @@ For more information, see the [Python SDK](/docs/python-sdk/common/errors) and [
 > [**DaytonaRateLimitError (Python SDK)**](/docs/en/python-sdk/common/errors#daytonaratelimiteerror)
 >
 > [**DaytonaRateLimitError (TypeScript SDK)**](/docs/python-sdk/common/errors#daytonaratelimiterror)
+>
+> [**DaytonaRateLimitError (Ruby SDK)**](/docs/ruby-sdk/errors#daytonaratelimiteerror)
 
 ### Rate limit error response
 

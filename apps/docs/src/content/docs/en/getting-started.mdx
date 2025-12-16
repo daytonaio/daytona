@@ -13,12 +13,12 @@ It serves as the primary point of control for managing your Daytona resources.
 
 ## SDKs
 
-Daytona provides Python and TypeScript SDKs to programmatically interact with Daytona Sandboxes. They support sandbox lifecycle management, code execution, resource access, and more.
+Daytona provides Python, TypeScript and Ruby SDKs to programmatically interact with Daytona Sandboxes. They support sandbox lifecycle management, code execution, resource access, and more.
 
-To interact with Daytona Sandboxes from the SDK, see the [Python SDK](/docs/en/python-sdk) and [TypeScript SDK](/docs/en/typescript-sdk) references.
+To interact with Daytona Sandboxes from the SDK, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk) and [Ruby SDK](/docs/en/ruby-sdk) references.
 
 :::tip
-Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python) and [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) examples to create Daytona Sandboxes and run your code.
+Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python), [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) and [Ruby](https://github.com/daytonaio/daytona/tree/main/examples/ruby) examples to create Daytona Sandboxes and run your code.
 :::
 
 ## CLI
@@ -37,6 +37,17 @@ To interact with Daytona Sandboxes from the command line, install the Daytona CL
   <TabItem label="Windows">
     ```bash
     powershell -Command "irm https://get.daytona.io/windows | iex"
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```bash
+    # Using Bundler (add to Gemfile)
+    gem 'daytona-sdk'
+
+    # Or install directly
+
+    gem install daytona-sdk
     ```
   </TabItem>
 </Tabs>
@@ -482,7 +493,7 @@ Connect to an LLM using the Anthropic API and ask Claude to generate code for ge
 
 ## Examples
 
-Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python) and [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) examples to create Daytona Sandboxes and run your code.
+Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python), [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) and [Ruby](https://github.com/daytonaio/daytona/tree/main/examples/ruby) examples to create Daytona Sandboxes and run your code.
 
 :::tip
 Use our LLMs context files for faster development with AI agents and assistants. Copy the [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt) files and include them in your projects or chat contexts.

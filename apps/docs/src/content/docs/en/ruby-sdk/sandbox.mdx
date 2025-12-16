@@ -1,0 +1,420 @@
+---
+title: "Sandbox"
+hideTitleOnPage: true
+---
+
+## Sandbox
+
+Represents a Daytona Sandbox.
+
+**Attributes**:
+
+- `id` _String_ - Unique identifier for the Sandbox
+- `organization_id` _String_ - Organization ID of the Sandbox
+- `snapshot` _String_ - Daytona snapshot used to create the Sandbox
+- `user` _String_ - OS user running in the Sandbox
+- `env` _Hash\<String, String\>_ - Environment variables set in the Sandbox
+- `labels` _Hash\<String, String\>_ - Custom labels attached to the Sandbox
+- `public` _Boolean_ - Whether the Sandbox is publicly accessible
+- `network_block_all` _Boolean_ - Whether to block all network access for the Sandbox
+- `network_allow_list` _String_ - Comma-separated list of allowed CIDR network addresses
+- `target` _String_ - Target location of the runner where the Sandbox runs
+- `cpu` _Float_ - Number of CPUs allocated to the Sandbox
+- `gpu` _Float_ - Number of GPUs allocated to the Sandbox
+- `memory` _Float_ - Amount of memory allocated to the Sandbox in GiB
+- `disk` _Float_ - Amount of disk space allocated to the Sandbox in GiB
+- `state` _DaytonaApiClient::SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
+- `error_reason` _String, nil_ - Error message if Sandbox is in error state
+- `backup_state` _String_ - Current state of Sandbox backup
+- `backup_created_at` _String_ - When the backup was created
+- `auto_stop_interval` _Float_ - Auto-stop interval in minutes
+- `auto_archive_interval` _Float_ - Auto-archive interval in minutes
+- `auto_delete_interval` _Float_ - Auto-delete interval in minutes
+- `volumes` _Array_ - Volumes attached to the Sandbox
+- `build_info` _DaytonaApiClient::BuildInfo_ - Build information for the Sandbox
+- `created_at` _String_ - When the Sandbox was created
+- `updated_at` _String_ - When the Sandbox was last updated
+- `process` _Daytona::Process_ - Process execution interface
+- `fs` _Daytona::FileSystem_ - File system operations interface
+- `git` _Daytona::Git_ - Git operations interface
+- `computer_use` _Daytona::ComputerUse_ - Computer use operations interface for desktop automation
+
+### Methods
+
+#### archive()
+
+```ruby
+def archive
+```
+
+Archives the sandbox, making it inactive and preserving its state. When sandboxes are archived, the entire filesystem
+state is moved to cost-effective object storage, making it possible to keep sandboxes available for an extended period.
+The tradeoff between archived and stopped states is that starting an archived sandbox takes more time, depending on its size.
+Sandbox must be stopped before archiving.
+
+**Returns**:
+
+- `void`
+
+***
+
+#### auto_archive_interval=()
+
+```ruby
+def auto_archive_interval=(interval)
+```
+
+Sets the auto-archive interval for the Sandbox.
+The Sandbox will automatically archive after being continuously stopped for the specified interval.
+
+**Parameters**:
+
+- `interval` _Integer_ - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
+  Set to 0 for the maximum interval. Default is 7 days.
+
+**Returns**:
+
+- `Integer`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If interval is negative
+
+**Example:**
+
+```ruby
+# Auto-archive after 1 hour
+sandbox.auto_archive_interval = 60
+# Or use the maximum interval
+sandbox.auto_archive_interval = 0
+```
+
+***
+
+#### auto_delete_interval=()
+
+```ruby
+def auto_delete_interval=(interval)
+```
+
+Sets the auto-delete interval for the Sandbox.
+The Sandbox will automatically delete after being continuously stopped for the specified interval.
+
+**Parameters**:
+
+- `interval` _Integer_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
+  Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+  By default, auto-delete is disabled.
+
+**Returns**:
+
+- `Integer`
+
+**Example:**
+
+```ruby
+# Auto-delete after 1 hour
+sandbox.auto_delete_interval = 60
+# Or delete immediately upon stopping
+sandbox.auto_delete_interval = 0
+# Or disable auto-delete
+sandbox.auto_delete_interval = -1
+```
+
+***
+
+#### auto_stop_interval=()
+
+```ruby
+def auto_stop_interval=(interval)
+```
+
+Sets the auto-stop interval for the Sandbox.
+The Sandbox will automatically stop after being idle (no new events) for the specified interval.
+Events include any state changes or interactions with the Sandbox through the SDK.
+Interactions using Sandbox Previews are not included.
+
+**Parameters**:
+
+- `interval` _Integer_ - Number of minutes of inactivity before auto-stopping.
+  Set to 0 to disable auto-stop. Default is 15 minutes.
+
+**Returns**:
+
+- `Integer`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If interval is negative
+
+**Example:**
+
+```ruby
+# Auto-stop after 1 hour
+sandbox.auto_stop_interval = 60
+# Or disable auto-stop
+sandbox.auto_stop_interval = 0
+```
+
+***
+
+#### create_lsp_server()
+
+```ruby
+def create_lsp_server(language_id:, path_to_project:)
+```
+
+Creates a new Language Server Protocol (LSP) server instance.
+The LSP server provides language-specific features like code completion,
+diagnostics, and more.
+
+**Parameters**:
+
+- `language_id` _Symbol_ - The language server type (e.g., `Daytona::LspServer::Language::PYTHON`)
+- `path_to_project` _String_ - Path to the project root directory. Relative paths are resolved based on the sandbox working directory.
+
+**Returns**:
+
+- `Daytona::LspServer` - A new LSP server instance configured for the specified language
+
+**Example:**
+
+```ruby
+lsp = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::TYPESCRIPT,
+  path_to_project: 'workspace/project'
+)
+```
+
+***
+
+#### create_ssh_access()
+
+```ruby
+def create_ssh_access(expires_in_minutes)
+```
+
+Creates an SSH access token for the sandbox.
+
+**Parameters**:
+
+- `expires_in_minutes` _Integer_ - The number of minutes the SSH access token will be valid for
+
+**Returns**:
+
+- `DaytonaApiClient::SshAccessDto` - The SSH access token
+
+***
+
+#### delete()
+
+```ruby
+def delete
+```
+
+Deletes the Sandbox.
+
+**Returns**:
+
+- `void`
+
+***
+
+#### labels=()
+
+```ruby
+def labels=(labels)
+```
+
+Sets labels for the Sandbox.
+Labels are key-value pairs that can be used to organize and identify Sandboxes.
+
+**Parameters**:
+
+- `labels` _Hash\<String, String\>_ - Dictionary of key-value pairs representing Sandbox labels
+
+**Returns**:
+
+- `Hash<String, String>`
+
+**Example:**
+
+```ruby
+# Set sandbox labels
+sandbox.labels = {
+  'project' => 'my-project',
+  'environment' => 'development',
+  'team' => 'backend'
+}
+```
+
+***
+
+#### preview_url()
+
+```ruby
+def preview_url(port)
+```
+
+Retrieves the preview link for the sandbox at the specified port. If the port is closed,
+it will be opened automatically. For private sandboxes, a token is included to grant access
+to the URL.
+
+**Parameters**:
+
+- `port` _Integer_ - The port to get the preview link for
+
+**Returns**:
+
+- `DaytonaApiClient::PortPreviewUrl` - The response object for the preview link, which includes the `url`
+  and the `token` (to access private sandboxes)
+
+**Example:**
+
+```ruby
+preview_link = sandbox.preview_url(3000)
+puts "Preview URL: #{preview_link.url}"
+puts "Token: #{preview_link.token}"
+```
+
+***
+
+#### refresh()
+
+```ruby
+def refresh
+```
+
+Refreshes the Sandbox data from the API.
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+sandbox.refresh
+puts "Sandbox #{sandbox.id}:"
+puts "State: #{sandbox.state}"
+puts "Resources: #{sandbox.cpu} CPU, #{sandbox.memory} GiB RAM"
+```
+
+***
+
+#### revoke_ssh_access()
+
+```ruby
+def revoke_ssh_access(token)
+```
+
+Revokes an SSH access token for the sandbox.
+
+**Parameters**:
+
+- `token` _String_ - The token to revoke
+
+**Returns**:
+
+- `void`
+
+***
+
+#### start()
+
+```ruby
+def start(timeout = 60)
+```
+
+Starts the Sandbox and waits for it to be ready.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum time to wait in seconds. 0 means no timeout.
+  Defaults to 60-second timeout.
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If Sandbox fails to start or times out
+
+**Example:**
+
+```ruby
+sandbox = daytona.get('my-sandbox-id')
+sandbox.start(40)  # Wait up to 40 seconds
+puts 'Sandbox started successfully'
+```
+
+***
+
+#### stop()
+
+```ruby
+def stop(timeout = 60)
+```
+
+Stops the Sandbox and waits for it to be fully stopped.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum time to wait in seconds. 0 means no timeout.
+  Defaults to 60-second timeout.
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+sandbox = daytona.get('my-sandbox-id')
+sandbox.stop
+puts 'Sandbox stopped successfully'
+```
+
+***
+
+#### validate_ssh_access()
+
+```ruby
+def validate_ssh_access(token)
+```
+
+Validates an SSH access token for the sandbox.
+
+**Parameters**:
+
+- `token` _String_ - The token to validate
+
+**Returns**:
+
+- `DaytonaApiClient::SshAccessValidationDto` - The SSH access validation result
+
+***
+
+#### wait_for_sandbox_start()
+
+```ruby
+def wait_for_sandbox_start(timeout = 60)
+```
+
+Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
+reaches the 'started' state or encounters an error.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum time to wait in seconds. 0 means no timeout.
+  Defaults to 60 seconds.
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If the sandbox ends up in an error state or fails to start within the timeout period.
+
