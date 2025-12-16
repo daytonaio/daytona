@@ -14,15 +14,12 @@ import { renderMarkdown } from './utils'
 async function processPrompt(prompt: string, sandbox: any, ctx: any): Promise<void> {
   console.log('Thinking...')
 
-  const result = await sandbox.codeInterpreter.runCode(
-    `coding_agent.run_query_sync(os.environ.get('PROMPT', ''))`,
-    {
-      context: ctx,
-      envs: { PROMPT: prompt },
-      onStdout: (msg: any) => process.stdout.write(renderMarkdown(msg.output)),
-      onStderr: (msg: any) => process.stdout.write(renderMarkdown(msg.output)),
-    },
-  )
+  const result = await sandbox.codeInterpreter.runCode(`coding_agent.run_query_sync(os.environ.get('PROMPT', ''))`, {
+    context: ctx,
+    envs: { PROMPT: prompt },
+    onStdout: (msg: any) => process.stdout.write(renderMarkdown(msg.output)),
+    onStderr: (msg: any) => process.stdout.write(renderMarkdown(msg.output)),
+  })
 
   if (result.error) console.error('Execution error:', result.error.value)
 }
@@ -66,19 +63,16 @@ async function main() {
     const ctx = await sandbox.codeInterpreter.createContext()
     await sandbox.fs.uploadFile('src/coding_agent.py', '/tmp/coding_agent.py')
     const previewLink = await sandbox.getPreviewLink(80)
-    await sandbox.codeInterpreter.runCode(
-      `import os, coding_agent;`,
-      {
-        context: ctx,
-        envs: { PREVIEW_URL: previewLink.url }
-      },
-    )
+    await sandbox.codeInterpreter.runCode(`import os, coding_agent;`, {
+      context: ctx,
+      envs: { PREVIEW_URL: previewLink.url },
+    })
 
     // Set up readline interface for user input
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
     rl.on('SIGINT', async () => {
       try {
-      console.log('\nCleaning up...')
+        console.log('\nCleaning up...')
         await sandbox.delete()
       } catch (e) {
         console.error('Error deleting sandbox:', e)
