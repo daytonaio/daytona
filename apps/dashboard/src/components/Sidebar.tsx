@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/sidebar'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
+import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -43,9 +44,11 @@ import {
   LockKeyhole,
   LogOut,
   Mail,
+  MapPinned,
   Moon,
   PackageOpen,
   SearchIcon,
+  Server,
   Settings,
   Slack,
   SquareUserRound,
@@ -53,10 +56,8 @@ import {
   TextSearch,
   TriangleAlert,
   Users,
-  Server,
-  MapPinned,
 } from 'lucide-react'
-import { usePostHog } from 'posthog-js/react'
+import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -67,8 +68,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { FeatureFlags } from '@/enums/FeatureFlags'
 
 interface SidebarProps {
   isBannerVisible: boolean
