@@ -133,6 +133,7 @@
     "express": "^5.2.0",
     "express-openid-connect": "^2.18.0",
     "express-session": "^1.18.1",
+    "fast-deep-equal": "^3.1.3",
     "fast-glob": "^3.3.0",
     "form-data": "^4.0.4",
     "gt-react": "^10.0.8",

@@ -27,8 +27,8 @@ import { useNavigate } from 'react-router-dom'
 function useDashboardCommands() {
   const { theme, setTheme } = useTheme()
 
-  useRegisterCommands(
-    [
+  const helpCommands: CommandConfig[] = useMemo(
+    () => [
       {
         id: 'open-slack',
         label: 'Open Slack',
@@ -48,8 +48,9 @@ function useDashboardCommands() {
         page: 'search-docs',
       },
     ],
-    { groupId: 'help', groupLabel: 'Help', groupOrder: 2 },
+    [],
   )
+  useRegisterCommands(helpCommands, { groupId: 'help', groupLabel: 'Help', groupOrder: 2 })
 
   const globalCommands: CommandConfig[] = useMemo(
     () => [
@@ -62,7 +63,6 @@ function useDashboardCommands() {
     ],
     [theme, setTheme],
   )
-
   useRegisterCommands(globalCommands, { groupId: 'global', groupLabel: 'Global', groupOrder: 5 })
 }
 
