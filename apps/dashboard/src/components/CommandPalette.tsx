@@ -113,6 +113,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
         set((state) => {
           const newSearchByPage = new Map(state.searchByPage)
           newSearchByPage.set(state.activePageId, value)
+
           return { searchByPage: newSearchByPage }
         }),
       setShouldFilter: (value) => set({ shouldFilter: value }),
@@ -134,6 +135,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
         set((state) => {
           if (state.pageStack.length <= 1) return state
           const newStack = state.pageStack.slice(0, -1)
+
           return {
             pageStack: newStack,
             activePageId: newStack[newStack.length - 1],
@@ -149,6 +151,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
               activePageId: pageId,
             }
           }
+
           return state
         }),
 
@@ -168,6 +171,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
             meta: { ...existing?.meta, ...config },
             groups: existing?.groups ?? new Map(),
           })
+
           return { pages: newPages }
         }),
 
@@ -410,7 +414,7 @@ export function CommandPalette({ className, overlay }: CommandPaletteProps) {
             <CommandEmpty search={search} />
           </CommandList>
 
-          <CommandFooter hideResultsCount={!shouldFilter}>
+          <CommandFooter hideResultsCount={!shouldFilter} className="mt-1">
             {pageStack.length > 1 ? (
               <button
                 onClick={popPage}
@@ -515,11 +519,24 @@ function CommandItem({ config }: { config: CommandConfig }) {
   )
 }
 
-function CommandFooter({ children, hideResultsCount = false }: { children: ReactNode; hideResultsCount?: boolean }) {
+function CommandFooter({
+  children,
+  hideResultsCount = false,
+  className,
+}: {
+  children: ReactNode
+  hideResultsCount?: boolean
+  className?: string
+}) {
   const resultsCount = useCommandState((state) => state.filtered.count)
 
   return (
-    <div className="border-t-[0.5px] p-2 text-xs text-muted-foreground dark:bg-muted/20 bg-muted flex justify-between">
+    <div
+      className={cn(
+        'border-t-[0.5px] p-2 text-xs text-muted-foreground dark:bg-muted/20 bg-muted flex justify-between',
+        className,
+      )}
+    >
       {children}
       {!hideResultsCount && <span className="ml-auto">{pluralize(resultsCount, 'result', 'results')}</span>}
     </div>
