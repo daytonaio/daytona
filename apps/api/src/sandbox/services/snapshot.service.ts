@@ -12,7 +12,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, Raw, ILike, FindOptionsWhere, Brackets } from 'typeorm'
+import { Repository, Not, In, Raw, ILike, FindOptionsWhere } from 'typeorm'
 import { v4 as uuidv4 } from 'uuid'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -691,22 +691,9 @@ export class SnapshotService {
       throw new NotFoundException('Region not found')
     }
 
-    const isAvailable = await this.regionRepository
-      .createQueryBuilder('region')
-      .where('region."id" = :regionId', { regionId })
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where('region."organizationId" = :organizationId', {
-            organizationId: organization.id,
-          }).orWhere(
-            'region."organizationId" IS NULL AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
-            { organizationId: organization.id },
-          )
-        }),
-      )
-      .getExists()
+    const availableRegions = await this.organizationService.listAvailableRegions(organization.id)
 
-    if (!isAvailable) {
+    if (!availableRegions.some((r) => r.id === regionId)) {
       if (region.regionType === RegionType.SHARED) {
         // region is public, but the organization does not have a quota for it
         throw new ForbiddenException(`Region ${regionId} is not available to the organization`)

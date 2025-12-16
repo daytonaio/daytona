@@ -216,10 +216,13 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
         customRegionType: RegionType.CUSTOM,
         organizationId,
       })
+      .orWhere('region."regionType" IN (:...otherRegionTypes) AND region."enforceQuotas" = false', {
+        otherRegionTypes: [RegionType.DEDICATED, RegionType.SHARED],
+      })
       .orWhere(
-        'region."regionType" IN (:...quotaRequiredRegionTypes) AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
+        'region."regionType" IN (:...otherRegionTypes) AND region."enforceQuotas" = true AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
         {
-          quotaRequiredRegionTypes: [RegionType.DEDICATED, RegionType.SHARED],
+          otherRegionTypes: [RegionType.DEDICATED, RegionType.SHARED],
           organizationId,
         },
       )
