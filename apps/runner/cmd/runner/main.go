@@ -152,53 +152,55 @@ func main() {
 	// Setup structured logger
 	slogLogger := newSLogger()
 
-	// Create metrics collector
-	metricsCollector := metrics.NewCollector(slogLogger)
+	if cfg.ApiVersion == 2 {
+		// Create metrics collector
+		metricsCollector := metrics.NewCollector(slogLogger)
 
-	healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
-		Interval:        cfg.HealthcheckInterval,
-		Timeout:         cfg.HealthcheckTimeout,
-		Collector:       metricsCollector,
-		Logger:          slogLogger,
-		Domain:          cfg.Domain,
-		ProxyPort:       cfg.ApiPort,
-		ProxyTLSEnabled: cfg.EnableTLS,
-	})
-	if err != nil {
-		log.Fatalf("Failed to create healthcheck service: %v", err)
-	}
-
-	go func() {
-		log.Info("Starting healthcheck service")
-		healthcheckService.Start(ctx)
-	}()
-
-	executorService, err := executor.NewExecutor(&executor.ExecutorConfig{
-		Logger:    slogLogger,
-		Docker:    dockerClient,
-		Collector: metricsCollector,
-	})
-	if err != nil {
-		log.Fatalf("Failed to create executor service: %v", err)
-	}
-
-	pollerService, err := poller.NewService(&poller.PollerServiceConfig{
-		PollTimeout: cfg.PollTimeout,
-		PollLimit:   cfg.PollLimit,
-		Logger:      slogLogger,
-		Executor:    executorService,
-	})
-	if err != nil {
-		log.Fatalf("Failed to create poller service: %v", err)
-	}
-
-	go func() {
-		log.Info("Starting poller service")
-		pollerService.Start(ctx)
+		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
+			Interval:        cfg.HealthcheckInterval,
+			Timeout:         cfg.HealthcheckTimeout,
+			Collector:       metricsCollector,
+			Logger:          slogLogger,
+			Domain:          cfg.Domain,
+			ProxyPort:       cfg.ApiPort,
+			ProxyTLSEnabled: cfg.EnableTLS,
+		})
 		if err != nil {
-			log.Errorf("Poller service error: %v", err)
+			log.Fatalf("Failed to create healthcheck service: %v", err)
 		}
-	}()
+
+		go func() {
+			log.Info("Starting healthcheck service")
+			healthcheckService.Start(ctx)
+		}()
+
+		executorService, err := executor.NewExecutor(&executor.ExecutorConfig{
+			Logger:    slogLogger,
+			Docker:    dockerClient,
+			Collector: metricsCollector,
+		})
+		if err != nil {
+			log.Fatalf("Failed to create executor service: %v", err)
+		}
+
+		pollerService, err := poller.NewService(&poller.PollerServiceConfig{
+			PollTimeout: cfg.PollTimeout,
+			PollLimit:   cfg.PollLimit,
+			Logger:      slogLogger,
+			Executor:    executorService,
+		})
+		if err != nil {
+			log.Fatalf("Failed to create poller service: %v", err)
+		}
+
+		go func() {
+			log.Info("Starting poller service")
+			pollerService.Start(ctx)
+			if err != nil {
+				log.Errorf("Poller service error: %v", err)
+			}
+		}()
+	}
 
 	apiServer := api.NewApiServer(api.ApiServerConfig{
 		ApiPort:     cfg.ApiPort,

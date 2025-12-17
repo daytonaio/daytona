@@ -40,8 +40,7 @@ type Config struct {
 	PollLimit              int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
 	HealthcheckInterval    time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
 	HealthcheckTimeout     time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
-	// TODO: if 2 then dont healtcheck and dont poll
-	ApiVersion int `envconfig:"API_VERSION" default:"0"`
+	ApiVersion             int           `envconfig:"API_VERSION" default:"2"`
 }
 
 var DEFAULT_API_PORT int = 8080

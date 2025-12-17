@@ -16,7 +16,6 @@ import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
 
-import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
@@ -39,8 +38,6 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
-import { JobService } from '../services/job.service'
-import { JobType, ResourceType } from '../dto/job.dto'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 
 @Injectable()
@@ -57,7 +54,6 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
-    private readonly jobService: JobService,
   ) {}
 
   async onApplicationShutdown() {

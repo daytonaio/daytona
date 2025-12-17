@@ -122,7 +122,6 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	}
 	healthcheck.SetProxyUrl(proxyUrl)
 
-	// Send healthcheck using the new RunnerServiceAPI
 	req := s.client.RunnersAPI.RunnerHealthcheck(reqCtx).RunnerHealthcheck(*healthcheck)
 	_, err = req.Execute()
 	if err != nil {

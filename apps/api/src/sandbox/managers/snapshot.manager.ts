@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { FindOptionsWhere, In, LessThan, Not, Repository } from 'typeorm'
+import { In, LessThan, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -28,19 +28,12 @@ import { RunnerService } from '../services/runner.service'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout as sleep } from 'timers/promises'
-import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RunnerAdapterFactory, RunnerSnapshotInfo } from '../runner-adapter/runnerAdapter'
-import { OnEvent } from '@nestjs/event-emitter'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
-import { Sandbox } from '../entities/sandbox.entity'
-import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotService } from '../services/snapshot.service'
-import { JobService } from '../services/job.service'
-import { JobType } from '../enums/job-type.enum'
-import { ResourceType } from '../enums/resource-type.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 
 const SYNC_AGAIN = 'sync-again'
@@ -71,9 +64,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
-    private readonly configService: TypedConfigService,
     private readonly snapshotService: SnapshotService,
-    private readonly jobService: JobService,
   ) {}
 
   async onApplicationShutdown() {

@@ -22,18 +22,6 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 )
 
-// JobType constants
-const (
-	JobTypeCreateSandbox  = "CREATE_SANDBOX"
-	JobTypeStartSandbox   = "START_SANDBOX"
-	JobTypeStopSandbox    = "STOP_SANDBOX"
-	JobTypeDestroySandbox = "DESTROY_SANDBOX"
-	JobTypeCreateBackup   = "CREATE_BACKUP"
-	JobTypeBuildSnapshot  = "BUILD_SNAPSHOT"
-	JobTypePullSnapshot   = "PULL_SNAPSHOT"
-	JobTypeRemoveSnapshot = "REMOVE_SNAPSHOT"
-)
-
 type ExecutorConfig struct {
 	Docker    *docker.DockerClient
 	Collector *metrics.Collector
@@ -116,7 +104,7 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 // executeJob dispatches to the appropriate handler based on job type
 func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
 	// Create a span for the job execution
-	tracer := otel.Tracer("runner-service")
+	tracer := otel.Tracer("runner")
 	ctx, span := tracer.Start(ctx, fmt.Sprintf("execute_%s", job.GetType()),
 		trace.WithAttributes(
 			attribute.String("job.id", job.GetId()),
@@ -137,21 +125,21 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
 	// Dispatch to handler
 	var err error
 	switch job.GetType() {
-	case JobTypeCreateSandbox:
+	case apiclient.JOBTYPE_CREATE_SANDBOX:
 		err = e.createSandbox(ctx, job)
-	case JobTypeStartSandbox:
+	case apiclient.JOBTYPE_START_SANDBOX:
 		err = e.startSandbox(ctx, job)
-	case JobTypeStopSandbox:
+	case apiclient.JOBTYPE_STOP_SANDBOX:
 		err = e.stopSandbox(ctx, job)
-	case JobTypeDestroySandbox:
+	case apiclient.JOBTYPE_DESTROY_SANDBOX:
 		err = e.destroySandbox(ctx, job)
-	case JobTypeCreateBackup:
+	case apiclient.JOBTYPE_CREATE_BACKUP:
 		err = e.createBackup(ctx, job)
-	case JobTypeBuildSnapshot:
+	case apiclient.JOBTYPE_BUILD_SNAPSHOT:
 		err = e.buildSnapshot(ctx, job)
-	case JobTypePullSnapshot:
+	case apiclient.JOBTYPE_PULL_SNAPSHOT:
 		err = e.pullSnapshot(ctx, job)
-	case JobTypeRemoveSnapshot:
+	case apiclient.JOBTYPE_REMOVE_SNAPSHOT:
 		err = e.removeSnapshot(ctx, job)
 	default:
 		err = fmt.Errorf("unknown job type: %s", job.GetType())
@@ -169,7 +157,7 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
 // updateJobStatus reports job completion status to the API
 func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status apiclient.JobStatus, errorMessage *string) error {
 	// Create a span for the API call - otelhttp will create a child span for the HTTP request
-	tracer := otel.Tracer("runner-service")
+	tracer := otel.Tracer("runner")
 	ctx, span := tracer.Start(ctx, "update_job_status",
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(
