@@ -52,7 +52,6 @@ import { Region } from '../region/entities/region.entity'
 import { JobController } from './controllers/job.controller'
 import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
-import { RunnerServiceController } from './controllers/runner-service.controller'
 import { Job } from './entities/job.entity'
 
 @Module({
@@ -78,7 +77,6 @@ import { Job } from './entities/job.entity'
   controllers: [
     SandboxController,
     RunnerController,
-    RunnerServiceController,
     ToolboxController,
     SnapshotController,
     WorkspaceController,

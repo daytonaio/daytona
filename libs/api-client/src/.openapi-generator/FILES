@@ -12,7 +12,6 @@ api/object-storage-api.ts
 api/organizations-api.ts
 api/preview-api.ts
 api/regions-api.ts
-api/runner-service-api.ts
 api/runners-api.ts
 api/sandbox-api.ts
 api/snapshots-api.ts

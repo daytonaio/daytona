@@ -40,6 +40,8 @@ import type { Runner } from '../models'
 // @ts-ignore
 import type { RunnerFull } from '../models'
 // @ts-ignore
+import type { RunnerHealthcheck } from '../models'
+// @ts-ignore
 import type { RunnerSnapshotDto } from '../models'
 /**
  * RunnersApi - axios parameter creator
@@ -339,6 +341,49 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+     * @summary Runner healthcheck
+     * @param {RunnerHealthcheck} runnerHealthcheck
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    runnerHealthcheck: async (
+      runnerHealthcheck: RunnerHealthcheck,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'runnerHealthcheck' is not null or undefined
+      assertParamExists('runnerHealthcheck', 'runnerHealthcheck', runnerHealthcheck)
+      const localVarPath = `/runners/healthcheck`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(runnerHealthcheck, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      *
      * @summary Update runner scheduling status
      * @param {string} id Runner ID
@@ -563,6 +608,29 @@ export const RunnersApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+     * @summary Runner healthcheck
+     * @param {RunnerHealthcheck} runnerHealthcheck
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async runnerHealthcheck(
+      runnerHealthcheck: RunnerHealthcheck,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.runnerHealthcheck(runnerHealthcheck, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['RunnersApi.runnerHealthcheck']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      *
      * @summary Update runner scheduling status
      * @param {string} id Runner ID
@@ -678,6 +746,16 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
      */
     listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Runner>> {
       return localVarFp.listRunners(xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+     * @summary Runner healthcheck
+     * @param {RunnerHealthcheck} runnerHealthcheck
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.runnerHealthcheck(runnerHealthcheck, options).then((request) => request(axios, basePath))
     },
     /**
      *
@@ -803,6 +881,20 @@ export class RunnersApi extends BaseAPI {
   public listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
       .listRunners(xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+   * @summary Runner healthcheck
+   * @param {RunnerHealthcheck} runnerHealthcheck
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof RunnersApi
+   */
+  public runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig) {
+    return RunnersApiFp(this.configuration)
+      .runnerHealthcheck(runnerHealthcheck, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -60,6 +60,7 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionService } from '../../region/services/region.service'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
+import { RunnerHealthcheckDto } from '../dto/runner-health.dto'
 
 @ApiTags('runners')
 @Controller('runners')
@@ -289,5 +290,28 @@ export class RunnerController {
   @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
   async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
     return this.runnerService.getRunnersBySnapshotRef(ref)
+  }
+
+  @Post('healthcheck')
+  @ApiOperation({
+    summary: 'Runner healthcheck',
+    operationId: 'runnerHealthcheck',
+    description:
+      'Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Healthcheck received',
+  })
+  async runnerHealthcheck(
+    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @Body() healthcheck: RunnerHealthcheckDto,
+  ): Promise<void> {
+    await this.runnerService.updateRunnerHealth(
+      runnerContext.runnerId,
+      healthcheck.domain,
+      healthcheck.proxyUrl,
+      healthcheck.metrics,
+    )
   }
 }

@@ -12,7 +12,6 @@ from daytona_api_client.api.object_storage_api import ObjectStorageApi
 from daytona_api_client.api.organizations_api import OrganizationsApi
 from daytona_api_client.api.preview_api import PreviewApi
 from daytona_api_client.api.regions_api import RegionsApi
-from daytona_api_client.api.runner_service_api import RunnerServiceApi
 from daytona_api_client.api.runners_api import RunnersApi
 from daytona_api_client.api.sandbox_api import SandboxApi
 from daytona_api_client.api.snapshots_api import SnapshotsApi

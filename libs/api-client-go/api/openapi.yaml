@@ -2850,7 +2850,7 @@ paths:
       summary: Get runners by snapshot ref
       tags:
         - runners
-  /runner-service/healthcheck:
+  /runners/healthcheck:
     post:
       description: Endpoint for version 2 runners to send healthcheck and metrics.
         Updates lastChecked timestamp and runner metrics.
@@ -2867,9 +2867,13 @@ paths:
           description: Healthcheck received
       security:
         - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
       summary: Runner healthcheck
       tags:
-        - runner-service
+        - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
     get:
       deprecated: true
