@@ -5,6 +5,7 @@ require 'logger'
 require 'dotenv'
 Dotenv.load('.env.local', '.env')
 require 'daytona_api_client'
+require 'daytona_toolbox_api_client'
 require 'toml'
 require 'websocket-client-simple'
 

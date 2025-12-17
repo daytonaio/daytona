@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'aws-sdk-s3', '~> 1.0'
   spec.add_dependency 'daytona_api_client', '>= 1.0.0'
+  spec.add_dependency 'daytona_toolbox_api_client', '>= 1.0.0'
   spec.add_dependency 'dotenv'
   spec.add_dependency 'toml', '~> 0.3'
   spec.add_dependency 'websocket-client-simple', '~> 0.6'

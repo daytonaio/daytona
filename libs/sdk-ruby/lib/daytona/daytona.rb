@@ -14,9 +14,6 @@ module Daytona
     # @return [DaytonaApiClient::SandboxApi]
     attr_reader :sandbox_api
 
-    # @return [DaytonaApiClient::ToolboxApi]
-    attr_reader :toolbox_api
-
     # @return [Daytona::VolumeService]
     attr_reader :volume
 
@@ -35,11 +32,12 @@ module Daytona
       ensure_access_token_defined
       @api_client = build_api_client
       @sandbox_api = DaytonaApiClient::SandboxApi.new(api_client)
-      @toolbox_api = DaytonaApiClient::ToolboxApi.new(api_client)
+      @config_api = DaytonaApiClient::ConfigApi.new(api_client)
       @volume = VolumeService.new(DaytonaApiClient::VolumesApi.new(api_client))
       @object_storage_api = DaytonaApiClient::ObjectStorageApi.new(api_client)
       @snapshots_api = DaytonaApiClient::SnapshotsApi.new(api_client)
       @snapshot = SnapshotService.new(snapshots_api:, object_storage_api:)
+      @proxy_toolbox_url = nil
     end
 
     # Creates a sandbox with the specified parameters
@@ -235,7 +233,20 @@ module Daytona
     # @param code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @return [Daytona::Sandbox]
     def to_sandbox(sandbox_dto:, code_toolbox:)
-      Sandbox.new(sandbox_dto:, config:, sandbox_api:, toolbox_api:, code_toolbox:)
+      Sandbox.new(
+        sandbox_dto:,
+        config:,
+        sandbox_api:,
+        code_toolbox:,
+        get_proxy_toolbox_url: method(:proxy_toolbox_url)
+      )
+    end
+
+    # Gets the proxy toolbox URL from the config API (lazy loaded)
+    #
+    # @return [String] The proxy toolbox URL
+    def proxy_toolbox_url
+      @proxy_toolbox_url ||= @config_api.config_controller_get_config.proxy_toolbox_url
     end
 
     # Converts a language to a code toolbox

@@ -6,11 +6,11 @@ module Daytona
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
-      # @return [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @return [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       attr_reader :toolbox_api
 
       # @param sandbox_id [String] The ID of the sandbox
-      # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       def initialize(sandbox_id:, toolbox_api:)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
@@ -18,14 +18,14 @@ module Daytona
 
       # Gets the current mouse cursor position.
       #
-      # @return [DaytonaApiClient::MousePosition] Current mouse position with x and y coordinates
+      # @return [DaytonaToolboxApiClient::MousePosition] Current mouse position with x and y coordinates
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
       #   position = sandbox.computer_use.mouse.get_position
       #   puts "Mouse is at: #{position.x}, #{position.y}"
       def position
-        toolbox_api.get_mouse_position(sandbox_id)
+        toolbox_api.get_mouse_position
       rescue StandardError => e
         raise Sdk::Error, "Failed to get mouse position: #{e.message}"
       end
@@ -34,15 +34,15 @@ module Daytona
       #
       # @param x [Integer] The x coordinate to move to
       # @param y [Integer] The y coordinate to move to
-      # @return [DaytonaApiClient::MouseMoveResponse] Move operation result
+      # @return [DaytonaToolboxApiClient::MouseMoveResponse] Move operation result
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
       #   result = sandbox.computer_use.mouse.move(x: 100, y: 200)
       #   puts "Mouse moved to: #{result.x}, #{result.y}"
       def move(x:, y:) # rubocop:disable Naming/MethodParameterName
-        request = DaytonaApiClient::MouseMoveRequest.new(x:, y:)
-        toolbox_api.move_mouse(sandbox_id, request)
+        request = DaytonaToolboxApiClient::MouseMoveRequest.new(x:, y:)
+        toolbox_api.move_mouse(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to move mouse: #{e.message}"
       end
@@ -53,7 +53,7 @@ module Daytona
       # @param y [Integer] The y coordinate to click at
       # @param button [String] The mouse button to click ('left', 'right', 'middle'). Defaults to 'left'
       # @param double [Boolean] Whether to perform a double-click. Defaults to false
-      # @return [DaytonaApiClient::MouseClickResponse] Click operation result
+      # @return [DaytonaToolboxApiClient::MouseClickResponse] Click operation result
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
@@ -66,8 +66,8 @@ module Daytona
       #   # Right click
       #   right_click = sandbox.computer_use.mouse.click(x: 100, y: 200, button: 'right')
       def click(x:, y:, button: 'left', double: false) # rubocop:disable Naming/MethodParameterName
-        request = DaytonaApiClient::MouseClickRequest.new(x:, y:, button:, double:)
-        toolbox_api.click_mouse(sandbox_id, request)
+        request = DaytonaToolboxApiClient::MouseClickRequest.new(x:, y:, button:, double:)
+        toolbox_api.click_mouse(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to click mouse: #{e.message}"
       end
@@ -79,15 +79,15 @@ module Daytona
       # @param end_x [Integer] The ending x coordinate
       # @param end_y [Integer] The ending y coordinate
       # @param button [String] The mouse button to use for dragging. Defaults to 'left'
-      # @return [DaytonaApiClient::MouseDragResponse] Drag operation result
+      # @return [DaytonaToolboxApiClient::MouseDragResponse] Drag operation result
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
       #   result = sandbox.computer_use.mouse.drag(start_x: 50, start_y: 50, end_x: 150, end_y: 150)
       #   puts "Dragged from #{result.from_x},#{result.from_y} to #{result.to_x},#{result.to_y}"
       def drag(start_x:, start_y:, end_x:, end_y:, button: 'left')
-        request = DaytonaApiClient::MouseDragRequest.new(start_x:, start_y:, end_x:, end_y:, button:)
-        toolbox_api.drag_mouse(sandbox_id, request)
+        request = DaytonaToolboxApiClient::MouseDragRequest.new(start_x:, start_y:, end_x:, end_y:, button:)
+        toolbox_api.drag_mouse(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to drag mouse: #{e.message}"
       end
@@ -108,8 +108,8 @@ module Daytona
       #   # Scroll down
       #   scroll_down = sandbox.computer_use.mouse.scroll(x: 100, y: 200, direction: 'down', amount: 5)
       def scroll(x:, y:, direction:, amount: 1) # rubocop:disable Naming/MethodParameterName
-        request = DaytonaApiClient::MouseScrollRequest.new(x:, y:, direction:, amount:)
-        toolbox_api.scroll_mouse(sandbox_id, request)
+        request = DaytonaToolboxApiClient::MouseScrollRequest.new(x:, y:, direction:, amount:)
+        toolbox_api.scroll_mouse(request)
         true
       rescue StandardError => e
         raise Sdk::Error, "Failed to scroll mouse: #{e.message}"
@@ -121,11 +121,11 @@ module Daytona
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
-      # @return [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @return [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       attr_reader :toolbox_api
 
       # @param sandbox_id [String] The ID of the sandbox
-      # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       def initialize(sandbox_id:, toolbox_api:)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
@@ -144,8 +144,8 @@ module Daytona
       #   # With delay between characters
       #   sandbox.computer_use.keyboard.type("Slow typing", delay: 100)
       def type(text:, delay: nil)
-        request = DaytonaApiClient::KeyboardTypeRequest.new(text:, delay:)
-        toolbox_api.type_text(sandbox_id, request)
+        request = DaytonaToolboxApiClient::KeyboardTypeRequest.new(text:, delay:)
+        toolbox_api.type_text(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to type text: #{e.message}"
       end
@@ -167,8 +167,8 @@ module Daytona
       #   # Press Ctrl+Shift+T
       #   sandbox.computer_use.keyboard.press("t", modifiers: ["ctrl", "shift"])
       def press(key:, modifiers: nil)
-        request = DaytonaApiClient::KeyboardPressRequest.new(key:, modifiers: modifiers || [])
-        toolbox_api.press_key(sandbox_id, request)
+        request = DaytonaToolboxApiClient::KeyboardPressRequest.new(key:, modifiers: modifiers || [])
+        toolbox_api.press_key(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to press key: #{e.message}"
       end
@@ -189,8 +189,8 @@ module Daytona
       #   # Alt+Tab
       #   sandbox.computer_use.keyboard.hotkey("alt+tab")
       def hotkey(keys:)
-        request = DaytonaApiClient::KeyboardHotkeyRequest.new(keys:)
-        toolbox_api.press_hotkey(sandbox_id, request)
+        request = DaytonaToolboxApiClient::KeyboardHotkeyRequest.new(keys:)
+        toolbox_api.press_hotkey(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to press hotkey: #{e.message}"
       end
@@ -201,11 +201,11 @@ module Daytona
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
-      # @return [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @return [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       attr_reader :toolbox_api
 
       # @param sandbox_id [String] The ID of the sandbox
-      # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       def initialize(sandbox_id:, toolbox_api:)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
@@ -224,7 +224,7 @@ module Daytona
       #   # With cursor visible
       #   with_cursor = sandbox.computer_use.screenshot.take_full_screen(show_cursor: true)
       def take_full_screen(show_cursor: false)
-        toolbox_api.take_screenshot(sandbox_id, show_cursor:)
+        toolbox_api.take_screenshot(show_cursor:)
       rescue StandardError => e
         raise Sdk::Error, "Failed to take screenshot: #{e.message}"
       end
@@ -241,7 +241,7 @@ module Daytona
       #   screenshot = sandbox.computer_use.screenshot.take_region(region)
       #   puts "Captured region: #{screenshot.region.width}x#{screenshot.region.height}"
       def take_region(region:, show_cursor: false)
-        toolbox_api.take_region_screenshot(sandbox_id, region.height, region.width, region.y, region.x, show_cursor:)
+        toolbox_api.take_region_screenshot(region.height, region.width, region.y, region.x, show_cursor:)
       rescue StandardError => e
         raise Sdk::Error, "Failed to take region screenshot: #{e.message}"
       end
@@ -315,11 +315,11 @@ module Daytona
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
-      # @return [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @return [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       attr_reader :toolbox_api
 
       # @param sandbox_id [String] The ID of the sandbox
-      # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for sandbox operations
+      # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
       def initialize(sandbox_id:, toolbox_api:)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
@@ -327,7 +327,7 @@ module Daytona
 
       # Gets information about the displays.
       #
-      # @return [DaytonaApiClient::DisplayInfoResponse] Display information including primary display and all available displays
+      # @return [DaytonaToolboxApiClient::DisplayInfoResponse] Display information including primary display and all available displays
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
@@ -338,14 +338,14 @@ module Daytona
       #     puts "Display #{i}: #{display.width}x#{display.height} at #{display.x},#{display.y}"
       #   end
       def info
-        toolbox_api.get_display_info(sandbox_id)
+        toolbox_api.get_display_info
       rescue StandardError => e
         raise Sdk::Error, "Failed to get display info: #{e.message}"
       end
 
       # Gets the list of open windows.
       #
-      # @return [DaytonaApiClient::WindowsResponse] List of open windows with their IDs and titles
+      # @return [DaytonaToolboxApiClient::WindowsResponse] List of open windows with their IDs and titles
       # @raise [Daytona::Sdk::Error] If the operation fails
       #
       # @example
@@ -355,7 +355,7 @@ module Daytona
       #     puts "- #{window.title} (ID: #{window.id})"
       #   end
       def windows
-        toolbox_api.get_windows(sandbox_id)
+        toolbox_api.get_windows
       rescue StandardError => e
         raise Sdk::Error, "Failed to get windows: #{e.message}"
       end
@@ -453,7 +453,7 @@ module Daytona
     #   result = sandbox.computer_use.start
     #   puts "Computer use processes started: #{result.message}"
     def start
-      toolbox_api.start_computer_use(sandbox_id)
+      toolbox_api.start_computer_use
     rescue StandardError => e
       raise Sdk::Error, "Failed to start computer use: #{e.message}"
     end
@@ -467,7 +467,7 @@ module Daytona
     #   result = sandbox.computer_use.stop
     #   puts "Computer use processes stopped: #{result.message}"
     def stop
-      toolbox_api.stop_computer_use(sandbox_id)
+      toolbox_api.stop_computer_use
     rescue StandardError => e
       raise Sdk::Error, "Failed to stop computer use: #{e.message}"
     end
@@ -481,7 +481,7 @@ module Daytona
     #   response = sandbox.computer_use.get_status
     #   puts "Computer use status: #{response.status}"
     def status
-      toolbox_api.get_computer_use_status(sandbox_id)
+      toolbox_api.get_computer_use_status
     rescue StandardError => e
       raise Sdk::Error, "Failed to get computer use status: #{e.message}"
     end

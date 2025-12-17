@@ -13,3 +13,4 @@ gem 'solargraph', '~> 0.57'
 gem 'webmock', '~> 3.25'
 
 gem 'daytona_api_client', path: '../api-client-ruby'
+gem 'daytona_toolbox_api_client', path: '../toolbox-api-client-ruby'

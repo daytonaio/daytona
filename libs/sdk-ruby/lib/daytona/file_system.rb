@@ -8,13 +8,13 @@ module Daytona
     # @return [String] The Sandbox ID
     attr_reader :sandbox_id
 
-    # @return [DaytonaApiClient::ToolboxApi] API client for Sandbox operations
+    # @return [DaytonaToolboxApiClient::FileSystemApi] API client for Sandbox operations
     attr_reader :toolbox_api
 
     # Initializes a new FileSystem instance.
     #
     # @param sandbox_id [String] The Sandbox ID
-    # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for Sandbox operations
+    # @param toolbox_api [DaytonaToolboxApiClient::FileSystemApi] API client for Sandbox operations
     def initialize(sandbox_id:, toolbox_api:)
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
@@ -37,7 +37,7 @@ module Daytona
     #   sandbox.fs.create_folder("workspace/secrets", "700")
     def create_folder(path, mode)
       Sdk.logger.debug("Creating folder #{path} with mode #{mode}")
-      toolbox_api.create_folder(sandbox_id, path, mode)
+      toolbox_api.create_folder(path, mode)
     rescue StandardError => e
       raise Sdk::Error, "Failed to create folder: #{e.message}"
     end
@@ -56,7 +56,7 @@ module Daytona
     #   # Delete a directory recursively
     #   sandbox.fs.delete_file("workspace/old_dir", recursive: true)
     def delete_file(path, recursive: false)
-      toolbox_api.delete_file(sandbox_id, path, { recursive: })
+      toolbox_api.delete_file(path, { recursive: })
     rescue StandardError => e
       raise Sdk::Error, "Failed to delete file: #{e.message}"
     end
@@ -80,7 +80,7 @@ module Daytona
     #   info = sandbox.fs.get_file_info("workspace/data")
     #   puts "Path is a directory" if info.is_dir
     def get_file_info(path)
-      toolbox_api.get_file_info(sandbox_id, path)
+      toolbox_api.get_file_info(path)
     rescue StandardError => e
       raise Sdk::Error, "Failed to get file info: #{e.message}"
     end
@@ -105,7 +105,7 @@ module Daytona
     #   dirs = files.select(&:is_dir)
     #   puts "Subdirectories: #{dirs.map(&:name).join(', ')}"
     def list_files(path)
-      toolbox_api.list_files(sandbox_id, { path: })
+      toolbox_api.list_files({ path: })
     rescue StandardError => e
       raise Sdk::Error, "Failed to list files: #{e.message}"
     end
@@ -130,7 +130,7 @@ module Daytona
     #   size_mb = File.size("local_copy.txt") / 1024.0 / 1024.0
     #   puts "Size of the downloaded file: #{size_mb} MB"
     def download_file(remote_path, local_path = nil) # rubocop:disable Metrics/MethodLength
-      file = toolbox_api.download_file(sandbox_id, remote_path)
+      file = toolbox_api.download_file(remote_path)
 
       if local_path
 
@@ -169,17 +169,17 @@ module Daytona
     def upload_file(source, remote_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       if source.is_a?(String) && File.exist?(source)
         # Source is a file path
-        File.open(source, 'rb') { |file| toolbox_api.upload_file(sandbox_id, remote_path, { file: }) }
+        File.open(source, 'rb') { |file| toolbox_api.upload_file(remote_path, { file: }) }
       elsif source.respond_to?(:read)
         # Source is an IO object
-        toolbox_api.upload_file(sandbox_id, remote_path, { file: source })
+        toolbox_api.upload_file(remote_path, { file: source })
       else
         # Source is string content - create a temporary file
         Tempfile.create('daytona_upload') do |file|
           file.binmode
           file.write(source)
           file.rewind
-          toolbox_api.upload_file(sandbox_id, remote_path, { file: })
+          toolbox_api.upload_file(remote_path, { file: })
         end
       end
     rescue StandardError => e
@@ -223,7 +223,7 @@ module Daytona
     #     puts "#{match.file}:#{match.line}: #{match.content.strip}"
     #   end
     def find_files(path, pattern)
-      toolbox_api.find_in_files(sandbox_id, path, pattern)
+      toolbox_api.find_in_files(path, pattern)
     rescue StandardError => e
       raise Sdk::Error, "Failed to find files: #{e.message}"
     end
@@ -247,7 +247,7 @@ module Daytona
     #   result = sandbox.fs.search_files("workspace/data", "test_*")
     #   puts "Found #{result.files.length} test files"
     def search_files(path, pattern)
-      toolbox_api.search_files(sandbox_id, path, pattern)
+      toolbox_api.search_files(path, pattern)
     rescue StandardError => e
       raise Sdk::Error, "Failed to search files: #{e.message}"
     end
@@ -280,7 +280,7 @@ module Daytona
     #     "workspace/new_dir"
     #   )
     def move_files(source, destination)
-      toolbox_api.move_file(sandbox_id, source, destination)
+      toolbox_api.move_file(source, destination)
     rescue StandardError => e
       raise Sdk::Error, "Failed to move files: #{e.message}"
     end
@@ -316,7 +316,7 @@ module Daytona
         pattern: pattern,
         new_value: new_value
       )
-      toolbox_api.replace_in_files(sandbox_id, replace_request)
+      toolbox_api.replace_in_files(replace_request)
     rescue StandardError => e
       raise Sdk::Error, "Failed to replace in files: #{e.message}"
     end
@@ -351,7 +351,7 @@ module Daytona
       opts[:owner] = owner if owner
       opts[:group] = group if group
 
-      toolbox_api.set_file_permissions(sandbox_id, path, opts)
+      toolbox_api.set_file_permissions(path, opts)
     rescue StandardError => e
       raise Sdk::Error, "Failed to set file permissions: #{e.message}"
     end

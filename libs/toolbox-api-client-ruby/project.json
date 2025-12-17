@@ -1,0 +1,64 @@
+{
+  "name": "toolbox-api-client-ruby",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/toolbox-api-client-ruby",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bundle install"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bundle exec rubocop"
+      }
+    },
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "yarn run openapi-generator-cli generate -i apps/daemon/pkg/toolbox/docs/swagger.json -g ruby --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona Toolbox API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemName=daytona_toolbox_api_client -o libs/toolbox-api-client-ruby",
+          "bash libs/toolbox-api-client-ruby/fix-gemspec.sh",
+          "cd libs/toolbox-api-client-ruby && bundle install"
+        ],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "daemon"
+        }
+      ]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "bundle exec rubocop -a --fail-level=E",
+          "prettier --write \"**/*.yml\""
+        ],
+        "parallel": false
+      }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "gem build daytona_toolbox_api_client.gemspec",
+          "gem push daytona_toolbox_api_client-*.gem --key rubygems --host https://rubygems.org"
+        ],
+        "parallel": false
+      }
+    }
+  }
+}
+
+

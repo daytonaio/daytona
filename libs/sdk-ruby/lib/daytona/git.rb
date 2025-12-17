@@ -5,13 +5,13 @@ module Daytona
     # @return [String] The Sandbox ID
     attr_reader :sandbox_id
 
-    # @return [DaytonaApiClient::ToolboxApi] API client for Sandbox operations
+    # @return [DaytonaToolboxApiClient::GitApi] API client for Sandbox operations
     attr_reader :toolbox_api
 
     # Initializes a new Git handler instance.
     #
     # @param sandbox_id [String] The Sandbox ID.
-    # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for Sandbox operations.
+    # @param toolbox_api [DaytonaToolboxApiClient::GitApi] API client for Sandbox operations.
     def initialize(sandbox_id:, toolbox_api:)
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
@@ -37,7 +37,7 @@ module Daytona
     #     "README.md"
     #   ])
     def add(path, files)
-      toolbox_api.git_add_files(sandbox_id, DaytonaApiClient::GitAddRequest.new(path:, files:))
+      toolbox_api.git_add_files(DaytonaToolboxApiClient::GitAddRequest.new(path:, files:))
     rescue StandardError => e
       raise Sdk::Error, "Failed to add files: #{e.message}"
     end
@@ -53,7 +53,7 @@ module Daytona
     #   response = sandbox.git.branches("workspace/repo")
     #   puts "Branches: #{response.branches}"
     def branches(path)
-      toolbox_api.git_list_branches(sandbox_id, path)
+      toolbox_api.git_list_branches(path)
     rescue StandardError => e
       raise Sdk::Error, "Failed to list branches: #{e.message}"
     end
@@ -98,8 +98,7 @@ module Daytona
     #   )
     def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil) # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
       toolbox_api.git_clone_repository(
-        sandbox_id,
-        DaytonaApiClient::GitCloneRequest.new(
+        DaytonaToolboxApiClient::GitCloneRequest.new(
           url: url,
           branch: branch,
           path: path,
@@ -137,8 +136,7 @@ module Daytona
     #   puts "Commit SHA: #{commit_response.sha}"
     def commit(path:, message:, author:, email:, allow_empty: false)
       response = toolbox_api.git_commit_changes(
-        sandbox_id,
-        DaytonaApiClient::GitCommitRequest.new(path:, message:, author:, email:, allow_empty:)
+        DaytonaToolboxApiClient::GitCommitRequest.new(path:, message:, author:, email:, allow_empty:)
       )
       GitCommitResponse.new(sha: response.hash)
     rescue StandardError => e
@@ -168,8 +166,7 @@ module Daytona
     #   )
     def push(path:, username: nil, password: nil)
       toolbox_api.git_push_changes(
-        sandbox_id,
-        DaytonaApiClient::GitRepoRequest.new(path:, username:, password:)
+        DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
       )
     rescue StandardError => e
       raise Sdk::Error, "Failed to push changes: #{e.message}"
@@ -198,8 +195,7 @@ module Daytona
     #
     def pull(path:, username: nil, password: nil)
       toolbox_api.git_pull_changes(
-        sandbox_id,
-        DaytonaApiClient::GitRepoRequest.new(path:, username:, password:)
+        DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
       )
     rescue StandardError => e
       raise Sdk::Error, "Failed to pull changes: #{e.message}"
@@ -209,7 +205,7 @@ module Daytona
     #
     # @param path [String] Path to the Git repository root. Relative paths are resolved based on
     #   the sandbox working directory.
-    # @return [DaytonaApiClient::GitStatus] Repository status information including:
+    # @return [DaytonaToolboxApiClient::GitStatus] Repository status information including:
     # @raise [Daytona::Sdk::Error] if getting status fails
     #
     # @example
@@ -218,7 +214,7 @@ module Daytona
     #   puts "Commits ahead: #{status.ahead}"
     #   puts "Commits behind: #{status.behind}"
     def status(path)
-      toolbox_api.git_get_status(sandbox_id, path)
+      toolbox_api.git_get_status(path)
     rescue StandardError => e
       raise Sdk::Error, "Failed to get status: #{e.message}"
     end
@@ -236,8 +232,7 @@ module Daytona
     #   sandbox.git.checkout_branch("workspace/repo", "feature-branch")
     def checkout_branch(path, branch)
       toolbox_api.git_checkout_branch(
-        sandbox_id,
-        DaytonaApiClient::GitCheckoutRequest.new(path:, branch:)
+        DaytonaToolboxApiClient::GitCheckoutRequest.new(path:, branch:)
       )
     rescue StandardError => e
       raise Sdk::Error, "Failed to checkout branch: #{e.message}"
@@ -257,8 +252,7 @@ module Daytona
     #
     def create_branch(path, name)
       toolbox_api.git_create_branch(
-        sandbox_id,
-        DaytonaApiClient::GitBranchRequest.new(path:, name:)
+        DaytonaToolboxApiClient::GitBranchRequest.new(path:, name:)
       )
     rescue StandardError => e
       raise Sdk::Error, "Failed to create branch: #{e.message}"
@@ -277,8 +271,7 @@ module Daytona
     #   sandbox.git.delete_branch("workspace/repo", "old-feature")
     def delete_branch(path, name)
       toolbox_api.git_delete_branch(
-        sandbox_id,
-        DaytonaApiClient::GitDeleteBranchRequest.new(path:, name:)
+        DaytonaToolboxApiClient::GitDeleteBranchRequest.new(path:, name:)
       )
     rescue StandardError => e
       raise Sdk::Error, "Failed to delete branch: #{e.message}"

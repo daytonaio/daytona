@@ -21,7 +21,7 @@ module Daytona
     # @return [String]
     attr_reader :path_to_project
 
-    # @return [DaytonaApiClient::ToolboxApi]
+    # @return [DaytonaToolboxApiClient::LspApi]
     attr_reader :toolbox_api
 
     # @return [String]
@@ -29,7 +29,7 @@ module Daytona
 
     # @param language_id [Symbol]
     # @param path_to_project [String]
-    # @param toolbox_api [DaytonaApiClient::ToolboxApi]
+    # @param toolbox_api [DaytonaToolboxApiClient::LspApi]
     # @param sandbox_id [String]
     def initialize(language_id:, path_to_project:, toolbox_api:, sandbox_id:)
       @language_id = language_id
@@ -45,8 +45,7 @@ module Daytona
     # @return [DaytonaApiClient::CompletionList]
     def completions(path:, position:)
       toolbox_api.lsp_completions(
-        sandbox_id,
-        DaytonaApiClient::LspCompletionParams.new(
+        DaytonaToolboxApiClient::LspCompletionParams.new(
           language_id:,
           path_to_project:,
           uri: uri(path),
@@ -63,8 +62,7 @@ module Daytona
     # @return [void]
     def did_close(path)
       toolbox_api.lsp_did_close(
-        sandbox_id,
-        DaytonaApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
+        DaytonaToolboxApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
       )
     end
 
@@ -77,23 +75,22 @@ module Daytona
     # @return [void]
     def did_open(path)
       toolbox_api.lsp_did_open(
-        sandbox_id,
-        DaytonaApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
+        DaytonaToolboxApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
       )
     end
 
     # Gets symbol information (functions, classes, variables, etc.) from a document.
     #
     # @param path [String]
-    # @return [Array<DaytonaApiClient::LspSymbol]
-    def document_symbols(path) = toolbox_api.lsp_document_symbols(sandbox_id, language_id, path_to_project, uri(path))
+    # @return [Array<DaytonaToolboxApiClient::LspSymbol]
+    def document_symbols(path) = toolbox_api.lsp_document_symbols(language_id, path_to_project, uri(path))
 
     # Searches for symbols matching the query string across all files
     # in the Sandbox.
     #
     # @param query [String]
-    # @return [Array<DaytonaApiClient::LspSymbol]
-    def sandbox_symbols(query) = toolbox_api.lsp_workspace_symbols(sandbox_id, language_id, path_to_project, query)
+    # @return [Array<DaytonaToolboxApiClient::LspSymbol]
+    def sandbox_symbols(query) = toolbox_api.lsp_workspace_symbols(language_id, path_to_project, query)
 
     # Starts the language server.
     # This method must be called before using any other LSP functionality.
@@ -102,8 +99,7 @@ module Daytona
     # @return [void]
     def start
       toolbox_api.lsp_start(
-        sandbox_id,
-        DaytonaApiClient::LspServerRequest.new(language_id:, path_to_project:)
+        DaytonaToolboxApiClient::LspServerRequest.new(language_id:, path_to_project:)
       )
     end
 
@@ -114,8 +110,7 @@ module Daytona
     # @return [void]
     def stop
       toolbox_api.lsp_stop(
-        sandbox_id,
-        DaytonaApiClient::LspServerRequest.new(language_id:, path_to_project:)
+        DaytonaToolboxApiClient::LspServerRequest.new(language_id:, path_to_project:)
       )
     end
 

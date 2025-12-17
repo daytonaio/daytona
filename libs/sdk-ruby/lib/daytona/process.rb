@@ -12,7 +12,7 @@ module Daytona
     # @return [String] The ID of the Sandbox
     attr_reader :sandbox_id
 
-    # @return [DaytonaApiClient::ToolboxApi] API client for Sandbox operations
+    # @return [DaytonaToolboxApiClient::ProcessApi] API client for Sandbox operations
     attr_reader :toolbox_api
 
     # @return [Proc] Function to get preview link for a port
@@ -22,7 +22,7 @@ module Daytona
     #
     # @param code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @param sandbox_id [String] The ID of the Sandbox
-    # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for Sandbox operations
+    # @param toolbox_api [DaytonaToolboxApiClient::ProcessApi] API client for Sandbox operations
     # @param get_preview_link [Proc] Function to get preview link for a port
     def initialize(code_toolbox:, sandbox_id:, toolbox_api:, get_preview_link:)
       @code_toolbox = code_toolbox
@@ -62,7 +62,7 @@ module Daytona
 
       command = "sh -c \"#{command}\""
 
-      response = toolbox_api.execute_command(sandbox_id, DaytonaApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
+      response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
       # Post-process the output to extract ExecutionArtifacts
       artifacts = parse_output(response.result.split("\n"))
 
@@ -109,7 +109,7 @@ module Daytona
     #   # Do work...
     #   sandbox.process.delete_session(session_id)
     def create_session(session_id)
-      toolbox_api.create_session(sandbox_id, DaytonaApiClient::CreateSessionRequest.new(session_id:))
+      toolbox_api.create_session(DaytonaToolboxApiClient::CreateSessionRequest.new(session_id:))
     end
 
     # Gets a session in the Sandbox
@@ -122,7 +122,7 @@ module Daytona
     #   session.commands.each do |cmd|
     #     puts "Command: #{cmd.command}"
     #   end
-    def get_session(session_id) = toolbox_api.get_session(sandbox_id, session_id)
+    def get_session(session_id) = toolbox_api.get_session(session_id)
 
     # Gets information about a specific command executed in a session
     #
@@ -136,7 +136,7 @@ module Daytona
     #     puts "Command #{cmd.command} completed successfully"
     #   end
     def get_session_command(session_id:, command_id:)
-      toolbox_api.get_session_command(sandbox_id, session_id, command_id)
+      toolbox_api.get_session_command(session_id, command_id)
     end
 
     # Executes a command in the session
@@ -163,10 +163,9 @@ module Daytona
     #   puts "Command stdout: #{result.stdout}"
     #   puts "Command stderr: #{result.stderr}"
     def execute_session_command(session_id:, req:) # rubocop:disable Metrics/MethodLength
-      response = toolbox_api.execute_session_command(
-        sandbox_id,
+      response = toolbox_api.session_execute_command(
         session_id,
-        DaytonaApiClient::SessionExecuteRequest.new(command: req.command, run_async: req.run_async)
+        DaytonaToolboxApiClient::SessionExecuteRequest.new(command: req.command, run_async: req.run_async)
       )
 
       stdout, stderr = Util.demux(response.output || '')
@@ -195,7 +194,6 @@ module Daytona
     def get_session_command_logs(session_id:, command_id:)
       parse_session_command_logs(
         toolbox_api.get_session_command_logs(
-          sandbox_id,
           session_id,
           command_id
         )
@@ -255,7 +253,7 @@ module Daytona
     #     puts "Session #{session.session_id}:"
     #     puts "  Commands: #{session.commands.length}"
     #   end
-    def list_sessions = toolbox_api.list_sessions(sandbox_id)
+    def list_sessions = toolbox_api.list_sessions
 
     # Terminates and removes a session from the Sandbox, cleaning up any resources associated with it
     #
@@ -268,7 +266,7 @@ module Daytona
     #
     #   # Clean up when done
     #   sandbox.process.delete_session("temp-session")
-    def delete_session(session_id) = toolbox_api.delete_session(sandbox_id, session_id)
+    def delete_session(session_id) = toolbox_api.delete_session(session_id)
 
     # Creates a new PTY (pseudo-terminal) session in the Sandbox.
     #
@@ -305,8 +303,7 @@ module Daytona
     # @raise [Daytona::Sdk::Error] If the PTY session creation fails or the session ID is already in use.
     def create_pty_session(id:, cwd: nil, envs: nil, pty_size: nil) # rubocop:disable Metrics/MethodLength
       response = toolbox_api.create_pty_session(
-        sandbox_id,
-        DaytonaApiClient::PtyCreateRequest.new(
+        DaytonaToolboxApiClient::PtyCreateRequest.new(
           id:,
           cwd:,
           envs:,
@@ -368,9 +365,8 @@ module Daytona
     #   puts "PTY resized to #{session_info.cols}x#{session_info.rows}"
     def resize_pty_session(session_id, pty_size)
       toolbox_api.resize_pty_session(
-        sandbox_id,
         session_id,
-        DaytonaApiClient::PtyResizeRequest.new(
+        DaytonaToolboxApiClient::PtyResizeRequest.new(
           cols: pty_size.cols,
           rows: pty_size.rows
         )
@@ -385,7 +381,7 @@ module Daytona
     # @example
     #   sandbox.process.delete_pty_session("my-pty")
     def delete_pty_session(session_id)
-      toolbox_api.delete_pty_session(sandbox_id, session_id)
+      toolbox_api.delete_pty_session(session_id)
     end
 
     # Lists all PTY sessions in the Sandbox
@@ -398,7 +394,7 @@ module Daytona
     #     puts "PTY Session #{session.id}: #{session.cols}x#{session.rows}"
     #   end
     def list_pty_sessions
-      toolbox_api.list_pty_sessions(sandbox_id)
+      toolbox_api.list_pty_sessions
     end
 
     # Gets detailed information about a specific PTY session
@@ -418,7 +414,7 @@ module Daytona
     #   puts "Working Directory: #{session_info.cwd}"
     #   puts "Terminal Size: #{session_info.cols}x#{session_info.rows}"
     def get_pty_session_info(session_id)
-      toolbox_api.get_pty_session(sandbox_id, session_id)
+      toolbox_api.get_pty_session(session_id)
     end
 
     private

@@ -73,9 +73,6 @@ module Daytona
     # (negative value means disabled, 0 means delete immediately upon stopping)
     attr_reader :auto_delete_interval
 
-    # @return [String] The domain name of the runner
-    attr_reader :runner_domain
-
     # @return [Array<DaytonaApiClient::SandboxVolume>] Array of volumes attached to the sandbox
     attr_reader :volumes
 
@@ -100,9 +97,6 @@ module Daytona
     # @return [DaytonaApiClient::SandboxApi]
     attr_reader :sandbox_api
 
-    # @return [DaytonaApiClient::ToolboxApi]
-    attr_reader :toolbox_api
-
     # @return [Daytona::Process]
     attr_reader :process
 
@@ -119,22 +113,39 @@ module Daytona
     # @params config [Daytona::Config]
     # @params sandbox_api [DaytonaApiClient::SandboxApi]
     # @params sandbox_dto [DaytonaApiClient::Sandbox]
-    # @params toolbox_api [DaytonaApiClient::ToolboxApi]
-    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, toolbox_api:) # rubocop:disable Metrics/MethodLength
+    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, get_proxy_toolbox_url:) # rubocop:disable Metrics/MethodLength
       process_response(sandbox_dto)
       @code_toolbox = code_toolbox
       @config = config
       @sandbox_api = sandbox_api
-      @toolbox_api = toolbox_api
+      @get_proxy_toolbox_url = get_proxy_toolbox_url
+
+      # Create toolbox API clients with dynamic configuration
+      toolbox_api_config = build_toolbox_api_config
+
+      # Helper to create API client with authentication header
+      create_authenticated_client = lambda do
+        client = DaytonaToolboxApiClient::ApiClient.new(toolbox_api_config)
+        client.default_headers['Authorization'] = "Bearer #{config.api_key || config.jwt_token}"
+        client
+      end
+
+      process_api = DaytonaToolboxApiClient::ProcessApi.new(create_authenticated_client.call)
+      fs_api = DaytonaToolboxApiClient::FileSystemApi.new(create_authenticated_client.call)
+      git_api = DaytonaToolboxApiClient::GitApi.new(create_authenticated_client.call)
+      lsp_api = DaytonaToolboxApiClient::LspApi.new(create_authenticated_client.call)
+      computer_use_api = DaytonaToolboxApiClient::ComputerUseApi.new(create_authenticated_client.call)
+
       @process = Process.new(
         sandbox_id: id,
         code_toolbox:,
-        toolbox_api:,
+        toolbox_api: process_api,
         get_preview_link: proc { |port| preview_url(port) }
       )
-      @fs = FileSystem.new(sandbox_id: id, toolbox_api:)
-      @git = Git.new(sandbox_id: id, toolbox_api:)
-      @computer_use = ComputerUse.new(sandbox_id: id, toolbox_api:)
+      @fs = FileSystem.new(sandbox_id: id, toolbox_api: fs_api)
+      @git = Git.new(sandbox_id: id, toolbox_api: git_api)
+      @computer_use = ComputerUse.new(sandbox_id: id, toolbox_api: computer_use_api)
+      @lsp_api = lsp_api
     end
 
     # Archives the sandbox, making it inactive and preserving its state. When sandboxes are
@@ -268,7 +279,7 @@ module Daytona
     #                      based on the sandbox working directory.
     # @return [Daytona::LspServer]
     def create_lsp_server(language_id:, path_to_project:)
-      LspServer.new(language_id:, path_to_project:, toolbox_api:, sandbox_id: id)
+      LspServer.new(language_id:, path_to_project:, toolbox_api: @lsp_api, sandbox_id: id)
     end
 
     #  Validates an SSH access token for the sandbox.
@@ -287,6 +298,24 @@ module Daytona
     end
 
     private
+
+    # Build toolbox API configuration with dynamic base URL from preview link
+    # @return [DaytonaToolboxApiClient::Configuration]
+    def build_toolbox_api_config
+      DaytonaToolboxApiClient::Configuration.new.configure do |cfg|
+        # Get the proxy toolbox URL and append sandbox ID
+        proxy_toolbox_url = @get_proxy_toolbox_url.call
+        proxy_toolbox_url += '/' unless proxy_toolbox_url.end_with?('/')
+        full_url = "#{proxy_toolbox_url}#{id}"
+        uri = URI(full_url)
+
+        cfg.scheme = uri.scheme
+        cfg.host = uri.host
+        cfg.base_path = uri.path.empty? ? '/' : uri.path
+
+        cfg
+      end
+    end
 
     # @params sandbox_dto [DaytonaApiClient::Sandbox]
     # @return [void]
@@ -311,7 +340,6 @@ module Daytona
       @auto_stop_interval = sandbox_dto.auto_stop_interval
       @auto_archive_interval = sandbox_dto.auto_archive_interval
       @auto_delete_interval = sandbox_dto.auto_delete_interval
-      @runner_domain = sandbox_dto.runner_domain
       @volumes = sandbox_dto.volumes
       @build_info = sandbox_dto.build_info
       @created_at = sandbox_dto.created_at

@@ -49,7 +49,7 @@
       "dependsOn": [
         {
           "target": "publish",
-          "projects": ["api-client-ruby"]
+          "projects": ["api-client-ruby", "toolbox-api-client-ruby"]
         }
       ]
     }

@@ -5,11 +5,18 @@ PATH
       typhoeus (~> 1.0, >= 1.0.1)
 
 PATH
+  remote: ../toolbox-api-client-ruby
+  specs:
+    daytona_toolbox_api_client (1.0.0)
+      typhoeus (~> 1.0, >= 1.0.1)
+
+PATH
   remote: .
   specs:
     daytona-sdk (0.125.0)
       aws-sdk-s3 (~> 1.0)
       daytona_api_client (>= 1.0.0)
+      daytona_toolbox_api_client (>= 1.0.0)
       dotenv
       toml (~> 0.3)
       websocket-client-simple (~> 0.6)
@@ -167,6 +174,7 @@ PLATFORMS
 DEPENDENCIES
   daytona-sdk!
   daytona_api_client!
+  daytona_toolbox_api_client!
   pry (~> 0.15)
   rake (~> 13.0)
   rubocop (~> 1.21)
