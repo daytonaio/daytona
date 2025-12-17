@@ -21,19 +21,11 @@ module DaytonaApiClient
     # ID of the sandbox this SSH access is for
     attr_accessor :sandbox_id
 
-    # ID of the runner hosting the sandbox
-    attr_accessor :runner_id
-
-    # Domain of the runner hosting the sandbox
-    attr_accessor :runner_domain
-
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'valid' => :'valid',
-        :'sandbox_id' => :'sandboxId',
-        :'runner_id' => :'runnerId',
-        :'runner_domain' => :'runnerDomain'
+        :'sandbox_id' => :'sandboxId'
       }
     end
 
@@ -51,9 +43,7 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'valid' => :'Boolean',
-        :'sandbox_id' => :'String',
-        :'runner_id' => :'String',
-        :'runner_domain' => :'String'
+        :'sandbox_id' => :'String'
       }
     end
 
@@ -89,14 +79,6 @@ module DaytonaApiClient
         self.sandbox_id = attributes[:'sandbox_id']
       else
         self.sandbox_id = nil
-      end
-
-      if attributes.key?(:'runner_id')
-        self.runner_id = attributes[:'runner_id']
-      end
-
-      if attributes.key?(:'runner_domain')
-        self.runner_domain = attributes[:'runner_domain']
       end
     end
 
@@ -151,9 +133,7 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           valid == o.valid &&
-          sandbox_id == o.sandbox_id &&
-          runner_id == o.runner_id &&
-          runner_domain == o.runner_domain
+          sandbox_id == o.sandbox_id
     end
 
     # @see the `==` method
@@ -165,7 +145,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [valid, sandbox_id, runner_id, runner_domain].hash
+      [valid, sandbox_id].hash
     end
 
     # Builds the object from hash

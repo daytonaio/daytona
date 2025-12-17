@@ -15,17 +15,7 @@ require 'time'
 
 module DaytonaApiClient
   class OrganizationUsageOverview
-    attr_accessor :total_cpu_quota
-
-    attr_accessor :total_memory_quota
-
-    attr_accessor :total_disk_quota
-
-    attr_accessor :current_cpu_usage
-
-    attr_accessor :current_memory_usage
-
-    attr_accessor :current_disk_usage
+    attr_accessor :region_usage
 
     attr_accessor :total_snapshot_quota
 
@@ -38,12 +28,7 @@ module DaytonaApiClient
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'total_cpu_quota' => :'totalCpuQuota',
-        :'total_memory_quota' => :'totalMemoryQuota',
-        :'total_disk_quota' => :'totalDiskQuota',
-        :'current_cpu_usage' => :'currentCpuUsage',
-        :'current_memory_usage' => :'currentMemoryUsage',
-        :'current_disk_usage' => :'currentDiskUsage',
+        :'region_usage' => :'regionUsage',
         :'total_snapshot_quota' => :'totalSnapshotQuota',
         :'current_snapshot_usage' => :'currentSnapshotUsage',
         :'total_volume_quota' => :'totalVolumeQuota',
@@ -64,12 +49,7 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'total_cpu_quota' => :'Float',
-        :'total_memory_quota' => :'Float',
-        :'total_disk_quota' => :'Float',
-        :'current_cpu_usage' => :'Float',
-        :'current_memory_usage' => :'Float',
-        :'current_disk_usage' => :'Float',
+        :'region_usage' => :'Array<RegionUsageOverview>',
         :'total_snapshot_quota' => :'Float',
         :'current_snapshot_usage' => :'Float',
         :'total_volume_quota' => :'Float',
@@ -99,40 +79,12 @@ module DaytonaApiClient
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'total_cpu_quota')
-        self.total_cpu_quota = attributes[:'total_cpu_quota']
+      if attributes.key?(:'region_usage')
+        if (value = attributes[:'region_usage']).is_a?(Array)
+          self.region_usage = value
+        end
       else
-        self.total_cpu_quota = nil
-      end
-
-      if attributes.key?(:'total_memory_quota')
-        self.total_memory_quota = attributes[:'total_memory_quota']
-      else
-        self.total_memory_quota = nil
-      end
-
-      if attributes.key?(:'total_disk_quota')
-        self.total_disk_quota = attributes[:'total_disk_quota']
-      else
-        self.total_disk_quota = nil
-      end
-
-      if attributes.key?(:'current_cpu_usage')
-        self.current_cpu_usage = attributes[:'current_cpu_usage']
-      else
-        self.current_cpu_usage = nil
-      end
-
-      if attributes.key?(:'current_memory_usage')
-        self.current_memory_usage = attributes[:'current_memory_usage']
-      else
-        self.current_memory_usage = nil
-      end
-
-      if attributes.key?(:'current_disk_usage')
-        self.current_disk_usage = attributes[:'current_disk_usage']
-      else
-        self.current_disk_usage = nil
+        self.region_usage = nil
       end
 
       if attributes.key?(:'total_snapshot_quota')
@@ -165,28 +117,8 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @total_cpu_quota.nil?
-        invalid_properties.push('invalid value for "total_cpu_quota", total_cpu_quota cannot be nil.')
-      end
-
-      if @total_memory_quota.nil?
-        invalid_properties.push('invalid value for "total_memory_quota", total_memory_quota cannot be nil.')
-      end
-
-      if @total_disk_quota.nil?
-        invalid_properties.push('invalid value for "total_disk_quota", total_disk_quota cannot be nil.')
-      end
-
-      if @current_cpu_usage.nil?
-        invalid_properties.push('invalid value for "current_cpu_usage", current_cpu_usage cannot be nil.')
-      end
-
-      if @current_memory_usage.nil?
-        invalid_properties.push('invalid value for "current_memory_usage", current_memory_usage cannot be nil.')
-      end
-
-      if @current_disk_usage.nil?
-        invalid_properties.push('invalid value for "current_disk_usage", current_disk_usage cannot be nil.')
+      if @region_usage.nil?
+        invalid_properties.push('invalid value for "region_usage", region_usage cannot be nil.')
       end
 
       if @total_snapshot_quota.nil?
@@ -212,12 +144,7 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @total_cpu_quota.nil?
-      return false if @total_memory_quota.nil?
-      return false if @total_disk_quota.nil?
-      return false if @current_cpu_usage.nil?
-      return false if @current_memory_usage.nil?
-      return false if @current_disk_usage.nil?
+      return false if @region_usage.nil?
       return false if @total_snapshot_quota.nil?
       return false if @current_snapshot_usage.nil?
       return false if @total_volume_quota.nil?
@@ -226,63 +153,13 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] total_cpu_quota Value to be assigned
-    def total_cpu_quota=(total_cpu_quota)
-      if total_cpu_quota.nil?
-        fail ArgumentError, 'total_cpu_quota cannot be nil'
+    # @param [Object] region_usage Value to be assigned
+    def region_usage=(region_usage)
+      if region_usage.nil?
+        fail ArgumentError, 'region_usage cannot be nil'
       end
 
-      @total_cpu_quota = total_cpu_quota
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] total_memory_quota Value to be assigned
-    def total_memory_quota=(total_memory_quota)
-      if total_memory_quota.nil?
-        fail ArgumentError, 'total_memory_quota cannot be nil'
-      end
-
-      @total_memory_quota = total_memory_quota
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] total_disk_quota Value to be assigned
-    def total_disk_quota=(total_disk_quota)
-      if total_disk_quota.nil?
-        fail ArgumentError, 'total_disk_quota cannot be nil'
-      end
-
-      @total_disk_quota = total_disk_quota
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] current_cpu_usage Value to be assigned
-    def current_cpu_usage=(current_cpu_usage)
-      if current_cpu_usage.nil?
-        fail ArgumentError, 'current_cpu_usage cannot be nil'
-      end
-
-      @current_cpu_usage = current_cpu_usage
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] current_memory_usage Value to be assigned
-    def current_memory_usage=(current_memory_usage)
-      if current_memory_usage.nil?
-        fail ArgumentError, 'current_memory_usage cannot be nil'
-      end
-
-      @current_memory_usage = current_memory_usage
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] current_disk_usage Value to be assigned
-    def current_disk_usage=(current_disk_usage)
-      if current_disk_usage.nil?
-        fail ArgumentError, 'current_disk_usage cannot be nil'
-      end
-
-      @current_disk_usage = current_disk_usage
+      @region_usage = region_usage
     end
 
     # Custom attribute writer method with validation
@@ -330,12 +207,7 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          total_cpu_quota == o.total_cpu_quota &&
-          total_memory_quota == o.total_memory_quota &&
-          total_disk_quota == o.total_disk_quota &&
-          current_cpu_usage == o.current_cpu_usage &&
-          current_memory_usage == o.current_memory_usage &&
-          current_disk_usage == o.current_disk_usage &&
+          region_usage == o.region_usage &&
           total_snapshot_quota == o.total_snapshot_quota &&
           current_snapshot_usage == o.current_snapshot_usage &&
           total_volume_quota == o.total_volume_quota &&
@@ -351,7 +223,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [total_cpu_quota, total_memory_quota, total_disk_quota, current_cpu_usage, current_memory_usage, current_disk_usage, total_snapshot_quota, current_snapshot_usage, total_volume_quota, current_volume_usage].hash
+      [region_usage, total_snapshot_quota, current_snapshot_usage, total_volume_quota, current_volume_usage].hash
     end
 
     # Builds the object from hash

@@ -15,6 +15,9 @@ require 'time'
 
 module DaytonaApiClient
   class CreateSandbox
+    # The name of the sandbox. If not provided, the sandbox ID will be used as the name
+    attr_accessor :name
+
     # The ID or name of the snapshot used for the sandbox
     attr_accessor :snapshot
 
@@ -94,6 +97,7 @@ module DaytonaApiClient
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
+        :'name' => :'name',
         :'snapshot' => :'snapshot',
         :'user' => :'user',
         :'env' => :'env',
@@ -128,6 +132,7 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
+        :'name' => :'String',
         :'snapshot' => :'String',
         :'user' => :'String',
         :'env' => :'Hash<String, String>',
@@ -170,6 +175,10 @@ module DaytonaApiClient
         end
         h[k.to_sym] = v
       }
+
+      if attributes.key?(:'name')
+        self.name = attributes[:'name']
+      end
 
       if attributes.key?(:'snapshot')
         self.snapshot = attributes[:'snapshot']
@@ -282,6 +291,7 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
+          name == o.name &&
           snapshot == o.snapshot &&
           user == o.user &&
           env == o.env &&
@@ -311,7 +321,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [snapshot, user, env, labels, public, network_block_all, network_allow_list, _class, target, cpu, gpu, memory, disk, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info].hash
+      [name, snapshot, user, env, labels, public, network_block_all, network_allow_list, _class, target, cpu, gpu, memory, disk, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info].hash
     end
 
     # Builds the object from hash

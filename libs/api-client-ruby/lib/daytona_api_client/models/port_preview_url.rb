@@ -15,21 +15,21 @@ require 'time'
 
 module DaytonaApiClient
   class PortPreviewUrl
+    # ID of the sandbox
+    attr_accessor :sandbox_id
+
     # Preview url
     attr_accessor :url
 
     # Access token
     attr_accessor :token
 
-    # Legacy preview url using runner domain
-    attr_accessor :legacy_proxy_url
-
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
+        :'sandbox_id' => :'sandboxId',
         :'url' => :'url',
-        :'token' => :'token',
-        :'legacy_proxy_url' => :'legacyProxyUrl'
+        :'token' => :'token'
       }
     end
 
@@ -46,9 +46,9 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
+        :'sandbox_id' => :'String',
         :'url' => :'String',
-        :'token' => :'String',
-        :'legacy_proxy_url' => :'String'
+        :'token' => :'String'
       }
     end
 
@@ -74,6 +74,12 @@ module DaytonaApiClient
         h[k.to_sym] = v
       }
 
+      if attributes.key?(:'sandbox_id')
+        self.sandbox_id = attributes[:'sandbox_id']
+      else
+        self.sandbox_id = nil
+      end
+
       if attributes.key?(:'url')
         self.url = attributes[:'url']
       else
@@ -85,10 +91,6 @@ module DaytonaApiClient
       else
         self.token = nil
       end
-
-      if attributes.key?(:'legacy_proxy_url')
-        self.legacy_proxy_url = attributes[:'legacy_proxy_url']
-      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -96,6 +98,10 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @sandbox_id.nil?
+        invalid_properties.push('invalid value for "sandbox_id", sandbox_id cannot be nil.')
+      end
+
       if @url.nil?
         invalid_properties.push('invalid value for "url", url cannot be nil.')
       end
@@ -111,9 +117,20 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @sandbox_id.nil?
       return false if @url.nil?
       return false if @token.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] sandbox_id Value to be assigned
+    def sandbox_id=(sandbox_id)
+      if sandbox_id.nil?
+        fail ArgumentError, 'sandbox_id cannot be nil'
+      end
+
+      @sandbox_id = sandbox_id
     end
 
     # Custom attribute writer method with validation
@@ -141,9 +158,9 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
+          sandbox_id == o.sandbox_id &&
           url == o.url &&
-          token == o.token &&
-          legacy_proxy_url == o.legacy_proxy_url
+          token == o.token
     end
 
     # @see the `==` method
@@ -155,7 +172,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [url, token, legacy_proxy_url].hash
+      [sandbox_id, url, token].hash
     end
 
     # Builds the object from hash

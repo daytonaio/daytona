@@ -14,40 +14,25 @@ require 'date'
 require 'time'
 
 module DaytonaApiClient
-  class UpdateSandboxStateDto
-    # The new state for the sandbox
-    attr_accessor :state
+  class RegionQuota
+    attr_accessor :organization_id
 
-    # Optional error message when reporting an error state
-    attr_accessor :error_reason
+    attr_accessor :region_id
 
-    class EnumAttributeValidator
-      attr_reader :datatype
-      attr_reader :allowable_values
+    attr_accessor :total_cpu_quota
 
-      def initialize(datatype, allowable_values)
-        @allowable_values = allowable_values.map do |value|
-          case datatype.to_s
-          when /Integer/i
-            value.to_i
-          when /Float/i
-            value.to_f
-          else
-            value
-          end
-        end
-      end
+    attr_accessor :total_memory_quota
 
-      def valid?(value)
-        !value || allowable_values.include?(value)
-      end
-    end
+    attr_accessor :total_disk_quota
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'state' => :'state',
-        :'error_reason' => :'errorReason'
+        :'organization_id' => :'organizationId',
+        :'region_id' => :'regionId',
+        :'total_cpu_quota' => :'totalCpuQuota',
+        :'total_memory_quota' => :'totalMemoryQuota',
+        :'total_disk_quota' => :'totalDiskQuota'
       }
     end
 
@@ -64,8 +49,11 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'state' => :'String',
-        :'error_reason' => :'String'
+        :'organization_id' => :'String',
+        :'region_id' => :'String',
+        :'total_cpu_quota' => :'Float',
+        :'total_memory_quota' => :'Float',
+        :'total_disk_quota' => :'Float'
       }
     end
 
@@ -79,26 +67,46 @@ module DaytonaApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::UpdateSandboxStateDto` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::RegionQuota` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::UpdateSandboxStateDto`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::RegionQuota`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'state')
-        self.state = attributes[:'state']
+      if attributes.key?(:'organization_id')
+        self.organization_id = attributes[:'organization_id']
       else
-        self.state = nil
+        self.organization_id = nil
       end
 
-      if attributes.key?(:'error_reason')
-        self.error_reason = attributes[:'error_reason']
+      if attributes.key?(:'region_id')
+        self.region_id = attributes[:'region_id']
+      else
+        self.region_id = nil
+      end
+
+      if attributes.key?(:'total_cpu_quota')
+        self.total_cpu_quota = attributes[:'total_cpu_quota']
+      else
+        self.total_cpu_quota = nil
+      end
+
+      if attributes.key?(:'total_memory_quota')
+        self.total_memory_quota = attributes[:'total_memory_quota']
+      else
+        self.total_memory_quota = nil
+      end
+
+      if attributes.key?(:'total_disk_quota')
+        self.total_disk_quota = attributes[:'total_disk_quota']
+      else
+        self.total_disk_quota = nil
       end
     end
 
@@ -107,8 +115,24 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @state.nil?
-        invalid_properties.push('invalid value for "state", state cannot be nil.')
+      if @organization_id.nil?
+        invalid_properties.push('invalid value for "organization_id", organization_id cannot be nil.')
+      end
+
+      if @region_id.nil?
+        invalid_properties.push('invalid value for "region_id", region_id cannot be nil.')
+      end
+
+      if @total_cpu_quota.nil?
+        invalid_properties.push('invalid value for "total_cpu_quota", total_cpu_quota cannot be nil.')
+      end
+
+      if @total_memory_quota.nil?
+        invalid_properties.push('invalid value for "total_memory_quota", total_memory_quota cannot be nil.')
+      end
+
+      if @total_disk_quota.nil?
+        invalid_properties.push('invalid value for "total_disk_quota", total_disk_quota cannot be nil.')
       end
 
       invalid_properties
@@ -118,20 +142,62 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @state.nil?
-      state_validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"])
-      return false unless state_validator.valid?(@state)
+      return false if @organization_id.nil?
+      return false if @region_id.nil?
+      return false if @total_cpu_quota.nil?
+      return false if @total_memory_quota.nil?
+      return false if @total_disk_quota.nil?
       true
     end
 
-    # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] state Object to be assigned
-    def state=(state)
-      validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"])
-      unless validator.valid?(state)
-        fail ArgumentError, "invalid value for \"state\", must be one of #{validator.allowable_values}."
+    # Custom attribute writer method with validation
+    # @param [Object] organization_id Value to be assigned
+    def organization_id=(organization_id)
+      if organization_id.nil?
+        fail ArgumentError, 'organization_id cannot be nil'
       end
-      @state = state
+
+      @organization_id = organization_id
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] region_id Value to be assigned
+    def region_id=(region_id)
+      if region_id.nil?
+        fail ArgumentError, 'region_id cannot be nil'
+      end
+
+      @region_id = region_id
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] total_cpu_quota Value to be assigned
+    def total_cpu_quota=(total_cpu_quota)
+      if total_cpu_quota.nil?
+        fail ArgumentError, 'total_cpu_quota cannot be nil'
+      end
+
+      @total_cpu_quota = total_cpu_quota
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] total_memory_quota Value to be assigned
+    def total_memory_quota=(total_memory_quota)
+      if total_memory_quota.nil?
+        fail ArgumentError, 'total_memory_quota cannot be nil'
+      end
+
+      @total_memory_quota = total_memory_quota
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] total_disk_quota Value to be assigned
+    def total_disk_quota=(total_disk_quota)
+      if total_disk_quota.nil?
+        fail ArgumentError, 'total_disk_quota cannot be nil'
+      end
+
+      @total_disk_quota = total_disk_quota
     end
 
     # Checks equality by comparing each attribute.
@@ -139,8 +205,11 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          state == o.state &&
-          error_reason == o.error_reason
+          organization_id == o.organization_id &&
+          region_id == o.region_id &&
+          total_cpu_quota == o.total_cpu_quota &&
+          total_memory_quota == o.total_memory_quota &&
+          total_disk_quota == o.total_disk_quota
     end
 
     # @see the `==` method
@@ -152,7 +221,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [state, error_reason].hash
+      [organization_id, region_id, total_cpu_quota, total_memory_quota, total_disk_quota].hash
     end
 
     # Builds the object from hash

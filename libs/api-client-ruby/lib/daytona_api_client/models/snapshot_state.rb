@@ -15,12 +15,9 @@ require 'time'
 
 module DaytonaApiClient
   class SnapshotState
-    BUILD_PENDING = "build_pending".freeze
     BUILDING = "building".freeze
     PENDING = "pending".freeze
     PULLING = "pulling".freeze
-    PENDING_VALIDATION = "pending_validation".freeze
-    VALIDATING = "validating".freeze
     ACTIVE = "active".freeze
     INACTIVE = "inactive".freeze
     ERROR = "error".freeze
@@ -28,7 +25,7 @@ module DaytonaApiClient
     REMOVING = "removing".freeze
 
     def self.all_vars
-      @all_vars ||= [BUILD_PENDING, BUILDING, PENDING, PULLING, PENDING_VALIDATION, VALIDATING, ACTIVE, INACTIVE, ERROR, BUILD_FAILED, REMOVING].freeze
+      @all_vars ||= [BUILDING, PENDING, PULLING, ACTIVE, INACTIVE, ERROR, BUILD_FAILED, REMOVING].freeze
     end
 
     # Builds the enum from string

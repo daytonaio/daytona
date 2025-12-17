@@ -14,26 +14,31 @@ require 'date'
 require 'time'
 
 module DaytonaApiClient
-  class PaginatedAuditLogs
-    attr_accessor :items
+  class RegionUsageOverview
+    attr_accessor :region_id
 
-    attr_accessor :total
+    attr_accessor :total_cpu_quota
 
-    attr_accessor :page
+    attr_accessor :current_cpu_usage
 
-    attr_accessor :total_pages
+    attr_accessor :total_memory_quota
 
-    # Token for next page in cursor-based pagination
-    attr_accessor :next_token
+    attr_accessor :current_memory_usage
+
+    attr_accessor :total_disk_quota
+
+    attr_accessor :current_disk_usage
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'items' => :'items',
-        :'total' => :'total',
-        :'page' => :'page',
-        :'total_pages' => :'totalPages',
-        :'next_token' => :'nextToken'
+        :'region_id' => :'regionId',
+        :'total_cpu_quota' => :'totalCpuQuota',
+        :'current_cpu_usage' => :'currentCpuUsage',
+        :'total_memory_quota' => :'totalMemoryQuota',
+        :'current_memory_usage' => :'currentMemoryUsage',
+        :'total_disk_quota' => :'totalDiskQuota',
+        :'current_disk_usage' => :'currentDiskUsage'
       }
     end
 
@@ -50,11 +55,13 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'items' => :'Array<AuditLog>',
-        :'total' => :'Float',
-        :'page' => :'Float',
-        :'total_pages' => :'Float',
-        :'next_token' => :'String'
+        :'region_id' => :'String',
+        :'total_cpu_quota' => :'Float',
+        :'current_cpu_usage' => :'Float',
+        :'total_memory_quota' => :'Float',
+        :'current_memory_usage' => :'Float',
+        :'total_disk_quota' => :'Float',
+        :'current_disk_usage' => :'Float'
       }
     end
 
@@ -68,46 +75,58 @@ module DaytonaApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::PaginatedAuditLogs` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::RegionUsageOverview` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::PaginatedAuditLogs`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::RegionUsageOverview`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'items')
-        if (value = attributes[:'items']).is_a?(Array)
-          self.items = value
-        end
+      if attributes.key?(:'region_id')
+        self.region_id = attributes[:'region_id']
       else
-        self.items = nil
+        self.region_id = nil
       end
 
-      if attributes.key?(:'total')
-        self.total = attributes[:'total']
+      if attributes.key?(:'total_cpu_quota')
+        self.total_cpu_quota = attributes[:'total_cpu_quota']
       else
-        self.total = nil
+        self.total_cpu_quota = nil
       end
 
-      if attributes.key?(:'page')
-        self.page = attributes[:'page']
+      if attributes.key?(:'current_cpu_usage')
+        self.current_cpu_usage = attributes[:'current_cpu_usage']
       else
-        self.page = nil
+        self.current_cpu_usage = nil
       end
 
-      if attributes.key?(:'total_pages')
-        self.total_pages = attributes[:'total_pages']
+      if attributes.key?(:'total_memory_quota')
+        self.total_memory_quota = attributes[:'total_memory_quota']
       else
-        self.total_pages = nil
+        self.total_memory_quota = nil
       end
 
-      if attributes.key?(:'next_token')
-        self.next_token = attributes[:'next_token']
+      if attributes.key?(:'current_memory_usage')
+        self.current_memory_usage = attributes[:'current_memory_usage']
+      else
+        self.current_memory_usage = nil
+      end
+
+      if attributes.key?(:'total_disk_quota')
+        self.total_disk_quota = attributes[:'total_disk_quota']
+      else
+        self.total_disk_quota = nil
+      end
+
+      if attributes.key?(:'current_disk_usage')
+        self.current_disk_usage = attributes[:'current_disk_usage']
+      else
+        self.current_disk_usage = nil
       end
     end
 
@@ -116,20 +135,32 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @items.nil?
-        invalid_properties.push('invalid value for "items", items cannot be nil.')
+      if @region_id.nil?
+        invalid_properties.push('invalid value for "region_id", region_id cannot be nil.')
       end
 
-      if @total.nil?
-        invalid_properties.push('invalid value for "total", total cannot be nil.')
+      if @total_cpu_quota.nil?
+        invalid_properties.push('invalid value for "total_cpu_quota", total_cpu_quota cannot be nil.')
       end
 
-      if @page.nil?
-        invalid_properties.push('invalid value for "page", page cannot be nil.')
+      if @current_cpu_usage.nil?
+        invalid_properties.push('invalid value for "current_cpu_usage", current_cpu_usage cannot be nil.')
       end
 
-      if @total_pages.nil?
-        invalid_properties.push('invalid value for "total_pages", total_pages cannot be nil.')
+      if @total_memory_quota.nil?
+        invalid_properties.push('invalid value for "total_memory_quota", total_memory_quota cannot be nil.')
+      end
+
+      if @current_memory_usage.nil?
+        invalid_properties.push('invalid value for "current_memory_usage", current_memory_usage cannot be nil.')
+      end
+
+      if @total_disk_quota.nil?
+        invalid_properties.push('invalid value for "total_disk_quota", total_disk_quota cannot be nil.')
+      end
+
+      if @current_disk_usage.nil?
+        invalid_properties.push('invalid value for "current_disk_usage", current_disk_usage cannot be nil.')
       end
 
       invalid_properties
@@ -139,51 +170,84 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @items.nil?
-      return false if @total.nil?
-      return false if @page.nil?
-      return false if @total_pages.nil?
+      return false if @region_id.nil?
+      return false if @total_cpu_quota.nil?
+      return false if @current_cpu_usage.nil?
+      return false if @total_memory_quota.nil?
+      return false if @current_memory_usage.nil?
+      return false if @total_disk_quota.nil?
+      return false if @current_disk_usage.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] items Value to be assigned
-    def items=(items)
-      if items.nil?
-        fail ArgumentError, 'items cannot be nil'
+    # @param [Object] region_id Value to be assigned
+    def region_id=(region_id)
+      if region_id.nil?
+        fail ArgumentError, 'region_id cannot be nil'
       end
 
-      @items = items
+      @region_id = region_id
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] total Value to be assigned
-    def total=(total)
-      if total.nil?
-        fail ArgumentError, 'total cannot be nil'
+    # @param [Object] total_cpu_quota Value to be assigned
+    def total_cpu_quota=(total_cpu_quota)
+      if total_cpu_quota.nil?
+        fail ArgumentError, 'total_cpu_quota cannot be nil'
       end
 
-      @total = total
+      @total_cpu_quota = total_cpu_quota
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] page Value to be assigned
-    def page=(page)
-      if page.nil?
-        fail ArgumentError, 'page cannot be nil'
+    # @param [Object] current_cpu_usage Value to be assigned
+    def current_cpu_usage=(current_cpu_usage)
+      if current_cpu_usage.nil?
+        fail ArgumentError, 'current_cpu_usage cannot be nil'
       end
 
-      @page = page
+      @current_cpu_usage = current_cpu_usage
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] total_pages Value to be assigned
-    def total_pages=(total_pages)
-      if total_pages.nil?
-        fail ArgumentError, 'total_pages cannot be nil'
+    # @param [Object] total_memory_quota Value to be assigned
+    def total_memory_quota=(total_memory_quota)
+      if total_memory_quota.nil?
+        fail ArgumentError, 'total_memory_quota cannot be nil'
       end
 
-      @total_pages = total_pages
+      @total_memory_quota = total_memory_quota
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] current_memory_usage Value to be assigned
+    def current_memory_usage=(current_memory_usage)
+      if current_memory_usage.nil?
+        fail ArgumentError, 'current_memory_usage cannot be nil'
+      end
+
+      @current_memory_usage = current_memory_usage
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] total_disk_quota Value to be assigned
+    def total_disk_quota=(total_disk_quota)
+      if total_disk_quota.nil?
+        fail ArgumentError, 'total_disk_quota cannot be nil'
+      end
+
+      @total_disk_quota = total_disk_quota
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] current_disk_usage Value to be assigned
+    def current_disk_usage=(current_disk_usage)
+      if current_disk_usage.nil?
+        fail ArgumentError, 'current_disk_usage cannot be nil'
+      end
+
+      @current_disk_usage = current_disk_usage
     end
 
     # Checks equality by comparing each attribute.
@@ -191,11 +255,13 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          items == o.items &&
-          total == o.total &&
-          page == o.page &&
-          total_pages == o.total_pages &&
-          next_token == o.next_token
+          region_id == o.region_id &&
+          total_cpu_quota == o.total_cpu_quota &&
+          current_cpu_usage == o.current_cpu_usage &&
+          total_memory_quota == o.total_memory_quota &&
+          current_memory_usage == o.current_memory_usage &&
+          total_disk_quota == o.total_disk_quota &&
+          current_disk_usage == o.current_disk_usage
     end
 
     # @see the `==` method
@@ -207,7 +273,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [items, total, page, total_pages, next_token].hash
+      [region_id, total_cpu_quota, current_cpu_usage, total_memory_quota, current_memory_usage, total_disk_quota, current_disk_usage].hash
     end
 
     # Builds the object from hash

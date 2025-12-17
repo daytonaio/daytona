@@ -15,12 +15,6 @@ require 'time'
 
 module DaytonaApiClient
   class UpdateOrganizationQuota
-    attr_accessor :total_cpu_quota
-
-    attr_accessor :total_memory_quota
-
-    attr_accessor :total_disk_quota
-
     attr_accessor :max_cpu_per_sandbox
 
     attr_accessor :max_memory_per_sandbox
@@ -33,18 +27,24 @@ module DaytonaApiClient
 
     attr_accessor :volume_quota
 
+    attr_accessor :authenticated_rate_limit
+
+    attr_accessor :sandbox_create_rate_limit
+
+    attr_accessor :sandbox_lifecycle_rate_limit
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'total_cpu_quota' => :'totalCpuQuota',
-        :'total_memory_quota' => :'totalMemoryQuota',
-        :'total_disk_quota' => :'totalDiskQuota',
         :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
         :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
         :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
         :'snapshot_quota' => :'snapshotQuota',
         :'max_snapshot_size' => :'maxSnapshotSize',
-        :'volume_quota' => :'volumeQuota'
+        :'volume_quota' => :'volumeQuota',
+        :'authenticated_rate_limit' => :'authenticatedRateLimit',
+        :'sandbox_create_rate_limit' => :'sandboxCreateRateLimit',
+        :'sandbox_lifecycle_rate_limit' => :'sandboxLifecycleRateLimit'
       }
     end
 
@@ -61,30 +61,30 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'total_cpu_quota' => :'Float',
-        :'total_memory_quota' => :'Float',
-        :'total_disk_quota' => :'Float',
         :'max_cpu_per_sandbox' => :'Float',
         :'max_memory_per_sandbox' => :'Float',
         :'max_disk_per_sandbox' => :'Float',
         :'snapshot_quota' => :'Float',
         :'max_snapshot_size' => :'Float',
-        :'volume_quota' => :'Float'
+        :'volume_quota' => :'Float',
+        :'authenticated_rate_limit' => :'Float',
+        :'sandbox_create_rate_limit' => :'Float',
+        :'sandbox_lifecycle_rate_limit' => :'Float'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
-        :'total_cpu_quota',
-        :'total_memory_quota',
-        :'total_disk_quota',
         :'max_cpu_per_sandbox',
         :'max_memory_per_sandbox',
         :'max_disk_per_sandbox',
         :'snapshot_quota',
         :'max_snapshot_size',
-        :'volume_quota'
+        :'volume_quota',
+        :'authenticated_rate_limit',
+        :'sandbox_create_rate_limit',
+        :'sandbox_lifecycle_rate_limit'
       ])
     end
 
@@ -103,24 +103,6 @@ module DaytonaApiClient
         end
         h[k.to_sym] = v
       }
-
-      if attributes.key?(:'total_cpu_quota')
-        self.total_cpu_quota = attributes[:'total_cpu_quota']
-      else
-        self.total_cpu_quota = nil
-      end
-
-      if attributes.key?(:'total_memory_quota')
-        self.total_memory_quota = attributes[:'total_memory_quota']
-      else
-        self.total_memory_quota = nil
-      end
-
-      if attributes.key?(:'total_disk_quota')
-        self.total_disk_quota = attributes[:'total_disk_quota']
-      else
-        self.total_disk_quota = nil
-      end
 
       if attributes.key?(:'max_cpu_per_sandbox')
         self.max_cpu_per_sandbox = attributes[:'max_cpu_per_sandbox']
@@ -157,6 +139,24 @@ module DaytonaApiClient
       else
         self.volume_quota = nil
       end
+
+      if attributes.key?(:'authenticated_rate_limit')
+        self.authenticated_rate_limit = attributes[:'authenticated_rate_limit']
+      else
+        self.authenticated_rate_limit = nil
+      end
+
+      if attributes.key?(:'sandbox_create_rate_limit')
+        self.sandbox_create_rate_limit = attributes[:'sandbox_create_rate_limit']
+      else
+        self.sandbox_create_rate_limit = nil
+      end
+
+      if attributes.key?(:'sandbox_lifecycle_rate_limit')
+        self.sandbox_lifecycle_rate_limit = attributes[:'sandbox_lifecycle_rate_limit']
+      else
+        self.sandbox_lifecycle_rate_limit = nil
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -179,15 +179,15 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          total_cpu_quota == o.total_cpu_quota &&
-          total_memory_quota == o.total_memory_quota &&
-          total_disk_quota == o.total_disk_quota &&
           max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
           max_memory_per_sandbox == o.max_memory_per_sandbox &&
           max_disk_per_sandbox == o.max_disk_per_sandbox &&
           snapshot_quota == o.snapshot_quota &&
           max_snapshot_size == o.max_snapshot_size &&
-          volume_quota == o.volume_quota
+          volume_quota == o.volume_quota &&
+          authenticated_rate_limit == o.authenticated_rate_limit &&
+          sandbox_create_rate_limit == o.sandbox_create_rate_limit &&
+          sandbox_lifecycle_rate_limit == o.sandbox_lifecycle_rate_limit
     end
 
     # @see the `==` method
@@ -199,7 +199,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [total_cpu_quota, total_memory_quota, total_disk_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_quota, max_snapshot_size, volume_quota].hash
+      [max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_quota, max_snapshot_size, volume_quota, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit].hash
     end
 
     # Builds the object from hash

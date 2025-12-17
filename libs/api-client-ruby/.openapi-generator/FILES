@@ -1,9 +1,7 @@
 .gitignore
 .rspec
 .rubocop.yml
-Gemfile
 Rakefile
-daytona_api_client.gemspec
 lib/daytona_api_client.rb
 lib/daytona_api_client/api/api_keys_api.rb
 lib/daytona_api_client/api/audit_api.rb
@@ -13,6 +11,7 @@ lib/daytona_api_client/api/health_api.rb
 lib/daytona_api_client/api/object_storage_api.rb
 lib/daytona_api_client/api/organizations_api.rb
 lib/daytona_api_client/api/preview_api.rb
+lib/daytona_api_client/api/regions_api.rb
 lib/daytona_api_client/api/runners_api.rb
 lib/daytona_api_client/api/sandbox_api.rb
 lib/daytona_api_client/api/snapshots_api.rb
@@ -39,7 +38,6 @@ lib/daytona_api_client/models/computer_use_start_response.rb
 lib/daytona_api_client/models/computer_use_status_response.rb
 lib/daytona_api_client/models/computer_use_stop_response.rb
 lib/daytona_api_client/models/create_api_key.rb
-lib/daytona_api_client/models/create_audit_log.rb
 lib/daytona_api_client/models/create_build_info.rb
 lib/daytona_api_client/models/create_docker_registry.rb
 lib/daytona_api_client/models/create_linked_account.rb
@@ -119,8 +117,12 @@ lib/daytona_api_client/models/pty_list_response.rb
 lib/daytona_api_client/models/pty_resize_request.rb
 lib/daytona_api_client/models/pty_session_info.rb
 lib/daytona_api_client/models/range.rb
+lib/daytona_api_client/models/rate_limit_config.rb
+lib/daytona_api_client/models/rate_limit_entry.rb
 lib/daytona_api_client/models/region.rb
+lib/daytona_api_client/models/region_quota.rb
 lib/daytona_api_client/models/region_screenshot_response.rb
+lib/daytona_api_client/models/region_usage_overview.rb
 lib/daytona_api_client/models/registry_push_access_dto.rb
 lib/daytona_api_client/models/replace_request.rb
 lib/daytona_api_client/models/replace_result.rb
@@ -147,9 +149,11 @@ lib/daytona_api_client/models/ssh_access_dto.rb
 lib/daytona_api_client/models/ssh_access_validation_dto.rb
 lib/daytona_api_client/models/storage_access_dto.rb
 lib/daytona_api_client/models/update_docker_registry.rb
+lib/daytona_api_client/models/update_organization_default_region.rb
 lib/daytona_api_client/models/update_organization_invitation.rb
 lib/daytona_api_client/models/update_organization_member_access.rb
 lib/daytona_api_client/models/update_organization_quota.rb
+lib/daytona_api_client/models/update_organization_region_quota.rb
 lib/daytona_api_client/models/update_organization_role.rb
 lib/daytona_api_client/models/update_sandbox_state_dto.rb
 lib/daytona_api_client/models/user.rb
@@ -163,4 +167,5 @@ lib/daytona_api_client/models/webhook_initialization_status.rb
 lib/daytona_api_client/models/windows_response.rb
 lib/daytona_api_client/models/work_dir_response.rb
 lib/daytona_api_client/models/workspace.rb
+lib/daytona_api_client/models/workspace_port_preview_url.rb
 lib/daytona_api_client/version.rb

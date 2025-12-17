@@ -20,36 +20,38 @@ module DaytonaApiClient
       @api_client = api_client
     end
     # Archive sandbox
-    # @param sandbox_id [String] 
+    # @param sandbox_id_or_name [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [nil]
-    def archive_sandbox(sandbox_id, opts = {})
-      archive_sandbox_with_http_info(sandbox_id, opts)
-      nil
+    # @return [Sandbox]
+    def archive_sandbox(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = archive_sandbox_with_http_info(sandbox_id_or_name, opts)
+      data
     end
 
     # Archive sandbox
-    # @param sandbox_id [String] 
+    # @param sandbox_id_or_name [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def archive_sandbox_with_http_info(sandbox_id, opts = {})
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def archive_sandbox_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.archive_sandbox ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.archive_sandbox"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.archive_sandbox"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/archive'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/archive'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
@@ -59,7 +61,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -82,30 +84,30 @@ module DaytonaApiClient
     end
 
     # Create sandbox backup
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Sandbox]
-    def create_backup(sandbox_id, opts = {})
-      data, _status_code, _headers = create_backup_with_http_info(sandbox_id, opts)
+    def create_backup(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = create_backup_with_http_info(sandbox_id_or_name, opts)
       data
     end
 
     # Create sandbox backup
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
-    def create_backup_with_http_info(sandbox_id, opts = {})
+    def create_backup_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.create_backup ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.create_backup"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.create_backup"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/backup'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/backup'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -215,32 +217,32 @@ module DaytonaApiClient
     end
 
     # Create SSH access for sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Float] :expires_in_minutes Expiration time in minutes (default: 60)
     # @return [SshAccessDto]
-    def create_ssh_access(sandbox_id, opts = {})
-      data, _status_code, _headers = create_ssh_access_with_http_info(sandbox_id, opts)
+    def create_ssh_access(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = create_ssh_access_with_http_info(sandbox_id_or_name, opts)
       data
     end
 
     # Create SSH access for sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Float] :expires_in_minutes Expiration time in minutes (default: 60)
     # @return [Array<(SshAccessDto, Integer, Hash)>] SshAccessDto data, response status code and response headers
-    def create_ssh_access_with_http_info(sandbox_id, opts = {})
+    def create_ssh_access_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.create_ssh_access ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.create_ssh_access"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.create_ssh_access"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/ssh-access'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/ssh-access'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -282,36 +284,38 @@ module DaytonaApiClient
     end
 
     # Delete sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [nil]
-    def delete_sandbox(sandbox_id, opts = {})
-      delete_sandbox_with_http_info(sandbox_id, opts)
-      nil
+    # @return [Sandbox]
+    def delete_sandbox(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = delete_sandbox_with_http_info(sandbox_id_or_name, opts)
+      data
     end
 
     # Delete sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def delete_sandbox_with_http_info(sandbox_id, opts = {})
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def delete_sandbox_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.delete_sandbox ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.delete_sandbox"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.delete_sandbox"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
@@ -321,7 +325,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -344,32 +348,32 @@ module DaytonaApiClient
     end
 
     # Get build logs
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :follow Whether to follow the logs stream
     # @return [nil]
-    def get_build_logs(sandbox_id, opts = {})
-      get_build_logs_with_http_info(sandbox_id, opts)
+    def get_build_logs(sandbox_id_or_name, opts = {})
+      get_build_logs_with_http_info(sandbox_id_or_name, opts)
       nil
     end
 
     # Get build logs
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :follow Whether to follow the logs stream
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def get_build_logs_with_http_info(sandbox_id, opts = {})
+    def get_build_logs_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.get_build_logs ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_build_logs"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.get_build_logs"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/build-logs'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/build-logs'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -409,36 +413,36 @@ module DaytonaApiClient
     end
 
     # Get preview URL for a sandbox port
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param port [Float] Port number to get preview URL for
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [PortPreviewUrl]
-    def get_port_preview_url(sandbox_id, port, opts = {})
-      data, _status_code, _headers = get_port_preview_url_with_http_info(sandbox_id, port, opts)
+    def get_port_preview_url(sandbox_id_or_name, port, opts = {})
+      data, _status_code, _headers = get_port_preview_url_with_http_info(sandbox_id_or_name, port, opts)
       data
     end
 
     # Get preview URL for a sandbox port
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param port [Float] Port number to get preview URL for
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(PortPreviewUrl, Integer, Hash)>] PortPreviewUrl data, response status code and response headers
-    def get_port_preview_url_with_http_info(sandbox_id, port, opts = {})
+    def get_port_preview_url_with_http_info(sandbox_id_or_name, port, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.get_port_preview_url ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_port_preview_url"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.get_port_preview_url"
       end
       # verify the required parameter 'port' is set
       if @api_client.config.client_side_validation && port.nil?
         fail ArgumentError, "Missing the required parameter 'port' when calling SandboxApi.get_port_preview_url"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/ports/{port}/preview-url'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'port' + '}', CGI.escape(port.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/ports/{port}/preview-url'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'port' + '}', CGI.escape(port.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -479,32 +483,32 @@ module DaytonaApiClient
     end
 
     # Get sandbox details
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :verbose Include verbose output
     # @return [Sandbox]
-    def get_sandbox(sandbox_id, opts = {})
-      data, _status_code, _headers = get_sandbox_with_http_info(sandbox_id, opts)
+    def get_sandbox(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = get_sandbox_with_http_info(sandbox_id_or_name, opts)
       data
     end
 
     # Get sandbox details
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :verbose Include verbose output
     # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
-    def get_sandbox_with_http_info(sandbox_id, opts = {})
+    def get_sandbox_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_sandbox"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.get_sandbox"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -541,64 +545,6 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#get_sandbox\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
-      end
-      return data, status_code, headers
-    end
-
-    # List all regions where sandboxes have been created
-    # @param [Hash] opts the optional parameters
-    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<Region>]
-    def get_sandbox_regions(opts = {})
-      data, _status_code, _headers = get_sandbox_regions_with_http_info(opts)
-      data
-    end
-
-    # List all regions where sandboxes have been created
-    # @param [Hash] opts the optional parameters
-    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(Array<Region>, Integer, Hash)>] Array<Region> data, response status code and response headers
-    def get_sandbox_regions_with_http_info(opts = {})
-      if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox_regions ...'
-      end
-      # resource path
-      local_var_path = '/sandbox/regions'
-
-      # query parameters
-      query_params = opts[:query_params] || {}
-
-      # header parameters
-      header_params = opts[:header_params] || {}
-      # HTTP header 'Accept' (if needed)
-      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
-      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
-
-      # form parameters
-      form_params = opts[:form_params] || {}
-
-      # http body (model)
-      post_body = opts[:debug_body]
-
-      # return_type
-      return_type = opts[:debug_return_type] || 'Array<Region>'
-
-      # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
-
-      new_options = opts.merge(
-        :operation => :"SandboxApi.get_sandbox_regions",
-        :header_params => header_params,
-        :query_params => query_params,
-        :form_params => form_params,
-        :body => post_body,
-        :auth_names => auth_names,
-        :return_type => return_type
-      )
-
-      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
-      if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: SandboxApi#get_sandbox_regions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -740,6 +686,7 @@ module DaytonaApiClient
     # @option opts [Float] :page Page number of the results (default to 1)
     # @option opts [Float] :limit Number of results per page (default to 100)
     # @option opts [String] :id Filter by partial ID match
+    # @option opts [String] :name Filter by partial name match
     # @option opts [String] :labels JSON encoded labels to filter by
     # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
     # @option opts [Array<String>] :states List of states to filter by
@@ -767,6 +714,7 @@ module DaytonaApiClient
     # @option opts [Float] :page Page number of the results (default to 1)
     # @option opts [Float] :limit Number of results per page (default to 100)
     # @option opts [String] :id Filter by partial ID match
+    # @option opts [String] :name Filter by partial name match
     # @option opts [String] :labels JSON encoded labels to filter by
     # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
     # @option opts [Array<String>] :states List of states to filter by
@@ -827,7 +775,7 @@ module DaytonaApiClient
         fail ArgumentError, 'invalid value for "opts[:"max_disk_gi_b"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
       end
 
-      allowable_values = ["id", "state", "snapshot", "region", "updatedAt", "createdAt"]
+      allowable_values = ["id", "name", "state", "snapshot", "region", "updatedAt", "createdAt"]
       if @api_client.config.client_side_validation && opts[:'sort'] && !allowable_values.include?(opts[:'sort'])
         fail ArgumentError, "invalid value for \"sort\", must be one of #{allowable_values}"
       end
@@ -843,6 +791,7 @@ module DaytonaApiClient
       query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
       query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
       query_params[:'id'] = opts[:'id'] if !opts[:'id'].nil?
+      query_params[:'name'] = opts[:'name'] if !opts[:'name'].nil?
       query_params[:'labels'] = opts[:'labels'] if !opts[:'labels'].nil?
       query_params[:'includeErroredDeleted'] = opts[:'include_errored_deleted'] if !opts[:'include_errored_deleted'].nil?
       query_params[:'states'] = @api_client.build_collection_param(opts[:'states'], :multi) if !opts[:'states'].nil?
@@ -894,37 +843,101 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Recover sandbox from error state
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Sandbox]
+    def recover_sandbox(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = recover_sandbox_with_http_info(sandbox_id_or_name, opts)
+      data
+    end
+
+    # Recover sandbox from error state
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def recover_sandbox_with_http_info(sandbox_id_or_name, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.recover_sandbox ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.recover_sandbox"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/recover'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Sandbox'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.recover_sandbox",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#recover_sandbox\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Replace sandbox labels
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param sandbox_labels [SandboxLabels] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [SandboxLabels]
-    def replace_labels(sandbox_id, sandbox_labels, opts = {})
-      data, _status_code, _headers = replace_labels_with_http_info(sandbox_id, sandbox_labels, opts)
+    def replace_labels(sandbox_id_or_name, sandbox_labels, opts = {})
+      data, _status_code, _headers = replace_labels_with_http_info(sandbox_id_or_name, sandbox_labels, opts)
       data
     end
 
     # Replace sandbox labels
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param sandbox_labels [SandboxLabels] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(SandboxLabels, Integer, Hash)>] SandboxLabels data, response status code and response headers
-    def replace_labels_with_http_info(sandbox_id, sandbox_labels, opts = {})
+    def replace_labels_with_http_info(sandbox_id_or_name, sandbox_labels, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.replace_labels ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.replace_labels"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.replace_labels"
       end
       # verify the required parameter 'sandbox_labels' is set
       if @api_client.config.client_side_validation && sandbox_labels.nil?
         fail ArgumentError, "Missing the required parameter 'sandbox_labels' when calling SandboxApi.replace_labels"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/labels'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/labels'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -970,32 +983,32 @@ module DaytonaApiClient
     end
 
     # Revoke SSH access for sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [String] :token SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
-    # @return [nil]
-    def revoke_ssh_access(sandbox_id, opts = {})
-      revoke_ssh_access_with_http_info(sandbox_id, opts)
-      nil
+    # @return [Sandbox]
+    def revoke_ssh_access(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = revoke_ssh_access_with_http_info(sandbox_id_or_name, opts)
+      data
     end
 
     # Revoke SSH access for sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [String] :token SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def revoke_ssh_access_with_http_info(sandbox_id, opts = {})
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def revoke_ssh_access_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.revoke_ssh_access ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.revoke_ssh_access"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.revoke_ssh_access"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/ssh-access'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/ssh-access'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -1003,6 +1016,8 @@ module DaytonaApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
@@ -1012,7 +1027,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -1035,42 +1050,44 @@ module DaytonaApiClient
     end
 
     # Set sandbox auto-archive interval
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param interval [Float] Auto-archive interval in minutes (0 means the maximum interval will be used)
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [nil]
-    def set_auto_archive_interval(sandbox_id, interval, opts = {})
-      set_auto_archive_interval_with_http_info(sandbox_id, interval, opts)
-      nil
+    # @return [Sandbox]
+    def set_auto_archive_interval(sandbox_id_or_name, interval, opts = {})
+      data, _status_code, _headers = set_auto_archive_interval_with_http_info(sandbox_id_or_name, interval, opts)
+      data
     end
 
     # Set sandbox auto-archive interval
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param interval [Float] Auto-archive interval in minutes (0 means the maximum interval will be used)
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def set_auto_archive_interval_with_http_info(sandbox_id, interval, opts = {})
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def set_auto_archive_interval_with_http_info(sandbox_id_or_name, interval, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.set_auto_archive_interval ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.set_auto_archive_interval"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.set_auto_archive_interval"
       end
       # verify the required parameter 'interval' is set
       if @api_client.config.client_side_validation && interval.nil?
         fail ArgumentError, "Missing the required parameter 'interval' when calling SandboxApi.set_auto_archive_interval"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/autoarchive/{interval}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'interval' + '}', CGI.escape(interval.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/autoarchive/{interval}'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'interval' + '}', CGI.escape(interval.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
@@ -1080,7 +1097,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -1103,42 +1120,44 @@ module DaytonaApiClient
     end
 
     # Set sandbox auto-delete interval
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param interval [Float] Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [nil]
-    def set_auto_delete_interval(sandbox_id, interval, opts = {})
-      set_auto_delete_interval_with_http_info(sandbox_id, interval, opts)
-      nil
+    # @return [Sandbox]
+    def set_auto_delete_interval(sandbox_id_or_name, interval, opts = {})
+      data, _status_code, _headers = set_auto_delete_interval_with_http_info(sandbox_id_or_name, interval, opts)
+      data
     end
 
     # Set sandbox auto-delete interval
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param interval [Float] Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def set_auto_delete_interval_with_http_info(sandbox_id, interval, opts = {})
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def set_auto_delete_interval_with_http_info(sandbox_id_or_name, interval, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.set_auto_delete_interval ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.set_auto_delete_interval"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.set_auto_delete_interval"
       end
       # verify the required parameter 'interval' is set
       if @api_client.config.client_side_validation && interval.nil?
         fail ArgumentError, "Missing the required parameter 'interval' when calling SandboxApi.set_auto_delete_interval"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/autodelete/{interval}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'interval' + '}', CGI.escape(interval.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/autodelete/{interval}'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'interval' + '}', CGI.escape(interval.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
@@ -1148,7 +1167,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -1171,42 +1190,44 @@ module DaytonaApiClient
     end
 
     # Set sandbox auto-stop interval
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param interval [Float] Auto-stop interval in minutes (0 to disable)
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [nil]
-    def set_autostop_interval(sandbox_id, interval, opts = {})
-      set_autostop_interval_with_http_info(sandbox_id, interval, opts)
-      nil
+    # @return [Sandbox]
+    def set_autostop_interval(sandbox_id_or_name, interval, opts = {})
+      data, _status_code, _headers = set_autostop_interval_with_http_info(sandbox_id_or_name, interval, opts)
+      data
     end
 
     # Set sandbox auto-stop interval
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param interval [Float] Auto-stop interval in minutes (0 to disable)
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def set_autostop_interval_with_http_info(sandbox_id, interval, opts = {})
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def set_autostop_interval_with_http_info(sandbox_id_or_name, interval, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.set_autostop_interval ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.set_autostop_interval"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.set_autostop_interval"
       end
       # verify the required parameter 'interval' is set
       if @api_client.config.client_side_validation && interval.nil?
         fail ArgumentError, "Missing the required parameter 'interval' when calling SandboxApi.set_autostop_interval"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/autostop/{interval}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'interval' + '}', CGI.escape(interval.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/autostop/{interval}'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'interval' + '}', CGI.escape(interval.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
@@ -1216,7 +1237,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -1239,30 +1260,30 @@ module DaytonaApiClient
     end
 
     # Start sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Sandbox]
-    def start_sandbox(sandbox_id, opts = {})
-      data, _status_code, _headers = start_sandbox_with_http_info(sandbox_id, opts)
+    def start_sandbox(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = start_sandbox_with_http_info(sandbox_id_or_name, opts)
       data
     end
 
     # Start sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
-    def start_sandbox_with_http_info(sandbox_id, opts = {})
+    def start_sandbox_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.start_sandbox ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.start_sandbox"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.start_sandbox"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/start'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/start'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -1303,36 +1324,38 @@ module DaytonaApiClient
     end
 
     # Stop sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [nil]
-    def stop_sandbox(sandbox_id, opts = {})
-      stop_sandbox_with_http_info(sandbox_id, opts)
-      nil
+    # @return [Sandbox]
+    def stop_sandbox(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = stop_sandbox_with_http_info(sandbox_id_or_name, opts)
+      data
     end
 
     # Stop sandbox
-    # @param sandbox_id [String] ID of the sandbox
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def stop_sandbox_with_http_info(sandbox_id, opts = {})
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def stop_sandbox_with_http_info(sandbox_id_or_name, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.stop_sandbox ...'
       end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.stop_sandbox"
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.stop_sandbox"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/stop'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+      local_var_path = '/sandbox/{sandboxIdOrName}/stop'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
@@ -1342,7 +1365,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -1364,37 +1387,31 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
-    # Update public status
+    # Update sandbox last activity
     # @param sandbox_id [String] ID of the sandbox
-    # @param is_public [Boolean] Public status to set
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def update_public_status(sandbox_id, is_public, opts = {})
-      update_public_status_with_http_info(sandbox_id, is_public, opts)
+    def update_last_activity(sandbox_id, opts = {})
+      update_last_activity_with_http_info(sandbox_id, opts)
       nil
     end
 
-    # Update public status
+    # Update sandbox last activity
     # @param sandbox_id [String] ID of the sandbox
-    # @param is_public [Boolean] Public status to set
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def update_public_status_with_http_info(sandbox_id, is_public, opts = {})
+    def update_last_activity_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: SandboxApi.update_public_status ...'
+        @api_client.config.logger.debug 'Calling API: SandboxApi.update_last_activity ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.update_public_status"
-      end
-      # verify the required parameter 'is_public' is set
-      if @api_client.config.client_side_validation && is_public.nil?
-        fail ArgumentError, "Missing the required parameter 'is_public' when calling SandboxApi.update_public_status"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.update_last_activity"
       end
       # resource path
-      local_var_path = '/sandbox/{sandboxId}/public/{isPublic}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'isPublic' + '}', CGI.escape(is_public.to_s))
+      local_var_path = '/sandbox/{sandboxId}/last-activity'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
@@ -1411,6 +1428,76 @@ module DaytonaApiClient
 
       # return_type
       return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.update_last_activity",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#update_last_activity\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Update public status
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param is_public [Boolean] Public status to set
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Sandbox]
+    def update_public_status(sandbox_id_or_name, is_public, opts = {})
+      data, _status_code, _headers = update_public_status_with_http_info(sandbox_id_or_name, is_public, opts)
+      data
+    end
+
+    # Update public status
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param is_public [Boolean] Public status to set
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def update_public_status_with_http_info(sandbox_id_or_name, is_public, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.update_public_status ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.update_public_status"
+      end
+      # verify the required parameter 'is_public' is set
+      if @api_client.config.client_side_validation && is_public.nil?
+        fail ArgumentError, "Missing the required parameter 'is_public' when calling SandboxApi.update_public_status"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/public/{isPublic}'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'isPublic' + '}', CGI.escape(is_public.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Sandbox'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']

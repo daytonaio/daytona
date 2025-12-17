@@ -18,10 +18,14 @@ module DaytonaApiClient
     # The name of organization
     attr_accessor :name
 
+    # The ID of the default region for the organization
+    attr_accessor :default_region_id
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'name' => :'name'
+        :'name' => :'name',
+        :'default_region_id' => :'defaultRegionId'
       }
     end
 
@@ -38,7 +42,8 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'name' => :'String'
+        :'name' => :'String',
+        :'default_region_id' => :'String'
       }
     end
 
@@ -69,6 +74,12 @@ module DaytonaApiClient
       else
         self.name = nil
       end
+
+      if attributes.key?(:'default_region_id')
+        self.default_region_id = attributes[:'default_region_id']
+      else
+        self.default_region_id = nil
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -80,6 +91,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "name", name cannot be nil.')
       end
 
+      if @default_region_id.nil?
+        invalid_properties.push('invalid value for "default_region_id", default_region_id cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -88,6 +103,7 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @name.nil?
+      return false if @default_region_id.nil?
       true
     end
 
@@ -101,12 +117,23 @@ module DaytonaApiClient
       @name = name
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] default_region_id Value to be assigned
+    def default_region_id=(default_region_id)
+      if default_region_id.nil?
+        fail ArgumentError, 'default_region_id cannot be nil'
+      end
+
+      @default_region_id = default_region_id
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          name == o.name
+          name == o.name &&
+          default_region_id == o.default_region_id
     end
 
     # @see the `==` method
@@ -118,7 +145,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name].hash
+      [name, default_region_id].hash
     end
 
     # Builds the object from hash

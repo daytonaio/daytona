@@ -19,36 +19,36 @@ module DaytonaApiClient
     def initialize(api_client = ApiClient.default)
       @api_client = api_client
     end
-    # Click mouse
+    # [DEPRECATED] Click mouse
     # Click mouse at specified coordinates
     # @param sandbox_id [String] 
     # @param mouse_click_request [MouseClickRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [MouseClickResponse]
-    def click_mouse(sandbox_id, mouse_click_request, opts = {})
-      data, _status_code, _headers = click_mouse_with_http_info(sandbox_id, mouse_click_request, opts)
+    def click_mouse_deprecated(sandbox_id, mouse_click_request, opts = {})
+      data, _status_code, _headers = click_mouse_deprecated_with_http_info(sandbox_id, mouse_click_request, opts)
       data
     end
 
-    # Click mouse
+    # [DEPRECATED] Click mouse
     # Click mouse at specified coordinates
     # @param sandbox_id [String] 
     # @param mouse_click_request [MouseClickRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(MouseClickResponse, Integer, Hash)>] MouseClickResponse data, response status code and response headers
-    def click_mouse_with_http_info(sandbox_id, mouse_click_request, opts = {})
+    def click_mouse_deprecated_with_http_info(sandbox_id, mouse_click_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.click_mouse ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.click_mouse_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.click_mouse"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.click_mouse_deprecated"
       end
       # verify the required parameter 'mouse_click_request' is set
       if @api_client.config.client_side_validation && mouse_click_request.nil?
-        fail ArgumentError, "Missing the required parameter 'mouse_click_request' when calling ToolboxApi.click_mouse"
+        fail ArgumentError, "Missing the required parameter 'mouse_click_request' when calling ToolboxApi.click_mouse_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/mouse/click'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -80,7 +80,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.click_mouse",
+        :operation => :"ToolboxApi.click_mouse_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -91,12 +91,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#click_mouse\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#click_mouse_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Create folder
+    # [DEPRECATED] Create folder
     # Create folder inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -104,12 +104,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def create_folder(sandbox_id, path, mode, opts = {})
-      create_folder_with_http_info(sandbox_id, path, mode, opts)
+    def create_folder_deprecated(sandbox_id, path, mode, opts = {})
+      create_folder_deprecated_with_http_info(sandbox_id, path, mode, opts)
       nil
     end
 
-    # Create folder
+    # [DEPRECATED] Create folder
     # Create folder inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -117,21 +117,21 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def create_folder_with_http_info(sandbox_id, path, mode, opts = {})
+    def create_folder_deprecated_with_http_info(sandbox_id, path, mode, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.create_folder ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.create_folder_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.create_folder"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.create_folder_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.create_folder"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.create_folder_deprecated"
       end
       # verify the required parameter 'mode' is set
       if @api_client.config.client_side_validation && mode.nil?
-        fail ArgumentError, "Missing the required parameter 'mode' when calling ToolboxApi.create_folder"
+        fail ArgumentError, "Missing the required parameter 'mode' when calling ToolboxApi.create_folder_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/folder'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -158,7 +158,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.create_folder",
+        :operation => :"ToolboxApi.create_folder_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -169,41 +169,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#create_folder\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#create_folder_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Create PTY session
+    # [DEPRECATED] Create PTY session
     # Create a new PTY session in the sandbox
     # @param sandbox_id [String] 
     # @param pty_create_request [PtyCreateRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [PtyCreateResponse]
-    def create_pty_session(sandbox_id, pty_create_request, opts = {})
-      data, _status_code, _headers = create_pty_session_with_http_info(sandbox_id, pty_create_request, opts)
+    def create_pty_session_deprecated(sandbox_id, pty_create_request, opts = {})
+      data, _status_code, _headers = create_pty_session_deprecated_with_http_info(sandbox_id, pty_create_request, opts)
       data
     end
 
-    # Create PTY session
+    # [DEPRECATED] Create PTY session
     # Create a new PTY session in the sandbox
     # @param sandbox_id [String] 
     # @param pty_create_request [PtyCreateRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(PtyCreateResponse, Integer, Hash)>] PtyCreateResponse data, response status code and response headers
-    def create_pty_session_with_http_info(sandbox_id, pty_create_request, opts = {})
+    def create_pty_session_deprecated_with_http_info(sandbox_id, pty_create_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.create_pty_session ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.create_pty_session_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.create_pty_session"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.create_pty_session_deprecated"
       end
       # verify the required parameter 'pty_create_request' is set
       if @api_client.config.client_side_validation && pty_create_request.nil?
-        fail ArgumentError, "Missing the required parameter 'pty_create_request' when calling ToolboxApi.create_pty_session"
+        fail ArgumentError, "Missing the required parameter 'pty_create_request' when calling ToolboxApi.create_pty_session_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -235,7 +235,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.create_pty_session",
+        :operation => :"ToolboxApi.create_pty_session_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -246,41 +246,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#create_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#create_pty_session_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Create session
+    # [DEPRECATED] Create session
     # Create a new session in the sandbox
     # @param sandbox_id [String] 
     # @param create_session_request [CreateSessionRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def create_session(sandbox_id, create_session_request, opts = {})
-      create_session_with_http_info(sandbox_id, create_session_request, opts)
+    def create_session_deprecated(sandbox_id, create_session_request, opts = {})
+      create_session_deprecated_with_http_info(sandbox_id, create_session_request, opts)
       nil
     end
 
-    # Create session
+    # [DEPRECATED] Create session
     # Create a new session in the sandbox
     # @param sandbox_id [String] 
     # @param create_session_request [CreateSessionRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def create_session_with_http_info(sandbox_id, create_session_request, opts = {})
+    def create_session_deprecated_with_http_info(sandbox_id, create_session_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.create_session ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.create_session_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.create_session"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.create_session_deprecated"
       end
       # verify the required parameter 'create_session_request' is set
       if @api_client.config.client_side_validation && create_session_request.nil?
-        fail ArgumentError, "Missing the required parameter 'create_session_request' when calling ToolboxApi.create_session"
+        fail ArgumentError, "Missing the required parameter 'create_session_request' when calling ToolboxApi.create_session_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/session'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -310,7 +310,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.create_session",
+        :operation => :"ToolboxApi.create_session_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -321,12 +321,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#create_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#create_session_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Delete file
+    # [DEPRECATED] Delete file
     # Delete file inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -334,12 +334,12 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :recursive 
     # @return [nil]
-    def delete_file(sandbox_id, path, opts = {})
-      delete_file_with_http_info(sandbox_id, path, opts)
+    def delete_file_deprecated(sandbox_id, path, opts = {})
+      delete_file_deprecated_with_http_info(sandbox_id, path, opts)
       nil
     end
 
-    # Delete file
+    # [DEPRECATED] Delete file
     # Delete file inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -347,17 +347,17 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :recursive 
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def delete_file_with_http_info(sandbox_id, path, opts = {})
+    def delete_file_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.delete_file ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.delete_file_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.delete_file"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.delete_file_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.delete_file"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.delete_file_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -384,7 +384,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.delete_file",
+        :operation => :"ToolboxApi.delete_file_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -395,41 +395,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#delete_file\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#delete_file_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Delete PTY session
+    # [DEPRECATED] Delete PTY session
     # Delete a PTY session and terminate the associated process
     # @param sandbox_id [String] 
     # @param session_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def delete_pty_session(sandbox_id, session_id, opts = {})
-      delete_pty_session_with_http_info(sandbox_id, session_id, opts)
+    def delete_pty_session_deprecated(sandbox_id, session_id, opts = {})
+      delete_pty_session_deprecated_with_http_info(sandbox_id, session_id, opts)
       nil
     end
 
-    # Delete PTY session
+    # [DEPRECATED] Delete PTY session
     # Delete a PTY session and terminate the associated process
     # @param sandbox_id [String] 
     # @param session_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def delete_pty_session_with_http_info(sandbox_id, session_id, opts = {})
+    def delete_pty_session_deprecated_with_http_info(sandbox_id, session_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.delete_pty_session ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.delete_pty_session_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.delete_pty_session"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.delete_pty_session_deprecated"
       end
       # verify the required parameter 'session_id' is set
       if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.delete_pty_session"
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.delete_pty_session_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
@@ -454,7 +454,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.delete_pty_session",
+        :operation => :"ToolboxApi.delete_pty_session_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -465,41 +465,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#delete_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#delete_pty_session_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Delete session
+    # [DEPRECATED] Delete session
     # Delete a specific session
     # @param sandbox_id [String] 
     # @param session_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def delete_session(sandbox_id, session_id, opts = {})
-      delete_session_with_http_info(sandbox_id, session_id, opts)
+    def delete_session_deprecated(sandbox_id, session_id, opts = {})
+      delete_session_deprecated_with_http_info(sandbox_id, session_id, opts)
       nil
     end
 
-    # Delete session
+    # [DEPRECATED] Delete session
     # Delete a specific session
     # @param sandbox_id [String] 
     # @param session_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def delete_session_with_http_info(sandbox_id, session_id, opts = {})
+    def delete_session_deprecated_with_http_info(sandbox_id, session_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.delete_session ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.delete_session_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.delete_session"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.delete_session_deprecated"
       end
       # verify the required parameter 'session_id' is set
       if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.delete_session"
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.delete_session_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/session/{sessionId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
@@ -524,7 +524,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.delete_session",
+        :operation => :"ToolboxApi.delete_session_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -535,41 +535,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#delete_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#delete_session_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Download file
+    # [DEPRECATED] Download file
     # Download file from sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [File]
-    def download_file(sandbox_id, path, opts = {})
-      data, _status_code, _headers = download_file_with_http_info(sandbox_id, path, opts)
+    def download_file_deprecated(sandbox_id, path, opts = {})
+      data, _status_code, _headers = download_file_deprecated_with_http_info(sandbox_id, path, opts)
       data
     end
 
-    # Download file
+    # [DEPRECATED] Download file
     # Download file from sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(File, Integer, Hash)>] File data, response status code and response headers
-    def download_file_with_http_info(sandbox_id, path, opts = {})
+    def download_file_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.download_file ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.download_file_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.download_file"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.download_file_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.download_file"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.download_file_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/download'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -597,7 +597,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.download_file",
+        :operation => :"ToolboxApi.download_file_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -608,41 +608,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#download_file\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#download_file_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Download multiple files
+    # [DEPRECATED] Download multiple files
     # Streams back a multipart/form-data bundle of the requested paths
     # @param sandbox_id [String] 
     # @param download_files [DownloadFiles] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [File]
-    def download_files(sandbox_id, download_files, opts = {})
-      data, _status_code, _headers = download_files_with_http_info(sandbox_id, download_files, opts)
+    def download_files_deprecated(sandbox_id, download_files, opts = {})
+      data, _status_code, _headers = download_files_deprecated_with_http_info(sandbox_id, download_files, opts)
       data
     end
 
-    # Download multiple files
+    # [DEPRECATED] Download multiple files
     # Streams back a multipart/form-data bundle of the requested paths
     # @param sandbox_id [String] 
     # @param download_files [DownloadFiles] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(File, Integer, Hash)>] File data, response status code and response headers
-    def download_files_with_http_info(sandbox_id, download_files, opts = {})
+    def download_files_deprecated_with_http_info(sandbox_id, download_files, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.download_files ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.download_files_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.download_files"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.download_files_deprecated"
       end
       # verify the required parameter 'download_files' is set
       if @api_client.config.client_side_validation && download_files.nil?
-        fail ArgumentError, "Missing the required parameter 'download_files' when calling ToolboxApi.download_files"
+        fail ArgumentError, "Missing the required parameter 'download_files' when calling ToolboxApi.download_files_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/bulk-download'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -674,7 +674,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.download_files",
+        :operation => :"ToolboxApi.download_files_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -685,41 +685,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#download_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#download_files_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Drag mouse
+    # [DEPRECATED] Drag mouse
     # Drag mouse from start to end coordinates
     # @param sandbox_id [String] 
     # @param mouse_drag_request [MouseDragRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [MouseDragResponse]
-    def drag_mouse(sandbox_id, mouse_drag_request, opts = {})
-      data, _status_code, _headers = drag_mouse_with_http_info(sandbox_id, mouse_drag_request, opts)
+    def drag_mouse_deprecated(sandbox_id, mouse_drag_request, opts = {})
+      data, _status_code, _headers = drag_mouse_deprecated_with_http_info(sandbox_id, mouse_drag_request, opts)
       data
     end
 
-    # Drag mouse
+    # [DEPRECATED] Drag mouse
     # Drag mouse from start to end coordinates
     # @param sandbox_id [String] 
     # @param mouse_drag_request [MouseDragRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(MouseDragResponse, Integer, Hash)>] MouseDragResponse data, response status code and response headers
-    def drag_mouse_with_http_info(sandbox_id, mouse_drag_request, opts = {})
+    def drag_mouse_deprecated_with_http_info(sandbox_id, mouse_drag_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.drag_mouse ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.drag_mouse_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.drag_mouse"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.drag_mouse_deprecated"
       end
       # verify the required parameter 'mouse_drag_request' is set
       if @api_client.config.client_side_validation && mouse_drag_request.nil?
-        fail ArgumentError, "Missing the required parameter 'mouse_drag_request' when calling ToolboxApi.drag_mouse"
+        fail ArgumentError, "Missing the required parameter 'mouse_drag_request' when calling ToolboxApi.drag_mouse_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/mouse/drag'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -751,7 +751,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.drag_mouse",
+        :operation => :"ToolboxApi.drag_mouse_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -762,41 +762,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#drag_mouse\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#drag_mouse_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Execute command
+    # [DEPRECATED] Execute command
     # Execute command synchronously inside sandbox
     # @param sandbox_id [String] 
     # @param execute_request [ExecuteRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ExecuteResponse]
-    def execute_command(sandbox_id, execute_request, opts = {})
-      data, _status_code, _headers = execute_command_with_http_info(sandbox_id, execute_request, opts)
+    def execute_command_deprecated(sandbox_id, execute_request, opts = {})
+      data, _status_code, _headers = execute_command_deprecated_with_http_info(sandbox_id, execute_request, opts)
       data
     end
 
-    # Execute command
+    # [DEPRECATED] Execute command
     # Execute command synchronously inside sandbox
     # @param sandbox_id [String] 
     # @param execute_request [ExecuteRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ExecuteResponse, Integer, Hash)>] ExecuteResponse data, response status code and response headers
-    def execute_command_with_http_info(sandbox_id, execute_request, opts = {})
+    def execute_command_deprecated_with_http_info(sandbox_id, execute_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.execute_command ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.execute_command_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.execute_command"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.execute_command_deprecated"
       end
       # verify the required parameter 'execute_request' is set
       if @api_client.config.client_side_validation && execute_request.nil?
-        fail ArgumentError, "Missing the required parameter 'execute_request' when calling ToolboxApi.execute_command"
+        fail ArgumentError, "Missing the required parameter 'execute_request' when calling ToolboxApi.execute_command_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/execute'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -828,7 +828,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.execute_command",
+        :operation => :"ToolboxApi.execute_command_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -839,12 +839,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#execute_command\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#execute_command_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Execute command in session
+    # [DEPRECATED] Execute command in session
     # Execute a command in a specific session
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -852,12 +852,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [SessionExecuteResponse]
-    def execute_session_command(sandbox_id, session_id, session_execute_request, opts = {})
-      data, _status_code, _headers = execute_session_command_with_http_info(sandbox_id, session_id, session_execute_request, opts)
+    def execute_session_command_deprecated(sandbox_id, session_id, session_execute_request, opts = {})
+      data, _status_code, _headers = execute_session_command_deprecated_with_http_info(sandbox_id, session_id, session_execute_request, opts)
       data
     end
 
-    # Execute command in session
+    # [DEPRECATED] Execute command in session
     # Execute a command in a specific session
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -865,21 +865,21 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(SessionExecuteResponse, Integer, Hash)>] SessionExecuteResponse data, response status code and response headers
-    def execute_session_command_with_http_info(sandbox_id, session_id, session_execute_request, opts = {})
+    def execute_session_command_deprecated_with_http_info(sandbox_id, session_id, session_execute_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.execute_session_command ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.execute_session_command_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.execute_session_command"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.execute_session_command_deprecated"
       end
       # verify the required parameter 'session_id' is set
       if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.execute_session_command"
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.execute_session_command_deprecated"
       end
       # verify the required parameter 'session_execute_request' is set
       if @api_client.config.client_side_validation && session_execute_request.nil?
-        fail ArgumentError, "Missing the required parameter 'session_execute_request' when calling ToolboxApi.execute_session_command"
+        fail ArgumentError, "Missing the required parameter 'session_execute_request' when calling ToolboxApi.execute_session_command_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
@@ -911,7 +911,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.execute_session_command",
+        :operation => :"ToolboxApi.execute_session_command_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -922,12 +922,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#execute_session_command\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#execute_session_command_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Search for text/pattern in files
+    # [DEPRECATED] Search for text/pattern in files
     # Search for text/pattern inside sandbox files
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -935,12 +935,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<Match>]
-    def find_in_files(sandbox_id, path, pattern, opts = {})
-      data, _status_code, _headers = find_in_files_with_http_info(sandbox_id, path, pattern, opts)
+    def find_in_files_deprecated(sandbox_id, path, pattern, opts = {})
+      data, _status_code, _headers = find_in_files_deprecated_with_http_info(sandbox_id, path, pattern, opts)
       data
     end
 
-    # Search for text/pattern in files
+    # [DEPRECATED] Search for text/pattern in files
     # Search for text/pattern inside sandbox files
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -948,21 +948,21 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Array<Match>, Integer, Hash)>] Array<Match> data, response status code and response headers
-    def find_in_files_with_http_info(sandbox_id, path, pattern, opts = {})
+    def find_in_files_deprecated_with_http_info(sandbox_id, path, pattern, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.find_in_files ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.find_in_files_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.find_in_files"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.find_in_files_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.find_in_files"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.find_in_files_deprecated"
       end
       # verify the required parameter 'pattern' is set
       if @api_client.config.client_side_validation && pattern.nil?
-        fail ArgumentError, "Missing the required parameter 'pattern' when calling ToolboxApi.find_in_files"
+        fail ArgumentError, "Missing the required parameter 'pattern' when calling ToolboxApi.find_in_files_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/find'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -991,7 +991,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.find_in_files",
+        :operation => :"ToolboxApi.find_in_files_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1002,35 +1002,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#find_in_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#find_in_files_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get computer use status
+    # [DEPRECATED] Get computer use status
     # Get status of all VNC desktop processes
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ComputerUseStatusResponse]
-    def get_computer_use_status(sandbox_id, opts = {})
-      data, _status_code, _headers = get_computer_use_status_with_http_info(sandbox_id, opts)
+    def get_computer_use_status_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = get_computer_use_status_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Get computer use status
+    # [DEPRECATED] Get computer use status
     # Get status of all VNC desktop processes
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ComputerUseStatusResponse, Integer, Hash)>] ComputerUseStatusResponse data, response status code and response headers
-    def get_computer_use_status_with_http_info(sandbox_id, opts = {})
+    def get_computer_use_status_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_computer_use_status ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_computer_use_status_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_computer_use_status"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_computer_use_status_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/status'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1057,7 +1057,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_computer_use_status",
+        :operation => :"ToolboxApi.get_computer_use_status_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1068,35 +1068,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_computer_use_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_computer_use_status_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get display info
+    # [DEPRECATED] Get display info
     # Get information about displays
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [DisplayInfoResponse]
-    def get_display_info(sandbox_id, opts = {})
-      data, _status_code, _headers = get_display_info_with_http_info(sandbox_id, opts)
+    def get_display_info_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = get_display_info_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Get display info
+    # [DEPRECATED] Get display info
     # Get information about displays
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(DisplayInfoResponse, Integer, Hash)>] DisplayInfoResponse data, response status code and response headers
-    def get_display_info_with_http_info(sandbox_id, opts = {})
+    def get_display_info_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_display_info ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_display_info_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_display_info"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_display_info_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/display/info'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1123,7 +1123,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_display_info",
+        :operation => :"ToolboxApi.get_display_info_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1134,41 +1134,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_display_info\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_display_info_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get file info
+    # [DEPRECATED] Get file info
     # Get file info inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [FileInfo]
-    def get_file_info(sandbox_id, path, opts = {})
-      data, _status_code, _headers = get_file_info_with_http_info(sandbox_id, path, opts)
+    def get_file_info_deprecated(sandbox_id, path, opts = {})
+      data, _status_code, _headers = get_file_info_deprecated_with_http_info(sandbox_id, path, opts)
       data
     end
 
-    # Get file info
+    # [DEPRECATED] Get file info
     # Get file info inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(FileInfo, Integer, Hash)>] FileInfo data, response status code and response headers
-    def get_file_info_with_http_info(sandbox_id, path, opts = {})
+    def get_file_info_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_file_info ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_file_info_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_file_info"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_file_info_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.get_file_info"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.get_file_info_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/info'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1196,7 +1196,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_file_info",
+        :operation => :"ToolboxApi.get_file_info_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1207,35 +1207,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_file_info\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_file_info_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get mouse position
+    # [DEPRECATED] Get mouse position
     # Get current mouse cursor position
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [MousePosition]
-    def get_mouse_position(sandbox_id, opts = {})
-      data, _status_code, _headers = get_mouse_position_with_http_info(sandbox_id, opts)
+    def get_mouse_position_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = get_mouse_position_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Get mouse position
+    # [DEPRECATED] Get mouse position
     # Get current mouse cursor position
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(MousePosition, Integer, Hash)>] MousePosition data, response status code and response headers
-    def get_mouse_position_with_http_info(sandbox_id, opts = {})
+    def get_mouse_position_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_mouse_position ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_mouse_position_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_mouse_position"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_mouse_position_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/mouse/position'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1262,7 +1262,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_mouse_position",
+        :operation => :"ToolboxApi.get_mouse_position_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1273,41 +1273,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_mouse_position\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_mouse_position_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get process errors
+    # [DEPRECATED] Get process errors
     # Get error logs for a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ProcessErrorsResponse]
-    def get_process_errors(process_name, sandbox_id, opts = {})
-      data, _status_code, _headers = get_process_errors_with_http_info(process_name, sandbox_id, opts)
+    def get_process_errors_deprecated(process_name, sandbox_id, opts = {})
+      data, _status_code, _headers = get_process_errors_deprecated_with_http_info(process_name, sandbox_id, opts)
       data
     end
 
-    # Get process errors
+    # [DEPRECATED] Get process errors
     # Get error logs for a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ProcessErrorsResponse, Integer, Hash)>] ProcessErrorsResponse data, response status code and response headers
-    def get_process_errors_with_http_info(process_name, sandbox_id, opts = {})
+    def get_process_errors_deprecated_with_http_info(process_name, sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_process_errors ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_process_errors_deprecated ...'
       end
       # verify the required parameter 'process_name' is set
       if @api_client.config.client_side_validation && process_name.nil?
-        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.get_process_errors"
+        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.get_process_errors_deprecated"
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_process_errors"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_process_errors_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors'.sub('{' + 'processName' + '}', CGI.escape(process_name.to_s)).sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1334,7 +1334,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_process_errors",
+        :operation => :"ToolboxApi.get_process_errors_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1345,41 +1345,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_process_errors\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_process_errors_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get process logs
+    # [DEPRECATED] Get process logs
     # Get logs for a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ProcessLogsResponse]
-    def get_process_logs(process_name, sandbox_id, opts = {})
-      data, _status_code, _headers = get_process_logs_with_http_info(process_name, sandbox_id, opts)
+    def get_process_logs_deprecated(process_name, sandbox_id, opts = {})
+      data, _status_code, _headers = get_process_logs_deprecated_with_http_info(process_name, sandbox_id, opts)
       data
     end
 
-    # Get process logs
+    # [DEPRECATED] Get process logs
     # Get logs for a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ProcessLogsResponse, Integer, Hash)>] ProcessLogsResponse data, response status code and response headers
-    def get_process_logs_with_http_info(process_name, sandbox_id, opts = {})
+    def get_process_logs_deprecated_with_http_info(process_name, sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_process_logs ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_process_logs_deprecated ...'
       end
       # verify the required parameter 'process_name' is set
       if @api_client.config.client_side_validation && process_name.nil?
-        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.get_process_logs"
+        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.get_process_logs_deprecated"
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_process_logs"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_process_logs_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs'.sub('{' + 'processName' + '}', CGI.escape(process_name.to_s)).sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1406,7 +1406,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_process_logs",
+        :operation => :"ToolboxApi.get_process_logs_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1417,41 +1417,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_process_logs\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_process_logs_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get process status
+    # [DEPRECATED] Get process status
     # Get status of a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ProcessStatusResponse]
-    def get_process_status(process_name, sandbox_id, opts = {})
-      data, _status_code, _headers = get_process_status_with_http_info(process_name, sandbox_id, opts)
+    def get_process_status_deprecated(process_name, sandbox_id, opts = {})
+      data, _status_code, _headers = get_process_status_deprecated_with_http_info(process_name, sandbox_id, opts)
       data
     end
 
-    # Get process status
+    # [DEPRECATED] Get process status
     # Get status of a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ProcessStatusResponse, Integer, Hash)>] ProcessStatusResponse data, response status code and response headers
-    def get_process_status_with_http_info(process_name, sandbox_id, opts = {})
+    def get_process_status_deprecated_with_http_info(process_name, sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_process_status ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_process_status_deprecated ...'
       end
       # verify the required parameter 'process_name' is set
       if @api_client.config.client_side_validation && process_name.nil?
-        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.get_process_status"
+        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.get_process_status_deprecated"
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_process_status"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_process_status_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status'.sub('{' + 'processName' + '}', CGI.escape(process_name.to_s)).sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1478,7 +1478,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_process_status",
+        :operation => :"ToolboxApi.get_process_status_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1489,33 +1489,33 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_process_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_process_status_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get sandbox project dir
+    # [DEPRECATED] Get sandbox project dir
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ProjectDirResponse]
-    def get_project_dir(sandbox_id, opts = {})
-      data, _status_code, _headers = get_project_dir_with_http_info(sandbox_id, opts)
+    def get_project_dir_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = get_project_dir_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Get sandbox project dir
+    # [DEPRECATED] Get sandbox project dir
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ProjectDirResponse, Integer, Hash)>] ProjectDirResponse data, response status code and response headers
-    def get_project_dir_with_http_info(sandbox_id, opts = {})
+    def get_project_dir_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_project_dir ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_project_dir_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_project_dir"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_project_dir_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/project-dir'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1542,7 +1542,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_project_dir",
+        :operation => :"ToolboxApi.get_project_dir_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1553,41 +1553,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_project_dir\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_project_dir_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get PTY session
+    # [DEPRECATED] Get PTY session
     # Get PTY session information by ID
     # @param sandbox_id [String] 
     # @param session_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [PtySessionInfo]
-    def get_pty_session(sandbox_id, session_id, opts = {})
-      data, _status_code, _headers = get_pty_session_with_http_info(sandbox_id, session_id, opts)
+    def get_pty_session_deprecated(sandbox_id, session_id, opts = {})
+      data, _status_code, _headers = get_pty_session_deprecated_with_http_info(sandbox_id, session_id, opts)
       data
     end
 
-    # Get PTY session
+    # [DEPRECATED] Get PTY session
     # Get PTY session information by ID
     # @param sandbox_id [String] 
     # @param session_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(PtySessionInfo, Integer, Hash)>] PtySessionInfo data, response status code and response headers
-    def get_pty_session_with_http_info(sandbox_id, session_id, opts = {})
+    def get_pty_session_deprecated_with_http_info(sandbox_id, session_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_pty_session ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_pty_session_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_pty_session"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_pty_session_deprecated"
       end
       # verify the required parameter 'session_id' is set
       if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_pty_session"
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_pty_session_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
@@ -1614,7 +1614,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_pty_session",
+        :operation => :"ToolboxApi.get_pty_session_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1625,84 +1625,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_pty_session_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get session
-    # Get session by ID
-    # @param sandbox_id [String] 
-    # @param session_id [String] 
-    # @param [Hash] opts the optional parameters
-    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Session]
-    def get_session(sandbox_id, session_id, opts = {})
-      data, _status_code, _headers = get_session_with_http_info(sandbox_id, session_id, opts)
-      data
-    end
-
-    # Get session
-    # Get session by ID
-    # @param sandbox_id [String] 
-    # @param session_id [String] 
-    # @param [Hash] opts the optional parameters
-    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(Session, Integer, Hash)>] Session data, response status code and response headers
-    def get_session_with_http_info(sandbox_id, session_id, opts = {})
-      if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_session ...'
-      end
-      # verify the required parameter 'sandbox_id' is set
-      if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_session"
-      end
-      # verify the required parameter 'session_id' is set
-      if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_session"
-      end
-      # resource path
-      local_var_path = '/toolbox/{sandboxId}/toolbox/process/session/{sessionId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
-
-      # query parameters
-      query_params = opts[:query_params] || {}
-
-      # header parameters
-      header_params = opts[:header_params] || {}
-      # HTTP header 'Accept' (if needed)
-      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
-      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
-
-      # form parameters
-      form_params = opts[:form_params] || {}
-
-      # http body (model)
-      post_body = opts[:debug_body]
-
-      # return_type
-      return_type = opts[:debug_return_type] || 'Session'
-
-      # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
-
-      new_options = opts.merge(
-        :operation => :"ToolboxApi.get_session",
-        :header_params => header_params,
-        :query_params => query_params,
-        :form_params => form_params,
-        :body => post_body,
-        :auth_names => auth_names,
-        :return_type => return_type
-      )
-
-      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
-      if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
-      end
-      return data, status_code, headers
-    end
-
-    # Get session command
+    # [DEPRECATED] Get session command
     # Get session command by ID
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -1710,12 +1638,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Command]
-    def get_session_command(sandbox_id, session_id, command_id, opts = {})
-      data, _status_code, _headers = get_session_command_with_http_info(sandbox_id, session_id, command_id, opts)
+    def get_session_command_deprecated(sandbox_id, session_id, command_id, opts = {})
+      data, _status_code, _headers = get_session_command_deprecated_with_http_info(sandbox_id, session_id, command_id, opts)
       data
     end
 
-    # Get session command
+    # [DEPRECATED] Get session command
     # Get session command by ID
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -1723,21 +1651,21 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Command, Integer, Hash)>] Command data, response status code and response headers
-    def get_session_command_with_http_info(sandbox_id, session_id, command_id, opts = {})
+    def get_session_command_deprecated_with_http_info(sandbox_id, session_id, command_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_session_command ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_session_command_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_session_command"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_session_command_deprecated"
       end
       # verify the required parameter 'session_id' is set
       if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_session_command"
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_session_command_deprecated"
       end
       # verify the required parameter 'command_id' is set
       if @api_client.config.client_side_validation && command_id.nil?
-        fail ArgumentError, "Missing the required parameter 'command_id' when calling ToolboxApi.get_session_command"
+        fail ArgumentError, "Missing the required parameter 'command_id' when calling ToolboxApi.get_session_command_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s)).sub('{' + 'commandId' + '}', CGI.escape(command_id.to_s))
@@ -1764,7 +1692,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_session_command",
+        :operation => :"ToolboxApi.get_session_command_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1775,12 +1703,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_session_command\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_session_command_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get command logs
+    # [DEPRECATED] Get command logs
     # Get logs for a specific command in a session
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -1789,12 +1717,12 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :follow Whether to stream the logs
     # @return [String]
-    def get_session_command_logs(sandbox_id, session_id, command_id, opts = {})
-      data, _status_code, _headers = get_session_command_logs_with_http_info(sandbox_id, session_id, command_id, opts)
+    def get_session_command_logs_deprecated(sandbox_id, session_id, command_id, opts = {})
+      data, _status_code, _headers = get_session_command_logs_deprecated_with_http_info(sandbox_id, session_id, command_id, opts)
       data
     end
 
-    # Get command logs
+    # [DEPRECATED] Get command logs
     # Get logs for a specific command in a session
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -1803,21 +1731,21 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :follow Whether to stream the logs
     # @return [Array<(String, Integer, Hash)>] String data, response status code and response headers
-    def get_session_command_logs_with_http_info(sandbox_id, session_id, command_id, opts = {})
+    def get_session_command_logs_deprecated_with_http_info(sandbox_id, session_id, command_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_session_command_logs ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_session_command_logs_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_session_command_logs"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_session_command_logs_deprecated"
       end
       # verify the required parameter 'session_id' is set
       if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_session_command_logs"
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_session_command_logs_deprecated"
       end
       # verify the required parameter 'command_id' is set
       if @api_client.config.client_side_validation && command_id.nil?
-        fail ArgumentError, "Missing the required parameter 'command_id' when calling ToolboxApi.get_session_command_logs"
+        fail ArgumentError, "Missing the required parameter 'command_id' when calling ToolboxApi.get_session_command_logs_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s)).sub('{' + 'commandId' + '}', CGI.escape(command_id.to_s))
@@ -1845,7 +1773,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_session_command_logs",
+        :operation => :"ToolboxApi.get_session_command_logs_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1856,33 +1784,105 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_session_command_logs\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_session_command_logs_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get sandbox user home dir
+    # [DEPRECATED] Get session
+    # Get session by ID
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Session]
+    def get_session_deprecated(sandbox_id, session_id, opts = {})
+      data, _status_code, _headers = get_session_deprecated_with_http_info(sandbox_id, session_id, opts)
+      data
+    end
+
+    # [DEPRECATED] Get session
+    # Get session by ID
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Session, Integer, Hash)>] Session data, response status code and response headers
+    def get_session_deprecated_with_http_info(sandbox_id, session_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_session_deprecated ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_session_deprecated"
+      end
+      # verify the required parameter 'session_id' is set
+      if @api_client.config.client_side_validation && session_id.nil?
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_session_deprecated"
+      end
+      # resource path
+      local_var_path = '/toolbox/{sandboxId}/toolbox/process/session/{sessionId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Session'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"ToolboxApi.get_session_deprecated",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ToolboxApi#get_session_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # [DEPRECATED] Get sandbox user home dir
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [UserHomeDirResponse]
-    def get_user_home_dir(sandbox_id, opts = {})
-      data, _status_code, _headers = get_user_home_dir_with_http_info(sandbox_id, opts)
+    def get_user_home_dir_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = get_user_home_dir_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Get sandbox user home dir
+    # [DEPRECATED] Get sandbox user home dir
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(UserHomeDirResponse, Integer, Hash)>] UserHomeDirResponse data, response status code and response headers
-    def get_user_home_dir_with_http_info(sandbox_id, opts = {})
+    def get_user_home_dir_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_user_home_dir ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_user_home_dir_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_user_home_dir"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_user_home_dir_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/user-home-dir'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1909,7 +1909,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_user_home_dir",
+        :operation => :"ToolboxApi.get_user_home_dir_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1920,35 +1920,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_user_home_dir\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_user_home_dir_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get windows
+    # [DEPRECATED] Get windows
     # Get list of open windows
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [WindowsResponse]
-    def get_windows(sandbox_id, opts = {})
-      data, _status_code, _headers = get_windows_with_http_info(sandbox_id, opts)
+    def get_windows_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = get_windows_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Get windows
+    # [DEPRECATED] Get windows
     # Get list of open windows
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(WindowsResponse, Integer, Hash)>] WindowsResponse data, response status code and response headers
-    def get_windows_with_http_info(sandbox_id, opts = {})
+    def get_windows_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_windows ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_windows_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_windows"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_windows_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/display/windows'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -1975,7 +1975,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_windows",
+        :operation => :"ToolboxApi.get_windows_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -1986,33 +1986,33 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_windows\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_windows_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get sandbox work-dir
+    # [DEPRECATED] Get sandbox work-dir
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [WorkDirResponse]
-    def get_work_dir(sandbox_id, opts = {})
-      data, _status_code, _headers = get_work_dir_with_http_info(sandbox_id, opts)
+    def get_work_dir_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = get_work_dir_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Get sandbox work-dir
+    # [DEPRECATED] Get sandbox work-dir
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(WorkDirResponse, Integer, Hash)>] WorkDirResponse data, response status code and response headers
-    def get_work_dir_with_http_info(sandbox_id, opts = {})
+    def get_work_dir_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_work_dir ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_work_dir_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_work_dir"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_work_dir_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/work-dir'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2039,7 +2039,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.get_work_dir",
+        :operation => :"ToolboxApi.get_work_dir_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2050,41 +2050,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#get_work_dir\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#get_work_dir_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Add files
+    # [DEPRECATED] Add files
     # Add files to git commit
     # @param sandbox_id [String] 
     # @param git_add_request [GitAddRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def git_add_files(sandbox_id, git_add_request, opts = {})
-      git_add_files_with_http_info(sandbox_id, git_add_request, opts)
+    def git_add_files_deprecated(sandbox_id, git_add_request, opts = {})
+      git_add_files_deprecated_with_http_info(sandbox_id, git_add_request, opts)
       nil
     end
 
-    # Add files
+    # [DEPRECATED] Add files
     # Add files to git commit
     # @param sandbox_id [String] 
     # @param git_add_request [GitAddRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def git_add_files_with_http_info(sandbox_id, git_add_request, opts = {})
+    def git_add_files_deprecated_with_http_info(sandbox_id, git_add_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_add_files ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_add_files_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_add_files"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_add_files_deprecated"
       end
       # verify the required parameter 'git_add_request' is set
       if @api_client.config.client_side_validation && git_add_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_add_request' when calling ToolboxApi.git_add_files"
+        fail ArgumentError, "Missing the required parameter 'git_add_request' when calling ToolboxApi.git_add_files_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/add'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2114,7 +2114,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_add_files",
+        :operation => :"ToolboxApi.git_add_files_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2125,41 +2125,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_add_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_add_files_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Checkout branch
+    # [DEPRECATED] Checkout branch
     # Checkout branch or commit in git repository
     # @param sandbox_id [String] 
     # @param git_checkout_request [GitCheckoutRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def git_checkout_branch(sandbox_id, git_checkout_request, opts = {})
-      git_checkout_branch_with_http_info(sandbox_id, git_checkout_request, opts)
+    def git_checkout_branch_deprecated(sandbox_id, git_checkout_request, opts = {})
+      git_checkout_branch_deprecated_with_http_info(sandbox_id, git_checkout_request, opts)
       nil
     end
 
-    # Checkout branch
+    # [DEPRECATED] Checkout branch
     # Checkout branch or commit in git repository
     # @param sandbox_id [String] 
     # @param git_checkout_request [GitCheckoutRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def git_checkout_branch_with_http_info(sandbox_id, git_checkout_request, opts = {})
+    def git_checkout_branch_deprecated_with_http_info(sandbox_id, git_checkout_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_checkout_branch ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_checkout_branch_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_checkout_branch"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_checkout_branch_deprecated"
       end
       # verify the required parameter 'git_checkout_request' is set
       if @api_client.config.client_side_validation && git_checkout_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_checkout_request' when calling ToolboxApi.git_checkout_branch"
+        fail ArgumentError, "Missing the required parameter 'git_checkout_request' when calling ToolboxApi.git_checkout_branch_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/checkout'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2189,7 +2189,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_checkout_branch",
+        :operation => :"ToolboxApi.git_checkout_branch_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2200,41 +2200,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_checkout_branch\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_checkout_branch_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Clone repository
+    # [DEPRECATED] Clone repository
     # Clone git repository
     # @param sandbox_id [String] 
     # @param git_clone_request [GitCloneRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def git_clone_repository(sandbox_id, git_clone_request, opts = {})
-      git_clone_repository_with_http_info(sandbox_id, git_clone_request, opts)
+    def git_clone_repository_deprecated(sandbox_id, git_clone_request, opts = {})
+      git_clone_repository_deprecated_with_http_info(sandbox_id, git_clone_request, opts)
       nil
     end
 
-    # Clone repository
+    # [DEPRECATED] Clone repository
     # Clone git repository
     # @param sandbox_id [String] 
     # @param git_clone_request [GitCloneRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def git_clone_repository_with_http_info(sandbox_id, git_clone_request, opts = {})
+    def git_clone_repository_deprecated_with_http_info(sandbox_id, git_clone_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_clone_repository ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_clone_repository_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_clone_repository"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_clone_repository_deprecated"
       end
       # verify the required parameter 'git_clone_request' is set
       if @api_client.config.client_side_validation && git_clone_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_clone_request' when calling ToolboxApi.git_clone_repository"
+        fail ArgumentError, "Missing the required parameter 'git_clone_request' when calling ToolboxApi.git_clone_repository_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/clone'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2264,7 +2264,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_clone_repository",
+        :operation => :"ToolboxApi.git_clone_repository_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2275,41 +2275,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_clone_repository\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_clone_repository_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Commit changes
+    # [DEPRECATED] Commit changes
     # Commit changes to git repository
     # @param sandbox_id [String] 
     # @param git_commit_request [GitCommitRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [GitCommitResponse]
-    def git_commit_changes(sandbox_id, git_commit_request, opts = {})
-      data, _status_code, _headers = git_commit_changes_with_http_info(sandbox_id, git_commit_request, opts)
+    def git_commit_changes_deprecated(sandbox_id, git_commit_request, opts = {})
+      data, _status_code, _headers = git_commit_changes_deprecated_with_http_info(sandbox_id, git_commit_request, opts)
       data
     end
 
-    # Commit changes
+    # [DEPRECATED] Commit changes
     # Commit changes to git repository
     # @param sandbox_id [String] 
     # @param git_commit_request [GitCommitRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(GitCommitResponse, Integer, Hash)>] GitCommitResponse data, response status code and response headers
-    def git_commit_changes_with_http_info(sandbox_id, git_commit_request, opts = {})
+    def git_commit_changes_deprecated_with_http_info(sandbox_id, git_commit_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_commit_changes ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_commit_changes_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_commit_changes"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_commit_changes_deprecated"
       end
       # verify the required parameter 'git_commit_request' is set
       if @api_client.config.client_side_validation && git_commit_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_commit_request' when calling ToolboxApi.git_commit_changes"
+        fail ArgumentError, "Missing the required parameter 'git_commit_request' when calling ToolboxApi.git_commit_changes_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/commit'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2341,7 +2341,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_commit_changes",
+        :operation => :"ToolboxApi.git_commit_changes_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2352,41 +2352,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_commit_changes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_commit_changes_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Create branch
+    # [DEPRECATED] Create branch
     # Create branch on git repository
     # @param sandbox_id [String] 
     # @param git_branch_request [GitBranchRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def git_create_branch(sandbox_id, git_branch_request, opts = {})
-      git_create_branch_with_http_info(sandbox_id, git_branch_request, opts)
+    def git_create_branch_deprecated(sandbox_id, git_branch_request, opts = {})
+      git_create_branch_deprecated_with_http_info(sandbox_id, git_branch_request, opts)
       nil
     end
 
-    # Create branch
+    # [DEPRECATED] Create branch
     # Create branch on git repository
     # @param sandbox_id [String] 
     # @param git_branch_request [GitBranchRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def git_create_branch_with_http_info(sandbox_id, git_branch_request, opts = {})
+    def git_create_branch_deprecated_with_http_info(sandbox_id, git_branch_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_create_branch ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_create_branch_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_create_branch"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_create_branch_deprecated"
       end
       # verify the required parameter 'git_branch_request' is set
       if @api_client.config.client_side_validation && git_branch_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_branch_request' when calling ToolboxApi.git_create_branch"
+        fail ArgumentError, "Missing the required parameter 'git_branch_request' when calling ToolboxApi.git_create_branch_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/branches'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2416,7 +2416,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_create_branch",
+        :operation => :"ToolboxApi.git_create_branch_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2427,41 +2427,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_create_branch\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_create_branch_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Delete branch
+    # [DEPRECATED] Delete branch
     # Delete branch on git repository
     # @param sandbox_id [String] 
     # @param git_delete_branch_request [GitDeleteBranchRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def git_delete_branch(sandbox_id, git_delete_branch_request, opts = {})
-      git_delete_branch_with_http_info(sandbox_id, git_delete_branch_request, opts)
+    def git_delete_branch_deprecated(sandbox_id, git_delete_branch_request, opts = {})
+      git_delete_branch_deprecated_with_http_info(sandbox_id, git_delete_branch_request, opts)
       nil
     end
 
-    # Delete branch
+    # [DEPRECATED] Delete branch
     # Delete branch on git repository
     # @param sandbox_id [String] 
     # @param git_delete_branch_request [GitDeleteBranchRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def git_delete_branch_with_http_info(sandbox_id, git_delete_branch_request, opts = {})
+    def git_delete_branch_deprecated_with_http_info(sandbox_id, git_delete_branch_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_delete_branch ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_delete_branch_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_delete_branch"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_delete_branch_deprecated"
       end
       # verify the required parameter 'git_delete_branch_request' is set
       if @api_client.config.client_side_validation && git_delete_branch_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_delete_branch_request' when calling ToolboxApi.git_delete_branch"
+        fail ArgumentError, "Missing the required parameter 'git_delete_branch_request' when calling ToolboxApi.git_delete_branch_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/branches'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2491,7 +2491,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_delete_branch",
+        :operation => :"ToolboxApi.git_delete_branch_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2502,41 +2502,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_delete_branch\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_delete_branch_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get commit history
+    # [DEPRECATED] Get commit history
     # Get commit history from git repository
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<GitCommitInfo>]
-    def git_get_history(sandbox_id, path, opts = {})
-      data, _status_code, _headers = git_get_history_with_http_info(sandbox_id, path, opts)
+    def git_get_history_deprecated(sandbox_id, path, opts = {})
+      data, _status_code, _headers = git_get_history_deprecated_with_http_info(sandbox_id, path, opts)
       data
     end
 
-    # Get commit history
+    # [DEPRECATED] Get commit history
     # Get commit history from git repository
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Array<GitCommitInfo>, Integer, Hash)>] Array<GitCommitInfo> data, response status code and response headers
-    def git_get_history_with_http_info(sandbox_id, path, opts = {})
+    def git_get_history_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_get_history ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_get_history_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_get_history"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_get_history_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.git_get_history"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.git_get_history_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/history'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2564,7 +2564,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_get_history",
+        :operation => :"ToolboxApi.git_get_history_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2575,41 +2575,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_get_history\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_get_history_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get git status
+    # [DEPRECATED] Get git status
     # Get status from git repository
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [GitStatus]
-    def git_get_status(sandbox_id, path, opts = {})
-      data, _status_code, _headers = git_get_status_with_http_info(sandbox_id, path, opts)
+    def git_get_status_deprecated(sandbox_id, path, opts = {})
+      data, _status_code, _headers = git_get_status_deprecated_with_http_info(sandbox_id, path, opts)
       data
     end
 
-    # Get git status
+    # [DEPRECATED] Get git status
     # Get status from git repository
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(GitStatus, Integer, Hash)>] GitStatus data, response status code and response headers
-    def git_get_status_with_http_info(sandbox_id, path, opts = {})
+    def git_get_status_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_get_status ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_get_status_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_get_status"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_get_status_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.git_get_status"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.git_get_status_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/status'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2637,7 +2637,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_get_status",
+        :operation => :"ToolboxApi.git_get_status_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2648,41 +2648,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_get_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_get_status_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get branch list
+    # [DEPRECATED] Get branch list
     # Get branch list from git repository
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ListBranchResponse]
-    def git_list_branches(sandbox_id, path, opts = {})
-      data, _status_code, _headers = git_list_branches_with_http_info(sandbox_id, path, opts)
+    def git_list_branches_deprecated(sandbox_id, path, opts = {})
+      data, _status_code, _headers = git_list_branches_deprecated_with_http_info(sandbox_id, path, opts)
       data
     end
 
-    # Get branch list
+    # [DEPRECATED] Get branch list
     # Get branch list from git repository
     # @param sandbox_id [String] 
     # @param path [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ListBranchResponse, Integer, Hash)>] ListBranchResponse data, response status code and response headers
-    def git_list_branches_with_http_info(sandbox_id, path, opts = {})
+    def git_list_branches_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_list_branches ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_list_branches_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_list_branches"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_list_branches_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.git_list_branches"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.git_list_branches_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/branches'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2710,7 +2710,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_list_branches",
+        :operation => :"ToolboxApi.git_list_branches_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2721,41 +2721,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_list_branches\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_list_branches_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Pull changes
+    # [DEPRECATED] Pull changes
     # Pull changes from remote
     # @param sandbox_id [String] 
     # @param git_repo_request [GitRepoRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def git_pull_changes(sandbox_id, git_repo_request, opts = {})
-      git_pull_changes_with_http_info(sandbox_id, git_repo_request, opts)
+    def git_pull_changes_deprecated(sandbox_id, git_repo_request, opts = {})
+      git_pull_changes_deprecated_with_http_info(sandbox_id, git_repo_request, opts)
       nil
     end
 
-    # Pull changes
+    # [DEPRECATED] Pull changes
     # Pull changes from remote
     # @param sandbox_id [String] 
     # @param git_repo_request [GitRepoRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def git_pull_changes_with_http_info(sandbox_id, git_repo_request, opts = {})
+    def git_pull_changes_deprecated_with_http_info(sandbox_id, git_repo_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_pull_changes ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_pull_changes_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_pull_changes"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_pull_changes_deprecated"
       end
       # verify the required parameter 'git_repo_request' is set
       if @api_client.config.client_side_validation && git_repo_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_repo_request' when calling ToolboxApi.git_pull_changes"
+        fail ArgumentError, "Missing the required parameter 'git_repo_request' when calling ToolboxApi.git_pull_changes_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/pull'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2785,7 +2785,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_pull_changes",
+        :operation => :"ToolboxApi.git_pull_changes_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2796,41 +2796,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_pull_changes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_pull_changes_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Push changes
+    # [DEPRECATED] Push changes
     # Push changes to remote
     # @param sandbox_id [String] 
     # @param git_repo_request [GitRepoRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def git_push_changes(sandbox_id, git_repo_request, opts = {})
-      git_push_changes_with_http_info(sandbox_id, git_repo_request, opts)
+    def git_push_changes_deprecated(sandbox_id, git_repo_request, opts = {})
+      git_push_changes_deprecated_with_http_info(sandbox_id, git_repo_request, opts)
       nil
     end
 
-    # Push changes
+    # [DEPRECATED] Push changes
     # Push changes to remote
     # @param sandbox_id [String] 
     # @param git_repo_request [GitRepoRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def git_push_changes_with_http_info(sandbox_id, git_repo_request, opts = {})
+    def git_push_changes_deprecated_with_http_info(sandbox_id, git_repo_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_push_changes ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.git_push_changes_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_push_changes"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.git_push_changes_deprecated"
       end
       # verify the required parameter 'git_repo_request' is set
       if @api_client.config.client_side_validation && git_repo_request.nil?
-        fail ArgumentError, "Missing the required parameter 'git_repo_request' when calling ToolboxApi.git_push_changes"
+        fail ArgumentError, "Missing the required parameter 'git_repo_request' when calling ToolboxApi.git_push_changes_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/git/push'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2860,7 +2860,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.git_push_changes",
+        :operation => :"ToolboxApi.git_push_changes_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2871,35 +2871,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#git_push_changes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#git_push_changes_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # List files
+    # [DEPRECATED] List files
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [String] :path 
     # @return [Array<FileInfo>]
-    def list_files(sandbox_id, opts = {})
-      data, _status_code, _headers = list_files_with_http_info(sandbox_id, opts)
+    def list_files_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = list_files_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # List files
+    # [DEPRECATED] List files
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [String] :path 
     # @return [Array<(Array<FileInfo>, Integer, Hash)>] Array<FileInfo> data, response status code and response headers
-    def list_files_with_http_info(sandbox_id, opts = {})
+    def list_files_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.list_files ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.list_files_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.list_files"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.list_files_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2927,7 +2927,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.list_files",
+        :operation => :"ToolboxApi.list_files_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -2938,35 +2938,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#list_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#list_files_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # List PTY sessions
+    # [DEPRECATED] List PTY sessions
     # List all active PTY sessions in the sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [PtyListResponse]
-    def list_pty_sessions(sandbox_id, opts = {})
-      data, _status_code, _headers = list_pty_sessions_with_http_info(sandbox_id, opts)
+    def list_pty_sessions_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = list_pty_sessions_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # List PTY sessions
+    # [DEPRECATED] List PTY sessions
     # List all active PTY sessions in the sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(PtyListResponse, Integer, Hash)>] PtyListResponse data, response status code and response headers
-    def list_pty_sessions_with_http_info(sandbox_id, opts = {})
+    def list_pty_sessions_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.list_pty_sessions ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.list_pty_sessions_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.list_pty_sessions"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.list_pty_sessions_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -2993,7 +2993,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.list_pty_sessions",
+        :operation => :"ToolboxApi.list_pty_sessions_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3004,35 +3004,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#list_pty_sessions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#list_pty_sessions_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # List sessions
+    # [DEPRECATED] List sessions
     # List all active sessions in the sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<Session>]
-    def list_sessions(sandbox_id, opts = {})
-      data, _status_code, _headers = list_sessions_with_http_info(sandbox_id, opts)
+    def list_sessions_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = list_sessions_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # List sessions
+    # [DEPRECATED] List sessions
     # List all active sessions in the sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Array<Session>, Integer, Hash)>] Array<Session> data, response status code and response headers
-    def list_sessions_with_http_info(sandbox_id, opts = {})
+    def list_sessions_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.list_sessions ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.list_sessions_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.list_sessions"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.list_sessions_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/session'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3059,7 +3059,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.list_sessions",
+        :operation => :"ToolboxApi.list_sessions_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3070,41 +3070,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#list_sessions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#list_sessions_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Get Lsp Completions
+    # [DEPRECATED] Get Lsp Completions
     # The Completion request is sent from the client to the server to compute completion items at a given cursor position.
     # @param sandbox_id [String] 
     # @param lsp_completion_params [LspCompletionParams] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [CompletionList]
-    def lsp_completions(sandbox_id, lsp_completion_params, opts = {})
-      data, _status_code, _headers = lsp_completions_with_http_info(sandbox_id, lsp_completion_params, opts)
+    def lsp_completions_deprecated(sandbox_id, lsp_completion_params, opts = {})
+      data, _status_code, _headers = lsp_completions_deprecated_with_http_info(sandbox_id, lsp_completion_params, opts)
       data
     end
 
-    # Get Lsp Completions
+    # [DEPRECATED] Get Lsp Completions
     # The Completion request is sent from the client to the server to compute completion items at a given cursor position.
     # @param sandbox_id [String] 
     # @param lsp_completion_params [LspCompletionParams] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(CompletionList, Integer, Hash)>] CompletionList data, response status code and response headers
-    def lsp_completions_with_http_info(sandbox_id, lsp_completion_params, opts = {})
+    def lsp_completions_deprecated_with_http_info(sandbox_id, lsp_completion_params, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_completions ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_completions_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_completions"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_completions_deprecated"
       end
       # verify the required parameter 'lsp_completion_params' is set
       if @api_client.config.client_side_validation && lsp_completion_params.nil?
-        fail ArgumentError, "Missing the required parameter 'lsp_completion_params' when calling ToolboxApi.lsp_completions"
+        fail ArgumentError, "Missing the required parameter 'lsp_completion_params' when calling ToolboxApi.lsp_completions_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/lsp/completions'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3136,7 +3136,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.lsp_completions",
+        :operation => :"ToolboxApi.lsp_completions_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3147,41 +3147,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#lsp_completions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#lsp_completions_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Call Lsp DidClose
+    # [DEPRECATED] Call Lsp DidClose
     # The document close notification is sent from the client to the server when the document got closed in the client.
     # @param sandbox_id [String] 
     # @param lsp_document_request [LspDocumentRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def lsp_did_close(sandbox_id, lsp_document_request, opts = {})
-      lsp_did_close_with_http_info(sandbox_id, lsp_document_request, opts)
+    def lsp_did_close_deprecated(sandbox_id, lsp_document_request, opts = {})
+      lsp_did_close_deprecated_with_http_info(sandbox_id, lsp_document_request, opts)
       nil
     end
 
-    # Call Lsp DidClose
+    # [DEPRECATED] Call Lsp DidClose
     # The document close notification is sent from the client to the server when the document got closed in the client.
     # @param sandbox_id [String] 
     # @param lsp_document_request [LspDocumentRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def lsp_did_close_with_http_info(sandbox_id, lsp_document_request, opts = {})
+    def lsp_did_close_deprecated_with_http_info(sandbox_id, lsp_document_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_did_close ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_did_close_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_did_close"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_did_close_deprecated"
       end
       # verify the required parameter 'lsp_document_request' is set
       if @api_client.config.client_side_validation && lsp_document_request.nil?
-        fail ArgumentError, "Missing the required parameter 'lsp_document_request' when calling ToolboxApi.lsp_did_close"
+        fail ArgumentError, "Missing the required parameter 'lsp_document_request' when calling ToolboxApi.lsp_did_close_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/lsp/did-close'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3211,7 +3211,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.lsp_did_close",
+        :operation => :"ToolboxApi.lsp_did_close_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3222,41 +3222,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#lsp_did_close\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#lsp_did_close_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Call Lsp DidOpen
+    # [DEPRECATED] Call Lsp DidOpen
     # The document open notification is sent from the client to the server to signal newly opened text documents.
     # @param sandbox_id [String] 
     # @param lsp_document_request [LspDocumentRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def lsp_did_open(sandbox_id, lsp_document_request, opts = {})
-      lsp_did_open_with_http_info(sandbox_id, lsp_document_request, opts)
+    def lsp_did_open_deprecated(sandbox_id, lsp_document_request, opts = {})
+      lsp_did_open_deprecated_with_http_info(sandbox_id, lsp_document_request, opts)
       nil
     end
 
-    # Call Lsp DidOpen
+    # [DEPRECATED] Call Lsp DidOpen
     # The document open notification is sent from the client to the server to signal newly opened text documents.
     # @param sandbox_id [String] 
     # @param lsp_document_request [LspDocumentRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def lsp_did_open_with_http_info(sandbox_id, lsp_document_request, opts = {})
+    def lsp_did_open_deprecated_with_http_info(sandbox_id, lsp_document_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_did_open ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_did_open_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_did_open"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_did_open_deprecated"
       end
       # verify the required parameter 'lsp_document_request' is set
       if @api_client.config.client_side_validation && lsp_document_request.nil?
-        fail ArgumentError, "Missing the required parameter 'lsp_document_request' when calling ToolboxApi.lsp_did_open"
+        fail ArgumentError, "Missing the required parameter 'lsp_document_request' when calling ToolboxApi.lsp_did_open_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/lsp/did-open'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3286,7 +3286,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.lsp_did_open",
+        :operation => :"ToolboxApi.lsp_did_open_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3297,12 +3297,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#lsp_did_open\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#lsp_did_open_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Call Lsp DocumentSymbols
+    # [DEPRECATED] Call Lsp DocumentSymbols
     # The document symbol request is sent from the client to the server.
     # @param sandbox_id [String] 
     # @param language_id [String] 
@@ -3311,12 +3311,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<LspSymbol>]
-    def lsp_document_symbols(sandbox_id, language_id, path_to_project, uri, opts = {})
-      data, _status_code, _headers = lsp_document_symbols_with_http_info(sandbox_id, language_id, path_to_project, uri, opts)
+    def lsp_document_symbols_deprecated(sandbox_id, language_id, path_to_project, uri, opts = {})
+      data, _status_code, _headers = lsp_document_symbols_deprecated_with_http_info(sandbox_id, language_id, path_to_project, uri, opts)
       data
     end
 
-    # Call Lsp DocumentSymbols
+    # [DEPRECATED] Call Lsp DocumentSymbols
     # The document symbol request is sent from the client to the server.
     # @param sandbox_id [String] 
     # @param language_id [String] 
@@ -3325,25 +3325,25 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Array<LspSymbol>, Integer, Hash)>] Array<LspSymbol> data, response status code and response headers
-    def lsp_document_symbols_with_http_info(sandbox_id, language_id, path_to_project, uri, opts = {})
+    def lsp_document_symbols_deprecated_with_http_info(sandbox_id, language_id, path_to_project, uri, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_document_symbols ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_document_symbols_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_document_symbols"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_document_symbols_deprecated"
       end
       # verify the required parameter 'language_id' is set
       if @api_client.config.client_side_validation && language_id.nil?
-        fail ArgumentError, "Missing the required parameter 'language_id' when calling ToolboxApi.lsp_document_symbols"
+        fail ArgumentError, "Missing the required parameter 'language_id' when calling ToolboxApi.lsp_document_symbols_deprecated"
       end
       # verify the required parameter 'path_to_project' is set
       if @api_client.config.client_side_validation && path_to_project.nil?
-        fail ArgumentError, "Missing the required parameter 'path_to_project' when calling ToolboxApi.lsp_document_symbols"
+        fail ArgumentError, "Missing the required parameter 'path_to_project' when calling ToolboxApi.lsp_document_symbols_deprecated"
       end
       # verify the required parameter 'uri' is set
       if @api_client.config.client_side_validation && uri.nil?
-        fail ArgumentError, "Missing the required parameter 'uri' when calling ToolboxApi.lsp_document_symbols"
+        fail ArgumentError, "Missing the required parameter 'uri' when calling ToolboxApi.lsp_document_symbols_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/lsp/document-symbols'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3373,7 +3373,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.lsp_document_symbols",
+        :operation => :"ToolboxApi.lsp_document_symbols_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3384,41 +3384,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#lsp_document_symbols\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#lsp_document_symbols_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Start Lsp server
+    # [DEPRECATED] Start Lsp server
     # Start Lsp server process inside sandbox project
     # @param sandbox_id [String] 
     # @param lsp_server_request [LspServerRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def lsp_start(sandbox_id, lsp_server_request, opts = {})
-      lsp_start_with_http_info(sandbox_id, lsp_server_request, opts)
+    def lsp_start_deprecated(sandbox_id, lsp_server_request, opts = {})
+      lsp_start_deprecated_with_http_info(sandbox_id, lsp_server_request, opts)
       nil
     end
 
-    # Start Lsp server
+    # [DEPRECATED] Start Lsp server
     # Start Lsp server process inside sandbox project
     # @param sandbox_id [String] 
     # @param lsp_server_request [LspServerRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def lsp_start_with_http_info(sandbox_id, lsp_server_request, opts = {})
+    def lsp_start_deprecated_with_http_info(sandbox_id, lsp_server_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_start ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_start_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_start"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_start_deprecated"
       end
       # verify the required parameter 'lsp_server_request' is set
       if @api_client.config.client_side_validation && lsp_server_request.nil?
-        fail ArgumentError, "Missing the required parameter 'lsp_server_request' when calling ToolboxApi.lsp_start"
+        fail ArgumentError, "Missing the required parameter 'lsp_server_request' when calling ToolboxApi.lsp_start_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/lsp/start'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3448,7 +3448,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.lsp_start",
+        :operation => :"ToolboxApi.lsp_start_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3459,41 +3459,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#lsp_start\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#lsp_start_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Stop Lsp server
+    # [DEPRECATED] Stop Lsp server
     # Stop Lsp server process inside sandbox project
     # @param sandbox_id [String] 
     # @param lsp_server_request [LspServerRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def lsp_stop(sandbox_id, lsp_server_request, opts = {})
-      lsp_stop_with_http_info(sandbox_id, lsp_server_request, opts)
+    def lsp_stop_deprecated(sandbox_id, lsp_server_request, opts = {})
+      lsp_stop_deprecated_with_http_info(sandbox_id, lsp_server_request, opts)
       nil
     end
 
-    # Stop Lsp server
+    # [DEPRECATED] Stop Lsp server
     # Stop Lsp server process inside sandbox project
     # @param sandbox_id [String] 
     # @param lsp_server_request [LspServerRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def lsp_stop_with_http_info(sandbox_id, lsp_server_request, opts = {})
+    def lsp_stop_deprecated_with_http_info(sandbox_id, lsp_server_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_stop ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_stop_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_stop"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_stop_deprecated"
       end
       # verify the required parameter 'lsp_server_request' is set
       if @api_client.config.client_side_validation && lsp_server_request.nil?
-        fail ArgumentError, "Missing the required parameter 'lsp_server_request' when calling ToolboxApi.lsp_stop"
+        fail ArgumentError, "Missing the required parameter 'lsp_server_request' when calling ToolboxApi.lsp_stop_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/lsp/stop'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3523,7 +3523,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.lsp_stop",
+        :operation => :"ToolboxApi.lsp_stop_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3534,12 +3534,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#lsp_stop\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#lsp_stop_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Call Lsp WorkspaceSymbols
+    # [DEPRECATED] Call Lsp WorkspaceSymbols
     # The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
     # @param sandbox_id [String] 
     # @param language_id [String] 
@@ -3548,12 +3548,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<LspSymbol>]
-    def lsp_workspace_symbols(sandbox_id, language_id, path_to_project, query, opts = {})
-      data, _status_code, _headers = lsp_workspace_symbols_with_http_info(sandbox_id, language_id, path_to_project, query, opts)
+    def lsp_workspace_symbols_deprecated(sandbox_id, language_id, path_to_project, query, opts = {})
+      data, _status_code, _headers = lsp_workspace_symbols_deprecated_with_http_info(sandbox_id, language_id, path_to_project, query, opts)
       data
     end
 
-    # Call Lsp WorkspaceSymbols
+    # [DEPRECATED] Call Lsp WorkspaceSymbols
     # The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
     # @param sandbox_id [String] 
     # @param language_id [String] 
@@ -3562,25 +3562,25 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Array<LspSymbol>, Integer, Hash)>] Array<LspSymbol> data, response status code and response headers
-    def lsp_workspace_symbols_with_http_info(sandbox_id, language_id, path_to_project, query, opts = {})
+    def lsp_workspace_symbols_deprecated_with_http_info(sandbox_id, language_id, path_to_project, query, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_workspace_symbols ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.lsp_workspace_symbols_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_workspace_symbols"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.lsp_workspace_symbols_deprecated"
       end
       # verify the required parameter 'language_id' is set
       if @api_client.config.client_side_validation && language_id.nil?
-        fail ArgumentError, "Missing the required parameter 'language_id' when calling ToolboxApi.lsp_workspace_symbols"
+        fail ArgumentError, "Missing the required parameter 'language_id' when calling ToolboxApi.lsp_workspace_symbols_deprecated"
       end
       # verify the required parameter 'path_to_project' is set
       if @api_client.config.client_side_validation && path_to_project.nil?
-        fail ArgumentError, "Missing the required parameter 'path_to_project' when calling ToolboxApi.lsp_workspace_symbols"
+        fail ArgumentError, "Missing the required parameter 'path_to_project' when calling ToolboxApi.lsp_workspace_symbols_deprecated"
       end
       # verify the required parameter 'query' is set
       if @api_client.config.client_side_validation && query.nil?
-        fail ArgumentError, "Missing the required parameter 'query' when calling ToolboxApi.lsp_workspace_symbols"
+        fail ArgumentError, "Missing the required parameter 'query' when calling ToolboxApi.lsp_workspace_symbols_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/lsp/workspace-symbols'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3610,7 +3610,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.lsp_workspace_symbols",
+        :operation => :"ToolboxApi.lsp_workspace_symbols_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3621,12 +3621,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#lsp_workspace_symbols\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#lsp_workspace_symbols_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Move file
+    # [DEPRECATED] Move file
     # Move file inside sandbox
     # @param sandbox_id [String] 
     # @param source [String] 
@@ -3634,12 +3634,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def move_file(sandbox_id, source, destination, opts = {})
-      move_file_with_http_info(sandbox_id, source, destination, opts)
+    def move_file_deprecated(sandbox_id, source, destination, opts = {})
+      move_file_deprecated_with_http_info(sandbox_id, source, destination, opts)
       nil
     end
 
-    # Move file
+    # [DEPRECATED] Move file
     # Move file inside sandbox
     # @param sandbox_id [String] 
     # @param source [String] 
@@ -3647,21 +3647,21 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def move_file_with_http_info(sandbox_id, source, destination, opts = {})
+    def move_file_deprecated_with_http_info(sandbox_id, source, destination, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.move_file ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.move_file_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.move_file"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.move_file_deprecated"
       end
       # verify the required parameter 'source' is set
       if @api_client.config.client_side_validation && source.nil?
-        fail ArgumentError, "Missing the required parameter 'source' when calling ToolboxApi.move_file"
+        fail ArgumentError, "Missing the required parameter 'source' when calling ToolboxApi.move_file_deprecated"
       end
       # verify the required parameter 'destination' is set
       if @api_client.config.client_side_validation && destination.nil?
-        fail ArgumentError, "Missing the required parameter 'destination' when calling ToolboxApi.move_file"
+        fail ArgumentError, "Missing the required parameter 'destination' when calling ToolboxApi.move_file_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/move'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3688,7 +3688,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.move_file",
+        :operation => :"ToolboxApi.move_file_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3699,41 +3699,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#move_file\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#move_file_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Move mouse
+    # [DEPRECATED] Move mouse
     # Move mouse cursor to specified coordinates
     # @param sandbox_id [String] 
     # @param mouse_move_request [MouseMoveRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [MouseMoveResponse]
-    def move_mouse(sandbox_id, mouse_move_request, opts = {})
-      data, _status_code, _headers = move_mouse_with_http_info(sandbox_id, mouse_move_request, opts)
+    def move_mouse_deprecated(sandbox_id, mouse_move_request, opts = {})
+      data, _status_code, _headers = move_mouse_deprecated_with_http_info(sandbox_id, mouse_move_request, opts)
       data
     end
 
-    # Move mouse
+    # [DEPRECATED] Move mouse
     # Move mouse cursor to specified coordinates
     # @param sandbox_id [String] 
     # @param mouse_move_request [MouseMoveRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(MouseMoveResponse, Integer, Hash)>] MouseMoveResponse data, response status code and response headers
-    def move_mouse_with_http_info(sandbox_id, mouse_move_request, opts = {})
+    def move_mouse_deprecated_with_http_info(sandbox_id, mouse_move_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.move_mouse ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.move_mouse_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.move_mouse"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.move_mouse_deprecated"
       end
       # verify the required parameter 'mouse_move_request' is set
       if @api_client.config.client_side_validation && mouse_move_request.nil?
-        fail ArgumentError, "Missing the required parameter 'mouse_move_request' when calling ToolboxApi.move_mouse"
+        fail ArgumentError, "Missing the required parameter 'mouse_move_request' when calling ToolboxApi.move_mouse_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/mouse/move'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3765,7 +3765,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.move_mouse",
+        :operation => :"ToolboxApi.move_mouse_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3776,41 +3776,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#move_mouse\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#move_mouse_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Press hotkey
+    # [DEPRECATED] Press hotkey
     # Press a hotkey combination
     # @param sandbox_id [String] 
     # @param keyboard_hotkey_request [KeyboardHotkeyRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def press_hotkey(sandbox_id, keyboard_hotkey_request, opts = {})
-      press_hotkey_with_http_info(sandbox_id, keyboard_hotkey_request, opts)
+    def press_hotkey_deprecated(sandbox_id, keyboard_hotkey_request, opts = {})
+      press_hotkey_deprecated_with_http_info(sandbox_id, keyboard_hotkey_request, opts)
       nil
     end
 
-    # Press hotkey
+    # [DEPRECATED] Press hotkey
     # Press a hotkey combination
     # @param sandbox_id [String] 
     # @param keyboard_hotkey_request [KeyboardHotkeyRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def press_hotkey_with_http_info(sandbox_id, keyboard_hotkey_request, opts = {})
+    def press_hotkey_deprecated_with_http_info(sandbox_id, keyboard_hotkey_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.press_hotkey ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.press_hotkey_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.press_hotkey"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.press_hotkey_deprecated"
       end
       # verify the required parameter 'keyboard_hotkey_request' is set
       if @api_client.config.client_side_validation && keyboard_hotkey_request.nil?
-        fail ArgumentError, "Missing the required parameter 'keyboard_hotkey_request' when calling ToolboxApi.press_hotkey"
+        fail ArgumentError, "Missing the required parameter 'keyboard_hotkey_request' when calling ToolboxApi.press_hotkey_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3840,7 +3840,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.press_hotkey",
+        :operation => :"ToolboxApi.press_hotkey_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3851,41 +3851,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#press_hotkey\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#press_hotkey_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Press key
+    # [DEPRECATED] Press key
     # Press a key with optional modifiers
     # @param sandbox_id [String] 
     # @param keyboard_press_request [KeyboardPressRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def press_key(sandbox_id, keyboard_press_request, opts = {})
-      press_key_with_http_info(sandbox_id, keyboard_press_request, opts)
+    def press_key_deprecated(sandbox_id, keyboard_press_request, opts = {})
+      press_key_deprecated_with_http_info(sandbox_id, keyboard_press_request, opts)
       nil
     end
 
-    # Press key
+    # [DEPRECATED] Press key
     # Press a key with optional modifiers
     # @param sandbox_id [String] 
     # @param keyboard_press_request [KeyboardPressRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def press_key_with_http_info(sandbox_id, keyboard_press_request, opts = {})
+    def press_key_deprecated_with_http_info(sandbox_id, keyboard_press_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.press_key ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.press_key_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.press_key"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.press_key_deprecated"
       end
       # verify the required parameter 'keyboard_press_request' is set
       if @api_client.config.client_side_validation && keyboard_press_request.nil?
-        fail ArgumentError, "Missing the required parameter 'keyboard_press_request' when calling ToolboxApi.press_key"
+        fail ArgumentError, "Missing the required parameter 'keyboard_press_request' when calling ToolboxApi.press_key_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/keyboard/key'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3915,7 +3915,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.press_key",
+        :operation => :"ToolboxApi.press_key_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -3926,41 +3926,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#press_key\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#press_key_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Replace in files
+    # [DEPRECATED] Replace in files
     # Replace text/pattern in multiple files inside sandbox
     # @param sandbox_id [String] 
     # @param replace_request [ReplaceRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<ReplaceResult>]
-    def replace_in_files(sandbox_id, replace_request, opts = {})
-      data, _status_code, _headers = replace_in_files_with_http_info(sandbox_id, replace_request, opts)
+    def replace_in_files_deprecated(sandbox_id, replace_request, opts = {})
+      data, _status_code, _headers = replace_in_files_deprecated_with_http_info(sandbox_id, replace_request, opts)
       data
     end
 
-    # Replace in files
+    # [DEPRECATED] Replace in files
     # Replace text/pattern in multiple files inside sandbox
     # @param sandbox_id [String] 
     # @param replace_request [ReplaceRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(Array<ReplaceResult>, Integer, Hash)>] Array<ReplaceResult> data, response status code and response headers
-    def replace_in_files_with_http_info(sandbox_id, replace_request, opts = {})
+    def replace_in_files_deprecated_with_http_info(sandbox_id, replace_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.replace_in_files ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.replace_in_files_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.replace_in_files"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.replace_in_files_deprecated"
       end
       # verify the required parameter 'replace_request' is set
       if @api_client.config.client_side_validation && replace_request.nil?
-        fail ArgumentError, "Missing the required parameter 'replace_request' when calling ToolboxApi.replace_in_files"
+        fail ArgumentError, "Missing the required parameter 'replace_request' when calling ToolboxApi.replace_in_files_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/replace'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -3992,7 +3992,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.replace_in_files",
+        :operation => :"ToolboxApi.replace_in_files_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4003,12 +4003,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#replace_in_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#replace_in_files_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Resize PTY session
+    # [DEPRECATED] Resize PTY session
     # Resize a PTY session
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -4016,12 +4016,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [PtySessionInfo]
-    def resize_pty_session(sandbox_id, session_id, pty_resize_request, opts = {})
-      data, _status_code, _headers = resize_pty_session_with_http_info(sandbox_id, session_id, pty_resize_request, opts)
+    def resize_pty_session_deprecated(sandbox_id, session_id, pty_resize_request, opts = {})
+      data, _status_code, _headers = resize_pty_session_deprecated_with_http_info(sandbox_id, session_id, pty_resize_request, opts)
       data
     end
 
-    # Resize PTY session
+    # [DEPRECATED] Resize PTY session
     # Resize a PTY session
     # @param sandbox_id [String] 
     # @param session_id [String] 
@@ -4029,21 +4029,21 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(PtySessionInfo, Integer, Hash)>] PtySessionInfo data, response status code and response headers
-    def resize_pty_session_with_http_info(sandbox_id, session_id, pty_resize_request, opts = {})
+    def resize_pty_session_deprecated_with_http_info(sandbox_id, session_id, pty_resize_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.resize_pty_session ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.resize_pty_session_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.resize_pty_session"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.resize_pty_session_deprecated"
       end
       # verify the required parameter 'session_id' is set
       if @api_client.config.client_side_validation && session_id.nil?
-        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.resize_pty_session"
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.resize_pty_session_deprecated"
       end
       # verify the required parameter 'pty_resize_request' is set
       if @api_client.config.client_side_validation && pty_resize_request.nil?
-        fail ArgumentError, "Missing the required parameter 'pty_resize_request' when calling ToolboxApi.resize_pty_session"
+        fail ArgumentError, "Missing the required parameter 'pty_resize_request' when calling ToolboxApi.resize_pty_session_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
@@ -4075,7 +4075,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.resize_pty_session",
+        :operation => :"ToolboxApi.resize_pty_session_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4086,41 +4086,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#resize_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#resize_pty_session_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Restart process
+    # [DEPRECATED] Restart process
     # Restart a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ProcessRestartResponse]
-    def restart_process(process_name, sandbox_id, opts = {})
-      data, _status_code, _headers = restart_process_with_http_info(process_name, sandbox_id, opts)
+    def restart_process_deprecated(process_name, sandbox_id, opts = {})
+      data, _status_code, _headers = restart_process_deprecated_with_http_info(process_name, sandbox_id, opts)
       data
     end
 
-    # Restart process
+    # [DEPRECATED] Restart process
     # Restart a specific VNC process
     # @param process_name [String] 
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ProcessRestartResponse, Integer, Hash)>] ProcessRestartResponse data, response status code and response headers
-    def restart_process_with_http_info(process_name, sandbox_id, opts = {})
+    def restart_process_deprecated_with_http_info(process_name, sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.restart_process ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.restart_process_deprecated ...'
       end
       # verify the required parameter 'process_name' is set
       if @api_client.config.client_side_validation && process_name.nil?
-        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.restart_process"
+        fail ArgumentError, "Missing the required parameter 'process_name' when calling ToolboxApi.restart_process_deprecated"
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.restart_process"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.restart_process_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart'.sub('{' + 'processName' + '}', CGI.escape(process_name.to_s)).sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4147,7 +4147,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.restart_process",
+        :operation => :"ToolboxApi.restart_process_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4158,41 +4158,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#restart_process\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#restart_process_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Scroll mouse
+    # [DEPRECATED] Scroll mouse
     # Scroll mouse at specified coordinates
     # @param sandbox_id [String] 
     # @param mouse_scroll_request [MouseScrollRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [MouseScrollResponse]
-    def scroll_mouse(sandbox_id, mouse_scroll_request, opts = {})
-      data, _status_code, _headers = scroll_mouse_with_http_info(sandbox_id, mouse_scroll_request, opts)
+    def scroll_mouse_deprecated(sandbox_id, mouse_scroll_request, opts = {})
+      data, _status_code, _headers = scroll_mouse_deprecated_with_http_info(sandbox_id, mouse_scroll_request, opts)
       data
     end
 
-    # Scroll mouse
+    # [DEPRECATED] Scroll mouse
     # Scroll mouse at specified coordinates
     # @param sandbox_id [String] 
     # @param mouse_scroll_request [MouseScrollRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(MouseScrollResponse, Integer, Hash)>] MouseScrollResponse data, response status code and response headers
-    def scroll_mouse_with_http_info(sandbox_id, mouse_scroll_request, opts = {})
+    def scroll_mouse_deprecated_with_http_info(sandbox_id, mouse_scroll_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.scroll_mouse ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.scroll_mouse_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.scroll_mouse"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.scroll_mouse_deprecated"
       end
       # verify the required parameter 'mouse_scroll_request' is set
       if @api_client.config.client_side_validation && mouse_scroll_request.nil?
-        fail ArgumentError, "Missing the required parameter 'mouse_scroll_request' when calling ToolboxApi.scroll_mouse"
+        fail ArgumentError, "Missing the required parameter 'mouse_scroll_request' when calling ToolboxApi.scroll_mouse_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4224,7 +4224,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.scroll_mouse",
+        :operation => :"ToolboxApi.scroll_mouse_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4235,12 +4235,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#scroll_mouse\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#scroll_mouse_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Search files
+    # [DEPRECATED] Search files
     # Search for files inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -4248,12 +4248,12 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [SearchFilesResponse]
-    def search_files(sandbox_id, path, pattern, opts = {})
-      data, _status_code, _headers = search_files_with_http_info(sandbox_id, path, pattern, opts)
+    def search_files_deprecated(sandbox_id, path, pattern, opts = {})
+      data, _status_code, _headers = search_files_deprecated_with_http_info(sandbox_id, path, pattern, opts)
       data
     end
 
-    # Search files
+    # [DEPRECATED] Search files
     # Search for files inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -4261,21 +4261,21 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(SearchFilesResponse, Integer, Hash)>] SearchFilesResponse data, response status code and response headers
-    def search_files_with_http_info(sandbox_id, path, pattern, opts = {})
+    def search_files_deprecated_with_http_info(sandbox_id, path, pattern, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.search_files ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.search_files_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.search_files"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.search_files_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.search_files"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.search_files_deprecated"
       end
       # verify the required parameter 'pattern' is set
       if @api_client.config.client_side_validation && pattern.nil?
-        fail ArgumentError, "Missing the required parameter 'pattern' when calling ToolboxApi.search_files"
+        fail ArgumentError, "Missing the required parameter 'pattern' when calling ToolboxApi.search_files_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/search'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4304,7 +4304,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.search_files",
+        :operation => :"ToolboxApi.search_files_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4315,12 +4315,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#search_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#search_files_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Set file permissions
+    # [DEPRECATED] Set file permissions
     # Set file owner/group/permissions inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -4330,12 +4330,12 @@ module DaytonaApiClient
     # @option opts [String] :group 
     # @option opts [String] :mode 
     # @return [nil]
-    def set_file_permissions(sandbox_id, path, opts = {})
-      set_file_permissions_with_http_info(sandbox_id, path, opts)
+    def set_file_permissions_deprecated(sandbox_id, path, opts = {})
+      set_file_permissions_deprecated_with_http_info(sandbox_id, path, opts)
       nil
     end
 
-    # Set file permissions
+    # [DEPRECATED] Set file permissions
     # Set file owner/group/permissions inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -4345,17 +4345,17 @@ module DaytonaApiClient
     # @option opts [String] :group 
     # @option opts [String] :mode 
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def set_file_permissions_with_http_info(sandbox_id, path, opts = {})
+    def set_file_permissions_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.set_file_permissions ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.set_file_permissions_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.set_file_permissions"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.set_file_permissions_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.set_file_permissions"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.set_file_permissions_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/permissions'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4384,7 +4384,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.set_file_permissions",
+        :operation => :"ToolboxApi.set_file_permissions_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4395,35 +4395,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#set_file_permissions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#set_file_permissions_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Start computer use processes
+    # [DEPRECATED] Start computer use processes
     # Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ComputerUseStartResponse]
-    def start_computer_use(sandbox_id, opts = {})
-      data, _status_code, _headers = start_computer_use_with_http_info(sandbox_id, opts)
+    def start_computer_use_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = start_computer_use_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Start computer use processes
+    # [DEPRECATED] Start computer use processes
     # Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ComputerUseStartResponse, Integer, Hash)>] ComputerUseStartResponse data, response status code and response headers
-    def start_computer_use_with_http_info(sandbox_id, opts = {})
+    def start_computer_use_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.start_computer_use ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.start_computer_use_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.start_computer_use"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.start_computer_use_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/start'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4450,7 +4450,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.start_computer_use",
+        :operation => :"ToolboxApi.start_computer_use_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4461,35 +4461,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#start_computer_use\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#start_computer_use_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Stop computer use processes
+    # [DEPRECATED] Stop computer use processes
     # Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [ComputerUseStopResponse]
-    def stop_computer_use(sandbox_id, opts = {})
-      data, _status_code, _headers = stop_computer_use_with_http_info(sandbox_id, opts)
+    def stop_computer_use_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = stop_computer_use_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Stop computer use processes
+    # [DEPRECATED] Stop computer use processes
     # Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(ComputerUseStopResponse, Integer, Hash)>] ComputerUseStopResponse data, response status code and response headers
-    def stop_computer_use_with_http_info(sandbox_id, opts = {})
+    def stop_computer_use_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.stop_computer_use ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.stop_computer_use_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.stop_computer_use"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.stop_computer_use_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/stop'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4516,7 +4516,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.stop_computer_use",
+        :operation => :"ToolboxApi.stop_computer_use_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4527,12 +4527,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#stop_computer_use\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#stop_computer_use_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Take compressed region screenshot
+    # [DEPRECATED] Take compressed region screenshot
     # Take a compressed screenshot of a specific region
     # @param sandbox_id [String] 
     # @param height [Float] 
@@ -4546,12 +4546,12 @@ module DaytonaApiClient
     # @option opts [String] :format 
     # @option opts [Boolean] :show_cursor 
     # @return [CompressedScreenshotResponse]
-    def take_compressed_region_screenshot(sandbox_id, height, width, y, x, opts = {})
-      data, _status_code, _headers = take_compressed_region_screenshot_with_http_info(sandbox_id, height, width, y, x, opts)
+    def take_compressed_region_screenshot_deprecated(sandbox_id, height, width, y, x, opts = {})
+      data, _status_code, _headers = take_compressed_region_screenshot_deprecated_with_http_info(sandbox_id, height, width, y, x, opts)
       data
     end
 
-    # Take compressed region screenshot
+    # [DEPRECATED] Take compressed region screenshot
     # Take a compressed screenshot of a specific region
     # @param sandbox_id [String] 
     # @param height [Float] 
@@ -4565,29 +4565,29 @@ module DaytonaApiClient
     # @option opts [String] :format 
     # @option opts [Boolean] :show_cursor 
     # @return [Array<(CompressedScreenshotResponse, Integer, Hash)>] CompressedScreenshotResponse data, response status code and response headers
-    def take_compressed_region_screenshot_with_http_info(sandbox_id, height, width, y, x, opts = {})
+    def take_compressed_region_screenshot_deprecated_with_http_info(sandbox_id, height, width, y, x, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_compressed_region_screenshot ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_compressed_region_screenshot_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_compressed_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_compressed_region_screenshot_deprecated"
       end
       # verify the required parameter 'height' is set
       if @api_client.config.client_side_validation && height.nil?
-        fail ArgumentError, "Missing the required parameter 'height' when calling ToolboxApi.take_compressed_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'height' when calling ToolboxApi.take_compressed_region_screenshot_deprecated"
       end
       # verify the required parameter 'width' is set
       if @api_client.config.client_side_validation && width.nil?
-        fail ArgumentError, "Missing the required parameter 'width' when calling ToolboxApi.take_compressed_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'width' when calling ToolboxApi.take_compressed_region_screenshot_deprecated"
       end
       # verify the required parameter 'y' is set
       if @api_client.config.client_side_validation && y.nil?
-        fail ArgumentError, "Missing the required parameter 'y' when calling ToolboxApi.take_compressed_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'y' when calling ToolboxApi.take_compressed_region_screenshot_deprecated"
       end
       # verify the required parameter 'x' is set
       if @api_client.config.client_side_validation && x.nil?
-        fail ArgumentError, "Missing the required parameter 'x' when calling ToolboxApi.take_compressed_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'x' when calling ToolboxApi.take_compressed_region_screenshot_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4622,7 +4622,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.take_compressed_region_screenshot",
+        :operation => :"ToolboxApi.take_compressed_region_screenshot_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4633,12 +4633,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#take_compressed_region_screenshot\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#take_compressed_region_screenshot_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Take compressed screenshot
+    # [DEPRECATED] Take compressed screenshot
     # Take a compressed screenshot with format, quality, and scale options
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
@@ -4648,12 +4648,12 @@ module DaytonaApiClient
     # @option opts [String] :format 
     # @option opts [Boolean] :show_cursor 
     # @return [CompressedScreenshotResponse]
-    def take_compressed_screenshot(sandbox_id, opts = {})
-      data, _status_code, _headers = take_compressed_screenshot_with_http_info(sandbox_id, opts)
+    def take_compressed_screenshot_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = take_compressed_screenshot_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Take compressed screenshot
+    # [DEPRECATED] Take compressed screenshot
     # Take a compressed screenshot with format, quality, and scale options
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
@@ -4663,13 +4663,13 @@ module DaytonaApiClient
     # @option opts [String] :format 
     # @option opts [Boolean] :show_cursor 
     # @return [Array<(CompressedScreenshotResponse, Integer, Hash)>] CompressedScreenshotResponse data, response status code and response headers
-    def take_compressed_screenshot_with_http_info(sandbox_id, opts = {})
+    def take_compressed_screenshot_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_compressed_screenshot ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_compressed_screenshot_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_compressed_screenshot"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_compressed_screenshot_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4700,7 +4700,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.take_compressed_screenshot",
+        :operation => :"ToolboxApi.take_compressed_screenshot_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4711,12 +4711,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#take_compressed_screenshot\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#take_compressed_screenshot_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Take region screenshot
+    # [DEPRECATED] Take region screenshot
     # Take a screenshot of a specific region
     # @param sandbox_id [String] 
     # @param height [Float] 
@@ -4727,12 +4727,12 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :show_cursor 
     # @return [RegionScreenshotResponse]
-    def take_region_screenshot(sandbox_id, height, width, y, x, opts = {})
-      data, _status_code, _headers = take_region_screenshot_with_http_info(sandbox_id, height, width, y, x, opts)
+    def take_region_screenshot_deprecated(sandbox_id, height, width, y, x, opts = {})
+      data, _status_code, _headers = take_region_screenshot_deprecated_with_http_info(sandbox_id, height, width, y, x, opts)
       data
     end
 
-    # Take region screenshot
+    # [DEPRECATED] Take region screenshot
     # Take a screenshot of a specific region
     # @param sandbox_id [String] 
     # @param height [Float] 
@@ -4743,29 +4743,29 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :show_cursor 
     # @return [Array<(RegionScreenshotResponse, Integer, Hash)>] RegionScreenshotResponse data, response status code and response headers
-    def take_region_screenshot_with_http_info(sandbox_id, height, width, y, x, opts = {})
+    def take_region_screenshot_deprecated_with_http_info(sandbox_id, height, width, y, x, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_region_screenshot ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_region_screenshot_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_region_screenshot_deprecated"
       end
       # verify the required parameter 'height' is set
       if @api_client.config.client_side_validation && height.nil?
-        fail ArgumentError, "Missing the required parameter 'height' when calling ToolboxApi.take_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'height' when calling ToolboxApi.take_region_screenshot_deprecated"
       end
       # verify the required parameter 'width' is set
       if @api_client.config.client_side_validation && width.nil?
-        fail ArgumentError, "Missing the required parameter 'width' when calling ToolboxApi.take_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'width' when calling ToolboxApi.take_region_screenshot_deprecated"
       end
       # verify the required parameter 'y' is set
       if @api_client.config.client_side_validation && y.nil?
-        fail ArgumentError, "Missing the required parameter 'y' when calling ToolboxApi.take_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'y' when calling ToolboxApi.take_region_screenshot_deprecated"
       end
       # verify the required parameter 'x' is set
       if @api_client.config.client_side_validation && x.nil?
-        fail ArgumentError, "Missing the required parameter 'x' when calling ToolboxApi.take_region_screenshot"
+        fail ArgumentError, "Missing the required parameter 'x' when calling ToolboxApi.take_region_screenshot_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/screenshot/region'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4797,7 +4797,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.take_region_screenshot",
+        :operation => :"ToolboxApi.take_region_screenshot_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4808,37 +4808,37 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#take_region_screenshot\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#take_region_screenshot_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Take screenshot
+    # [DEPRECATED] Take screenshot
     # Take a screenshot of the entire screen
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :show_cursor 
     # @return [ScreenshotResponse]
-    def take_screenshot(sandbox_id, opts = {})
-      data, _status_code, _headers = take_screenshot_with_http_info(sandbox_id, opts)
+    def take_screenshot_deprecated(sandbox_id, opts = {})
+      data, _status_code, _headers = take_screenshot_deprecated_with_http_info(sandbox_id, opts)
       data
     end
 
-    # Take screenshot
+    # [DEPRECATED] Take screenshot
     # Take a screenshot of the entire screen
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [Boolean] :show_cursor 
     # @return [Array<(ScreenshotResponse, Integer, Hash)>] ScreenshotResponse data, response status code and response headers
-    def take_screenshot_with_http_info(sandbox_id, opts = {})
+    def take_screenshot_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_screenshot ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.take_screenshot_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_screenshot"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.take_screenshot_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/screenshot'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4866,7 +4866,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.take_screenshot",
+        :operation => :"ToolboxApi.take_screenshot_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4877,41 +4877,41 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#take_screenshot\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#take_screenshot_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Type text
+    # [DEPRECATED] Type text
     # Type text using keyboard
     # @param sandbox_id [String] 
     # @param keyboard_type_request [KeyboardTypeRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def type_text(sandbox_id, keyboard_type_request, opts = {})
-      type_text_with_http_info(sandbox_id, keyboard_type_request, opts)
+    def type_text_deprecated(sandbox_id, keyboard_type_request, opts = {})
+      type_text_deprecated_with_http_info(sandbox_id, keyboard_type_request, opts)
       nil
     end
 
-    # Type text
+    # [DEPRECATED] Type text
     # Type text using keyboard
     # @param sandbox_id [String] 
     # @param keyboard_type_request [KeyboardTypeRequest] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def type_text_with_http_info(sandbox_id, keyboard_type_request, opts = {})
+    def type_text_deprecated_with_http_info(sandbox_id, keyboard_type_request, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.type_text ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.type_text_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.type_text"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.type_text_deprecated"
       end
       # verify the required parameter 'keyboard_type_request' is set
       if @api_client.config.client_side_validation && keyboard_type_request.nil?
-        fail ArgumentError, "Missing the required parameter 'keyboard_type_request' when calling ToolboxApi.type_text"
+        fail ArgumentError, "Missing the required parameter 'keyboard_type_request' when calling ToolboxApi.type_text_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/computeruse/keyboard/type'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -4941,7 +4941,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.type_text",
+        :operation => :"ToolboxApi.type_text_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -4952,12 +4952,12 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#type_text\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#type_text_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Upload file
+    # [DEPRECATED] Upload file
     # Upload file inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -4965,12 +4965,12 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [File] :file 
     # @return [nil]
-    def upload_file(sandbox_id, path, opts = {})
-      upload_file_with_http_info(sandbox_id, path, opts)
+    def upload_file_deprecated(sandbox_id, path, opts = {})
+      upload_file_deprecated_with_http_info(sandbox_id, path, opts)
       nil
     end
 
-    # Upload file
+    # [DEPRECATED] Upload file
     # Upload file inside sandbox
     # @param sandbox_id [String] 
     # @param path [String] 
@@ -4978,17 +4978,17 @@ module DaytonaApiClient
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @option opts [File] :file 
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def upload_file_with_http_info(sandbox_id, path, opts = {})
+    def upload_file_deprecated_with_http_info(sandbox_id, path, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.upload_file ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.upload_file_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.upload_file"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.upload_file_deprecated"
       end
       # verify the required parameter 'path' is set
       if @api_client.config.client_side_validation && path.nil?
-        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.upload_file"
+        fail ArgumentError, "Missing the required parameter 'path' when calling ToolboxApi.upload_file_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/upload'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -5020,7 +5020,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.upload_file",
+        :operation => :"ToolboxApi.upload_file_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -5031,35 +5031,35 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#upload_file\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#upload_file_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
 
-    # Upload multiple files
+    # [DEPRECATED] Upload multiple files
     # Upload multiple files inside sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def upload_files(sandbox_id, opts = {})
-      upload_files_with_http_info(sandbox_id, opts)
+    def upload_files_deprecated(sandbox_id, opts = {})
+      upload_files_deprecated_with_http_info(sandbox_id, opts)
       nil
     end
 
-    # Upload multiple files
+    # [DEPRECATED] Upload multiple files
     # Upload multiple files inside sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def upload_files_with_http_info(sandbox_id, opts = {})
+    def upload_files_deprecated_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: ToolboxApi.upload_files ...'
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.upload_files_deprecated ...'
       end
       # verify the required parameter 'sandbox_id' is set
       if @api_client.config.client_side_validation && sandbox_id.nil?
-        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.upload_files"
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.upload_files_deprecated"
       end
       # resource path
       local_var_path = '/toolbox/{sandboxId}/toolbox/files/bulk-upload'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
@@ -5089,7 +5089,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"ToolboxApi.upload_files",
+        :operation => :"ToolboxApi.upload_files_deprecated",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -5100,7 +5100,7 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: ToolboxApi#upload_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: ToolboxApi#upload_files_deprecated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

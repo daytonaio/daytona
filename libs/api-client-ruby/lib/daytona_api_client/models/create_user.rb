@@ -23,6 +23,8 @@ module DaytonaApiClient
 
     attr_accessor :personal_organization_quota
 
+    attr_accessor :personal_organization_default_region_id
+
     attr_accessor :role
 
     attr_accessor :email_verified
@@ -56,6 +58,7 @@ module DaytonaApiClient
         :'name' => :'name',
         :'email' => :'email',
         :'personal_organization_quota' => :'personalOrganizationQuota',
+        :'personal_organization_default_region_id' => :'personalOrganizationDefaultRegionId',
         :'role' => :'role',
         :'email_verified' => :'emailVerified'
       }
@@ -78,6 +81,7 @@ module DaytonaApiClient
         :'name' => :'String',
         :'email' => :'String',
         :'personal_organization_quota' => :'CreateOrganizationQuota',
+        :'personal_organization_default_region_id' => :'String',
         :'role' => :'String',
         :'email_verified' => :'Boolean'
       }
@@ -123,6 +127,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'personal_organization_quota')
         self.personal_organization_quota = attributes[:'personal_organization_quota']
+      end
+
+      if attributes.key?(:'personal_organization_default_region_id')
+        self.personal_organization_default_region_id = attributes[:'personal_organization_default_region_id']
       end
 
       if attributes.key?(:'role')
@@ -200,6 +208,7 @@ module DaytonaApiClient
           name == o.name &&
           email == o.email &&
           personal_organization_quota == o.personal_organization_quota &&
+          personal_organization_default_region_id == o.personal_organization_default_region_id &&
           role == o.role &&
           email_verified == o.email_verified
     end
@@ -213,7 +222,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, email, personal_organization_quota, role, email_verified].hash
+      [id, name, email, personal_organization_quota, personal_organization_default_region_id, role, email_verified].hash
     end
 
     # Builds the object from hash

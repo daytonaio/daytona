@@ -21,11 +21,15 @@ module DaytonaApiClient
     # The mount path for the volume
     attr_accessor :mount_path
 
+    # Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
+    attr_accessor :subpath
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'volume_id' => :'volumeId',
-        :'mount_path' => :'mountPath'
+        :'mount_path' => :'mountPath',
+        :'subpath' => :'subpath'
       }
     end
 
@@ -43,7 +47,8 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'volume_id' => :'String',
-        :'mount_path' => :'String'
+        :'mount_path' => :'String',
+        :'subpath' => :'String'
       }
     end
 
@@ -79,6 +84,10 @@ module DaytonaApiClient
         self.mount_path = attributes[:'mount_path']
       else
         self.mount_path = nil
+      end
+
+      if attributes.key?(:'subpath')
+        self.subpath = attributes[:'subpath']
       end
     end
 
@@ -133,7 +142,8 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           volume_id == o.volume_id &&
-          mount_path == o.mount_path
+          mount_path == o.mount_path &&
+          subpath == o.subpath
     end
 
     # @see the `==` method
@@ -145,7 +155,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [volume_id, mount_path].hash
+      [volume_id, mount_path, subpath].hash
     end
 
     # Builds the object from hash

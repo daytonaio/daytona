@@ -19,76 +19,13 @@ module DaytonaApiClient
     def initialize(api_client = ApiClient.default)
       @api_client = api_client
     end
-    # Create audit log entry
-    # @param create_audit_log [CreateAuditLog] 
-    # @param [Hash] opts the optional parameters
-    # @return [AuditLog]
-    def create_audit_log(create_audit_log, opts = {})
-      data, _status_code, _headers = create_audit_log_with_http_info(create_audit_log, opts)
-      data
-    end
-
-    # Create audit log entry
-    # @param create_audit_log [CreateAuditLog] 
-    # @param [Hash] opts the optional parameters
-    # @return [Array<(AuditLog, Integer, Hash)>] AuditLog data, response status code and response headers
-    def create_audit_log_with_http_info(create_audit_log, opts = {})
-      if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: AuditApi.create_audit_log ...'
-      end
-      # verify the required parameter 'create_audit_log' is set
-      if @api_client.config.client_side_validation && create_audit_log.nil?
-        fail ArgumentError, "Missing the required parameter 'create_audit_log' when calling AuditApi.create_audit_log"
-      end
-      # resource path
-      local_var_path = '/audit'
-
-      # query parameters
-      query_params = opts[:query_params] || {}
-
-      # header parameters
-      header_params = opts[:header_params] || {}
-      # HTTP header 'Accept' (if needed)
-      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
-      # HTTP header 'Content-Type'
-      content_type = @api_client.select_header_content_type(['application/json'])
-      if !content_type.nil?
-        header_params['Content-Type'] = content_type
-      end
-
-      # form parameters
-      form_params = opts[:form_params] || {}
-
-      # http body (model)
-      post_body = opts[:debug_body] || @api_client.object_to_http_body(create_audit_log)
-
-      # return_type
-      return_type = opts[:debug_return_type] || 'AuditLog'
-
-      # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
-
-      new_options = opts.merge(
-        :operation => :"AuditApi.create_audit_log",
-        :header_params => header_params,
-        :query_params => query_params,
-        :form_params => form_params,
-        :body => post_body,
-        :auth_names => auth_names,
-        :return_type => return_type
-      )
-
-      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
-      if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: AuditApi#create_audit_log\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
-      end
-      return data, status_code, headers
-    end
-
     # Get all audit logs
     # @param [Hash] opts the optional parameters
     # @option opts [Float] :page Page number of the results (default to 1)
     # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [Time] :from From date (ISO 8601 format)
+    # @option opts [Time] :to To date (ISO 8601 format)
+    # @option opts [String] :next_token Token for cursor-based pagination. When provided, takes precedence over page parameter.
     # @return [PaginatedAuditLogs]
     def get_all_audit_logs(opts = {})
       data, _status_code, _headers = get_all_audit_logs_with_http_info(opts)
@@ -99,6 +36,9 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [Float] :page Page number of the results (default to 1)
     # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [Time] :from From date (ISO 8601 format)
+    # @option opts [Time] :to To date (ISO 8601 format)
+    # @option opts [String] :next_token Token for cursor-based pagination. When provided, takes precedence over page parameter.
     # @return [Array<(PaginatedAuditLogs, Integer, Hash)>] PaginatedAuditLogs data, response status code and response headers
     def get_all_audit_logs_with_http_info(opts = {})
       if @api_client.config.debugging
@@ -123,6 +63,9 @@ module DaytonaApiClient
       query_params = opts[:query_params] || {}
       query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
       query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+      query_params[:'from'] = opts[:'from'] if !opts[:'from'].nil?
+      query_params[:'to'] = opts[:'to'] if !opts[:'to'].nil?
+      query_params[:'nextToken'] = opts[:'next_token'] if !opts[:'next_token'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}
@@ -163,6 +106,9 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [Float] :page Page number of the results (default to 1)
     # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [Time] :from From date (ISO 8601 format)
+    # @option opts [Time] :to To date (ISO 8601 format)
+    # @option opts [String] :next_token Token for cursor-based pagination. When provided, takes precedence over page parameter.
     # @return [PaginatedAuditLogs]
     def get_organization_audit_logs(organization_id, opts = {})
       data, _status_code, _headers = get_organization_audit_logs_with_http_info(organization_id, opts)
@@ -174,6 +120,9 @@ module DaytonaApiClient
     # @param [Hash] opts the optional parameters
     # @option opts [Float] :page Page number of the results (default to 1)
     # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [Time] :from From date (ISO 8601 format)
+    # @option opts [Time] :to To date (ISO 8601 format)
+    # @option opts [String] :next_token Token for cursor-based pagination. When provided, takes precedence over page parameter.
     # @return [Array<(PaginatedAuditLogs, Integer, Hash)>] PaginatedAuditLogs data, response status code and response headers
     def get_organization_audit_logs_with_http_info(organization_id, opts = {})
       if @api_client.config.debugging
@@ -202,6 +151,9 @@ module DaytonaApiClient
       query_params = opts[:query_params] || {}
       query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
       query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+      query_params[:'from'] = opts[:'from'] if !opts[:'from'].nil?
+      query_params[:'to'] = opts[:'to'] if !opts[:'to'].nil?
+      query_params[:'nextToken'] = opts[:'next_token'] if !opts[:'next_token'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}

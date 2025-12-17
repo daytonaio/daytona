@@ -48,15 +48,6 @@ module DaytonaApiClient
     # Suspension cleanup grace period hours
     attr_accessor :suspension_cleanup_grace_period_hours
 
-    # Total CPU quota
-    attr_accessor :total_cpu_quota
-
-    # Total memory quota
-    attr_accessor :total_memory_quota
-
-    # Total disk quota
-    attr_accessor :total_disk_quota
-
     # Max CPU per sandbox
     attr_accessor :max_cpu_per_sandbox
 
@@ -68,6 +59,18 @@ module DaytonaApiClient
 
     # Sandbox default network block all
     attr_accessor :sandbox_limited_network_egress
+
+    # Default region ID
+    attr_accessor :default_region_id
+
+    # Authenticated rate limit per minute
+    attr_accessor :authenticated_rate_limit
+
+    # Sandbox create rate limit per minute
+    attr_accessor :sandbox_create_rate_limit
+
+    # Sandbox lifecycle rate limit per minute
+    attr_accessor :sandbox_lifecycle_rate_limit
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
@@ -83,13 +86,14 @@ module DaytonaApiClient
         :'suspension_reason' => :'suspensionReason',
         :'suspended_until' => :'suspendedUntil',
         :'suspension_cleanup_grace_period_hours' => :'suspensionCleanupGracePeriodHours',
-        :'total_cpu_quota' => :'totalCpuQuota',
-        :'total_memory_quota' => :'totalMemoryQuota',
-        :'total_disk_quota' => :'totalDiskQuota',
         :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
         :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
         :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
-        :'sandbox_limited_network_egress' => :'sandboxLimitedNetworkEgress'
+        :'sandbox_limited_network_egress' => :'sandboxLimitedNetworkEgress',
+        :'default_region_id' => :'defaultRegionId',
+        :'authenticated_rate_limit' => :'authenticatedRateLimit',
+        :'sandbox_create_rate_limit' => :'sandboxCreateRateLimit',
+        :'sandbox_lifecycle_rate_limit' => :'sandboxLifecycleRateLimit'
       }
     end
 
@@ -117,19 +121,23 @@ module DaytonaApiClient
         :'suspension_reason' => :'String',
         :'suspended_until' => :'Time',
         :'suspension_cleanup_grace_period_hours' => :'Float',
-        :'total_cpu_quota' => :'Float',
-        :'total_memory_quota' => :'Float',
-        :'total_disk_quota' => :'Float',
         :'max_cpu_per_sandbox' => :'Float',
         :'max_memory_per_sandbox' => :'Float',
         :'max_disk_per_sandbox' => :'Float',
-        :'sandbox_limited_network_egress' => :'Boolean'
+        :'sandbox_limited_network_egress' => :'Boolean',
+        :'default_region_id' => :'String',
+        :'authenticated_rate_limit' => :'Float',
+        :'sandbox_create_rate_limit' => :'Float',
+        :'sandbox_lifecycle_rate_limit' => :'Float'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
+        :'authenticated_rate_limit',
+        :'sandbox_create_rate_limit',
+        :'sandbox_lifecycle_rate_limit'
       ])
     end
 
@@ -215,24 +223,6 @@ module DaytonaApiClient
         self.suspension_cleanup_grace_period_hours = nil
       end
 
-      if attributes.key?(:'total_cpu_quota')
-        self.total_cpu_quota = attributes[:'total_cpu_quota']
-      else
-        self.total_cpu_quota = nil
-      end
-
-      if attributes.key?(:'total_memory_quota')
-        self.total_memory_quota = attributes[:'total_memory_quota']
-      else
-        self.total_memory_quota = nil
-      end
-
-      if attributes.key?(:'total_disk_quota')
-        self.total_disk_quota = attributes[:'total_disk_quota']
-      else
-        self.total_disk_quota = nil
-      end
-
       if attributes.key?(:'max_cpu_per_sandbox')
         self.max_cpu_per_sandbox = attributes[:'max_cpu_per_sandbox']
       else
@@ -255,6 +245,28 @@ module DaytonaApiClient
         self.sandbox_limited_network_egress = attributes[:'sandbox_limited_network_egress']
       else
         self.sandbox_limited_network_egress = nil
+      end
+
+      if attributes.key?(:'default_region_id')
+        self.default_region_id = attributes[:'default_region_id']
+      end
+
+      if attributes.key?(:'authenticated_rate_limit')
+        self.authenticated_rate_limit = attributes[:'authenticated_rate_limit']
+      else
+        self.authenticated_rate_limit = nil
+      end
+
+      if attributes.key?(:'sandbox_create_rate_limit')
+        self.sandbox_create_rate_limit = attributes[:'sandbox_create_rate_limit']
+      else
+        self.sandbox_create_rate_limit = nil
+      end
+
+      if attributes.key?(:'sandbox_lifecycle_rate_limit')
+        self.sandbox_lifecycle_rate_limit = attributes[:'sandbox_lifecycle_rate_limit']
+      else
+        self.sandbox_lifecycle_rate_limit = nil
       end
     end
 
@@ -307,18 +319,6 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "suspension_cleanup_grace_period_hours", suspension_cleanup_grace_period_hours cannot be nil.')
       end
 
-      if @total_cpu_quota.nil?
-        invalid_properties.push('invalid value for "total_cpu_quota", total_cpu_quota cannot be nil.')
-      end
-
-      if @total_memory_quota.nil?
-        invalid_properties.push('invalid value for "total_memory_quota", total_memory_quota cannot be nil.')
-      end
-
-      if @total_disk_quota.nil?
-        invalid_properties.push('invalid value for "total_disk_quota", total_disk_quota cannot be nil.')
-      end
-
       if @max_cpu_per_sandbox.nil?
         invalid_properties.push('invalid value for "max_cpu_per_sandbox", max_cpu_per_sandbox cannot be nil.')
       end
@@ -353,9 +353,6 @@ module DaytonaApiClient
       return false if @suspension_reason.nil?
       return false if @suspended_until.nil?
       return false if @suspension_cleanup_grace_period_hours.nil?
-      return false if @total_cpu_quota.nil?
-      return false if @total_memory_quota.nil?
-      return false if @total_disk_quota.nil?
       return false if @max_cpu_per_sandbox.nil?
       return false if @max_memory_per_sandbox.nil?
       return false if @max_disk_per_sandbox.nil?
@@ -474,36 +471,6 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] total_cpu_quota Value to be assigned
-    def total_cpu_quota=(total_cpu_quota)
-      if total_cpu_quota.nil?
-        fail ArgumentError, 'total_cpu_quota cannot be nil'
-      end
-
-      @total_cpu_quota = total_cpu_quota
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] total_memory_quota Value to be assigned
-    def total_memory_quota=(total_memory_quota)
-      if total_memory_quota.nil?
-        fail ArgumentError, 'total_memory_quota cannot be nil'
-      end
-
-      @total_memory_quota = total_memory_quota
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] total_disk_quota Value to be assigned
-    def total_disk_quota=(total_disk_quota)
-      if total_disk_quota.nil?
-        fail ArgumentError, 'total_disk_quota cannot be nil'
-      end
-
-      @total_disk_quota = total_disk_quota
-    end
-
-    # Custom attribute writer method with validation
     # @param [Object] max_cpu_per_sandbox Value to be assigned
     def max_cpu_per_sandbox=(max_cpu_per_sandbox)
       if max_cpu_per_sandbox.nil?
@@ -559,13 +526,14 @@ module DaytonaApiClient
           suspension_reason == o.suspension_reason &&
           suspended_until == o.suspended_until &&
           suspension_cleanup_grace_period_hours == o.suspension_cleanup_grace_period_hours &&
-          total_cpu_quota == o.total_cpu_quota &&
-          total_memory_quota == o.total_memory_quota &&
-          total_disk_quota == o.total_disk_quota &&
           max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
           max_memory_per_sandbox == o.max_memory_per_sandbox &&
           max_disk_per_sandbox == o.max_disk_per_sandbox &&
-          sandbox_limited_network_egress == o.sandbox_limited_network_egress
+          sandbox_limited_network_egress == o.sandbox_limited_network_egress &&
+          default_region_id == o.default_region_id &&
+          authenticated_rate_limit == o.authenticated_rate_limit &&
+          sandbox_create_rate_limit == o.sandbox_create_rate_limit &&
+          sandbox_lifecycle_rate_limit == o.sandbox_lifecycle_rate_limit
     end
 
     # @see the `==` method
@@ -577,7 +545,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, total_cpu_quota, total_memory_quota, total_disk_quota, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, sandbox_limited_network_egress].hash
+      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit].hash
     end
 
     # Builds the object from hash

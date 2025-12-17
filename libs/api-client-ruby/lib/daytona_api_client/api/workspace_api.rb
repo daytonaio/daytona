@@ -353,7 +353,7 @@ module DaytonaApiClient
     # @param port [Float] Port number to get preview URL for
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [PortPreviewUrl]
+    # @return [WorkspacePortPreviewUrl]
     def get_port_preview_url_workspace_deprecated(workspace_id, port, opts = {})
       data, _status_code, _headers = get_port_preview_url_workspace_deprecated_with_http_info(workspace_id, port, opts)
       data
@@ -364,7 +364,7 @@ module DaytonaApiClient
     # @param port [Float] Port number to get preview URL for
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @return [Array<(PortPreviewUrl, Integer, Hash)>] PortPreviewUrl data, response status code and response headers
+    # @return [Array<(WorkspacePortPreviewUrl, Integer, Hash)>] WorkspacePortPreviewUrl data, response status code and response headers
     def get_port_preview_url_workspace_deprecated_with_http_info(workspace_id, port, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: WorkspaceApi.get_port_preview_url_workspace_deprecated ...'
@@ -396,7 +396,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type] || 'PortPreviewUrl'
+      return_type = opts[:debug_return_type] || 'WorkspacePortPreviewUrl'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']

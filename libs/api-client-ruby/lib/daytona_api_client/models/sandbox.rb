@@ -21,6 +21,9 @@ module DaytonaApiClient
     # The organization ID of the sandbox
     attr_accessor :organization_id
 
+    # The name of the sandbox
+    attr_accessor :name
+
     # The snapshot used for the sandbox
     attr_accessor :snapshot
 
@@ -66,6 +69,9 @@ module DaytonaApiClient
     # The error reason of the sandbox
     attr_accessor :error_reason
 
+    # Whether the sandbox error is recoverable.
+    attr_accessor :recoverable
+
     # The state of the backup
     attr_accessor :backup_state
 
@@ -80,9 +86,6 @@ module DaytonaApiClient
 
     # Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
     attr_accessor :auto_delete_interval
-
-    # The domain name of the runner
-    attr_accessor :runner_domain
 
     # Array of volumes attached to the sandbox
     attr_accessor :volumes
@@ -129,6 +132,7 @@ module DaytonaApiClient
       {
         :'id' => :'id',
         :'organization_id' => :'organizationId',
+        :'name' => :'name',
         :'snapshot' => :'snapshot',
         :'user' => :'user',
         :'env' => :'env',
@@ -144,12 +148,12 @@ module DaytonaApiClient
         :'state' => :'state',
         :'desired_state' => :'desiredState',
         :'error_reason' => :'errorReason',
+        :'recoverable' => :'recoverable',
         :'backup_state' => :'backupState',
         :'backup_created_at' => :'backupCreatedAt',
         :'auto_stop_interval' => :'autoStopInterval',
         :'auto_archive_interval' => :'autoArchiveInterval',
         :'auto_delete_interval' => :'autoDeleteInterval',
-        :'runner_domain' => :'runnerDomain',
         :'volumes' => :'volumes',
         :'build_info' => :'buildInfo',
         :'created_at' => :'createdAt',
@@ -174,6 +178,7 @@ module DaytonaApiClient
       {
         :'id' => :'String',
         :'organization_id' => :'String',
+        :'name' => :'String',
         :'snapshot' => :'String',
         :'user' => :'String',
         :'env' => :'Hash<String, String>',
@@ -189,12 +194,12 @@ module DaytonaApiClient
         :'state' => :'SandboxState',
         :'desired_state' => :'SandboxDesiredState',
         :'error_reason' => :'String',
+        :'recoverable' => :'Boolean',
         :'backup_state' => :'String',
         :'backup_created_at' => :'String',
         :'auto_stop_interval' => :'Float',
         :'auto_archive_interval' => :'Float',
         :'auto_delete_interval' => :'Float',
-        :'runner_domain' => :'String',
         :'volumes' => :'Array<SandboxVolume>',
         :'build_info' => :'BuildInfo',
         :'created_at' => :'String',
@@ -236,6 +241,12 @@ module DaytonaApiClient
         self.organization_id = attributes[:'organization_id']
       else
         self.organization_id = nil
+      end
+
+      if attributes.key?(:'name')
+        self.name = attributes[:'name']
+      else
+        self.name = nil
       end
 
       if attributes.key?(:'snapshot')
@@ -322,6 +333,10 @@ module DaytonaApiClient
         self.error_reason = attributes[:'error_reason']
       end
 
+      if attributes.key?(:'recoverable')
+        self.recoverable = attributes[:'recoverable']
+      end
+
       if attributes.key?(:'backup_state')
         self.backup_state = attributes[:'backup_state']
       end
@@ -340,10 +355,6 @@ module DaytonaApiClient
 
       if attributes.key?(:'auto_delete_interval')
         self.auto_delete_interval = attributes[:'auto_delete_interval']
-      end
-
-      if attributes.key?(:'runner_domain')
-        self.runner_domain = attributes[:'runner_domain']
       end
 
       if attributes.key?(:'volumes')
@@ -384,6 +395,10 @@ module DaytonaApiClient
 
       if @organization_id.nil?
         invalid_properties.push('invalid value for "organization_id", organization_id cannot be nil.')
+      end
+
+      if @name.nil?
+        invalid_properties.push('invalid value for "name", name cannot be nil.')
       end
 
       if @user.nil?
@@ -435,6 +450,7 @@ module DaytonaApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @id.nil?
       return false if @organization_id.nil?
+      return false if @name.nil?
       return false if @user.nil?
       return false if @env.nil?
       return false if @labels.nil?
@@ -470,6 +486,16 @@ module DaytonaApiClient
       end
 
       @organization_id = organization_id
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] name Value to be assigned
+    def name=(name)
+      if name.nil?
+        fail ArgumentError, 'name cannot be nil'
+      end
+
+      @name = name
     end
 
     # Custom attribute writer method with validation
@@ -599,6 +625,7 @@ module DaytonaApiClient
       self.class == o.class &&
           id == o.id &&
           organization_id == o.organization_id &&
+          name == o.name &&
           snapshot == o.snapshot &&
           user == o.user &&
           env == o.env &&
@@ -614,12 +641,12 @@ module DaytonaApiClient
           state == o.state &&
           desired_state == o.desired_state &&
           error_reason == o.error_reason &&
+          recoverable == o.recoverable &&
           backup_state == o.backup_state &&
           backup_created_at == o.backup_created_at &&
           auto_stop_interval == o.auto_stop_interval &&
           auto_archive_interval == o.auto_archive_interval &&
           auto_delete_interval == o.auto_delete_interval &&
-          runner_domain == o.runner_domain &&
           volumes == o.volumes &&
           build_info == o.build_info &&
           created_at == o.created_at &&
@@ -637,7 +664,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, runner_domain, volumes, build_info, created_at, updated_at, _class, daemon_version].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version].hash
     end
 
     # Builds the object from hash

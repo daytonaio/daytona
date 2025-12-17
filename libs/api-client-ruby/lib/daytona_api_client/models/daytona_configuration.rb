@@ -36,6 +36,9 @@ module DaytonaApiClient
     # Proxy template URL
     attr_accessor :proxy_template_url
 
+    # Toolbox template URL
+    attr_accessor :proxy_toolbox_url
+
     # Default snapshot for sandboxes
     attr_accessor :default_snapshot
 
@@ -60,6 +63,9 @@ module DaytonaApiClient
     # Base64 encoded SSH Gateway public key
     attr_accessor :ssh_gateway_public_key
 
+    # Rate limit configuration
+    attr_accessor :rate_limit
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -70,6 +76,7 @@ module DaytonaApiClient
         :'announcements' => :'announcements',
         :'pylon_app_id' => :'pylonAppId',
         :'proxy_template_url' => :'proxyTemplateUrl',
+        :'proxy_toolbox_url' => :'proxyToolboxUrl',
         :'default_snapshot' => :'defaultSnapshot',
         :'dashboard_url' => :'dashboardUrl',
         :'max_auto_archive_interval' => :'maxAutoArchiveInterval',
@@ -77,7 +84,8 @@ module DaytonaApiClient
         :'environment' => :'environment',
         :'billing_api_url' => :'billingApiUrl',
         :'ssh_gateway_command' => :'sshGatewayCommand',
-        :'ssh_gateway_public_key' => :'sshGatewayPublicKey'
+        :'ssh_gateway_public_key' => :'sshGatewayPublicKey',
+        :'rate_limit' => :'rateLimit'
       }
     end
 
@@ -101,6 +109,7 @@ module DaytonaApiClient
         :'announcements' => :'Hash<String, Announcement>',
         :'pylon_app_id' => :'String',
         :'proxy_template_url' => :'String',
+        :'proxy_toolbox_url' => :'String',
         :'default_snapshot' => :'String',
         :'dashboard_url' => :'String',
         :'max_auto_archive_interval' => :'Float',
@@ -108,7 +117,8 @@ module DaytonaApiClient
         :'environment' => :'String',
         :'billing_api_url' => :'String',
         :'ssh_gateway_command' => :'String',
-        :'ssh_gateway_public_key' => :'String'
+        :'ssh_gateway_public_key' => :'String',
+        :'rate_limit' => :'RateLimitConfig'
       }
     end
 
@@ -174,6 +184,12 @@ module DaytonaApiClient
         self.proxy_template_url = nil
       end
 
+      if attributes.key?(:'proxy_toolbox_url')
+        self.proxy_toolbox_url = attributes[:'proxy_toolbox_url']
+      else
+        self.proxy_toolbox_url = nil
+      end
+
       if attributes.key?(:'default_snapshot')
         self.default_snapshot = attributes[:'default_snapshot']
       else
@@ -215,6 +231,10 @@ module DaytonaApiClient
       if attributes.key?(:'ssh_gateway_public_key')
         self.ssh_gateway_public_key = attributes[:'ssh_gateway_public_key']
       end
+
+      if attributes.key?(:'rate_limit')
+        self.rate_limit = attributes[:'rate_limit']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -240,6 +260,10 @@ module DaytonaApiClient
 
       if @proxy_template_url.nil?
         invalid_properties.push('invalid value for "proxy_template_url", proxy_template_url cannot be nil.')
+      end
+
+      if @proxy_toolbox_url.nil?
+        invalid_properties.push('invalid value for "proxy_toolbox_url", proxy_toolbox_url cannot be nil.')
       end
 
       if @default_snapshot.nil?
@@ -274,6 +298,7 @@ module DaytonaApiClient
       return false if @linked_accounts_enabled.nil?
       return false if @announcements.nil?
       return false if @proxy_template_url.nil?
+      return false if @proxy_toolbox_url.nil?
       return false if @default_snapshot.nil?
       return false if @dashboard_url.nil?
       return false if @max_auto_archive_interval.nil?
@@ -330,6 +355,16 @@ module DaytonaApiClient
       end
 
       @proxy_template_url = proxy_template_url
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] proxy_toolbox_url Value to be assigned
+    def proxy_toolbox_url=(proxy_toolbox_url)
+      if proxy_toolbox_url.nil?
+        fail ArgumentError, 'proxy_toolbox_url cannot be nil'
+      end
+
+      @proxy_toolbox_url = proxy_toolbox_url
     end
 
     # Custom attribute writer method with validation
@@ -394,6 +429,7 @@ module DaytonaApiClient
           announcements == o.announcements &&
           pylon_app_id == o.pylon_app_id &&
           proxy_template_url == o.proxy_template_url &&
+          proxy_toolbox_url == o.proxy_toolbox_url &&
           default_snapshot == o.default_snapshot &&
           dashboard_url == o.dashboard_url &&
           max_auto_archive_interval == o.max_auto_archive_interval &&
@@ -401,7 +437,8 @@ module DaytonaApiClient
           environment == o.environment &&
           billing_api_url == o.billing_api_url &&
           ssh_gateway_command == o.ssh_gateway_command &&
-          ssh_gateway_public_key == o.ssh_gateway_public_key
+          ssh_gateway_public_key == o.ssh_gateway_public_key &&
+          rate_limit == o.rate_limit
     end
 
     # @see the `==` method
@@ -413,7 +450,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [version, posthog, oidc, linked_accounts_enabled, announcements, pylon_app_id, proxy_template_url, default_snapshot, dashboard_url, max_auto_archive_interval, maintanance_mode, environment, billing_api_url, ssh_gateway_command, ssh_gateway_public_key].hash
+      [version, posthog, oidc, linked_accounts_enabled, announcements, pylon_app_id, proxy_template_url, proxy_toolbox_url, default_snapshot, dashboard_url, max_auto_archive_interval, maintanance_mode, environment, billing_api_url, ssh_gateway_command, ssh_gateway_public_key, rate_limit].hash
     end
 
     # Builds the object from hash

@@ -22,16 +22,16 @@ module DaytonaApiClient
     # Check if user has access to the sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
-    # @return [nil]
+    # @return [Boolean]
     def has_sandbox_access(sandbox_id, opts = {})
-      has_sandbox_access_with_http_info(sandbox_id, opts)
-      nil
+      data, _status_code, _headers = has_sandbox_access_with_http_info(sandbox_id, opts)
+      data
     end
 
     # Check if user has access to the sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    # @return [Array<(Boolean, Integer, Hash)>] Boolean data, response status code and response headers
     def has_sandbox_access_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: PreviewApi.has_sandbox_access ...'
@@ -48,6 +48,8 @@ module DaytonaApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
 
       # form parameters
       form_params = opts[:form_params] || {}
@@ -56,7 +58,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Boolean'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']

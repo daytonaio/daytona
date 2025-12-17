@@ -22,7 +22,12 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn run openapi-generator-cli generate -i dist/apps/api/openapi.json -g ruby --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemName=daytona_api_client -o libs/api-client-ruby"
+        "commands": [
+          "yarn run openapi-generator-cli generate -i dist/apps/api/openapi.json -g ruby --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemName=daytona_api_client -o libs/api-client-ruby",
+          "bash libs/api-client-ruby/fix-gemspec.sh",
+          "cd libs/api-client-ruby && bundle install"
+        ],
+        "parallel": false
       }
     },
     "format": {

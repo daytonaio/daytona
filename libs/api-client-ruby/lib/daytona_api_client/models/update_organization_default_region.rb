@@ -14,40 +14,14 @@ require 'date'
 require 'time'
 
 module DaytonaApiClient
-  class UpdateSandboxStateDto
-    # The new state for the sandbox
-    attr_accessor :state
-
-    # Optional error message when reporting an error state
-    attr_accessor :error_reason
-
-    class EnumAttributeValidator
-      attr_reader :datatype
-      attr_reader :allowable_values
-
-      def initialize(datatype, allowable_values)
-        @allowable_values = allowable_values.map do |value|
-          case datatype.to_s
-          when /Integer/i
-            value.to_i
-          when /Float/i
-            value.to_f
-          else
-            value
-          end
-        end
-      end
-
-      def valid?(value)
-        !value || allowable_values.include?(value)
-      end
-    end
+  class UpdateOrganizationDefaultRegion
+    # The ID of the default region for the organization
+    attr_accessor :default_region_id
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'state' => :'state',
-        :'error_reason' => :'errorReason'
+        :'default_region_id' => :'defaultRegionId'
       }
     end
 
@@ -64,8 +38,7 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'state' => :'String',
-        :'error_reason' => :'String'
+        :'default_region_id' => :'String'
       }
     end
 
@@ -79,26 +52,22 @@ module DaytonaApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::UpdateSandboxStateDto` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::UpdateOrganizationDefaultRegion` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::UpdateSandboxStateDto`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::UpdateOrganizationDefaultRegion`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'state')
-        self.state = attributes[:'state']
+      if attributes.key?(:'default_region_id')
+        self.default_region_id = attributes[:'default_region_id']
       else
-        self.state = nil
-      end
-
-      if attributes.key?(:'error_reason')
-        self.error_reason = attributes[:'error_reason']
+        self.default_region_id = nil
       end
     end
 
@@ -107,8 +76,8 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @state.nil?
-        invalid_properties.push('invalid value for "state", state cannot be nil.')
+      if @default_region_id.nil?
+        invalid_properties.push('invalid value for "default_region_id", default_region_id cannot be nil.')
       end
 
       invalid_properties
@@ -118,20 +87,18 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @state.nil?
-      state_validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"])
-      return false unless state_validator.valid?(@state)
+      return false if @default_region_id.nil?
       true
     end
 
-    # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] state Object to be assigned
-    def state=(state)
-      validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"])
-      unless validator.valid?(state)
-        fail ArgumentError, "invalid value for \"state\", must be one of #{validator.allowable_values}."
+    # Custom attribute writer method with validation
+    # @param [Object] default_region_id Value to be assigned
+    def default_region_id=(default_region_id)
+      if default_region_id.nil?
+        fail ArgumentError, 'default_region_id cannot be nil'
       end
-      @state = state
+
+      @default_region_id = default_region_id
     end
 
     # Checks equality by comparing each attribute.
@@ -139,8 +106,7 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          state == o.state &&
-          error_reason == o.error_reason
+          default_region_id == o.default_region_id
     end
 
     # @see the `==` method
@@ -152,7 +118,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [state, error_reason].hash
+      [default_region_id].hash
     end
 
     # Builds the object from hash

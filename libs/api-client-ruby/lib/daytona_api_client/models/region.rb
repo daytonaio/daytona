@@ -15,13 +15,29 @@ require 'time'
 
 module DaytonaApiClient
   class Region
+    # Region ID
+    attr_accessor :id
+
     # Region name
     attr_accessor :name
+
+    # Organization ID
+    attr_accessor :organization_id
+
+    # Creation timestamp
+    attr_accessor :created_at
+
+    # Last update timestamp
+    attr_accessor :updated_at
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'name' => :'name'
+        :'id' => :'id',
+        :'name' => :'name',
+        :'organization_id' => :'organizationId',
+        :'created_at' => :'createdAt',
+        :'updated_at' => :'updatedAt'
       }
     end
 
@@ -38,13 +54,18 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'name' => :'String'
+        :'id' => :'String',
+        :'name' => :'String',
+        :'organization_id' => :'String',
+        :'created_at' => :'String',
+        :'updated_at' => :'String'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
+        :'organization_id',
       ])
     end
 
@@ -64,10 +85,32 @@ module DaytonaApiClient
         h[k.to_sym] = v
       }
 
+      if attributes.key?(:'id')
+        self.id = attributes[:'id']
+      else
+        self.id = nil
+      end
+
       if attributes.key?(:'name')
         self.name = attributes[:'name']
       else
         self.name = nil
+      end
+
+      if attributes.key?(:'organization_id')
+        self.organization_id = attributes[:'organization_id']
+      end
+
+      if attributes.key?(:'created_at')
+        self.created_at = attributes[:'created_at']
+      else
+        self.created_at = nil
+      end
+
+      if attributes.key?(:'updated_at')
+        self.updated_at = attributes[:'updated_at']
+      else
+        self.updated_at = nil
       end
     end
 
@@ -76,8 +119,20 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @id.nil?
+        invalid_properties.push('invalid value for "id", id cannot be nil.')
+      end
+
       if @name.nil?
         invalid_properties.push('invalid value for "name", name cannot be nil.')
+      end
+
+      if @created_at.nil?
+        invalid_properties.push('invalid value for "created_at", created_at cannot be nil.')
+      end
+
+      if @updated_at.nil?
+        invalid_properties.push('invalid value for "updated_at", updated_at cannot be nil.')
       end
 
       invalid_properties
@@ -87,8 +142,21 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @id.nil?
       return false if @name.nil?
+      return false if @created_at.nil?
+      return false if @updated_at.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] id Value to be assigned
+    def id=(id)
+      if id.nil?
+        fail ArgumentError, 'id cannot be nil'
+      end
+
+      @id = id
     end
 
     # Custom attribute writer method with validation
@@ -101,12 +169,36 @@ module DaytonaApiClient
       @name = name
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] created_at Value to be assigned
+    def created_at=(created_at)
+      if created_at.nil?
+        fail ArgumentError, 'created_at cannot be nil'
+      end
+
+      @created_at = created_at
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] updated_at Value to be assigned
+    def updated_at=(updated_at)
+      if updated_at.nil?
+        fail ArgumentError, 'updated_at cannot be nil'
+      end
+
+      @updated_at = updated_at
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          name == o.name
+          id == o.id &&
+          name == o.name &&
+          organization_id == o.organization_id &&
+          created_at == o.created_at &&
+          updated_at == o.updated_at
     end
 
     # @see the `==` method
@@ -118,7 +210,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name].hash
+      [id, name, organization_id, created_at, updated_at].hash
     end
 
     # Builds the object from hash

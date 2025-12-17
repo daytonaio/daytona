@@ -28,3 +28,6 @@ spec/**
 .gitlab-ci.yml
 docs/**
 README.md
+Gemfile
+Gemfile.lock
+daytona_api_client.gemspec
