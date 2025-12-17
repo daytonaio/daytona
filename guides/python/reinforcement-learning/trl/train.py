@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SANDBOX_POOL_SIZE = 10
+SANDBOX_POOL_SIZE = 500
 MAX_TIMEOUT_SECONDS = 1
 MODEL_NAME = "Qwen/Qwen3-1.7B-Base"
 
@@ -282,16 +282,16 @@ def main():
 
         training_args = GRPOConfig(
             output_dir="training_results",
-            per_device_train_batch_size=10,
-            gradient_accumulation_steps=1,
-            num_generations=5,
+            per_device_train_batch_size=20,
+            gradient_accumulation_steps=25,
+            num_generations=250,
             max_prompt_length=256,
             max_completion_length=512,
-            learning_rate=5e-6,
+            learning_rate=8e-6,
             num_train_epochs=1,
             logging_steps=1,
             report_to="none",
-            max_steps=64,
+            max_steps=8,
             bf16=True,
             use_vllm=True,
             vllm_mode="colocate",
