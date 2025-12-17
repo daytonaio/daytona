@@ -41,6 +41,7 @@ export abstract class SandboxAction {
     errorReason?: string,
     daemonVersion?: string,
     backupState?: BackupState,
+    recoverable?: boolean,
   ) {
     //  check if the lock code is still valid
     const lockKey = getStateChangeLockKey(sandboxId)
@@ -115,6 +116,10 @@ export abstract class SandboxAction {
 
     if (backupState !== undefined) {
       sandbox.setBackupState(backupState)
+    }
+
+    if (recoverable !== undefined) {
+      sandbox.recoverable = recoverable
     }
 
     await this.sandboxRepository.save(sandbox)
