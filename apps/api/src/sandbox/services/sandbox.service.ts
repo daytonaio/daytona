@@ -54,7 +54,7 @@ import {
   SandboxSortDirection,
   DEFAULT_SANDBOX_SORT_FIELD,
   DEFAULT_SANDBOX_SORT_DIRECTION,
-} from '../dto/list-sandboxes-query.dto'
+} from '../dto/list-sandboxes-query.deprecated.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import {
@@ -807,7 +807,7 @@ export class SandboxService {
     return this.sandboxRepository.find({ where })
   }
 
-  async findAll(
+  async list_deprecated(
     organizationId: string,
     page = 1,
     limit = 10,

@@ -7,9 +7,9 @@ import { QueryKey, useQuery } from '@tanstack/react-query'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
-  ListSandboxesPaginatedOrderEnum,
-  ListSandboxesPaginatedSortEnum,
-  ListSandboxesPaginatedStatesEnum,
+  ListSandboxesPaginatedDeprecatedOrderEnum,
+  ListSandboxesPaginatedDeprecatedSortEnum,
+  ListSandboxesPaginatedDeprecatedStatesEnum,
   PaginatedSandboxes,
 } from '@daytonaio/api-client'
 import { isValidUUID } from '@/lib/utils'
@@ -18,7 +18,7 @@ export interface SandboxFilters {
   idOrName?: string
   labels?: Record<string, string>
   includeErroredDeleted?: boolean
-  states?: ListSandboxesPaginatedStatesEnum[]
+  states?: ListSandboxesPaginatedDeprecatedStatesEnum[]
   snapshots?: string[]
   regions?: string[]
   minCpu?: number
@@ -32,13 +32,13 @@ export interface SandboxFilters {
 }
 
 export interface SandboxSorting {
-  field?: ListSandboxesPaginatedSortEnum
-  direction?: ListSandboxesPaginatedOrderEnum
+  field?: ListSandboxesPaginatedDeprecatedSortEnum
+  direction?: ListSandboxesPaginatedDeprecatedOrderEnum
 }
 
 export const DEFAULT_SANDBOX_SORTING: SandboxSorting = {
-  field: ListSandboxesPaginatedSortEnum.UPDATED_AT,
-  direction: ListSandboxesPaginatedOrderEnum.DESC,
+  field: ListSandboxesPaginatedDeprecatedSortEnum.UPDATED_AT,
+  direction: ListSandboxesPaginatedDeprecatedOrderEnum.DESC,
 }
 
 export interface SandboxQueryParams {
@@ -78,7 +78,7 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
 
       const { page, pageSize, filters = {}, sorting = {} } = params
 
-      const listResponse = await sandboxApi.listSandboxesPaginated(
+      const listResponse = await sandboxApi.listSandboxesPaginatedDeprecated(
         selectedOrganization.id,
         page,
         pageSize,
