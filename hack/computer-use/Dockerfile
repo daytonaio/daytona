@@ -32,7 +32,6 @@ COPY ./apps/proxy /app/apps/proxy
 COPY ./apps/daemon /app/apps/daemon
 COPY ./libs/computer-use /app/libs/computer-use
 COPY ./apps/ssh-gateway /app/apps/ssh-gateway
-COPY ./apps/runner-service /app/apps/runner-service
 
 # Build the application with optimizations
 RUN cd /app/libs/computer-use && \
