@@ -69,7 +69,7 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 	// Build log fields
 	jobLog := e.log.With(
 		slog.String("job_id", job.GetId()),
-		slog.String("job_type", job.GetType()),
+		slog.String("job_type", string(job.GetType())),
 	)
 
 	// Add resource info if present
@@ -118,8 +118,8 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
 	ctx, span := tracer.Start(ctx, fmt.Sprintf("execute_%s", job.GetType()),
 		trace.WithAttributes(
 			attribute.String("job.id", job.GetId()),
-			attribute.String("job.type", job.GetType()),
-			attribute.String("job.status", job.GetStatus()),
+			attribute.String("job.type", string(job.GetType())),
+			attribute.String("job.status", string(job.GetStatus())),
 		),
 	)
 	defer span.End()
@@ -181,7 +181,7 @@ func (e *Executor) updateJobStatus(ctx context.Context, jobID, status string, er
 		span.SetAttributes(attribute.String("job.error", *errorMessage))
 	}
 
-	updateStatus := apiclient.NewUpdateJobStatus(status)
+	updateStatus := apiclient.NewUpdateJobStatus(apiclient.JobStatus(status))
 	if errorMessage != nil {
 		updateStatus.SetErrorMessage(*errorMessage)
 	}

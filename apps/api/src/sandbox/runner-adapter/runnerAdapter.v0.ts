@@ -36,8 +36,8 @@ const isDebugEnabled = process.env.DEBUG === 'true'
 const RETRYABLE_NETWORK_ERROR_CODES = ['ECONNRESET', 'ETIMEDOUT']
 
 @Injectable()
-export class RunnerAdapterLegacy implements RunnerAdapter {
-  private readonly logger = new Logger(RunnerAdapterLegacy.name)
+export class RunnerAdapterV0 implements RunnerAdapter {
+  private readonly logger = new Logger(RunnerAdapterV0.name)
   private sandboxApiClient: SandboxApi
   private snapshotApiClient: SnapshotsApi
   private runnerApiClient: DefaultApi

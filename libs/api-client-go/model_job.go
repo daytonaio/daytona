@@ -24,15 +24,15 @@ type Job struct {
 	// The ID of the job
 	Id string `json:"id"`
 	// The type of the job
-	Type string `json:"type"`
+	Type JobType `json:"type"`
 	// The status of the job
-	Status string `json:"status"`
+	Status JobStatus `json:"status"`
 	// The type of resource this job operates on
-	ResourceType *string `json:"resourceType,omitempty"`
+	ResourceType string `json:"resourceType"`
 	// The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)
-	ResourceId *string `json:"resourceId,omitempty"`
-	// Job-specific payload data (operational metadata)
-	Payload map[string]interface{} `json:"payload,omitempty"`
+	ResourceId string `json:"resourceId"`
+	// Job-specific JSON-encoded payload data (operational metadata)
+	Payload *string `json:"payload,omitempty"`
 	// OpenTelemetry trace context for distributed tracing (W3C Trace Context format)
 	TraceContext map[string]interface{} `json:"traceContext,omitempty"`
 	// Error message if the job failed
@@ -50,11 +50,13 @@ type _Job Job
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJob(id string, type_ string, status string, createdAt string) *Job {
+func NewJob(id string, type_ JobType, status JobStatus, resourceType string, resourceId string, createdAt string) *Job {
 	this := Job{}
 	this.Id = id
 	this.Type = type_
 	this.Status = status
+	this.ResourceType = resourceType
+	this.ResourceId = resourceId
 	this.CreatedAt = createdAt
 	return &this
 }
@@ -92,9 +94,9 @@ func (o *Job) SetId(v string) {
 }
 
 // GetType returns the Type field value
-func (o *Job) GetType() string {
+func (o *Job) GetType() JobType {
 	if o == nil {
-		var ret string
+		var ret JobType
 		return ret
 	}
 
@@ -103,7 +105,7 @@ func (o *Job) GetType() string {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *Job) GetTypeOk() (*string, bool) {
+func (o *Job) GetTypeOk() (*JobType, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -111,14 +113,14 @@ func (o *Job) GetTypeOk() (*string, bool) {
 }
 
 // SetType sets field value
-func (o *Job) SetType(v string) {
+func (o *Job) SetType(v JobType) {
 	o.Type = v
 }
 
 // GetStatus returns the Status field value
-func (o *Job) GetStatus() string {
+func (o *Job) GetStatus() JobStatus {
 	if o == nil {
-		var ret string
+		var ret JobStatus
 		return ret
 	}
 
@@ -127,7 +129,7 @@ func (o *Job) GetStatus() string {
 
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *Job) GetStatusOk() (*string, bool) {
+func (o *Job) GetStatusOk() (*JobStatus, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -135,88 +137,72 @@ func (o *Job) GetStatusOk() (*string, bool) {
 }
 
 // SetStatus sets field value
-func (o *Job) SetStatus(v string) {
+func (o *Job) SetStatus(v JobStatus) {
 	o.Status = v
 }
 
-// GetResourceType returns the ResourceType field value if set, zero value otherwise.
+// GetResourceType returns the ResourceType field value
 func (o *Job) GetResourceType() string {
-	if o == nil || IsNil(o.ResourceType) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.ResourceType
+
+	return o.ResourceType
 }
 
-// GetResourceTypeOk returns a tuple with the ResourceType field value if set, nil otherwise
+// GetResourceTypeOk returns a tuple with the ResourceType field value
 // and a boolean to check if the value has been set.
 func (o *Job) GetResourceTypeOk() (*string, bool) {
-	if o == nil || IsNil(o.ResourceType) {
+	if o == nil {
 		return nil, false
 	}
-	return o.ResourceType, true
+	return &o.ResourceType, true
 }
 
-// HasResourceType returns a boolean if a field has been set.
-func (o *Job) HasResourceType() bool {
-	if o != nil && !IsNil(o.ResourceType) {
-		return true
-	}
-
-	return false
-}
-
-// SetResourceType gets a reference to the given string and assigns it to the ResourceType field.
+// SetResourceType sets field value
 func (o *Job) SetResourceType(v string) {
-	o.ResourceType = &v
+	o.ResourceType = v
 }
 
-// GetResourceId returns the ResourceId field value if set, zero value otherwise.
+// GetResourceId returns the ResourceId field value
 func (o *Job) GetResourceId() string {
-	if o == nil || IsNil(o.ResourceId) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.ResourceId
+
+	return o.ResourceId
 }
 
-// GetResourceIdOk returns a tuple with the ResourceId field value if set, nil otherwise
+// GetResourceIdOk returns a tuple with the ResourceId field value
 // and a boolean to check if the value has been set.
 func (o *Job) GetResourceIdOk() (*string, bool) {
-	if o == nil || IsNil(o.ResourceId) {
+	if o == nil {
 		return nil, false
 	}
-	return o.ResourceId, true
+	return &o.ResourceId, true
 }
 
-// HasResourceId returns a boolean if a field has been set.
-func (o *Job) HasResourceId() bool {
-	if o != nil && !IsNil(o.ResourceId) {
-		return true
-	}
-
-	return false
-}
-
-// SetResourceId gets a reference to the given string and assigns it to the ResourceId field.
+// SetResourceId sets field value
 func (o *Job) SetResourceId(v string) {
-	o.ResourceId = &v
+	o.ResourceId = v
 }
 
 // GetPayload returns the Payload field value if set, zero value otherwise.
-func (o *Job) GetPayload() map[string]interface{} {
+func (o *Job) GetPayload() string {
 	if o == nil || IsNil(o.Payload) {
-		var ret map[string]interface{}
+		var ret string
 		return ret
 	}
-	return o.Payload
+	return *o.Payload
 }
 
 // GetPayloadOk returns a tuple with the Payload field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Job) GetPayloadOk() (map[string]interface{}, bool) {
+func (o *Job) GetPayloadOk() (*string, bool) {
 	if o == nil || IsNil(o.Payload) {
-		return map[string]interface{}{}, false
+		return nil, false
 	}
 	return o.Payload, true
 }
@@ -230,9 +216,9 @@ func (o *Job) HasPayload() bool {
 	return false
 }
 
-// SetPayload gets a reference to the given map[string]interface{} and assigns it to the Payload field.
-func (o *Job) SetPayload(v map[string]interface{}) {
-	o.Payload = v
+// SetPayload gets a reference to the given string and assigns it to the Payload field.
+func (o *Job) SetPayload(v string) {
+	o.Payload = &v
 }
 
 // GetTraceContext returns the TraceContext field value if set, zero value otherwise.
@@ -368,12 +354,8 @@ func (o Job) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["type"] = o.Type
 	toSerialize["status"] = o.Status
-	if !IsNil(o.ResourceType) {
-		toSerialize["resourceType"] = o.ResourceType
-	}
-	if !IsNil(o.ResourceId) {
-		toSerialize["resourceId"] = o.ResourceId
-	}
+	toSerialize["resourceType"] = o.ResourceType
+	toSerialize["resourceId"] = o.ResourceId
 	if !IsNil(o.Payload) {
 		toSerialize["payload"] = o.Payload
 	}
@@ -403,6 +385,8 @@ func (o *Job) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"type",
 		"status",
+		"resourceType",
+		"resourceId",
 		"createdAt",
 	}
 

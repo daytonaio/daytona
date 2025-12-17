@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,6 +12,10 @@
  * Do not edit the class manually.
  */
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { JobStatus } from './job-status'
+
 /**
  *
  * @export
@@ -20,23 +24,20 @@
 export interface UpdateJobStatus {
   /**
    * The new status of the job
-   * @type {string}
+   * @type {JobStatus}
    * @memberof UpdateJobStatus
    */
-  status: UpdateJobStatusStatusEnum
+  status: JobStatus
   /**
    * Error message if the job failed
    * @type {string}
    * @memberof UpdateJobStatus
    */
   errorMessage?: string
+  /**
+   * Result metadata for the job
+   * @type {string}
+   * @memberof UpdateJobStatus
+   */
+  resultMetadata?: string
 }
-
-export const UpdateJobStatusStatusEnum = {
-  PENDING: 'PENDING',
-  IN_PROGRESS: 'IN_PROGRESS',
-  COMPLETED: 'COMPLETED',
-  FAILED: 'FAILED',
-} as const
-
-export type UpdateJobStatusStatusEnum = (typeof UpdateJobStatusStatusEnum)[keyof typeof UpdateJobStatusStatusEnum]

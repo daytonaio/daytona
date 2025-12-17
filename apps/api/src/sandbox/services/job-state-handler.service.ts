@@ -16,6 +16,7 @@ import { JobStatus } from '../enums/job-status.enum'
 import { JobType } from '../enums/job-type.enum'
 import { Job } from '../entities/job.entity'
 import { BackupState } from '../enums/backup-state.enum'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -69,6 +70,9 @@ export class JobStateHandlerService {
       case JobType.REMOVE_SNAPSHOT:
         await this.handleRemoveSnapshotJobCompletion(job)
         break
+      case JobType.CREATE_BACKUP:
+        await this.handleCreateBackupJobCompletion(job)
+        break
       default:
         break
     }
@@ -85,13 +89,28 @@ export class JobStateHandlerService {
         return
       }
 
+      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
+        this.logger.error(
+          `Sandbox ${sandboxId} is not in desired state STARTED for CREATE_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+        )
+        return
+      }
+
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(
           `CREATE_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
         )
         sandbox.state = SandboxState.STARTED
-        sandbox.setBackupState(BackupState.NONE)
         sandbox.errorReason = null
+        if (job.resultMetadata) {
+          try {
+            const metadata = JSON.parse(job.resultMetadata)
+            if (metadata.daemonVersion && typeof metadata.daemonVersion === 'string')
+              sandbox.daemonVersion = metadata.daemonVersion
+          } catch {
+            // Ignore JSON parse errors
+          }
+        }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         sandbox.state = SandboxState.ERROR
@@ -115,10 +134,26 @@ export class JobStateHandlerService {
         return
       }
 
+      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
+        this.logger.error(
+          `Sandbox ${sandboxId} is not in desired state STARTED for START_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+        )
+        return
+      }
+
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`START_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`)
         sandbox.state = SandboxState.STARTED
         sandbox.errorReason = null
+        if (job.resultMetadata) {
+          try {
+            const metadata = JSON.parse(job.resultMetadata)
+            if (metadata.daemonVersion && typeof metadata.daemonVersion === 'string')
+              sandbox.daemonVersion = metadata.daemonVersion
+          } catch {
+            // Ignore JSON parse errors
+          }
+        }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`START_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         sandbox.state = SandboxState.ERROR
@@ -139,6 +174,13 @@ export class JobStateHandlerService {
       const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
       if (!sandbox) {
         this.logger.warn(`Sandbox ${sandboxId} not found for STOP_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (sandbox.desiredState !== SandboxDesiredState.STOPPED) {
+        this.logger.error(
+          `Sandbox ${sandboxId} is not in desired state STOPPED for STOP_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
+        )
         return
       }
 
@@ -166,6 +208,10 @@ export class JobStateHandlerService {
       const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
       if (!sandbox) {
         this.logger.warn(`Sandbox ${sandboxId} not found for DESTROY_SANDBOX job ${job.id}`)
+        return
+      }
+      if (sandbox.desiredState !== SandboxDesiredState.DESTROYED) {
+        // Don't log anything because sandboxes can be destroyed on runners when archiving or moving to a new runner
         return
       }
 
@@ -311,6 +357,12 @@ export class JobStateHandlerService {
         this.logger.log(
           `REMOVE_SNAPSHOT job ${job.id} completed successfully for snapshot ${snapshotRef} on runner ${runnerId}`,
         )
+        const affected = await this.snapshotRunnerRepository.delete({ snapshotRef, runnerId })
+        if (affected.affected && affected.affected > 0) {
+          this.logger.log(
+            `Removed ${affected.affected} snapshot runners for snapshot ${snapshotRef} on runner ${runnerId}`,
+          )
+        }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(
           `REMOVE_SNAPSHOT job ${job.id} failed for snapshot ${snapshotRef} on runner ${runnerId}: ${job.errorMessage}`,
@@ -318,6 +370,33 @@ export class JobStateHandlerService {
       }
     } catch (error) {
       this.logger.error(`Error handling REMOVE_SNAPSHOT job completion for snapshot ${snapshotRef}:`, error)
+    }
+  }
+
+  private async handleCreateBackupJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    if (!sandboxId) return
+
+    try {
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for CREATE_BACKUP job ${job.id}`)
+        return
+      }
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(
+          `CREATE_BACKUP job ${job.id} completed successfully, marking sandbox ${sandboxId} as BACKUP_COMPLETED`,
+        )
+        sandbox.setBackupState(BackupState.COMPLETED)
+        await this.sandboxRepository.save(sandbox)
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`CREATE_BACKUP job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+        sandbox.setBackupState(BackupState.ERROR, undefined, undefined, job.errorMessage)
+        await this.sandboxRepository.save(sandbox)
+      }
+    } catch (error) {
+      this.logger.error(`Error handling CREATE_BACKUP job completion for sandbox ${sandboxId}:`, error)
     }
   }
 }

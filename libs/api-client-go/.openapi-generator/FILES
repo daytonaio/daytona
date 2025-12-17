@@ -79,6 +79,8 @@ model_health_controller_check_200_response.go
 model_health_controller_check_200_response_info_value.go
 model_health_controller_check_503_response.go
 model_job.go
+model_job_status.go
+model_job_type.go
 model_keyboard_hotkey_request.go
 model_keyboard_press_request.go
 model_keyboard_type_request.go

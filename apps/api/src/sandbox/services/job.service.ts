@@ -5,10 +5,10 @@
 
 import { Injectable, Logger, NotFoundException, forwardRef, Inject } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, In, LessThan, DataSource, EntityManager } from 'typeorm'
+import { Repository, LessThan, EntityManager } from 'typeorm'
 import { Job } from '../entities/job.entity'
 import { JobDto, JobStatus, JobType, ResourceType } from '../dto/job.dto'
-import { PayloadForJobType, ResourceTypeForJobType } from '../dto/job-type-map.dto'
+import { ResourceTypeForJobType } from '../dto/job-type-map.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -24,8 +24,6 @@ export class JobService {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     @InjectRedis() private readonly redis: Redis,
-    private readonly dataSource: DataSource,
-    @Inject(forwardRef(() => JobStateHandlerService))
     private readonly jobStateHandlerService: JobStateHandlerService,
   ) {}
 
@@ -40,7 +38,7 @@ export class JobService {
     runnerId: string,
     resourceType: ResourceTypeForJobType<T>,
     resourceId: string,
-    payload?: PayloadForJobType<T>,
+    payload?: string | Record<string, any>,
   ): Promise<Job> {
     // Use provided manager if available, otherwise use default repository
     const repo = manager ? manager.getRepository(Job) : this.jobRepository
@@ -48,17 +46,19 @@ export class JobService {
     // Capture current OpenTelemetry trace context for distributed tracing
     const traceContext = this.captureTraceContext()
 
-    const job = repo.create({
-      type,
-      runnerId,
-      resourceType,
-      resourceId,
-      status: JobStatus.PENDING,
-      payload,
-      traceContext,
-    })
+    const encodedPayload = typeof payload === 'string' ? payload : payload ? JSON.stringify(payload) : undefined
 
-    const savedJob = await repo.save(job)
+    const savedJob = await repo.save(
+      new Job({
+        type,
+        runnerId,
+        resourceType,
+        resourceId,
+        status: JobStatus.PENDING,
+        payload: encodedPayload,
+        traceContext,
+      }),
+    )
 
     // Log with context-specific info
     const contextInfo = resourceId ? `${resourceType} ${resourceId}` : 'N/A'
@@ -140,7 +140,7 @@ export class JobService {
         // If aborted, disconnect immediately to cancel BRPOP
         if (abortSignal.aborted) {
           this.logger.debug(`BRPOP aborted for runner ${runnerId}, closing Redis connection`)
-          await blockingClient.disconnect()
+          blockingClient.disconnect()
           return []
         }
       } else {
@@ -197,7 +197,12 @@ export class JobService {
     return claimedJobs
   }
 
-  async updateJobStatus(jobId: string, status: JobStatus, errorMessage?: string): Promise<Job> {
+  async updateJobStatus(
+    jobId: string,
+    status: JobStatus,
+    errorMessage?: string,
+    resultMetadata?: string,
+  ): Promise<Job> {
     const job = await this.findOne(jobId)
     if (!job) {
       throw new NotFoundException(`Job with ID ${jobId} not found`)
@@ -214,6 +219,10 @@ export class JobService {
 
     if (status === JobStatus.COMPLETED || status === JobStatus.FAILED) {
       job.completedAt = new Date()
+    }
+
+    if (resultMetadata) {
+      job.resultMetadata = resultMetadata
     }
 
     const updatedJob = await this.jobRepository.save(job)
@@ -257,21 +266,6 @@ export class JobService {
         createdAt: 'DESC',
       },
     })
-  }
-
-  private toDto(job: Job): JobDto {
-    return {
-      id: job.id,
-      type: job.type,
-      status: job.status,
-      resourceType: job.resourceType,
-      resourceId: job.resourceId,
-      payload: job.payload,
-      traceContext: job.traceContext,
-      errorMessage: job.errorMessage,
-      createdAt: job.createdAt.toISOString(),
-      updatedAt: job.updatedAt?.toISOString(),
-    }
   }
 
   /**
@@ -378,18 +372,7 @@ export class JobService {
         // save() with @VersionColumn will automatically check version and throw OptimisticLockVersionMismatchError if changed
         const savedJob = await this.jobRepository.save(job)
 
-        claimedJobs.push({
-          id: savedJob.id,
-          type: savedJob.type,
-          status: savedJob.status,
-          resourceType: savedJob.resourceType,
-          resourceId: savedJob.resourceId,
-          payload: savedJob.payload || undefined,
-          traceContext: savedJob.traceContext || undefined,
-          errorMessage: savedJob.errorMessage || undefined,
-          createdAt: savedJob.createdAt.toISOString(),
-          updatedAt: savedJob.updatedAt?.toISOString(),
-        })
+        claimedJobs.push(new JobDto(savedJob))
       } catch (error) {
         // If optimistic lock fails, job was already claimed by another runner - skip it
         this.logger.debug(`Job ${job.id} already claimed by another runner (version mismatch)`)

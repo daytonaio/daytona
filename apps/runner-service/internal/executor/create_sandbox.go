@@ -7,6 +7,7 @@ package executor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"time"
@@ -28,11 +29,16 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 
 	// Parse payload
 	payload := job.GetPayload()
+	var parsedPayload map[string]interface{}
+	err := json.Unmarshal([]byte(payload), &parsedPayload)
+	if err != nil {
+		return fmt.Errorf("parse payload: %w", err)
+	}
 
-	snapshot, _ := payload["snapshot"].(string)
-	cpu, _ := payload["cpu"].(float64)
-	mem, _ := payload["mem"].(float64)
-	entrypoint, _ := payload["entrypoint"].([]interface{})
+	snapshot, _ := parsedPayload["snapshot"].(string)
+	cpu, _ := parsedPayload["cpu"].(float64)
+	mem, _ := parsedPayload["mem"].(float64)
+	entrypoint, _ := parsedPayload["entrypoint"].([]interface{})
 
 	// Convert entrypoint to string slice
 	var entrypointStr []string
@@ -44,7 +50,7 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 
 	// Get env map
 	envMap := make(map[string]string)
-	if envPayload, ok := payload["env"].(map[string]interface{}); ok {
+	if envPayload, ok := parsedPayload["env"].(map[string]interface{}); ok {
 		for k, v := range envPayload {
 			if s, ok := v.(string); ok {
 				envMap[k] = s
@@ -54,7 +60,7 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 
 	// Get labels map
 	labelsMap := make(map[string]string)
-	if labelsPayload, ok := payload["labels"].(map[string]interface{}); ok {
+	if labelsPayload, ok := parsedPayload["labels"].(map[string]interface{}); ok {
 		for k, v := range labelsPayload {
 			if s, ok := v.(string); ok {
 				labelsMap[k] = s
@@ -64,7 +70,7 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) error 
 
 	// Get registry auth if present
 	var authStr string
-	if registryPayload, ok := payload["registry"].(map[string]interface{}); ok {
+	if registryPayload, ok := parsedPayload["registry"].(map[string]interface{}); ok {
 		username, _ := registryPayload["username"].(string)
 		password, _ := registryPayload["password"].(string)
 		server, _ := registryPayload["server"].(string)

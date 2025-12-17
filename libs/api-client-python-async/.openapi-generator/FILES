@@ -81,6 +81,8 @@ daytona_api_client_async/models/health_controller_check200_response.py
 daytona_api_client_async/models/health_controller_check200_response_info_value.py
 daytona_api_client_async/models/health_controller_check503_response.py
 daytona_api_client_async/models/job.py
+daytona_api_client_async/models/job_status.py
+daytona_api_client_async/models/job_type.py
 daytona_api_client_async/models/keyboard_hotkey_request.py
 daytona_api_client_async/models/keyboard_press_request.py
 daytona_api_client_async/models/keyboard_type_request.py

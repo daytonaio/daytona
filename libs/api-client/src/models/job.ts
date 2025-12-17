@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -11,6 +11,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+
+// May contain unused imports in some cases
+// @ts-ignore
+import type { JobStatus } from './job-status'
+// May contain unused imports in some cases
+// @ts-ignore
+import type { JobType } from './job-type'
 
 /**
  *
@@ -26,34 +33,34 @@ export interface Job {
   id: string
   /**
    * The type of the job
-   * @type {string}
+   * @type {JobType}
    * @memberof Job
    */
-  type: JobTypeEnum
+  type: JobType
   /**
    * The status of the job
-   * @type {string}
+   * @type {JobStatus}
    * @memberof Job
    */
-  status: JobStatusEnum
+  status: JobStatus
   /**
    * The type of resource this job operates on
    * @type {string}
    * @memberof Job
    */
-  resourceType?: JobResourceTypeEnum
+  resourceType: JobResourceTypeEnum
   /**
    * The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)
    * @type {string}
    * @memberof Job
    */
-  resourceId?: string
+  resourceId: string
   /**
-   * Job-specific payload data (operational metadata)
-   * @type {{ [key: string]: any; }}
+   * Job-specific JSON-encoded payload data (operational metadata)
+   * @type {string}
    * @memberof Job
    */
-  payload?: { [key: string]: any }
+  payload?: string
   /**
    * OpenTelemetry trace context for distributed tracing (W3C Trace Context format)
    * @type {{ [key: string]: any; }}
@@ -80,26 +87,6 @@ export interface Job {
   updatedAt?: string
 }
 
-export const JobTypeEnum = {
-  CREATE_SANDBOX: 'CREATE_SANDBOX',
-  START_SANDBOX: 'START_SANDBOX',
-  STOP_SANDBOX: 'STOP_SANDBOX',
-  DESTROY_SANDBOX: 'DESTROY_SANDBOX',
-  CREATE_BACKUP: 'CREATE_BACKUP',
-  BUILD_SNAPSHOT: 'BUILD_SNAPSHOT',
-  PULL_SNAPSHOT: 'PULL_SNAPSHOT',
-  REMOVE_SNAPSHOT: 'REMOVE_SNAPSHOT',
-} as const
-
-export type JobTypeEnum = (typeof JobTypeEnum)[keyof typeof JobTypeEnum]
-export const JobStatusEnum = {
-  PENDING: 'PENDING',
-  IN_PROGRESS: 'IN_PROGRESS',
-  COMPLETED: 'COMPLETED',
-  FAILED: 'FAILED',
-} as const
-
-export type JobStatusEnum = (typeof JobStatusEnum)[keyof typeof JobStatusEnum]
 export const JobResourceTypeEnum = {
   SANDBOX: 'SANDBOX',
   SNAPSHOT: 'SNAPSHOT',

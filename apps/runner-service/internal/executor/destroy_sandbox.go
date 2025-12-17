@@ -7,6 +7,7 @@ package executor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/docker/docker/api/types/container"
@@ -19,8 +20,14 @@ func (e *Executor) destroySandbox(ctx context.Context, job *apiclient.Job) error
 	e.log.Debug("destroying sandbox", "job_id", job.GetId(), "sandbox_id", sandboxId)
 
 	payload := job.GetPayload()
-	cpu, _ := payload["cpu"].(float64)
-	mem, _ := payload["mem"].(float64)
+	var parsedPayload map[string]interface{}
+	err := json.Unmarshal([]byte(payload), &parsedPayload)
+	if err != nil {
+		return fmt.Errorf("parse payload: %w", err)
+	}
+
+	cpu, _ := parsedPayload["cpu"].(float64)
+	mem, _ := parsedPayload["mem"].(float64)
 
 	// Force remove container
 	if err := e.dockerClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{

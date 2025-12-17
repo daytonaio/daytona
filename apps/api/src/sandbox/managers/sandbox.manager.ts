@@ -41,6 +41,7 @@ import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
 import { JobService } from '../services/job.service'
 import { JobType, ResourceType } from '../dto/job.dto'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -119,17 +120,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 }
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-                // For v2 runners, create job to execute the action
-                if (runner.version === '2') {
-                  const jobType = sandbox.autoDeleteInterval === 0 ? JobType.DESTROY_SANDBOX : JobType.STOP_SANDBOX
-                  await this.jobService.createJob(null, jobType, runner.id, ResourceType.SANDBOX, sandbox.id)
-                  this.logger.debug(
-                    `Created ${jobType} job for autostop on v2 runner ${runner.id}, sandbox ${sandbox.id}`,
-                  )
-                } else {
-                  // For v0 runners, use syncInstanceState with imperative adapter calls
-                  this.syncInstanceState(sandbox.id)
-                }
+                this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -239,22 +230,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 sandbox.applyDesiredDestroyedState()
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-                // For v2 runners, create job to execute the action
-                if (runner.version === '2') {
-                  await this.jobService.createJob(
-                    null,
-                    JobType.DESTROY_SANDBOX,
-                    runner.id,
-                    ResourceType.SANDBOX,
-                    sandbox.id,
-                  )
-                  this.logger.debug(
-                    `Created DESTROY_SANDBOX job for autodelete on v2 runner ${runner.id}, sandbox ${sandbox.id}`,
-                  )
-                } else {
-                  // For v0 runners, use syncInstanceState with imperative adapter calls
-                  this.syncInstanceState(sandbox.id)
-                }
+                this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -480,33 +456,43 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @OnEvent(SandboxEvents.ARCHIVED)
+  @OnAsyncEvent({
+    event: SandboxEvents.ARCHIVED,
+  })
   @TrackJobExecution()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.DESTROYED)
+  @OnAsyncEvent({
+    event: SandboxEvents.DESTROYED,
+  })
   @TrackJobExecution()
   private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.STARTED)
+  @OnAsyncEvent({
+    event: SandboxEvents.STARTED,
+  })
   @TrackJobExecution()
   private async handleSandboxStartedEvent(event: SandboxStartedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.STOPPED)
+  @OnAsyncEvent({
+    event: SandboxEvents.STOPPED,
+  })
   @TrackJobExecution()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.CREATED)
+  @OnAsyncEvent({
+    event: SandboxEvents.CREATED,
+  })
   @TrackJobExecution()
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 }

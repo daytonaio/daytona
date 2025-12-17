@@ -12506,12 +12506,31 @@ components:
       required:
         - name
       type: object
+    JobType:
+      description: The type of the job
+      enum:
+        - CREATE_SANDBOX
+        - START_SANDBOX
+        - STOP_SANDBOX
+        - DESTROY_SANDBOX
+        - CREATE_BACKUP
+        - BUILD_SNAPSHOT
+        - PULL_SNAPSHOT
+        - REMOVE_SNAPSHOT
+      type: string
+    JobStatus:
+      description: The status of the job
+      enum:
+        - PENDING
+        - IN_PROGRESS
+        - COMPLETED
+        - FAILED
+      type: string
     Job:
       example:
         createdAt: 2024-10-01T12:00:00Z
         resourceId: sandbox123
-        payload:
-          key: ''
+        payload: payload
         errorMessage: Failed to create sandbox
         id: job123
         type: CREATE_SANDBOX
@@ -12526,27 +12545,15 @@ components:
           example: job123
           type: string
         type:
+          allOf:
+            - $ref: '#/components/schemas/JobType'
           description: The type of the job
-          enum:
-            - CREATE_SANDBOX
-            - START_SANDBOX
-            - STOP_SANDBOX
-            - DESTROY_SANDBOX
-            - CREATE_BACKUP
-            - BUILD_SNAPSHOT
-            - PULL_SNAPSHOT
-            - REMOVE_SNAPSHOT
           example: CREATE_SANDBOX
-          type: string
         status:
+          allOf:
+            - $ref: '#/components/schemas/JobStatus'
           description: The status of the job
-          enum:
-            - PENDING
-            - IN_PROGRESS
-            - COMPLETED
-            - FAILED
           example: PENDING
-          type: string
         resourceType:
           description: The type of resource this job operates on
           enum:
@@ -12561,9 +12568,8 @@ components:
           example: sandbox123
           type: string
         payload:
-          additionalProperties: true
-          description: Job-specific payload data (operational metadata)
-          type: object
+          description: Job-specific JSON-encoded payload data (operational metadata)
+          type: string
         traceContext:
           additionalProperties: true
           description: OpenTelemetry trace context for distributed tracing (W3C Trace
@@ -12586,6 +12592,8 @@ components:
       required:
         - createdAt
         - id
+        - resourceId
+        - resourceType
         - status
         - type
       type: object
@@ -12594,8 +12602,7 @@ components:
         jobs:
           - createdAt: 2024-10-01T12:00:00Z
             resourceId: sandbox123
-            payload:
-              key: ''
+            payload: payload
             errorMessage: Failed to create sandbox
             id: job123
             type: CREATE_SANDBOX
@@ -12606,8 +12613,7 @@ components:
             updatedAt: 2024-10-01T12:00:00Z
           - createdAt: 2024-10-01T12:00:00Z
             resourceId: sandbox123
-            payload:
-              key: ''
+            payload: payload
             errorMessage: Failed to create sandbox
             id: job123
             type: CREATE_SANDBOX
@@ -12627,21 +12633,21 @@ components:
       type: object
     UpdateJobStatus:
       example:
+        resultMetadata: resultMetadata
         errorMessage: Failed to create sandbox
         status: IN_PROGRESS
       properties:
         status:
+          allOf:
+            - $ref: '#/components/schemas/JobStatus'
           description: The new status of the job
-          enum:
-            - PENDING
-            - IN_PROGRESS
-            - COMPLETED
-            - FAILED
           example: IN_PROGRESS
-          type: string
         errorMessage:
           description: Error message if the job failed
           example: Failed to create sandbox
+          type: string
+        resultMetadata:
+          description: Result metadata for the job
           type: string
       required:
         - status

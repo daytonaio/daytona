@@ -70,10 +70,7 @@ import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { Transactional } from 'typeorm-transactional'
-import { JobService } from './job.service'
-import { JobType } from '../enums/job-type.enum'
-import { ResourceType } from '../enums/resource-type.enum'
-import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -104,8 +101,6 @@ export class SandboxService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly regionService: RegionService,
-    private readonly jobService: JobService,
-    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -265,7 +260,7 @@ export class SandboxService {
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: SandboxState.STOPPED })
 
-    this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
     return sandbox
   }
 
@@ -473,10 +468,7 @@ export class SandboxService {
 
       await this.sandboxRepository.insert(sandbox)
 
-      // For v2 runners, create CREATE_SANDBOX job
-      if (runner.version === '2') {
-        await this.createSandboxJobForV2Runner(sandbox, snapshot, runner, organization)
-      }
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
 
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
@@ -1072,16 +1064,7 @@ export class SandboxService {
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-    // For v2 runners, create job in the same transaction
-    if (sandbox.runnerId) {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      if (runner && runner.version === '2') {
-        await this.jobService.createJob(null, JobType.DESTROY_SANDBOX, runner.id, ResourceType.SANDBOX, sandbox.id)
-        this.logger.debug(`Created DESTROY_SANDBOX job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
-      }
-    }
-
-    this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     return sandbox
   }
 
@@ -1194,21 +1177,7 @@ export class SandboxService {
 
       await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-      // For v2 runners, create job in the same transaction
-      if (sandbox.runnerId) {
-        const runner = await this.runnerService.findOne(sandbox.runnerId)
-        if (runner && runner.version === '2') {
-          const metadata = {
-            limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-          }
-          await this.jobService.createJob(null, JobType.START_SANDBOX, runner.id, ResourceType.SANDBOX, sandbox.id, {
-            metadata,
-          })
-          this.logger.debug(`Created START_SANDBOX job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
-        }
-      }
-
-      this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
 
       return sandbox
     } catch (error) {
@@ -1249,20 +1218,10 @@ export class SandboxService {
 
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-    // For v2 runners, create job in the same transaction
-    if (sandbox.runnerId) {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      if (runner && runner.version === '2') {
-        const jobType = sandbox.autoDeleteInterval === 0 ? JobType.DESTROY_SANDBOX : JobType.STOP_SANDBOX
-        await this.jobService.createJob(null, jobType, runner.id, ResourceType.SANDBOX, sandbox.id)
-        this.logger.debug(`Created ${jobType} job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
-      }
-    }
-
     if (sandbox.autoDeleteInterval === 0) {
-      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     } else {
-      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
     }
     return sandbox
   }
@@ -1700,53 +1659,5 @@ export class SandboxService {
     if (!updateResult.affected) {
       throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
     }
-  }
-
-  /**
-   * Create a CREATE_SANDBOX job for v2 runners
-   * This method handles registry lookup and payload construction
-   */
-  private async createSandboxJobForV2Runner(
-    sandbox: Sandbox,
-    snapshot: Snapshot,
-    runner: Runner,
-    organization: Organization,
-  ): Promise<void> {
-    const registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshot.ref, organization.id)
-    if (!registry) {
-      throw new BadRequestError('No registry found for snapshot')
-    }
-
-    const payload = {
-      snapshot: snapshot.ref,
-      cpu: sandbox.cpu,
-      mem: sandbox.mem,
-      disk: sandbox.disk,
-      gpu: sandbox.gpu,
-      osUser: sandbox.osUser,
-      env: sandbox.env,
-      labels: sandbox.labels,
-      volumes: sandbox.volumes,
-      authToken: sandbox.authToken,
-      entrypoint: snapshot.entrypoint,
-      registry: {
-        url: registry.url,
-        username: registry.username,
-        password: registry.password,
-        project: registry.project,
-      },
-      networkBlockAll: sandbox.networkBlockAll,
-      networkAllowList: sandbox.networkAllowList,
-      metadata: {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        organizationId: organization.id,
-        organizationName: organization.name,
-        sandboxName: sandbox.name,
-      },
-    }
-
-    await this.jobService.createJob(null, JobType.CREATE_SANDBOX, runner.id, ResourceType.SANDBOX, sandbox.id, payload)
-
-    this.logger.debug(`Created CREATE_SANDBOX job for v2 runner ${runner.id}, sandbox ${sandbox.id}`)
   }
 }

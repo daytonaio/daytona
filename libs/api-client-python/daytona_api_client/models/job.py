@@ -20,6 +20,8 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
+from daytona_api_client.models.job_status import JobStatus
+from daytona_api_client.models.job_type import JobType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,11 +30,11 @@ class Job(BaseModel):
     Job
     """ # noqa: E501
     id: StrictStr = Field(description="The ID of the job")
-    type: StrictStr = Field(description="The type of the job")
-    status: StrictStr = Field(description="The status of the job")
-    resource_type: Optional[StrictStr] = Field(default=None, description="The type of resource this job operates on", alias="resourceType")
-    resource_id: Optional[StrictStr] = Field(default=None, description="The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)", alias="resourceId")
-    payload: Optional[Dict[str, Any]] = Field(default=None, description="Job-specific payload data (operational metadata)")
+    type: JobType = Field(description="The type of the job")
+    status: JobStatus = Field(description="The status of the job")
+    resource_type: StrictStr = Field(description="The type of resource this job operates on", alias="resourceType")
+    resource_id: StrictStr = Field(description="The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)", alias="resourceId")
+    payload: Optional[StrictStr] = Field(default=None, description="Job-specific JSON-encoded payload data (operational metadata)")
     trace_context: Optional[Dict[str, Any]] = Field(default=None, description="OpenTelemetry trace context for distributed tracing (W3C Trace Context format)", alias="traceContext")
     error_message: Optional[StrictStr] = Field(default=None, description="Error message if the job failed", alias="errorMessage")
     created_at: StrictStr = Field(description="The creation timestamp of the job", alias="createdAt")
@@ -40,26 +42,9 @@ class Job(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "type", "status", "resourceType", "resourceId", "payload", "traceContext", "errorMessage", "createdAt", "updatedAt"]
 
-    @field_validator('type')
-    def type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['CREATE_SANDBOX', 'START_SANDBOX', 'STOP_SANDBOX', 'DESTROY_SANDBOX', 'CREATE_BACKUP', 'BUILD_SNAPSHOT', 'PULL_SNAPSHOT', 'REMOVE_SNAPSHOT']):
-            raise ValueError("must be one of enum values ('CREATE_SANDBOX', 'START_SANDBOX', 'STOP_SANDBOX', 'DESTROY_SANDBOX', 'CREATE_BACKUP', 'BUILD_SNAPSHOT', 'PULL_SNAPSHOT', 'REMOVE_SNAPSHOT')")
-        return value
-
-    @field_validator('status')
-    def status_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED']):
-            raise ValueError("must be one of enum values ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED')")
-        return value
-
     @field_validator('resource_type')
     def resource_type_validate_enum(cls, value):
         """Validates the enum"""
-        if value is None:
-            return value
-
         if value not in set(['SANDBOX', 'SNAPSHOT', 'BACKUP']):
             raise ValueError("must be one of enum values ('SANDBOX', 'SNAPSHOT', 'BACKUP')")
         return value

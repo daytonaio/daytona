@@ -6,7 +6,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Runner } from '../entities/runner.entity'
 import { ModuleRef } from '@nestjs/core'
-import { RunnerAdapterLegacy } from './runnerAdapter.legacy'
+import { RunnerAdapterV0 } from './runnerAdapter.v0'
+import { RunnerAdapterV2 } from './runnerAdapter.v2'
 import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -76,7 +77,7 @@ export interface RunnerAdapter {
     destinationRef?: string,
   ): Promise<void>
   tagImage(sourceImage: string, targetImage: string): Promise<void>
-  snapshotExists(snapshotName: string): Promise<boolean>
+  snapshotExists(snapshotRef: string): Promise<boolean>
   getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>
   getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string>
 
@@ -99,7 +100,12 @@ export class RunnerAdapterFactory {
   async create(runner: Runner): Promise<RunnerAdapter> {
     switch (runner.version) {
       case '0': {
-        const adapter = await this.moduleRef.create(RunnerAdapterLegacy)
+        const adapter = await this.moduleRef.create(RunnerAdapterV0)
+        await adapter.init(runner)
+        return adapter
+      }
+      case '2': {
+        const adapter = await this.moduleRef.create(RunnerAdapterV2)
         await adapter.init(runner)
         return adapter
       }

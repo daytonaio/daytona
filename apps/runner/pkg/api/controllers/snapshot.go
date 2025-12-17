@@ -97,49 +97,10 @@ func PullSnapshot(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	// Pull the image using the pull registry (or none for public images)
-	err = runner.Docker.PullImage(ctx.Request.Context(), request.Snapshot, request.Registry)
+	err = runner.Docker.PullSnapshot(ctx.Request.Context(), request)
 	if err != nil {
 		ctx.Error(err)
 		return
-	}
-
-	if request.DestinationRegistry != nil {
-		if request.DestinationRegistry.Project == nil {
-			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to registry")))
-			return
-		}
-
-		var targetRef string
-
-		// If destination ref is provided, use it directly; otherwise build it from the image info
-		if request.DestinationRef != nil {
-			targetRef = *request.DestinationRef
-		} else {
-			// Get image info to retrieve the hash
-			imageInfo, err := runner.Docker.GetImageInfo(ctx.Request.Context(), request.Snapshot)
-			if err != nil {
-				ctx.Error(err)
-				return
-			}
-
-			ref := "daytona-" + getHashWithoutPrefix(imageInfo.Hash) + ":daytona"
-			targetRef = fmt.Sprintf("%s/%s/%s", request.DestinationRegistry.Url, *request.DestinationRegistry.Project, ref)
-		}
-
-		// Tag the image for the target registry
-		err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, targetRef)
-		if err != nil {
-			ctx.Error(err)
-			return
-		}
-
-		// Push the tagged image
-		err = runner.Docker.PushImage(ctx.Request.Context(), targetRef, request.DestinationRegistry)
-		if err != nil {
-			ctx.Error(err)
-			return
-		}
 	}
 
 	ctx.JSON(http.StatusOK, "Snapshot pulled successfully")
@@ -176,34 +137,10 @@ func BuildSnapshot(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err = runner.Docker.BuildImage(ctx.Request.Context(), request)
+	err = runner.Docker.BuildSnapshot(ctx.Request.Context(), request)
 	if err != nil {
 		ctx.Error(err)
 		return
-	}
-
-	tag := request.Snapshot
-
-	if request.PushToInternalRegistry {
-		if request.Registry.Project == nil {
-			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to internal registry")))
-			return
-		}
-		tag = fmt.Sprintf("%s/%s/%s", request.Registry.Url, *request.Registry.Project, request.Snapshot)
-	}
-
-	err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, tag)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	if request.PushToInternalRegistry {
-		err = runner.Docker.PushImage(ctx.Request.Context(), tag, request.Registry)
-		if err != nil {
-			ctx.Error(err)
-			return
-		}
 	}
 
 	ctx.JSON(http.StatusOK, "Snapshot built successfully")

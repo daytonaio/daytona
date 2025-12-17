@@ -22,9 +22,11 @@ var _ MappedNullable = &UpdateJobStatus{}
 // UpdateJobStatus struct for UpdateJobStatus
 type UpdateJobStatus struct {
 	// The new status of the job
-	Status string `json:"status"`
+	Status JobStatus `json:"status"`
 	// Error message if the job failed
-	ErrorMessage         *string `json:"errorMessage,omitempty"`
+	ErrorMessage *string `json:"errorMessage,omitempty"`
+	// Result metadata for the job
+	ResultMetadata       *string `json:"resultMetadata,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -34,7 +36,7 @@ type _UpdateJobStatus UpdateJobStatus
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateJobStatus(status string) *UpdateJobStatus {
+func NewUpdateJobStatus(status JobStatus) *UpdateJobStatus {
 	this := UpdateJobStatus{}
 	this.Status = status
 	return &this
@@ -49,9 +51,9 @@ func NewUpdateJobStatusWithDefaults() *UpdateJobStatus {
 }
 
 // GetStatus returns the Status field value
-func (o *UpdateJobStatus) GetStatus() string {
+func (o *UpdateJobStatus) GetStatus() JobStatus {
 	if o == nil {
-		var ret string
+		var ret JobStatus
 		return ret
 	}
 
@@ -60,7 +62,7 @@ func (o *UpdateJobStatus) GetStatus() string {
 
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *UpdateJobStatus) GetStatusOk() (*string, bool) {
+func (o *UpdateJobStatus) GetStatusOk() (*JobStatus, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,7 +70,7 @@ func (o *UpdateJobStatus) GetStatusOk() (*string, bool) {
 }
 
 // SetStatus sets field value
-func (o *UpdateJobStatus) SetStatus(v string) {
+func (o *UpdateJobStatus) SetStatus(v JobStatus) {
 	o.Status = v
 }
 
@@ -104,6 +106,38 @@ func (o *UpdateJobStatus) SetErrorMessage(v string) {
 	o.ErrorMessage = &v
 }
 
+// GetResultMetadata returns the ResultMetadata field value if set, zero value otherwise.
+func (o *UpdateJobStatus) GetResultMetadata() string {
+	if o == nil || IsNil(o.ResultMetadata) {
+		var ret string
+		return ret
+	}
+	return *o.ResultMetadata
+}
+
+// GetResultMetadataOk returns a tuple with the ResultMetadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateJobStatus) GetResultMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ResultMetadata) {
+		return nil, false
+	}
+	return o.ResultMetadata, true
+}
+
+// HasResultMetadata returns a boolean if a field has been set.
+func (o *UpdateJobStatus) HasResultMetadata() bool {
+	if o != nil && !IsNil(o.ResultMetadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetResultMetadata gets a reference to the given string and assigns it to the ResultMetadata field.
+func (o *UpdateJobStatus) SetResultMetadata(v string) {
+	o.ResultMetadata = &v
+}
+
 func (o UpdateJobStatus) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -117,6 +151,9 @@ func (o UpdateJobStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize["status"] = o.Status
 	if !IsNil(o.ErrorMessage) {
 		toSerialize["errorMessage"] = o.ErrorMessage
+	}
+	if !IsNil(o.ResultMetadata) {
+		toSerialize["resultMetadata"] = o.ResultMetadata
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -163,6 +200,7 @@ func (o *UpdateJobStatus) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "status")
 		delete(additionalProperties, "errorMessage")
+		delete(additionalProperties, "resultMetadata")
 		o.AdditionalProperties = additionalProperties
 	}
 

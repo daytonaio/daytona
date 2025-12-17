@@ -18,8 +18,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from daytona_api_client_async.models.job_status import JobStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,17 +28,11 @@ class UpdateJobStatus(BaseModel):
     """
     UpdateJobStatus
     """ # noqa: E501
-    status: StrictStr = Field(description="The new status of the job")
+    status: JobStatus = Field(description="The new status of the job")
     error_message: Optional[StrictStr] = Field(default=None, description="Error message if the job failed", alias="errorMessage")
+    result_metadata: Optional[StrictStr] = Field(default=None, description="Result metadata for the job", alias="resultMetadata")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["status", "errorMessage"]
-
-    @field_validator('status')
-    def status_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED']):
-            raise ValueError("must be one of enum values ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED')")
-        return value
+    __properties: ClassVar[List[str]] = ["status", "errorMessage", "resultMetadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -98,7 +93,8 @@ class UpdateJobStatus(BaseModel):
 
         _obj = cls.model_validate({
             "status": obj.get("status"),
-            "errorMessage": obj.get("errorMessage")
+            "errorMessage": obj.get("errorMessage"),
+            "resultMetadata": obj.get("resultMetadata")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

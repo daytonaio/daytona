@@ -53,13 +53,18 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.eventEmitterReadinessWatcher.waitUntilReady()
 
     await this.initializeDefaultRegion()
-    await this.initializeDefaultRunner()
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeBackupRegistry()
     await this.initializeInternalRegistry()
     await this.initializeBackupRegistry()
-    await this.initializeDefaultSnapshot()
+
+    // Default runner init is not awaited because v2 runners depend on the API to be ready
+    this.initializeDefaultRunner()
+      .then(() => this.initializeDefaultSnapshot())
+      .catch((error) => {
+        this.logger.error('Error initializing default runner', error)
+      })
   }
 
   private async stopAllCronJobs(): Promise<void> {

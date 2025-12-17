@@ -4,7 +4,6 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -118,7 +117,7 @@ func CreateBackup(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err = runner.Docker.StartBackupCreate(ctx.Request.Context(), sandboxId, createBackupDTO)
+	err = runner.Docker.CreateBackupAsync(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
 		runner.StatesCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
 		ctx.Error(err)
@@ -195,41 +194,10 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 	runner := runner.GetInstance(nil)
 
-	info, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
+	err = runner.Docker.UpdateNetworkSettings(ctx.Request.Context(), sandboxId, updateNetworkSettingsDto)
 	if err != nil {
-		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		ctx.Error(err)
 		return
-	}
-	containerShortId := info.ID[:12]
-
-	ipAddress := common.GetContainerIpAddress(ctx, info)
-
-	// Return error if container does not have an IP address
-	if ipAddress == "" {
-		ctx.Error(common_errors.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
-		return
-	}
-
-	if updateNetworkSettingsDto.NetworkBlockAll != nil && *updateNetworkSettingsDto.NetworkBlockAll {
-		err = runner.NetRulesManager.SetNetworkRules(containerShortId, ipAddress, "")
-		if err != nil {
-			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
-			return
-		}
-	} else if updateNetworkSettingsDto.NetworkAllowList != nil {
-		err = runner.NetRulesManager.SetNetworkRules(containerShortId, ipAddress, *updateNetworkSettingsDto.NetworkAllowList)
-		if err != nil {
-			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
-			return
-		}
-	}
-
-	if updateNetworkSettingsDto.NetworkLimitEgress != nil && *updateNetworkSettingsDto.NetworkLimitEgress {
-		err = runner.NetRulesManager.SetNetworkLimiter(containerShortId, ipAddress)
-		if err != nil {
-			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
-			return
-		}
 	}
 
 	ctx.JSON(http.StatusOK, "Network settings updated")

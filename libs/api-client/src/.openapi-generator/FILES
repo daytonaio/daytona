@@ -81,6 +81,8 @@ models/health-controller-check200-response-info-value.ts
 models/health-controller-check200-response.ts
 models/health-controller-check503-response.ts
 models/index.ts
+models/job-status.ts
+models/job-type.ts
 models/job.ts
 models/keyboard-hotkey-request.ts
 models/keyboard-press-request.ts

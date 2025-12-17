@@ -110,17 +110,7 @@ export class JobController {
       throw new Error(`Job ${jobId} not found`)
     }
 
-    return {
-      id: job.id,
-      type: job.type,
-      status: job.status,
-      resourceType: job.resourceType,
-      resourceId: job.resourceId,
-      payload: job.payload,
-      errorMessage: job.errorMessage,
-      createdAt: job.createdAt.toISOString(),
-      updatedAt: job.updatedAt?.toISOString(),
-    }
+    return new JobDto(job)
   }
 
   @Post(':jobId/status')
@@ -145,18 +135,13 @@ export class JobController {
   ): Promise<JobDto> {
     this.logger.log(`Runner ${runnerContext.runnerId} updating job ${jobId} status to ${updateJobStatusDto.status}`)
 
-    const job = await this.jobService.updateJobStatus(jobId, updateJobStatusDto.status, updateJobStatusDto.errorMessage)
+    const job = await this.jobService.updateJobStatus(
+      jobId,
+      updateJobStatusDto.status,
+      updateJobStatusDto.errorMessage,
+      updateJobStatusDto.resultMetadata,
+    )
 
-    return {
-      id: job.id,
-      type: job.type,
-      status: job.status,
-      resourceType: job.resourceType,
-      resourceId: job.resourceId,
-      payload: job.payload,
-      errorMessage: job.errorMessage,
-      createdAt: job.createdAt.toISOString(),
-      updatedAt: job.updatedAt?.toISOString(),
-    }
+    return new JobDto(job)
   }
 }

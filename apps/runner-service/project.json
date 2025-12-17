@@ -46,16 +46,6 @@
       },
       "dependsOn": ["copy-daemon-bin"]
     },
-    "serve": {
-      "executor": "@nx-go/nx-go:serve",
-      "options": {
-        "main": "{projectRoot}/cmd/runner-service/main.go"
-      },
-      "configurations": {
-        "production": {}
-      },
-      "dependsOn": ["copy-daemon-bin"]
-    },
     "format": {
       "executor": "nx:run-commands",
       "options": {

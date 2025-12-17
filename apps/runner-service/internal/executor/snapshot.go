@@ -29,8 +29,13 @@ func (e *Executor) buildSnapshot(ctx context.Context, job *apiclient.Job) error 
 
 	e.log.Info("Building snapshot", slog.String("snapshot_ref", snapshotRef))
 
+	var parsedPayload map[string]interface{}
+	err := json.Unmarshal([]byte(payload), &parsedPayload)
+	if err != nil {
+		return fmt.Errorf("parse payload: %w", err)
+	}
 	// Extract buildInfo from payload
-	buildInfo, ok := payload["buildInfo"].(map[string]interface{})
+	buildInfo, ok := parsedPayload["buildInfo"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("buildInfo not found in payload")
 	}
@@ -58,8 +63,14 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) error {
 
 	payload := job.GetPayload()
 
+	var parsedPayload map[string]interface{}
+	err := json.Unmarshal([]byte(payload), &parsedPayload)
+	if err != nil {
+		return fmt.Errorf("parse payload: %w", err)
+	}
+
 	// Get source image from payload (external image like ubuntu:22.04)
-	sourceImage, ok := payload["sourceImage"].(string)
+	sourceImage, ok := parsedPayload["sourceImage"].(string)
 	if !ok || sourceImage == "" {
 		// Fallback to destination ref for backwards compatibility
 		sourceImage = destinationRef
@@ -75,7 +86,7 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) error {
 	}
 
 	// Extract source registry credentials if present
-	if registryPayload, ok := payload["registry"].(map[string]interface{}); ok {
+	if registryPayload, ok := parsedPayload["registry"].(map[string]interface{}); ok {
 		authConfig := registry.AuthConfig{}
 
 		if username, ok := registryPayload["username"].(string); ok {
@@ -126,7 +137,7 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) error {
 		}
 
 		// Push to internal registry if destination registry credentials are provided
-		if destRegistryPayload, ok := payload["destinationRegistry"].(map[string]interface{}); ok {
+		if destRegistryPayload, ok := parsedPayload["destinationRegistry"].(map[string]interface{}); ok {
 			pushOptions := image.PushOptions{}
 
 			authConfig := registry.AuthConfig{}
@@ -181,10 +192,10 @@ func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) error
 	if snapshotRef == "" {
 		// Fallback to payload for backwards compatibility
 		payload := job.GetPayload()
-		var ok bool
-		snapshotRef, ok = payload["snapshotRef"].(string)
-		if !ok {
-			return fmt.Errorf("snapshotRef not found in job")
+		var parsedPayload map[string]interface{}
+		err := json.Unmarshal([]byte(payload), &parsedPayload)
+		if err != nil {
+			return fmt.Errorf("parse payload: %w", err)
 		}
 	}
 

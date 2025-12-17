@@ -8,58 +8,10 @@ import { IsEnum, IsObject, IsOptional, IsString } from 'class-validator'
 import { JobType } from '../enums/job-type.enum'
 import { JobStatus } from '../enums/job-status.enum'
 import { ResourceType } from '../enums/resource-type.enum'
+import { Job } from '../entities/job.entity'
 
 // Re-export enums for convenience
 export { JobType, JobStatus, ResourceType }
-
-// Typed payload interfaces for different job types
-// Note: resourceId (sandboxId, snapshotRef, etc.) is stored in Job.resourceId column, not in payload
-export interface SandboxJobPayload {
-  snapshot?: string
-  cpu?: number
-  mem?: number
-  disk?: number
-  metadata?: Record<string, any>
-}
-
-export interface SnapshotJobPayload {
-  // Source registry for pulling external images
-  registry?: {
-    url?: string
-    username?: string
-    password?: string
-    project?: string
-  }
-  // Destination registry for pushing to internal registry
-  destinationRegistry?: {
-    url?: string
-    username?: string
-    password?: string
-    project?: string
-  }
-  // Source image name for PULL_SNAPSHOT (external image like ubuntu:22.04)
-  sourceImage?: string
-  // Destination ref for PULL_SNAPSHOT (internal registry ref)
-  destinationRef?: string
-  // Build info for BUILD_SNAPSHOT
-  buildInfo?: {
-    snapshotRef: string
-    context?: string
-    dockerfile?: string
-    buildArgs?: Record<string, string>
-  }
-  organizationId?: string
-}
-
-export interface BackupJobPayload {
-  backupSnapshotName: string
-  registry?: {
-    url?: string
-    username?: string
-    password?: string
-    project?: string
-  }
-}
 
 @ApiSchema({ name: 'Job' })
 export class JobDto {
@@ -72,6 +24,7 @@ export class JobDto {
   @ApiProperty({
     description: 'The type of the job',
     enum: JobType,
+    enumName: 'JobType',
     example: JobType.CREATE_SANDBOX,
   })
   @IsEnum(JobType)
@@ -80,36 +33,32 @@ export class JobDto {
   @ApiProperty({
     description: 'The status of the job',
     enum: JobStatus,
+    enumName: 'JobStatus',
     example: JobStatus.PENDING,
   })
   @IsEnum(JobStatus)
   status: JobStatus
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The type of resource this job operates on',
     enum: ResourceType,
     example: ResourceType.SANDBOX,
   })
-  @IsOptional()
   @IsEnum(ResourceType)
-  resourceType?: ResourceType
+  resourceType: ResourceType
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)',
     example: 'sandbox123',
   })
-  @IsOptional()
   @IsString()
-  resourceId?: string
+  resourceId: string
 
   @ApiPropertyOptional({
-    description: 'Job-specific payload data (operational metadata)',
-    type: 'object',
-    additionalProperties: true,
+    description: 'Job-specific JSON-encoded payload data (operational metadata)',
   })
   @IsOptional()
-  @IsObject()
-  payload?: Record<string, any>
+  payload?: string
 
   @ApiPropertyOptional({
     description: 'OpenTelemetry trace context for distributed tracing (W3C Trace Context format)',
@@ -141,6 +90,19 @@ export class JobDto {
   })
   @IsOptional()
   updatedAt?: string
+
+  constructor(job: Job) {
+    this.id = job.id
+    this.type = job.type
+    this.status = job.status
+    this.resourceType = job.resourceType
+    this.resourceId = job.resourceId
+    this.payload = job.payload || undefined
+    this.traceContext = job.traceContext || undefined
+    this.errorMessage = job.errorMessage || undefined
+    this.createdAt = job.createdAt.toISOString()
+    this.updatedAt = job.updatedAt?.toISOString()
+  }
 }
 
 @ApiSchema({ name: 'PollJobsRequest' })
@@ -174,6 +136,7 @@ export class UpdateJobStatusDto {
   @ApiProperty({
     description: 'The new status of the job',
     enum: JobStatus,
+    enumName: 'JobStatus',
     example: JobStatus.IN_PROGRESS,
   })
   @IsEnum(JobStatus)
@@ -186,4 +149,11 @@ export class UpdateJobStatusDto {
   @IsOptional()
   @IsString()
   errorMessage?: string
+
+  @ApiPropertyOptional({
+    description: 'Result metadata for the job',
+  })
+  @IsOptional()
+  @IsString()
+  resultMetadata?: string
 }

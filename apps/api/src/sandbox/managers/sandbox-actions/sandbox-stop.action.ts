@@ -33,13 +33,6 @@ export class SandboxStopAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
-    // v2 runners use job-based stop - jobs are created in sandbox.service.ts
-    // JobStateHandlerService handles state updates when job completes
-    if (runner.version === '2') {
-      return DONT_SYNC_AGAIN
-    }
-
-    // v0 runners use imperative adapter calls
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     switch (sandbox.state) {
