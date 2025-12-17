@@ -28,6 +28,7 @@ export enum NavigationCategory {
   GENERAL,
   TYPESCRIPT_SDK,
   PYTHON_SDK,
+  RUBY_SDK,
 }
 
 /**
@@ -78,6 +79,15 @@ export const getSidebarConfig = (
             icon: 'package.svg',
           },
           relatedGroupCategory: NavigationCategory.PYTHON_SDK,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/ruby-sdk', locale),
+          label: labels['sidebarconfig.rubySdkReference'],
+          attrs: {
+            icon: 'package.svg',
+          },
+          relatedGroupCategory: NavigationCategory.RUBY_SDK,
         },
         {
           type: 'link',
@@ -615,6 +625,25 @@ export const getSidebarConfig = (
           type: 'link',
           href: localizePath('/docs/python-sdk/async/async-sandbox', locale),
           label: t('sidebarconfig.asyncSandbox'),
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.rubySdkReference'],
+      homePageHref: localizePath('/docs/ruby-sdk', locale),
+      category: NavigationCategory.RUBY_SDK,
+      autopopulateFromDir: localizePath('/docs/ruby-sdk', locale),
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/ruby-sdk/daytona', locale),
+          label: labels['sidebarconfig.daytona'],
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/ruby-sdk/sandbox', locale),
+          label: labels['sidebarconfig.sandbox'],
         },
       ],
     },

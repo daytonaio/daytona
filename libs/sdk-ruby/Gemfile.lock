@@ -52,6 +52,7 @@ GEM
     ethon (0.15.0)
       ffi (>= 1.15.0)
     event_emitter (0.2.6)
+    ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     hashdiff (1.2.1)
@@ -67,6 +68,8 @@ GEM
     logger (1.7.0)
     method_source (1.1.0)
     mutex_m (0.3.0)
+    nokogiri (1.18.10-aarch64-linux-gnu)
+      racc (~> 1.4)
     nokogiri (1.18.10-arm64-darwin)
       racc (~> 1.4)
     nokogiri (1.18.10-x86_64-linux-gnu)
@@ -157,6 +160,7 @@ GEM
       yard (~> 0.9)
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin-24
   x86_64-linux
 
