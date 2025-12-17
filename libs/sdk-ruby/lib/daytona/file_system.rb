@@ -169,17 +169,17 @@ module Daytona
     def upload_file(source, remote_path) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       if source.is_a?(String) && File.exist?(source)
         # Source is a file path
-        File.open(source, 'rb') { |file| toolbox_api.upload_file(remote_path, { file: }) }
+        File.open(source, 'rb') { |file| toolbox_api.upload_file(remote_path, file) }
       elsif source.respond_to?(:read)
         # Source is an IO object
-        toolbox_api.upload_file(remote_path, { file: source })
+        toolbox_api.upload_file(remote_path, source)
       else
         # Source is string content - create a temporary file
         Tempfile.create('daytona_upload') do |file|
           file.binmode
           file.write(source)
           file.rewind
-          toolbox_api.upload_file(remote_path, { file: })
+          toolbox_api.upload_file(remote_path, file)
         end
       end
     rescue StandardError => e
