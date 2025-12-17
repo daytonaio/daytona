@@ -437,11 +437,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           </SidebarMenuItem>
           <SidebarMenuItem key="version">
             <div
-              className={cn('flex items-center w-full justify-center gap-2 pt-2 overflow-auto h-4 whitespace-nowrap', {
-                'opacity-0': !sidebar.open,
-              })}
+              className={cn(
+                'flex items-center w-full justify-center gap-2 mt-2 overflow-auto min-h-4 whitespace-nowrap',
+              )}
             >
-              {<span className="text-xs text-muted-foreground">Version {version}</span>}
+              {sidebar.open && <span className="text-xs text-muted-foreground">Version {version}</span>}
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
