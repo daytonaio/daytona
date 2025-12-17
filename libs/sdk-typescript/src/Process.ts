@@ -72,7 +72,7 @@ export class Process {
    * @param {string} command - Shell command to execute
    * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox working directory.
    * @param {Record<string, string>} [env] - Environment variables to set for the command
-   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
+   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely. Defaults to 6 minutes.
    * @returns {Promise<ExecuteResponse>} Command execution results containing:
    *                                    - exitCode: The command's exit status
    *                                    - result: Standard output from the command
@@ -135,7 +135,7 @@ export class Process {
    *
    * @param {string} code - Code to execute
    * @param {CodeRunParams} params - Parameters for code execution
-   * @param {number} [timeout] - Maximum time in seconds to wait for execution to complete
+   * @param {number} [timeout] - Maximum time in seconds to wait for execution to complete. 0 means wait indefinitely. Defaults to 6 minutes.
    * @returns {Promise<ExecuteResponse>} Code execution results containing:
    *                                    - exitCode: The execution's exit status
    *                                    - result: Standard output from the code

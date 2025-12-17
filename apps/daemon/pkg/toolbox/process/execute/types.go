@@ -1,7 +1,7 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-package process
+package execute
 
 type ExecuteRequest struct {
 	Command string `json:"command" validate:"required"`

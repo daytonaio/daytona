@@ -104,7 +104,7 @@ class AsyncProcess:
                 specified, uses the sandbox working directory.
             env (Optional[Dict[str, str]]): Environment variables to set for the command.
             timeout (Optional[int]): Maximum time in seconds to wait for the command
-                to complete. 0 means wait indefinitely.
+                to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
         Returns:
             ExecuteResponse: Command execution results containing:
@@ -172,7 +172,7 @@ class AsyncProcess:
             code (str): Code to execute.
             params (Optional[CodeRunParams]): Parameters for code execution.
             timeout (Optional[int]): Maximum time in seconds to wait for the code
-                to complete. 0 means wait indefinitely.
+                to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
         Returns:
             ExecuteResponse: Code execution result containing:

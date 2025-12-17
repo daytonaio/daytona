@@ -46,7 +46,7 @@ Execute a shell command in the Sandbox.
   specified, uses the sandbox working directory.
 - `env` _Optional[Dict[str, str]]_ - Environment variables to set for the command.
 - `timeout` _Optional[int]_ - Maximum time in seconds to wait for the command
-  to complete. 0 means wait indefinitely.
+  to complete. 0 means wait indefinitely. Defaults to 6 minutes.
   
 
 **Returns**:
@@ -87,7 +87,7 @@ Executes code in the Sandbox using the appropriate language runtime.
 - `code` _str_ - Code to execute.
 - `params` _Optional[CodeRunParams]_ - Parameters for code execution.
 - `timeout` _Optional[int]_ - Maximum time in seconds to wait for the code
-  to complete. 0 means wait indefinitely.
+  to complete. 0 means wait indefinitely. Defaults to 6 minutes.
   
 
 **Returns**:
