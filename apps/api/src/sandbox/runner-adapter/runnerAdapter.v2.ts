@@ -22,8 +22,9 @@ import {
   CreateBackupDTO,
   BuildSnapshotRequestDTO,
   PullSnapshotRequestDTO,
+  UpdateNetworkSettingsDTO,
 } from '@daytonaio/runner-api-client'
-import { Propagation, Transactional } from 'typeorm-transactional'
+import { Transactional } from 'typeorm-transactional'
 
 /**
  * RunnerAdapterV2 implements RunnerAdapter for v2 runners.
@@ -118,9 +119,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     }
   }
 
-  @Transactional({
-    propagation: Propagation.MANDATORY,
-  })
+  @Transactional()
   async createSandbox(
     sandbox: Sandbox,
     registry?: DockerRegistry,
@@ -383,11 +382,28 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
   @Transactional()
   async updateNetworkSettings(
-    _sandboxId: string,
-    _networkBlockAll?: boolean,
-    _networkAllowList?: string,
-    _networkLimitEgress?: boolean,
+    sandboxId: string,
+    networkBlockAll?: boolean,
+    networkAllowList?: string,
+    networkLimitEgress?: boolean,
   ): Promise<void> {
-    throw new Error('updateNetworkSettings is not supported for V2 runners')
+    const payload: UpdateNetworkSettingsDTO = {
+      networkBlockAll: networkBlockAll,
+      networkAllowList: networkAllowList,
+      networkLimitEgress: networkLimitEgress,
+    }
+
+    await this.jobService.createJob(
+      null,
+      JobType.UPDATE_SANDBOX_NETWORK_SETTINGS,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload,
+    )
+
+    this.logger.debug(
+      `Created UPDATE_SANDBOX_NETWORK_SETTINGS job for sandbox ${sandboxId} on runner ${this.runner.id}`,
+    )
   }
 }

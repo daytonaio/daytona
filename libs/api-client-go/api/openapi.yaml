@@ -12521,6 +12521,7 @@ components:
         - BUILD_SNAPSHOT
         - PULL_SNAPSHOT
         - REMOVE_SNAPSHOT
+        - UPDATE_SANDBOX_NETWORK_SETTINGS
       type: string
     JobStatus:
       description: The status of the job

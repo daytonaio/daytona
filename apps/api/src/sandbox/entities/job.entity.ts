@@ -4,6 +4,7 @@
  */
 
 import {
+  Check,
   Column,
   CreateDateColumn,
   Entity,
@@ -25,6 +26,12 @@ import { v4 } from 'uuid'
   unique: true,
   where: '"completedAt" IS NULL',
 })
+@Check(
+  'VALIDATE_JOB_TYPE',
+  `"type" IN (${Object.values(JobType)
+    .map((v) => `'${v}'`)
+    .join(', ')})`,
+)
 export class Job {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -33,8 +40,7 @@ export class Job {
   version: number
 
   @Column({
-    type: 'enum',
-    enum: JobType,
+    type: 'character varying',
   })
   type: JobType
 

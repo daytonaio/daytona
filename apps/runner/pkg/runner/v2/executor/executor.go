@@ -141,6 +141,8 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
 		err = e.pullSnapshot(ctx, job)
 	case apiclient.JOBTYPE_REMOVE_SNAPSHOT:
 		err = e.removeSnapshot(ctx, job)
+	case apiclient.JOBTYPE_UPDATE_SANDBOX_NETWORK_SETTINGS:
+		err = e.updateNetworkSettings(ctx, job)
 	default:
 		err = fmt.Errorf("unknown job type: %s", job.GetType())
 	}

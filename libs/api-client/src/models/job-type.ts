@@ -27,6 +27,7 @@ export const JobType = {
   BUILD_SNAPSHOT: 'BUILD_SNAPSHOT',
   PULL_SNAPSHOT: 'PULL_SNAPSHOT',
   REMOVE_SNAPSHOT: 'REMOVE_SNAPSHOT',
+  UPDATE_SANDBOX_NETWORK_SETTINGS: 'UPDATE_SANDBOX_NETWORK_SETTINGS',
 } as const
 
 export type JobType = (typeof JobType)[keyof typeof JobType]
