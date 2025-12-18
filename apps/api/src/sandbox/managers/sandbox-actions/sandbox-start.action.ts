@@ -230,41 +230,11 @@ export class SandboxStartAction extends SandboxAction {
     } else {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.PULLING_SNAPSHOT)
-      this.pullSnapshotToRunner(snapshot.ref, runner)
+      this.snapshotService.pullSnapshotToRunner(snapshot.ref, runner)
       await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
     }
 
     return SYNC_AGAIN
-  }
-
-  async pullSnapshotToRunner(snapshotRef: string, runner: Runner) {
-    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef)
-
-    // If no registry found by image name, use the default internal registry
-    if (!dockerRegistry) {
-      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      if (!dockerRegistry) {
-        throw new Error('No registry found for snapshot and no default internal registry configured')
-      }
-    }
-
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-    let retries = 0
-    while (retries < 10) {
-      try {
-        await runnerAdapter.pullSnapshot(snapshotRef, dockerRegistry)
-        break
-      } catch (err) {
-        if (err.code !== 'ECONNRESET') {
-          throw err
-        }
-        if (++retries >= 10) {
-          throw err
-        }
-        await new Promise((resolve) => setTimeout(resolve, retries * 1000))
-      }
-    }
   }
 
   // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result

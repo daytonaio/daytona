@@ -156,6 +156,13 @@ export class RunnerDto {
   })
   unschedulable: boolean
 
+  @ApiPropertyOptional({
+    description: 'Whether the runner is draining (not accepting new sandboxes)',
+    example: false,
+  })
+  @IsOptional()
+  isDraining?: boolean
+
   @ApiProperty({
     description: 'The creation timestamp of the runner',
     example: '2023-10-01T12:00:00Z',
@@ -199,6 +206,7 @@ export class RunnerDto {
       state: runner.state,
       lastChecked: runner.lastChecked?.toISOString(),
       unschedulable: runner.unschedulable,
+      isDraining: runner.isDraining,
       createdAt: runner.createdAt.toISOString(),
       updatedAt: runner.updatedAt.toISOString(),
       version: runner.version,

@@ -52,11 +52,12 @@ class Runner(BaseModel):
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
+    is_draining: Optional[StrictBool] = Field(default=None, description="Whether the runner is draining (not accepting new sandboxes)", alias="isDraining")
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "isDraining", "createdAt", "updatedAt", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -139,6 +140,7 @@ class Runner(BaseModel):
             "state": obj.get("state"),
             "lastChecked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),
+            "isDraining": obj.get("isDraining"),
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
             "version": obj.get("version")

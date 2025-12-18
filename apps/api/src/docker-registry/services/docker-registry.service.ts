@@ -198,10 +198,18 @@ export class DockerRegistryService {
   async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     const whereCondition = organizationId
       ? [
-          { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
-          { organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
+          { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION, RegistryType.BACKUP]) },
+          {
+            organizationId: IsNull(),
+            registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION, RegistryType.BACKUP]),
+          },
         ]
-      : [{ organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) }]
+      : [
+          {
+            organizationId: IsNull(),
+            registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION, RegistryType.BACKUP]),
+          },
+        ]
 
     const registries = await this.dockerRegistryRepository.find({
       where: whereCondition,

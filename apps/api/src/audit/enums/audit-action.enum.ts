@@ -22,6 +22,7 @@ export enum AuditAction {
   LEAVE_ORGANIZATION = 'leave_organization',
   REGENERATE_KEY_PAIR = 'regenerate_key_pair',
   UPDATE_SCHEDULING = 'update_scheduling',
+  UPDATE_DRAINING = 'update_draining',
   START = 'start',
   STOP = 'stop',
   REPLACE_LABELS = 'replace_labels',

@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException, forwardRef, Inject } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
+import { FindOptionsWhere, In, IsNull, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -19,13 +19,17 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { BackupState } from '../enums/backup-state.enum'
+import { SnapshotService } from './snapshot.service'
 
 @Injectable()
 export class RunnerService {
@@ -39,10 +43,12 @@ export class RunnerService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
+    @InjectRedis()
+    private readonly redis: Redis,
+    @Inject(forwardRef(() => SnapshotService))
+    private readonly snapshotService: SnapshotService,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -121,6 +127,7 @@ export class RunnerService {
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
+      isDraining: Not(true),
       availabilityScore: params.availabilityScoreThreshold
         ? MoreThanOrEqual(params.availabilityScoreThreshold)
         : MoreThanOrEqual(this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')),
@@ -186,7 +193,7 @@ export class RunnerService {
       return
     }
 
-    // Don't change state if runner is decommissioned
+    // Don't change state if runner is decommissioned or draining
     if (runner.state === RunnerState.DECOMMISSIONED) {
       this.logger.debug(`Runner ${runnerId} is decommissioned, not updating state`)
       return
@@ -296,6 +303,167 @@ export class RunnerService {
     }
   }
 
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-decommission-runners', waitForCompletion: true })
+  @LogExecution('check-decommission-runners')
+  @WithInstrumentation()
+  private async handleCheckDecommissionRunners() {
+    const lockKey = 'check-decommission-runners'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const drainingRunners = await this.runnerRepository.find({
+        where: {
+          isDraining: true,
+        },
+      })
+
+      this.logger.debug(`Checking ${drainingRunners.length} draining runners`)
+
+      await Promise.allSettled(
+        drainingRunners.map(async (runner) => {
+          try {
+            // Check if runner has any sandboxes with desiredState != DESTROYED
+            const nonDestroyedSandboxCount = await this.sandboxRepository.count({
+              where: {
+                runnerId: runner.id,
+                desiredState: Not(SandboxDesiredState.DESTROYED),
+              },
+            })
+
+            const redisKey = `runner:draining-check:${runner.id}`
+
+            if (nonDestroyedSandboxCount > 0) {
+              // Reset counter if there are non-destroyed sandboxes
+              await this.redis.set(redisKey, '0', 'EX', 600) // 10 minute TTL
+              this.logger.debug(
+                `Runner ${runner.id} has ${nonDestroyedSandboxCount} sandboxes with desiredState != DESTROYED, reset counter`,
+              )
+            } else {
+              // Increment counter
+              const currentCount = await this.redis.get(redisKey)
+              const count = currentCount ? parseInt(currentCount, 10) + 1 : 1
+
+              if (count >= 3) {
+                // Decommission the runner
+                await this.runnerRepository.update(runner.id, {
+                  state: RunnerState.DECOMMISSIONED,
+                })
+                await this.redis.del(redisKey)
+                this.logger.log(`Runner ${runner.id} has been decommissioned after 3 successful draining checks`)
+              } else {
+                await this.redis.set(redisKey, count.toString(), 'EX', 600) // 10 minute TTL
+                this.logger.debug(
+                  `Runner ${runner.id} draining check passed (${count}/3), all sandboxes have desiredState = DESTROYED`,
+                )
+              }
+            }
+          } catch (e) {
+            this.logger.error(`Error checking draining runner ${runner.id}`, e)
+          }
+        }),
+      )
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  // Moves stopped sandboxes' backups to another runner to prepare reassignment
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'migrate-draining-runner-snapshots', waitForCompletion: true })
+  @LogExecution('migrate-draining-runner-snapshots')
+  @WithInstrumentation()
+  private async handleMigrateDrainingRunnerSnapshots() {
+    const lockKey = 'migrate-draining-runner-snapshots'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const drainingRunners = await this.runnerRepository.find({
+        where: {
+          isDraining: true,
+        },
+      })
+
+      this.logger.debug(`Checking ${drainingRunners.length} draining runners for snapshot migration`)
+
+      await Promise.allSettled(
+        drainingRunners.map(async (runner) => {
+          try {
+            const sandboxes = await this.sandboxRepository.find({
+              where: {
+                runnerId: runner.id,
+                state: SandboxState.STOPPED,
+                desiredState: SandboxDesiredState.STOPPED,
+                backupState: BackupState.COMPLETED,
+                backupSnapshot: Not(IsNull()),
+              },
+              take: 100,
+            })
+
+            this.logger.debug(
+              `Found ${sandboxes.length} eligible sandboxes on draining runner ${runner.id} for snapshot migration`,
+            )
+
+            await Promise.allSettled(
+              sandboxes.map(async (sandbox) => {
+                const sandboxLockKey = `draining-runner-snapshot-migration:${sandbox.id}`
+                const hasSandboxLock = await this.redisLockProvider.lock(sandboxLockKey, 3600)
+                if (!hasSandboxLock) {
+                  return
+                }
+
+                try {
+                  // Get an available runner in the same region with the same class
+                  const targetRunner = await this.getRandomAvailableRunner({
+                    regions: [sandbox.region],
+                    sandboxClass: sandbox.class,
+                    excludedRunnerIds: [runner.id],
+                  })
+
+                  // Check if snapshot runner entry already exists
+                  const existingEntry = await this.getSnapshotRunner(targetRunner.id, sandbox.backupSnapshot)
+                  if (existingEntry) {
+                    this.logger.debug(
+                      `Snapshot runner entry already exists for runner ${targetRunner.id} and snapshot ${sandbox.backupSnapshot}`,
+                    )
+                    // Do not unlock to avoid duplicates
+                    return
+                  }
+
+                  // Create snapshot runner entry on the target runner
+                  await this.createSnapshotRunnerEntry(targetRunner.id, sandbox.backupSnapshot)
+                  this.snapshotService.pullSnapshotToRunner(sandbox.backupSnapshot, targetRunner)
+
+                  this.logger.log(
+                    `Created snapshot runner entry for sandbox ${sandbox.id} backup ${sandbox.backupSnapshot} on runner ${targetRunner.id} (migrating from draining runner ${runner.id})`,
+                  )
+                  await this.redisLockProvider.unlock(sandboxLockKey)
+                } catch (e) {
+                  if (e instanceof BadRequestError && e.message === 'No available runners') {
+                    this.logger.warn(
+                      `No available runners found in region ${sandbox.region} for sandbox ${sandbox.id} snapshot migration`,
+                    )
+                  } else {
+                    this.logger.error(`Error migrating snapshot for sandbox ${sandbox.id}`, e)
+                  }
+                  await this.redisLockProvider.unlock(sandboxLockKey)
+                }
+              }),
+            )
+          } catch (e) {
+            this.logger.error(`Error processing draining runner ${runner.id} for snapshot migration`, e)
+          }
+        }),
+      )
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
   private async updateRunnerStatus(runnerId: string, runnerInfo?: RunnerInfo) {
     const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
     if (!runner) {
@@ -353,6 +521,16 @@ export class RunnerService {
     }
 
     runner.unschedulable = unschedulable
+    return this.runnerRepository.save(runner)
+  }
+
+  async updateDrainingStatus(id: string, isDraining: boolean): Promise<Runner> {
+    const runner = await this.runnerRepository.findOne({ where: { id } })
+    if (!runner) {
+      throw new Error('Runner not found')
+    }
+
+    runner.isDraining = isDraining
     return this.runnerRepository.save(runner)
   }
 

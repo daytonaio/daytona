@@ -69,6 +69,8 @@ definitions:
         type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      skipStart:
+        type: boolean
       snapshot:
         type: string
       storageQuota:

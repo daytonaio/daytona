@@ -67,6 +67,8 @@ type Runner struct {
 	LastChecked *string `json:"lastChecked,omitempty"`
 	// Whether the runner is unschedulable
 	Unschedulable bool `json:"unschedulable"`
+	// Whether the runner is draining (not accepting new sandboxes)
+	IsDraining *bool `json:"isDraining,omitempty"`
 	// The creation timestamp of the runner
 	CreatedAt string `json:"createdAt"`
 	// The last update timestamp of the runner
@@ -736,6 +738,38 @@ func (o *Runner) SetUnschedulable(v bool) {
 	o.Unschedulable = v
 }
 
+// GetIsDraining returns the IsDraining field value if set, zero value otherwise.
+func (o *Runner) GetIsDraining() bool {
+	if o == nil || IsNil(o.IsDraining) {
+		var ret bool
+		return ret
+	}
+	return *o.IsDraining
+}
+
+// GetIsDrainingOk returns a tuple with the IsDraining field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetIsDrainingOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsDraining) {
+		return nil, false
+	}
+	return o.IsDraining, true
+}
+
+// HasIsDraining returns a boolean if a field has been set.
+func (o *Runner) HasIsDraining() bool {
+	if o != nil && !IsNil(o.IsDraining) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsDraining gets a reference to the given bool and assigns it to the IsDraining field.
+func (o *Runner) SetIsDraining(v bool) {
+	o.IsDraining = &v
+}
+
 // GetCreatedAt returns the CreatedAt field value
 func (o *Runner) GetCreatedAt() string {
 	if o == nil {
@@ -859,6 +893,9 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 		toSerialize["lastChecked"] = o.LastChecked
 	}
 	toSerialize["unschedulable"] = o.Unschedulable
+	if !IsNil(o.IsDraining) {
+		toSerialize["isDraining"] = o.IsDraining
+	}
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["version"] = o.Version
@@ -944,6 +981,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "lastChecked")
 		delete(additionalProperties, "unschedulable")
+		delete(additionalProperties, "isDraining")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "version")
