@@ -96,7 +96,7 @@ func (a *ApiServer) Start() error {
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
 
-	metricsController := public.Group("/metrics")
+	metricsController := protected.Group("/metrics")
 	{
 		metricsController.GET("", gin.WrapH(promhttp.Handler()))
 	}
