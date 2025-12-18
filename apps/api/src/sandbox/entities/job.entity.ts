@@ -136,4 +136,16 @@ export class Job {
     this.createdAt = new Date()
     this.updatedAt = new Date()
   }
+
+  getResultMetadata(): Record<string, string> | null {
+    if (!this.resultMetadata) {
+      return null
+    }
+
+    try {
+      return JSON.parse(this.resultMetadata)
+    } catch {
+      return null
+    }
+  }
 }

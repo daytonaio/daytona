@@ -22,7 +22,7 @@ import (
 //	@Description	Create a sandbox
 //	@Param			sandbox	body	dto.CreateSandboxDTO	true	"Create sandbox"
 //	@Produce		json
-//	@Success		201	{string}	containerId
+//	@Success		201	{object}	dto.StartSandboxResponse
 //	@Failure		400	{object}	common_errors.ErrorResponse
 //	@Failure		401	{object}	common_errors.ErrorResponse
 //	@Failure		404	{object}	common_errors.ErrorResponse
@@ -41,7 +41,7 @@ func Create(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	containerId, err := runner.Docker.Create(ctx.Request.Context(), createSandboxDto)
+	_, daemonVersion, err := runner.Docker.Create(ctx.Request.Context(), createSandboxDto)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, createSandboxDto.Id, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("create", string(common.PrometheusOperationStatusFailure)).Inc()
@@ -51,7 +51,9 @@ func Create(ctx *gin.Context) {
 
 	common.ContainerOperationCount.WithLabelValues("create", string(common.PrometheusOperationStatusSuccess)).Inc()
 
-	ctx.JSON(http.StatusCreated, containerId)
+	ctx.JSON(http.StatusCreated, dto.StartSandboxResponse{
+		DaemonVersion: daemonVersion,
+	})
 }
 
 // Destroy 			godoc
@@ -244,14 +246,15 @@ func GetNetworkSettings(ctx *gin.Context) {
 //	@Summary		Start sandbox
 //	@Description	Start sandbox
 //	@Produce		json
-//	@Param			sandboxId	path		string	true	"Sandbox ID"
-//	@Param			metadata	body		object	false	"Metadata"
-//	@Success		200			{string}	string	"Sandbox started"
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Param			sandboxId	path	string	true	"Sandbox ID"
+//	@Param			metadata	body	object	false	"Metadata"
+//	@Produce		json
+//	@Success		200	{object}	dto.StartSandboxResponse	"Sandbox started"
+//	@Failure		400	{object}	common_errors.ErrorResponse
+//	@Failure		401	{object}	common_errors.ErrorResponse
+//	@Failure		404	{object}	common_errors.ErrorResponse
+//	@Failure		409	{object}	common_errors.ErrorResponse
+//	@Failure		500	{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/start [post]
 //
 //	@id				Start
@@ -267,7 +270,7 @@ func Start(ctx *gin.Context) {
 		return
 	}
 
-	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
+	daemonVersion, err := runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
 
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
@@ -275,7 +278,9 @@ func Start(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "Sandbox started")
+	ctx.JSON(http.StatusOK, dto.StartSandboxResponse{
+		DaemonVersion: daemonVersion,
+	})
 }
 
 // Stop 			godoc
@@ -332,17 +337,27 @@ func Info(ctx *gin.Context) {
 
 	info := runner.SandboxService.GetSandboxStatesInfo(ctx.Request.Context(), sandboxId)
 
+	var daemonVersion *string
+	if info.SandboxState == enums.SandboxStateStarted {
+		daemonVersionStr, err := runner.Docker.GetDaemonVersion(ctx.Request.Context(), sandboxId)
+		if err == nil {
+			daemonVersion = &daemonVersionStr
+		}
+	}
+
 	ctx.JSON(http.StatusOK, SandboxInfoResponse{
-		State:       info.SandboxState,
-		BackupState: info.BackupState,
-		BackupError: info.BackupErrorReason,
+		State:         info.SandboxState,
+		BackupState:   info.BackupState,
+		BackupError:   info.BackupErrorReason,
+		DaemonVersion: daemonVersion,
 	})
 }
 
 type SandboxInfoResponse struct {
-	State       enums.SandboxState `json:"state"`
-	BackupState enums.BackupState  `json:"backupState"`
-	BackupError *string            `json:"backupError,omitempty"`
+	State         enums.SandboxState `json:"state"`
+	BackupState   enums.BackupState  `json:"backupState"`
+	BackupError   *string            `json:"backupError,omitempty"`
+	DaemonVersion *string            `json:"daemonVersion,omitempty"`
 } //	@name	SandboxInfoResponse
 
 // RemoveDestroyed godoc

@@ -333,7 +333,7 @@ func GetBuildLogs(ctx *gin.Context) {
 //	@Description	Get information about a specified snapshot including size and entrypoint
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
-//	@Success		200			{object}	SnapshotInfoResponse
+//	@Success		200			{object}	dto.SnapshotInfoResponse
 //	@Failure		400			{object}	common_errors.ErrorResponse
 //	@Failure		401			{object}	common_errors.ErrorResponse
 //	@Failure		404			{object}	common_errors.ErrorResponse
@@ -367,23 +367,11 @@ func GetSnapshotInfo(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, SnapshotInfoResponse{
+	ctx.JSON(http.StatusOK, dto.SnapshotInfoResponse{
 		Name:       snapshot,
 		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024), // Convert bytes to GB
 		Entrypoint: info.Entrypoint,
 		Cmd:        info.Cmd,
-		Hash:       getHashWithoutPrefix(info.Hash),
+		Hash:       dto.HashWithoutPrefix(info.Hash),
 	})
-}
-
-type SnapshotInfoResponse struct {
-	Name       string   `json:"name" example:"nginx:latest"`
-	SizeGB     float64  `json:"sizeGB" example:"0.13"`
-	Entrypoint []string `json:"entrypoint,omitempty" example:"[\"nginx\",\"-g\",\"daemon off;\"]"`
-	Cmd        []string `json:"cmd,omitempty" example:"[\"nginx\",\"-g\",\"daemon off;\"]"`
-	Hash       string   `json:"hash,omitempty" example:"a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff"`
-} //	@name	SnapshotInfoResponse
-
-func getHashWithoutPrefix(hash string) string {
-	return strings.TrimPrefix(hash, "sha256:")
 }

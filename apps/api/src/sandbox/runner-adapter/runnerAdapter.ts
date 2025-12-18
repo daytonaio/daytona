@@ -16,6 +16,7 @@ import { BackupState } from '../enums/backup-state.enum'
 
 export interface RunnerSandboxInfo {
   state: SandboxState
+  daemonVersion?: string
   backupState?: BackupState
   backupErrorReason?: string
 }
@@ -42,6 +43,10 @@ export interface RunnerInfo {
   metrics?: RunnerMetrics
 }
 
+export interface StartSandboxResponse {
+  daemonVersion: string
+}
+
 export interface RunnerAdapter {
   init(runner: Runner): Promise<void>
 
@@ -55,8 +60,8 @@ export interface RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
-  ): Promise<void>
-  startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void>
+  ): Promise<StartSandboxResponse | undefined>
+  startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<StartSandboxResponse | undefined>
   stopSandbox(sandboxId: string): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>
   removeDestroyedSandbox(sandboxId: string): Promise<void>
@@ -79,9 +84,6 @@ export interface RunnerAdapter {
   tagImage(sourceImage: string, targetImage: string): Promise<void>
   snapshotExists(snapshotRef: string): Promise<boolean>
   getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>
-  getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string>
-
-  getSandboxDaemonVersion(sandboxId: string): Promise<string>
 
   updateNetworkSettings(
     sandboxId: string,

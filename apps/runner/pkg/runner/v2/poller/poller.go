@@ -52,6 +52,9 @@ func NewService(cfg *PollerServiceConfig) (*Service, error) {
 func (s *Service) Start(ctx context.Context) {
 	s.log.Info("Starting job poller")
 
+	// TODO: fetch IN_PROGRESS jobs and process them
+	// ensures that on restart, jobs that were in progress are not lost
+
 	for {
 		select {
 		case <-ctx.Done():

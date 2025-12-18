@@ -81,7 +81,7 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 	jobLog.Info("Executing job")
 
 	// Execute the job based on type
-	err := e.executeJob(ctx, job)
+	resultMetadata, err := e.executeJob(ctx, job)
 
 	// Update job status
 	status := apiclient.JOBSTATUS_COMPLETED
@@ -96,13 +96,13 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 	}
 
 	// Report status to API
-	if err := e.updateJobStatus(ctx, job.GetId(), status, errorMessage); err != nil {
+	if err := e.updateJobStatus(ctx, job.GetId(), status, resultMetadata, errorMessage); err != nil {
 		jobLog.Error("Failed to update job status", slog.Any("error", err))
 	}
 }
 
 // executeJob dispatches to the appropriate handler based on job type
-func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
+func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) (any, error) {
 	// Create a span for the job execution
 	tracer := otel.Tracer("runner")
 	ctx, span := tracer.Start(ctx, fmt.Sprintf("execute_%s", job.GetType()),
@@ -123,26 +123,27 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
 	}
 
 	// Dispatch to handler
+	var resultMetadata any
 	var err error
 	switch job.GetType() {
 	case apiclient.JOBTYPE_CREATE_SANDBOX:
-		err = e.createSandbox(ctx, job)
+		resultMetadata, err = e.createSandbox(ctx, job)
 	case apiclient.JOBTYPE_START_SANDBOX:
-		err = e.startSandbox(ctx, job)
+		resultMetadata, err = e.startSandbox(ctx, job)
 	case apiclient.JOBTYPE_STOP_SANDBOX:
-		err = e.stopSandbox(ctx, job)
+		resultMetadata, err = e.stopSandbox(ctx, job)
 	case apiclient.JOBTYPE_DESTROY_SANDBOX:
-		err = e.destroySandbox(ctx, job)
+		resultMetadata, err = e.destroySandbox(ctx, job)
 	case apiclient.JOBTYPE_CREATE_BACKUP:
-		err = e.createBackup(ctx, job)
+		resultMetadata, err = e.createBackup(ctx, job)
 	case apiclient.JOBTYPE_BUILD_SNAPSHOT:
-		err = e.buildSnapshot(ctx, job)
+		resultMetadata, err = e.buildSnapshot(ctx, job)
 	case apiclient.JOBTYPE_PULL_SNAPSHOT:
-		err = e.pullSnapshot(ctx, job)
+		resultMetadata, err = e.pullSnapshot(ctx, job)
 	case apiclient.JOBTYPE_REMOVE_SNAPSHOT:
-		err = e.removeSnapshot(ctx, job)
+		resultMetadata, err = e.removeSnapshot(ctx, job)
 	case apiclient.JOBTYPE_UPDATE_SANDBOX_NETWORK_SETTINGS:
-		err = e.updateNetworkSettings(ctx, job)
+		resultMetadata, err = e.updateNetworkSettings(ctx, job)
 	default:
 		err = fmt.Errorf("unknown job type: %s", job.GetType())
 	}
@@ -153,11 +154,11 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) error {
 		span.SetAttributes(attribute.Bool("error", true))
 	}
 
-	return err
+	return resultMetadata, err
 }
 
 // updateJobStatus reports job completion status to the API
-func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status apiclient.JobStatus, errorMessage *string) error {
+func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status apiclient.JobStatus, resultMetadata any, errorMessage *string) error {
 	// Create a span for the API call - otelhttp will create a child span for the HTTP request
 	tracer := otel.Tracer("runner")
 	ctx, span := tracer.Start(ctx, "update_job_status",
@@ -176,6 +177,14 @@ func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status api
 	updateStatus := apiclient.NewUpdateJobStatus(status)
 	if errorMessage != nil {
 		updateStatus.SetErrorMessage(*errorMessage)
+	}
+
+	if resultMetadata != nil {
+		resultMetadataJSON, err := json.Marshal(resultMetadata)
+		if err != nil {
+			return fmt.Errorf("failed to marshal result metadata: %w", err)
+		}
+		updateStatus.SetResultMetadata(string(resultMetadataJSON))
 	}
 
 	req := e.client.JobsAPI.UpdateJobStatus(ctx, jobID).UpdateJobStatus(*updateStatus)

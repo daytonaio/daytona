@@ -102,14 +102,9 @@ export class JobStateHandlerService {
         )
         sandbox.state = SandboxState.STARTED
         sandbox.errorReason = null
-        if (job.resultMetadata) {
-          try {
-            const metadata = JSON.parse(job.resultMetadata)
-            if (metadata.daemonVersion && typeof metadata.daemonVersion === 'string')
-              sandbox.daemonVersion = metadata.daemonVersion
-          } catch {
-            // Ignore JSON parse errors
-          }
+        const metadata = job.getResultMetadata()
+        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+          sandbox.daemonVersion = metadata.daemonVersion
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
@@ -145,14 +140,9 @@ export class JobStateHandlerService {
         this.logger.debug(`START_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`)
         sandbox.state = SandboxState.STARTED
         sandbox.errorReason = null
-        if (job.resultMetadata) {
-          try {
-            const metadata = JSON.parse(job.resultMetadata)
-            if (metadata.daemonVersion && typeof metadata.daemonVersion === 'string')
-              sandbox.daemonVersion = metadata.daemonVersion
-          } catch {
-            // Ignore JSON parse errors
-          }
+        const metadata = job.getResultMetadata()
+        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+          sandbox.daemonVersion = metadata.daemonVersion
         }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`START_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)

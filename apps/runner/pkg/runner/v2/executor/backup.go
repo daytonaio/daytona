@@ -13,13 +13,13 @@ import (
 	"github.com/daytonaio/runner/pkg/api/dto"
 )
 
-func (e *Executor) createBackup(ctx context.Context, job *apiclient.Job) error {
+func (e *Executor) createBackup(ctx context.Context, job *apiclient.Job) (any, error) {
 	var createBackupDto dto.CreateBackupDTO
 	err := e.parsePayload(job.Payload, &createBackupDto)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal payload: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 
 	// TODO: is state cache needed?
-	return e.docker.CreateBackup(ctx, job.ResourceId, createBackupDto)
+	return nil, e.docker.CreateBackup(ctx, job.ResourceId, createBackupDto)
 }

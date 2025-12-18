@@ -6,7 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, IsNull } from 'typeorm'
-import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo } from './runnerAdapter'
+import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo, StartSandboxResponse } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Job } from '../entities/job.entity'
@@ -78,9 +78,12 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
     let state = sandbox.state
 
+    let daemonVersion: string | undefined = undefined
+
     // If there's an incomplete job, infer the transitional state from job type
     if (incompleteJob) {
       state = this.inferStateFromJob(incompleteJob, sandbox)
+      daemonVersion = incompleteJob.getResultMetadata()?.daemonVersion
     } else {
       // Look for latest job for this sandbox
       const latestJob = await this.jobRepository.findOne({
@@ -92,6 +95,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       })
       if (latestJob) {
         state = this.inferStateFromJob(latestJob, sandbox)
+        daemonVersion = latestJob.getResultMetadata()?.daemonVersion
       }
     }
 
@@ -99,6 +103,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       state,
       backupState: sandbox.backupState,
       backupErrorReason: sandbox.backupErrorReason,
+      daemonVersion,
     }
   }
 
@@ -125,7 +130,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
-  ): Promise<void> {
+  ): Promise<StartSandboxResponse | undefined> {
     const payload: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
@@ -165,10 +170,16 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     )
 
     this.logger.debug(`Created CREATE_SANDBOX job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
+
+    // Daemon version will be set in the job result metadata
+    return undefined
   }
 
   @Transactional()
-  async startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void> {
+  async startSandbox(
+    sandboxId: string,
+    metadata?: { [key: string]: string },
+  ): Promise<StartSandboxResponse | undefined> {
     await this.jobService.createJob(
       null,
       JobType.START_SANDBOX,
@@ -179,6 +190,9 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     )
 
     this.logger.debug(`Created START_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+
+    // Daemon version will be set in the job result metadata
+    return undefined
   }
 
   @Transactional()
@@ -368,11 +382,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   @Transactional()
   async getSnapshotInfo(_snapshotName: string): Promise<RunnerSnapshotInfo> {
     throw new Error('getSnapshotInfo is not supported for V2 runners')
-  }
-
-  @Transactional()
-  async getSnapshotLogs(_snapshotRef: string, _follow: boolean): Promise<string> {
-    throw new Error('getSnapshotLogs is not supported for V2 runners')
   }
 
   @Transactional()
