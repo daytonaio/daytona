@@ -1,0 +1,63 @@
+name: Build Verification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: System dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          corepack enable
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "poetry==2.1.3"
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
+
+      - name: Project dependencies
+        run: |
+          yarn install --immutable
+          poetry lock
+          poetry install
+          go work sync
+          go env -w GOFLAGS="-buildvcs=false"
+
+      - name: Build projects
+        run: |
+          yarn build:production
+          yarn nx build-amd64 runner --configuration=production --nxBail=true
+
+      - name: Build CLI
+        run: |
+          cd ./apps/cli
+          GOOS=linux GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=linux GOARCH=arm64 ./hack/build.sh --skip-env-file
+          GOOS=darwin GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=darwin GOARCH=arm64 ./hack/build.sh --skip-env-file
+          cd ../..
+
+      - name: Verify build artifacts
+        run: |
+          echo "=== Checking build artifacts ==="
+          ls -la dist/apps/ || echo "dist/apps/ not found"
+          ls -la dist/libs/ || echo "dist/libs/ not found"
+          echo "=== Build verification completed ==="

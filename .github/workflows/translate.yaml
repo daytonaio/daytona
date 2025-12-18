@@ -1,7 +1,8 @@
 name: GT Translate
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
+  workflow_dispatch:
 
 jobs:
   translate:
