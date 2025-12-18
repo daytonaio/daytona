@@ -7,3 +7,7 @@ const (
 	USER_GROUP    = "user"
 	SANDBOX_GROUP = "sandbox"
 )
+
+var (
+	SuppressVersionMismatchWarning = false
+)
