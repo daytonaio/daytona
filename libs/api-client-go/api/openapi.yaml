@@ -1079,15 +1079,15 @@ paths:
       summary: Cancel organization invitation
       tags:
         - organizations
-  /organizations/{organizationId}/regions:
+  /regions:
     get:
       operationId: listAvailableRegions
       parameters:
-        - description: Organization ID
+        - description: Use with JWT to specify the organization ID
           explode: false
-          in: path
-          name: organizationId
-          required: true
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
           schema:
             type: string
           style: simple
@@ -1112,11 +1112,11 @@ paths:
     post:
       operationId: createRegion
       parameters:
-        - description: Organization ID
+        - description: Use with JWT to specify the organization ID
           explode: false
-          in: path
-          name: organizationId
-          required: true
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
           schema:
             type: string
           style: simple
@@ -1142,22 +1142,22 @@ paths:
       summary: Create a new region
       tags:
         - organizations
-  /organizations/{organizationId}/regions/{id}:
+  /regions/{id}:
     delete:
       operationId: deleteRegion
       parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
-          required: true
-          schema:
-            type: string
-          style: simple
-        - description: Organization ID
-          explode: false
-          in: path
-          name: organizationId
           required: true
           schema:
             type: string
@@ -1177,18 +1177,18 @@ paths:
     get:
       operationId: getRegionById
       parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
-          required: true
-          schema:
-            type: string
-          style: simple
-        - description: Organization ID
-          explode: false
-          in: path
-          name: organizationId
           required: true
           schema:
             type: string
@@ -1209,22 +1209,22 @@ paths:
       summary: Get region by ID
       tags:
         - organizations
-  /organizations/{organizationId}/regions/{id}/regenerate-proxy-api-key:
+  /regions/{id}/regenerate-proxy-api-key:
     post:
       operationId: regenerateProxyApiKey
       parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
-          required: true
-          schema:
-            type: string
-          style: simple
-        - description: Organization ID
-          explode: false
-          in: path
-          name: organizationId
           required: true
           schema:
             type: string
@@ -1245,22 +1245,22 @@ paths:
       summary: Regenerate proxy API key for a region
       tags:
         - organizations
-  /organizations/{organizationId}/regions/{id}/regenerate-ssh-gateway-api-key:
+  /regions/{id}/regenerate-ssh-gateway-api-key:
     post:
       operationId: regenerateSshGatewayApiKey
       parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
-          required: true
-          schema:
-            type: string
-          style: simple
-        - description: Organization ID
-          explode: false
-          in: path
-          name: organizationId
           required: true
           schema:
             type: string
@@ -1482,7 +1482,7 @@ paths:
       summary: Get user by ID
       tags:
         - users
-  /regions:
+  /shared-regions:
     get:
       operationId: listSharedRegions
       parameters: []
