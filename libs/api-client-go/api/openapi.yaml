@@ -7096,6 +7096,65 @@ paths:
       summary: Get volume details by name
       tags:
         - volumes
+  /jobs:
+    get:
+      description: "Returns a paginated list of jobs for the runner, optionally filtered\
+        \ by status."
+      operationId: listJobs
+      parameters:
+        - description: Page number of the results
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+          style: form
+        - description: 'Maximum number of jobs to return (default: 100, max: 500)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            maximum: 200
+            minimum: 1
+            type: number
+          style: form
+        - description: Filter jobs by status
+          explode: true
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/JobStatus'
+          style: form
+        - description: 'Number of jobs to skip for pagination (default: 0)'
+          explode: true
+          in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobs'
+          description: List of jobs for the runner
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List jobs for the runner
+      tags:
+        - jobs
   /jobs/poll:
     get:
       description: "Long poll endpoint for runners to fetch pending jobs. Returns\
@@ -12510,6 +12569,13 @@ components:
       required:
         - name
       type: object
+    JobStatus:
+      enum:
+        - PENDING
+        - IN_PROGRESS
+        - COMPLETED
+        - FAILED
+      type: string
     JobType:
       description: The type of the job
       enum:
@@ -12522,14 +12588,6 @@ components:
         - PULL_SNAPSHOT
         - REMOVE_SNAPSHOT
         - UPDATE_SANDBOX_NETWORK_SETTINGS
-      type: string
-    JobStatus:
-      description: The status of the job
-      enum:
-        - PENDING
-        - IN_PROGRESS
-        - COMPLETED
-        - FAILED
       type: string
     Job:
       example:
@@ -12601,6 +12659,51 @@ components:
         - resourceType
         - status
         - type
+      type: object
+    PaginatedJobs:
+      example:
+        total: 0.8008281904610115
+        totalPages: 1.4658129805029452
+        page: 6.027456183070403
+        items:
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload: payload
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+          - createdAt: 2024-10-01T12:00:00Z
+            resourceId: sandbox123
+            payload: payload
+            errorMessage: Failed to create sandbox
+            id: job123
+            type: CREATE_SANDBOX
+            traceContext:
+              traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
+            status: PENDING
+            resourceType: SANDBOX
+            updatedAt: 2024-10-01T12:00:00Z
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Job'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
       type: object
     PollJobsResponse:
       example:

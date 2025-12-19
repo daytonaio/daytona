@@ -16,7 +16,7 @@ import (
 	"fmt"
 )
 
-// JobStatus The status of the job
+// JobStatus the model 'JobStatus'
 type JobStatus string
 
 // List of JobStatus

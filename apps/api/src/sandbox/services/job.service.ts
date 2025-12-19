@@ -14,6 +14,7 @@ import { Redis } from 'ioredis'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { JobStateHandlerService } from './job-state-handler.service'
 import { propagation, context as otelContext } from '@opentelemetry/api'
+import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 
 @Injectable()
 export class JobService {
@@ -252,6 +253,30 @@ export class JobService {
     })
   }
 
+  async findJobsForRunner(runnerId: string, status?: JobStatus, page = 1, limit = 100): Promise<PaginatedList<JobDto>> {
+    const whereCondition: { runnerId: string; status?: JobStatus } = { runnerId }
+
+    if (status) {
+      whereCondition.status = status
+    }
+
+    const [jobs, total] = await this.jobRepository.findAndCount({
+      where: whereCondition,
+      order: {
+        createdAt: 'DESC',
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    })
+
+    return {
+      items: jobs.map((job) => new JobDto(job)),
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    }
+  }
+
   async findJobsBySandboxId(sandboxId: string): Promise<Job[]> {
     return this.findJobsByResourceId(ResourceType.SANDBOX, sandboxId)
   }
@@ -322,16 +347,19 @@ export class JobService {
 
       // Mark each stale job as failed with timeout error
       for (const job of staleJobs) {
-        job.status = JobStatus.FAILED
-        job.errorMessage = `Job timed out - no update received for ${staleThresholdMinutes} minutes`
-        job.completedAt = new Date()
-        job.updatedAt = new Date()
+        try {
+          await this.updateJobStatus(
+            job.id,
+            JobStatus.FAILED,
+            `Job timed out - no update received for ${staleThresholdMinutes} minutes`,
+          )
 
-        await this.jobRepository.save(job)
-
-        this.logger.warn(
-          `Marked job ${job.id} (type: ${job.type}, resource: ${job.resourceType} ${job.resourceId}) as failed due to timeout`,
-        )
+          this.logger.warn(
+            `Marked job ${job.id} (type: ${job.type}, resource: ${job.resourceType} ${job.resourceId}) as failed due to timeout`,
+          )
+        } catch (error) {
+          this.logger.error(`Error marking job ${job.id} as failed: ${error.message}`, error.stack)
+        }
       }
     } catch (error) {
       this.logger.error(`Error handling stale jobs: ${error.message}`, error.stack)

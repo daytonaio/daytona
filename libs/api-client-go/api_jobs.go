@@ -36,6 +36,20 @@ type JobsAPI interface {
 	GetJobExecute(r JobsAPIGetJobRequest) (*Job, *http.Response, error)
 
 	/*
+		ListJobs List jobs for the runner
+
+		Returns a paginated list of jobs for the runner, optionally filtered by status.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return JobsAPIListJobsRequest
+	*/
+	ListJobs(ctx context.Context) JobsAPIListJobsRequest
+
+	// ListJobsExecute executes the request
+	//  @return PaginatedJobs
+	ListJobsExecute(r JobsAPIListJobsRequest) (*PaginatedJobs, *http.Response, error)
+
+	/*
 		PollJobs Long poll for jobs
 
 		Long poll endpoint for runners to fetch pending jobs. Returns immediately if jobs are available, otherwise waits up to timeout seconds.
@@ -114,6 +128,152 @@ func (a *JobsAPIService) GetJobExecute(r JobsAPIGetJobRequest) (*Job, *http.Resp
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type JobsAPIListJobsRequest struct {
+	ctx        context.Context
+	ApiService JobsAPI
+	page       *float32
+	limit      *float32
+	status     *JobStatus
+	offset     *float32
+}
+
+// Page number of the results
+func (r JobsAPIListJobsRequest) Page(page float32) JobsAPIListJobsRequest {
+	r.page = &page
+	return r
+}
+
+// Maximum number of jobs to return (default: 100, max: 500)
+func (r JobsAPIListJobsRequest) Limit(limit float32) JobsAPIListJobsRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter jobs by status
+func (r JobsAPIListJobsRequest) Status(status JobStatus) JobsAPIListJobsRequest {
+	r.status = &status
+	return r
+}
+
+// Number of jobs to skip for pagination (default: 0)
+func (r JobsAPIListJobsRequest) Offset(offset float32) JobsAPIListJobsRequest {
+	r.offset = &offset
+	return r
+}
+
+func (r JobsAPIListJobsRequest) Execute() (*PaginatedJobs, *http.Response, error) {
+	return r.ApiService.ListJobsExecute(r)
+}
+
+/*
+ListJobs List jobs for the runner
+
+Returns a paginated list of jobs for the runner, optionally filtered by status.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return JobsAPIListJobsRequest
+*/
+func (a *JobsAPIService) ListJobs(ctx context.Context) JobsAPIListJobsRequest {
+	return JobsAPIListJobsRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PaginatedJobs
+func (a *JobsAPIService) ListJobsExecute(r JobsAPIListJobsRequest) (*PaginatedJobs, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PaginatedJobs
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsAPIService.ListJobs")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/jobs"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 100
+		r.limit = &defaultValue
+	}
+	if r.status != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "status", r.status, "form", "")
+	}
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

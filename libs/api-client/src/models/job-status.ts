@@ -13,7 +13,7 @@
  */
 
 /**
- * The status of the job
+ *
  * @export
  * @enum {string}
  */

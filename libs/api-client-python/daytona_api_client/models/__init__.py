@@ -100,6 +100,7 @@ from daytona_api_client.models.organization_suspension import OrganizationSuspen
 from daytona_api_client.models.organization_usage_overview import OrganizationUsageOverview
 from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
+from daytona_api_client.models.paginated_jobs import PaginatedJobs
 from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
 from daytona_api_client.models.paginated_snapshots import PaginatedSnapshots
 from daytona_api_client.models.poll_jobs_response import PollJobsResponse

@@ -34,6 +34,10 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { Job } from '../models'
 // @ts-ignore
+import type { JobStatus } from '../models'
+// @ts-ignore
+import type { PaginatedJobs } from '../models'
+// @ts-ignore
 import type { PollJobsResponse } from '../models'
 // @ts-ignore
 import type { UpdateJobStatus } from '../models'
@@ -70,6 +74,66 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Returns a paginated list of jobs for the runner, optionally filtered by status.
+     * @summary List jobs for the runner
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Maximum number of jobs to return (default: 100, max: 500)
+     * @param {JobStatus} [status] Filter jobs by status
+     * @param {number} [offset] Number of jobs to skip for pagination (default: 0)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listJobs: async (
+      page?: number,
+      limit?: number,
+      status?: JobStatus,
+      offset?: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/jobs`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (page !== undefined) {
+        localVarQueryParameter['page'] = page
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
+      }
+
+      if (status !== undefined) {
+        localVarQueryParameter['status'] = status
+      }
+
+      if (offset !== undefined) {
+        localVarQueryParameter['offset'] = offset
+      }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
@@ -204,6 +268,35 @@ export const JobsApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Returns a paginated list of jobs for the runner, optionally filtered by status.
+     * @summary List jobs for the runner
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Maximum number of jobs to return (default: 100, max: 500)
+     * @param {JobStatus} [status] Filter jobs by status
+     * @param {number} [offset] Number of jobs to skip for pagination (default: 0)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listJobs(
+      page?: number,
+      limit?: number,
+      status?: JobStatus,
+      offset?: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedJobs>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listJobs(page, limit, status, offset, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['JobsApi.listJobs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Long poll endpoint for runners to fetch pending jobs. Returns immediately if jobs are available, otherwise waits up to timeout seconds.
      * @summary Long poll for jobs
      * @param {number} [timeout] Timeout in seconds for long polling (default: 30, max: 60)
@@ -274,6 +367,25 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
       return localVarFp.getJob(jobId, options).then((request) => request(axios, basePath))
     },
     /**
+     * Returns a paginated list of jobs for the runner, optionally filtered by status.
+     * @summary List jobs for the runner
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Maximum number of jobs to return (default: 100, max: 500)
+     * @param {JobStatus} [status] Filter jobs by status
+     * @param {number} [offset] Number of jobs to skip for pagination (default: 0)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listJobs(
+      page?: number,
+      limit?: number,
+      status?: JobStatus,
+      offset?: number,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedJobs> {
+      return localVarFp.listJobs(page, limit, status, offset, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Long poll endpoint for runners to fetch pending jobs. Returns immediately if jobs are available, otherwise waits up to timeout seconds.
      * @summary Long poll for jobs
      * @param {number} [timeout] Timeout in seconds for long polling (default: 30, max: 60)
@@ -320,6 +432,23 @@ export class JobsApi extends BaseAPI {
   public getJob(jobId: string, options?: RawAxiosRequestConfig) {
     return JobsApiFp(this.configuration)
       .getJob(jobId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Returns a paginated list of jobs for the runner, optionally filtered by status.
+   * @summary List jobs for the runner
+   * @param {number} [page] Page number of the results
+   * @param {number} [limit] Maximum number of jobs to return (default: 100, max: 500)
+   * @param {JobStatus} [status] Filter jobs by status
+   * @param {number} [offset] Number of jobs to skip for pagination (default: 0)
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof JobsApi
+   */
+  public listJobs(page?: number, limit?: number, status?: JobStatus, offset?: number, options?: RawAxiosRequestConfig) {
+    return JobsApiFp(this.configuration)
+      .listJobs(page, limit, status, offset, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

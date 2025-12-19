@@ -9,6 +9,8 @@ import { JobType } from '../enums/job-type.enum'
 import { JobStatus } from '../enums/job-status.enum'
 import { ResourceType } from '../enums/resource-type.enum'
 import { Job } from '../entities/job.entity'
+import { PageNumber } from '../../common/decorators/page-number.decorator'
+import { PageLimit } from '../../common/decorators/page-limit.decorator'
 
 // Re-export enums for convenience
 export { JobType, JobStatus, ResourceType }
@@ -129,6 +131,40 @@ export class PollJobsResponseDto {
     type: [JobDto],
   })
   jobs: JobDto[]
+}
+
+@ApiSchema({ name: 'PaginatedJobs' })
+export class PaginatedJobsDto {
+  @ApiProperty({ type: [JobDto] })
+  items: JobDto[]
+
+  @ApiProperty()
+  total: number
+
+  @ApiProperty()
+  page: number
+
+  @ApiProperty()
+  totalPages: number
+}
+
+@ApiSchema({ name: 'ListJobsQuery' })
+export class ListJobsQueryDto {
+  @PageNumber(1)
+  page = 1
+
+  @PageLimit(100)
+  limit = 100
+
+  @ApiPropertyOptional({
+    description: 'Filter by job status',
+    enum: JobStatus,
+    enumName: 'JobStatus',
+    example: JobStatus.PENDING,
+  })
+  @IsOptional()
+  @IsEnum(JobStatus)
+  status?: JobStatus
 }
 
 @ApiSchema({ name: 'UpdateJobStatus' })

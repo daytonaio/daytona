@@ -108,6 +108,7 @@ model_organization_suspension.go
 model_organization_usage_overview.go
 model_organization_user.go
 model_paginated_audit_logs.go
+model_paginated_jobs.go
 model_paginated_sandboxes.go
 model_paginated_snapshots.go
 model_poll_jobs_response.go

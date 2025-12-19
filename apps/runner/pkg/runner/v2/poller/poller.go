@@ -50,10 +50,22 @@ func NewService(cfg *PollerServiceConfig) (*Service, error) {
 
 // Start begins the job polling loop
 func (s *Service) Start(ctx context.Context) {
-	s.log.Info("Starting job poller")
+	inProgressJobs, _, err := s.client.JobsAPI.ListJobs(ctx).Status(apiclient.JOBSTATUS_IN_PROGRESS).Execute()
+	if err != nil {
+		// Only log error
+		s.log.Warn("Failed to fetch IN_PROGRESS jobs", slog.Any("error", err))
+	} else {
+		if inProgressJobs != nil && len(inProgressJobs.Items) > 0 {
+			s.log.Info("Found IN_PROGRESS jobs", slog.Int("count", len(inProgressJobs.Items)))
+			for _, job := range inProgressJobs.Items {
+				go s.executor.Execute(ctx, &job)
+			}
+		} else {
+			s.log.Info("No IN_PROGRESS jobs found")
+		}
+	}
 
-	// TODO: fetch IN_PROGRESS jobs and process them
-	// ensures that on restart, jobs that were in progress are not lost
+	s.log.Info("Starting job poller")
 
 	for {
 		select {

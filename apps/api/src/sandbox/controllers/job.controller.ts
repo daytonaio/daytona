@@ -10,7 +10,14 @@ import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
 import { RunnerContext } from '../../common/interfaces/runner-context.interface'
-import { JobDto, PollJobsResponseDto, UpdateJobStatusDto } from '../dto/job.dto'
+import {
+  JobDto,
+  JobStatus,
+  ListJobsQueryDto,
+  PaginatedJobsDto,
+  PollJobsResponseDto,
+  UpdateJobStatusDto,
+} from '../dto/job.dto'
 import { JobService } from '../services/job.service'
 
 @ApiTags('jobs')
@@ -22,6 +29,44 @@ export class JobController {
   private readonly logger = new Logger(JobController.name)
 
   constructor(private readonly jobService: JobService) {}
+
+  @Get()
+  @ApiOperation({
+    summary: 'List jobs for the runner',
+    operationId: 'listJobs',
+    description: 'Returns a paginated list of jobs for the runner, optionally filtered by status.',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: JobStatus,
+    enumName: 'JobStatus',
+    example: JobStatus.PENDING,
+    description: 'Filter jobs by status',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Maximum number of jobs to return (default: 100, max: 500)',
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    type: Number,
+    description: 'Number of jobs to skip for pagination (default: 0)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of jobs for the runner',
+    type: PaginatedJobsDto,
+  })
+  async listJobs(
+    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @Query() query: ListJobsQueryDto,
+  ): Promise<PaginatedJobsDto> {
+    return await this.jobService.findJobsForRunner(runnerContext.runnerId, query.status, query.page, query.limit)
+  }
 
   @Get('poll')
   @ApiOperation({

@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class JobStatus(str, Enum):
     """
-    The status of the job
+    JobStatus
     """
 
     """
