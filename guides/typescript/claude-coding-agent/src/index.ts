@@ -56,7 +56,7 @@ async function main() {
 
     // Install the Claude Agent SDK
     console.log('Installing Agent SDK...')
-    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk')
+    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk==0.1.16')
 
     // Initialize the code interpreter and upload the coding agent script
     console.log('Initializing Agent SDK...')
