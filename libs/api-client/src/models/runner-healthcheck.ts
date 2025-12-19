@@ -40,4 +40,10 @@ export interface RunnerHealthcheck {
    * @memberof RunnerHealthcheck
    */
   proxyUrl?: string
+  /**
+   * Runner app version
+   * @type {string}
+   * @memberof RunnerHealthcheck
+   */
+  appVersion: string
 }

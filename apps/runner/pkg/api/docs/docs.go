@@ -1504,11 +1504,11 @@ const docTemplate = `{
         "RunnerInfoResponseDTO": {
             "type": "object",
             "properties": {
+                "appVersion": {
+                    "type": "string"
+                },
                 "metrics": {
                     "$ref": "#/definitions/RunnerMetrics"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },

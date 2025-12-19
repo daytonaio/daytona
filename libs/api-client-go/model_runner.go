@@ -71,8 +71,15 @@ type Runner struct {
 	CreatedAt string `json:"createdAt"`
 	// The last update timestamp of the runner
 	UpdatedAt string `json:"updatedAt"`
-	// The version of the runner
-	Version              string `json:"version"`
+	// The version of the runner (deprecated in favor of apiVersion)
+	// Deprecated
+	Version string `json:"version"`
+	// The api version of the runner
+	// Deprecated
+	ApiVersion string `json:"apiVersion"`
+	// The app version of the runner
+	// Deprecated
+	AppVersion           *string `json:"appVersion,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -82,7 +89,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
+func NewRunner(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Cpu = cpu
@@ -96,6 +103,7 @@ func NewRunner(id string, cpu float32, memory float32, disk float32, class Sandb
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	this.Version = version
+	this.ApiVersion = apiVersion
 	return &this
 }
 
@@ -820,6 +828,7 @@ func (o *Runner) SetUpdatedAt(v string) {
 }
 
 // GetVersion returns the Version field value
+// Deprecated
 func (o *Runner) GetVersion() string {
 	if o == nil {
 		var ret string
@@ -831,6 +840,7 @@ func (o *Runner) GetVersion() string {
 
 // GetVersionOk returns a tuple with the Version field value
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *Runner) GetVersionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
@@ -839,8 +849,71 @@ func (o *Runner) GetVersionOk() (*string, bool) {
 }
 
 // SetVersion sets field value
+// Deprecated
 func (o *Runner) SetVersion(v string) {
 	o.Version = v
+}
+
+// GetApiVersion returns the ApiVersion field value
+// Deprecated
+func (o *Runner) GetApiVersion() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ApiVersion
+}
+
+// GetApiVersionOk returns a tuple with the ApiVersion field value
+// and a boolean to check if the value has been set.
+// Deprecated
+func (o *Runner) GetApiVersionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ApiVersion, true
+}
+
+// SetApiVersion sets field value
+// Deprecated
+func (o *Runner) SetApiVersion(v string) {
+	o.ApiVersion = v
+}
+
+// GetAppVersion returns the AppVersion field value if set, zero value otherwise.
+// Deprecated
+func (o *Runner) GetAppVersion() string {
+	if o == nil || IsNil(o.AppVersion) {
+		var ret string
+		return ret
+	}
+	return *o.AppVersion
+}
+
+// GetAppVersionOk returns a tuple with the AppVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// Deprecated
+func (o *Runner) GetAppVersionOk() (*string, bool) {
+	if o == nil || IsNil(o.AppVersion) {
+		return nil, false
+	}
+	return o.AppVersion, true
+}
+
+// HasAppVersion returns a boolean if a field has been set.
+func (o *Runner) HasAppVersion() bool {
+	if o != nil && !IsNil(o.AppVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetAppVersion gets a reference to the given string and assigns it to the AppVersion field.
+// Deprecated
+func (o *Runner) SetAppVersion(v string) {
+	o.AppVersion = &v
 }
 
 func (o Runner) MarshalJSON() ([]byte, error) {
@@ -907,6 +980,10 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["version"] = o.Version
+	toSerialize["apiVersion"] = o.ApiVersion
+	if !IsNil(o.AppVersion) {
+		toSerialize["appVersion"] = o.AppVersion
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -932,6 +1009,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"createdAt",
 		"updatedAt",
 		"version",
+		"apiVersion",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -987,6 +1065,8 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "version")
+		delete(additionalProperties, "apiVersion")
+		delete(additionalProperties, "appVersion")
 		o.AdditionalProperties = additionalProperties
 	}
 

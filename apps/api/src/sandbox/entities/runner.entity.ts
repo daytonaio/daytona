@@ -125,9 +125,15 @@ export class Runner {
   state: RunnerState
 
   @Column({
+    default: 'v0.0.0-dev',
+    nullable: true,
+  })
+  appVersion: string | null
+
+  @Column({
     default: '0',
   })
-  version: string
+  apiVersion: string
 
   @Column({
     nullable: true,
@@ -154,13 +160,14 @@ export class Runner {
     region: string
     name: string
     apiKey: string
-    version: string
+    apiVersion: string
     cpu?: number
     memoryGiB?: number
     diskGiB?: number
     domain?: string | null
     apiUrl?: string
     proxyUrl?: string
+    appVersion?: string | null
   }) {
     this.region = params.region
     this.name = params.name
@@ -172,7 +179,8 @@ export class Runner {
     this.apiUrl = params.apiUrl
     this.proxyUrl = params.proxyUrl
     this.class = SandboxClass.SMALL
-    this.version = params.version
+    this.apiVersion = params.apiVersion
+    this.appVersion = params.appVersion ?? null
     this.gpu = null
     this.gpuType = null
   }

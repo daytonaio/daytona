@@ -179,11 +179,26 @@ export interface RunnerFull {
    */
   updatedAt: string
   /**
-   * The version of the runner
+   * The version of the runner (deprecated in favor of apiVersion)
    * @type {string}
    * @memberof RunnerFull
+   * @deprecated
    */
   version: string
+  /**
+   * The api version of the runner
+   * @type {string}
+   * @memberof RunnerFull
+   * @deprecated
+   */
+  apiVersion: string
+  /**
+   * The app version of the runner
+   * @type {string}
+   * @memberof RunnerFull
+   * @deprecated
+   */
+  appVersion?: string
   /**
    * The API key for the runner
    * @type {string}

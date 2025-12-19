@@ -153,6 +153,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     const response = await this.runnerApiClient.runnerInfo({ signal })
     return {
       metrics: response.data.metrics,
+      appVersion: response.data.appVersion,
     }
   }
 

@@ -112,7 +112,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
     this.logger.log(`Creating default runner: ${this.configService.getOrThrow('defaultRunner.name')}`)
 
-    const runnerVersion = this.configService.get('defaultRunner.version') || '0'
+    const runnerVersion = this.configService.get('defaultRunner.apiVersion') || '0'
 
     if (runnerVersion === '0') {
       const { runner } = await this.runnerService.create({
@@ -124,7 +124,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
         diskGiB: this.configService.getOrThrow('defaultRunner.disk'),
         regionId: this.configService.getOrThrow('defaultRegion.id'),
         domain: this.configService.getOrThrow('defaultRunner.domain'),
-        version: runnerVersion,
+        apiVersion: runnerVersion,
         name: this.configService.getOrThrow('defaultRunner.name'),
       })
 
@@ -145,7 +145,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       const { runner } = await this.runnerService.create({
         apiKey: this.configService.getOrThrow('defaultRunner.apiKey'),
         regionId: this.configService.getOrThrow('defaultRegion.id'),
-        version: runnerVersion,
+        apiVersion: runnerVersion,
         name: this.configService.getOrThrow('defaultRunner.name'),
       })
 

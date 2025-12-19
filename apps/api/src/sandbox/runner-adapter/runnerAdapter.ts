@@ -41,6 +41,7 @@ export interface RunnerMetrics {
 
 export interface RunnerInfo {
   metrics?: RunnerMetrics
+  appVersion?: string
 }
 
 export interface StartSandboxResponse {
@@ -100,7 +101,7 @@ export class RunnerAdapterFactory {
   constructor(private moduleRef: ModuleRef) {}
 
   async create(runner: Runner): Promise<RunnerAdapter> {
-    switch (runner.version) {
+    switch (runner.apiVersion) {
       case '0': {
         const adapter = await this.moduleRef.create(RunnerAdapterV0)
         await adapter.init(runner)
@@ -112,7 +113,7 @@ export class RunnerAdapterFactory {
         return adapter
       }
       default:
-        throw new Error(`Unsupported runner version: ${runner.version}`)
+        throw new Error(`Unsupported runner version: ${runner.apiVersion}`)
     }
   }
 }

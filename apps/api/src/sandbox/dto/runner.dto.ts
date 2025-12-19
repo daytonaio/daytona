@@ -179,10 +179,26 @@ export class RunnerDto {
   updatedAt: string
 
   @ApiProperty({
-    description: 'The version of the runner',
+    description: 'The version of the runner (deprecated in favor of apiVersion)',
     example: '0',
+    deprecated: true,
   })
   version: string
+
+  @ApiProperty({
+    description: 'The api version of the runner',
+    example: '0',
+    deprecated: true,
+  })
+  apiVersion: string
+
+  @ApiPropertyOptional({
+    description: 'The app version of the runner',
+    example: 'v0.0.0-dev',
+    deprecated: true,
+  })
+  @IsOptional()
+  appVersion?: string
 
   static fromRunner(runner: Runner): RunnerDto {
     return {
@@ -211,7 +227,9 @@ export class RunnerDto {
       unschedulable: runner.unschedulable,
       createdAt: runner.createdAt.toISOString(),
       updatedAt: runner.updatedAt.toISOString(),
-      version: runner.version,
+      version: runner.apiVersion,
+      apiVersion: runner.apiVersion,
+      appVersion: runner.appVersion,
     }
   }
 }

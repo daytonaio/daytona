@@ -24,8 +24,8 @@ type AdminCreateRunner struct {
 	RegionId string `json:"regionId"`
 	Name     string `json:"name"`
 	ApiKey   string `json:"apiKey"`
-	// The version of the runner to create
-	Version string `json:"version" validate:"regexp=^(0|2)$"`
+	// The api version of the runner to create
+	ApiVersion string `json:"apiVersion" validate:"regexp=^(0|2)$"`
 	// The domain of the runner
 	Domain *string `json:"domain,omitempty"`
 	// The API URL of the runner
@@ -47,12 +47,12 @@ type _AdminCreateRunner AdminCreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAdminCreateRunner(regionId string, name string, apiKey string, version string) *AdminCreateRunner {
+func NewAdminCreateRunner(regionId string, name string, apiKey string, apiVersion string) *AdminCreateRunner {
 	this := AdminCreateRunner{}
 	this.RegionId = regionId
 	this.Name = name
 	this.ApiKey = apiKey
-	this.Version = version
+	this.ApiVersion = apiVersion
 	return &this
 }
 
@@ -136,28 +136,28 @@ func (o *AdminCreateRunner) SetApiKey(v string) {
 	o.ApiKey = v
 }
 
-// GetVersion returns the Version field value
-func (o *AdminCreateRunner) GetVersion() string {
+// GetApiVersion returns the ApiVersion field value
+func (o *AdminCreateRunner) GetApiVersion() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.Version
+	return o.ApiVersion
 }
 
-// GetVersionOk returns a tuple with the Version field value
+// GetApiVersionOk returns a tuple with the ApiVersion field value
 // and a boolean to check if the value has been set.
-func (o *AdminCreateRunner) GetVersionOk() (*string, bool) {
+func (o *AdminCreateRunner) GetApiVersionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Version, true
+	return &o.ApiVersion, true
 }
 
-// SetVersion sets field value
-func (o *AdminCreateRunner) SetVersion(v string) {
-	o.Version = v
+// SetApiVersion sets field value
+func (o *AdminCreateRunner) SetApiVersion(v string) {
+	o.ApiVersion = v
 }
 
 // GetDomain returns the Domain field value if set, zero value otherwise.
@@ -365,7 +365,7 @@ func (o AdminCreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize["regionId"] = o.RegionId
 	toSerialize["name"] = o.Name
 	toSerialize["apiKey"] = o.ApiKey
-	toSerialize["version"] = o.Version
+	toSerialize["apiVersion"] = o.ApiVersion
 	if !IsNil(o.Domain) {
 		toSerialize["domain"] = o.Domain
 	}
@@ -400,7 +400,7 @@ func (o *AdminCreateRunner) UnmarshalJSON(data []byte) (err error) {
 		"regionId",
 		"name",
 		"apiKey",
-		"version",
+		"apiVersion",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -433,7 +433,7 @@ func (o *AdminCreateRunner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "regionId")
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "apiKey")
-		delete(additionalProperties, "version")
+		delete(additionalProperties, "apiVersion")
 		delete(additionalProperties, "domain")
 		delete(additionalProperties, "apiUrl")
 		delete(additionalProperties, "proxyUrl")

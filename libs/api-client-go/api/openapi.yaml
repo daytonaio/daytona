@@ -10080,6 +10080,7 @@ components:
       type: string
     RunnerFull:
       example:
+        appVersion: v0.0.0-dev
         memory: 16
         currentMemoryUsagePercentage: 68.2
         apiKey: dtn_1234567890
@@ -10087,6 +10088,7 @@ components:
         currentDiskUsagePercentage: 33.8
         currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
+        apiVersion: '0'
         apiUrl: https://api.runner1.example.com
         regionType: shared
         id: runner123
@@ -10211,8 +10213,19 @@ components:
           example: 2023-10-01T12:00:00Z
           type: string
         version:
-          description: The version of the runner
+          deprecated: true
+          description: The version of the runner (deprecated in favor of apiVersion)
           example: '0'
+          type: string
+        apiVersion:
+          deprecated: true
+          description: The api version of the runner
+          example: '0'
+          type: string
+        appVersion:
+          deprecated: true
+          description: The app version of the runner
+          example: v0.0.0-dev
           type: string
         apiKey:
           description: The API key for the runner
@@ -10225,6 +10238,7 @@ components:
           example: shared
       required:
         - apiKey
+        - apiVersion
         - class
         - cpu
         - createdAt
@@ -10240,12 +10254,14 @@ components:
       type: object
     Runner:
       example:
+        appVersion: v0.0.0-dev
         memory: 16
         currentMemoryUsagePercentage: 68.2
         availabilityScore: 85
         currentDiskUsagePercentage: 33.8
         currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
+        apiVersion: '0'
         apiUrl: https://api.runner1.example.com
         id: runner123
         state: initializing
@@ -10369,10 +10385,22 @@ components:
           example: 2023-10-01T12:00:00Z
           type: string
         version:
-          description: The version of the runner
+          deprecated: true
+          description: The version of the runner (deprecated in favor of apiVersion)
           example: '0'
           type: string
+        apiVersion:
+          deprecated: true
+          description: The api version of the runner
+          example: '0'
+          type: string
+        appVersion:
+          deprecated: true
+          description: The app version of the runner
+          example: v0.0.0-dev
+          type: string
       required:
+        - apiVersion
         - class
         - cpu
         - createdAt
@@ -10465,6 +10493,7 @@ components:
       type: object
     RunnerHealthcheck:
       example:
+        appVersion: v0.0.0-dev
         proxyUrl: http://proxy.daytona.example.com:8080
         domain: runner-123.daytona.example.com
         metrics: ''
@@ -10481,6 +10510,12 @@ components:
           description: Runner proxy URL
           example: http://proxy.daytona.example.com:8080
           type: string
+        appVersion:
+          description: Runner app version
+          example: v0.0.0-dev
+          type: string
+      required:
+        - appVersion
       type: object
     ProjectDirResponse:
       example:
@@ -12936,6 +12971,7 @@ components:
     AdminCreateRunner:
       example:
         diskGiB: 100
+        apiVersion: '2'
         apiKey: apiKey
         apiUrl: https://api.runner1.example.com
         regionId: regionId
@@ -12944,7 +12980,6 @@ components:
         domain: runner1.example.com
         name: name
         cpu: 8
-        version: '2'
       properties:
         regionId:
           type: string
@@ -12952,8 +12987,8 @@ components:
           type: string
         apiKey:
           type: string
-        version:
-          description: The version of the runner to create
+        apiVersion:
+          description: The api version of the runner to create
           example: '2'
           pattern: ^(0|2)$
           type: string
@@ -12983,9 +13018,9 @@ components:
           type: number
       required:
         - apiKey
+        - apiVersion
         - name
         - regionId
-        - version
       type: object
     WebhookAppPortalAccess:
       example:

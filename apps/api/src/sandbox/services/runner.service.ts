@@ -21,9 +21,7 @@ import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
-import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
@@ -84,12 +82,12 @@ export class RunnerService {
 
     let runner: Runner
 
-    switch (createRunnerDto.version) {
+    switch (createRunnerDto.apiVersion) {
       case '0':
         runner = new Runner({
           region: createRunnerDto.regionId,
           name: createRunnerDto.name,
-          version: createRunnerDto.version,
+          apiVersion: createRunnerDto.apiVersion,
           apiKey: apiKey,
           cpu: createRunnerDto.cpu,
           memoryGiB: createRunnerDto.memoryGiB,
@@ -97,14 +95,16 @@ export class RunnerService {
           domain: createRunnerDto.domain,
           apiUrl: createRunnerDto.apiUrl,
           proxyUrl: createRunnerDto.proxyUrl,
+          appVersion: createRunnerDto.appVersion,
         })
         break
       case '2':
         runner = new Runner({
           region: createRunnerDto.regionId,
           name: createRunnerDto.name,
-          version: createRunnerDto.version,
+          apiVersion: createRunnerDto.apiVersion,
           apiKey: apiKey,
+          appVersion: createRunnerDto.appVersion,
         })
         break
       default:
@@ -347,6 +347,7 @@ export class RunnerService {
       memoryGiB?: number
       diskGiB?: number
     },
+    appVersion?: string,
   ): Promise<void> {
     const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
     if (!runner) {
@@ -370,6 +371,10 @@ export class RunnerService {
 
     if (proxyUrl) {
       updateData.proxyUrl = proxyUrl
+    }
+
+    if (appVersion) {
+      updateData.appVersion = appVersion
     }
 
     if (metrics) {
@@ -441,11 +446,11 @@ export class RunnerService {
       const runners = await this.runnerRepository.find({
         where: [
           {
-            version: '0',
+            apiVersion: '0',
             state: Not(RunnerState.DECOMMISSIONED),
           },
           {
-            version: '2',
+            apiVersion: '2',
             state: Not(In([RunnerState.DECOMMISSIONED, RunnerState.INITIALIZING])),
           },
         ],
@@ -461,7 +466,7 @@ export class RunnerService {
       await Promise.allSettled(
         runners.map(async (runner) => {
           // v2 runners report health via healthcheck endpoint, check based on lastChecked timestamp
-          if (runner.version === '2') {
+          if (runner.apiVersion === '2') {
             await this.checkRunnerV2Health(runner)
             return
           }
@@ -495,7 +500,13 @@ export class RunnerService {
                     this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
                   }
 
-                  await this.updateRunnerHealth(runner.id, undefined, undefined, runnerInfo?.metrics)
+                  await this.updateRunnerHealth(
+                    runner.id,
+                    undefined,
+                    undefined,
+                    runnerInfo?.metrics,
+                    runnerInfo?.appVersion,
+                  )
                 })(),
                 new Promise((_, reject) => {
                   timeoutId = setTimeout(() => {

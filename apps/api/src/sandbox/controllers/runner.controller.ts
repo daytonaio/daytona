@@ -117,7 +117,7 @@ export class RunnerController {
     const { runner, apiKey } = await this.runnerService.create({
       regionId: createRunnerDto.regionId,
       name: createRunnerDto.name,
-      version: '2',
+      apiVersion: '2',
     })
 
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)
@@ -312,6 +312,7 @@ export class RunnerController {
       healthcheck.domain,
       healthcheck.proxyUrl,
       healthcheck.metrics,
+      healthcheck.appVersion,
     )
   }
 }

@@ -55,11 +55,13 @@ class RunnerFull(BaseModel):
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
-    version: StrictStr = Field(description="The version of the runner")
+    version: StrictStr = Field(description="The version of the runner (deprecated in favor of apiVersion)")
+    api_version: StrictStr = Field(description="The api version of the runner", alias="apiVersion")
+    app_version: Optional[StrictStr] = Field(default=None, description="The app version of the runner", alias="appVersion")
     api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
     region_type: Optional[RegionType] = Field(default=None, description="The region type of the runner", alias="regionType")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiKey", "regionType"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "appVersion", "apiKey", "regionType"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -145,6 +147,8 @@ class RunnerFull(BaseModel):
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
             "version": obj.get("version"),
+            "apiVersion": obj.get("apiVersion"),
+            "appVersion": obj.get("appVersion"),
             "apiKey": obj.get("apiKey"),
             "regionType": obj.get("regionType")
         })

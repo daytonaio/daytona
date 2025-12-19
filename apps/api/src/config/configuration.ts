@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
-
 const configuration = {
   production: process.env.NODE_ENV === 'production',
   version: process.env.VERSION || '0.0.0-dev',
@@ -157,7 +155,7 @@ const configuration = {
     cpu: parseInt(process.env.DEFAULT_RUNNER_CPU || '4', 10),
     memory: parseInt(process.env.DEFAULT_RUNNER_MEMORY || '8', 10),
     disk: parseInt(process.env.DEFAULT_RUNNER_DISK || '50', 10),
-    version: (process.env.DEFAULT_RUNNER_VERSION || '0') as '0' | '2',
+    apiVersion: (process.env.DEFAULT_RUNNER_API_VERSION || '0') as '0' | '2',
     name: process.env.DEFAULT_RUNNER_NAME,
   },
   runnerUsage: {

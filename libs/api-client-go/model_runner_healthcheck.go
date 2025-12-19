@@ -13,6 +13,7 @@ package apiclient
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the RunnerHealthcheck type satisfies the MappedNullable interface at compile time
@@ -25,7 +26,9 @@ type RunnerHealthcheck struct {
 	// Runner domain
 	Domain *string `json:"domain,omitempty"`
 	// Runner proxy URL
-	ProxyUrl             *string `json:"proxyUrl,omitempty"`
+	ProxyUrl *string `json:"proxyUrl,omitempty"`
+	// Runner app version
+	AppVersion           string `json:"appVersion"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -35,8 +38,9 @@ type _RunnerHealthcheck RunnerHealthcheck
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerHealthcheck() *RunnerHealthcheck {
+func NewRunnerHealthcheck(appVersion string) *RunnerHealthcheck {
 	this := RunnerHealthcheck{}
+	this.AppVersion = appVersion
 	return &this
 }
 
@@ -144,6 +148,30 @@ func (o *RunnerHealthcheck) SetProxyUrl(v string) {
 	o.ProxyUrl = &v
 }
 
+// GetAppVersion returns the AppVersion field value
+func (o *RunnerHealthcheck) GetAppVersion() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.AppVersion
+}
+
+// GetAppVersionOk returns a tuple with the AppVersion field value
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthcheck) GetAppVersionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.AppVersion, true
+}
+
+// SetAppVersion sets field value
+func (o *RunnerHealthcheck) SetAppVersion(v string) {
+	o.AppVersion = v
+}
+
 func (o RunnerHealthcheck) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -163,6 +191,7 @@ func (o RunnerHealthcheck) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ProxyUrl) {
 		toSerialize["proxyUrl"] = o.ProxyUrl
 	}
+	toSerialize["appVersion"] = o.AppVersion
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -172,6 +201,27 @@ func (o RunnerHealthcheck) ToMap() (map[string]interface{}, error) {
 }
 
 func (o *RunnerHealthcheck) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"appVersion",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
 	varRunnerHealthcheck := _RunnerHealthcheck{}
 
 	err = json.Unmarshal(data, &varRunnerHealthcheck)
@@ -188,6 +238,7 @@ func (o *RunnerHealthcheck) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "metrics")
 		delete(additionalProperties, "domain")
 		delete(additionalProperties, "proxyUrl")
+		delete(additionalProperties, "appVersion")
 		o.AdditionalProperties = additionalProperties
 	}
 

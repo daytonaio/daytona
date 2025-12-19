@@ -37,7 +37,7 @@ func RunnerInfo(ctx *gin.Context) {
 			CurrentAllocatedDiskGiB:      metrics.AllocatedDisk,
 			CurrentSnapshotCount:         metrics.SnapshotCount,
 		},
-		Version: internal.Version,
+		AppVersion: internal.Version,
 	}
 
 	ctx.JSON(http.StatusOK, response)

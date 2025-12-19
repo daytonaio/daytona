@@ -176,9 +176,24 @@ export interface Runner {
    */
   updatedAt: string
   /**
-   * The version of the runner
+   * The version of the runner (deprecated in favor of apiVersion)
    * @type {string}
    * @memberof Runner
+   * @deprecated
    */
   version: string
+  /**
+   * The api version of the runner
+   * @type {string}
+   * @memberof Runner
+   * @deprecated
+   */
+  apiVersion: string
+  /**
+   * The app version of the runner
+   * @type {string}
+   * @memberof Runner
+   * @deprecated
+   */
+  appVersion?: string
 }

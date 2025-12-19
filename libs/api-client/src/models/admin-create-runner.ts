@@ -37,11 +37,11 @@ export interface AdminCreateRunner {
    */
   apiKey: string
   /**
-   * The version of the runner to create
+   * The api version of the runner to create
    * @type {string}
    * @memberof AdminCreateRunner
    */
-  version: string
+  apiVersion: string
   /**
    * The domain of the runner
    * @type {string}

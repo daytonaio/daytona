@@ -15,11 +15,11 @@ export class AdminCreateRunnerDto extends CreateRunnerDto {
 
   @IsString()
   @ApiProperty({
-    description: 'The version of the runner to create',
+    description: 'The api version of the runner to create',
     pattern: '^(0|2)$',
     example: '2',
   })
-  version: '0' | '2'
+  apiVersion: '0' | '2'
 
   @ApiProperty({
     required: false,

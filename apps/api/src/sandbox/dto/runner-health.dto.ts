@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsNumber, IsOptional } from 'class-validator'
+import { IsNumber, IsOptional, IsString } from 'class-validator'
 
 @ApiSchema({ name: 'RunnerHealthMetrics' })
 export class RunnerHealthMetricsDto {
@@ -101,4 +101,11 @@ export class RunnerHealthcheckDto {
   })
   @IsOptional()
   proxyUrl?: string
+
+  @ApiProperty({
+    description: 'Runner app version',
+    example: 'v0.0.0-dev',
+  })
+  @IsString()
+  appVersion: string
 }

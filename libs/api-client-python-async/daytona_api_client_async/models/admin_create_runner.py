@@ -31,7 +31,7 @@ class AdminCreateRunner(BaseModel):
     region_id: StrictStr = Field(alias="regionId")
     name: StrictStr
     api_key: StrictStr = Field(alias="apiKey")
-    version: Annotated[str, Field(strict=True)] = Field(description="The version of the runner to create")
+    api_version: Annotated[str, Field(strict=True)] = Field(description="The api version of the runner to create", alias="apiVersion")
     domain: Optional[StrictStr] = Field(default=None, description="The domain of the runner")
     api_url: Optional[StrictStr] = Field(default=None, description="The API URL of the runner", alias="apiUrl")
     proxy_url: Optional[StrictStr] = Field(default=None, description="The proxy URL of the runner", alias="proxyUrl")
@@ -39,10 +39,10 @@ class AdminCreateRunner(BaseModel):
     memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The memory capacity of the runner in GiB", alias="memoryGiB")
     disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk capacity of the runner in GiB", alias="diskGiB")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionId", "name", "apiKey", "version", "domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB"]
+    __properties: ClassVar[List[str]] = ["regionId", "name", "apiKey", "apiVersion", "domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB"]
 
-    @field_validator('version')
-    def version_validate_regular_expression(cls, value):
+    @field_validator('api_version')
+    def api_version_validate_regular_expression(cls, value):
         """Validates the regular expression"""
         if not re.match(r"^(0|2)$", value):
             raise ValueError(r"must validate the regular expression /^(0|2)$/")
@@ -109,7 +109,7 @@ class AdminCreateRunner(BaseModel):
             "regionId": obj.get("regionId"),
             "name": obj.get("name"),
             "apiKey": obj.get("apiKey"),
-            "version": obj.get("version"),
+            "apiVersion": obj.get("apiVersion"),
             "domain": obj.get("domain"),
             "apiUrl": obj.get("apiUrl"),
             "proxyUrl": obj.get("proxyUrl"),

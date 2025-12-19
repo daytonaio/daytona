@@ -12,6 +12,7 @@ import (
 	"time"
 
 	apiclient "github.com/daytonaio/apiclient"
+	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/internal/metrics"
 	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
 )
@@ -108,7 +109,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	}
 
 	// Build healthcheck request
-	healthcheck := apiclient.NewRunnerHealthcheck()
+	healthcheck := apiclient.NewRunnerHealthcheck(internal.Version)
 	if metricsPtr != nil {
 		healthcheck.SetMetrics(*metricsPtr)
 	}

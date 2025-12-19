@@ -66,7 +66,7 @@ export class AdminRunnerController {
         regionId: req.body?.regionId,
         name: req.body?.name,
         apiKey: MASKED_AUDIT_VALUE,
-        version: req.body?.version,
+        apiVersion: req.body?.apiVersion,
       }),
     },
   })
@@ -84,7 +84,7 @@ export class AdminRunnerController {
       regionId: createRunnerDto.regionId,
       name: createRunnerDto.name,
       apiKey: createRunnerDto.apiKey,
-      version: createRunnerDto.version,
+      apiVersion: createRunnerDto.apiVersion,
       cpu: createRunnerDto.cpu,
       memoryGiB: createRunnerDto.memoryGiB,
       diskGiB: createRunnerDto.diskGiB,
