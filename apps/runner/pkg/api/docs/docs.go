@@ -705,6 +705,12 @@ const docTemplate = `{
                         "schema": {
                             "type": "object"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Auth token",
+                        "name": "token",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1457,6 +1463,9 @@ const docTemplate = `{
                 "userId"
             ],
             "properties": {
+                "authToken": {
+                    "type": "string"
+                },
                 "cpuQuota": {
                     "type": "integer",
                     "minimum": 1
@@ -1500,6 +1509,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "osUser": {
+                    "type": "string"
+                },
+                "otelEndpoint": {
                     "type": "string"
                 },
                 "registry": {

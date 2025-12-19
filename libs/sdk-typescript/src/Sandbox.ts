@@ -33,6 +33,7 @@ import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { ComputerUse } from './ComputerUse'
 import { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 const TOOLBOX_URL_PLACEHOLDER = 'dtn-placeholder'
 
@@ -184,6 +185,7 @@ export class Sandbox implements SandboxDto {
    * const userHomeDir = await sandbox.getUserHomeDir();
    * console.log(`Sandbox user home: ${userHomeDir}`);
    */
+  @WithInstrumentation()
   public async getUserHomeDir(): Promise<string | undefined> {
     const response = await this.infoApi.getUserHomeDir()
     return response.data.dir
@@ -192,6 +194,7 @@ export class Sandbox implements SandboxDto {
   /**
    * @deprecated Use `getUserHomeDir` instead. This method will be removed in a future version.
    */
+  @WithInstrumentation()
   public async getUserRootDir(): Promise<string | undefined> {
     return this.getUserHomeDir()
   }
@@ -206,6 +209,7 @@ export class Sandbox implements SandboxDto {
    * const workDir = await sandbox.getWorkDir();
    * console.log(`Sandbox working directory: ${workDir}`);
    */
+  @WithInstrumentation()
   public async getWorkDir(): Promise<string | undefined> {
     const response = await this.infoApi.getWorkDir()
     return response.data.dir
@@ -224,6 +228,7 @@ export class Sandbox implements SandboxDto {
    * @example
    * const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
    */
+  @WithInstrumentation()
   public async createLspServer(languageId: LspLanguageId | string, pathToProject: string): Promise<LspServer> {
     return new LspServer(
       languageId as LspLanguageId,
@@ -248,6 +253,7 @@ export class Sandbox implements SandboxDto {
    *   team: 'backend'
    * });
    */
+  @WithInstrumentation()
   public async setLabels(labels: Record<string, string>): Promise<Record<string, string>> {
     this.labels = (await this.sandboxApi.replaceLabels(this.id, { labels })).data.labels
     return this.labels
@@ -268,6 +274,7 @@ export class Sandbox implements SandboxDto {
    * await sandbox.start(40);  // Wait up to 40 seconds
    * console.log('Sandbox started successfully');
    */
+  @WithInstrumentation()
   public async start(timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
@@ -319,6 +326,7 @@ export class Sandbox implements SandboxDto {
    * await sandbox.stop();
    * console.log('Sandbox stopped successfully');
    */
+  @WithInstrumentation()
   public async stop(timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
@@ -334,6 +342,7 @@ export class Sandbox implements SandboxDto {
    * Deletes the Sandbox.
    * @returns {Promise<void>}
    */
+  @WithInstrumentation()
   public async delete(timeout = 60): Promise<void> {
     await this.sandboxApi.deleteSandbox(this.id, undefined, { timeout: timeout * 1000 })
     this.refreshDataSafe()
@@ -350,6 +359,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<void>}
    * @throws {DaytonaError} - `DaytonaError` - If the sandbox ends up in an error state or fails to start within the timeout period.
    */
+  @WithInstrumentation()
   public async waitUntilStarted(timeout = 60) {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
@@ -390,6 +400,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<void>}
    * @throws {DaytonaError} - `DaytonaError` - If the sandbox fails to stop within the timeout period.
    */
+  @WithInstrumentation()
   public async waitUntilStopped(timeout = 60) {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
@@ -431,6 +442,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`State: ${sandbox.state}`);
    * console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
    */
+  @WithInstrumentation()
   public async refreshData(): Promise<void> {
     const response = await this.sandboxApi.getSandbox(this.id)
     this.processSandboxDto(response.data)
@@ -470,6 +482,7 @@ export class Sandbox implements SandboxDto {
    * // Or disable auto-stop
    * await sandbox.setAutostopInterval(0);
    */
+  @WithInstrumentation()
   public async setAutostopInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
       throw new DaytonaError('autoStopInterval must be a non-negative integer')
@@ -495,6 +508,7 @@ export class Sandbox implements SandboxDto {
    * // Or use the maximum interval
    * await sandbox.setAutoArchiveInterval(0);
    */
+  @WithInstrumentation()
   public async setAutoArchiveInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
       throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
@@ -521,6 +535,7 @@ export class Sandbox implements SandboxDto {
    * // Or disable auto-delete
    * await sandbox.setAutoDeleteInterval(-1);
    */
+  @WithInstrumentation()
   public async setAutoDeleteInterval(interval: number): Promise<void> {
     await this.sandboxApi.setAutoDeleteInterval(this.id, interval)
     this.autoDeleteInterval = interval
@@ -540,6 +555,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Preview URL: ${previewLink.url}`);
    * console.log(`Token: ${previewLink.token}`);
    */
+  @WithInstrumentation()
   public async getPreviewLink(port: number): Promise<PortPreviewUrl> {
     return (await this.sandboxApi.getPortPreviewUrl(this.id, port)).data
   }
@@ -550,6 +566,7 @@ export class Sandbox implements SandboxDto {
    * The tradeoff between archived and stopped states is that starting an archived sandbox takes more time, depending on its size.
    * Sandbox must be stopped before archiving.
    */
+  @WithInstrumentation()
   public async archive(): Promise<void> {
     await this.sandboxApi.archiveSandbox(this.id)
     await this.refreshData()
@@ -561,6 +578,7 @@ export class Sandbox implements SandboxDto {
    * @param {number} expiresInMinutes - The number of minutes the SSH access token will be valid for.
    * @returns {Promise<SshAccessDto>} The SSH access token.
    */
+  @WithInstrumentation()
   public async createSshAccess(expiresInMinutes?: number): Promise<SshAccessDto> {
     return (await this.sandboxApi.createSshAccess(this.id, undefined, expiresInMinutes)).data
   }
@@ -571,6 +589,7 @@ export class Sandbox implements SandboxDto {
    * @param {string} token - The token to revoke.
    * @returns {Promise<void>}
    */
+  @WithInstrumentation()
   public async revokeSshAccess(token: string): Promise<void> {
     await this.sandboxApi.revokeSshAccess(this.id, undefined, token)
   }
@@ -581,6 +600,7 @@ export class Sandbox implements SandboxDto {
    * @param {string} token - The token to validate.
    * @returns {Promise<SshAccessValidationDto>} The SSH access validation result.
    */
+  @WithInstrumentation()
   public async validateSshAccess(token: string): Promise<SshAccessValidationDto> {
     return (await this.sandboxApi.validateSshAccess(token)).data
   }

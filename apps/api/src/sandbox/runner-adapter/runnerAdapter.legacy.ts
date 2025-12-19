@@ -172,6 +172,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
+    otelEndpoint?: string,
   ): Promise<void> {
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
@@ -200,13 +201,15 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
       metadata: metadata,
+      authToken: sandbox.authToken,
+      otelEndpoint,
     }
 
     await this.sandboxApiClient.create(createSandboxDto)
   }
 
-  async startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void> {
-    await this.sandboxApiClient.start(sandboxId, metadata)
+  async startSandbox(sandboxId: string, authToken: string, metadata?: { [key: string]: string }): Promise<void> {
+    await this.sandboxApiClient.start(sandboxId, authToken, metadata)
   }
 
   async stopSandbox(sandboxId: string): Promise<void> {

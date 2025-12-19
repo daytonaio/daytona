@@ -9,6 +9,7 @@ daytona_toolbox_api_client_async/api/interpreter_api.py
 daytona_toolbox_api_client_async/api/lsp_api.py
 daytona_toolbox_api_client_async/api/port_api.py
 daytona_toolbox_api_client_async/api/process_api.py
+daytona_toolbox_api_client_async/api/server_api.py
 daytona_toolbox_api_client_async/api_client.py
 daytona_toolbox_api_client_async/api_response.py
 daytona_toolbox_api_client_async/configuration.py
@@ -40,6 +41,7 @@ daytona_toolbox_api_client_async/models/git_commit_response.py
 daytona_toolbox_api_client_async/models/git_git_delete_branch_request.py
 daytona_toolbox_api_client_async/models/git_repo_request.py
 daytona_toolbox_api_client_async/models/git_status.py
+daytona_toolbox_api_client_async/models/initialize_request.py
 daytona_toolbox_api_client_async/models/interpreter_context.py
 daytona_toolbox_api_client_async/models/is_port_in_use_response.py
 daytona_toolbox_api_client_async/models/keyboard_hotkey_request.py

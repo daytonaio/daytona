@@ -32,6 +32,7 @@ import {
   ChevronsUpDown,
   Container,
   CreditCard,
+  FlaskConical,
   HardDrive,
   KeyRound,
   ListChecks,
@@ -55,6 +56,8 @@ import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -70,6 +73,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
+  const organizationExperimentsEnabled = useFeatureFlagEnabled('organization_experiments')
+
   const sidebarItems = useMemo(() => {
     const arr: Array<{
       icon: React.ReactElement
@@ -141,6 +146,17 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       label: 'Settings',
       path: RoutePath.SETTINGS,
     })
+
+    if (
+      organizationExperimentsEnabled &&
+      authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+    ) {
+      arr.push({
+        icon: <FlaskConical size={16} strokeWidth={1.5} />,
+        label: 'Experimental',
+        path: RoutePath.EXPERIMENTAL,
+      })
+    }
     return arr
   }, [
     authenticatedUserOrganizationMember?.role,
@@ -148,6 +164,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     authenticatedUserHasPermission,
     webhooksInitialized,
     openAppPortal,
+    organizationExperimentsEnabled,
   ])
 
   const billingItems = useMemo(() => {

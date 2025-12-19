@@ -44,6 +44,10 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 			return
 		}
 
+		if target == nil {
+			return
+		}
+
 		reverseProxy := &httputil.ReverseProxy{
 			Director: func(req *http.Request) {
 				req.Host = target.Host

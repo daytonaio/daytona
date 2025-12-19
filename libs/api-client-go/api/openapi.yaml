@@ -672,6 +672,34 @@ paths:
       summary: Get region quota by sandbox ID
       tags:
         - organizations
+  /organizations/otel-config/by-sandbox-auth-token/{authToken}:
+    get:
+      operationId: getOrganizationOtelConfigBySandboxAuthToken
+      parameters:
+        - description: Sandbox Auth Token
+          explode: false
+          in: path
+          name: authToken
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtelConfig'
+          description: OTEL Config
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get organization OTEL config by sandbox auth token
+      tags:
+        - organizations
   /organizations/{organizationId}/sandbox-default-limited-network-egress:
     post:
       operationId: updateSandboxDefaultLimitedNetworkEgress
@@ -700,6 +728,44 @@ paths:
             - profile
             - email
       summary: Update sandbox default limited network egress
+      tags:
+        - organizations
+  /organizations/{organizationId}/experimental-config:
+    put:
+      operationId: updateExperimentalConfig
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              example:
+                otel:
+                  endpoint: http://otel-collector:4317
+                  headers:
+                    api-key: XXX
+              type: object
+        description: Experimental configuration as a JSON object. Set to null to clear
+          the configuration.
+        required: false
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update experimental configuration
       tags:
         - organizations
   /organizations/{organizationId}/roles:
@@ -7951,6 +8017,7 @@ components:
         name: name
         maxMemoryPerSandbox: 1.4658129805029452
         id: id
+        experimentalConfig: '{}'
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -8017,10 +8084,14 @@ components:
           description: Sandbox lifecycle rate limit per minute
           nullable: true
           type: number
+        experimentalConfig:
+          description: Experimental configuration
+          type: object
       required:
         - authenticatedRateLimit
         - createdAt
         - createdBy
+        - experimentalConfig
         - id
         - maxCpuPerSandbox
         - maxDiskPerSandbox
@@ -8237,6 +8308,27 @@ components:
         - totalCpuQuota
         - totalDiskQuota
         - totalMemoryQuota
+      type: object
+    OtelConfig:
+      example:
+        headers:
+          x-api-key: my-api-key
+        endpoint: endpoint
+      properties:
+        endpoint:
+          description: Endpoint
+          type: string
+        headers:
+          additionalProperties:
+            type: string
+          description: Headers
+          example:
+            x-api-key: my-api-key
+          nullable: true
+          type: object
+      required:
+        - endpoint
+        - headers
       type: object
     OrganizationSandboxDefaultLimitedNetworkEgress:
       example:

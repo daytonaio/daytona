@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
+	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/pkg/api/controllers"
 	"github.com/daytonaio/runner/pkg/api/docs"
 	"github.com/daytonaio/runner/pkg/api/middlewares"
@@ -67,6 +68,7 @@ func (a *ApiServer) Start() error {
 	docs.SwaggerInfo.Description = "Daytona Runner API"
 	docs.SwaggerInfo.Title = "Daytona Runner API"
 	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Version = internal.Version
 
 	_, err := net.Dial("tcp", fmt.Sprintf(":%d", a.apiPort))
 	if err == nil {

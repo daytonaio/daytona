@@ -17,6 +17,7 @@ import { Image } from './Image'
 import { Resources } from './Daytona'
 import { processStreamingResponse } from './utils/Stream'
 import { dynamicImport } from './utils/Import'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Represents a Daytona Snapshot which is a pre-configured sandbox.
@@ -93,6 +94,7 @@ export class SnapshotService {
    * console.log(`Found ${result.total} snapshots`);
    * result.items.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
    */
+  @WithInstrumentation()
   async list(page?: number, limit?: number): Promise<PaginatedSnapshots> {
     const response = await this.snapshotsApi.getAllSnapshots(undefined, page, limit)
     return {
@@ -115,6 +117,7 @@ export class SnapshotService {
    * const snapshot = await daytona.snapshot.get("snapshot-name");
    * console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`);
    */
+  @WithInstrumentation()
   async get(name: string): Promise<Snapshot> {
     const response = await this.snapshotsApi.getSnapshot(name)
     return response.data as Snapshot
@@ -133,6 +136,7 @@ export class SnapshotService {
    * await daytona.snapshot.delete(snapshot);
    * console.log("Snapshot deleted successfully");
    */
+  @WithInstrumentation()
   async delete(snapshot: Snapshot): Promise<void> {
     await this.snapshotsApi.removeSnapshot(snapshot.id)
   }
@@ -150,6 +154,7 @@ export class SnapshotService {
    * const image = Image.debianSlim('3.12').pipInstall('numpy');
    * await daytona.snapshot.create({ name: 'my-snapshot', image: image }, { onLogs: console.log });
    */
+  @WithInstrumentation()
   public async create(
     params: CreateSnapshotParams,
     options: { onLogs?: (chunk: string) => void; timeout?: number } = {},
@@ -249,6 +254,7 @@ export class SnapshotService {
    * @param {Snapshot} snapshot - Snapshot to activate
    * @returns {Promise<Snapshot>} The activated Snapshot instance
    */
+  @WithInstrumentation()
   async activate(snapshot: Snapshot): Promise<Snapshot> {
     return (await this.snapshotsApi.activateSnapshot(snapshot.id)).data as Snapshot
   }
@@ -260,6 +266,7 @@ export class SnapshotService {
    * @param {Image} image - The Image instance.
    * @returns {Promise<string[]>} The list of context hashes stored in object storage.
    */
+  @WithInstrumentation()
   static async processImageContext(objectStorageApi: ObjectStorageApi, image: Image): Promise<string[]> {
     if (!image.contextList || !image.contextList.length) {
       return []

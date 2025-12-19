@@ -25,6 +25,7 @@ from daytona_toolbox_api_client_async.api.interpreter_api import InterpreterApi
 from daytona_toolbox_api_client_async.api.lsp_api import LspApi
 from daytona_toolbox_api_client_async.api.port_api import PortApi
 from daytona_toolbox_api_client_async.api.process_api import ProcessApi
+from daytona_toolbox_api_client_async.api.server_api import ServerApi
 
 # import ApiClient
 from daytona_toolbox_api_client_async.api_response import ApiResponse
@@ -64,6 +65,7 @@ from daytona_toolbox_api_client_async.models.git_commit_response import GitCommi
 from daytona_toolbox_api_client_async.models.git_git_delete_branch_request import GitGitDeleteBranchRequest
 from daytona_toolbox_api_client_async.models.git_repo_request import GitRepoRequest
 from daytona_toolbox_api_client_async.models.git_status import GitStatus
+from daytona_toolbox_api_client_async.models.initialize_request import InitializeRequest
 from daytona_toolbox_api_client_async.models.interpreter_context import InterpreterContext
 from daytona_toolbox_api_client_async.models.is_port_in_use_response import IsPortInUseResponse
 from daytona_toolbox_api_client_async.models.keyboard_hotkey_request import KeyboardHotkeyRequest

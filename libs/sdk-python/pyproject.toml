@@ -21,7 +21,11 @@ dependencies = [
     "obstore>=0.7.0,<0.8.0",
     "websockets>=15.0.0,<16.0.0",
     "multipart>=1.0.0,<2.0.0",
-    "typing-extensions>=4.0.0; python_version < '3.10'"
+    "typing-extensions>=4.0.0; python_version < '3.10'",
+    "opentelemetry-api>=1.27.0,<2.0.0",
+    "opentelemetry-sdk>=1.27.0,<2.0.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.27.0,<2.0.0",
+    "opentelemetry-instrumentation-aiohttp-client>=0.59b0"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
