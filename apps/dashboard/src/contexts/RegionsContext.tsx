@@ -7,11 +7,12 @@ import { Region } from '@daytonaio/api-client'
 import { createContext } from 'react'
 
 export interface IRegionsContext {
-  regions: Region[]
-  loadingRegions: boolean
   sharedRegions: Region[]
+  loadingSharedRegions: boolean
+  availableRegions: Region[]
+  loadingAvailableRegions: boolean
   customRegions: Region[]
-  refreshRegions: () => Promise<Region[]>
+  refreshAvailableRegions: () => Promise<Region[]>
   getRegionName: (regionId: string) => string | undefined
 }
 

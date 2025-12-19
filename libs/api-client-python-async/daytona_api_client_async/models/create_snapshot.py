@@ -37,8 +37,9 @@ class CreateSnapshot(BaseModel):
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
+    region_id: Optional[StrictStr] = Field(default=None, description="ID of the region where the snapshot will be available. Defaults to organization default region if not specified.", alias="regionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -109,7 +110,8 @@ class CreateSnapshot(BaseModel):
             "gpu": obj.get("gpu"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
-            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
+            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            "regionId": obj.get("regionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

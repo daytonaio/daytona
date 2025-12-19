@@ -144,6 +144,9 @@ class AsyncSnapshotService:
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 
+        if params.region_id:
+            create_snapshot_req.region_id = params.region_id
+
         created_snapshot = await self.__snapshots_api.create_snapshot(create_snapshot_req)
 
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]

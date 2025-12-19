@@ -37,6 +37,7 @@ interface DataTableProps {
   data: SnapshotDto[]
   loading: boolean
   loadingSnapshots: Record<string, boolean>
+  getRegionName: (regionId: string) => string | undefined
   onDelete: (snapshot: SnapshotDto) => void
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
   onActivate?: (snapshot: SnapshotDto) => void
@@ -54,6 +55,7 @@ export function SnapshotTable({
   data,
   loading,
   loadingSnapshots,
+  getRegionName,
   onDelete,
   onActivate,
   onDeactivate,
@@ -84,10 +86,11 @@ export function SnapshotTable({
         onActivate,
         onDeactivate,
         loadingSnapshots,
+        getRegionName,
         writePermitted,
         deletePermitted,
       }),
-    [onDelete, onActivate, onDeactivate, loadingSnapshots, writePermitted, deletePermitted],
+    [onDelete, onActivate, onDeactivate, loadingSnapshots, getRegionName, writePermitted, deletePermitted],
   )
 
   const columnsWithSelection = useMemo(() => {
@@ -281,6 +284,7 @@ const getColumns = ({
   onActivate,
   onDeactivate,
   loadingSnapshots,
+  getRegionName,
   writePermitted,
   deletePermitted,
 }: {
@@ -288,6 +292,7 @@ const getColumns = ({
   onActivate?: (snapshot: SnapshotDto) => void
   onDeactivate?: (snapshot: SnapshotDto) => void
   loadingSnapshots: Record<string, boolean>
+  getRegionName: (regionId: string) => string | undefined
   writePermitted: boolean
   deletePermitted: boolean
 }): ColumnDef<SnapshotDto>[] => {
@@ -325,12 +330,47 @@ const getColumns = ({
       },
     },
     {
-      accessorKey: 'entrypoint',
-      header: 'Entrypoint',
+      accessorKey: 'regionIds',
+      header: 'Region',
       cell: ({ row }) => {
         const snapshot = row.original
-        const entrypoint = Array.isArray(snapshot.entrypoint) ? snapshot.entrypoint.join(' ') : ''
-        return entrypoint
+        if (!snapshot.regionIds?.length) {
+          return '-'
+        }
+
+        const regionNames = snapshot.regionIds.map((id) => getRegionName(id) ?? id)
+        const firstRegion = regionNames[0]
+        const remainingCount = regionNames.length - 1
+
+        if (remainingCount === 0) {
+          return (
+            <span className="truncate max-w-[150px] block" title={firstRegion}>
+              {firstRegion}
+            </span>
+          )
+        }
+
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate max-w-[150px]">{firstRegion}</span>
+                  <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                    +{remainingCount}
+                  </Badge>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="flex flex-col gap-1">
+                  {regionNames.map((name, idx) => (
+                    <span key={idx}>{name}</span>
+                  ))}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
       },
     },
     {
