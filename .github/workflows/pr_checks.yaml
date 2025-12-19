@@ -119,6 +119,7 @@ jobs:
       - name: Install Ruby dependencies
         run: |
           cd libs/api-client-ruby && bundle install
+          cd libs/toolbox-api-client-ruby && bundle install
           cd ../sdk-ruby && bundle install
       - name: Install Python dependencies
         run: |
@@ -161,6 +162,7 @@ jobs:
       - name: Install Ruby dependencies
         run: |
           cd libs/api-client-ruby && bundle install
+          cd libs/toolbox-api-client-ruby && bundle install
           cd ../sdk-ruby && bundle install
       - name: Build all
         run: |

@@ -70,9 +70,37 @@ response = await sandbox.process.codeRun(
 console.log(response.result);
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Run Python code
+response = sandbox.process.code_run(code: <<~PYTHON)
+  def greet(name):
+      return f"Hello, {name}!"
+  
+  print(greet("Daytona"))
+PYTHON
+
+puts response.result
+
+# Run code with environment variables
+response = sandbox.process.code_run(
+  code: 'import os; print(f"FOO: {os.environ.get(\'FOO\')}")',
+  env: { 'FOO' => 'BAR' }
+)
+puts response.result
+
+# Run code with timeout
+response = sandbox.process.code_run(
+  code: 'import time; time.sleep(2); print("Done")',
+  timeout: 5
+)
+puts response.result
+```
+</TabItem>
 </Tabs>
 
-See: [code_run (Python SDK)](/docs/python-sdk/sync/process/#processcode_run), [codeRun (TypeScript SDK)](/docs/typescript-sdk/process/#coderun)
+See: [code_run (Python SDK)](/docs/python-sdk/sync/process/#processcode_run), [codeRun (TypeScript SDK)](/docs/typescript-sdk/process/#coderun), [code_run (Ruby SDK)](/docs/ruby-sdk/process/#code_run)
 
 ### Stateful Code Interpreter
 
@@ -208,9 +236,31 @@ console.log(response3.result);
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+
+# Execute any shell command
+response = sandbox.process.exec(command: 'ls -la')
+puts response.result
+
+# Setting a working directory and a timeout
+response = sandbox.process.exec(command: 'sleep 3', cwd: 'workspace/src', timeout: 5)
+puts response.result
+
+# Passing environment variables
+response = sandbox.process.exec(
+  command: 'echo $CUSTOM_SECRET',
+  env: { 'CUSTOM_SECRET' => 'DAYTONA' }
+)
+puts response.result
+
+```
+
+</TabItem>
 </Tabs>
 
-See: [exec (Python SDK)](/docs/python-sdk/sync/process/#processexec), [executeCommand (TypeScript SDK)](/docs/typescript-sdk/process/#executecommand)
+See: [exec (Python SDK)](/docs/python-sdk/sync/process/#processexec), [executeCommand (TypeScript SDK)](/docs/typescript-sdk/process/#executecommand), [exec (Ruby SDK)](/docs/ruby-sdk/process/#exec)
 
 ## Sessions (Background Processes)
 
@@ -255,9 +305,28 @@ for (const session of sessions) {
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Check session's executed commands
+session = sandbox.process.get_session(session_id)
+puts "Session #{session_id}:"
+session.commands.each do |command|
+  puts "Command: #{command.command}, Exit Code: #{command.exit_code}"
+end
+
+# List all running sessions
+sessions = sandbox.process.list_sessions
+sessions.each do |session|
+  puts "PID: #{session.id}, Commands: #{session.commands}"
+end
+
+```
+
+</TabItem>
 </Tabs>
 
-See: [get_session (Python SDK)](/docs/python-sdk/sync/process/#processget_session), [list_sessions (Python SDK)](/docs/python-sdk/sync/process/#processlist_sessions), [getSession (TypeScript SDK)](/docs/typescript-sdk/process/#getsession), [listSessions (TypeScript SDK)](/docs/typescript-sdk/process/#listsessions)
+See: [get_session (Python SDK)](/docs/python-sdk/sync/process/#processget_session), [list_sessions (Python SDK)](/docs/python-sdk/sync/process/#processlist_sessions), [getSession (TypeScript SDK)](/docs/typescript-sdk/process/#getsession), [listSessions (TypeScript SDK)](/docs/typescript-sdk/process/#listsessions), [get_session (Ruby SDK)](/docs/ruby-sdk/process/#get_session), [list_sessions (Ruby SDK)](/docs/ruby-sdk/process/#list_sessions)
 
 ## Best Practices
 
@@ -297,9 +366,23 @@ The following best practices apply to managing resources when executing processe
    }
    ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+   ```ruby
+   # Ruby - Clean up session
+   session_id = 'long-running-cmd'
+   begin
+     sandbox.process.create_session(session_id)
+     session = sandbox.process.get_session(session_id)
+     # Do work...
+   ensure
+     sandbox.process.delete_session(session.session_id)
+   end
+   ```
+</TabItem>
 </Tabs>
 
-See: [create_session (Python SDK)](/docs/python-sdk/sync/process/#processcreate_session), [delete_session (Python SDK)](/docs/python-sdk/sync/process/#processdelete_session), [createSession (TypeScript SDK)](/docs/typescript-sdk/process/#createsession), [deleteSession (TypeScript SDK)](/docs/typescript-sdk/process/#deletesession)
+See: [create_session (Python SDK)](/docs/python-sdk/sync/process/#processcreate_session), [delete_session (Python SDK)](/docs/python-sdk/sync/process/#processdelete_session), [createSession (TypeScript SDK)](/docs/typescript-sdk/process/#createsession), [deleteSession (TypeScript SDK)](/docs/typescript-sdk/process/#deletesession), [create_session (Ruby SDK)](/docs/ruby-sdk/process/#create_session), [delete_session (Ruby SDK)](/docs/ruby-sdk/process/#delete_session)
 
 ### Error Handling
 
@@ -331,6 +414,18 @@ try {
         console.error("Error output:", e.stderr);
     }
 }
+```
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+begin
+  response = sandbox.process.code_run(code: 'invalid python code')
+rescue Daytona::ProcessExecutionError => e
+  puts "Execution failed: #{e}"
+  puts "Exit code: #{e.exit_code}"
+  puts "Error output: #{e.stderr}"
+end
 ```
 </TabItem>
 </Tabs>

@@ -77,7 +77,7 @@
     // "install-deps": "git config --global --add safe.directory ${containerWorkspaceFolder} && yarn",
     "env": "test -f .env.local || touch .env.local"
   },
-  "postStartCommand": "yarn && poetry lock && poetry install && (cd libs/api-client-ruby && bundle install) && (cd libs/sdk-ruby && bundle install) && docker buildx create --name builder --driver-opt network=host --config .devcontainer/buildkitd.toml --driver docker-container --use",
+  "postStartCommand": "yarn && poetry lock && poetry install && (cd libs/api-client-ruby && bundle install) && (cd libs/toolbox-api-client-ruby && bundle install) && (cd libs/sdk-ruby && bundle install) && docker buildx create --name builder --driver-opt network=host --config .devcontainer/buildkitd.toml --driver docker-container --use",
   "postAttachCommand": "",
   "forwardPorts": [
     5556,

@@ -58,6 +58,23 @@ const sandbox = await daytona.create(
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Define a simple declarative image with Python packages
+declarative_image = Daytona::Image
+  .debian_slim('3.12')
+  .pip_install(['requests', 'pytest'])
+  .workdir('/home/daytona')
+
+# Create a new Sandbox with the declarative image and stream the build logs
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromImageParams.new(image: declarative_image),
+  timeout: 0,
+  on_snapshot_create_logs: proc { |chunk| puts chunk }
+)
+```
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -144,6 +161,32 @@ const sandbox = await daytona.create({
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create a simple Python data science image
+snapshot_name = 'data-science-snapshot'
+
+image = Daytona::Image
+  .debian_slim('3.12')
+  .pip_install(['pandas', 'numpy'])
+  .workdir('/home/daytona')
+
+# Create the Snapshot and stream the build logs
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(
+    name: snapshot_name,
+    image: image
+  ),
+  on_logs: proc { |chunk| puts chunk }
+)
+
+# Create a new Sandbox using the pre-built Snapshot
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: snapshot_name)
+)
+```
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -185,6 +228,16 @@ const image = Image.base('python:3.12-slim-bookworm')
 const image = Image.debianSlim('3.12')
 ```
 
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create an image from a base
+image = Daytona::Image.base('python:3.12-slim-bookworm')
+
+# Use a Debian slim image with Python 3.12
+image = Daytona::Image.debian_slim('3.12')
+```
 </TabItem>
 </Tabs>
 
@@ -235,6 +288,21 @@ const image = Image.debianSlim('3.12').pipInstallFromPyproject('pyproject.toml',
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Add pip packages
+image = Daytona::Image.debian_slim('3.12').pip_install(['requests', 'pandas'])
+
+# Install from requirements.txt
+image = Daytona::Image.debian_slim('3.12').pip_install_from_requirements('requirements.txt')
+
+# Install from pyproject.toml (with optional dependencies)
+image = Daytona::Image.debian_slim('3.12').pip_install_from_pyproject('pyproject.toml', 
+  optional_dependencies: ['dev']
+)
+```
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -279,6 +347,16 @@ const image = Image.debianSlim('3.12').addLocalDir('src', '/home/daytona/src')
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Add a local file
+image = Daytona::Image.debian_slim('3.12').add_local_file('package.json', '/home/daytona/package.json')
+
+# Add a local directory
+image = Daytona::Image.debian_slim('3.12').add_local_dir('src', '/home/daytona/src')
+```
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -318,6 +396,16 @@ const image = Image.debianSlim('3.12').env({ PROJECT_ROOT: '/home/daytona' })
 const image = Image.debianSlim('3.12').workdir('/home/daytona')
 ```
 
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Set environment variables
+image = Daytona::Image.debian_slim('3.12').env('PROJECT_ROOT': '/home/daytona')
+
+# Set working directory
+image = Daytona::Image.debian_slim('3.12').workdir('/home/daytona')
+```
 </TabItem>
 </Tabs>
 
@@ -372,6 +460,23 @@ const image = Image.debianSlim('3.12').entrypoint(['/bin/bash'])
 const image = Image.debianSlim('3.12').cmd(['/bin/bash'])
 ```
 
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Run shell commands during build
+image = Daytona::Image.debian_slim('3.12').run_commands(
+  'apt-get update && apt-get install -y git',
+  'groupadd -r daytona && useradd -r -g daytona -m daytona',
+  'mkdir -p /home/daytona/workspace'
+)
+
+# Set entrypoint
+image = Daytona::Image.debian_slim('3.12').entrypoint(['/bin/bash'])
+
+# Set default command
+image = Daytona::Image.debian_slim('3.12').cmd(['/bin/bash'])
+```
 </TabItem>
 </Tabs>
 

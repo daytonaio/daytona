@@ -261,6 +261,30 @@ await daytona.snapshot.create(
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# Create a Snapshot with custom resources
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(
+    name: 'my-snapshot',
+    image: Daytona::Image.debian_slim('3.12'),
+    # All resource parameters are optional:
+    resources: Daytona::Resources.new(
+      cpu: 2,
+      memory: 4,
+      disk: 8
+    )
+  ),
+  on_logs: proc { |chunk| puts chunk }
+)
+```
+
+</TabItem>
 </Tabs>
 
 ## Get a Snapshot by name
@@ -377,6 +401,16 @@ print("Snapshot deleted")
 const daytona = new Daytona()
 await daytona.snapshot.delete("my-awesome-snapshot")
 console.log("Snapshot deleted")
+```
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'my-snapshot-name'
+  )
+)
 ```
 </TabItem>
 </Tabs>

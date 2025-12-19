@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    daytona_toolbox_api_client (1.0.0)
+    daytona_toolbox_api_client (0.126.0.alpha.7)
       typhoeus (~> 1.0, >= 1.0.1)
 
 GEM

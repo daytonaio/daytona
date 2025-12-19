@@ -26,7 +26,8 @@ daytona.snapshot.create(
     name: snapshot_name,
     image:,
     resources: Daytona::Resources.new(cpu: 1, memory: 1, disk: 3)
-  )
+  ),
+  on_logs: proc { |chunk| puts chunk }
 )
 
 # Create first sandbox using the pre-built image

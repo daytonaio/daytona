@@ -99,7 +99,8 @@ module Daytona
 
       snapshot = snapshots_api.create_snapshot(create_snapshot_req)
 
-      snapshot = stream_logs(snapshot, on_logs:) if on_logs
+      # Always wait for snapshot to be ready, regardless of on_logs
+      snapshot = wait_for_snapshot(snapshot, on_logs:)
 
       if [DaytonaApiClient::SnapshotState::ERROR, DaytonaApiClient::SnapshotState::BUILD_FAILED].include?(snapshot.state)
         raise Sdk::Error, "Failed to create snapshot #{snapshot.name}, reason: #{snapshot.error_reason}"
@@ -148,10 +149,13 @@ module Daytona
     # @return [DaytonaApiClient::ObjectStorageApi, nil] The object storage API client
     attr_reader :object_storage_api
 
+    # Wait for snapshot to reach a terminal state (ACTIVE, ERROR, or BUILD_FAILED)
+    # Optionally streams logs if on_logs callback is provided
+    #
     # @param snapshot [DaytonaApiClient::SnapshotDto]
-    # @param on_logs [Proc]
+    # @param on_logs [Proc, nil]
     # @return [DaytonaApiClient::SnapshotDto]
-    def stream_logs(snapshot, on_logs:) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    def wait_for_snapshot(snapshot, on_logs:) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       terminal_states = [
         DaytonaApiClient::SnapshotState::ACTIVE,
         DaytonaApiClient::SnapshotState::ERROR,
@@ -160,13 +164,25 @@ module Daytona
 
       thread = nil
       previous_state = snapshot.state
+      
+      # Log initial state if callback provided
+      on_logs&.call("Creating snapshot #{snapshot.name} (#{snapshot.state})")
+
       until terminal_states.include?(snapshot.state)
         Sdk.logger.debug("Waiting for snapshot to be created: #{snapshot.state}")
-        if thread.nil? && snapshot.state != DaytonaApiClient::SnapshotState::BUILD_PENDING
+        
+        # Start log streaming thread if callback provided and snapshot is building
+        if on_logs && thread.nil? && snapshot.state != DaytonaApiClient::SnapshotState::PENDING
           thread = start_log_streaming(snapshot, on_logs:)
         end
 
-        on_logs.call("Creating snapshot #{snapshot.name} (#{snapshot.state})") if previous_state != snapshot.state
+        # Log state changes if callback provided
+        if on_logs && previous_state != snapshot.state
+          if snapshot.state != DaytonaApiClient::SnapshotState::PENDING && thread.nil?
+            thread = start_log_streaming(snapshot, on_logs:)
+          end
+          on_logs.call("Creating snapshot #{snapshot.name} (#{snapshot.state})")
+        end
 
         sleep(1)
         previous_state = snapshot.state
@@ -175,7 +191,7 @@ module Daytona
 
       thread&.join
 
-      if snapshot.state == DaytonaApiClient::SnapshotState::ACTIVE
+      if on_logs && snapshot.state == DaytonaApiClient::SnapshotState::ACTIVE
         on_logs.call("Created snapshot #{snapshot.name} (#{snapshot.state})")
       end
 

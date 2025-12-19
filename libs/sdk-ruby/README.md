@@ -7,7 +7,7 @@ The official Ruby SDK for [Daytona](https://daytona.io) - a platform for secure,
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'daytona-sdk'
+gem 'daytona'
 ```
 
 And then execute:
@@ -19,7 +19,7 @@ bundle install
 Or install it yourself as:
 
 ```bash
-gem install daytona-sdk
+gem install daytona
 ```
 
 ## Quick Start
@@ -81,19 +81,24 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 ### Publishing a New Version
 
-1. Update the version in `lib/daytona/sdk/version.rb`
-2. Run the publish script:
+From the repository root:
 
 ```bash
-# Set your RubyGems API key
-export RUBYGEMS_API_KEY=your_api_key
+# Set your RubyGems API key and version
+export RUBYGEMS_API_KEY="your-rubygems-api-key"
+export RUBYGEMS_PKG_VERSION="X.Y.Z" # pre-release format example: "X.Y.Z.alpha.1"
 
-# Publish
-./scripts/publish.sh
-
-# Or publish with a specific version
-./scripts/publish.sh 0.126.0
+# Publish (builds and publishes all Ruby gems)
+yarn nx publish sdk-ruby
 ```
+
+This will automatically:
+
+- Set the version for all Ruby gems (api-client, toolbox-api-client, sdk)
+- Build all gems in the correct dependency order
+- Publish to RubyGems
+
+For more details, see [PUBLISHING.md](../../PUBLISHING.md).
 
 ## Requirements
 

@@ -67,7 +67,7 @@ module Daytona
       #   right_click = sandbox.computer_use.mouse.click(x: 100, y: 200, button: 'right')
       def click(x:, y:, button: 'left', double: false) # rubocop:disable Naming/MethodParameterName
         request = DaytonaToolboxApiClient::MouseClickRequest.new(x:, y:, button:, double:)
-        toolbox_api.click_mouse(request)
+        toolbox_api.click(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to click mouse: #{e.message}"
       end
@@ -87,7 +87,7 @@ module Daytona
       #   puts "Dragged from #{result.from_x},#{result.from_y} to #{result.to_x},#{result.to_y}"
       def drag(start_x:, start_y:, end_x:, end_y:, button: 'left')
         request = DaytonaToolboxApiClient::MouseDragRequest.new(start_x:, start_y:, end_x:, end_y:, button:)
-        toolbox_api.drag_mouse(request)
+        toolbox_api.drag(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to drag mouse: #{e.message}"
       end
@@ -109,7 +109,7 @@ module Daytona
       #   scroll_down = sandbox.computer_use.mouse.scroll(x: 100, y: 200, direction: 'down', amount: 5)
       def scroll(x:, y:, direction:, amount: 1) # rubocop:disable Naming/MethodParameterName
         request = DaytonaToolboxApiClient::MouseScrollRequest.new(x:, y:, direction:, amount:)
-        toolbox_api.scroll_mouse(request)
+        toolbox_api.scroll(request)
         true
       rescue StandardError => e
         raise Sdk::Error, "Failed to scroll mouse: #{e.message}"

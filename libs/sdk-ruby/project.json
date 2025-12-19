@@ -9,7 +9,22 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "bundle install"
+        "commands": ["rm -f *.gem", "bundle install", "gem build daytona.gemspec"],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["api-client-ruby", "toolbox-api-client-ruby"]
+        },
+        "set-version"
+      ]
+    },
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "if [ -n \"$RUBYGEMS_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${RUBYGEMS_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; sed -i \"s/VERSION = '[^']*'/VERSION = '$VER'/\" lib/daytona/sdk/version.rb && echo \"Changed version to $VER\"; else echo \"Using version from version.rb\"; fi"
       }
     },
     "lint": {
@@ -30,9 +45,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "commands": [
-          "bundle exec rubocop -a --fail-level=E"
-        ],
+        "commands": ["bundle exec rubocop -a --fail-level=E"],
         "parallel": false
       }
     },
@@ -41,8 +54,8 @@
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
-          "gem build daytona-sdk.gemspec",
-          "gem push daytona-sdk-*.gem --key rubygems --host https://rubygems.org"
+          "mkdir -p ~/.gem && echo \":rubygems: $RUBYGEMS_API_KEY\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials",
+          "gem push daytona-*.gem --key rubygems --host https://rubygems.org"
         ],
         "parallel": false
       },
@@ -50,9 +63,9 @@
         {
           "target": "publish",
           "projects": ["api-client-ruby", "toolbox-api-client-ruby"]
-        }
+        },
+        "build"
       ]
     }
   }
 }
-

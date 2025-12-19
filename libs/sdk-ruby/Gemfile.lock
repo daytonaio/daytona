@@ -13,11 +13,11 @@ PATH
 PATH
   remote: .
   specs:
-    daytona-sdk (0.125.0)
+    daytona (1.0.0)
       aws-sdk-s3 (~> 1.0)
-      daytona_api_client (>= 1.0.0)
-      daytona_toolbox_api_client (>= 1.0.0)
-      dotenv
+      daytona_api_client (= 1.0.0)
+      daytona_toolbox_api_client (= 1.0.0)
+      dotenv (~> 2.0)
       toml (~> 0.3)
       websocket-client-simple (~> 0.6)
 
@@ -55,7 +55,7 @@ GEM
       bigdecimal
       rexml
     diff-lcs (1.6.2)
-    dotenv (3.2.0)
+    dotenv (2.8.1)
     ethon (0.15.0)
       ffi (>= 1.15.0)
     event_emitter (0.2.6)
@@ -172,7 +172,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  daytona-sdk!
+  daytona!
   daytona_api_client!
   daytona_toolbox_api_client!
   pry (~> 0.15)

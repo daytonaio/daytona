@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in daytona-sdk.gemspec
+# Specify your gem's dependencies in daytona.gemspec
 gemspec
 
 gem 'pry', '~> 0.15'

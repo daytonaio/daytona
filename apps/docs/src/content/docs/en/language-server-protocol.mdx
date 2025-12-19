@@ -45,9 +45,32 @@ const lspServer = await sandbox.createLspServer(
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+# Create Sandbox
+daytona = Daytona::Daytona.new
+sandbox = daytona.create
+
+# Create LSP server for Python
+lsp_server = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::PYTHON,
+  path_to_project: 'workspace/project'
+)
+
+# Create LSP server for TypeScript
+lsp_server = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::TYPESCRIPT,
+  path_to_project: 'workspace/project'
+)
+```
+
+</TabItem>
 </Tabs>
 
-See: [create_lsp_server (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [createLspServer (TypeScript SDK)](/docs/typescript-sdk/sandbox#createlspserver)
+See: [create_lsp_server (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [createLspServer (TypeScript SDK)](/docs/typescript-sdk/sandbox#createlspserver), [create_lsp_server (Ruby SDK)](/docs/ruby-sdk/sandbox#create_lsp_server)
 
 ### Supported Languages
 
@@ -87,6 +110,16 @@ const completions = await lspServer.completions(
 console.log('Completions:', completions)
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+completions = lsp_server.completions(
+  path: 'workspace/project/main.py',
+  position: Daytona::LspServer::Position.new(line: 10, character: 15)
+)
+puts "Completions: #{completions}"
+```
+</TabItem>
 </Tabs>
 
-See: [completions (Python SDK)](/docs/python-sdk/sync/lsp-server/#lspservercompletions), [completions (TypeScript SDK)](/docs/typescript-sdk/lsp-server/#completions)
+See: [completions (Python SDK)](/docs/python-sdk/sync/lsp-server/#lspservercompletions), [completions (TypeScript SDK)](/docs/typescript-sdk/lsp-server/#completions), [completions (Ruby SDK)](/docs/ruby-sdk/lsp-server/#completions)

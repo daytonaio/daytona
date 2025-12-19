@@ -72,9 +72,35 @@ await sandbox.git.clone(
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Basic clone
+sandbox.git.clone(
+  url: 'https://github.com/user/repo.git',
+  path: 'workspace/repo'
+)
+
+# Clone with authentication
+sandbox.git.clone(
+  url: 'https://github.com/user/repo.git',
+  path: 'workspace/repo',
+  username: 'git',
+  password: 'personal_access_token'
+)
+
+# Clone specific branch
+sandbox.git.clone(
+  url: 'https://github.com/user/repo.git',
+  path: 'workspace/repo',
+  branch: 'develop'
+)
+```
+
+</TabItem>
 </Tabs>
 
-See: [clone (Python SDK)](/docs/python-sdk/sync/git/#gitclone), [clone (TypeScript SDK)](/docs/typescript-sdk/git/#clone)
+See: [clone (Python SDK)](/docs/python-sdk/sync/git/#gitclone), [clone (TypeScript SDK)](/docs/typescript-sdk/git/#clone), [clone (Ruby SDK)](/docs/ruby-sdk/git/#clone)
 
 ### Repository Status
 
@@ -118,9 +144,29 @@ response.branches.forEach(branch => {
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Get repository status
+status = sandbox.git.status('workspace/repo')
+puts "Current branch: #{status.current_branch}"
+puts "Commits ahead: #{status.ahead}"
+puts "Commits behind: #{status.behind}"
+status.file_status.each do |file|
+  puts "File: #{file.name}"
+end
+
+# List branches
+response = sandbox.git.branches('workspace/repo')
+response.branches.each do |branch|
+  puts "Branch: #{branch}"
+end
+```
+
+</TabItem>
 </Tabs>
 
-See: [status (Python SDK)](/docs/python-sdk/sync/git/#gitstatus), [status (TypeScript SDK)](/docs/typescript-sdk/git/#status)
+See: [status (Python SDK)](/docs/python-sdk/sync/git/#gitstatus), [status (TypeScript SDK)](/docs/typescript-sdk/git/#status), [status (Ruby SDK)](/docs/ruby-sdk/git/#status)
 
 ## Branch Operations
 
@@ -159,9 +205,23 @@ await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create new branch
+sandbox.git.create_branch('workspace/repo', 'feature/new-feature')
+
+# Switch branch
+sandbox.git.checkout_branch('workspace/repo', 'feature/new-feature')
+
+# Delete branch
+sandbox.git.delete_branch('workspace/repo', 'feature/old-feature')
+```
+
+</TabItem>
 </Tabs>
 
-See: [create_branch (Python SDK)](/docs/python-sdk/sync/git/#gitcreate_branch), [checkout_branch (Python SDK)](/docs/python-sdk/sync/git/#gitcheckout_branch), [delete_branch (Python SDK)](/docs/python-sdk/sync/git/#gitdelete_branch), [createBranch (TypeScript SDK)](/docs/typescript-sdk/git/#createbranch), [checkoutBranch (TypeScript SDK)](/docs/typescript-sdk/git/#checkoutbranch), [deleteBranch (TypeScript SDK)](/docs/typescript-sdk/git/#deletebranch)
+See: [create_branch (Python SDK)](/docs/python-sdk/sync/git/#gitcreate_branch), [checkout_branch (Python SDK)](/docs/python-sdk/sync/git/#gitcheckout_branch), [delete_branch (Python SDK)](/docs/python-sdk/sync/git/#gitdelete_branch), [createBranch (TypeScript SDK)](/docs/typescript-sdk/git/#createbranch), [checkoutBranch (TypeScript SDK)](/docs/typescript-sdk/git/#checkoutbranch), [deleteBranch (TypeScript SDK)](/docs/typescript-sdk/git/#deletebranch), [create_branch (Ruby SDK)](/docs/ruby-sdk/git/#create_branch), [checkout_branch (Ruby SDK)](/docs/ruby-sdk/git/#checkout_branch), [delete_branch (Ruby SDK)](/docs/ruby-sdk/git/#delete_branch)
 
 ## Staging and Committing
 
@@ -198,9 +258,23 @@ await sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", 
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Stage specific files
+sandbox.git.add('workspace/repo', ['file1.txt', 'file2.txt'])
+
+# Stage all changes
+sandbox.git.add('workspace/repo', ['.'])
+
+# Commit changes
+sandbox.git.commit('workspace/repo', 'feat: add new feature', 'John Doe', 'john@example.com')
+```
+
+</TabItem>
 </Tabs>
 
-See: [add (Python SDK)](/docs/python-sdk/sync/git/#gitadd), [commit (Python SDK)](/docs/python-sdk/sync/git/#gitcommit), [add (TypeScript SDK)](/docs/typescript-sdk/git/#add), [commit (TypeScript SDK)](/docs/typescript-sdk/git/#commit)
+See: [add (Python SDK)](/docs/python-sdk/sync/git/#gitadd), [commit (Python SDK)](/docs/python-sdk/sync/git/#gitcommit), [add (TypeScript SDK)](/docs/typescript-sdk/git/#add), [commit (TypeScript SDK)](/docs/typescript-sdk/git/#commit), [add (Ruby SDK)](/docs/ruby-sdk/git/#add), [commit (Ruby SDK)](/docs/ruby-sdk/git/#commit)
 
 ## Remote Operations
 
@@ -231,6 +305,17 @@ await sandbox.git.pull("workspace/repo");
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Push changes
+sandbox.git.push('workspace/repo')
+
+# Pull changes
+sandbox.git.pull('workspace/repo')
+```
+
+</TabItem>
 </Tabs>
 
-See: [push (Python SDK)](/docs/python-sdk/sync/git/#gitpush), [pull (Python SDK)](/docs/python-sdk/sync/git/#gitpull), [push (TypeScript SDK)](/docs/typescript-sdk/git/#push), [pull (TypeScript SDK)](/docs/typescript-sdk/git/#pull)
+See: [push (Python SDK)](/docs/python-sdk/sync/git/#gitpush), [pull (Python SDK)](/docs/python-sdk/sync/git/#gitpull), [push (TypeScript SDK)](/docs/typescript-sdk/git/#push), [pull (TypeScript SDK)](/docs/typescript-sdk/git/#pull), [push (Ruby SDK)](/docs/ruby-sdk/git/#push), [pull (Ruby SDK)](/docs/ruby-sdk/git/#pull)

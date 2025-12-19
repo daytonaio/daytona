@@ -44,7 +44,7 @@ module Daytona
     # @param position [Daytona::LspServer::Position]
     # @return [DaytonaApiClient::CompletionList]
     def completions(path:, position:)
-      toolbox_api.lsp_completions(
+      toolbox_api.completions(
         DaytonaToolboxApiClient::LspCompletionParams.new(
           language_id:,
           path_to_project:,
@@ -61,7 +61,7 @@ module Daytona
     # @param path [String]
     # @return [void]
     def did_close(path)
-      toolbox_api.lsp_did_close(
+      toolbox_api.did_close(
         DaytonaToolboxApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
       )
     end
@@ -74,7 +74,7 @@ module Daytona
     # @param path [String]
     # @return [void]
     def did_open(path)
-      toolbox_api.lsp_did_open(
+      toolbox_api.did_open(
         DaytonaToolboxApiClient::LspDocumentRequest.new(language_id:, path_to_project:, uri: uri(path))
       )
     end
@@ -83,14 +83,14 @@ module Daytona
     #
     # @param path [String]
     # @return [Array<DaytonaToolboxApiClient::LspSymbol]
-    def document_symbols(path) = toolbox_api.lsp_document_symbols(language_id, path_to_project, uri(path))
+    def document_symbols(path) = toolbox_api.document_symbols(language_id, path_to_project, uri(path))
 
     # Searches for symbols matching the query string across all files
     # in the Sandbox.
     #
     # @param query [String]
     # @return [Array<DaytonaToolboxApiClient::LspSymbol]
-    def sandbox_symbols(query) = toolbox_api.lsp_workspace_symbols(language_id, path_to_project, query)
+    def sandbox_symbols(query) = toolbox_api.workspace_symbols(query, language_id, path_to_project)
 
     # Starts the language server.
     # This method must be called before using any other LSP functionality.
@@ -98,7 +98,7 @@ module Daytona
     #
     # @return [void]
     def start
-      toolbox_api.lsp_start(
+      toolbox_api.start(
         DaytonaToolboxApiClient::LspServerRequest.new(language_id:, path_to_project:)
       )
     end
@@ -109,7 +109,7 @@ module Daytona
     #
     # @return [void]
     def stop
-      toolbox_api.lsp_stop(
+      toolbox_api.stop(
         DaytonaToolboxApiClient::LspServerRequest.new(language_id:, path_to_project:)
       )
     end

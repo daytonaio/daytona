@@ -126,6 +126,39 @@ const sandbox2 = await daytona.create({
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# Create a new volume or get an existing one
+volume = daytona.volume.get('my-volume', create: true)
+
+# Mount the volume to the sandbox
+mount_dir = '/home/daytona/volume'
+
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [DaytonaApiClient::SandboxVolume.new(volume_id: volume.id, mount_path: mount_dir)]
+)
+sandbox = daytona.create(params)
+
+# Mount a specific subpath within the volume
+# This is useful for isolating data or implementing multi-tenancy
+params2 = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [DaytonaApiClient::SandboxVolume.new(
+    volume_id: volume.id,
+    mount_path: mount_dir,
+    subpath: 'users/alice'
+  )]
+)
+sandbox2 = daytona.create(params2)
+```
+
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/) and [Ruby SDK](/docs/en/ruby-sdk/) references:
@@ -169,6 +202,17 @@ The following snippet demonstrate how to read from and write to a volume:
     await daytona.delete(sandbox1)
     ```
 
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Write to a file in the mounted volume using the Sandbox file system API
+    sandbox.fs.upload_file('Hello from Daytona volume!', '/home/daytona/volume/example.txt')
+
+    # When you're done with the sandbox, you can remove it
+    # The volume will persist even after the sandbox is removed
+    daytona.delete(sandbox)
+    ```
   </TabItem>
 </Tabs>
 

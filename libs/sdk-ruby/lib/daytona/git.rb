@@ -37,7 +37,7 @@ module Daytona
     #     "README.md"
     #   ])
     def add(path, files)
-      toolbox_api.git_add_files(DaytonaToolboxApiClient::GitAddRequest.new(path:, files:))
+      toolbox_api.add_files(DaytonaToolboxApiClient::GitAddRequest.new(path:, files:))
     rescue StandardError => e
       raise Sdk::Error, "Failed to add files: #{e.message}"
     end
@@ -53,7 +53,7 @@ module Daytona
     #   response = sandbox.git.branches("workspace/repo")
     #   puts "Branches: #{response.branches}"
     def branches(path)
-      toolbox_api.git_list_branches(path)
+      toolbox_api.list_branches(path)
     rescue StandardError => e
       raise Sdk::Error, "Failed to list branches: #{e.message}"
     end
@@ -97,7 +97,7 @@ module Daytona
     #     commit_id: "abc123"
     #   )
     def clone(url:, path:, branch: nil, commit_id: nil, username: nil, password: nil) # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
-      toolbox_api.git_clone_repository(
+      toolbox_api.clone_repository(
         DaytonaToolboxApiClient::GitCloneRequest.new(
           url: url,
           branch: branch,
@@ -135,7 +135,7 @@ module Daytona
     #   )
     #   puts "Commit SHA: #{commit_response.sha}"
     def commit(path:, message:, author:, email:, allow_empty: false)
-      response = toolbox_api.git_commit_changes(
+      response = toolbox_api.commit_changes(
         DaytonaToolboxApiClient::GitCommitRequest.new(path:, message:, author:, email:, allow_empty:)
       )
       GitCommitResponse.new(sha: response.hash)
@@ -165,7 +165,7 @@ module Daytona
     #     password: "github_token"
     #   )
     def push(path:, username: nil, password: nil)
-      toolbox_api.git_push_changes(
+      toolbox_api.push_changes(
         DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
       )
     rescue StandardError => e
@@ -194,7 +194,7 @@ module Daytona
     #   )
     #
     def pull(path:, username: nil, password: nil)
-      toolbox_api.git_pull_changes(
+      toolbox_api.pull_changes(
         DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
       )
     rescue StandardError => e
@@ -214,7 +214,7 @@ module Daytona
     #   puts "Commits ahead: #{status.ahead}"
     #   puts "Commits behind: #{status.behind}"
     def status(path)
-      toolbox_api.git_get_status(path)
+      toolbox_api.get_status(path)
     rescue StandardError => e
       raise Sdk::Error, "Failed to get status: #{e.message}"
     end
@@ -231,7 +231,7 @@ module Daytona
     #   # Checkout a branch
     #   sandbox.git.checkout_branch("workspace/repo", "feature-branch")
     def checkout_branch(path, branch)
-      toolbox_api.git_checkout_branch(
+      toolbox_api.checkout_branch(
         DaytonaToolboxApiClient::GitCheckoutRequest.new(path:, branch:)
       )
     rescue StandardError => e
@@ -251,7 +251,7 @@ module Daytona
     #   sandbox.git.create_branch("workspace/repo", "new-feature")
     #
     def create_branch(path, name)
-      toolbox_api.git_create_branch(
+      toolbox_api.create_branch(
         DaytonaToolboxApiClient::GitBranchRequest.new(path:, name:)
       )
     rescue StandardError => e
@@ -270,7 +270,7 @@ module Daytona
     #   # Delete a branch
     #   sandbox.git.delete_branch("workspace/repo", "old-feature")
     def delete_branch(path, name)
-      toolbox_api.git_delete_branch(
+      toolbox_api.delete_branch(
         DaytonaToolboxApiClient::GitDeleteBranchRequest.new(path:, name:)
       )
     rescue StandardError => e

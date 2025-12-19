@@ -34,9 +34,13 @@ daytona-ruby examples/ruby/file-operations/main.rb
 If the `daytona-ruby` alias isn't available, you can run examples manually:
 
 ```bash
-ruby -I/workspaces/daytona/libs/sdk-ruby/lib \
+cd /workspaces/daytona && \
+BUNDLE_GEMFILE=/workspaces/daytona/libs/sdk-ruby/Gemfile \
+bundle exec ruby \
+     -I/workspaces/daytona/libs/sdk-ruby/lib \
      -I/workspaces/daytona/libs/api-client-ruby/lib \
-     -r daytona/sdk \
+     -I/workspaces/daytona/libs/toolbox-api-client-ruby/lib \
+     -r daytona \
      examples/ruby/lifecycle/lifecycle.rb
 ```
 
@@ -44,5 +48,5 @@ Or using bundler from the SDK directory:
 
 ```bash
 cd /workspaces/daytona/libs/sdk-ruby
-bundle exec ruby -r bundler/setup -r daytona/sdk ../../examples/ruby/lifecycle/lifecycle.rb
+bundle exec ruby -r bundler/setup -r daytona ../../examples/ruby/lifecycle/lifecycle.rb
 ```

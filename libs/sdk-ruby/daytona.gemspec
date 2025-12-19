@@ -3,7 +3,7 @@
 require_relative 'lib/daytona/sdk/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'daytona-sdk'
+  spec.name = 'daytona'
   spec.version = Daytona::Sdk::VERSION
   spec.authors = ['Daytona Platforms Inc.']
   spec.email = ['support@daytona.io']
@@ -34,9 +34,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'aws-sdk-s3', '~> 1.0'
-  spec.add_dependency 'daytona_api_client', '>= 1.0.0'
-  spec.add_dependency 'daytona_toolbox_api_client', '>= 1.0.0'
-  spec.add_dependency 'dotenv'
+  spec.add_dependency 'daytona_api_client', Daytona::Sdk::VERSION
+  spec.add_dependency 'daytona_toolbox_api_client', Daytona::Sdk::VERSION
+  spec.add_dependency 'dotenv', '~> 2.0'
   spec.add_dependency 'toml', '~> 0.3'
   spec.add_dependency 'websocket-client-simple', '~> 0.6'
 end

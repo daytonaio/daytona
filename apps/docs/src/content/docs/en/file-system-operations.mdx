@@ -182,6 +182,20 @@ await sandbox.fs.uploadFiles(files)
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Upload multiple files at once
+files = [
+  Daytona::FileUpload.new('Content of file 1', 'data/file1.txt'),
+  Daytona::FileUpload.new('Content of file 2', 'data/file2.txt'),
+  Daytona::FileUpload.new('{"key": "value"}', 'config/settings.json')
+]
+
+sandbox.fs.upload_files(files)
+```
+
+</TabItem>
 </Tabs>
 
 See: [upload_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_files), [uploadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfiles)
@@ -211,6 +225,22 @@ print(content.decode('utf-8'))
 const downloadedFile = await sandbox.fs.downloadFile("file1.txt")
 
 console.log('File content:', downloadedFile.toString())
+
+```
+
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+
+# Download file and get a Tempfile reference
+file = sandbox.fs.download_file('file1.txt')
+
+# Read the content
+puts "File content: #{file.open.read}"
+
+# Or download and save to a specific path
+sandbox.fs.download_file('file1.txt', 'local_file.txt')
 
 ```
 
@@ -261,6 +291,26 @@ results.forEach(result => {
 })
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Download multiple files at once
+files = [
+  Daytona::FileDownloadRequest.new(source: 'data/file1.txt'), # No destination - download to memory
+  Daytona::FileDownloadRequest.new(source: 'data/file2.txt', destination: 'local_file2.txt') # Download to local file
+]
+
+results = sandbox.fs.download_files(files)
+
+results.each do |result|
+  if result.error
+    puts "Error downloading #{result.source}: #{result.error}"
+  elsif result.result
+    puts "Downloaded #{result.source} to #{result.result}"
+  end
+end
+```
+</TabItem>
 </Tabs>
 
 See: [download_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_files), [downloadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfiles)
@@ -281,6 +331,15 @@ sandbox.fs.delete_file("workspace/file.txt")
 ```typescript
 
 await sandbox.fs.deleteFile("workspace/file.txt")
+```
+
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+
+sandbox.fs.delete_file('workspace/file.txt')
+
 ```
 
 </TabItem>
@@ -317,6 +376,18 @@ await sandbox.fs.setFilePermissions("workspace/file.txt", { mode: "644" })
 // Get file permissions
 const fileInfo = await sandbox.fs.getFileDetails("workspace/file.txt")
 console.log(`Permissions: ${fileInfo.permissions}`)
+```
+
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Set file permissions
+sandbox.fs.set_file_permissions('workspace/file.txt', '644')
+
+# Get file permissions
+file_info = sandbox.fs.get_file_info('workspace/file.txt')
+puts "Permissions: #{file_info.permissions}"
 ```
 
 </TabItem>
@@ -370,6 +441,26 @@ await sandbox.fs.replaceInFiles(
     ["workspace/file1.txt", "workspace/file2.txt"],
     "old_text",
     "new_text"
+)
+```
+
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Search for text in files; if a folder is specified, the search is recursive
+results = sandbox.fs.find_files('workspace/src', 'text-of-interest')
+results.each do |match|
+  puts "Absolute file path: #{match.file}"
+  puts "Line number: #{match.line}"
+  puts "Line content: #{match.content}"
+end
+
+# Replace text in files
+sandbox.fs.replace_in_files(
+  files: ['workspace/file1.txt', 'workspace/file2.txt'],
+  pattern: 'old_text',
+  new_value: 'new_text'
 )
 ```
 
