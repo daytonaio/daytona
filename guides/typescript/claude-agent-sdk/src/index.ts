@@ -45,11 +45,21 @@ async function main() {
   // Initialize the Daytona client
   const daytona = new Daytona({ apiKey })
 
+  let sandbox: Sandbox | undefined
+  const cleanup = async () => {
+    console.log('\nCleaning up...')
+    try {
+      if (sandbox) await sandbox.delete()
+    } catch (e) {
+      console.error('Error deleting sandbox:', e)
+    }
+  }
+
   try {
     // Create a new Daytona sandbox
     // The sandbox language is irrelevant since we will use the code interpreter SDK
     console.log('Creating sandbox...')
-    const sandbox = await daytona.create({
+    sandbox = await daytona.create({
       envVars: {
         ANTHROPIC_API_KEY: process.env.SANDBOX_ANTHROPIC_API_KEY,
       },
@@ -57,7 +67,9 @@ async function main() {
 
     // Install the Claude Agent SDK
     console.log('Installing Agent SDK...')
-    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk==0.1.16')
+    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk').then((r: any) => {
+      if (r.exitCode) throw new Error('Error installing Agent SDK: ' + r.result)
+    })
 
     // Initialize the code interpreter and upload the coding agent script
     console.log('Initializing Agent SDK...')
@@ -67,19 +79,15 @@ async function main() {
     await sandbox.codeInterpreter.runCode(`import os, coding_agent;`, {
       context: ctx,
       envs: { PREVIEW_URL: previewLink.url },
+    }).then((r: any) => {
+      if (r.error) throw new Error('Error initializing Agent SDK: ' + r.error.value)
     })
 
     // Set up readline interface for user input
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
     rl.on('SIGINT', async () => {
-      try {
-        console.log('\nCleaning up...')
-        await sandbox.delete()
-      } catch (e) {
-        console.error('Error deleting sandbox:', e)
-      } finally {
-        process.exit(0)
-      }
+      await cleanup()
+      process.exit()
     })
 
     // Start the interactive prompt loop
@@ -90,7 +98,8 @@ async function main() {
       await processPrompt(prompt, sandbox, ctx)
     }
   } catch (error) {
-    console.error('An error occurred:', error)
+    console.error(error)
+    await cleanup()
     process.exit(1)
   }
 }
