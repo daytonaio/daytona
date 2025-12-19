@@ -181,7 +181,7 @@ class SnapshotService:
         log_task = None
         if on_logs:
             on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
-            if created_snapshot.state != SnapshotState.PENDING:
+            if created_snapshot.state != SnapshotState.PENDING and created_snapshot.state not in terminal_states:
                 log_task = threading.Thread(target=start_log_streaming)
                 log_task.start()
 
@@ -197,7 +197,8 @@ class SnapshotService:
             created_snapshot = self.__snapshots_api.get_snapshot(created_snapshot.id)
 
         if on_logs:
-            log_task.join()
+            if log_task:
+                log_task.join()
             if created_snapshot.state == SnapshotState.ACTIVE:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
