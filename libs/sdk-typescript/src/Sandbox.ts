@@ -68,6 +68,7 @@ export interface SandboxCodeToolbox {
  * @property {number} disk - Amount of disk space allocated to the Sandbox in GiB
  * @property {SandboxState} state - Current state of the Sandbox (e.g., "started", "stopped")
  * @property {string} [errorReason] - Error message if Sandbox is in error state
+ * @property {boolean} [recoverable] - Whether the Sandbox error is recoverable.
  * @property {SandboxBackupStateEnum} [backupState] - Current state of Sandbox backup
  * @property {string} [backupCreatedAt] - When the backup was created
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes
@@ -104,6 +105,7 @@ export class Sandbox implements SandboxDto {
   public disk!: number
   public state?: SandboxState
   public errorReason?: string
+  public recoverable?: boolean
   public backupState?: SandboxBackupStateEnum
   public backupCreatedAt?: string
   public autoStopInterval?: number
@@ -279,6 +281,31 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * Recover the Sandbox from a recoverable error and wait for it to be ready.
+   *
+   * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
+   *                            Defaults to 60-second timeout.
+   * @returns {Promise<void>}
+   * @throws {DaytonaError} - `DaytonaError` - If Sandbox fails to recover or times out
+   *
+   * @example
+   * const sandbox = await daytona.get('my-sandbox-id');
+   * await sandbox.recover();
+   * console.log('Sandbox recovered successfully');
+   */
+  public async recover(timeout = 60): Promise<void> {
+    if (timeout < 0) {
+      throw new DaytonaError('Timeout must be a non-negative number')
+    }
+
+    const startTime = Date.now()
+    const response = await this.sandboxApi.recoverSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    this.processSandboxDto(response.data)
+    const timeElapsed = Date.now() - startTime
+    await this.waitUntilStarted(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
+  }
+
+  /**
    * Stops the Sandbox.
    *
    * This method stops the Sandbox and waits for it to be fully stopped.
@@ -288,7 +315,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<void>}
    *
    * @example
-   * const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+   * const sandbox = await daytona.get('my-sandbox-id');
    * await sandbox.stop();
    * console.log('Sandbox stopped successfully');
    */
@@ -580,6 +607,7 @@ export class Sandbox implements SandboxDto {
     this.disk = sandboxDto.disk
     this.state = sandboxDto.state
     this.errorReason = sandboxDto.errorReason
+    this.recoverable = sandboxDto.recoverable
     this.backupState = sandboxDto.backupState
     this.backupCreatedAt = sandboxDto.backupCreatedAt
     this.autoStopInterval = sandboxDto.autoStopInterval

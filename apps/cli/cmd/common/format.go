@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -104,6 +105,12 @@ func RegisterFormatFlag(cmd *cobra.Command) {
 	cmd.PreRun = func(cmd *cobra.Command, args []string) {
 		if FormatFlag != "" {
 			BlockStdOut()
+			// When a structured output format is requested, suppress
+			// noisy warnings such as version mismatch so scripts
+			// consuming json/yaml aren't broken.
+			internal.SuppressVersionMismatchWarning = true
+		} else {
+			internal.SuppressVersionMismatchWarning = false
 		}
 	}
 }

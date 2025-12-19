@@ -4,13 +4,9 @@
 package docker
 
 import (
-	"context"
-	"fmt"
 	"io"
 	"sync"
-	"time"
 
-	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/client"
@@ -85,40 +81,4 @@ type DockerClient struct {
 	daemonStartTimeoutSec  int
 	sandboxStartTimeoutSec int
 	useSnapshotEntrypoint  bool
-}
-
-// retryWithExponentialBackoff executes a function with exponential backoff retry logic
-func (d *DockerClient) retryWithExponentialBackoff(ctx context.Context, operationName, containerId string, maxRetries int, baseDelay, maxDelay time.Duration, operationFunc func() error) error {
-	if maxRetries <= 1 {
-		log.Debugf("Invalid max retries value: %d. Using default value: %d", maxRetries, constants.DEFAULT_MAX_RETRIES)
-		maxRetries = constants.DEFAULT_MAX_RETRIES
-	}
-
-	for attempt := 0; attempt < maxRetries; attempt++ {
-		logAttempt := attempt + 1
-		log.Debugf("%s sandbox %s (attempt %d/%d)...", operationName, containerId, logAttempt, maxRetries)
-
-		err := operationFunc()
-		if err == nil {
-			return nil
-		}
-
-		if attempt < maxRetries-1 {
-			// Calculate exponential backoff delay
-			delay := min(baseDelay*time.Duration(1<<attempt), maxDelay)
-
-			log.Warnf("Failed to %s sandbox %s (attempt %d/%d): %v. Retrying in %v...", operationName, containerId, logAttempt, maxRetries, err, delay)
-
-			select {
-			case <-time.After(delay):
-				continue
-			case <-ctx.Done():
-				return ctx.Err()
-			}
-		}
-
-		return fmt.Errorf("failed to %s sandbox after %d attempts: %w", operationName, maxRetries, err)
-	}
-
-	return nil
 }

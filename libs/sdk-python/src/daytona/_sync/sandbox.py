@@ -63,6 +63,7 @@ class Sandbox(SandboxDto):
         disk (int): Amount of disk space allocated to the Sandbox in GiB.
         state (SandboxState): Current state of the Sandbox (e.g., "started", "stopped").
         error_reason (str): Error message if Sandbox is in error state.
+        recoverable (bool): Whether the Sandbox error is recoverable.
         backup_state (SandboxBackupStateEnum): Current state of Sandbox backup.
         backup_created_at (str): When the backup was created.
         auto_stop_interval (int): Auto-stop interval in minutes.
@@ -279,13 +280,41 @@ class Sandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             sandbox.start(timeout=40)  # Wait up to 40 seconds
             print("Sandbox started successfully")
             ```
         """
         start_time = time.time()
         sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+        self.__process_sandbox_dto(sandbox)
+        time_elapsed = time.time() - start_time
+        self.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
+
+    @intercept_errors(message_prefix="Failed to recover sandbox: ")
+    @with_timeout(
+        error_message=lambda self, timeout: (
+            f"Sandbox {self.id} failed to recover within the {timeout} seconds timeout period"
+        )
+    )
+    def recover(self, timeout: Optional[float] = 60):
+        """Recovers the Sandbox from a recoverable error and waits for it to be ready.
+
+        Args:
+            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+        Raises:
+            DaytonaError: If timeout is negative. If sandbox fails to recover or times out.
+
+        Example:
+            ```python
+            sandbox = daytona.get("my-sandbox-id")
+            sandbox.recover(timeout=40)  # Wait up to 40 seconds
+            print("Sandbox recovered successfully")
+            ```
+        """
+        start_time = time.time()
+        sandbox = self._sandbox_api.recover_sandbox(self.id, _request_timeout=timeout or None)
         self.__process_sandbox_dto(sandbox)
         time_elapsed = time.time() - start_time
         self.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
@@ -307,7 +336,7 @@ class Sandbox(SandboxDto):
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox")
+            sandbox = daytona.get("my-sandbox-id")
             sandbox.stop()
             print("Sandbox stopped successfully")
             ```
@@ -568,6 +597,7 @@ class Sandbox(SandboxDto):
         self.disk = sandbox_dto.disk
         self.state = sandbox_dto.state
         self.error_reason = sandbox_dto.error_reason
+        self.recoverable = sandbox_dto.recoverable
         self.backup_state = sandbox_dto.backup_state
         self.backup_created_at = sandbox_dto.backup_created_at
         self.auto_stop_interval = sandbox_dto.auto_stop_interval

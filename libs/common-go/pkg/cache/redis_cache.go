@@ -5,6 +5,7 @@ package cache
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -74,10 +75,14 @@ func NewRedisCache[T any](config *config.RedisConfig, keyPrefix string) (*RedisC
 	}
 
 	if client == nil {
-		client = redis.NewClient(&redis.Options{
+		options := &redis.Options{
 			Addr:     fmt.Sprintf("%s:%d", *config.Host, *config.Port),
 			Password: password,
-		})
+		}
+		if config.TLS != nil && *config.TLS {
+			options.TLSConfig = &tls.Config{}
+		}
+		client = redis.NewClient(options)
 	}
 
 	return &RedisCache[T]{

@@ -4,8 +4,14 @@
 package config
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"strings"
+	"time"
 
+	"github.com/daytonaio/apiclient"
+	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -26,20 +32,22 @@ type Config struct {
 	ToolboxOnlyMode       bool         `envconfig:"TOOLBOX_ONLY_MODE"`
 	PreviewWarningEnabled bool         `envconfig:"PREVIEW_WARNING_ENABLED"`
 	ShutdownTimeoutSec    int          `envconfig:"SHUTDOWN_TIMEOUT_SEC"`
+	ApiClient             *apiclient.APIClient
 }
 
 type OidcConfig struct {
-	ClientId     string  `envconfig:"CLIENT_ID" validate:"required"`
+	ClientId     string  `envconfig:"CLIENT_ID"`
 	ClientSecret string  `envconfig:"CLIENT_SECRET"`
-	Domain       string  `envconfig:"DOMAIN" validate:"required"`
+	Domain       string  `envconfig:"DOMAIN"`
 	PublicDomain *string `envconfig:"PUBLIC_DOMAIN"`
-	Audience     string  `envconfig:"AUDIENCE" validate:"required"`
+	Audience     string  `envconfig:"AUDIENCE"`
 }
 
 type RedisConfig struct {
 	Host     *string `envconfig:"HOST"`
 	Port     *int    `envconfig:"PORT"`
 	Password *string `envconfig:"PASSWORD"`
+	TLS      *bool   `envconfig:"TLS"`
 }
 
 var DEFAULT_PROXY_PORT int = 4000
@@ -83,6 +91,59 @@ func GetConfig() (*Config, error) {
 		if config.Redis.Host == nil && config.Redis.Port == nil && config.Redis.Password == nil {
 			config.Redis = nil
 		}
+	}
+
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
+		{
+			URL: config.DaytonaApiUrl,
+		},
+	}
+
+	clientConfig.AddDefaultHeader("Authorization", "Bearer "+config.ProxyApiKey)
+
+	config.ApiClient = apiclient.NewAPIClient(clientConfig)
+
+	config.ApiClient.GetConfig().HTTPClient = &http.Client{
+		Transport: http.DefaultTransport,
+	}
+
+	ctx := context.Background()
+
+	// Retry fetching Daytona API config with exponential backoff
+	err = utils.RetryWithExponentialBackoff(
+		ctx,
+		"get Daytona API config",
+		utils.DEFAULT_MAX_RETRIES,
+		time.Second,
+		10*time.Second,
+		func() error {
+			apiConfig, _, err := config.ApiClient.ConfigAPI.ConfigControllerGetConfig(ctx).Execute()
+			if err != nil {
+				return err
+			}
+
+			if config.Oidc.ClientId == "" {
+				config.Oidc.ClientId = apiConfig.Oidc.ClientId
+			}
+
+			if config.Oidc.Domain == "" {
+				config.Oidc.Domain = apiConfig.Oidc.Issuer
+
+				if !strings.HasSuffix(config.Oidc.Domain, "/") {
+					config.Oidc.Domain += "/"
+				}
+			}
+
+			if config.Oidc.Audience == "" {
+				config.Oidc.Audience = apiConfig.Oidc.Audience
+			}
+
+			return nil
+		},
+	)
+	if err != nil {
+		return nil, err
 	}
 
 	return config, nil

@@ -331,6 +331,48 @@
         }
       }
     },
+    "/sandboxes/{sandboxId}/is-recoverable": {
+      "post": {
+        "description": "Check if the sandbox's error reason indicates a recoverable error",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["sandbox"],
+        "summary": "Check if sandbox error is recoverable",
+        "operationId": "IsRecoverable",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Error reason to check",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IsRecoverableDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/IsRecoverableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/sandboxes/{sandboxId}/network-settings": {
       "get": {
         "description": "Get sandbox network settings",
@@ -413,6 +455,72 @@
         "responses": {
           "200": {
             "description": "Network settings updated",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/sandboxes/{sandboxId}/recover": {
+      "post": {
+        "description": "Recover sandbox from error state using specified recovery type",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["sandbox"],
+        "summary": "Recover sandbox from error state",
+        "operationId": "Recover",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Recovery parameters",
+            "name": "recovery",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecoverSandboxDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sandbox recovered",
             "schema": {
               "type": "string"
             }
@@ -1345,6 +1453,23 @@
         }
       }
     },
+    "IsRecoverableDTO": {
+      "type": "object",
+      "required": ["errorReason"],
+      "properties": {
+        "errorReason": {
+          "type": "string"
+        }
+      }
+    },
+    "IsRecoverableResponse": {
+      "type": "object",
+      "properties": {
+        "recoverable": {
+          "type": "boolean"
+        }
+      }
+    },
     "PullSnapshotRequestDTO": {
       "type": "object",
       "required": ["snapshot"],
@@ -1360,6 +1485,64 @@
         },
         "snapshot": {
           "type": "string"
+        }
+      }
+    },
+    "RecoverSandboxDTO": {
+      "type": "object",
+      "required": ["errorReason", "osUser", "snapshot", "userId"],
+      "properties": {
+        "backupErrorReason": {
+          "type": "string"
+        },
+        "cpuQuota": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "errorReason": {
+          "type": "string"
+        },
+        "fromVolumeId": {
+          "type": "string"
+        },
+        "gpuQuota": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "memoryQuota": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "networkAllowList": {
+          "type": "string"
+        },
+        "networkBlockAll": {
+          "type": "boolean"
+        },
+        "osUser": {
+          "type": "string"
+        },
+        "snapshot": {
+          "type": "string"
+        },
+        "storageQuota": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "userId": {
+          "type": "string"
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.VolumeDTO"
+          }
         }
       }
     },

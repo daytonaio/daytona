@@ -530,3 +530,33 @@ By default, Sandboxes auto-stop after 15 minutes of inactivity. To keep a Sandbo
     ```
   </TabItem>
 </Tabs>
+
+## Recover from Error State
+
+When a Sandbox enters an error state, it can sometimes be recovered using the `recover` method, depending on the underlying error reason. The `recoverable` flag indicates whether the error state can be resolved through an automated recovery procedure.
+
+:::note
+Recovery actions are not performed automatically because they address errors that require **further user intervention**, such as freeing up storage space.
+:::
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Check if the Sandbox is recoverable
+    if sandbox.recoverable:
+        sandbox.recover()
+        print("Sandbox recovered successfully")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Check if the Sandbox is recoverable
+    if (sandbox.recoverable) {
+        await sandbox.recover();
+        console.log('Sandbox recovered successfully');
+    }
+    ```
+  </TabItem>
+</Tabs>
+

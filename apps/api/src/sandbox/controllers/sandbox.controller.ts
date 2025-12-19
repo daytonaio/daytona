@@ -392,6 +392,40 @@ export class SandboxController {
     return SandboxDto.fromSandbox(sandbox)
   }
 
+  @Post(':sandboxIdOrName/recover')
+  @HttpCode(200)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
+  @ApiOperation({
+    summary: 'Recover sandbox from error state',
+    operationId: 'recoverSandbox',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recovery initiated',
+    type: SandboxDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  async recoverSandbox(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+  ): Promise<SandboxDto> {
+    const recoveredSandbox = await this.sandboxService.recover(sandboxIdOrName, authContext.organization)
+    let sandboxDto = SandboxDto.fromSandbox(recoveredSandbox)
+
+    if (sandboxDto.state !== SandboxState.STARTED) {
+      sandboxDto = await this.waitForSandboxStarted(sandboxDto, 30)
+    }
+
+    return sandboxDto
+  }
+
   @Post(':sandboxIdOrName/start')
   @HttpCode(200)
   @SkipThrottle({ authenticated: true })

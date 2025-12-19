@@ -52,6 +52,7 @@ interface GetColumnsProps {
   deletePermitted: boolean
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  handleRecover: (id: string) => void
 }
 
 export function getColumns({
@@ -66,6 +67,7 @@ export function getColumns({
   deletePermitted,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handleRecover,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const handleOpenWebTerminal = async (sandboxId: string) => {
     const url = await getWebTerminalUrl(sandboxId)
@@ -156,7 +158,11 @@ export function getColumns({
       },
       cell: ({ row }) => (
         <div className="w-full truncate">
-          <SandboxStateComponent state={row.original.state} errorReason={row.original.errorReason} />
+          <SandboxStateComponent
+            state={row.original.state}
+            errorReason={row.original.errorReason}
+            recoverable={row.original.recoverable}
+          />
         </div>
       ),
       accessorKey: 'state',
@@ -316,6 +322,7 @@ export function getColumns({
             onOpenWebTerminal={handleOpenWebTerminal}
             onCreateSshAccess={handleCreateSshAccess}
             onRevokeSshAccess={handleRevokeSshAccess}
+            onRecover={handleRecover}
           />
         </div>
       ),

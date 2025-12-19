@@ -95,19 +95,7 @@ The network access policies for your organization are set automatically dependin
 
 If your organization requires sandboxes to access services protected by a firewall (e.g., internal APIs, private databases, or cloud resources behind a Load Balancer), you may need to whitelist Daytona's egress IP addresses.
 
-Traffic originating from Daytona sandboxes will appear from the following IP addresses:
-
-- `100.28.153.11/32`
-- `44.213.113.27/32`
-- `44.202.200.25/32`
-- `44.202.186.29/32`
-- `54.157.121.57/32`
-- `44.202.128.241/32`
-- `52.91.252.131/32`
-
-:::caution[Important Update]
-The list of egress IP addresses is currently subject to change as infrastructure updates are performed. If you are configuring strict firewalls, please monitor this page or contact [support@daytona.io](mailto:support@daytona.io) for the most up-to-date list.
-:::
+To obtain the current IP address range for whitelisting purposes, please contact [support@daytona.io](mailto:support@daytona.io?subject=Request%20for%20IP%20Address%20Range&body=Hi%20Daytona%20Team%2C%0A%0AI%20need%20to%20whitelist%20Daytona%27s%20egress%20IP%20addresses%20for%20firewall%20configuration.%0A%0AOrganization%20ID%3A%20%5BYOUR_ORG_ID%5D%0AUse%20Case%3A%20%5BDESCRIBE_YOUR_USE_CASE%5D%0A%0ACould%20you%20please%20provide%20the%20current%20IP%20address%20range%3F%0A%0AThank%20you%21).
 
 ## Testing Network Access
 
@@ -143,32 +131,70 @@ Test network connectivity before starting critical development work and consider
 
 The following services are whitelisted and accessible on all tiers:
 
-- Package registries:
-  - npm: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
-  - yarn: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
-  - PyPI: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
-  - Maven: `repo1.maven.org`, `repo.maven.apache.org`
-- Container registries:
-  - Docker: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
-  - Google: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
-  - Microsoft: `mcr.microsoft.com`
-  - Quay: `quay.io`, `quay-registry.s3.amazonaws.com`
-  - Kubernetes: `registry.k8s.io`
-- Git repositories:
-  - GitHub: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
-  - GitLab: `gitlab.com`, `registry.gitlab.com`
-  - Bitbucket: `bitbucket.org`
-- System package managers:
-  - Ubuntu: `archive.ubuntu.com`, `security.ubuntu.com`
-  - Debian: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
-- CDN services:
-  - Cloudflare: `cloudflare.com`
-  - Fastly: `fastly.com`
-  - JavaScript CDNs: `unpkg.com`, `jsdelivr.net`
-- AI/ML services:
-  - Anthropic: `api.anthropic.com`
-- Platform services:
-  - Daytona: `app.daytona.io`
+### NPM Registry and Package Managers
+
+- **NPM Registry**: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
+- **Yarn Packages**: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
+
+### Git Hosting and Version Control
+
+- **GitHub**: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
+- **GitLab**: `gitlab.com`, `registry.gitlab.com`
+- **Bitbucket**: `bitbucket.org`
+
+### Python Package Managers
+
+- **PyPI**: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
+
+### Ubuntu/Debian Package Repositories
+
+- **Ubuntu Repos**: `archive.ubuntu.com`, `security.ubuntu.com`
+- **Debian Repos**: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
+
+### CDN and Content Delivery
+
+- **CDN Services**: `fastly.com`, `cloudflare.com`
+- **JavaScript CDNs**: `unpkg.com`, `jsdelivr.net`
+
+### AI/ML Services
+
+- **Anthropic**: `api.anthropic.com`
+- **OpenAI**: `api.openai.com`
+- **Perplexity**: `api.perplexity.ai`
+- **DeepSeek**: `api.deepseek.com`
+- **Groq**: `api.groq.com`
+- **Expo**: `api.expo.dev`
+- **OpenRouter**: `openrouter.ai`
+
+### Docker Registries and Container Services
+
+- **Docker Registries**: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
+- **Microsoft Container Registry**: `mcr.microsoft.com`
+- **Kubernetes Registry**: `registry.k8s.io`
+- **Google Container Registry**: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
+- **Quay**: `quay.io`, `quay-registry.s3.amazonaws.com`
+
+### Maven Repositories
+
+- **Maven Repos**: `repo1.maven.org`, `repo.maven.apache.org`
+
+### Google Fonts
+
+- **Google Fonts**: `fonts.googleapis.com`, `fonts.gstatic.com`
+
+### AWS S3 Endpoints
+
+- **US East**: `s3.us-east-1.amazonaws.com`, `s3.us-east-2.amazonaws.com`
+- **US West**: `s3.us-west-1.amazonaws.com`, `s3.us-west-2.amazonaws.com`
+- **EU**: `s3.eu-central-1.amazonaws.com`, `s3.eu-west-1.amazonaws.com`, `s3.eu-west-2.amazonaws.com`
+
+### Daytona Platform
+
+- **Daytona**: `app.daytona.io`
+
+:::note
+This list is continuously updated. If you require access to additional essential development services, please contact [support@daytona.io](mailto:support@daytona.io).
+:::
 
 
 ## Getting Help

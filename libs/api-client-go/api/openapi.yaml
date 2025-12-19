@@ -1765,6 +1765,42 @@ paths:
       summary: Get sandbox details
       tags:
         - sandbox
+  /sandbox/{sandboxIdOrName}/recover:
+    post:
+      operationId: recoverSandbox
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Recovery initiated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Recover sandbox from error state
+      tags:
+        - sandbox
   /sandbox/{sandboxIdOrName}/start:
     post:
       operationId: startSandbox
@@ -7445,6 +7481,10 @@ components:
       type: object
     RateLimitConfig:
       properties:
+        failedAuth:
+          allOf:
+            - $ref: '#/components/schemas/RateLimitEntry'
+          description: Failed authentication rate limit
         authenticated:
           allOf:
             - $ref: '#/components/schemas/RateLimitEntry'
@@ -8737,6 +8777,7 @@ components:
             volumeId: volume123
             subpath: users/alice
         cpu: 2
+        recoverable: true
         env:
           NODE_ENV: production
         gpu: 0
@@ -8833,6 +8874,10 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
+        recoverable:
+          description: Whether the sandbox error is recoverable.
+          example: true
+          type: boolean
         backupState:
           description: The state of the backup
           enum:
@@ -8934,6 +8979,7 @@ components:
                 volumeId: volume123
                 subpath: users/alice
             cpu: 2
+            recoverable: true
             env:
               NODE_ENV: production
             gpu: 0
@@ -8971,6 +9017,7 @@ components:
                 volumeId: volume123
                 subpath: users/alice
             cpu: 2
+            recoverable: true
             env:
               NODE_ENV: production
             gpu: 0
@@ -10968,7 +11015,6 @@ components:
     CreateSnapshot:
       example:
         general: true
-        skipValidation: false
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
@@ -11015,10 +11061,6 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
-        skipValidation:
-          description: Whether to skip validation for the snapshot
-          example: false
-          type: boolean
       required:
         - name
       type: object
@@ -11027,8 +11069,6 @@ components:
         - building
         - pending
         - pulling
-        - pending_validation
-        - validating
         - active
         - inactive
         - error
@@ -11044,7 +11084,6 @@ components:
         organizationId: organizationId
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
-        skipValidation: true
         disk: 5.637376656633329
         size: 0.8008281904610115
         mem: 5.962133916683182
@@ -11104,8 +11143,6 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the snapshot
-        skipValidation:
-          type: boolean
       required:
         - cpu
         - createdAt
@@ -11119,7 +11156,6 @@ components:
         - mem
         - name
         - size
-        - skipValidation
         - state
         - updatedAt
       type: object
@@ -11136,7 +11172,6 @@ components:
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
-            skipValidation: true
             disk: 5.637376656633329
             size: 0.8008281904610115
             mem: 5.962133916683182
@@ -11156,7 +11191,6 @@ components:
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
-            skipValidation: true
             disk: 5.637376656633329
             size: 0.8008281904610115
             mem: 5.962133916683182
@@ -11245,6 +11279,7 @@ components:
             volumeId: volume123
             subpath: users/alice
         cpu: 2
+        recoverable: true
         env:
           NODE_ENV: production
         snapshotCreatedAt: 2024-10-01T12:00:00Z
@@ -11342,6 +11377,10 @@ components:
           description: The error reason of the sandbox
           example: The sandbox is not running
           type: string
+        recoverable:
+          description: Whether the sandbox error is recoverable.
+          example: true
+          type: boolean
         backupState:
           description: The state of the backup
           enum:

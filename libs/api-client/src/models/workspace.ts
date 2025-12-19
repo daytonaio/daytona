@@ -143,6 +143,12 @@ export interface Workspace {
    */
   errorReason?: string
   /**
+   * Whether the sandbox error is recoverable.
+   * @type {boolean}
+   * @memberof Workspace
+   */
+  recoverable?: boolean
+  /**
    * The state of the backup
    * @type {string}
    * @memberof Workspace

@@ -38,6 +38,12 @@ import type { CreateSandboxDTO } from '../models'
 // @ts-ignore
 import type { ErrorResponse } from '../models'
 // @ts-ignore
+import type { IsRecoverableDTO } from '../models'
+// @ts-ignore
+import type { IsRecoverableResponse } from '../models'
+// @ts-ignore
+import type { RecoverSandboxDTO } from '../models'
+// @ts-ignore
 import type { ResizeSandboxDTO } from '../models'
 // @ts-ignore
 import type { SandboxInfoResponse } from '../models'
@@ -235,6 +241,100 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Check if the sandbox\'s error reason indicates a recoverable error
+     * @summary Check if sandbox error is recoverable
+     * @param {string} sandboxId Sandbox ID
+     * @param {IsRecoverableDTO} request Error reason to check
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    isRecoverable: async (
+      sandboxId: string,
+      request: IsRecoverableDTO,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('isRecoverable', 'sandboxId', sandboxId)
+      // verify required parameter 'request' is not null or undefined
+      assertParamExists('isRecoverable', 'request', request)
+      const localVarPath = `/sandboxes/{sandboxId}/is-recoverable`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication Bearer required
+      await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Recover sandbox from error state using specified recovery type
+     * @summary Recover sandbox from error state
+     * @param {string} sandboxId Sandbox ID
+     * @param {RecoverSandboxDTO} recovery Recovery parameters
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    recover: async (
+      sandboxId: string,
+      recovery: RecoverSandboxDTO,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('recover', 'sandboxId', sandboxId)
+      // verify required parameter 'recovery' is not null or undefined
+      assertParamExists('recover', 'recovery', recovery)
+      const localVarPath = `/sandboxes/{sandboxId}/recover`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication Bearer required
+      await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(recovery, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -574,6 +674,56 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Check if the sandbox\'s error reason indicates a recoverable error
+     * @summary Check if sandbox error is recoverable
+     * @param {string} sandboxId Sandbox ID
+     * @param {IsRecoverableDTO} request Error reason to check
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async isRecoverable(
+      sandboxId: string,
+      request: IsRecoverableDTO,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IsRecoverableResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.isRecoverable(sandboxId, request, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.isRecoverable']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Recover sandbox from error state using specified recovery type
+     * @summary Recover sandbox from error state
+     * @param {string} sandboxId Sandbox ID
+     * @param {RecoverSandboxDTO} recovery Recovery parameters
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async recover(
+      sandboxId: string,
+      recovery: RecoverSandboxDTO,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.recover(sandboxId, recovery, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.recover']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Remove a sandbox that has been previously destroyed
      * @summary Remove a destroyed sandbox
      * @param {string} sandboxId Sandbox ID
@@ -755,6 +905,32 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       return localVarFp.info(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**
+     * Check if the sandbox\'s error reason indicates a recoverable error
+     * @summary Check if sandbox error is recoverable
+     * @param {string} sandboxId Sandbox ID
+     * @param {IsRecoverableDTO} request Error reason to check
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    isRecoverable(
+      sandboxId: string,
+      request: IsRecoverableDTO,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<IsRecoverableResponse> {
+      return localVarFp.isRecoverable(sandboxId, request, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Recover sandbox from error state using specified recovery type
+     * @summary Recover sandbox from error state
+     * @param {string} sandboxId Sandbox ID
+     * @param {RecoverSandboxDTO} recovery Recovery parameters
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    recover(sandboxId: string, recovery: RecoverSandboxDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.recover(sandboxId, recovery, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Remove a sandbox that has been previously destroyed
      * @summary Remove a destroyed sandbox
      * @param {string} sandboxId Sandbox ID
@@ -889,6 +1065,36 @@ export class SandboxApi extends BaseAPI {
   public info(sandboxId: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
       .info(sandboxId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Check if the sandbox\'s error reason indicates a recoverable error
+   * @summary Check if sandbox error is recoverable
+   * @param {string} sandboxId Sandbox ID
+   * @param {IsRecoverableDTO} request Error reason to check
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public isRecoverable(sandboxId: string, request: IsRecoverableDTO, options?: RawAxiosRequestConfig) {
+    return SandboxApiFp(this.configuration)
+      .isRecoverable(sandboxId, request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Recover sandbox from error state using specified recovery type
+   * @summary Recover sandbox from error state
+   * @param {string} sandboxId Sandbox ID
+   * @param {RecoverSandboxDTO} recovery Recovery parameters
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public recover(sandboxId: string, recovery: RecoverSandboxDTO, options?: RawAxiosRequestConfig) {
+    return SandboxApiFp(this.configuration)
+      .recover(sandboxId, recovery, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

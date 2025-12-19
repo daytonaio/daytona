@@ -96,7 +96,7 @@ func (a *ApiServer) Start() error {
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
 
-	metricsController := public.Group("/metrics")
+	metricsController := protected.Group("/metrics")
 	{
 		metricsController.GET("", gin.WrapH(promhttp.Handler()))
 	}
@@ -115,6 +115,8 @@ func (a *ApiServer) Start() error {
 		sandboxController.POST("/:sandboxId/stop", controllers.Stop)
 		sandboxController.POST("/:sandboxId/backup", controllers.CreateBackup)
 		sandboxController.POST("/:sandboxId/resize", controllers.Resize)
+		sandboxController.POST("/:sandboxId/recover", controllers.Recover)
+		sandboxController.POST("/:sandboxId/is-recoverable", controllers.IsRecoverable)
 		sandboxController.DELETE("/:sandboxId", controllers.RemoveDestroyed)
 		sandboxController.POST("/:sandboxId/network-settings", controllers.UpdateNetworkSettings)
 

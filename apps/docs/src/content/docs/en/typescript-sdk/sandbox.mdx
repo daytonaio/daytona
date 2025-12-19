@@ -156,6 +156,13 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.public
     ```
+- `recoverable?` _boolean_ - Whether the Sandbox error is recoverable.
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.recoverable
+    ```
 - `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
     
     ##### Implementation of
@@ -408,6 +415,38 @@ Gets the working directory path inside the Sandbox.
 ```ts
 const workDir = await sandbox.getWorkDir();
 console.log(`Sandbox working directory: ${workDir}`);
+```
+
+***
+
+#### recover()
+
+```ts
+recover(timeout?: number): Promise<void>
+```
+
+Recover the Sandbox from a recoverable error and wait for it to be ready.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60-second timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- `DaytonaError` - If Sandbox fails to recover or times out
+
+**Example:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox-id');
+await sandbox.recover();
+console.log('Sandbox recovered successfully');
 ```
 
 ***
@@ -673,7 +712,7 @@ This method stops the Sandbox and waits for it to be fully stopped.
 **Example:**
 
 ```ts
-const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+const sandbox = await daytona.get('my-sandbox-id');
 await sandbox.stop();
 console.log('Sandbox stopped successfully');
 ```

@@ -99,7 +99,8 @@ export class AuditInterceptor implements NestInterceptor {
         observer.next(result)
         observer.complete()
       } catch (handlerError) {
-        const errorMessage = handlerError?.message || 'Unknown error'
+        const errorMessage =
+          handlerError instanceof HttpException ? handlerError.message : 'An unexpected error occurred.'
         const statusCode = this.resolveErrorStatusCode(handlerError)
         await this.recordHandlerError(auditLog, errorMessage, statusCode)
 

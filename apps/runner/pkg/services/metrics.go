@@ -5,11 +5,9 @@ package services
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
 
@@ -192,45 +190,18 @@ func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, con
 
 		// Disk allocation from StorageOpt (assuming xfs filesystem)
 		if containerJSON.HostConfig.StorageOpt != nil {
-			if sizeStr, exists := containerJSON.HostConfig.StorageOpt["size"]; exists {
-				// Parse size string like "10G" and convert to GB
-				diskGB, err := s.parseStorageQuotaGB(sizeStr)
-				if err != nil {
-					log.Errorf("Error parsing storage quota for container %s: %v", containerId, err)
-				} else {
-					if diskGB > 0 {
-						allocatedDisk = diskGB
-					}
+			storageGB, err := common.ParseStorageOptSizeGB(containerJSON.HostConfig.StorageOpt)
+			if err != nil {
+				log.Errorf("Error parsing storage quota for container %s: %v", containerId, err)
+			} else {
+				// Convert float64 to int64 for consistency with existing behavior
+				diskGB := int64(storageGB)
+				if diskGB > 0 {
+					allocatedDisk = diskGB
 				}
 			}
 		}
 	}
 
 	return allocatedCpu, allocatedMemory, allocatedDisk, nil
-}
-
-func (s *MetricsService) parseStorageQuotaGB(sizeStr string) (int64, error) {
-	// Handle size format like "10G" and return the GB value
-	if sizeStr == "" {
-		return 0, fmt.Errorf("empty size string")
-	}
-
-	// Remove any whitespace
-	sizeStr = strings.TrimSpace(sizeStr)
-
-	// Check if it ends with 'G' (assuming xfs format)
-	if strings.HasSuffix(sizeStr, "G") {
-		// Remove the 'G' and parse the number
-		numStr := strings.TrimSuffix(sizeStr, "G")
-
-		gb, err := strconv.ParseInt(numStr, 10, 64)
-		if err != nil {
-			return 0, err
-		}
-
-		return gb, nil
-	}
-
-	// If it doesn't end with 'G', return 0 (not xfs format)
-	return 0, fmt.Errorf("not in expected xfs format (e.g., '10G')")
 }

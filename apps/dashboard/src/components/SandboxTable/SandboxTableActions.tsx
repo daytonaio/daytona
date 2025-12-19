@@ -4,7 +4,7 @@
  */
 
 import { SandboxState } from '@daytonaio/api-client'
-import { Terminal, MoreVertical, Play, Square, Loader2 } from 'lucide-react'
+import { Terminal, MoreVertical, Play, Square, Loader2, Wrench } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -29,6 +29,7 @@ export function SandboxTableActions({
   onOpenWebTerminal,
   onCreateSshAccess,
   onRevokeSshAccess,
+  onRecover,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
@@ -52,6 +53,13 @@ export function SandboxTableActions({
           key: 'start',
           label: 'Start',
           onClick: () => onStart(sandbox.id),
+          disabled: isLoading,
+        })
+      } else if (sandbox.state === SandboxState.ERROR && sandbox.recoverable) {
+        items.push({
+          key: 'recover',
+          label: 'Recover',
+          onClick: () => onRecover(sandbox.id),
           disabled: isLoading,
         })
       }
@@ -108,6 +116,7 @@ export function SandboxTableActions({
     onVnc,
     onCreateSshAccess,
     onRevokeSshAccess,
+    onRecover,
   ])
 
   if (!writePermitted && !deletePermitted) {
@@ -123,6 +132,8 @@ export function SandboxTableActions({
           e.stopPropagation()
           if (sandbox.state === SandboxState.STARTED) {
             onStop(sandbox.id)
+          } else if (sandbox.state === SandboxState.ERROR && sandbox.recoverable) {
+            onRecover(sandbox.id)
           } else {
             onStart(sandbox.id)
           }
@@ -132,6 +143,8 @@ export function SandboxTableActions({
           <Square className="w-4 h-4" />
         ) : sandbox.state === SandboxState.STOPPING || sandbox.state === SandboxState.STARTING ? (
           <Loader2 className="w-4 h-4 animate-spin" />
+        ) : sandbox.state === SandboxState.ERROR && sandbox.recoverable ? (
+          <Wrench className="w-4 h-4" />
         ) : (
           <Play className="w-4 h-4" />
         )}

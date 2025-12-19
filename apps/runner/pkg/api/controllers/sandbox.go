@@ -5,10 +5,12 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
+	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
@@ -377,6 +379,58 @@ type SandboxInfoResponse struct {
 	BackupError *string            `json:"backupError,omitempty"`
 } //	@name	SandboxInfoResponse
 
+// Recover godoc
+//
+//	@Summary		Recover sandbox from error state
+//	@Description	Recover sandbox from error state using specified recovery type
+//	@Tags			sandbox
+//	@Accept			json
+//	@Produce		json
+//	@Param			sandboxId	path		string					true	"Sandbox ID"
+//	@Param			recovery	body		dto.RecoverSandboxDTO	true	"Recovery parameters"
+//	@Success		200			{string}	string					"Sandbox recovered"
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/recover [post]
+//
+//	@id				Recover
+func Recover(ctx *gin.Context) {
+	var recoverDto dto.RecoverSandboxDTO
+	err := ctx.ShouldBindJSON(&recoverDto)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	sandboxId := ctx.Param("sandboxId")
+	runner := runner.GetInstance(nil)
+
+	// Deduce recovery type from error reason
+	recoveryType := common.DeduceRecoveryType(recoverDto.ErrorReason)
+	if recoveryType == models.UnknownRecoveryType {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("unable to deduce recovery type from error reason: %s", recoverDto.ErrorReason)))
+		return
+	}
+
+	switch recoveryType {
+	case models.RecoveryTypeStorageExpansion:
+		err = runner.Docker.RecoverFromStorageLimit(ctx.Request.Context(), sandboxId, float64(recoverDto.StorageQuota))
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+
+	default:
+		ctx.Error(common_errors.NewInvalidBodyRequestError(fmt.Errorf("unsupported recovery type: %s", recoveryType)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "Sandbox recovered")
+}
+
 // RemoveDestroyed godoc
 //
 //	@Tags			sandbox
@@ -407,4 +461,32 @@ func RemoveDestroyed(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "Sandbox removed")
+}
+
+// IsRecoverable godoc
+//
+//	@Summary		Check if sandbox error is recoverable
+//	@Description	Check if the sandbox's error reason indicates a recoverable error
+//	@Tags			sandbox
+//	@Accept			json
+//	@Produce		json
+//	@Param			sandboxId	path		string					true	"Sandbox ID"
+//	@Param			request		body		dto.IsRecoverableDTO	true	"Error reason to check"
+//	@Success		200			{object}	dto.IsRecoverableResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/is-recoverable [post]
+//
+//	@id				IsRecoverable
+func IsRecoverable(ctx *gin.Context) {
+	var request dto.IsRecoverableDTO
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	recoverable := common.IsRecoverable(request.ErrorReason)
+
+	ctx.JSON(http.StatusOK, dto.IsRecoverableResponse{
+		Recoverable: recoverable,
+	})
 }

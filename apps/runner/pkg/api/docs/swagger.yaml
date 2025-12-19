@@ -115,6 +115,18 @@ definitions:
       - statusCode
       - timestamp
     type: object
+  IsRecoverableDTO:
+    properties:
+      errorReason:
+        type: string
+    required:
+      - errorReason
+    type: object
+  IsRecoverableResponse:
+    properties:
+      recoverable:
+        type: boolean
+    type: object
   PullSnapshotRequestDTO:
     properties:
       destinationRef:
@@ -127,6 +139,50 @@ definitions:
         type: string
     required:
       - snapshot
+    type: object
+  RecoverSandboxDTO:
+    properties:
+      backupErrorReason:
+        type: string
+      cpuQuota:
+        minimum: 1
+        type: integer
+      env:
+        additionalProperties:
+          type: string
+        type: object
+      errorReason:
+        type: string
+      fromVolumeId:
+        type: string
+      gpuQuota:
+        minimum: 0
+        type: integer
+      memoryQuota:
+        minimum: 1
+        type: integer
+      networkAllowList:
+        type: string
+      networkBlockAll:
+        type: boolean
+      osUser:
+        type: string
+      snapshot:
+        type: string
+      storageQuota:
+        minimum: 1
+        type: integer
+      userId:
+        type: string
+      volumes:
+        items:
+          $ref: '#/definitions/dto.VolumeDTO'
+        type: array
+    required:
+      - errorReason
+      - osUser
+      - snapshot
+      - userId
     type: object
   RegistryDTO:
     properties:
@@ -530,6 +586,38 @@ paths:
       summary: Destroy sandbox
       tags:
         - sandbox
+  /sandboxes/{sandboxId}/is-recoverable:
+    post:
+      consumes:
+        - application/json
+      description: Check if the sandbox's error reason indicates a recoverable error
+      operationId: IsRecoverable
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Error reason to check
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/IsRecoverableDTO'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/IsRecoverableResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Check if sandbox error is recoverable
+      tags:
+        - sandbox
   /sandboxes/{sandboxId}/network-settings:
     get:
       description: Get sandbox network settings
@@ -613,6 +701,54 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Update sandbox network settings
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/recover:
+    post:
+      consumes:
+        - application/json
+      description: Recover sandbox from error state using specified recovery type
+      operationId: Recover
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Recovery parameters
+          in: body
+          name: recovery
+          required: true
+          schema:
+            $ref: '#/definitions/RecoverSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox recovered
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Recover sandbox from error state
       tags:
         - sandbox
   /sandboxes/{sandboxId}/resize:

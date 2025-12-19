@@ -123,8 +123,8 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 		hostConfig.Resources = container.Resources{
 			CPUPeriod:  100000,
 			CPUQuota:   sandboxDto.CpuQuota * 100000,
-			Memory:     sandboxDto.MemoryQuota * 1024 * 1024 * 1024,
-			MemorySwap: sandboxDto.MemoryQuota * 1024 * 1024 * 1024,
+			Memory:     common.GBToBytes(float64(sandboxDto.MemoryQuota)),
+			MemorySwap: common.GBToBytes(float64(sandboxDto.MemoryQuota)),
 		}
 	}
 

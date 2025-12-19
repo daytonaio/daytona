@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Logger, ServiceUnavailableException } from '@nestjs/common'
+import { Controller, Get, Logger, ServiceUnavailableException, UseGuards } from '@nestjs/common'
 import { HealthCheckService, HealthCheck, TypeOrmHealthIndicator } from '@nestjs/terminus'
 import { RedisHealthIndicator } from './redis.health'
+import { AnonymousRateLimitGuard } from '../common/guards/anonymous-rate-limit.guard'
 
 @Controller('health')
+@UseGuards(AnonymousRateLimitGuard)
 export class HealthController {
   private readonly logger = new Logger(HealthController.name)
 

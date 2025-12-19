@@ -460,7 +460,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   @LogExecution('check-snapshot-state')
   @WithInstrumentation()
   async checkSnapshotState() {
-    //  the first time the snapshot is created it needs to be validated and pushed to the internal registry
+    //  the first time the snapshot is created it needs to be pushed to the internal registry
     //  before propagating to the runners
     //  this cron job will process the snapshot states until the snapshot is active (or error)
 
@@ -508,9 +508,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         case SnapshotState.PULLING:
         case SnapshotState.BUILDING:
           syncState = await this.handleCheckInitialRunnerSnapshot(snapshot)
-          break
-        case SnapshotState.VALIDATING:
-          syncState = await this.handleSnapshotStateValidating(snapshot)
           break
         case SnapshotState.REMOVING:
           syncState = await this.handleSnapshotStateRemoving(snapshot)
@@ -572,18 +569,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  async handleSnapshotStateValidating(snapshot: Snapshot): Promise<SyncState> {
-    const timeoutMinutes = 1
-    const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while validating snapshot')
-      return DONT_SYNC_AGAIN
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return SYNC_AGAIN
-  }
-
   async handleSnapshotStateRemoving(snapshot: Snapshot): Promise<SyncState> {
     const snapshotRunnerItems = await this.snapshotRunnerRepository.find({
       where: {
@@ -602,7 +587,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     // Check for timeout - allow up to 30 minutes
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
+    if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
       await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
       return DONT_SYNC_AGAIN
     }
@@ -615,7 +600,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       },
     })
 
-    if (snapshot.skipValidation && snapshot.ref && snapshotRunner) {
+    if (snapshot.ref && snapshotRunner) {
       if (snapshotRunner.state === SnapshotRunnerState.READY) {
         await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
       } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
@@ -645,7 +630,42 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     // Process snapshot info in case it had failed or it's a build snapshot
     if (!snapshot.ref) {
-      await this.processSnapshotInfo(snapshot, snapshotInfoResponse)
+      const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      const sanitizedUrl = defaultInternalRegistry.url.replace(/^https?:\/\//, '')
+      snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${snapshotInfoResponse.hash}:daytona`
+
+      const organization = await this.organizationService.findOne(snapshot.organizationId)
+      if (!organization) {
+        throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
+      }
+
+      const MAX_SIZE_GB = organization.maxSnapshotSize
+
+      if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
+        await this.updateSnapshotState(
+          snapshot.id,
+          SnapshotState.ERROR,
+          `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(
+            2,
+          )}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
+        )
+        return DONT_SYNC_AGAIN
+      }
+
+      snapshot.size = snapshotInfoResponse.sizeGB
+
+      // If entrypoint is not explicitly set, set it from snapshotInfoResponse
+      if (!snapshot.entrypoint) {
+        if (snapshotInfoResponse.entrypoint && snapshotInfoResponse.entrypoint.length > 0) {
+          if (Array.isArray(snapshotInfoResponse.entrypoint)) {
+            snapshot.entrypoint = snapshotInfoResponse.entrypoint
+          } else {
+            snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
+          }
+        } else {
+          snapshot.entrypoint = ['sleep', 'infinity']
+        }
+      }
     }
 
     try {
@@ -654,25 +674,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       this.logger.error(`Failed to remove snapshot ${snapshot.imageName}: ${fromAxiosError(error)}`)
     }
 
-    let nextState = SnapshotState.ACTIVE
-    let snapshotErrorMessage: string | undefined = undefined
-
-    if (!snapshot.skipValidation) {
-      snapshot.state = SnapshotState.VALIDATING
-      await this.snapshotRepository.save(snapshot)
-
-      const { validationSuccess, errorMessage } = await this.validateSandboxCreationOnRunner(snapshot, runner)
-      if (!validationSuccess) {
-        nextState = SnapshotState.ERROR
-        snapshotErrorMessage = errorMessage
-      }
-    }
-
-    if (nextState === SnapshotState.ACTIVE) {
-      await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
-    }
-
-    await this.updateSnapshotState(snapshot.id, nextState, snapshotErrorMessage)
+    await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
+    await this.snapshotRepository.save(snapshot)
 
     // Best effort removal of old snapshot from transient registry
     const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
@@ -692,66 +695,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     return DONT_SYNC_AGAIN
-  }
-
-  async validateSandboxCreationOnRunner(
-    snapshot: Snapshot,
-    runner: Runner,
-  ): Promise<{ validationSuccess: boolean; errorMessage: string }> {
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-    const id = uuidv4()
-
-    const sandbox = new Sandbox(id)
-    sandbox.id = id
-    sandbox.snapshot = snapshot.ref
-    sandbox.osUser = 'root' // TODO: instead of root, use the user from the snapshot
-    sandbox.disk = snapshot.disk
-    sandbox.mem = snapshot.mem
-    sandbox.cpu = snapshot.cpu
-    sandbox.organizationId = snapshot.organizationId
-    sandbox.runnerId = runner.id
-    sandbox.labels = {
-      DAYTONA_VALIDATING_SNAPSHOT_ID: snapshot.id,
-    }
-
-    let validationSuccess = false
-    let creationSuccess = false
-    let errorMessage = 'Validation failed, ensure your entrypoint is valid/long-running'
-
-    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
-
-    try {
-      await runnerAdapter.createSandbox(sandbox, registry, snapshot.entrypoint)
-      creationSuccess = true
-    } catch (error) {
-      validationSuccess = false
-      errorMessage = `${errorMessage}: ${fromAxiosError(error)}`
-      return { validationSuccess, errorMessage }
-    }
-
-    // Wait for 5 seconds to ensure the sandbox hasn't exited
-    await new Promise((resolve) => setTimeout(resolve, 5000))
-
-    try {
-      const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-      if (sandboxInfo.state === SandboxState.STARTED) {
-        validationSuccess = true
-      }
-    } catch (error) {
-      validationSuccess = false
-      errorMessage = `Validation failed, error getting sandbox info: ${fromAxiosError(error)}`
-    }
-
-    if (creationSuccess) {
-      try {
-        await runnerAdapter.destroySandbox(sandbox.id)
-      } catch (error) {
-        this.logger.error(`Failed to destroy sandbox ${sandbox.id}: ${fromAxiosError(error)}`)
-      }
-    }
-
-    return { validationSuccess, errorMessage }
   }
 
   async processPullOnInitialRunner(snapshot: Snapshot, runner: Runner) {
@@ -1082,43 +1025,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       this.logger.error(`Failed to cleanup inactive snapshots from runners: ${fromAxiosError(error)}`)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
-    }
-  }
-
-  private async processSnapshotInfo(snapshot: Snapshot, snapshotInfoResponse: RunnerSnapshotInfo) {
-    const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-    const sanitizedUrl = defaultInternalRegistry.url.replace(/^https?:\/\//, '')
-    snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${snapshotInfoResponse.hash}:daytona`
-
-    const organization = await this.organizationService.findOne(snapshot.organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
-    }
-
-    const MAX_SIZE_GB = organization.maxSnapshotSize
-
-    if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
-      await this.updateSnapshotState(
-        snapshot.id,
-        SnapshotState.ERROR,
-        `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
-      )
-      return DONT_SYNC_AGAIN
-    }
-
-    snapshot.size = snapshotInfoResponse.sizeGB
-
-    // If entrypoint is not explicitly set, set it from snapshotInfoResponse
-    if (!snapshot.entrypoint) {
-      if (snapshotInfoResponse.entrypoint && snapshotInfoResponse.entrypoint.length > 0) {
-        if (Array.isArray(snapshotInfoResponse.entrypoint)) {
-          snapshot.entrypoint = snapshotInfoResponse.entrypoint
-        } else {
-          snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
-        }
-      } else {
-        snapshot.entrypoint = ['sleep', 'infinity']
-      }
     }
   }
 

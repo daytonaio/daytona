@@ -161,6 +161,14 @@ export class SandboxDto {
   errorReason?: string
 
   @ApiPropertyOptional({
+    description: 'Whether the sandbox error is recoverable.',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  recoverable?: boolean
+
+  @ApiPropertyOptional({
     description: 'The state of the backup',
     enum: BackupState,
     example: Object.values(BackupState)[0],
@@ -275,6 +283,7 @@ export class SandboxDto {
       state: this.getSandboxState(sandbox),
       desiredState: sandbox.desiredState,
       errorReason: sandbox.errorReason,
+      recoverable: sandbox.recoverable,
       backupState: sandbox.backupState,
       backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
       autoStopInterval: sandbox.autoStopInterval,
