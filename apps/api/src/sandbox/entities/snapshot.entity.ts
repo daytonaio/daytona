@@ -18,6 +18,7 @@ import {
 import { SnapshotRunner } from './snapshot-runner.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { BuildInfo } from './build-info.entity'
+import { SnapshotRegion } from './snapshot-region.entity'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -102,4 +103,10 @@ export class Snapshot {
 
   @Column({ nullable: true })
   initialRunnerId?: string
+
+  @OneToMany(() => SnapshotRegion, (snapshotRegion) => snapshotRegion.snapshot, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  snapshotRegions: SnapshotRegion[]
 }

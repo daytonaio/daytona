@@ -3,7 +3,7 @@
 Delete a sandbox
 
 ```
-daytona sandbox delete [SANDBOX_ID] [flags]
+daytona sandbox delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 ### Options

@@ -1,6 +1,6 @@
-name: daytona sandbox stop
-synopsis: Stop a sandbox
-usage: daytona sandbox stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+name: daytona sandbox archive
+synopsis: Archive a sandbox
+usage: daytona sandbox archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 inherited_options:
   - name: help
     default_value: 'false'

@@ -28,7 +28,7 @@ import { useCopyToClipboard } from 'usehooks-ts'
 const OrganizationSettings: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
-  const { getRegionName, sharedRegions: regions, loadingRegions } = useRegions()
+  const { getRegionName, sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
 
   const deleteOrganizationMutation = useDeleteOrganizationMutation()
   const leaveOrganizationMutation = useLeaveOrganizationMutation()

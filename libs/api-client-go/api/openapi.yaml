@@ -1079,15 +1079,15 @@ paths:
       summary: Cancel organization invitation
       tags:
         - organizations
-  /regions:
+  /organizations/{organizationId}/regions:
     get:
-      operationId: listRegions
+      operationId: listAvailableRegions
       parameters:
-        - description: Use with JWT to specify the organization ID
+        - description: Organization ID
           explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
+          in: path
+          name: organizationId
+          required: true
           schema:
             type: string
           style: simple
@@ -1099,24 +1099,24 @@ paths:
                 items:
                   $ref: '#/components/schemas/Region'
                 type: array
-          description: List of all regions
+          description: List of all available regions
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: List all regions
+      summary: List all available regions for the organization
       tags:
-        - regions
+        - organizations
     post:
       operationId: createRegion
       parameters:
-        - description: Use with JWT to specify the organization ID
+        - description: Organization ID
           explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
+          in: path
+          name: organizationId
+          required: true
           schema:
             type: string
           style: simple
@@ -1141,23 +1141,23 @@ paths:
             - email
       summary: Create a new region
       tags:
-        - regions
-  /regions/{id}:
+        - organizations
+  /organizations/{organizationId}/regions/{id}:
     delete:
       operationId: deleteRegion
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1173,22 +1173,22 @@ paths:
             - email
       summary: Delete a region
       tags:
-        - regions
+        - organizations
     get:
       operationId: getRegionById
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1208,23 +1208,23 @@ paths:
             - email
       summary: Get region by ID
       tags:
-        - regions
-  /regions/{id}/regenerate-proxy-api-key:
+        - organizations
+  /organizations/{organizationId}/regions/{id}/regenerate-proxy-api-key:
     post:
       operationId: regenerateProxyApiKey
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1244,23 +1244,23 @@ paths:
             - email
       summary: Regenerate proxy API key for a region
       tags:
-        - regions
-  /regions/{id}/regenerate-ssh-gateway-api-key:
+        - organizations
+  /organizations/{organizationId}/regions/{id}/regenerate-ssh-gateway-api-key:
     post:
       operationId: regenerateSshGatewayApiKey
       parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
         - description: Region ID
           explode: false
           in: path
           name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
           required: true
           schema:
             type: string
@@ -1280,7 +1280,7 @@ paths:
             - email
       summary: Regenerate SSH gateway API key for a region
       tags:
-        - regions
+        - organizations
   /users/me:
     get:
       operationId: getAuthenticatedUser
@@ -1482,6 +1482,28 @@ paths:
       summary: Get user by ID
       tags:
         - users
+  /regions:
+    get:
+      operationId: listSharedRegions
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Region'
+                type: array
+          description: List of all shared regions
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all shared regions
+      tags:
+        - regions
   /sandbox:
     get:
       operationId: listSandboxes
@@ -11742,6 +11764,7 @@ components:
         imageName: ubuntu:22.04
         memory: 1
         buildInfo: ''
+        regionId: regionId
         entrypoint: sleep infinity
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
@@ -11784,6 +11807,10 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
+        regionId:
+          description: ID of the region where the snapshot will be available. Defaults
+            to organization default region if not specified.
+          type: string
       required:
         - name
       type: object
@@ -11803,6 +11830,9 @@ components:
         imageName: imageName
         buildInfo: ''
         cpu: 6.027456183070403
+        regionIds:
+          - regionIds
+          - regionIds
         gpu: 1.4658129805029452
         organizationId: organizationId
         general: true
@@ -11866,6 +11896,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the snapshot
+        regionIds:
+          description: IDs of regions where the snapshot is available
+          items:
+            type: string
+          type: array
       required:
         - cpu
         - createdAt
@@ -11891,6 +11926,9 @@ components:
           - imageName: imageName
             buildInfo: ''
             cpu: 6.027456183070403
+            regionIds:
+              - regionIds
+              - regionIds
             gpu: 1.4658129805029452
             organizationId: organizationId
             general: true
@@ -11910,6 +11948,9 @@ components:
           - imageName: imageName
             buildInfo: ''
             cpu: 6.027456183070403
+            regionIds:
+              - regionIds
+              - regionIds
             gpu: 1.4658129805029452
             organizationId: organizationId
             general: true

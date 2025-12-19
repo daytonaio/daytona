@@ -39,7 +39,9 @@ type SnapshotDto struct {
 	UpdatedAt      time.Time       `json:"updatedAt"`
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
 	// Build information for the snapshot
-	BuildInfo            *BuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
+	// IDs of regions where the snapshot is available
+	RegionIds            []string `json:"regionIds,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -516,6 +518,38 @@ func (o *SnapshotDto) SetBuildInfo(v BuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetRegionIds returns the RegionIds field value if set, zero value otherwise.
+func (o *SnapshotDto) GetRegionIds() []string {
+	if o == nil || IsNil(o.RegionIds) {
+		var ret []string
+		return ret
+	}
+	return o.RegionIds
+}
+
+// GetRegionIdsOk returns a tuple with the RegionIds field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetRegionIdsOk() ([]string, bool) {
+	if o == nil || IsNil(o.RegionIds) {
+		return nil, false
+	}
+	return o.RegionIds, true
+}
+
+// HasRegionIds returns a boolean if a field has been set.
+func (o *SnapshotDto) HasRegionIds() bool {
+	if o != nil && !IsNil(o.RegionIds) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegionIds gets a reference to the given []string and assigns it to the RegionIds field.
+func (o *SnapshotDto) SetRegionIds(v []string) {
+	o.RegionIds = v
+}
+
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -550,6 +584,9 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
+	}
+	if !IsNil(o.RegionIds) {
+		toSerialize["regionIds"] = o.RegionIds
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -624,6 +661,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "lastUsedAt")
 		delete(additionalProperties, "buildInfo")
+		delete(additionalProperties, "regionIds")
 		o.AdditionalProperties = additionalProperties
 	}
 

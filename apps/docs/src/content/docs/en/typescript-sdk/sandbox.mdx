@@ -225,7 +225,7 @@ new Sandbox(
    axiosInstance: AxiosInstance, 
    sandboxApi: SandboxApi, 
    codeToolbox: SandboxCodeToolbox, 
-   getToolboxBaseUrl: () => Promise<string>): Sandbox
+   getToolboxBaseUrl: (sandboxId: string, regionId: string) => Promise<string>): Sandbox
 ```
 
 Creates a new Sandbox instance
@@ -237,7 +237,7 @@ Creates a new Sandbox instance
 - `axiosInstance` _AxiosInstance_
 - `sandboxApi` _SandboxApi_ - API client for Sandbox operations
 - `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation
-- `getToolboxBaseUrl` _\(\) =\> Promise\<string\>_
+- `getToolboxBaseUrl` _\(sandboxId: string, regionId: string\) =\> Promise\<string\>_
 
 
 **Returns**:

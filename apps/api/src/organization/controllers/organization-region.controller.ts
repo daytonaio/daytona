@@ -16,7 +16,7 @@ import {
   NotFoundException,
   Delete,
 } from '@nestjs/common'
-import { ApiOAuth2, ApiResponse, ApiOperation, ApiTags, ApiBearerAuth, ApiHeader, ApiParam } from '@nestjs/swagger'
+import { ApiOAuth2, ApiResponse, ApiOperation, ApiTags, ApiBearerAuth, ApiParam } from '@nestjs/swagger'
 import { RequiredOrganizationResourcePermissions } from '../decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../guards/organization-resource-action.guard'
@@ -25,10 +25,7 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { CreateRegionDto, CreateRegionResponseDto } from '../../region/dto/create-region.dto'
 import { RegionDto } from '../../region/dto/region.dto'
 import { RegionService } from '../../region/services/region.service'
@@ -38,9 +35,8 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
 
-@ApiTags('regions')
-@Controller('regions')
-@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@ApiTags('organizations')
+@Controller('organizations/:organizationId/regions')
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
@@ -55,16 +51,21 @@ export class OrganizationRegionController {
   @Get()
   @HttpCode(200)
   @ApiOperation({
-    summary: 'List all regions',
-    operationId: 'listRegions',
+    summary: 'List all available regions for the organization',
+    operationId: 'listAvailableRegions',
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all regions',
+    description: 'List of all available regions',
     type: [RegionDto],
   })
-  async listRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
-    return this.organizationService.listRegions(authContext.organizationId)
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  async listAvailableRegions(@Param('organizationId') organizationId: string): Promise<RegionDto[]> {
+    return this.organizationService.listAvailableRegions(organizationId)
   }
 
   @Post()
@@ -79,6 +80,11 @@ export class OrganizationRegionController {
     description: 'The region has been successfully created.',
     type: CreateRegionResponseDto,
   })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.REGION,
@@ -92,7 +98,7 @@ export class OrganizationRegionController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async createRegion(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('organizationId') organizationId: string,
     @Body() createRegionDto: CreateRegionDto,
   ): Promise<CreateRegionResponseDto> {
     return await this.regionService.create(
@@ -101,7 +107,7 @@ export class OrganizationRegionController {
         enforceQuotas: false,
         regionType: RegionType.CUSTOM,
       },
-      authContext.organizationId,
+      organizationId,
     )
   }
 
@@ -114,6 +120,11 @@ export class OrganizationRegionController {
   @ApiResponse({
     status: 200,
     type: RegionDto,
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
   })
   @ApiParam({
     name: 'id',
@@ -138,6 +149,11 @@ export class OrganizationRegionController {
   @ApiResponse({
     status: 204,
     description: 'The region has been successfully deleted.',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
   })
   @ApiParam({
     name: 'id',
@@ -168,6 +184,11 @@ export class OrganizationRegionController {
     type: RegenerateApiKeyResponseDto,
   })
   @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiParam({
     name: 'id',
     description: 'Region ID',
     type: String,
@@ -196,6 +217,11 @@ export class OrganizationRegionController {
     status: 200,
     description: 'The SSH gateway API key has been successfully regenerated.',
     type: RegenerateApiKeyResponseDto,
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
   })
   @ApiParam({
     name: 'id',

@@ -24,6 +24,7 @@ import {
 import { SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
+import { getRegionFullDisplayName } from '@/lib/utils'
 
 interface UseSandboxTableProps {
   data: Sandbox[]
@@ -100,7 +101,7 @@ export function useSandboxTable({
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
     return regionsData.map((region) => ({
-      label: `${region.name}${region.organizationId && region.name !== region.id ? ` (${region.id})` : ''}`,
+      label: getRegionFullDisplayName(region),
       value: region.id,
     }))
   }, [regionsData])

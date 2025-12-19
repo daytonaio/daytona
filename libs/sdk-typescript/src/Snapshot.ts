@@ -60,12 +60,14 @@ export interface PaginatedSnapshots extends Omit<PaginatedSnapshotsDto, 'items'>
  * If an Image instance is provided, it will be used to create a new image in Daytona.
  * @property {Resources} resources - Resources of the snapshot.
  * @property {string[]} entrypoint - Entrypoint of the snapshot.
+ * @property {string} regionId - ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
  */
 export type CreateSnapshotParams = {
   name: string
   image: string | Image
   resources?: Resources
   entrypoint?: string[]
+  regionId?: string
 }
 
 /**
@@ -176,6 +178,10 @@ export class SnapshotService {
       createSnapshotReq.gpu = params.resources.gpu
       createSnapshotReq.memory = params.resources.memory
       createSnapshotReq.disk = params.resources.disk
+    }
+
+    if (params.regionId) {
+      createSnapshotReq.regionId = params.regionId
     }
 
     let createdSnapshot = (

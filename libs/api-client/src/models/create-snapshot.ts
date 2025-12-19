@@ -76,4 +76,10 @@ export interface CreateSnapshot {
    * @memberof CreateSnapshot
    */
   buildInfo?: CreateBuildInfo
+  /**
+   * ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
+   * @type {string}
+   * @memberof CreateSnapshot
+   */
+  regionId?: string
 }
