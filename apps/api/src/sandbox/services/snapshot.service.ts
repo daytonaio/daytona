@@ -303,8 +303,7 @@ export class SnapshotService {
       }
 
       try {
-        await this.snapshotRepository.insert(snapshot)
-        return snapshot
+        return await this.snapshotRepository.save(snapshot)
       } catch (error) {
         if (error.code === '23505') {
           // PostgreSQL unique violation error code
