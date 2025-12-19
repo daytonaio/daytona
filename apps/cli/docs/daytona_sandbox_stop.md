@@ -3,7 +3,7 @@
 Stop a sandbox
 
 ```
-daytona sandbox stop [SANDBOX_ID] [flags]
+daytona sandbox stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 ### Options inherited from parent commands

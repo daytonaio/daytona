@@ -3,7 +3,7 @@
 Start a sandbox
 
 ```
-daytona sandbox start [SANDBOX_ID] [flags]
+daytona sandbox start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 ### Options inherited from parent commands

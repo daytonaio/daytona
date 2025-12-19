@@ -66,6 +66,12 @@ export class SnapshotDto {
   })
   buildInfo?: BuildInfoDto
 
+  @ApiPropertyOptional({
+    description: 'IDs of regions where the snapshot is available',
+    type: [String],
+  })
+  regionIds?: string[]
+
   static fromSnapshot(snapshot: Snapshot): SnapshotDto {
     return {
       id: snapshot.id,
@@ -92,6 +98,7 @@ export class SnapshotDto {
             updatedAt: snapshot.buildInfo.updatedAt,
           }
         : undefined,
+      regionIds: snapshot.snapshotRegions?.map((sr) => sr.regionId) ?? undefined,
     }
   }
 }

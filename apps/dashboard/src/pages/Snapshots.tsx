@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useApi } from '@/hooks/useApi'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -27,6 +26,10 @@ import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, Snaps
 import { Plus } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useRegions } from '@/hooks/useRegions'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getRegionFullDisplayName } from '@/lib/utils'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 
@@ -34,6 +37,7 @@ const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
 
   const { snapshotApi } = useApi()
+  const { availableRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
   const [snapshotsData, setSnapshotsData] = useState<PaginatedSnapshots>({
     items: [],
     total: 0,
@@ -52,6 +56,7 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
+  const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -255,6 +260,7 @@ const Snapshots: React.FC = () => {
           cpu,
           memory,
           disk,
+          regionId: selectedRegionId ?? undefined,
         },
         selectedOrganization?.id,
       )
@@ -262,6 +268,7 @@ const Snapshots: React.FC = () => {
       setNewSnapshotName('')
       setNewImageName('')
       setNewEntrypoint('')
+      setSelectedRegionId(undefined)
       toast.success(`Creating snapshot ${trimmedName}`)
 
       if (paginationParams.pageIndex !== 0) {
@@ -408,6 +415,7 @@ const Snapshots: React.FC = () => {
             setCpu(undefined)
             setMemory(undefined)
             setDisk(undefined)
+            setSelectedRegionId(undefined)
           }}
         >
           {writePermitted && (
@@ -458,16 +466,22 @@ const Snapshots: React.FC = () => {
                 </p>
               </div>
               <div className="space-y-3">
-                <Label htmlFor="entrypoint">Entrypoint (optional)</Label>
-                <Input
-                  id="entrypoint"
-                  value={newEntrypoint}
-                  onChange={(e) => setNewEntrypoint(e.target.value)}
-                  placeholder="sleep infinity"
-                />
+                <Label htmlFor="region-select">Region</Label>
+                <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
+                  <SelectTrigger className="h-8" id="region-select" disabled={loadingRegions} loading={loadingRegions}>
+                    <SelectValue placeholder={loadingRegions ? 'Loading regions...' : 'Select a region'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regions.map((region) => (
+                      <SelectItem key={region.id} value={region.id}>
+                        {getRegionFullDisplayName(region)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Ensure that the entrypoint is a long running command. If not provided, or if the snapshot does not
-                  have an entrypoint, 'sleep infinity' will be used as the default.
+                  The region where the snapshot will be available. If not specified, your organization's default region
+                  will be used.
                 </p>
               </div>
               <div className="space-y-4">
@@ -517,6 +531,19 @@ const Snapshots: React.FC = () => {
                   If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
                 </p>
               </div>
+              <div className="space-y-3">
+                <Label htmlFor="entrypoint">Entrypoint (optional)</Label>
+                <Input
+                  id="entrypoint"
+                  value={newEntrypoint}
+                  onChange={(e) => setNewEntrypoint(e.target.value)}
+                  placeholder="sleep infinity"
+                />
+                <p className="text-sm text-muted-foreground mt-1 pl-1">
+                  Ensure that the entrypoint is a long running command. If not provided, or if the snapshot does not
+                  have an entrypoint, 'sleep infinity' will be used as the default.
+                </p>
+              </div>
             </form>
             <DialogFooter>
               <DialogClose asChild>
@@ -553,6 +580,7 @@ const Snapshots: React.FC = () => {
           data={snapshotsData.items}
           loading={loadingTable}
           loadingSnapshots={loadingSnapshots}
+          getRegionName={getRegionName}
           onDelete={(snapshot) => {
             setSnapshotToDelete(snapshot)
             setShowDeleteDialog(true)

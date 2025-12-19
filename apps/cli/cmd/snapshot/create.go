@@ -51,6 +51,9 @@ var CreateCmd = &cobra.Command{
 		if diskFlag != 0 {
 			createSnapshot.SetDisk(diskFlag)
 		}
+		if regionIdFlag != "" {
+			createSnapshot.SetRegionId(regionIdFlag)
+		}
 
 		if usingDockerfile {
 			createBuildInfoDto, err := common.GetCreateBuildInfoDto(ctx, dockerfilePathFlag, contextFlag)
@@ -132,6 +135,7 @@ var (
 	cpuFlag            int32
 	memoryFlag         int32
 	diskFlag           int32
+	regionIdFlag       string
 )
 
 func init() {
@@ -142,6 +146,7 @@ func init() {
 	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores that will be allocated to the underlying sandboxes (default: 1)")
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
+	CreateCmd.Flags().StringVar(&regionIdFlag, "region", "", "ID of the region where the snapshot will be available (defaults to organization default region)")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "context")

@@ -20,6 +20,7 @@ import { Runner } from '../../sandbox/entities/runner.entity'
 import { RegionType } from '../enums/region-type.enum'
 import { CreateRegionResponseDto } from '../dto/create-region.dto'
 import { generateApiKeyHash, generateApiKeyValue } from '../../common/utils/api-key'
+import { RegionDto } from '../dto/region.dto'
 
 @Injectable()
 export class RegionService {
@@ -173,8 +174,8 @@ export class RegionService {
    * @param type - The type of the regions to find.
    * @returns The regions found ordered by name ascending.
    */
-  async findAllByRegionType(regionType: RegionType): Promise<Region[]> {
-    return this.regionRepository.find({
+  async findAllByRegionType(regionType: RegionType): Promise<RegionDto[]> {
+    const regions = await this.regionRepository.find({
       where: {
         regionType,
       },
@@ -182,6 +183,8 @@ export class RegionService {
         name: 'ASC',
       },
     })
+
+    return regions.map(RegionDto.fromRegion)
   }
 
   /**

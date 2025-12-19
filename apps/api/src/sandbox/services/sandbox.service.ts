@@ -70,6 +70,8 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
+import { SnapshotService } from './snapshot.service'
+import { RegionType } from '../../region/enums/region-type.enum'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -100,6 +102,7 @@ export class SandboxService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly regionService: RegionService,
+    private readonly snapshotService: SnapshotService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -150,8 +153,15 @@ export class SandboxService {
     }
 
     const regionQuota = await this.organizationService.getRegionQuota(organization.id, regionId)
+
     if (!regionQuota) {
-      throw new NotFoundException('Region not found')
+      if (region.regionType === RegionType.SHARED) {
+        // region is public, but the organization does not have a quota for it
+        throw new ForbiddenException(`Region ${regionId} is not available to the organization`)
+      } else {
+        // region is not public, respond as if the region was not found
+        throw new NotFoundException('Region not found')
+      }
     }
 
     // validate usage quotas
@@ -348,6 +358,10 @@ export class SandboxService {
 
       if (!snapshot) {
         snapshot = snapshots[0]
+      }
+
+      if (!(await this.snapshotService.isAvailableInRegion(snapshot.id, regionId))) {
+        throw new BadRequestError(`Snapshot ${snapshotIdOrName} is not available in region ${regionId}`)
       }
 
       if (snapshot.state !== SnapshotState.ACTIVE) {
