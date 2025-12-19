@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { InterpreterContext } from '@daytonaio/toolbox-api-client'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 
@@ -11,7 +12,7 @@ import * as readline from 'readline'
 dotenv.config()
 import { renderMarkdown } from './utils'
 
-async function processPrompt(prompt: string, sandbox: any, ctx: any): Promise<void> {
+async function processPrompt(prompt: string, sandbox: Sandbox, ctx: InterpreterContext): Promise<void> {
   console.log('Thinking...')
 
   const result = await sandbox.codeInterpreter.runCode(`coding_agent.run_query_sync(os.environ.get('PROMPT', ''))`, {
