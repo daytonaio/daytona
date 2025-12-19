@@ -37,7 +37,7 @@ type Config struct {
 	DaemonStartTimeoutSec  int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
 	SandboxStartTimeoutSec int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
 	UseSnapshotEntrypoint  bool          `envconfig:"USE_SNAPSHOT_ENTRYPOINT"`
-	Domain                 string        `envconfig:"RUNNER_DOMAIN" validate:"hostname|ip"`
+	Domain                 string        `envconfig:"RUNNER_DOMAIN" validate:"omitempty,hostname|ip"`
 	PollTimeout            time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
 	PollLimit              int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
 	HealthcheckInterval    time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
