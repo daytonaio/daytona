@@ -43,6 +43,8 @@ options:
   - name: memory
     default_value: '0'
     usage: Memory allocated to the sandbox in MB
+  - name: name
+    usage: Name of the sandbox
   - name: network-allow-list
     usage: |
       Comma-separated list of allowed CIDR network addresses for the sandbox

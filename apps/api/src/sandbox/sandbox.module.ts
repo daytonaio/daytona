@@ -49,6 +49,7 @@ import { SandboxRepository } from './repositories/sandbox.repository'
 import { ProxyCacheInvalidationService } from './services/proxy-cache-invalidation.service'
 import { RegionModule } from '../region/region.module'
 import { Region } from '../region/entities/region.entity'
+import { SnapshotRegion } from './entities/snapshot-region.entity'
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { Region } from '../region/entities/region.entity'
       Snapshot,
       BuildInfo,
       SnapshotRunner,
+      SnapshotRegion,
       DockerRegistry,
       WarmPool,
       Volume,

@@ -216,6 +216,19 @@ __Flags__
 | `--help` |  | help for daytona |
 
 
+## daytona sandbox archive
+Archive a sandbox
+
+```shell
+daytona sandbox archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
 ## daytona sandbox create
 Create a new sandbox
 
@@ -226,7 +239,6 @@ daytona sandbox create [flags]
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--name` |  | Name of the sandbox |
 | `--auto-archive` |  | Auto-archive interval in minutes (0 means the maximum interval will be used) |
 | `--auto-delete` |  | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
 | `--auto-stop` |  | Auto-stop interval in minutes (0 means disabled) |
@@ -350,6 +362,7 @@ __Flags__
 | `--entrypoint` | `-e` | The entrypoint command for the snapshot |
 | `--image` | `-i` | The image name for the snapshot |
 | `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
+| `--region` |  | ID of the region where the snapshot will be available (defaults to organization default region) |
 | `--help` |  | help for daytona |
 
 

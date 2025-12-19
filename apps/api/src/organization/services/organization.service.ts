@@ -209,23 +209,33 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return this.getRegionQuota(sandbox.organizationId, sandbox.region)
   }
 
-  async listRegions(organizationId: string): Promise<RegionDto[]> {
+  /**
+   * Lists all available regions for the organization.
+   *
+   * A region is available for the organization if either:
+   * - It is directly associated with the organization, or
+   * - It is not associated with any organization, but the organization has quotas allocated for the region or quotas are not enforced for the region
+   *
+   * @param organizationId - The organization ID.
+   * @returns The available regions
+   */
+  async listAvailableRegions(organizationId: string): Promise<RegionDto[]> {
     const regions = await this.regionRepository
       .createQueryBuilder('region')
-      .where('region."regionType" = :customType AND region."organizationId" = :organizationId', {
-        customType: RegionType.CUSTOM,
+      .where('region."regionType" = :customRegionType AND region."organizationId" = :organizationId', {
+        customRegionType: RegionType.CUSTOM,
         organizationId,
       })
+      .orWhere('region."regionType" IN (:...otherRegionTypes) AND region."enforceQuotas" = false', {
+        otherRegionTypes: [RegionType.DEDICATED, RegionType.SHARED],
+      })
       .orWhere(
-        'region."regionType" = :dedicatedType AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
+        'region."regionType" IN (:...otherRegionTypes) AND region."enforceQuotas" = true AND EXISTS (SELECT 1 FROM region_quota rq WHERE rq."regionId" = region."id" AND rq."organizationId" = :organizationId)',
         {
-          dedicatedType: RegionType.DEDICATED,
+          otherRegionTypes: [RegionType.DEDICATED, RegionType.SHARED],
           organizationId,
         },
       )
-      .orWhere('region."regionType" = :sharedType', {
-        sharedType: RegionType.SHARED,
-      })
       .orderBy(
         `CASE region."regionType" 
           WHEN '${RegionType.CUSTOM}' THEN 1 

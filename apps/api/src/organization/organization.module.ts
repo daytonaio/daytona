@@ -26,7 +26,7 @@ import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 import { OrganizationUsageService } from './services/organization-usage.service'
 import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
-import { OrganizationRegionController } from './controllers/region.controller'
+import { OrganizationRegionController } from './controllers/organization-region.controller'
 import { Region } from '../region/entities/region.entity'
 
 @Module({
