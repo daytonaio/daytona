@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
       )}
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
         <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
-        <SidebarInset className="overflow-hidden">
+        <SidebarInset className="overflow-clip">
           <div className="relative md:hidden px-5 pt-4">
             <SidebarTrigger className="[&_svg]:size-5" />
           </div>

@@ -289,7 +289,7 @@ const Wallet = () => {
               </CardHeader>
               <CardContent className="">
                 <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-center justify-between">
-                  <div className="flex gap-4 sm:gap-12 items-end sm:flex-row flex-col">
+                  <div className="flex gap-4 sm:gap-12 sm:flex-row flex-col">
                     <div className="flex flex-col gap-1">
                       <div className="">Current balance</div>
                       <div className="text-xl text-foreground font-semibold">

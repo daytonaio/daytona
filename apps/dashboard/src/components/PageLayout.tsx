@@ -12,7 +12,13 @@ function PageLayout({ className, ...props }: ComponentProps<'div'>) {
 
 function PageHeader({ className, ...props }: ComponentProps<'header'>) {
   return (
-    <header className={cn('flex items-center justify-between border-b border-border p-4 px-5', className)} {...props} />
+    <header
+      className={cn(
+        'flex items-center justify-between border-b border-border p-4 px-5 sticky top-0 bg-background z-10',
+        className,
+      )}
+      {...props}
+    />
   )
 }
 
