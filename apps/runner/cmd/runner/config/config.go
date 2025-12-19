@@ -17,8 +17,8 @@ import (
 )
 
 type Config struct {
-	ServerUrl              string        `envconfig:"SERVER_URL" validate:"required"`
-	ApiToken               string        `envconfig:"API_TOKEN" validate:"required"`
+	DaytonaApiUrl          string        `envconfig:"DAYTONA_API_URL"`
+	ApiToken               string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
 	ApiPort                int           `envconfig:"API_PORT"`
 	TLSCertFile            string        `envconfig:"TLS_CERT_FILE"`
 	TLSKeyFile             string        `envconfig:"TLS_KEY_FILE"`
@@ -65,6 +65,24 @@ func GetConfig() (*Config, error) {
 	err = validate.Struct(config)
 	if err != nil {
 		return nil, err
+	}
+
+	if config.DaytonaApiUrl == "" {
+		// For backward compatibility
+		serverUrl := os.Getenv("SERVER_URL")
+		if serverUrl == "" {
+			return nil, fmt.Errorf("DAYTONA_API_URL or SERVER_URL is required")
+		}
+		config.DaytonaApiUrl = serverUrl
+	}
+
+	if config.ApiToken == "" {
+		// For backward compatibility
+		apiToken := os.Getenv("API_TOKEN")
+		if apiToken == "" {
+			return nil, fmt.Errorf("DAYTONA_RUNNER_TOKEN or API_TOKEN is required")
+		}
+		config.ApiToken = apiToken
 	}
 
 	if config.ApiPort == 0 {
