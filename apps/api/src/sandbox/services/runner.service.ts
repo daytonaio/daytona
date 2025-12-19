@@ -450,8 +450,9 @@ export class RunnerService {
             state: Not(RunnerState.DECOMMISSIONED),
           },
           {
+            // v2 runners report health via healthcheck endpoint, so we only check if the health is stale (lastChecked timestamp)
             apiVersion: '2',
-            state: Not(In([RunnerState.DECOMMISSIONED, RunnerState.INITIALIZING])),
+            state: RunnerState.READY,
           },
         ],
         order: {
