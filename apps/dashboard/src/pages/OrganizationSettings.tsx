@@ -6,6 +6,7 @@
 import { DeleteOrganizationDialog } from '@/components/Organizations/DeleteOrganizationDialog'
 import { LeaveOrganizationDialog } from '@/components/Organizations/LeaveOrganizationDialog'
 import { SetDefaultRegionDialog } from '@/components/Organizations/SetDefaultRegionDialog'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/ui/field'
@@ -88,12 +89,12 @@ const OrganizationSettings: React.FC = () => {
   const isOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
 
   return (
-    <div className="px-6 py-2 max-w-3xl p-5">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">General Settings</h1>
-      </div>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Settings</PageTitle>
+      </PageHeader>
 
-      <div className="flex flex-col gap-6">
+      <PageContent>
         <Card>
           <CardHeader className="p-4">
             <CardTitle>Organization Details</CardTitle>
@@ -187,15 +188,15 @@ const OrganizationSettings: React.FC = () => {
             </CardContent>
           </Card>
         )}
-      </div>
-      <SetDefaultRegionDialog
-        open={showSetDefaultRegionDialog}
-        onOpenChange={setSetDefaultRegionDialog}
-        regions={sharedRegions}
-        loadingRegions={loadingRegions}
-        onSetDefaultRegion={handleSetDefaultRegion}
-      />
-    </div>
+        <SetDefaultRegionDialog
+          open={showSetDefaultRegionDialog}
+          onOpenChange={setSetDefaultRegionDialog}
+          regions={sharedRegions}
+          loadingRegions={loadingRegions}
+          onSetDefaultRegion={handleSetDefaultRegion}
+        />
+      </PageContent>
+    </PageLayout>
   )
 }
 

@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import * as React from 'react'
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ChartConfig,
@@ -16,7 +14,9 @@ import {
 } from '@/components/ui/chart'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { subMonths } from 'date-fns'
+import * as React from 'react'
 import { useCallback, useMemo } from 'react'
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { FacetFilter } from './ui/facet-filter'
 
 export type UsageChartData = {
@@ -112,7 +112,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+      <CardHeader className="flex items-center gap-2 space-y-0 border-b p-4 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>{title}</CardTitle>
         </div>

@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { CreateOrganizationRoleDialog } from '@/components/OrganizationRoles/CreateOrganizationRoleDialog'
+import { OrganizationRoleTable } from '@/components/OrganizationRoles/OrganizationRoleTable'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { useApi } from '@/hooks/useApi'
+import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
+import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
-import { useApi } from '@/hooks/useApi'
-import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
-import { OrganizationRoleTable } from '@/components/OrganizationRoles/OrganizationRoleTable'
-import { CreateOrganizationRoleDialog } from '@/components/OrganizationRoles/CreateOrganizationRoleDialog'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
-import { handleApiError } from '@/lib/error-handling'
 
 const OrganizationRoles: React.FC = () => {
   const { organizationsApi } = useApi()
@@ -90,20 +91,22 @@ const OrganizationRoles: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Roles</h1>
-        <CreateOrganizationRoleDialog onCreateRole={handleCreateRole} />
-      </div>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Roles</PageTitle>
+        <CreateOrganizationRoleDialog className="ml-auto" onCreateRole={handleCreateRole} />
+      </PageHeader>
 
-      <OrganizationRoleTable
-        data={roles}
-        loadingData={loadingRoles}
-        onUpdateRole={handleUpdateRole}
-        onDeleteRole={handleDeleteRole}
-        loadingRoleAction={loadingRoleAction}
-      />
-    </div>
+      <PageContent>
+        <OrganizationRoleTable
+          data={roles}
+          loadingData={loadingRoles}
+          onUpdateRole={handleUpdateRole}
+          onDeleteRole={handleDeleteRole}
+          loadingRoleAction={loadingRoleAction}
+        />
+      </PageContent>
+    </PageLayout>
   )
 }
 

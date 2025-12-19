@@ -3,15 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useApi } from '@/hooks/useApi'
-import { Plus } from 'lucide-react'
-import {
-  DockerRegistryRegistryTypeEnum,
-  OrganizationRolePermissionsEnum,
-  type DockerRegistry,
-} from '@daytonaio/api-client'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { RegistryTable } from '@/components/RegistryTable'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -20,13 +14,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { Label } from '@/components/ui/label'
+import { useApi } from '@/hooks/useApi'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import {
+  DockerRegistryRegistryTypeEnum,
+  OrganizationRolePermissionsEnum,
+  type DockerRegistry,
+} from '@daytonaio/api-client'
+import { Plus } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 const Registries: React.FC = () => {
@@ -255,101 +255,111 @@ const Registries: React.FC = () => {
   )
 
   return (
-    <div className="px-6 py-2">
-      <Dialog
-        open={showCreateOrEditDialog}
-        onOpenChange={(isOpen) => {
-          setShowCreateOrEditDialog(isOpen)
-          if (isOpen) {
-            return
-          }
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Registries</PageTitle>
+        {writePermitted && (
+          <Button
+            variant="default"
+            size="sm"
+            disabled={loading}
+            className="ml-auto"
+            title="Add Registry"
+            onClick={() => {
+              setShowCreateOrEditDialog(true)
+              setFormData({
+                name: '',
+                url: '',
+                username: '',
+                password: '',
+                project: '',
+              })
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Registry
+          </Button>
+        )}
+      </PageHeader>
 
-          setRegistryToDelete(null)
-          setRegistryToEdit(null)
-          setFormData({
-            name: '',
-            url: '',
-            username: '',
-            password: '',
-            project: '',
-          })
-        }}
-      >
-        <div className="mb-2 h-12 flex items-center justify-between">
-          <h1 className="text-2xl font-medium">Container Registries</h1>
-          {writePermitted && (
-            <DialogTrigger asChild disabled={loading}>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={loading}
-                className="w-auto px-4"
-                title="Add Registry"
-                onClick={() =>
-                  setFormData({
-                    name: '',
-                    url: '',
-                    username: '',
-                    password: '',
-                    project: '',
-                  })
-                }
-              >
-                <Plus className="w-4 h-4" />
-                Add Registry
-              </Button>
-            </DialogTrigger>
-          )}
-          {dialogContent}
-        </div>
+      <PageContent size="full">
+        <Dialog
+          open={showCreateOrEditDialog}
+          onOpenChange={(isOpen) => {
+            setShowCreateOrEditDialog(isOpen)
+            if (isOpen) {
+              return
+            }
 
-        <RegistryTable
-          data={registries}
-          loading={loading}
-          onDelete={(id) => setRegistryToDelete(id)}
-          onEdit={(registry) => {
+            setRegistryToDelete(null)
+            setRegistryToEdit(null)
             setFormData({
-              name: registry.name,
-              url: registry.url,
-              username: registry.username,
+              name: '',
+              url: '',
+              username: '',
               password: '',
-              project: registry.project,
+              project: '',
             })
-            setRegistryToEdit(registry)
           }}
-        />
-      </Dialog>
+        >
+          {writePermitted && dialogContent}
 
-      <Dialog
-        open={!!registryToDelete}
-        onOpenChange={(isOpen) => {
-          if (isOpen) {
-            return
-          }
+          <RegistryTable
+            data={registries}
+            loading={loading}
+            onDelete={(id) => setRegistryToDelete(id)}
+            onEdit={(registry) => {
+              setFormData({
+                name: registry.name,
+                url: registry.url,
+                username: registry.username,
+                password: '',
+                project: registry.project,
+              })
+              setRegistryToEdit(registry)
+            }}
+          />
+        </Dialog>
 
-          setRegistryToDelete(null)
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Registry Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this registry? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Cancel
+        <Dialog
+          open={!!registryToDelete}
+          onOpenChange={(isOpen) => {
+            if (isOpen) {
+              return
+            }
+
+            setRegistryToDelete(null)
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Registry Deletion</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this registry? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (registryToDelete) {
+                    handleDelete(registryToDelete)
+                  }
+                }}
+                disabled={actionInProgress}
+              >
+                {actionInProgress ? 'Deleting...' : 'Delete'}
               </Button>
-            </DialogClose>
-            <Button variant="destructive" onClick={() => handleDelete(registryToDelete!)} disabled={actionInProgress}>
-              {actionInProgress ? 'Deleting...' : 'Delete'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </PageContent>
+    </PageLayout>
   )
 }
 

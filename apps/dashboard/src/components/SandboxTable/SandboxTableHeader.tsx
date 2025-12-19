@@ -3,44 +3,44 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import * as React from 'react'
+import { cn } from '@/lib/utils'
 import {
   ArrowUpDown,
-  Check,
-  ListFilter,
-  Square,
-  Globe,
-  Cpu,
-  Tag,
   Calendar,
   Camera,
+  Check,
+  Columns,
+  Cpu,
+  Globe,
   HardDrive,
+  ListFilter,
   MemoryStick,
   RefreshCw,
-  Columns,
+  Square,
+  Tag,
 } from 'lucide-react'
+import * as React from 'react'
+import { DebouncedInput } from '../DebouncedInput'
+import { TableColumnVisibilityToggle } from '../TableColumnVisibilityToggle'
 import { Button } from '../ui/button'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuPortal,
+  DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
-import { DebouncedInput } from '../DebouncedInput'
-import { SandboxTableHeaderProps } from './types'
-import { StateFilter, StateFilterIndicator } from './filters/StateFilter'
-import { RegionFilter, RegionFilterIndicator } from './filters/RegionFilter'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { cn } from '@/lib/utils'
-import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFilter'
-import { SnapshotFilter, SnapshotFilterIndicator } from './filters/SnapshotFilter'
-import { ResourceFilter, ResourceFilterIndicator, ResourceFilterValue } from './filters/ResourceFilter'
 import { LabelFilter, LabelFilterIndicator } from './filters/LabelFilter'
-import { TableColumnVisibilityToggle } from '../TableColumnVisibilityToggle'
+import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFilter'
+import { RegionFilter, RegionFilterIndicator } from './filters/RegionFilter'
+import { ResourceFilter, ResourceFilterIndicator, ResourceFilterValue } from './filters/ResourceFilter'
+import { SnapshotFilter, SnapshotFilterIndicator } from './filters/SnapshotFilter'
+import { StateFilter, StateFilterIndicator } from './filters/StateFilter'
+import { SandboxTableHeaderProps } from './types'
 
 const RESOURCE_FILTERS = [
   { type: 'cpu' as const, label: 'CPU', icon: Cpu },
@@ -71,7 +71,7 @@ export function SandboxTableHeader({
   ]
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center mb-4">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <div className="flex flex-wrap gap-2 items-center">
         <DebouncedInput
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}

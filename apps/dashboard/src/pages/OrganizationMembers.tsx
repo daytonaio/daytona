@@ -3,23 +3,24 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { useAuth } from 'react-oidc-context'
+import { CreateOrganizationInvitationDialog } from '@/components/OrganizationMembers/CreateOrganizationInvitationDialog'
+import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
+import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { useApi } from '@/hooks/useApi'
+import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
+import { useOrganizations } from '@/hooks/useOrganizations'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
 import {
   CreateOrganizationInvitationRoleEnum,
   OrganizationInvitation,
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytonaio/api-client'
-import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
-import { CreateOrganizationInvitationDialog } from '@/components/OrganizationMembers/CreateOrganizationInvitationDialog'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
-import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
-import { useOrganizations } from '@/hooks/useOrganizations'
-import { handleApiError } from '@/lib/error-handling'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuth } from 'react-oidc-context'
+import { toast } from 'sonner'
 
 const OrganizationMembers: React.FC = () => {
   const { user } = useAuth()
@@ -175,47 +176,50 @@ const OrganizationMembers: React.FC = () => {
   }, [authenticatedUserOrganizationMember])
 
   return (
-    <div className="px-6 py-2">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Members</h1>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Members</PageTitle>
         {authenticatedUserIsOwner && (
           <CreateOrganizationInvitationDialog
+            className="ml-auto"
             availableRoles={roles}
             loadingAvailableRoles={loadingRoles}
             onCreateInvitation={handleCreateInvitation}
           />
         )}
-      </div>
+      </PageHeader>
 
-      <OrganizationMemberTable
-        data={organizationMembers}
-        loadingData={loadingRoles}
-        availableAssignments={roles}
-        loadingAvailableAssignments={loadingRoles}
-        onUpdateMemberAccess={handleUpdateMemberAccess}
-        onRemoveMember={handleRemoveMember}
-        loadingMemberAction={loadingMemberAction}
-        ownerMode={authenticatedUserIsOwner}
-      />
+      <PageContent>
+        <OrganizationMemberTable
+          data={organizationMembers}
+          loadingData={loadingRoles}
+          availableAssignments={roles}
+          loadingAvailableAssignments={loadingRoles}
+          onUpdateMemberAccess={handleUpdateMemberAccess}
+          onRemoveMember={handleRemoveMember}
+          loadingMemberAction={loadingMemberAction}
+          ownerMode={authenticatedUserIsOwner}
+        />
 
-      {authenticatedUserIsOwner && (
-        <>
-          <div className="mb-2 mt-12 h-12 flex items-center justify-between">
-            <h1 className="text-2xl font-medium">Invitations</h1>
-          </div>
+        {authenticatedUserIsOwner && (
+          <>
+            <div className="mb-2 mt-12 h-12 flex items-center justify-between">
+              <h1 className="text-2xl font-medium">Invitations</h1>
+            </div>
 
-          <OrganizationInvitationTable
-            data={invitations}
-            loadingData={loadingInvitations}
-            availableRoles={roles}
-            loadingAvailableRoles={loadingRoles}
-            onCancelInvitation={handleCancelInvitation}
-            onUpdateInvitation={handleUpdateInvitation}
-            loadingInvitationAction={loadingInvitationAction}
-          />
-        </>
-      )}
-    </div>
+            <OrganizationInvitationTable
+              data={invitations}
+              loadingData={loadingInvitations}
+              availableRoles={roles}
+              loadingAvailableRoles={loadingRoles}
+              onCancelInvitation={handleCancelInvitation}
+              onUpdateInvitation={handleUpdateInvitation}
+              loadingInvitationAction={loadingInvitationAction}
+            />
+          </>
+        )}
+      </PageContent>
+    </PageLayout>
   )
 }
 

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
@@ -39,41 +40,45 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
   const isPhoneVerified = user?.profile.phone_verified
 
   return (
-    <div className="p-6 max-w-3xl">
-      <h1 className="text-2xl font-medium">Settings</h1>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Account Settings</PageTitle>
+      </PageHeader>
 
-      <div className="flex flex-col gap-6 mt-4">
-        {linkedAccountsEnabled && <LinkedAccounts />}
-        <Card>
-          <CardHeader>
-            <CardTitle>Verification</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 mt-5">
-            <div className="p-4 border-t border-border flex items-center justify-between gap-2">
-              <div className="flex flex-col gap-1">
-                <div>Phone Verification</div>
-                <div>
-                  {isPhoneVerified ? (
-                    <div className="text-sm text-muted-foreground flex items-center gap-2">
-                      <CheckCircleIcon className="w-4 h-4 shrink-0" /> Phone number verified
-                    </div>
-                  ) : (
-                    <div className="text-sm text-muted-foreground">
-                      Verify your phone number to increase account limits.
-                    </div>
-                  )}
+      <PageContent>
+        <div className="flex flex-col gap-6">
+          {linkedAccountsEnabled && <LinkedAccounts />}
+          <Card>
+            <CardHeader className="p-4">
+              <CardTitle>Verification</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="p-4 border-t border-border flex items-center justify-between gap-2">
+                <div className="flex flex-col gap-1">
+                  <div>Phone Verification</div>
+                  <div>
+                    {isPhoneVerified ? (
+                      <div className="text-sm text-muted-foreground flex items-center gap-2">
+                        <CheckCircleIcon className="w-4 h-4 shrink-0" /> Phone number verified
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        Verify your phone number to increase account limits.
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {!isPhoneVerified && (
+                  <Button onClick={handleEnrollInSmsMfa} disabled={enrollInSmsMfaMutation.isPending}>
+                    {enrollInSmsMfaMutation.isPending && <Spinner />} Verify
+                  </Button>
+                )}
               </div>
-              {!isPhoneVerified && (
-                <Button onClick={handleEnrollInSmsMfa} disabled={enrollInSmsMfaMutation.isPending}>
-                  {enrollInSmsMfaMutation.isPending && <Spinner />} Verify
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            </CardContent>
+          </Card>
+        </div>
+      </PageContent>
+    </PageLayout>
   )
 }
 
