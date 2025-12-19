@@ -164,13 +164,13 @@ module Daytona
 
       thread = nil
       previous_state = snapshot.state
-      
+
       # Log initial state if callback provided
       on_logs&.call("Creating snapshot #{snapshot.name} (#{snapshot.state})")
 
       until terminal_states.include?(snapshot.state)
         Sdk.logger.debug("Waiting for snapshot to be created: #{snapshot.state}")
-        
+
         # Start log streaming thread if callback provided and snapshot is building
         if on_logs && thread.nil? && snapshot.state != DaytonaApiClient::SnapshotState::PENDING
           thread = start_log_streaming(snapshot, on_logs:)

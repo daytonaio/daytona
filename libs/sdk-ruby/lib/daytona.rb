@@ -5,4 +5,3 @@
 #   require 'daytona'
 
 require_relative 'daytona/sdk'
-

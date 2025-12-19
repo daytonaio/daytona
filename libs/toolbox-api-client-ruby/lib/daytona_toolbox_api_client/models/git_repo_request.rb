@@ -249,7 +249,5 @@ module DaytonaToolboxApiClient
         value
       end
     end
-
   end
-
 end

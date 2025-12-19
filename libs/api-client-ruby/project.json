@@ -18,7 +18,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "if [ -n \"$RUBYGEMS_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${RUBYGEMS_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; sed -i \"s/VERSION = '[^']*'/VERSION = '$VER'/\" lib/daytona_api_client/version.rb && echo \"Changed version to $VER\"; else echo \"Using version from version.rb\"; fi"
+        "command": "if [ -n \"$RUBYGEMS_PKG_VERSION\" ]; then sed -i \"s/VERSION = '[^']*'/VERSION = '$RUBYGEMS_PKG_VERSION'/\" lib/daytona_api_client/version.rb && echo \"Changed version to $RUBYGEMS_PKG_VERSION\"; else echo \"Using version from version.rb\"; fi"
       }
     },
     "lint": {
