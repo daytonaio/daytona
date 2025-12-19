@@ -204,8 +204,8 @@ type CreateSnapshotParams = {
   entrypoint: string[];
   image: string | Image;
   name: string;
+  regionId: string;
   resources: Resources;
-  skipValidation: boolean;
 };
 ```
 
@@ -216,8 +216,8 @@ Parameters for creating a new snapshot.
 - `entrypoint?` _string\[\]_
 - `image` _string \| Image_
 - `name` _string_
+- `regionId?` _string_
 - `resources?` _Resources_
-- `skipValidation?` _boolean_
 
 
 ## Snapshot

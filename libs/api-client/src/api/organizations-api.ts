@@ -38,6 +38,10 @@ import type { CreateOrganizationInvitation } from '../models'
 // @ts-ignore
 import type { CreateOrganizationRole } from '../models'
 // @ts-ignore
+import type { CreateRegion } from '../models'
+// @ts-ignore
+import type { CreateRegionResponse } from '../models'
+// @ts-ignore
 import type { Organization } from '../models'
 // @ts-ignore
 import type { OrganizationInvitation } from '../models'
@@ -51,6 +55,10 @@ import type { OrganizationSuspension } from '../models'
 import type { OrganizationUsageOverview } from '../models'
 // @ts-ignore
 import type { OrganizationUser } from '../models'
+// @ts-ignore
+import type { RegenerateApiKeyResponse } from '../models'
+// @ts-ignore
+import type { Region } from '../models'
 // @ts-ignore
 import type { RegionQuota } from '../models'
 // @ts-ignore
@@ -309,6 +317,56 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
     },
     /**
      *
+     * @summary Create a new region
+     * @param {string} organizationId Organization ID
+     * @param {CreateRegion} createRegion
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createRegion: async (
+      organizationId: string,
+      createRegion: CreateRegion,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('createRegion', 'organizationId', organizationId)
+      // verify required parameter 'createRegion' is not null or undefined
+      assertParamExists('createRegion', 'createRegion', createRegion)
+      const localVarPath = `/organizations/{organizationId}/regions`.replace(
+        `{${'organizationId'}}`,
+        encodeURIComponent(String(organizationId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(createRegion, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Decline organization invitation
      * @param {string} invitationId Invitation ID
      * @param {*} [options] Override http request option.
@@ -456,6 +514,52 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
       const localVarPath = `/organizations/{organizationId}/roles/{roleId}`
         .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
         .replace(`{${'roleId'}}`, encodeURIComponent(String(roleId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Delete a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteRegion: async (
+      id: string,
+      organizationId: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('deleteRegion', 'id', id)
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('deleteRegion', 'organizationId', organizationId)
+      const localVarPath = `/organizations/{organizationId}/regions/{id}`
+        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
+        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -646,6 +750,52 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
     },
     /**
      *
+     * @summary Get region by ID
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getRegionById: async (
+      id: string,
+      organizationId: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('getRegionById', 'id', id)
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('getRegionById', 'organizationId', organizationId)
+      const localVarPath = `/organizations/{organizationId}/regions/{id}`
+        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
+        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Get region quota by sandbox ID
      * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
@@ -706,6 +856,46 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
       }
 
       const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary List all available regions for the organization
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listAvailableRegions: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('listAvailableRegions', 'organizationId', organizationId)
+      const localVarPath = `/organizations/{organizationId}/regions`.replace(
+        `{${'organizationId'}}`,
+        encodeURIComponent(String(organizationId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
 
@@ -905,6 +1095,98 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
       }
 
       const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Regenerate proxy API key for a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    regenerateProxyApiKey: async (
+      id: string,
+      organizationId: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('regenerateProxyApiKey', 'id', id)
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('regenerateProxyApiKey', 'organizationId', organizationId)
+      const localVarPath = `/organizations/{organizationId}/regions/{id}/regenerate-proxy-api-key`
+        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
+        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Regenerate SSH gateway API key for a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    regenerateSshGatewayApiKey: async (
+      id: string,
+      organizationId: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('regenerateSshGatewayApiKey', 'id', id)
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('regenerateSshGatewayApiKey', 'organizationId', organizationId)
+      const localVarPath = `/organizations/{organizationId}/regions/{id}/regenerate-ssh-gateway-api-key`
+        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
+        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
 
@@ -1557,6 +1839,31 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Create a new region
+     * @param {string} organizationId Organization ID
+     * @param {CreateRegion} createRegion
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createRegion(
+      organizationId: string,
+      createRegion: CreateRegion,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createRegion(organizationId, createRegion, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.createRegion']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Decline organization invitation
      * @param {string} invitationId Invitation ID
      * @param {*} [options] Override http request option.
@@ -1647,6 +1954,31 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.deleteOrganizationRole']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Delete a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async deleteRegion(
+      id: string,
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRegion(id, organizationId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.deleteRegion']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1750,6 +2082,31 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get region by ID
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getRegionById(
+      id: string,
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Region>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionById(id, organizationId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.getRegionById']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Get region quota by sandbox ID
      * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
@@ -1786,6 +2143,29 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.leaveOrganization']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary List all available regions for the organization
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listAvailableRegions(
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Region>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listAvailableRegions(organizationId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.listAvailableRegions']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1899,6 +2279,56 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.listOrganizations']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Regenerate proxy API key for a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async regenerateProxyApiKey(
+      id: string,
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateProxyApiKey(id, organizationId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.regenerateProxyApiKey']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Regenerate SSH gateway API key for a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async regenerateSshGatewayApiKey(
+      id: string,
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateSshGatewayApiKey(id, organizationId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.regenerateSshGatewayApiKey']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2268,6 +2698,21 @@ export const OrganizationsApiFactory = function (
     },
     /**
      *
+     * @summary Create a new region
+     * @param {string} organizationId Organization ID
+     * @param {CreateRegion} createRegion
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createRegion(
+      organizationId: string,
+      createRegion: CreateRegion,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<CreateRegionResponse> {
+      return localVarFp.createRegion(organizationId, createRegion, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Decline organization invitation
      * @param {string} invitationId Invitation ID
      * @param {*} [options] Override http request option.
@@ -2322,6 +2767,17 @@ export const OrganizationsApiFactory = function (
     },
     /**
      *
+     * @summary Delete a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteRegion(id: string, organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.deleteRegion(id, organizationId, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Get organization by ID
      * @param {string} organizationId Organization ID
      * @param {*} [options] Override http request option.
@@ -2368,6 +2824,17 @@ export const OrganizationsApiFactory = function (
     },
     /**
      *
+     * @summary Get region by ID
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getRegionById(id: string, organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Region> {
+      return localVarFp.getRegionById(id, organizationId, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Get region quota by sandbox ID
      * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
@@ -2385,6 +2852,16 @@ export const OrganizationsApiFactory = function (
      */
     leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
       return localVarFp.leaveOrganization(organizationId, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary List all available regions for the organization
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listAvailableRegions(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Region>> {
+      return localVarFp.listAvailableRegions(organizationId, options).then((request) => request(axios, basePath))
     },
     /**
      *
@@ -2446,6 +2923,38 @@ export const OrganizationsApiFactory = function (
      */
     listOrganizations(options?: RawAxiosRequestConfig): AxiosPromise<Array<Organization>> {
       return localVarFp.listOrganizations(options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Regenerate proxy API key for a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    regenerateProxyApiKey(
+      id: string,
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<RegenerateApiKeyResponse> {
+      return localVarFp.regenerateProxyApiKey(id, organizationId, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Regenerate SSH gateway API key for a region
+     * @param {string} id Region ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    regenerateSshGatewayApiKey(
+      id: string,
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<RegenerateApiKeyResponse> {
+      return localVarFp
+        .regenerateSshGatewayApiKey(id, organizationId, options)
+        .then((request) => request(axios, basePath))
     },
     /**
      *
@@ -2698,6 +3207,21 @@ export class OrganizationsApi extends BaseAPI {
 
   /**
    *
+   * @summary Create a new region
+   * @param {string} organizationId Organization ID
+   * @param {CreateRegion} createRegion
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public createRegion(organizationId: string, createRegion: CreateRegion, options?: RawAxiosRequestConfig) {
+    return OrganizationsApiFp(this.configuration)
+      .createRegion(organizationId, createRegion, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
    * @summary Decline organization invitation
    * @param {string} invitationId Invitation ID
    * @param {*} [options] Override http request option.
@@ -2751,6 +3275,21 @@ export class OrganizationsApi extends BaseAPI {
   public deleteOrganizationRole(organizationId: string, roleId: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
       .deleteOrganizationRole(organizationId, roleId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Delete a region
+   * @param {string} id Region ID
+   * @param {string} organizationId Organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public deleteRegion(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+    return OrganizationsApiFp(this.configuration)
+      .deleteRegion(id, organizationId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2811,6 +3350,21 @@ export class OrganizationsApi extends BaseAPI {
 
   /**
    *
+   * @summary Get region by ID
+   * @param {string} id Region ID
+   * @param {string} organizationId Organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public getRegionById(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+    return OrganizationsApiFp(this.configuration)
+      .getRegionById(id, organizationId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
    * @summary Get region quota by sandbox ID
    * @param {string} sandboxId Sandbox ID
    * @param {*} [options] Override http request option.
@@ -2834,6 +3388,20 @@ export class OrganizationsApi extends BaseAPI {
   public leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
       .leaveOrganization(organizationId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary List all available regions for the organization
+   * @param {string} organizationId Organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public listAvailableRegions(organizationId: string, options?: RawAxiosRequestConfig) {
+    return OrganizationsApiFp(this.configuration)
+      .listAvailableRegions(organizationId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2902,6 +3470,36 @@ export class OrganizationsApi extends BaseAPI {
   public listOrganizations(options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
       .listOrganizations(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Regenerate proxy API key for a region
+   * @param {string} id Region ID
+   * @param {string} organizationId Organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public regenerateProxyApiKey(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+    return OrganizationsApiFp(this.configuration)
+      .regenerateProxyApiKey(id, organizationId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Regenerate SSH gateway API key for a region
+   * @param {string} id Region ID
+   * @param {string} organizationId Organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public regenerateSshGatewayApiKey(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+    return OrganizationsApiFp(this.configuration)
+      .regenerateSshGatewayApiKey(id, organizationId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

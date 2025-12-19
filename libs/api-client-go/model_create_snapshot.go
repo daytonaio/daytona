@@ -38,7 +38,9 @@ type CreateSnapshot struct {
 	// Disk space allocated to the sandbox in GB
 	Disk *int32 `json:"disk,omitempty"`
 	// Build information for the snapshot
-	BuildInfo            *CreateBuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
+	// ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
+	RegionId             *string `json:"regionId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -342,6 +344,38 @@ func (o *CreateSnapshot) SetBuildInfo(v CreateBuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetRegionId returns the RegionId field value if set, zero value otherwise.
+func (o *CreateSnapshot) GetRegionId() string {
+	if o == nil || IsNil(o.RegionId) {
+		var ret string
+		return ret
+	}
+	return *o.RegionId
+}
+
+// GetRegionIdOk returns a tuple with the RegionId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSnapshot) GetRegionIdOk() (*string, bool) {
+	if o == nil || IsNil(o.RegionId) {
+		return nil, false
+	}
+	return o.RegionId, true
+}
+
+// HasRegionId returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasRegionId() bool {
+	if o != nil && !IsNil(o.RegionId) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegionId gets a reference to the given string and assigns it to the RegionId field.
+func (o *CreateSnapshot) SetRegionId(v string) {
+	o.RegionId = &v
+}
+
 func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -376,6 +410,9 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
+	}
+	if !IsNil(o.RegionId) {
+		toSerialize["regionId"] = o.RegionId
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -429,6 +466,7 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "memory")
 		delete(additionalProperties, "disk")
 		delete(additionalProperties, "buildInfo")
+		delete(additionalProperties, "regionId")
 		o.AdditionalProperties = additionalProperties
 	}
 

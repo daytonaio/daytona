@@ -1,6 +1,6 @@
 name: daytona sandbox start
 synopsis: Start a sandbox
-usage: daytona sandbox start [SANDBOX_ID] [flags]
+usage: daytona sandbox start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 inherited_options:
   - name: help
     default_value: 'false'

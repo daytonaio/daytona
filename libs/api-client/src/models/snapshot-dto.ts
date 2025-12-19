@@ -127,4 +127,10 @@ export interface SnapshotDto {
    * @memberof SnapshotDto
    */
   buildInfo?: BuildInfo
+  /**
+   * IDs of regions where the snapshot is available
+   * @type {Array<string>}
+   * @memberof SnapshotDto
+   */
+  regionIds?: Array<string>
 }
