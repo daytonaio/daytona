@@ -32,7 +32,7 @@ RUN mkdir -p /etc/docker && echo '{"insecure-registries": ["registry:6000"]}' > 
 ENV ENVIRONMENT=development
 
 ENV API_PORT=3003
-ENV API_TOKEN=secret_api_token
+ENV DAYTONA_RUNNER_TOKEN=secret_api_token
 
 ENV LOG_FILE_PATH=/home/daytona/runner/runner.log
 
@@ -44,7 +44,7 @@ ENV AWS_ACCESS_KEY_ID=minioadmin
 ENV AWS_SECRET_ACCESS_KEY=minioadmin
 ENV AWS_DEFAULT_BUCKET=daytona
 
-ENV SERVER_URL=http://api:3000/api
+ENV DAYTONA_API_URL=http://api:3000/api
 ENV RUNNER_DOMAIN=localhost
 
 
