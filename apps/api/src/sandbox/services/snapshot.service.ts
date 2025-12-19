@@ -278,14 +278,13 @@ export class SnapshotService {
         where: { snapshotRef: buildSnapshotRef },
       })
 
-      if (
-        existingBuildInfo &&
-        // Update lastUsed once per minute at most
-        (await this.redisLockProvider.lock(`build-info:${existingBuildInfo.snapshotRef}:update`, 60))
-      ) {
+      if (existingBuildInfo) {
         snapshot.buildInfo = existingBuildInfo
-        existingBuildInfo.lastUsedAt = new Date()
-        await this.buildInfoRepository.save(existingBuildInfo)
+        // Update lastUsed once per minute at most
+        if (await this.redisLockProvider.lock(`build-info:${existingBuildInfo.snapshotRef}:update`, 60)) {
+          existingBuildInfo.lastUsedAt = new Date()
+          await this.buildInfoRepository.save(existingBuildInfo)
+        }
       } else {
         const buildInfoEntity = this.buildInfoRepository.create({
           ...createSnapshotDto.buildInfo,
@@ -304,7 +303,8 @@ export class SnapshotService {
       }
 
       try {
-        return await this.snapshotRepository.save(snapshot)
+        await this.snapshotRepository.insert(snapshot)
+        return snapshot
       } catch (error) {
         if (error.code === '23505') {
           // PostgreSQL unique violation error code

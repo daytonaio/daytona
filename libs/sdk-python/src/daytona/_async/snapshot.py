@@ -173,7 +173,7 @@ class AsyncSnapshotService:
         log_task = None
         if on_logs:
             on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
-            if created_snapshot.state != SnapshotState.PENDING:
+            if created_snapshot.state != SnapshotState.PENDING and created_snapshot.state not in terminal_states:
                 log_task = asyncio.create_task(start_log_streaming())
 
         previous_state = created_snapshot.state
@@ -187,7 +187,8 @@ class AsyncSnapshotService:
             created_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
 
         if on_logs:
-            await log_task
+            if log_task:
+                await log_task
             if created_snapshot.state == SnapshotState.ACTIVE:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
