@@ -412,13 +412,7 @@ const Snapshots: React.FC = () => {
         >
           {writePermitted && (
             <DialogTrigger asChild>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={loadingTable}
-                className="w-auto px-4"
-                title="Create Snapshot"
-              >
+              <Button variant="default" size="sm" disabled={loadingTable} className="ml-auto" title="Create Snapshot">
                 <Plus className="w-4 h-4" />
                 Create Snapshot
               </Button>

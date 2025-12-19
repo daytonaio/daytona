@@ -202,13 +202,7 @@ const Volumes: React.FC = () => {
         >
           {writePermitted && (
             <DialogTrigger asChild>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={loadingVolumes}
-                className="w-auto px-4"
-                title="Create Volume"
-              >
+              <Button variant="default" size="sm" disabled={loadingVolumes} className="ml-auto" title="Create Volume">
                 <Plus className="w-4 h-4" />
                 Create Volume
               </Button>

@@ -181,6 +181,7 @@ const OrganizationMembers: React.FC = () => {
         <PageTitle>Members</PageTitle>
         {authenticatedUserIsOwner && (
           <CreateOrganizationInvitationDialog
+            className="ml-auto"
             availableRoles={roles}
             loadingAvailableRoles={loadingRoles}
             onCreateInvitation={handleCreateInvitation}

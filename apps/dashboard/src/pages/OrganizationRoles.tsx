@@ -94,7 +94,7 @@ const OrganizationRoles: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Roles</PageTitle>
-        <CreateOrganizationRoleDialog onCreateRole={handleCreateRole} />
+        <CreateOrganizationRoleDialog className="ml-auto" onCreateRole={handleCreateRole} />
       </PageHeader>
 
       <PageContent>

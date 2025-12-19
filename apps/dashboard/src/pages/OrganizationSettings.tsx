@@ -91,7 +91,7 @@ const OrganizationSettings: React.FC = () => {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>General Settings</PageTitle>
+        <PageTitle>Settings</PageTitle>
       </PageHeader>
 
       <PageContent>

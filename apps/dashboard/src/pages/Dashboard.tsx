@@ -8,7 +8,7 @@ import { Outlet } from 'react-router-dom'
 
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { Sidebar } from '@/components/Sidebar'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
@@ -88,10 +88,7 @@ const Dashboard: React.FC = () => {
       )}
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
         <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
-        <SidebarInset className="overflow-clip">
-          <div className="relative md:hidden px-5 pt-4">
-            <SidebarTrigger className="[&_svg]:size-5" />
-          </div>
+        <SidebarInset className="overflow-y-auto">
           <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
             <Outlet />
           </div>

@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState } from 'react'
-import { Plus } from 'lucide-react'
-import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogClose,
@@ -16,18 +15,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ORGANIZATION_ROLE_PERMISSIONS_GROUPS } from '@/constants/OrganizationPermissionsGroups'
 import { OrganizationRolePermissionGroup } from '@/types/OrganizationRolePermissionGroup'
+import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { Plus } from 'lucide-react'
+import React, { useState } from 'react'
 
 interface CreateOrganizationRoleDialogProps {
   onCreateRole: (name: string, description: string, permissions: OrganizationRolePermissionsEnum[]) => Promise<boolean>
+  className?: string
 }
 
-export const CreateOrganizationRoleDialog: React.FC<CreateOrganizationRoleDialogProps> = ({ onCreateRole }) => {
+export const CreateOrganizationRoleDialog: React.FC<CreateOrganizationRoleDialogProps> = ({
+  onCreateRole,
+  className,
+}) => {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -93,7 +97,7 @@ export const CreateOrganizationRoleDialog: React.FC<CreateOrganizationRoleDialog
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="w-auto px-4" title="Add Registry">
+        <Button variant="default" size="sm" className={className} title="Add Registry">
           <Plus className="w-4 h-4" />
           Create Role
         </Button>

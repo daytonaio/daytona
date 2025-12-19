@@ -257,14 +257,13 @@ const Registries: React.FC = () => {
   return (
     <PageLayout>
       <PageHeader>
-        <PageTitle>Container Registries</PageTitle>
-
+        <PageTitle>Registries</PageTitle>
         {writePermitted && (
           <Button
             variant="default"
             size="sm"
             disabled={loading}
-            className="w-auto px-4"
+            className="ml-auto"
             title="Add Registry"
             onClick={() => {
               setShowCreateOrEditDialog(true)

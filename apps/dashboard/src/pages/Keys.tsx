@@ -109,6 +109,7 @@ const Keys: React.FC = () => {
       <PageHeader>
         <PageTitle>API Keys</PageTitle>
         <CreateApiKeyDialog
+          className="ml-auto"
           availablePermissions={availablePermissions}
           onCreateApiKey={handleCreateKey}
           apiUrl={apiUrl}

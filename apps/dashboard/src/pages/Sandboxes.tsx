@@ -797,7 +797,7 @@ const Sandboxes: React.FC = () => {
       <PageHeader>
         <PageTitle>Sandboxes</PageTitle>
         {!sandboxesDataIsLoading && (!sandboxesData?.items || sandboxesData.items.length === 0) && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto">
             <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
               Onboarding guide
             </Button>

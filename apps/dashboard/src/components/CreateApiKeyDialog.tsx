@@ -3,11 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
-import { Check, Copy, Plus } from 'lucide-react'
-import { CreateApiKeyPermissionsEnum, ApiKeyResponse } from '@daytonaio/api-client'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   Dialog,
   DialogClose,
@@ -19,11 +17,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
-import { CreateApiKeyPermissionGroup } from '@/types/CreateApiKeyPermissionGroup'
 import { Label } from '@/components/ui/label'
+import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
 import { getMaskedApiKey } from '@/lib/utils'
-import { DatePicker } from '@/components/ui/date-picker'
+import { CreateApiKeyPermissionGroup } from '@/types/CreateApiKeyPermissionGroup'
+import { ApiKeyResponse, CreateApiKeyPermissionsEnum } from '@daytonaio/api-client'
+import { Check, Copy, Plus } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 interface CreateApiKeyDialogProps {
   availablePermissions: CreateApiKeyPermissionsEnum[]
@@ -33,12 +33,14 @@ interface CreateApiKeyDialogProps {
     permissions: CreateApiKeyPermissionsEnum[],
     expiresAt: Date | null,
   ) => Promise<ApiKeyResponse | null>
+  className?: string
 }
 
 export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
   availablePermissions,
   apiUrl,
   onCreateApiKey,
+  className,
 }) => {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
@@ -139,7 +141,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="w-auto px-4" title="Create Key">
+        <Button variant="default" size="sm" title="Create Key" className={className}>
           <Plus className="w-4 h-4" />
           Create Key
         </Button>

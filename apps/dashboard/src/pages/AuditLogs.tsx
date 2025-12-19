@@ -175,7 +175,7 @@ const AuditLogs: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Audit Logs</PageTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           <Label htmlFor="auto-refresh">Auto Refresh</Label>
           <Switch id="auto-refresh" checked={autoRefresh} onCheckedChange={handleAutoRefreshChange} />
         </div>
