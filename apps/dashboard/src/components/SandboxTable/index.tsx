@@ -13,7 +13,7 @@ import { CheckIcon, CommandIcon, Container, SquareIcon, Trash2Icon } from 'lucid
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useRegisterCommands, type CommandConfig } from '../CommandPalette'
+import { useCommandPaletteActions, useRegisterCommands, type CommandConfig } from '../CommandPalette'
 import { Pagination } from '../Pagination'
 import { TableEmptyState } from '../TableEmptyState'
 import {
@@ -165,6 +165,10 @@ export function SandboxTable({
   }
 
   useSandboxCommands({ table, writePermitted, deletePermitted, onDelete: () => setBulkDeleteDialogOpen(true) })
+  const { setIsOpen } = useCommandPaletteActions()
+  const handleOpenCommandPalette = () => {
+    setIsOpen(true)
+  }
 
   return (
     <>
@@ -288,16 +292,16 @@ export function SandboxTable({
               initial={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
               animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
               exit={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
-              className="dark absolute bottom-5 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs"
+              className="bg-popover absolute bottom-5 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs"
             >
               <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-1 py-1 flex items-center justify-between gap-4">
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm">
                   {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
                 </div>
 
-                <Button variant="secondary" size="sm" className="h-8">
+                <Button variant="ghost" size="sm" className="h-8" onClick={handleOpenCommandPalette}>
                   <CommandIcon className="w-4 h-4" />
-                  <span className="text-sm text-muted-foreground">Actions</span>
+                  <span className="text-sm">Actions</span>
                 </Button>
               </div>
             </motion.div>
