@@ -111,6 +111,23 @@
         }
       ]
     },
+    "package-deb": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p dist/apps/runner-deb/deb/opt/daytona",
+          "mkdir -p dist/apps/runner-deb/deb/etc/systemd/system",
+          "mkdir -p dist/apps/runner-deb/deb/DEBIAN",
+          "cp dist/apps/runner-amd64 dist/apps/runner-deb/deb/opt/daytona/runner",
+          "cp {projectRoot}/packaging/systemd/daytona-runner.service dist/apps/runner-deb/deb/etc/systemd/system/",
+          "cp {projectRoot}/packaging/deb/DEBIAN/postinst {projectRoot}/packaging/deb/DEBIAN/prerm {projectRoot}/packaging/deb/DEBIAN/postrm dist/apps/runner-deb/deb/DEBIAN/",
+          "VERSION=${VERSION:-0.1.0} envsubst < {projectRoot}/packaging/deb/DEBIAN/control > dist/apps/runner-deb/deb/DEBIAN/control",
+          "dpkg-deb --build dist/apps/runner-deb/deb dist/apps/runner-deb/daytona-runner_${VERSION:-0.0.0-dev}_amd64.deb"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build-amd64", "check-version-env"]
+    },
     "push-manifest": {}
   },
   "implicitDependencies": ["computer-use", "daemon"]
