@@ -52,6 +52,8 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
+  const [search, setSearch] = useState('')
+
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -350,6 +352,22 @@ const Snapshots: React.FC = () => {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
   }
+  const [search, setSearch] = useState('')
+
+const filteredSnapshots = useMemo(() => {
+  if (!search.trim()) return snapshotsData.items
+
+  const query = search.toLowerCase()
+
+  return snapshotsData.items.filter((s) =>
+    `${s.name} ${s.imageName ?? ''} ${s.tag ?? ''}`
+      .toLowerCase()
+      .includes(query),
+  )
+}, [search, snapshotsData.items])
+
+const writePermitted = useMemo(
+
 
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS),
@@ -395,6 +413,13 @@ const Snapshots: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
+        <Input
+  placeholder="Search snapshots by name, tag, or image"
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  className="max-w-sm mt-2"
+/>
+
         <Dialog
           open={showCreateDialog}
           onOpenChange={(isOpen) => {
