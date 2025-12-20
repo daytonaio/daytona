@@ -467,6 +467,13 @@ export const getSidebarConfig = (
           disablePagination: true,
           hideInSidebar: true,
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/connect-terminal-agent-sandbox', locale),
+          label: labels['sidebarconfig.claude'],
+          disablePagination: true,
+          hideInSidebar: true,
+        },
       ],
     },
     {
