@@ -46,6 +46,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 @Injectable()
 export class RunnerService {
   private readonly logger = new Logger(RunnerService.name)
+  private readonly scoreConfig: AvailabilityScoreConfig
 
   constructor(
     @InjectRepository(Runner)
@@ -63,7 +64,9 @@ export class RunnerService {
     @Inject(EventEmitter2)
     private eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
-  ) {}
+  ) {
+    this.scoreConfig = this.getAvailabilityScoreConfig()
+  }
 
   /**
    * @throws {BadRequestException} If the runner name or class is invalid.
@@ -255,7 +258,7 @@ export class RunnerService {
       unschedulable: Not(true),
       availabilityScore: params.availabilityScoreThreshold
         ? MoreThanOrEqual(params.availabilityScoreThreshold)
-        : MoreThanOrEqual(this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')),
+        : MoreThanOrEqual(this.configService.getOrThrow('runnerScore.thresholds.availability')),
     }
 
     const excludedRunnerIds = params.excludedRunnerIds?.length
@@ -340,6 +343,7 @@ export class RunnerService {
     apiUrl?: string,
     proxyUrl?: string,
     metrics?: {
+      currentCpuLoadAverage?: number
       currentCpuUsagePercentage?: number
       currentMemoryUsagePercentage?: number
       currentDiskUsagePercentage?: number
@@ -386,6 +390,7 @@ export class RunnerService {
     }
 
     if (metrics) {
+      updateData.currentCpuLoadAverage = metrics.currentCpuLoadAverage || 0
       updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
       updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
       updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
@@ -398,6 +403,7 @@ export class RunnerService {
       updateData.diskGiB = metrics.diskGiB
 
       updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
+        cpuLoadAverage: updateData.currentCpuLoadAverage,
         cpuUsage: updateData.currentCpuUsagePercentage,
         memoryUsage: updateData.currentMemoryUsagePercentage,
         diskUsage: updateData.currentDiskUsagePercentage,
@@ -731,6 +737,7 @@ export class RunnerService {
 
   private calculateAvailabilityScore(runnerId: string, params: AvailabilityScoreParams): number {
     if (
+      params.cpuLoadAverage < 0 ||
       params.cpuUsage < 0 ||
       params.memoryUsage < 0 ||
       params.diskUsage < 0 ||
@@ -739,7 +746,7 @@ export class RunnerService {
       params.allocatedDiskGiB < 0
     ) {
       this.logger.warn(
-        `Runner ${runnerId} has negative values for CPU, memory, disk, allocated CPU, allocated memory, or allocated disk`,
+        `Runner ${runnerId} has negative values for load, CPU, memory, disk, allocated CPU, allocated memory, or allocated disk`,
       )
       return 0
     }
@@ -748,68 +755,14 @@ export class RunnerService {
   }
 
   private calculateTOPSISScore(params: AvailabilityScoreParams): number {
-    // Define ideal (best) and anti-ideal (worst) values
-    const ideal = {
-      cpu: 0,
-      memory: 0,
-      disk: 0,
-      allocCpu: 100, // 100% means no overallocation
-      allocMem: 100,
-      allocDisk: 100,
-    }
-
-    const antiIdeal = {
-      cpu: 100,
-      memory: 100,
-      disk: 100,
-      allocCpu: 500, // 500% means severe overallocation
-      allocMem: 500,
-      allocDisk: 500,
-    }
-
-    // Weights based on your requirements
-    const weights = [
-      this.configService.getOrThrow('runnerUsage.cpuUsageWeight'),
-      this.configService.getOrThrow('runnerUsage.memoryUsageWeight'),
-      this.configService.getOrThrow('runnerUsage.diskUsageWeight'),
-      this.configService.getOrThrow('runnerUsage.allocatedCpuWeight'),
-      this.configService.getOrThrow('runnerUsage.allocatedMemoryWeight'),
-      this.configService.getOrThrow('runnerUsage.allocatedDiskWeight'),
-    ]
-
-    const cpuPenaltyExponent = this.configService.getOrThrow('runnerUsage.cpuPenaltyExponent')
-    const memoryPenaltyExponent = this.configService.getOrThrow('runnerUsage.memoryPenaltyExponent')
-    const diskPenaltyExponent = this.configService.getOrThrow('runnerUsage.diskPenaltyExponent')
-
-    const cpuPenaltyThreshold = this.configService.getOrThrow('runnerUsage.cpuPenaltyThreshold')
-    const memoryPenaltyThreshold = this.configService.getOrThrow('runnerUsage.memoryPenaltyThreshold')
-    const diskPenaltyThreshold = this.configService.getOrThrow('runnerUsage.diskPenaltyThreshold')
-
-    // Calculate allocation ratios
-    const allocatedCpuRatio = (params.allocatedCpu / params.runnerCpu) * 100
-    const allocatedMemoryRatio = (params.allocatedMemoryGiB / params.runnerMemoryGiB) * 100
-    const allocatedDiskRatio = (params.allocatedDiskGiB / params.runnerDiskGiB) * 100
-
-    // Current values array
     const current = [
       params.cpuUsage,
       params.memoryUsage,
       params.diskUsage,
-      allocatedCpuRatio,
-      allocatedMemoryRatio,
-      allocatedDiskRatio,
-    ]
-
-    // Ideal and anti-ideal arrays
-    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk]
-
-    const antiIdealValues = [
-      antiIdeal.cpu,
-      antiIdeal.memory,
-      antiIdeal.disk,
-      antiIdeal.allocCpu,
-      antiIdeal.allocMem,
-      antiIdeal.allocDisk,
+      // Allocation ratios percentage
+      (params.allocatedCpu / params.runnerCpu) * 100,
+      (params.allocatedMemoryGiB / params.runnerMemoryGiB) * 100,
+      (params.allocatedDiskGiB / params.runnerDiskGiB) * 100,
     ]
 
     // Calculate weighted Euclidean distances
@@ -817,12 +770,13 @@ export class RunnerService {
     let distanceToAntiIdeal = 0
 
     for (let i = 0; i < current.length; i++) {
-      const normalizedCurrent = current[i] / 100 // Normalize to 0-1 scale for allocation ratios >100%
-      const normalizedIdeal = idealValues[i] / 100
-      const normalizedAntiIdeal = antiIdealValues[i] / 100
+      // Normalize to 0-1 scale
+      const normalizedCurrent = current[i] / 100
+      const normalizedIdeal = this.scoreConfig.targetValues.ideal[i] / 100
+      const normalizedAntiIdeal = this.scoreConfig.targetValues.antiIdeal[i] / 100
 
-      distanceToIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedIdeal, 2)
-      distanceToAntiIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedAntiIdeal, 2)
+      distanceToIdeal += this.scoreConfig.weights[i] * Math.pow(normalizedCurrent - normalizedIdeal, 2)
+      distanceToAntiIdeal += this.scoreConfig.weights[i] * Math.pow(normalizedCurrent - normalizedAntiIdeal, 2)
     }
 
     distanceToIdeal = Math.sqrt(distanceToIdeal)
@@ -834,22 +788,81 @@ export class RunnerService {
     // Apply exponential penalties for critical thresholds
     let penaltyMultiplier = 1
 
-    if (params.cpuUsage >= cpuPenaltyThreshold) {
-      penaltyMultiplier *= Math.exp(-cpuPenaltyExponent * (params.cpuUsage - cpuPenaltyThreshold))
+    if (params.cpuUsage >= this.scoreConfig.penalty.thresholds.cpu) {
+      penaltyMultiplier *= Math.exp(
+        -this.scoreConfig.penalty.exponents.cpu * (params.cpuUsage - this.scoreConfig.penalty.thresholds.cpu),
+      )
     }
 
-    if (params.memoryUsage >= memoryPenaltyThreshold) {
-      penaltyMultiplier *= Math.exp(-memoryPenaltyExponent * (params.memoryUsage - memoryPenaltyThreshold))
+    if (params.cpuLoadAverage >= this.scoreConfig.penalty.thresholds.cpuLoadAvg) {
+      penaltyMultiplier *= Math.exp(
+        -this.scoreConfig.penalty.exponents.cpuLoadAvg *
+          (params.cpuLoadAverage - this.scoreConfig.penalty.thresholds.cpuLoadAvg),
+      )
     }
 
-    if (params.diskUsage >= diskPenaltyThreshold) {
-      penaltyMultiplier *= Math.exp(-diskPenaltyExponent * (params.diskUsage - diskPenaltyThreshold))
+    if (params.memoryUsage >= this.scoreConfig.penalty.thresholds.memory) {
+      penaltyMultiplier *= Math.exp(
+        -this.scoreConfig.penalty.exponents.memory * (params.memoryUsage - this.scoreConfig.penalty.thresholds.memory),
+      )
+    }
+
+    if (params.diskUsage >= this.scoreConfig.penalty.thresholds.disk) {
+      penaltyMultiplier *= Math.exp(
+        -this.scoreConfig.penalty.exponents.disk * (params.diskUsage - this.scoreConfig.penalty.thresholds.disk),
+      )
     }
 
     // Apply penalty
     topsisScore *= penaltyMultiplier
 
     return Math.round(topsisScore * 100)
+  }
+
+  private getAvailabilityScoreConfig(): AvailabilityScoreConfig {
+    return {
+      availabilityThreshold: this.configService.getOrThrow('runnerScore.thresholds.availability'),
+      weights: [
+        this.configService.getOrThrow('runnerScore.weights.cpuUsage'),
+        this.configService.getOrThrow('runnerScore.weights.memoryUsage'),
+        this.configService.getOrThrow('runnerScore.weights.diskUsage'),
+        this.configService.getOrThrow('runnerScore.weights.allocatedCpu'),
+        this.configService.getOrThrow('runnerScore.weights.allocatedMemory'),
+        this.configService.getOrThrow('runnerScore.weights.allocatedDisk'),
+      ],
+      penalty: {
+        exponents: {
+          cpu: this.configService.getOrThrow('runnerScore.penalty.exponents.cpu'),
+          cpuLoadAvg: this.configService.getOrThrow('runnerScore.penalty.exponents.cpuLoadAvg'),
+          memory: this.configService.getOrThrow('runnerScore.penalty.exponents.memory'),
+          disk: this.configService.getOrThrow('runnerScore.penalty.exponents.disk'),
+        },
+        thresholds: {
+          cpu: this.configService.getOrThrow('runnerScore.penalty.thresholds.cpu'),
+          cpuLoadAvg: this.configService.getOrThrow('runnerScore.penalty.thresholds.cpuLoadAvg'),
+          memory: this.configService.getOrThrow('runnerScore.penalty.thresholds.memory'),
+          disk: this.configService.getOrThrow('runnerScore.penalty.thresholds.disk'),
+        },
+      },
+      targetValues: {
+        ideal: [
+          this.configService.getOrThrow('runnerScore.targetValues.ideal.cpu'),
+          this.configService.getOrThrow('runnerScore.targetValues.ideal.memory'),
+          this.configService.getOrThrow('runnerScore.targetValues.ideal.disk'),
+          this.configService.getOrThrow('runnerScore.targetValues.ideal.allocCpu'),
+          this.configService.getOrThrow('runnerScore.targetValues.ideal.allocMem'),
+          this.configService.getOrThrow('runnerScore.targetValues.ideal.allocDisk'),
+        ],
+        antiIdeal: [
+          this.configService.getOrThrow('runnerScore.targetValues.antiIdeal.cpu'),
+          this.configService.getOrThrow('runnerScore.targetValues.antiIdeal.memory'),
+          this.configService.getOrThrow('runnerScore.targetValues.antiIdeal.disk'),
+          this.configService.getOrThrow('runnerScore.targetValues.antiIdeal.allocCpu'),
+          this.configService.getOrThrow('runnerScore.targetValues.antiIdeal.allocMem'),
+          this.configService.getOrThrow('runnerScore.targetValues.antiIdeal.allocDisk'),
+        ],
+      },
+    }
   }
 }
 
@@ -862,6 +875,7 @@ export class GetRunnerParams {
 }
 
 interface AvailabilityScoreParams {
+  cpuLoadAverage: number
   cpuUsage: number
   memoryUsage: number
   diskUsage: number
@@ -871,4 +885,27 @@ interface AvailabilityScoreParams {
   runnerCpu: number
   runnerMemoryGiB: number
   runnerDiskGiB: number
+}
+
+interface AvailabilityScoreConfig {
+  availabilityThreshold: number
+  weights: number[]
+  penalty: {
+    exponents: {
+      cpu: number
+      cpuLoadAvg: number
+      memory: number
+      disk: number
+    }
+    thresholds: {
+      cpu: number
+      cpuLoadAvg: number
+      memory: number
+      disk: number
+    }
+  }
+  targetValues: {
+    ideal: number[]
+    antiIdeal: number[]
+  }
 }

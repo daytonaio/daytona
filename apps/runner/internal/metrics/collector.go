@@ -6,16 +6,28 @@
 package metrics
 
 import (
+	"container/ring"
 	"context"
+	"fmt"
 	"log/slog"
+	"sync"
+	"time"
 
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/disk"
-	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/load"
+	"github.com/shirou/gopsutil/v4/mem"
 )
+
+// CPUSnapshot represents a point-in-time CPU measurement
+type CPUSnapshot struct {
+	timestamp  time.Time
+	cpuPercent float64
+}
 
 // Metrics holds runner metrics
 type Metrics struct {
+	CPULoadAverage        float32
 	CPUUsagePercentage    float32
 	MemoryUsagePercentage float32
 	DiskUsagePercentage   float32
@@ -31,6 +43,11 @@ type Metrics struct {
 // Collector collects system metrics
 type Collector struct {
 	log *slog.Logger
+
+	// CPU usage - ring buffer for sliding window
+	cpuRing  *ring.Ring
+	cpuMutex sync.RWMutex
+
 	// For now, allocations are tracked manually
 	// In a real implementation, these would query container runtime
 	allocatedCPU       float32
@@ -40,10 +57,21 @@ type Collector struct {
 }
 
 // NewCollector creates a new metrics collector
-func NewCollector(logger *slog.Logger) *Collector {
-	return &Collector{
-		log: logger.With(slog.String("component", "metrics")),
+func NewCollector(logger *slog.Logger, windowSize int) *Collector {
+	if windowSize <= 0 {
+		// Default to size 60
+		windowSize = 60
 	}
+
+	return &Collector{
+		log:     logger.With(slog.String("component", "metrics")),
+		cpuRing: ring.New(windowSize),
+	}
+}
+
+// Start begins needed metrics collection processes
+func (c *Collector) Start(ctx context.Context) {
+	go c.snapshotCPUUsage(ctx)
 }
 
 // Collect gathers current system metrics
@@ -64,11 +92,19 @@ func (c *Collector) Collect(ctx context.Context) *Metrics {
 	}
 
 	// Collect CPU usage
-	cpuPercent, err := cpu.PercentWithContext(ctx, 0, false)
+	cpuUsage, err := c.collectCPUUsageAverage()
 	if err != nil {
 		c.log.Warn("Failed to collect CPU metrics", slog.Any("error", err))
-	} else if len(cpuPercent) > 0 {
-		metrics.CPUUsagePercentage = float32(cpuPercent[0])
+	} else {
+		metrics.CPUUsagePercentage = float32(cpuUsage)
+	}
+
+	// Update CPU load averages
+	loadAvg, err := load.Avg()
+	if err != nil {
+		c.log.Warn("Failed to collect CPU load averages", slog.Any("error", err))
+	} else {
+		metrics.CPULoadAverage = float32(loadAvg.Load15) / float32(cpuCount)
 	}
 
 	// Collect memory usage and total
@@ -138,4 +174,54 @@ func (c *Collector) DecrementSnapshots() {
 	if c.snapshotCount > 0 {
 		c.snapshotCount--
 	}
+}
+
+// snapshotCPUUsage runs in a background goroutine, continuously monitoring CPU usage
+func (c *Collector) snapshotCPUUsage(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			c.log.Info("CPU usage snapshotting stopped")
+			return
+		default:
+			// Add a new CPU snapshot to the ring buffer
+			// Use 1-second averaging for accurate CPU measurement
+			cpuPercent, err := cpu.PercentWithContext(ctx, 1*time.Second, false)
+			if err != nil {
+				c.log.Warn("Failed to collect next CPU usage ring", slog.Any("error", err))
+				return
+			}
+
+			c.cpuMutex.Lock()
+			c.cpuRing.Value = CPUSnapshot{
+				timestamp:  time.Now(),
+				cpuPercent: cpuPercent[0],
+			}
+			c.cpuRing = c.cpuRing.Next()
+			c.cpuMutex.Unlock()
+		}
+	}
+}
+
+// collectCPUUsageAverage calculates the average CPU usage from the ring buffer
+func (c *Collector) collectCPUUsageAverage() (float64, error) {
+	var total float64
+	var count int
+
+	c.cpuMutex.RLock()
+	defer c.cpuMutex.RUnlock()
+
+	c.cpuRing.Do(func(x interface{}) {
+		if x != nil {
+			snapshot := x.(CPUSnapshot)
+			total += snapshot.cpuPercent
+			count++
+		}
+	})
+
+	if count == 0 {
+		return -1.0, fmt.Errorf("no CPU usage data available")
+	}
+
+	return total / float64(count), nil
 }

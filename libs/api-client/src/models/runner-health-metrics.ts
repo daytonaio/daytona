@@ -19,6 +19,12 @@
  */
 export interface RunnerHealthMetrics {
   /**
+   * Current CPU load average
+   * @type {number}
+   * @memberof RunnerHealthMetrics
+   */
+  currentCpuLoadAverage: number
+  /**
    * Current CPU usage percentage
    * @type {number}
    * @memberof RunnerHealthMetrics
