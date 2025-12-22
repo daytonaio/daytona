@@ -21,6 +21,8 @@ var _ MappedNullable = &RunnerHealthMetrics{}
 
 // RunnerHealthMetrics struct for RunnerHealthMetrics
 type RunnerHealthMetrics struct {
+	// Current CPU load average
+	CurrentCpuLoadAverage float32 `json:"currentCpuLoadAverage"`
 	// Current CPU usage percentage
 	CurrentCpuUsagePercentage float32 `json:"currentCpuUsagePercentage"`
 	// Current memory usage percentage
@@ -50,8 +52,9 @@ type _RunnerHealthMetrics RunnerHealthMetrics
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerHealthMetrics(currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemoryGiB float32, currentAllocatedDiskGiB float32, currentSnapshotCount float32, cpu float32, memoryGiB float32, diskGiB float32) *RunnerHealthMetrics {
+func NewRunnerHealthMetrics(currentCpuLoadAverage float32, currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemoryGiB float32, currentAllocatedDiskGiB float32, currentSnapshotCount float32, cpu float32, memoryGiB float32, diskGiB float32) *RunnerHealthMetrics {
 	this := RunnerHealthMetrics{}
+	this.CurrentCpuLoadAverage = currentCpuLoadAverage
 	this.CurrentCpuUsagePercentage = currentCpuUsagePercentage
 	this.CurrentMemoryUsagePercentage = currentMemoryUsagePercentage
 	this.CurrentDiskUsagePercentage = currentDiskUsagePercentage
@@ -71,6 +74,30 @@ func NewRunnerHealthMetrics(currentCpuUsagePercentage float32, currentMemoryUsag
 func NewRunnerHealthMetricsWithDefaults() *RunnerHealthMetrics {
 	this := RunnerHealthMetrics{}
 	return &this
+}
+
+// GetCurrentCpuLoadAverage returns the CurrentCpuLoadAverage field value
+func (o *RunnerHealthMetrics) GetCurrentCpuLoadAverage() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentCpuLoadAverage
+}
+
+// GetCurrentCpuLoadAverageOk returns a tuple with the CurrentCpuLoadAverage field value
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthMetrics) GetCurrentCpuLoadAverageOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentCpuLoadAverage, true
+}
+
+// SetCurrentCpuLoadAverage sets field value
+func (o *RunnerHealthMetrics) SetCurrentCpuLoadAverage(v float32) {
+	o.CurrentCpuLoadAverage = v
 }
 
 // GetCurrentCpuUsagePercentage returns the CurrentCpuUsagePercentage field value
@@ -323,6 +350,7 @@ func (o RunnerHealthMetrics) MarshalJSON() ([]byte, error) {
 
 func (o RunnerHealthMetrics) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["currentCpuLoadAverage"] = o.CurrentCpuLoadAverage
 	toSerialize["currentCpuUsagePercentage"] = o.CurrentCpuUsagePercentage
 	toSerialize["currentMemoryUsagePercentage"] = o.CurrentMemoryUsagePercentage
 	toSerialize["currentDiskUsagePercentage"] = o.CurrentDiskUsagePercentage
@@ -346,6 +374,7 @@ func (o *RunnerHealthMetrics) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"currentCpuLoadAverage",
 		"currentCpuUsagePercentage",
 		"currentMemoryUsagePercentage",
 		"currentDiskUsagePercentage",
@@ -385,6 +414,7 @@ func (o *RunnerHealthMetrics) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "currentCpuLoadAverage")
 		delete(additionalProperties, "currentCpuUsagePercentage")
 		delete(additionalProperties, "currentMemoryUsagePercentage")
 		delete(additionalProperties, "currentDiskUsagePercentage")

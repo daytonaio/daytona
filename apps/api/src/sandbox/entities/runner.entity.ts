@@ -71,6 +71,12 @@ export class Runner {
     type: 'float',
     default: 0,
   })
+  currentCpuLoadAverage: number
+
+  @Column({
+    type: 'float',
+    default: 0,
+  })
   currentCpuUsagePercentage: number
 
   @Column({

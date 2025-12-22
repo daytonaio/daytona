@@ -9,6 +9,13 @@ import { IsNumber, IsOptional, IsString } from 'class-validator'
 @ApiSchema({ name: 'RunnerHealthMetrics' })
 export class RunnerHealthMetricsDto {
   @ApiProperty({
+    description: 'Current CPU load average',
+    example: 0.98,
+  })
+  @IsNumber()
+  currentCpuLoadAverage: number
+
+  @ApiProperty({
     description: 'Current CPU usage percentage',
     example: 45.5,
   })

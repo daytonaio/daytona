@@ -66,6 +66,9 @@ func (s *Service) Start(ctx context.Context) {
 	ticker := time.NewTicker(s.interval)
 	defer ticker.Stop()
 
+	// Start collector
+	s.collector.Start(ctx)
+
 	// Send initial healthcheck immediately
 	if err := s.sendHealthcheck(ctx); err != nil {
 		s.log.Warn("Failed to send initial healthcheck", slog.Any("error", err))
@@ -95,6 +98,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	m := s.collector.Collect(reqCtx)
 
 	metricsPtr := &apiclient.RunnerHealthMetrics{
+		CurrentCpuLoadAverage:        m.CPULoadAverage,
 		CurrentCpuUsagePercentage:    m.CPUUsagePercentage,
 		CurrentMemoryUsagePercentage: m.MemoryUsagePercentage,
 		CurrentDiskUsagePercentage:   m.DiskUsagePercentage,
@@ -109,11 +113,10 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 
 	// Build healthcheck request
 	healthcheck := apiclient.NewRunnerHealthcheck(internal.Version)
-	if metricsPtr != nil {
-		healthcheck.SetMetrics(*metricsPtr)
-	}
 
+	healthcheck.SetMetrics(*metricsPtr)
 	healthcheck.SetDomain(s.domain)
+	
 	proxyUrl := fmt.Sprintf("http://%s:%d", s.domain, s.proxyPort)
 	apiUrl := fmt.Sprintf("http://%s:%d", s.domain, s.apiPort)
 

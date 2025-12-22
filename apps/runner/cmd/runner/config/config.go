@@ -40,6 +40,7 @@ type Config struct {
 	Domain                 string        `envconfig:"RUNNER_DOMAIN" validate:"omitempty,hostname|ip"`
 	PollTimeout            time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
 	PollLimit              int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
+	CollectorWindowSize    int           `envconfig:"COLLECTOR_WINDOW_SIZE" default:"60" validate:"min=1"`
 	HealthcheckInterval    time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
 	HealthcheckTimeout     time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
 	ApiVersion             int           `envconfig:"API_VERSION" default:"2"`

@@ -154,7 +154,7 @@ func main() {
 
 	if cfg.ApiVersion == 2 {
 		// Create metrics collector
-		metricsCollector := metrics.NewCollector(slogLogger)
+		metricsCollector := metrics.NewCollector(slogLogger, cfg.CollectorWindowSize)
 
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
 			Interval:   cfg.HealthcheckInterval,
