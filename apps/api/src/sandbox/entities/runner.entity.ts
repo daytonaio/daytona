@@ -23,12 +23,12 @@ export class Runner {
   @Column({
     nullable: true,
   })
-  apiUrl: string
+  apiUrl: string | null
 
   @Column({
     nullable: true,
   })
-  proxyUrl: string
+  proxyUrl: string | null
 
   @Column()
   apiKey: string

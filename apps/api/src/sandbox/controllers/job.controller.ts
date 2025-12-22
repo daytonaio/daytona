@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Logger, Req } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Logger, Req, NotFoundException } from '@nestjs/common'
 import { Request } from 'express'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
@@ -152,7 +152,7 @@ export class JobController {
 
     const job = await this.jobService.findOne(jobId)
     if (!job) {
-      throw new Error(`Job ${jobId} not found`)
+      throw new NotFoundException(`Job ${jobId} not found`)
     }
 
     return new JobDto(job)

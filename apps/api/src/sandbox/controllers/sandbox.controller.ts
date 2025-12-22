@@ -905,6 +905,10 @@ export class SandboxController {
       throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} not found`)
     }
 
+    if (!runner.apiUrl) {
+      throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} has no API URL`)
+    }
+
     const logProxy = new LogProxy(
       runner.apiUrl,
       sandbox.buildInfo.snapshotRef.split(':')[0],

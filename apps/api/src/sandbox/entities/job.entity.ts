@@ -49,11 +49,9 @@ export class Job {
     enum: JobStatus,
     default: JobStatus.PENDING,
   })
-  @Index()
   status: JobStatus
 
   @Column()
-  @Index()
   runnerId: string
 
   @Column({
