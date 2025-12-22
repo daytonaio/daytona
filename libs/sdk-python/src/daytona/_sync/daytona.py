@@ -7,8 +7,10 @@
 
 import asyncio
 import json
+import threading
 import time
 import warnings
+from concurrent.futures import Future
 from copy import deepcopy
 from importlib.metadata import version
 from typing import Callable, Dict, List, Optional, Union, overload
@@ -195,7 +197,8 @@ class Daytona:
         self._sandbox_api = SandboxApi(self._api_client)
         self._object_storage_api = ObjectStorageApi(self._api_client)
         self._config_api = ConfigApi(self._api_client)
-        self._proxy_toolbox_url = None
+        self._proxy_toolbox_url_future: Optional[Future] = None
+        self._proxy_toolbox_url_future_lock = threading.Lock()
 
         # Initialize services
         self.volume = VolumeService(VolumesApi(self._api_client))
@@ -646,6 +649,28 @@ class Daytona:
         return new_client
 
     def _get_proxy_toolbox_url(self):
-        if self._proxy_toolbox_url is None:
-            self._proxy_toolbox_url = (self._config_api.config_controller_get_config()).proxy_toolbox_url
-        return self._proxy_toolbox_url
+        if self._proxy_toolbox_url_future is not None:
+            return self._proxy_toolbox_url_future.result()
+
+        with self._proxy_toolbox_url_future_lock:
+            # Double-check: another thread might have created the future
+            # Create local variable "future" so that the thread knows if it created the future
+            # and should do the API call and set the result
+            if self._proxy_toolbox_url_future is None:
+                future = Future()
+                self._proxy_toolbox_url_future = future
+            else:
+                future = None
+
+        # Make API call if we created the future
+        # This allows other threads to wait on the future instead of blocking on the lock
+        if future is not None:
+            try:
+                config = self._config_api.config_controller_get_config()
+                future.set_result(config.proxy_toolbox_url)
+            except Exception as e:
+                future.set_exception(e)
+                raise
+
+        # Allows other threads to wait on the same future in parallel
+        return self._proxy_toolbox_url_future.result()
