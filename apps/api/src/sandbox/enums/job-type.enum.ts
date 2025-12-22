@@ -4,9 +4,7 @@
  */
 
 /**
- * Adding/modifying job types here requires a database migration
- * to update the job_type_enum type in the database
- * and the VALIDATE_JOB_TYPE check constraint in the job table
+ * Adding/modifying job types here requires a database migration to update the VALIDATE_JOB_TYPE check constraint in the job table
  */
 export enum JobType {
   CREATE_SANDBOX = 'CREATE_SANDBOX',
