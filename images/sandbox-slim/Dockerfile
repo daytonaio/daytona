@@ -19,7 +19,12 @@ SHELL ["/bin/bash", "-c"]
 RUN python3 -m pip install --no-cache-dir pipx && pipx ensurepath && pipx install uv
 
 # Install Python LSP, daytona and essential pip packages
-RUN python3 -m pip install --no-cache-dir python-lsp-server daytona matplotlib pandas numpy
+RUN python3 -m pip install --no-cache-dir \
+    python-lsp-server==1.14.0 \
+    daytona==0.22.0 \
+    matplotlib==3.10.8 \
+    pandas==2.2.3 \
+    numpy==2.2.6
 
 # Create the Daytona user and configure sudo access
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona
@@ -41,7 +46,7 @@ RUN source $NVM_DIR/nvm.sh \
 ENV NODE_PATH=$NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-RUN npm install -g ts-node typescript typescript-language-server
+RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.1.3
 
 # Switch to Daytona user
 USER daytona
