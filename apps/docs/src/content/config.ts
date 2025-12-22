@@ -422,6 +422,15 @@ export const getSidebarConfig = (
             icon: 'chart.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/claude-code', locale),
+          label: labels['sidebarconfig.claudeCode'],
+          disablePagination: true,
+          attrs: {
+            icon: 'claude.svg',
+          },
+        },
       ],
     },
     {
