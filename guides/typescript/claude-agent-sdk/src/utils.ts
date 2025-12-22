@@ -12,6 +12,6 @@ export const RESET = ESC + '[0m'
 export function renderMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, `${BOLD}$1${RESET}`) // **bold**
-    .replace(/(?<!\*)\*([^\*\n]+?)\*(?!\*)/g, `${ITALIC}$1${RESET}`) // *italic*
+    .replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g, `${ITALIC}$1${RESET}`) // *italic*
     .replace(/`([^`]+?)`/g, `${DIM}$1${RESET}`) // `code`
 }
