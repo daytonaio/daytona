@@ -13,6 +13,7 @@ from daytona import CreateSandboxFromSnapshotParams, Daytona
 CODING_MODEL = "gpt-5.1"
 SUMMARY_MODEL = "gpt-4o"
 
+
 # Helper function to extract Python code from a given string
 def extract_python(text: str) -> str:
     match = re.search(r"```python([\s\S]*?)```", text)
