@@ -113,8 +113,9 @@
   "sidebarconfig.ossDeployment": "Open Source",
   "sidebarconfig.deployments": "Deployments",
   "sidebarconfig.integrations": "Guides",
-  "sidebarconfig.langchainIntegrations": "LangChain",
+  "sidebarconfig.langchain": "LangChain",
   "sidebarconfig.inngestAgentKit": "AgentKit",
+  "sidebarconfig.mastra": "Mastra",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
 }
