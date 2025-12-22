@@ -32,7 +32,9 @@ The default sandbox image contains Python, Node and their most popular dependenc
 - instructor
 - huggingface
 - ollama
+- claude-agent-sdk
 
 - ts-node
 - typescript
 - typescript-language-server
+- bun

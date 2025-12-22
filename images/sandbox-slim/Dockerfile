@@ -16,10 +16,10 @@ RUN chsh -s /bin/bash
 SHELL ["/bin/bash", "-c"]
 
 # Install pipx and uv
-RUN python3 -m pip install pipx && pipx ensurepath && pipx install uv
+RUN python3 -m pip install --no-cache-dir pipx && pipx ensurepath && pipx install uv
 
 # Install Python LSP, daytona and essential pip packages
-RUN python3 -m pip install python-lsp-server daytona matplotlib pandas numpy
+RUN python3 -m pip install --no-cache-dir python-lsp-server daytona matplotlib pandas numpy
 
 # Create the Daytona user and configure sudo access
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona

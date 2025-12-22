@@ -29,16 +29,17 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pipx and uv
-RUN python3 -m pip install pipx && pipx ensurepath && pipx install uv
+RUN python3 -m pip install --no-cache-dir pipx && pipx ensurepath && pipx install uv
 
 # Install the Python Language Server
-RUN python3 -m pip install python-lsp-server
+RUN python3 -m pip install --no-cache-dir python-lsp-server
 
 # Install common pip packages
-RUN python3 -m pip install \
+RUN python3 -m pip install --no-cache-dir \
     numpy pandas scikit-learn keras torch scipy seaborn matplotlib \
     django flask beautifulsoup4 requests opencv-python pillow sqlalchemy \
-    daytona pydantic-ai langchain transformers openai anthropic llama-index instructor huggingface ollama
+    daytona pydantic-ai langchain transformers openai anthropic llama-index \
+    instructor huggingface ollama claude-agent-sdk
 
 # Create the Daytona user and configure sudo access
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona
@@ -47,7 +48,7 @@ RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d
 RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install node && nvm use node" \
   && chown -R daytona:daytona /usr/local/share/nvm
 
-RUN npm install -g ts-node typescript typescript-language-server
+RUN npm install -g ts-node typescript typescript-language-server bun
 
 # Create directory for computer use plugin
 RUN mkdir -p /usr/local/lib && chown daytona:daytona /usr/local/lib
