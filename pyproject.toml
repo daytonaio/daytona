@@ -32,6 +32,7 @@ unasync = ">=0.6.0,<0.7.0"
 docutils = "!=0.21.post1"
 deptry = "^0.23.0"
 ipykernel = "^6.30.1"
+openai = ">=1.0.0,<2.0.0"
 
 [tool.basedpyright]
 typeCheckingMode = "off"
