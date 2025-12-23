@@ -23,7 +23,7 @@ func (c *Context) attachWebSocket(ws *websocket.Conn) {
 	cl := &wsClient{
 		id:   uuid.NewString(),
 		conn: ws,
-		send: make(chan wsFrame, 256),
+		send: make(chan wsFrame, 1024),
 		done: make(chan struct{}),
 	}
 
@@ -116,6 +116,19 @@ func (cl *wsClient) close() {
 		case <-timer.C:
 			// Timeout reached, proceed with closing
 			log.Debug("Timeout waiting for client writer to finish")
+		}
+
+		// Wait for client's close frame response (proper WebSocket handshake)
+		// Set a read deadline to prevent hanging if client doesn't respond
+		_ = cl.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+
+		// Drain any remaining messages until we get close frame or timeout
+		// This ensures proper WebSocket close handshake per RFC 6455
+		for {
+			_, _, err := cl.conn.NextReader()
+			if err != nil {
+				break
+			}
 		}
 
 		_ = cl.conn.Close()

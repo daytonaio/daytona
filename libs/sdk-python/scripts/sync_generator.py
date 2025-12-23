@@ -68,6 +68,10 @@ ADDITIONAL_REPLACEMENTS = {
     # aioboto3 replacement
     "aioboto3": "boto3",
     "async_pty_handle": "pty_handle",
+    # Task/Future replacements
+    "_task: Optional[asyncio.Task]": "_future: Optional[Future]",
+    "_task_lock = asyncio.Lock()": "_future_lock = threading.Lock()",
+    "asyncio.Task": "Future",
 }
 
 # Complex regex-based tweaks
@@ -114,6 +118,15 @@ POST_REPLACEMENTS = [
     # Remove aiofiles imports (including submodules)
     (re.compile(r"^import aiofiles(?:\.[\w_]+)?\s*$", flags=re.MULTILINE), ""),
     (re.compile(r"^from aiofiles(?:\.[\w_]+)? import .+$", flags=re.MULTILINE), ""),
+    # Task/Future pattern replacements - make these more specific to avoid false positives
+    (re.compile(r"\bself\._(\w+)_task:"), r"self._\1_future:"),
+    (re.compile(r"\bself\._(\w+)_task_lock\b"), r"self._\1_future_lock"),
+    (re.compile(r"\b_task:"), r"_future:"),
+    (re.compile(r"\b_task_lock\b"), r"_future_lock"),
+    # Fix asyncio.Lock() -> threading.Lock()
+    (re.compile(r"asyncio\.Lock\(\)"), r"threading.Lock()"),
+    # Fix asyncio.Task type hints
+    (re.compile(r": Optional\[asyncio\.Task\]"), r": Optional[Future]"),
 ]
 
 # Auto-generation banner
@@ -759,6 +772,61 @@ def replace_asyncio_sleep_calls(text: str) -> str:
     return "".join(result)
 
 
+def convert_proxy_toolbox_url_method(text: str) -> str:
+    """
+    Convert _get_proxy_toolbox_url method from async task caching to sync future caching.
+
+    FILE-SPECIFIC: This conversion is only applied to daytona.py to avoid affecting other files.
+
+    Replaces the entire method with the sync version that uses concurrent.futures.Future
+    instead of asyncio.Task for thread-safe lazy initialization.
+    """
+    # Find the method and extract it
+    method_pattern = re.compile(r"(    def _get_proxy_toolbox_url\(self\):.*?)(?=\n    def |\n\nclass |\Z)", re.DOTALL)
+
+    match = method_pattern.search(text)
+    if not match:
+        return text
+
+    # Check if this method needs conversion (contains asyncio.create_task or _task references)
+    method_body = match.group(1)
+    if "asyncio.create_task" not in method_body and "_proxy_toolbox_url_task" not in method_body:
+        # Already converted or doesn't need conversion
+        return text
+
+    sync_method = """    def _get_proxy_toolbox_url(self):
+        if self._proxy_toolbox_url_future is not None:
+            return self._proxy_toolbox_url_future.result()
+
+        with self._proxy_toolbox_url_future_lock:
+            # Double-check: another thread might have created the future
+            # Create local variable "future" so that the thread knows if it created the future
+            # and should do the API call and set the result
+            if self._proxy_toolbox_url_future is None:
+                future = Future()
+                self._proxy_toolbox_url_future = future
+            else:
+                future = None
+
+        # Make API call if we created the future
+        # This allows other threads to wait on the future instead of blocking on the lock
+        if future is not None:
+            try:
+                config = self._config_api.config_controller_get_config()
+                future.set_result(config.proxy_toolbox_url)
+            except Exception as e:
+                future.set_exception(e)
+                raise
+
+        # Allows other threads to wait on the same future in parallel
+        return self._proxy_toolbox_url_future.result()"""
+
+    # Replace the method
+    text = method_pattern.sub(sync_method, text, count=1)
+
+    return text
+
+
 def replace_asyncio_create_task_with_threading(text: str) -> str:
     """
     Replace:
@@ -817,19 +885,25 @@ def replace_asyncio_create_task_with_threading(text: str) -> str:
 
 def manage_asyncio_imports(text: str) -> str:
     """
-    Manage asyncio, time, and aiofiles imports based on usage:
+    Manage asyncio, time, aiofiles, threading, and concurrent.futures imports based on usage:
     - If asyncio is used in the text but not imported, add "import asyncio"
     - If asyncio is not used, remove any existing asyncio imports
     - If time is used in the text but not imported, add "import time"
     - If time is not used, remove any existing time imports
     - If aiofiles is not used, remove any existing aiofiles imports
+    - If Future is used in the text but not imported, add "from concurrent.futures import Future"
+    - If Future is not used, remove any existing Future imports
+    - If threading is used in the text but not imported, add "import threading"
+    - If threading is not used, remove any existing threading imports
     """
     lines = text.splitlines(keepends=True)
 
-    # Check if asyncio, time, and aiofiles are used anywhere in the text (excluding import lines)
+    # Check if asyncio, time, aiofiles, Future, and threading are used anywhere in the text (excluding import lines)
     asyncio_used = False
     time_used = False
     aiofiles_used = False
+    future_used = False
+    threading_used = False
     non_import_text = ""
     for line in lines:
         if not (
@@ -839,6 +913,10 @@ def manage_asyncio_imports(text: str) -> str:
             or line.strip().startswith("from time import")
             or line.strip().startswith("import aiofiles")
             or line.strip().startswith("from aiofiles import")
+            or line.strip().startswith("from concurrent.futures import")
+            or line.strip().startswith("import concurrent.futures")
+            or line.strip().startswith("import threading")
+            or line.strip().startswith("from threading import")
         ):
             non_import_text += line
 
@@ -848,10 +926,16 @@ def manage_asyncio_imports(text: str) -> str:
         time_used = True
     if re.search(r"\baiofiles\.", non_import_text):
         aiofiles_used = True
+    if re.search(r"\bFuture\b", non_import_text):
+        future_used = True
+    if re.search(r"\bthreading\.", non_import_text):
+        threading_used = True
 
-    # Check if asyncio, time, and aiofiles are already imported
+    # Check if asyncio, time, aiofiles, Future, and threading are already imported
     has_asyncio_import = False
     has_time_import = False
+    has_future_import = False
+    has_threading_import = False
 
     new_lines = []
     in_multiline_import = False
@@ -929,6 +1013,23 @@ def manage_asyncio_imports(text: str) -> str:
 
                 if used_imports:
                     new_lines.append(f"from aiofiles import {', '.join(used_imports)}\n")
+            # else: skip this line (remove unused import)
+            continue
+
+        # Check for concurrent.futures.Future imports
+        m = re.match(r"^\s*from concurrent\.futures import (.+)$", line)
+        if m:
+            has_future_import = True
+            if future_used:
+                new_lines.append(line)  # Keep the import
+            # else: skip this line (remove unused import)
+            continue
+
+        # Check for threading imports
+        if re.match(r"^\s*import threading\s*$", line):
+            has_threading_import = True
+            if threading_used:
+                new_lines.append(line)  # Keep the import
             # else: skip this line (remove unused import)
             continue
 
@@ -1015,6 +1116,76 @@ def manage_asyncio_imports(text: str) -> str:
                 insert_idx = i + 1
 
         new_lines.insert(insert_idx, "import time\n")
+
+    # If Future is used but not imported, add the import
+    if future_used and not has_future_import:
+        # Find the best position - after imports but before other code
+        insert_idx = 0
+        in_multiline_import = False
+        paren_count = 0
+
+        for i, line in enumerate(new_lines):
+            stripped = line.strip()
+
+            # Skip license/comments at the beginning
+            if not stripped or stripped.startswith("#"):
+                insert_idx = i + 1
+                continue
+
+            # Handle import statements
+            if stripped.startswith(("import ", "from ")):
+                paren_count += line.count("(") - line.count(")")
+                if paren_count > 0:
+                    in_multiline_import = True
+                insert_idx = i + 1
+            elif in_multiline_import:
+                paren_count += line.count("(") - line.count(")")
+                if paren_count <= 0:
+                    in_multiline_import = False
+                    paren_count = 0
+                insert_idx = i + 1
+            elif not in_multiline_import:
+                # This is the first non-import line, insert here
+                break
+            else:
+                insert_idx = i + 1
+
+        new_lines.insert(insert_idx, "from concurrent.futures import Future\n")
+
+    # If threading is used but not imported, add the import
+    if threading_used and not has_threading_import:
+        # Find the best position - after imports but before other code
+        insert_idx = 0
+        in_multiline_import = False
+        paren_count = 0
+
+        for i, line in enumerate(new_lines):
+            stripped = line.strip()
+
+            # Skip license/comments at the beginning
+            if not stripped or stripped.startswith("#"):
+                insert_idx = i + 1
+                continue
+
+            # Handle import statements
+            if stripped.startswith(("import ", "from ")):
+                paren_count += line.count("(") - line.count(")")
+                if paren_count > 0:
+                    in_multiline_import = True
+                insert_idx = i + 1
+            elif in_multiline_import:
+                paren_count += line.count("(") - line.count(")")
+                if paren_count <= 0:
+                    in_multiline_import = False
+                    paren_count = 0
+                insert_idx = i + 1
+            elif not in_multiline_import:
+                # This is the first non-import line, insert here
+                break
+            else:
+                insert_idx = i + 1
+
+        new_lines.insert(insert_idx, "import threading\n")
 
     return "".join(new_lines)
 
@@ -1239,6 +1410,9 @@ def post_process(path: Path):
     text = path.read_text(encoding="utf-8")
     original = text
 
+    # Get the filename to apply file-specific conversions
+    filename = path.name
+
     # 0) Convert 'with <constructor-call> as <var>:' to '<var> = <constructor-call>' and unindent block
     text = replace_with_constructor_as_var(text)
 
@@ -1263,6 +1437,10 @@ def post_process(path: Path):
 
     # 6) Convert "await asyncio.sleep(...)" calls into "time.sleep(...)"
     text = replace_asyncio_sleep_calls(text)
+
+    # 6.4) FILE-SPECIFIC: Convert _get_proxy_toolbox_url method from task to future caching (daytona.py only)
+    if filename == "daytona.py":
+        text = convert_proxy_toolbox_url_method(text)
 
     # 6.5) Convert 'asyncio.create_task' to 'threading.Thread' and usages
     text = replace_asyncio_create_task_with_threading(text)
