@@ -16,7 +16,7 @@ import {
   IDockerRegistryProvider,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
-import { parseDockerImage } from '../../common/utils/docker-image.util'
+import { parseDockerImage, checkDockerfileHasRegistryPrefix } from '../../common/utils/docker-image.util'
 import axios from 'axios'
 import type { AxiosRequestHeaders } from 'axios'
 import { AxiosHeaders } from 'axios'
@@ -802,6 +802,38 @@ export class DockerRegistryService {
       this.logger.error(`Exception when deleting image ${imageName}: ${error.message}`)
       throw error
     }
+  }
+
+  /**
+   * Gets source registries for building a Docker image from a Dockerfile
+   * If the Dockerfile has images with registry prefixes, returns all user registries
+   *
+   * @param dockerfileContent - The Dockerfile content
+   * @param organizationId - The organization ID
+   * @returns Array of source registries (private registries + default Docker Hub)
+   */
+  async getSourceRegistriesForDockerfile(dockerfileContent: string, organizationId: string): Promise<DockerRegistry[]> {
+    const sourceRegistries: DockerRegistry[] = []
+
+    // Check if Dockerfile has any images with a registry prefix
+    // If so, include all user's registries (we can't reliably match specific registries)
+    if (checkDockerfileHasRegistryPrefix(dockerfileContent)) {
+      const userRegistries = await this.findAll(organizationId)
+      sourceRegistries.push(...userRegistries)
+    }
+
+    // Add default Docker Hub registry only if user doesn't have their own Docker Hub credentials
+    // The auth configs map is keyed by URL, so adding the default last would override user credentials
+    const userHasDockerHubCreds = sourceRegistries.some((registry) => registry.url.includes('docker.io'))
+
+    if (!userHasDockerHubCreds) {
+      const defaultDockerHubRegistry = await this.getDefaultDockerHubRegistry()
+      if (defaultDockerHubRegistry) {
+        sourceRegistries.push(defaultDockerHubRegistry)
+      }
+    }
+
+    return sourceRegistries
   }
 }
 
