@@ -17,7 +17,7 @@ import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { CommandPaletteProvider } from './components/CommandPalette'
+import { CommandPaletteProvider, useIsCommandPaletteEnabled } from './components/CommandPalette'
 import LoadingFallback from './components/LoadingFallback'
 import { Button } from './components/ui/button'
 import {
@@ -106,6 +106,8 @@ function App() {
     }
   }, [location, posthog])
 
+  const cmdkEnabled = useIsCommandPaletteEnabled()
+
   if (authError) {
     return (
       <Dialog open>
@@ -138,7 +140,7 @@ function App() {
                   <RegionsProvider>
                     <UserOrganizationInvitationsProvider>
                       <NotificationSocketProvider>
-                        <CommandPaletteProvider>
+                        <CommandPaletteProvider enableGlobalShortcut={cmdkEnabled}>
                           <Dashboard />
                         </CommandPaletteProvider>
                       </NotificationSocketProvider>

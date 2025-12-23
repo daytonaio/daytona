@@ -61,7 +61,12 @@ import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
+import {
+  CommandConfig,
+  useCommandPaletteActions,
+  useIsCommandPaletteEnabled,
+  useRegisterCommands,
+} from './CommandPalette'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
@@ -277,6 +282,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
 
   useNavCommands(commandItems)
 
+  const cmdkEnabled = useIsCommandPaletteEnabled()
+
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarHeader>
@@ -292,22 +299,22 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           <SidebarTrigger className="p-2 [&_svg]:size-5" />
         </div>
         <SidebarMenu>
-          <SidebarMenuItem className="mb-1">
-            <SidebarMenuButton
-              tooltip="Search"
-              variant="outline"
-              className="flex items-center gap-2 justify-between"
-              onClick={() => commandPaletteActions.setIsOpen(true)}
-            >
-              <span className="flex items-center gap-2">
-                <SearchIcon className="w-4 h-4" /> Search
-              </span>
-              <Kbd className="whitespace-nowrap">⌘ K</Kbd>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <OrganizationPicker />
-          </SidebarMenuItem>
+          {cmdkEnabled && (
+            <SidebarMenuItem className="mb-1">
+              <SidebarMenuButton
+                tooltip="Search"
+                variant="outline"
+                className="flex items-center gap-2 justify-between"
+                onClick={() => commandPaletteActions.setIsOpen(true)}
+              >
+                <span className="flex items-center gap-2">
+                  <SearchIcon className="w-4 h-4" /> Search
+                </span>
+                <Kbd className="whitespace-nowrap">⌘ K</Kbd>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          <OrganizationPicker />
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>

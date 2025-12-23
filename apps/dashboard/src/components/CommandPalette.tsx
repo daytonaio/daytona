@@ -5,11 +5,13 @@
 
 'use client'
 
+import { useConfig } from '@/hooks/useConfig'
 import { useDeepCompareMemo } from '@/hooks/useDeepCompareMemo'
 import { cn, pluralize } from '@/lib/utils'
 import { useCommandState } from 'cmdk'
 import { AlertCircle, ChevronRight, Loader2 } from 'lucide-react'
 import { AnimatePresence, motion, useAnimate } from 'motion/react'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { createStore, useStore, type StoreApi } from 'zustand'
 import {
@@ -274,6 +276,17 @@ export type CommandPaletteProviderProps = {
   children: ReactNode
   defaultPage?: string
   enableGlobalShortcut?: boolean
+}
+
+export function useIsCommandPaletteEnabled() {
+  const config = useConfig()
+  const enabled = useFeatureFlagEnabled('dashboard-command-palette')
+
+  if (!config.posthog) {
+    return true
+  }
+
+  return enabled
 }
 
 export function CommandPaletteProvider({
