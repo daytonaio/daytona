@@ -4740,13 +4740,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@httptoolkit/esm@npm:^3.3.1":
-  version: 3.3.2
-  resolution: "@httptoolkit/esm@npm:3.3.2"
-  checksum: 10c0/16495aeaf705f2be8cf8665b3e2c8c1e92a876b1c5a16923f8197f692290827cc17e11f00fae955f4dd24c0c0dfd286f52d961f1d025595e1d50107d1dab3115
-  languageName: node
-  linkType: hard
-
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -18499,7 +18492,6 @@ __metadata:
     gt-react: "npm:^10.0.8"
     gtx-cli: "npm:^2.0.23"
     husky: "npm:^9.1.7"
-    import-sync: "npm:^2.2.3"
     ioredis: "npm:^5.5.0"
     is-ci: "npm:^4.1.0"
     isomorphic-ws: "npm:^5.0.0"
@@ -23226,15 +23218,6 @@ __metadata:
   version: 4.2.0
   resolution: "import-meta-resolve@npm:4.2.0"
   checksum: 10c0/3ee8aeecb61d19b49d2703987f977e9d1c7d4ba47db615a570eaa02fe414f40dfa63f7b953e842cbe8470d26df6371332bfcf21b2fd92b0112f9fea80dde2c4c
-  languageName: node
-  linkType: hard
-
-"import-sync@npm:^2.2.3":
-  version: 2.2.3
-  resolution: "import-sync@npm:2.2.3"
-  dependencies:
-    "@httptoolkit/esm": "npm:^3.3.1"
-  checksum: 10c0/07e26fcc5842672299cedaf1b943101b0eba5cc8c52f744b12a2c3090116063840236229141b11bcb20cf724f6fc63de546a7dbed1201081287cf8c547f25085
   languageName: node
   linkType: hard
 

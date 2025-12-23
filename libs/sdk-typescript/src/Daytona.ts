@@ -426,10 +426,12 @@ export class Daytona {
 
       if ('image' in params) {
         if (typeof params.image === 'string') {
+          const builtImage = await Image.base(params.image)
           buildInfo = {
-            dockerfileContent: Image.base(params.image).dockerfile,
+            dockerfileContent: builtImage.dockerfile,
           }
         } else if (params.image instanceof Image) {
+          // User must await ImageBuilder to get Image before passing it here
           const contextHashes = await SnapshotService.processImageContext(this.objectStorageApi, params.image)
           buildInfo = {
             contextHashes,

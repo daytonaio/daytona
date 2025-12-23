@@ -163,12 +163,16 @@ export class SnapshotService {
       createSnapshotReq.imageName = params.image
       createSnapshotReq.entrypoint = params.entrypoint
     } else {
+      // User must await ImageBuilder to get Image before passing it here
       const contextHashes = await SnapshotService.processImageContext(this.objectStorageApi, params.image)
+      let dockerfileContent = params.image.dockerfile
+      if (params.entrypoint) {
+        const argsStr = params.entrypoint.map((arg) => `"${arg}"`).join(', ')
+        dockerfileContent += `\nENTRYPOINT [${argsStr}]`
+      }
       createSnapshotReq.buildInfo = {
         contextHashes,
-        dockerfileContent: params.entrypoint
-          ? params.image.entrypoint(params.entrypoint).dockerfile
-          : params.image.dockerfile,
+        dockerfileContent,
       }
     }
 
@@ -271,6 +275,7 @@ export class SnapshotService {
    * @returns {Promise<string[]>} The list of context hashes stored in object storage.
    */
   static async processImageContext(objectStorageApi: ObjectStorageApi, image: Image): Promise<string[]> {
+    // Image should already be awaited by the caller
     if (!image.contextList || !image.contextList.length) {
       return []
     }

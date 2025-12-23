@@ -25,6 +25,72 @@ export interface Context {
 }
 
 /**
+ * Internal state used during image building.
+ *
+ * @interface
+ * @property {string[]} dockerfile - The Dockerfile content as an array of lines.
+ * @property {Context[]} contextList - The list of context files to be added to the image.
+ */
+interface ImgState {
+  dockerfile: string[]
+  contextList: Context[]
+}
+
+/**
+ * Represents a built image with its Dockerfile content and context files.
+ * This is the immutable result of building an ImageBuilder.
+ *
+ * @class
+ * @property {string} dockerfile - The complete Dockerfile content.
+ * @property {Context[]} contextList - The list of context files to be added to the image.
+ */
+export class Image {
+  constructor(
+    public readonly dockerfile: string,
+    public readonly contextList: Context[],
+  ) {}
+
+  /**
+   * Creates an ImageBuilder from an existing base image.
+   *
+   * @param {string} image - The base image to use.
+   * @returns {ImageBuilder} The ImageBuilder instance.
+   *
+   * @example
+   * const image = await Image.base('python:3.12-slim-bookworm')
+   */
+  static base(image: string): ImageBuilder {
+    return ImageBuilder.base(image)
+  }
+
+  /**
+   * Creates an ImageBuilder with a Debian slim base image.
+   *
+   * @param {string} pythonVersion - The Python version to use.
+   * @returns {ImageBuilder} The ImageBuilder instance.
+   *
+   * @example
+   * const image = await Image.debianSlim('3.12')
+   */
+  static debianSlim(pythonVersion?: SupportedPythonSeries): ImageBuilder {
+    return ImageBuilder.debianSlim(pythonVersion)
+  }
+
+  /**
+   * Creates an ImageBuilder from an existing Dockerfile.
+   *
+   * @param {string} path - The path to the Dockerfile.
+   * @returns {ImageBuilder} The ImageBuilder instance.
+   *
+   * @example
+   * const image = await Image.fromDockerfile('Dockerfile')
+   */
+  static fromDockerfile(path: string): ImageBuilder {
+    return ImageBuilder.fromDockerfile(path)
+  }
+}
+
+/**
  * Options for the pip install command.
  *
  * @interface
@@ -55,57 +121,68 @@ export interface PyprojectOptions extends PipInstallOptions {
 }
 
 /**
- * Represents an image definition for a Daytona sandbox.
- * Do not construct this class directly. Instead use one of its static factory methods,
+ * A builder for creating Docker images for Daytona sandboxes.
+ * Do not construct this class directly. Instead use static factory methods on the Image class,
  * such as `Image.base()`, `Image.debianSlim()` or `Image.fromDockerfile()`.
  *
+ * ## Execution Model
+ * - Operations record transformation steps without executing immediately
+ * - Steps are executed sequentially when the builder is awaited
+ * - You **MUST** `await` the builder after the final method call to get the built Image
+ * - The builder resolves to an immutable Image object
+ *
  * @class
- * @property {string} dockerfile - The Dockerfile content.
- * @property {Context[]} contextList - The list of context files to be added to the image.
+ *
+ * @example
+ * // Correct usage - await after the chain to get Image
+ * const image = await Image.debianSlim('3.12')
+ *   .pipInstall(['numpy'])
+ *   .addLocalFile('file.txt', '/dest')
+ *   .env({ FOO: 'bar' })
+ *
+ * await daytona.snapshot.create({ name: 'my-snapshot', image })
  */
-export class Image {
-  private _dockerfile = ''
-  private _contextList: Context[] = []
-  private _promiseChain: Promise<void> = Promise.resolve()
+export class ImageBuilder implements PromiseLike<Image> {
+  private steps: Array<(s: ImgState) => ImgState | Promise<ImgState>> = []
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private constructor() {}
+  private constructor(private initial: ImgState) {}
 
-  get dockerfile(): string {
-    return this._dockerfile
-  }
-
-  get contextList(): Context[] {
-    return this._contextList
+  /**
+   * Builds the final Image by applying all recorded transformation steps.
+   *
+   * @returns {Promise<Image>} A promise that resolves to the built Image.
+   */
+  private async build(): Promise<Image> {
+    let state = this.initial
+    for (const step of this.steps) {
+      state = await step(state)
+    }
+    return new Image(state.dockerfile.join('\n'), state.contextList)
   }
 
   /**
-   * Makes the Image class thenable, allowing it to be used with `await`.
-   * When awaited, all queued async operations are executed and the Image instance resolves to itself.
+   * Makes the ImageBuilder thenable, allowing it to be used with `await`.
+   *
+   * Steps are recorded as they are called, but execution is deferred until the builder is awaited.
+   * Awaiting the builder builds the final Image by applying all transformation steps sequentially.
+   *
+   * **Important**: You MUST await the builder after the method chain to get the built Image
+   * before passing it to SDK methods.
    *
    * @param {function} onfulfilled - Called when the Image is resolved.
-   * @param {function} onrejected - Called when the Image is rejected.
-   * @returns {Promise} A promise that resolves to the transformation result.
+   * @param {function} onrejected - Called when the build is rejected.
+   * @returns {PromiseLike} A promise that resolves to the built Image.
    *
    * @example
-   * const image = await Image.debianSlim('3.12').pipInstall('numpy')
+   * const image = await Image.debianSlim('3.12')
+   *   .pipInstall('numpy')
+   *   .addLocalFile('file.txt', '/dest')
    */
   then<TResult1 = Image, TResult2 = never>(
-    onfulfilled?: ((value: Image) => TResult1 | PromiseLike<TResult1>) | null,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
-  ): Promise<TResult1 | TResult2> {
-    return this._promiseChain.then(() => this).then(onfulfilled, onrejected)
-  }
-
-  /**
-   * Queues an async operation to be executed when the Image is awaited.
-   *
-   * @param {function} operation - The async operation to queue.
-   * @returns {Image} The Image instance for chaining.
-   */
-  private queueAsyncOperation(operation: () => Promise<void>): Image {
-    this._promiseChain = this._promiseChain.then(operation)
-    return this
+    onfulfilled?: ((value: Image) => TResult1 | PromiseLike<TResult1>) | null | undefined,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null | undefined,
+  ): PromiseLike<TResult1 | TResult2> {
+    return this.build().then(onfulfilled, onrejected)
   }
 
   /**
@@ -114,17 +191,20 @@ export class Image {
    * @param {string | string[]} packages - The packages to install.
    * @param {Object} options - The options for the pip install command.
    * @param {string[]} options.findLinks - The find-links to use for the pip install command.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
-   * const image = Image.debianSlim('3.12').pipInstall('numpy', { findLinks: ['https://pypi.org/simple'] })
+   * const image = await Image.debianSlim('3.12').pipInstall('numpy', { findLinks: ['https://pypi.org/simple'] })
    */
-  pipInstall(packages: string | string[], options?: PipInstallOptions): Image {
+  pipInstall(packages: string | string[], options?: PipInstallOptions): this {
     const pkgs = this.flattenStringArgs('pipInstall', 'packages', packages)
     if (!pkgs.length) return this
 
     const extraArgs = this.formatPipInstallArgs(options)
-    this._dockerfile += `RUN python -m pip install ${quote(pkgs.sort())}${extraArgs}\n`
+    this.steps.push((s) => ({
+      ...s,
+      dockerfile: [...s.dockerfile, `RUN python -m pip install ${quote(pkgs.sort())}${extraArgs}`],
+    }))
 
     return this
   }
@@ -134,14 +214,14 @@ export class Image {
    *
    * @param {string} requirementsTxt - The path to the requirements.txt file.
    * @param {PipInstallOptions} options - The options for the pip install command.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image.debianSlim('3.12')
    * image.pipInstallFromRequirements('requirements.txt', { findLinks: ['https://pypi.org/simple'] })
    */
-  pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Image {
-    return this.queueAsyncOperation(async () => {
+  pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): this {
+    this.steps.push(async (s) => {
       const importErrorPrefix = '"pipInstallFromRequirements" is not supported: '
       const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
       const fs = await dynamicImport('fs', importErrorPrefix)
@@ -153,10 +233,17 @@ export class Image {
 
       const extraArgs = this.formatPipInstallArgs(options)
 
-      this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
-      this._dockerfile += `COPY ${expandedPath} /.requirements.txt\n`
-      this._dockerfile += `RUN python -m pip install -r /.requirements.txt${extraArgs}\n`
+      return {
+        ...s,
+        contextList: [...s.contextList, { sourcePath: expandedPath, archivePath: expandedPath }],
+        dockerfile: [
+          ...s.dockerfile,
+          `COPY ${expandedPath} /.requirements.txt`,
+          `RUN python -m pip install -r /.requirements.txt${extraArgs}`,
+        ],
+      }
     })
+    return this
   }
 
   /**
@@ -164,14 +251,14 @@ export class Image {
    *
    * @param {string} pyprojectToml - The path to the pyproject.toml file.
    * @param {PyprojectOptions} options - The options for the pip install command.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image.debianSlim('3.12')
    * image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] })
    */
-  pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Image {
-    return this.queueAsyncOperation(async () => {
+  pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): this {
+    this.steps.push(async (s) => {
       const importErrorPrefix = '"pipInstallFromPyproject" is not supported: '
       const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
       const toml = await dynamicImport('@iarna/toml', importErrorPrefix)
@@ -200,8 +287,16 @@ export class Image {
         }
       }
 
-      this.pipInstall(dependencies, options)
+      const pkgs = this.flattenStringArgs('pipInstall', 'packages', dependencies)
+      if (!pkgs.length) return s
+
+      const extraArgs = this.formatPipInstallArgs(options)
+      return {
+        ...s,
+        dockerfile: [...s.dockerfile, `RUN python -m pip install ${quote(pkgs.sort())}${extraArgs}`],
+      }
     })
+    return this
   }
 
   /**
@@ -209,26 +304,31 @@ export class Image {
    *
    * @param {string} localPath - The path to the local file.
    * @param {string} remotePath - The path of the file in the image.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
    *  .debianSlim('3.12')
    *  .addLocalFile('requirements.txt', '/home/daytona/requirements.txt')
    */
-  addLocalFile(localPath: string, remotePath: string): Image {
-    return this.queueAsyncOperation(async () => {
+  addLocalFile(localPath: string, remotePath: string): this {
+    this.steps.push(async (s) => {
       const importErrorPrefix = '"addLocalFile" is not supported: '
       const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
 
+      let finalRemotePath = remotePath
       if (remotePath.endsWith('/')) {
-        remotePath = remotePath + pathe.basename(localPath)
+        finalRemotePath = remotePath + pathe.basename(localPath)
       }
 
       const expandedPath = expandTilde(localPath)
-      this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
-      this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
+      return {
+        ...s,
+        contextList: [...s.contextList, { sourcePath: expandedPath, archivePath: expandedPath }],
+        dockerfile: [...s.dockerfile, `COPY ${expandedPath} ${finalRemotePath}`],
+      }
     })
+    return this
   }
 
   /**
@@ -236,30 +336,34 @@ export class Image {
    *
    * @param {string} localPath - The path to the local directory.
    * @param {string} remotePath - The path of the directory in the image.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
    *  .debianSlim('3.12')
    *  .addLocalDir('src', '/home/daytona/src')
    */
-  addLocalDir(localPath: string, remotePath: string): Image {
-    return this.queueAsyncOperation(async () => {
+  addLocalDir(localPath: string, remotePath: string): this {
+    this.steps.push(async (s) => {
       const importErrorPrefix = '"addLocalDir" is not supported: '
       const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
 
       const expandedPath = expandTilde(localPath)
 
-      this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
-      this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
+      return {
+        ...s,
+        contextList: [...s.contextList, { sourcePath: expandedPath, archivePath: expandedPath }],
+        dockerfile: [...s.dockerfile, `COPY ${expandedPath} ${remotePath}`],
+      }
     })
+    return this
   }
 
   /**
    * Runs commands in the image.
    *
    * @param {string | string[]} commands - The commands to run.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
@@ -269,14 +373,21 @@ export class Image {
    *    ['bash', '-c', 'echo Hello, world, again!']
    *  )
    */
-  runCommands(...commands: (string | string[])[]): Image {
-    for (const command of commands) {
-      if (Array.isArray(command)) {
-        this._dockerfile += `RUN ${command.map((c) => `"${c.replace(/"/g, '\\\\\\"').replace(/'/g, "\\'")}"`).join(' ')}\n`
-      } else {
-        this._dockerfile += `RUN ${command}\n`
+  runCommands(...commands: (string | string[])[]): this {
+    this.steps.push((s) => {
+      const newLines: string[] = []
+      for (const command of commands) {
+        if (Array.isArray(command)) {
+          newLines.push(`RUN ${command.map((c) => `"${c.replace(/"/g, '\\\\\\"').replace(/'/g, "\\'")}"`).join(' ')}`)
+        } else {
+          newLines.push(`RUN ${command}`)
+        }
       }
-    }
+      return {
+        ...s,
+        dockerfile: [...s.dockerfile, ...newLines],
+      }
+    })
 
     return this
   }
@@ -285,14 +396,14 @@ export class Image {
    * Sets environment variables in the image.
    *
    * @param {Record<string, string>} envVars - The environment variables to set.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
    *  .debianSlim('3.12')
    *  .env({ FOO: 'bar' })
    */
-  env(envVars: Record<string, string>): Image {
+  env(envVars: Record<string, string>): this {
     const nonStringKeys = Object.entries(envVars)
       .filter(([, value]) => typeof value !== 'string')
       .map(([key]) => key)
@@ -301,9 +412,16 @@ export class Image {
       throw new Error(`Image ENV variables must be strings. Invalid keys: ${nonStringKeys}`)
     }
 
-    for (const [key, val] of Object.entries(envVars)) {
-      this._dockerfile += `ENV ${key}=${quote([val])}\n`
-    }
+    this.steps.push((s) => {
+      const newLines: string[] = []
+      for (const [key, val] of Object.entries(envVars)) {
+        newLines.push(`ENV ${key}=${quote([val])}`)
+      }
+      return {
+        ...s,
+        dockerfile: [...s.dockerfile, ...newLines],
+      }
+    })
 
     return this
   }
@@ -312,15 +430,18 @@ export class Image {
    * Sets the working directory in the image.
    *
    * @param {string} dirPath - The path to the working directory.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
    *  .debianSlim('3.12')
    *  .workdir('/home/daytona')
    */
-  workdir(dirPath: string): Image {
-    this._dockerfile += `WORKDIR ${quote([dirPath])}\n`
+  workdir(dirPath: string): this {
+    this.steps.push((s) => ({
+      ...s,
+      dockerfile: [...s.dockerfile, `WORKDIR ${quote([dirPath])}`],
+    }))
     return this
   }
 
@@ -328,20 +449,25 @@ export class Image {
    * Sets the entrypoint for the image.
    *
    * @param {string[]} entrypointCommands - The commands to set as the entrypoint.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
    *  .debianSlim('3.12')
    *  .entrypoint(['/bin/bash'])
    */
-  entrypoint(entrypointCommands: string[]): Image {
+  entrypoint(entrypointCommands: string[]): this {
     if (!Array.isArray(entrypointCommands) || !entrypointCommands.every((x) => typeof x === 'string')) {
       throw new Error('entrypoint_commands must be a list of strings')
     }
 
-    const argsStr = entrypointCommands.map((arg) => `"${arg}"`).join(', ')
-    this._dockerfile += `ENTRYPOINT [${argsStr}]\n`
+    this.steps.push((s) => {
+      const argsStr = entrypointCommands.map((arg) => `"${arg}"`).join(', ')
+      return {
+        ...s,
+        dockerfile: [...s.dockerfile, `ENTRYPOINT [${argsStr}]`],
+      }
+    })
 
     return this
   }
@@ -350,20 +476,25 @@ export class Image {
    * Sets the default command for the image.
    *
    * @param {string[]} cmd - The command to set as the default command.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
    *  .debianSlim('3.12')
    *  .cmd(['/bin/bash'])
    */
-  cmd(cmd: string[]): Image {
+  cmd(cmd: string[]): this {
     if (!Array.isArray(cmd) || !cmd.every((x) => typeof x === 'string')) {
       throw new Error('Image CMD must be a list of strings')
     }
 
-    const cmdStr = cmd.map((arg) => `"${arg}"`).join(', ')
-    this._dockerfile += `CMD [${cmdStr}]\n`
+    this.steps.push((s) => {
+      const cmdStr = cmd.map((arg) => `"${arg}"`).join(', ')
+      return {
+        ...s,
+        dockerfile: [...s.dockerfile, `CMD [${cmdStr}]`],
+      }
+    })
 
     return this
   }
@@ -373,15 +504,15 @@ export class Image {
    *
    * @param {string | string[]} dockerfileCommands - The commands to add to the Dockerfile.
    * @param {string} contextDir - The path to the context directory.
-   * @returns {Image} The Image instance.
+   * @returns {this} The ImageBuilder instance.
    *
    * @example
    * const image = Image
    *  .debianSlim('3.12')
    *  .dockerfileCommands(['RUN echo "Hello, world!"'])
    */
-  dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image {
-    return this.queueAsyncOperation(async () => {
+  dockerfileCommands(dockerfileCommands: string[], contextDir?: string): this {
+    this.steps.push(async (s) => {
       if (contextDir) {
         const importErrorPrefix = '"dockerfileCommands" is not supported: '
         const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
@@ -393,7 +524,8 @@ export class Image {
         }
       }
 
-      for (const [contextPath, originalPath] of await Image.extractCopySources(
+      const newContextList: Context[] = []
+      for (const [contextPath, originalPath] of await ImageBuilder.extractCopySources(
         dockerfileCommands.join('\n'),
         contextDir || '',
       )) {
@@ -404,25 +536,30 @@ export class Image {
           // eslint-disable-next-line no-useless-escape
           archiveBasePath = archiveBasePath.replace(/^[\/\\]+/, '')
         }
-        this._contextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
+        newContextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
       }
 
-      this._dockerfile += dockerfileCommands.join('\n') + '\n'
+      return {
+        ...s,
+        contextList: [...s.contextList, ...newContextList],
+        dockerfile: [...s.dockerfile, ...dockerfileCommands],
+      }
     })
+    return this
   }
 
   /**
-   * Creates an Image from an existing Dockerfile.
+   * Creates an ImageBuilder from an existing Dockerfile.
    *
    * @param {string} path - The path to the Dockerfile.
-   * @returns {Image} The Image instance.
+   * @returns {ImageBuilder} The ImageBuilder instance.
    *
    * @example
-   * const image = Image.fromDockerfile('Dockerfile')
+   * const image = await Image.fromDockerfile('Dockerfile')
    */
-  static fromDockerfile(path: string): Image {
-    const img = new Image()
-    return img.queueAsyncOperation(async () => {
+  static fromDockerfile(path: string): ImageBuilder {
+    const img = new ImageBuilder({ dockerfile: [], contextList: [] })
+    img.steps.push(async (s) => {
       const importErrorPrefix = '"fromDockerfile" is not supported: '
       const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
       const fs = await dynamicImport('fs', importErrorPrefix)
@@ -434,12 +571,11 @@ export class Image {
 
       const dockerfileContent = fs.readFileSync(expandedPath, 'utf-8')
 
-      img._dockerfile = dockerfileContent
-
       // Remove dockerfile filename from path to get the path prefix
       const pathPrefix = pathe.dirname(expandedPath) + pathe.sep
 
-      for (const [contextPath, originalPath] of await Image.extractCopySources(dockerfileContent, pathPrefix)) {
+      const newContextList: Context[] = []
+      for (const [contextPath, originalPath] of await ImageBuilder.extractCopySources(dockerfileContent, pathPrefix)) {
         let archiveBasePath = contextPath
         if (!originalPath.startsWith(pathPrefix)) {
           // Remove the path prefix from the context path to get the archive path
@@ -448,38 +584,45 @@ export class Image {
           // eslint-disable-next-line no-useless-escape
           archiveBasePath = archiveBasePath.replace(/^[\/\\]+/, '')
         }
-        img._contextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
+        newContextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
+      }
+
+      return {
+        ...s,
+        dockerfile: dockerfileContent.split('\n').filter((line) => line.trim()),
+        contextList: [...s.contextList, ...newContextList],
       }
     })
-  }
-
-  /**
-   * Creates an Image from an existing base image.
-   *
-   * @param {string} image - The base image to use.
-   * @returns {Image} The Image instance.
-   *
-   * @example
-   * const image = Image.base('python:3.12-slim-bookworm')
-   */
-  static base(image: string): Image {
-    const img = new Image()
-    img._dockerfile = `FROM ${image}\n`
     return img
   }
 
   /**
-   * Creates a Debian slim image based on the official Python Docker image.
+   * Creates an ImageBuilder from an existing base image.
    *
-   * @param {string} pythonVersion - The Python version to use.
-   * @returns {Image} The Image instance.
+   * @param {string} image - The base image to use.
+   * @returns {ImageBuilder} The ImageBuilder instance.
    *
    * @example
-   * const image = Image.debianSlim('3.12')
+   * const image = await Image.base('python:3.12-slim-bookworm')
    */
-  static debianSlim(pythonVersion?: SupportedPythonSeries): Image {
-    const version = Image.processPythonVersion(pythonVersion)
-    const img = new Image()
+  static base(image: string): ImageBuilder {
+    return new ImageBuilder({
+      dockerfile: [`FROM ${image}`],
+      contextList: [],
+    })
+  }
+
+  /**
+   * Creates an ImageBuilder with a Debian slim base image.
+   *
+   * @param {string} pythonVersion - The Python version to use.
+   * @returns {ImageBuilder} The ImageBuilder instance.
+   *
+   * @example
+   * const image = await Image.debianSlim('3.12')
+   */
+  static debianSlim(pythonVersion?: SupportedPythonSeries): ImageBuilder {
+    const version = ImageBuilder.processPythonVersion(pythonVersion)
 
     const commands = [
       `FROM python:${version}-slim-bookworm`,
@@ -487,12 +630,13 @@ export class Image {
       'RUN apt-get install -y gcc gfortran build-essential',
       'RUN pip install --upgrade pip',
       // Set debian front-end to non-interactive to avoid users getting stuck with input prompts.
-
       "RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections",
     ]
 
-    img._dockerfile = commands.join('\n') + '\n'
-    return img
+    return new ImageBuilder({
+      dockerfile: commands,
+      contextList: [],
+    })
   }
 
   /**

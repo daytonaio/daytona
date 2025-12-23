@@ -14,7 +14,7 @@ async function main() {
   fs.writeFileSync(localFilePath, localFileContent)
 
   // Create a Python image with common data science packages
-  const image = Image.debianSlim('3.12')
+  const image = await Image.debianSlim('3.12')
     .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
     .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace')
     .workdir('/home/daytona/workspace')
