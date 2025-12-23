@@ -88,3 +88,49 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
 
   return result
 }
+
+/**
+ * Checks if the Dockerfile content contains any FROM images that may require registry credentials.
+ * This includes:
+ * - Private registry images (e.g., 'myregistry.com/image', 'registry:5000/image')
+ * - Private Docker Hub images (e.g., 'username/my-private-image')
+ *
+ * @param dockerfileContent - The full Dockerfile content as a string
+ * @returns true if any FROM image may require credentials, false otherwise
+ *
+ * Example:
+ * - FROM node:18 -> false (public Docker Hub library image)
+ * - FROM username/my-image:0.0.1 -> true (private Docker Hub image)
+ * - FROM myregistry.com/myimage:latest -> true (private registry)
+ * - FROM registry:5000/test/image -> true (private registry)
+ */
+export function checkDockerfileHasRegistryPrefix(dockerfileContent: string): boolean {
+  const lines = dockerfileContent.split('\n')
+
+  // Regex to match FROM statements
+  const fromRegex = /^\s*FROM\s+(?:--[a-z-]+=[^\s]+\s+)*([^\s]+)(?:\s+AS\s+[^\s]+)?/i
+
+  for (const line of lines) {
+    // Remove inline comments (everything after #)
+    const lineWithoutComment = line.split('#')[0]
+    const trimmedLine = lineWithoutComment.trim()
+
+    // Skip empty lines and comment-only lines
+    if (!trimmedLine) {
+      continue
+    }
+
+    const match = fromRegex.exec(trimmedLine)
+    if (match && match[1]) {
+      const imageName = match[1].trim()
+
+      // Check if image has a path component (contains '/')
+      // This covers both private registries and private Docker Hub images (namespace/image)
+      if (imageName.includes('/')) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
