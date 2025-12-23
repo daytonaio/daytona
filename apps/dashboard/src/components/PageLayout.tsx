@@ -55,7 +55,7 @@ function PageContent({
   return (
     <>
       <PageBanner>
-        <BannerStack />
+        <BannerStack bannerClassName={cn({ 'max-w-5xl mx-auto': size === 'default' })} />
       </PageBanner>
       <main
         className={cn(
