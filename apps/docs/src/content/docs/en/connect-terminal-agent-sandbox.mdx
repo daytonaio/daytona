@@ -5,7 +5,6 @@ description: Step-by-step guide to building an autonomous coding agent using Cla
 
 import { Image } from 'astro:assets'
 
-import claudeCodingAgentDemo from '../../../assets/docs/images/connect-terminal-agent-sandbox-demo.gif'
 import claudeCodingAgentResult from '../../../assets/docs/images/connect-terminal-agent-sandbox-result.gif'
 
 This guide demonstrates how to run an autonomous coding agent based on [Claude Code](https://code.claude.com/docs/en/overview) inside a Daytona sandbox environment. The agent uses the [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) to follow user prompts.
@@ -23,12 +22,55 @@ You interact with the main program via a command line chat interface. The progra
 <details>
   <summary>Click to view example workflow</summary>
   <div>
-    <Image
-      src={claudeCodingAgentDemo}
-      alt="CLI chat session with Claude coding agent"
-      width={600}
-      style={{ maxWidth: '100%', height: 'auto', margin: '1rem 0' }}
-    />
+    ```
+$ npm run start                                   174s
+Creating sandbox...
+Installing Agent SDK...
+Initializing Agent SDK...
+Press Ctrl+C at any time to exit.
+User: Build a Zelda-like game where I can move around the screen and talk to famous programmers
+Thinking...
+I'll build a Zelda-like game for you! This will be a fun project with player movement and NPC interactions with famous programmers.
+🔨 Write
+🔨 Write
+Now let me start a simple HTTP server to host the game:
+🔨 Bash
+Perfect! I've created a Zelda-like game called "Programmer's Quest" for you! 🎮
+
+## Game Features:
+
+✨ Zelda-style gameplay:
+- Top-down 2D view with classic retro aesthetics
+- Player character with sword and shield
+- Grid-based movement system
+- Environmental obstacles (trees and rocks)
+
+👥 Famous Programmers as NPCs:
+1. Linus Torvalds - Creator of Linux
+2. Grace Hopper - COBOL pioneer and Admiral
+3. Alan Turing - Father of computer science
+4. Ada Lovelace - First computer programmer
+5. Dennis Ritchie - Creator of C and UNIX
+
+🎮 Controls:
+- Arrow Keys or WASD - Move your character
+- SPACE - Talk to NPCs when you're near them
+
+🌟 Gameplay:
+- Explore the grassy map and find all 5 legendary programmers
+- Each NPC has multiple quotes that cycle when you talk to them
+- NPCs glow when you're near them
+- Dialog boxes appear with their famous quotes
+- Track your progress in the HUD
+
+## Play Now:
+🎯 [Click here to play the game!](https://80-8e2c4d23-212a-4f1e-bb6c-abfa71aeed3a.proxy.daytona.works)
+
+The game features smooth movement, collision detection with trees and rocks, and an immersive dialog system. Try to find and talk to all 5 famous programmers to learn their wisdom! Each has 3 different quotes that cycle as you keep talking to them.
+
+Enjoy your adventure! 🗡️✨
+User:
+```
   </div>
 </details>
 
