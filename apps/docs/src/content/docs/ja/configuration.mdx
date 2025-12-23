@@ -4,71 +4,85 @@ title: 構成
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-## 環境変数を設定する
+## 設定方法 \{#configuration-methods\}
 
-Daytona で認証するには API キーが必要です。API キーは Daytona プラットフォームから取得できます。
+Daytona SDK では、優先度の高い順に、環境を設定する次の方法をサポートしています:
 
-1. [Daytona Dashboard](https://app.daytona.io/dashboard/) にアクセスします。
-2. API Keys を開きます。
-3. **`Create Key`** ボタンをクリックします。
-4. **`.env`** ファイルで **`DAYTONA_API_KEY`** 環境変数を設定し、API キーを追加します。
-5. **`.env`** ファイルで **`DAYTONA_API_URL`** 環境変数を設定し、Daytona の API URL を指定します。
+1. [**コード内での設定**](#configuration-in-code)
+2. [**環境変数**](#environment-variables)
+3. [**.env ファイル**](#env-file)
+4. [**デフォルト値**](#default-values)
 
-## 構成オプション
+## コードでの設定 \{#configuration-in-code\}
 
-Daytona SDK では、Python と TypeScript で `DaytonaConfig` クラスを使用して設定を行えます。`DaytonaConfig` クラスは次のパラメータを受け取ります。
+Daytona SDK では、Python と TypeScript の `DaytonaConfig` クラスを使って設定を行うことができます。`DaytonaConfig` クラスは次のパラメータを受け取ります:
 
-- `api_key`: Daytona の APIキー
-- `api_url`: Daytona の API の URL
-- `target`: サンドボックスを作成する Daytona のターゲット（リージョン）
+* `api_key`: Daytona の [API キー](/docs/api-keys)
+* `api_url`: Daytona API の URL
+* `target`: サンドボックスを作成する Daytona のターゲット
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import DaytonaConfig
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import DaytonaConfig
 
-config = DaytonaConfig(
-    api_key="your-api-key",
-    api_url="your-api-url",
-    target="us"
-)
+    config = DaytonaConfig(
+        api_key="your-api-key",
+        api_url="your-api-url",
+        target="us"
+    )
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { DaytonaConfig } from '@daytonaio/sdk';
+    ```
+  </TabItem>
 
-const config: DaytonaConfig = {
-    apiKey: "your-api-key",          
-    apiUrl: "your-api-url",     
-    target: "us"                  
-};
-```
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { DaytonaConfig } from '@daytonaio/sdk';
 
-</TabItem>
+    const config: DaytonaConfig = {
+        apiKey: "your-api-key",          
+        apiUrl: "your-api-url",     
+        target: "us"                  
+    };
+    ```
+  </TabItem>
 </Tabs>
 
-## 環境変数
+## 環境変数 \{#environment-variables\}
 
-Daytona SDK は設定に環境変数を利用できます。SDK は次の環境変数を自動的に参照します：
+Daytona SDK は設定に環境変数を利用できます。SDK は以下の環境変数を自動的に参照します:
 
-| Variable              | Description                                | Optional |
-| --------------------- | ------------------------------------------ | -------- |
-| **`DAYTONA_API_KEY`** | Daytona の APIキー。                        |          |
-| **`DAYTONA_API_URL`** | Daytona API の URL。                        | Yes      |
-| **`DAYTONA_TARGET`**  | サンドボックスを作成する Daytona のターゲット（ターゲット（リージョン））。 | Yes      |
+| 変数                   | 説明                                      | 任意     |
+| --------------------- | ----------------------------------------- | -------- |
+| **`DAYTONA_API_KEY`** | Daytona の API キー。                     | いいえ   |
+| **`DAYTONA_API_URL`** | Daytona API の URL。                      | はい     |
+| **`DAYTONA_TARGET`**  | サンドボックスを作成する対象の Daytona。 | はい     |
 
-### 環境変数の設定
+シェルで環境変数を設定します:
 
-Daytona SDK は環境変数から設定を読み込みます。以下の方法で設定できます。
+<Tabs syncKey="shell">
+  <TabItem label="Bash/Zsh" icon="seti:shell">
+    ```bash
+    export DAYTONA_API_KEY=your-api-key
+    export DAYTONA_API_URL=https://your-api-url
+    export DAYTONA_TARGET=us
+    ```
+  </TabItem>
 
-- [**`.env`** ファイルを使用](#using-a-env-file)
-- [シェル環境を使用](#using-shell-environment)
+  <TabItem label="Windows PowerShell" icon="seti:powershell">
+    ```bash
+    $env:DAYTONA_API_KEY="your-api-key"
+    $env:DAYTONA_API_URL="https://your-api-url"
+    $env:DAYTONA_TARGET="us"
+    ```
+  </TabItem>
+</Tabs>
 
-#### **`.env`** ファイルを使用
+これらの環境変数は `.env` ファイルでも設定できます。
 
-プロジェクトのルートディレクトリに `.env` ファイルを作成します：
+## .env ファイル \{#env-file\}
+
+プロジェクトのルートディレクトリに `.env` ファイルを作成します。
 
 ```bash
 DAYTONA_API_KEY=your-api-key
@@ -76,34 +90,13 @@ DAYTONA_API_URL=https://your-api-url
 DAYTONA_TARGET=us
 ```
 
-- `DAYTONA_API_KEY`: Daytona の APIキー。
-- `DAYTONA_API_URL`: Daytona API の URL。
-- `DAYTONA_TARGET`: サンドボックスを作成する Daytona のターゲット（ターゲット（リージョン））。
+SDK は初期化時にこれらの値を自動的に読み込みます。
 
-#### シェル環境を使用
+## デフォルト値 \{#default-values\}
 
-シェルで環境変数を設定します：
+設定がない場合、Daytona SDK は組み込みの既定値を使用します。
 
-<Tabs syncKey="shell">
-<TabItem label="Bash/Zsh" icon="seti:shell">
-```bash
-export DAYTONA_API_KEY=your-api-key
-export DAYTONA_API_URL=https://your-api-url
-```
-</TabItem>
-<TabItem label="Windows PowerShell" icon="seti:powershell">
-```bash
-$env:DAYTONA_API_KEY="your-api-key"
-$env:DAYTONA_API_URL="https://your-api-url"
-```
-</TabItem>
-</Tabs>
-
-## 設定の優先順位
-
-SDK は設定に対して次の優先順位（高い順）を適用します:
-
-1. コード内で明示的に指定された設定
-2. 環境変数
-3. 設定ファイル
-4. デフォルト値
+| オプション | 既定値                           |
+|------------|----------------------------------|
+| API URL    | https://app.daytona.io/api       |
+| ターゲット | 組織のデフォルトリージョン       |
