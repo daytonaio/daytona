@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, LessThan, Not, Repository } from 'typeorm'
+import { In, IsNull, LessThan, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -38,6 +38,9 @@ import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotService } from '../services/snapshot.service'
+import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { BackupState } from '../enums/backup-state.enum'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -60,6 +63,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
+    @InjectRepository(Sandbox)
+    private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly runnerService: RunnerService,
@@ -408,6 +413,103 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       snapshotRunner.state = SnapshotRunnerState.READY
       await this.snapshotRunnerRepository.save(snapshotRunner)
       return
+    }
+  }
+
+  // Moves stopped sandboxes' backups to another runner to prepare reassignment
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'migrate-draining-runner-snapshots', waitForCompletion: true })
+  @LogExecution('migrate-draining-runner-snapshots')
+  @WithInstrumentation()
+  private async handleMigrateDrainingRunnerSnapshots() {
+    const lockKey = 'migrate-draining-runner-snapshots'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const drainingRunners = await this.runnerRepository.find({
+        where: {
+          isDraining: true,
+        },
+      })
+
+      this.logger.debug(`Checking ${drainingRunners.length} draining runners for snapshot migration`)
+
+      await Promise.allSettled(
+        drainingRunners.map(async (runner) => {
+          try {
+            const sandboxes = await this.sandboxRepository.find({
+              where: {
+                runnerId: runner.id,
+                state: SandboxState.STOPPED,
+                desiredState: SandboxDesiredState.STOPPED,
+                backupState: BackupState.COMPLETED,
+                backupSnapshot: Not(IsNull()),
+              },
+              take: 100,
+            })
+
+            this.logger.debug(
+              `Found ${sandboxes.length} eligible sandboxes on draining runner ${runner.id} for snapshot migration`,
+            )
+
+            await Promise.allSettled(
+              sandboxes.map(async (sandbox) => {
+                const sandboxLockKey = `draining-runner-snapshot-migration:${sandbox.id}`
+                const hasSandboxLock = await this.redisLockProvider.lock(sandboxLockKey, 3600)
+                if (!hasSandboxLock) {
+                  return
+                }
+
+                try {
+                  // Get an available runner in the same region with the same class
+                  const targetRunner = await this.runnerService.getRandomAvailableRunner({
+                    regions: [sandbox.region],
+                    sandboxClass: sandbox.class,
+                    excludedRunnerIds: [runner.id],
+                  })
+
+                  // Check if snapshot runner entry already exists
+                  const existingEntry = await this.runnerService.getSnapshotRunner(
+                    targetRunner.id,
+                    sandbox.backupSnapshot,
+                  )
+                  if (existingEntry) {
+                    this.logger.debug(
+                      `Snapshot runner entry already exists for runner ${targetRunner.id} and snapshot ${sandbox.backupSnapshot}`,
+                    )
+                    // Do not unlock to avoid duplicates
+                    return
+                  }
+
+                  // Create snapshot runner entry on the target runner
+                  await this.runnerService.createSnapshotRunnerEntry(targetRunner.id, sandbox.backupSnapshot)
+                  this.snapshotService.pullSnapshotToRunner(sandbox.backupSnapshot, targetRunner)
+
+                  this.logger.log(
+                    `Created snapshot runner entry for sandbox ${sandbox.id} backup ${sandbox.backupSnapshot} on runner ${targetRunner.id} (migrating from draining runner ${runner.id})`,
+                  )
+                  await this.redisLockProvider.unlock(sandboxLockKey)
+                } catch (e) {
+                  if (e instanceof BadRequestError && e.message === 'No available runners') {
+                    this.logger.warn(
+                      `No available runners found in region ${sandbox.region} for sandbox ${sandbox.id} snapshot migration`,
+                    )
+                  } else {
+                    this.logger.error(`Error migrating snapshot for sandbox ${sandbox.id}`, e)
+                  }
+                  await this.redisLockProvider.unlock(sandboxLockKey)
+                }
+              }),
+            )
+          } catch (e) {
+            this.logger.error(`Error processing draining runner ${runner.id} for snapshot migration`, e)
+          }
+        }),
+      )
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
