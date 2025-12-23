@@ -27,7 +27,6 @@ import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvit
 import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { addHours, formatRelative } from 'date-fns'
 import {
   BookOpen,
   Box,
@@ -48,17 +47,14 @@ import {
   SquareUserRound,
   Sun,
   TextSearch,
-  TriangleAlert,
   Users,
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
-import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { ScrollArea } from './ui/scroll-area'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -280,67 +276,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       </SidebarContent>
       <SidebarFooter className="pb-4">
         <SidebarMenu>
-          {selectedOrganization?.suspended && (
-            <SidebarMenuItem key="suspended">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Card className="w-full m-0 p-0 mb-4 cursor-pointer border-red-600 bg-red-100/80 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                      <CardHeader className="py-2 pl-2">
-                        <CardTitle className="text-sm flex items-center gap-2">
-                          <TriangleAlert className="w-4 h-4 flex-shrink-0" />
-                          <div className="overflow-hidden">
-                            Organization suspended
-                            {selectedOrganization.suspensionReason && (
-                              <div className="text-xs text-muted-foreground text-ellipsis overflow-hidden">
-                                ({selectedOrganization.suspensionReason})
-                              </div>
-                            )}
-                          </div>
-                        </CardTitle>
-                      </CardHeader>
-                    </Card>
-                  </TooltipTrigger>
-                  <TooltipContent className="mb-2 flex flex-col gap-2 max-w-[400px]" side="right">
-                    <p>
-                      <strong>Organization suspended</strong>
-                      <br />
-                      Starting and creating sandboxes is disabled.
-                    </p>
-                    {selectedOrganization.suspensionReason && (
-                      <p>
-                        <strong>Suspension reason:</strong> <br />
-                        {selectedOrganization.suspensionReason}
-                      </p>
-                    )}
-                    {selectedOrganization.suspendedAt && (
-                      <p>
-                        <strong>Suspended at:</strong> <br />
-                        {new Date(selectedOrganization.suspendedAt).toLocaleString('en-US', {
-                          timeZone: 'UTC',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        })}
-                        <br />
-                        Started sandboxes will be stopped{' '}
-                        {formatRelative(
-                          addHours(
-                            new Date(selectedOrganization.suspendedAt),
-                            selectedOrganization.suspensionCleanupGracePeriodHours,
-                          ),
-                          new Date(selectedOrganization.suspendedAt),
-                        )}
-                      </p>
-                    )}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </SidebarMenuItem>
-          )}
           <SidebarMenuItem key="theme-toggle">
             <SidebarMenuButton
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
