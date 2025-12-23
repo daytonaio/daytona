@@ -40,6 +40,7 @@ import (
 
 type ApiServerConfig struct {
 	ApiPort     int
+	ApiToken    string
 	TLSCertFile string
 	TLSKeyFile  string
 	EnableTLS   bool
@@ -48,6 +49,7 @@ type ApiServerConfig struct {
 func NewApiServer(config ApiServerConfig) *ApiServer {
 	return &ApiServer{
 		apiPort:     config.ApiPort,
+		apiToken:    config.ApiToken,
 		tlsCertFile: config.TLSCertFile,
 		tlsKeyFile:  config.TLSKeyFile,
 		enableTLS:   config.EnableTLS,
@@ -56,6 +58,7 @@ func NewApiServer(config ApiServerConfig) *ApiServer {
 
 type ApiServer struct {
 	apiPort     int
+	apiToken    string
 	tlsCertFile string
 	tlsKeyFile  string
 	enableTLS   bool
@@ -94,7 +97,7 @@ func (a *ApiServer) Start() error {
 	}
 
 	protected := a.router.Group("/")
-	protected.Use(middlewares.AuthMiddleware())
+	protected.Use(middlewares.AuthMiddleware(a.apiToken))
 
 	metricsController := public.Group("/metrics")
 	{

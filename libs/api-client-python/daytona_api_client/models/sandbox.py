@@ -60,8 +60,9 @@ class Sandbox(BaseModel):
     updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the sandbox", alias="updatedAt")
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion")
+    runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", alias="runnerId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "runnerId"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -179,7 +180,8 @@ class Sandbox(BaseModel):
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
             "class": obj.get("class"),
-            "daemonVersion": obj.get("daemonVersion")
+            "daemonVersion": obj.get("daemonVersion"),
+            "runnerId": obj.get("runnerId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

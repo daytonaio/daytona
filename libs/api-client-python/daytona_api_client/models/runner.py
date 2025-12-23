@@ -30,14 +30,14 @@ class Runner(BaseModel):
     Runner
     """ # noqa: E501
     id: StrictStr = Field(description="The ID of the runner")
-    domain: StrictStr = Field(description="The domain of the runner")
-    api_url: StrictStr = Field(description="The API URL of the runner", alias="apiUrl")
-    proxy_url: StrictStr = Field(description="The proxy URL of the runner", alias="proxyUrl")
+    domain: Optional[StrictStr] = Field(default=None, description="The domain of the runner")
+    api_url: Optional[StrictStr] = Field(default=None, description="The API URL of the runner", alias="apiUrl")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="The proxy URL of the runner", alias="proxyUrl")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU capacity of the runner")
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GiB")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB")
-    gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU capacity of the runner")
-    gpu_type: StrictStr = Field(description="The type of GPU", alias="gpuType")
+    gpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The GPU capacity of the runner")
+    gpu_type: Optional[StrictStr] = Field(default=None, description="The type of GPU", alias="gpuType")
     var_class: SandboxClass = Field(description="The class of the runner", alias="class")
     current_cpu_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU usage percentage", alias="currentCpuUsagePercentage")
     current_memory_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current RAM usage percentage", alias="currentMemoryUsagePercentage")
@@ -54,9 +54,11 @@ class Runner(BaseModel):
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
-    version: StrictStr = Field(description="The version of the runner")
+    version: StrictStr = Field(description="The version of the runner (deprecated in favor of apiVersion)")
+    api_version: StrictStr = Field(description="The api version of the runner", alias="apiVersion")
+    app_version: Optional[StrictStr] = Field(default=None, description="The app version of the runner", alias="appVersion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "appVersion"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -141,7 +143,9 @@ class Runner(BaseModel):
             "unschedulable": obj.get("unschedulable"),
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
-            "version": obj.get("version")
+            "version": obj.get("version"),
+            "apiVersion": obj.get("apiVersion"),
+            "appVersion": obj.get("appVersion")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

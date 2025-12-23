@@ -254,6 +254,14 @@ export class SandboxDto {
   @IsOptional()
   daemonVersion?: string
 
+  @ApiPropertyOptional({
+    description: 'The runner ID of the sandbox',
+    example: 'runner123',
+    required: false,
+  })
+  @IsOptional()
+  runnerId?: string
+
   static fromSandbox(sandbox: Sandbox): SandboxDto {
     return {
       id: sandbox.id,
@@ -289,9 +297,11 @@ export class SandboxDto {
             contextHashes: sandbox.buildInfo.contextHashes,
             createdAt: sandbox.buildInfo.createdAt,
             updatedAt: sandbox.buildInfo.updatedAt,
+            snapshotRef: sandbox.buildInfo.snapshotRef,
           }
         : undefined,
       daemonVersion: sandbox.daemonVersion,
+      runnerId: sandbox.runnerId,
     }
   }
 

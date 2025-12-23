@@ -75,6 +75,7 @@ import { SkipThrottle } from '@nestjs/throttler'
 import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
 import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 import { ToolboxProxyUrlDto } from '../dto/toolbox-proxy-url.dto'
+import { UrlDto } from '../../common/dto/url.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -866,6 +867,8 @@ export class SandboxController {
   @ApiOperation({
     summary: 'Get build logs',
     operationId: 'getBuildLogs',
+    deprecated: true,
+    description: 'This endpoint is deprecated. Use `getBuildLogsUrl` instead.',
   })
   @ApiParam({
     name: 'sandboxIdOrName',
@@ -905,6 +908,10 @@ export class SandboxController {
       throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} not found`)
     }
 
+    if (!runner.apiUrl) {
+      throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} has no API URL`)
+    }
+
     const logProxy = new LogProxy(
       runner.apiUrl,
       sandbox.buildInfo.snapshotRef.split(':')[0],
@@ -915,6 +922,28 @@ export class SandboxController {
       next,
     )
     return logProxy.create()
+  }
+
+  @Get(':sandboxIdOrName/build-logs-url')
+  @ApiOperation({
+    summary: 'Get build logs URL',
+    operationId: 'getBuildLogsUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Build logs URL',
+    type: UrlDto,
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getBuildLogsUrl(@Param('sandboxIdOrName') sandboxIdOrName: string): Promise<UrlDto> {
+    const buildLogsUrl = await this.sandboxService.getBuildLogsUrl(sandboxIdOrName)
+
+    return new UrlDto(buildLogsUrl)
   }
 
   @Post(':sandboxIdOrName/ssh-access')

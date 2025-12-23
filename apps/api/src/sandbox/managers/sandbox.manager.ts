@@ -16,7 +16,6 @@ import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
 
-import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
@@ -39,6 +38,7 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -115,7 +115,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-                this.syncInstanceState(sandbox.id)
+
+                this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -224,7 +225,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               try {
                 sandbox.applyDesiredDestroyedState()
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-                this.syncInstanceState(sandbox.id)
+
+                this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -450,33 +452,43 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @OnEvent(SandboxEvents.ARCHIVED)
+  @OnAsyncEvent({
+    event: SandboxEvents.ARCHIVED,
+  })
   @TrackJobExecution()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.DESTROYED)
+  @OnAsyncEvent({
+    event: SandboxEvents.DESTROYED,
+  })
   @TrackJobExecution()
   private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.STARTED)
+  @OnAsyncEvent({
+    event: SandboxEvents.STARTED,
+  })
   @TrackJobExecution()
   private async handleSandboxStartedEvent(event: SandboxStartedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.STOPPED)
+  @OnAsyncEvent({
+    event: SandboxEvents.STOPPED,
+  })
   @TrackJobExecution()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.CREATED)
+  @OnAsyncEvent({
+    event: SandboxEvents.CREATED,
+  })
   @TrackJobExecution()
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 }

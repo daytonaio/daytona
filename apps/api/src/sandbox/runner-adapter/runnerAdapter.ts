@@ -6,7 +6,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Runner } from '../entities/runner.entity'
 import { ModuleRef } from '@nestjs/core'
-import { RunnerAdapterLegacy } from './runnerAdapter.legacy'
+import { RunnerAdapterV0 } from './runnerAdapter.v0'
+import { RunnerAdapterV2 } from './runnerAdapter.v2'
 import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -15,6 +16,7 @@ import { BackupState } from '../enums/backup-state.enum'
 
 export interface RunnerSandboxInfo {
   state: SandboxState
+  daemonVersion?: string
   backupState?: BackupState
   backupErrorReason?: string
 }
@@ -39,6 +41,11 @@ export interface RunnerMetrics {
 
 export interface RunnerInfo {
   metrics?: RunnerMetrics
+  appVersion?: string
+}
+
+export interface StartSandboxResponse {
+  daemonVersion: string
 }
 
 export interface RunnerAdapter {
@@ -54,8 +61,8 @@ export interface RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
-  ): Promise<void>
-  startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void>
+  ): Promise<StartSandboxResponse | undefined>
+  startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<StartSandboxResponse | undefined>
   stopSandbox(sandboxId: string): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>
   removeDestroyedSandbox(sandboxId: string): Promise<void>
@@ -76,11 +83,8 @@ export interface RunnerAdapter {
     destinationRef?: string,
   ): Promise<void>
   tagImage(sourceImage: string, targetImage: string): Promise<void>
-  snapshotExists(snapshotName: string): Promise<boolean>
+  snapshotExists(snapshotRef: string): Promise<boolean>
   getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>
-  getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string>
-
-  getSandboxDaemonVersion(sandboxId: string): Promise<string>
 
   updateNetworkSettings(
     sandboxId: string,
@@ -97,14 +101,19 @@ export class RunnerAdapterFactory {
   constructor(private moduleRef: ModuleRef) {}
 
   async create(runner: Runner): Promise<RunnerAdapter> {
-    switch (runner.version) {
+    switch (runner.apiVersion) {
       case '0': {
-        const adapter = await this.moduleRef.create(RunnerAdapterLegacy)
+        const adapter = await this.moduleRef.create(RunnerAdapterV0)
+        await adapter.init(runner)
+        return adapter
+      }
+      case '2': {
+        const adapter = await this.moduleRef.create(RunnerAdapterV2)
         await adapter.init(runner)
         return adapter
       }
       default:
-        throw new Error(`Unsupported runner version: ${runner.version}`)
+        throw new Error(`Unsupported runner version: ${runner.apiVersion}`)
     }
   }
 }

@@ -21,9 +21,6 @@ var _ MappedNullable = &CreateRunner{}
 
 // CreateRunner struct for CreateRunner
 type CreateRunner struct {
-	Domain               string `json:"domain"`
-	ApiUrl               string `json:"apiUrl"`
-	ProxyUrl             string `json:"proxyUrl"`
 	RegionId             string `json:"regionId"`
 	Name                 string `json:"name"`
 	AdditionalProperties map[string]interface{}
@@ -35,11 +32,8 @@ type _CreateRunner CreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateRunner(domain string, apiUrl string, proxyUrl string, regionId string, name string) *CreateRunner {
+func NewCreateRunner(regionId string, name string) *CreateRunner {
 	this := CreateRunner{}
-	this.Domain = domain
-	this.ApiUrl = apiUrl
-	this.ProxyUrl = proxyUrl
 	this.RegionId = regionId
 	this.Name = name
 	return &this
@@ -51,78 +45,6 @@ func NewCreateRunner(domain string, apiUrl string, proxyUrl string, regionId str
 func NewCreateRunnerWithDefaults() *CreateRunner {
 	this := CreateRunner{}
 	return &this
-}
-
-// GetDomain returns the Domain field value
-func (o *CreateRunner) GetDomain() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Domain
-}
-
-// GetDomainOk returns a tuple with the Domain field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetDomainOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Domain, true
-}
-
-// SetDomain sets field value
-func (o *CreateRunner) SetDomain(v string) {
-	o.Domain = v
-}
-
-// GetApiUrl returns the ApiUrl field value
-func (o *CreateRunner) GetApiUrl() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ApiUrl
-}
-
-// GetApiUrlOk returns a tuple with the ApiUrl field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetApiUrlOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ApiUrl, true
-}
-
-// SetApiUrl sets field value
-func (o *CreateRunner) SetApiUrl(v string) {
-	o.ApiUrl = v
-}
-
-// GetProxyUrl returns the ProxyUrl field value
-func (o *CreateRunner) GetProxyUrl() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ProxyUrl
-}
-
-// GetProxyUrlOk returns a tuple with the ProxyUrl field value
-// and a boolean to check if the value has been set.
-func (o *CreateRunner) GetProxyUrlOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ProxyUrl, true
-}
-
-// SetProxyUrl sets field value
-func (o *CreateRunner) SetProxyUrl(v string) {
-	o.ProxyUrl = v
 }
 
 // GetRegionId returns the RegionId field value
@@ -183,9 +105,6 @@ func (o CreateRunner) MarshalJSON() ([]byte, error) {
 
 func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["domain"] = o.Domain
-	toSerialize["apiUrl"] = o.ApiUrl
-	toSerialize["proxyUrl"] = o.ProxyUrl
 	toSerialize["regionId"] = o.RegionId
 	toSerialize["name"] = o.Name
 
@@ -201,9 +120,6 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"domain",
-		"apiUrl",
-		"proxyUrl",
 		"regionId",
 		"name",
 	}
@@ -235,9 +151,6 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "domain")
-		delete(additionalProperties, "apiUrl")
-		delete(additionalProperties, "proxyUrl")
 		delete(additionalProperties, "regionId")
 		delete(additionalProperties, "name")
 		o.AdditionalProperties = additionalProperties

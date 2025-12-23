@@ -71,6 +71,7 @@ import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { SnapshotService } from './snapshot.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -268,7 +269,7 @@ export class SandboxService {
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: SandboxState.STOPPED })
 
-    this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
     return sandbox
   }
 
@@ -478,6 +479,9 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -680,6 +684,9 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -1071,7 +1078,7 @@ export class SandboxService {
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-    this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     return sandbox
   }
 
@@ -1082,56 +1089,60 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
-      return sandbox
-    }
-
-    if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      // Allow start of stopped | archived and archiving | archived sandboxes
-      if (
-        sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
-        (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
-      ) {
-        throw new SandboxError('State change in progress')
-      }
-    }
-
-    if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
-      throw new SandboxError('Sandbox is not in valid state')
-    }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-      await this.validateOrganizationQuotas(
-        organization,
-        sandbox.region,
-        sandbox.cpu,
-        sandbox.mem,
-        sandbox.disk,
-        sandbox.id,
-      )
-
-    if (pendingCpuIncremented) {
-      pendingCpuIncrement = sandbox.cpu
-    }
-    if (pendingMemoryIncremented) {
-      pendingMemoryIncrement = sandbox.mem
-    }
-    if (pendingDiskIncremented) {
-      pendingDiskIncrement = sandbox.disk
-    }
-
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.STARTED
-    sandbox.authToken = nanoid(32).toLocaleLowerCase()
-
     try {
+      if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
+        return sandbox
+      }
+
+      if (String(sandbox.state) !== String(sandbox.desiredState)) {
+        // Allow start of stopped | archived and archiving | archived sandboxes
+        if (
+          sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
+          (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
+        ) {
+          throw new SandboxError('State change in progress')
+        }
+      }
+
+      if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
+        throw new SandboxError('Sandbox is not in valid state')
+      }
+
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(
+          organization,
+          sandbox.region,
+          sandbox.cpu,
+          sandbox.mem,
+          sandbox.disk,
+          sandbox.id,
+        )
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = sandbox.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = sandbox.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sandbox.disk
+      }
+
+      sandbox.pending = true
+      sandbox.desiredState = SandboxDesiredState.STARTED
+      sandbox.authToken = nanoid(32).toLocaleLowerCase()
+
       await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+      await this.eventEmitter.emitAsync(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
+
+      return sandbox
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -1142,10 +1153,6 @@ export class SandboxService {
       )
       throw error
     }
-
-    this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
-
-    return sandbox
   }
 
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
@@ -1174,9 +1181,9 @@ export class SandboxService {
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
     if (sandbox.autoDeleteInterval === 0) {
-      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     } else {
-      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
     }
     return sandbox
   }
@@ -1215,6 +1222,26 @@ export class SandboxService {
     }
 
     return this.configService.getOrThrow('proxy.toolboxUrl')
+  }
+
+  async getBuildLogsUrl(sandboxIdOrName: string): Promise<string> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName)
+
+    if (!sandbox.buildInfo?.snapshotRef) {
+      throw new NotFoundException(`Sandbox ${sandboxIdOrName} has no build info`)
+    }
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+
+    if (!region) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} not found`)
+    }
+
+    if (!region.proxyUrl) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} has no proxy URL`)
+    }
+
+    return region.proxyUrl + '/sandboxes/' + sandbox.id + '/build-logs'
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, regionIdOrName?: string): Promise<string> {

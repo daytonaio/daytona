@@ -8,7 +8,7 @@ import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
 import { Injectable, Logger } from '@nestjs/common'
-import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo } from './runnerAdapter'
+import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo, StartSandboxResponse } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import {
   Configuration,
@@ -36,8 +36,8 @@ const isDebugEnabled = process.env.DEBUG === 'true'
 const RETRYABLE_NETWORK_ERROR_CODES = ['ECONNRESET', 'ETIMEDOUT']
 
 @Injectable()
-export class RunnerAdapterLegacy implements RunnerAdapter {
-  private readonly logger = new Logger(RunnerAdapterLegacy.name)
+export class RunnerAdapterV0 implements RunnerAdapter {
+  private readonly logger = new Logger(RunnerAdapterV0.name)
   private sandboxApiClient: SandboxApi
   private snapshotApiClient: SnapshotsApi
   private runnerApiClient: DefaultApi
@@ -153,6 +153,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     const response = await this.runnerApiClient.runnerInfo({ signal })
     return {
       metrics: response.data.metrics,
+      appVersion: response.data.appVersion,
     }
   }
 
@@ -162,6 +163,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       state: this.convertSandboxState(sandboxInfo.data.state),
       backupState: this.convertBackupState(sandboxInfo.data.backupState),
       backupErrorReason: sandboxInfo.data.backupError,
+      daemonVersion: sandboxInfo.data.daemonVersion,
     }
   }
 
@@ -170,7 +172,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
-  ): Promise<void> {
+  ): Promise<StartSandboxResponse | undefined> {
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
@@ -200,11 +202,30 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       metadata: metadata,
     }
 
-    await this.sandboxApiClient.create(createSandboxDto)
+    const response = await this.sandboxApiClient.create(createSandboxDto)
+
+    if (!response?.data?.daemonVersion) {
+      return undefined
+    }
+
+    return {
+      daemonVersion: response.data.daemonVersion,
+    }
   }
 
-  async startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void> {
-    await this.sandboxApiClient.start(sandboxId, metadata)
+  async startSandbox(
+    sandboxId: string,
+    metadata?: { [key: string]: string },
+  ): Promise<StartSandboxResponse | undefined> {
+    const response = await this.sandboxApiClient.start(sandboxId, metadata)
+
+    if (!response?.data?.daemonVersion) {
+      return undefined
+    }
+
+    return {
+      daemonVersion: response.data.daemonVersion,
+    }
   }
 
   async stopSandbox(sandboxId: string): Promise<void> {
@@ -330,11 +351,6 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       cmd: response.data.cmd,
       hash: response.data.hash,
     }
-  }
-
-  async getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string> {
-    const response = await this.snapshotApiClient.getBuildLogs(snapshotRef, follow)
-    return response.data
   }
 
   async getSandboxDaemonVersion(sandboxId: string): Promise<string> {

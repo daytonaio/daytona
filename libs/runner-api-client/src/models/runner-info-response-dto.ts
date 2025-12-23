@@ -24,14 +24,14 @@ import type { RunnerMetrics } from './runner-metrics'
 export interface RunnerInfoResponseDTO {
   /**
    *
+   * @type {string}
+   * @memberof RunnerInfoResponseDTO
+   */
+  appVersion?: string
+  /**
+   *
    * @type {RunnerMetrics}
    * @memberof RunnerInfoResponseDTO
    */
   metrics?: RunnerMetrics
-  /**
-   *
-   * @type {string}
-   * @memberof RunnerInfoResponseDTO
-   */
-  version?: string
 }

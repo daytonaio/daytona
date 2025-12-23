@@ -80,7 +80,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/StartSandboxResponse"
                         }
                     },
                     "400": {
@@ -563,6 +563,7 @@ const docTemplate = `{
             "post": {
                 "description": "Start sandbox",
                 "produces": [
+                    "application/json",
                     "application/json"
                 ],
                 "tags": [
@@ -591,7 +592,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Sandbox started",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/StartSandboxResponse"
                         }
                     },
                     "400": {
@@ -1503,11 +1504,11 @@ const docTemplate = `{
         "RunnerInfoResponseDTO": {
             "type": "object",
             "properties": {
+                "appVersion": {
+                    "type": "string"
+                },
                 "metrics": {
                     "$ref": "#/definitions/RunnerMetrics"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },
@@ -1545,6 +1546,9 @@ const docTemplate = `{
                 },
                 "backupState": {
                     "$ref": "#/definitions/enums.BackupState"
+                },
+                "daemonVersion": {
+                    "type": "string"
                 },
                 "state": {
                     "$ref": "#/definitions/enums.SandboxState"
@@ -1596,6 +1600,14 @@ const docTemplate = `{
                 "sizeGB": {
                     "type": "number",
                     "example": 0.13
+                }
+            }
+        },
+        "StartSandboxResponse": {
+            "type": "object",
+            "properties": {
+                "daemonVersion": {
+                    "type": "string"
                 }
             }
         },

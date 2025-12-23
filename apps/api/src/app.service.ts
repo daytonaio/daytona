@@ -18,6 +18,7 @@ import { RegionService } from './region/services/region.service'
 import { RunnerService } from './sandbox/services/runner.service'
 import { RunnerAdapterFactory } from './sandbox/runner-adapter/runnerAdapter'
 import { RegionType } from './region/enums/region-type.enum'
+import { RunnerState } from './sandbox/enums/runner-state.enum'
 
 export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
@@ -52,13 +53,18 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.eventEmitterReadinessWatcher.waitUntilReady()
 
     await this.initializeDefaultRegion()
-    await this.initializeDefaultRunner()
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeBackupRegistry()
     await this.initializeInternalRegistry()
     await this.initializeBackupRegistry()
-    await this.initializeDefaultSnapshot()
+
+    // Default runner init is not awaited because v2 runners depend on the API to be ready
+    this.initializeDefaultRunner()
+      .then(() => this.initializeDefaultSnapshot())
+      .catch((error) => {
+        this.logger.error('Error initializing default runner', error)
+      })
   }
 
   private async stopAllCronJobs(): Promise<void> {
@@ -90,50 +96,73 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
   }
 
   private async initializeDefaultRunner(): Promise<void> {
-    if (!this.configService.get('defaultRunner.domain')) {
+    if (!this.configService.get('defaultRunner.name')) {
       return
     }
 
-    const existingRunner = await this.runnerService.findOneByDomain(
-      this.configService.getOrThrow('defaultRunner.domain'),
-    )
-    if (existingRunner) {
+    const defaultRegionId = this.configService.getOrThrow('defaultRegion.id')
+
+    const existingRunners = await this.runnerService.findAllByRegion(defaultRegionId)
+    if (
+      existingRunners.length > 0 &&
+      existingRunners.some((r) => r.name === this.configService.get('defaultRunner.name'))
+    ) {
       return
     }
 
-    this.logger.log(`Creating default runner: ${this.configService.getOrThrow('defaultRunner.domain')}`)
+    this.logger.log(`Creating default runner: ${this.configService.getOrThrow('defaultRunner.name')}`)
 
-    const { runner } = await this.runnerService.create({
-      apiUrl: this.configService.getOrThrow('defaultRunner.apiUrl'),
-      proxyUrl: this.configService.getOrThrow('defaultRunner.proxyUrl'),
-      apiKey: this.configService.getOrThrow('defaultRunner.apiKey'),
-      cpu: this.configService.getOrThrow('defaultRunner.cpu'),
-      memoryGiB: this.configService.getOrThrow('defaultRunner.memory'),
-      diskGiB: this.configService.getOrThrow('defaultRunner.disk'),
-      gpu: this.configService.getOrThrow('defaultRunner.gpu'),
-      gpuType: this.configService.getOrThrow('defaultRunner.gpuType'),
-      regionId: this.configService.getOrThrow('defaultRegion.id'),
-      class: this.configService.getOrThrow('defaultRunner.class'),
-      domain: this.configService.getOrThrow('defaultRunner.domain'),
-      version: this.configService.get('defaultRunner.version') || '0',
-      name: this.configService.getOrThrow('defaultRunner.name'),
-    })
+    const runnerVersion = this.configService.get('defaultRunner.apiVersion') || '0'
 
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    if (runnerVersion === '0') {
+      const { runner } = await this.runnerService.create({
+        apiUrl: this.configService.getOrThrow('defaultRunner.apiUrl'),
+        proxyUrl: this.configService.getOrThrow('defaultRunner.proxyUrl'),
+        apiKey: this.configService.getOrThrow('defaultRunner.apiKey'),
+        cpu: this.configService.getOrThrow('defaultRunner.cpu'),
+        memoryGiB: this.configService.getOrThrow('defaultRunner.memory'),
+        diskGiB: this.configService.getOrThrow('defaultRunner.disk'),
+        regionId: this.configService.getOrThrow('defaultRegion.id'),
+        domain: this.configService.getOrThrow('defaultRunner.domain'),
+        apiVersion: runnerVersion,
+        name: this.configService.getOrThrow('defaultRunner.name'),
+      })
 
-    this.logger.log(`Waiting for runner ${runner.domain} to be healthy...`)
-    for (let i = 0; i < 30; i++) {
-      try {
-        await runnerAdapter.healthCheck()
-        this.logger.log(`Runner ${runner.domain} is healthy`)
-        break
-      } catch {
-        // ignore
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+      this.logger.log(`Waiting for runner ${runner.name} to be healthy...`)
+      for (let i = 0; i < 30; i++) {
+        try {
+          await runnerAdapter.healthCheck()
+          this.logger.log(`Runner ${runner.name} is healthy`)
+          return
+        } catch {
+          // ignore
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000))
       }
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+    } else if (runnerVersion === '2') {
+      const { runner } = await this.runnerService.create({
+        apiKey: this.configService.getOrThrow('defaultRunner.apiKey'),
+        regionId: this.configService.getOrThrow('defaultRegion.id'),
+        apiVersion: runnerVersion,
+        name: this.configService.getOrThrow('defaultRunner.name'),
+      })
+
+      this.logger.log(`Waiting for runner ${runner.name} to be healthy...`)
+      for (let i = 0; i < 30; i++) {
+        const { state } = await this.runnerService.findOneFullOrFail(runner.id)
+        if (state === RunnerState.READY) {
+          this.logger.log(`Runner ${runner.name} is healthy`)
+          return
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
     }
 
-    this.logger.log(`Default runner created successfully: ${this.configService.getOrThrow('defaultRunner.domain')}`)
+    this.logger.log(
+      `Default runner ${this.configService.getOrThrow('defaultRunner.name')} created successfully but didn't pass health check`,
+    )
   }
 
   private async initializeAdminUser(): Promise<void> {

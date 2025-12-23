@@ -79,7 +79,9 @@ type Sandbox struct {
 	// Deprecated
 	Class *string `json:"class,omitempty"`
 	// The version of the daemon running in the sandbox
-	DaemonVersion        *string `json:"daemonVersion,omitempty"`
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// The runner ID of the sandbox
+	RunnerId             *string `json:"runnerId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -942,6 +944,38 @@ func (o *Sandbox) SetDaemonVersion(v string) {
 	o.DaemonVersion = &v
 }
 
+// GetRunnerId returns the RunnerId field value if set, zero value otherwise.
+func (o *Sandbox) GetRunnerId() string {
+	if o == nil || IsNil(o.RunnerId) {
+		var ret string
+		return ret
+	}
+	return *o.RunnerId
+}
+
+// GetRunnerIdOk returns a tuple with the RunnerId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetRunnerIdOk() (*string, bool) {
+	if o == nil || IsNil(o.RunnerId) {
+		return nil, false
+	}
+	return o.RunnerId, true
+}
+
+// HasRunnerId returns a boolean if a field has been set.
+func (o *Sandbox) HasRunnerId() bool {
+	if o != nil && !IsNil(o.RunnerId) {
+		return true
+	}
+
+	return false
+}
+
+// SetRunnerId gets a reference to the given string and assigns it to the RunnerId field.
+func (o *Sandbox) SetRunnerId(v string) {
+	o.RunnerId = &v
+}
+
 func (o Sandbox) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -1012,6 +1046,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.DaemonVersion) {
 		toSerialize["daemonVersion"] = o.DaemonVersion
+	}
+	if !IsNil(o.RunnerId) {
+		toSerialize["runnerId"] = o.RunnerId
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -1097,6 +1134,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
+		delete(additionalProperties, "runnerId")
 		o.AdditionalProperties = additionalProperties
 	}
 

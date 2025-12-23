@@ -1435,8 +1435,8 @@ class OrganizationsApi:
     @validate_call
     async def create_region(
         self,
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
         create_region: CreateRegion,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1453,10 +1453,10 @@ class OrganizationsApi:
         """Create a new region
 
 
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
         :param create_region: (required)
         :type create_region: CreateRegion
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1480,8 +1480,8 @@ class OrganizationsApi:
         """ # noqa: E501
 
         _param = self._create_region_serialize(
-            organization_id=organization_id,
             create_region=create_region,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1505,8 +1505,8 @@ class OrganizationsApi:
     @validate_call
     async def create_region_with_http_info(
         self,
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
         create_region: CreateRegion,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1523,10 +1523,10 @@ class OrganizationsApi:
         """Create a new region
 
 
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
         :param create_region: (required)
         :type create_region: CreateRegion
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1550,8 +1550,8 @@ class OrganizationsApi:
         """ # noqa: E501
 
         _param = self._create_region_serialize(
-            organization_id=organization_id,
             create_region=create_region,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1575,8 +1575,8 @@ class OrganizationsApi:
     @validate_call
     async def create_region_without_preload_content(
         self,
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
         create_region: CreateRegion,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1593,10 +1593,10 @@ class OrganizationsApi:
         """Create a new region
 
 
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
         :param create_region: (required)
         :type create_region: CreateRegion
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1620,8 +1620,8 @@ class OrganizationsApi:
         """ # noqa: E501
 
         _param = self._create_region_serialize(
-            organization_id=organization_id,
             create_region=create_region,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1640,8 +1640,8 @@ class OrganizationsApi:
 
     def _create_region_serialize(
         self,
-        organization_id,
         create_region,
+        x_daytona_organization_id,
         _request_auth,
         _content_type,
         _headers,
@@ -1663,10 +1663,10 @@ class OrganizationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if organization_id is not None:
-            _path_params['organizationId'] = organization_id
         # process the query parameters
         # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if create_region is not None:
@@ -1703,7 +1703,7 @@ class OrganizationsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/organizations/{organizationId}/regions',
+            resource_path='/regions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2761,7 +2761,7 @@ class OrganizationsApi:
     async def delete_region(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2780,8 +2780,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2806,7 +2806,7 @@ class OrganizationsApi:
 
         _param = self._delete_region_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2831,7 +2831,7 @@ class OrganizationsApi:
     async def delete_region_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2850,8 +2850,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2876,7 +2876,7 @@ class OrganizationsApi:
 
         _param = self._delete_region_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2901,7 +2901,7 @@ class OrganizationsApi:
     async def delete_region_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2920,8 +2920,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2946,7 +2946,7 @@ class OrganizationsApi:
 
         _param = self._delete_region_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2966,7 +2966,7 @@ class OrganizationsApi:
     def _delete_region_serialize(
         self,
         id,
-        organization_id,
+        x_daytona_organization_id,
         _request_auth,
         _content_type,
         _headers,
@@ -2990,10 +2990,10 @@ class OrganizationsApi:
         # process the path parameters
         if id is not None:
             _path_params['id'] = id
-        if organization_id is not None:
-            _path_params['organizationId'] = organization_id
         # process the query parameters
         # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
@@ -3008,7 +3008,7 @@ class OrganizationsApi:
 
         return self.api_client.param_serialize(
             method='DELETE',
-            resource_path='/organizations/{organizationId}/regions/{id}',
+            resource_path='/regions/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4049,7 +4049,7 @@ class OrganizationsApi:
     async def get_region_by_id(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4068,8 +4068,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -4094,7 +4094,7 @@ class OrganizationsApi:
 
         _param = self._get_region_by_id_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4119,7 +4119,7 @@ class OrganizationsApi:
     async def get_region_by_id_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4138,8 +4138,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -4164,7 +4164,7 @@ class OrganizationsApi:
 
         _param = self._get_region_by_id_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4189,7 +4189,7 @@ class OrganizationsApi:
     async def get_region_by_id_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4208,8 +4208,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -4234,7 +4234,7 @@ class OrganizationsApi:
 
         _param = self._get_region_by_id_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4254,7 +4254,7 @@ class OrganizationsApi:
     def _get_region_by_id_serialize(
         self,
         id,
-        organization_id,
+        x_daytona_organization_id,
         _request_auth,
         _content_type,
         _headers,
@@ -4278,10 +4278,10 @@ class OrganizationsApi:
         # process the path parameters
         if id is not None:
             _path_params['id'] = id
-        if organization_id is not None:
-            _path_params['organizationId'] = organization_id
         # process the query parameters
         # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
@@ -4303,7 +4303,7 @@ class OrganizationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/organizations/{organizationId}/regions/{id}',
+            resource_path='/regions/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4833,7 +4833,7 @@ class OrganizationsApi:
     @validate_call
     async def list_available_regions(
         self,
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4850,8 +4850,8 @@ class OrganizationsApi:
         """List all available regions for the organization
 
 
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -4875,7 +4875,7 @@ class OrganizationsApi:
         """ # noqa: E501
 
         _param = self._list_available_regions_serialize(
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4899,7 +4899,7 @@ class OrganizationsApi:
     @validate_call
     async def list_available_regions_with_http_info(
         self,
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4916,8 +4916,8 @@ class OrganizationsApi:
         """List all available regions for the organization
 
 
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -4941,7 +4941,7 @@ class OrganizationsApi:
         """ # noqa: E501
 
         _param = self._list_available_regions_serialize(
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -4965,7 +4965,7 @@ class OrganizationsApi:
     @validate_call
     async def list_available_regions_without_preload_content(
         self,
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4982,8 +4982,8 @@ class OrganizationsApi:
         """List all available regions for the organization
 
 
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -5007,7 +5007,7 @@ class OrganizationsApi:
         """ # noqa: E501
 
         _param = self._list_available_regions_serialize(
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -5026,7 +5026,7 @@ class OrganizationsApi:
 
     def _list_available_regions_serialize(
         self,
-        organization_id,
+        x_daytona_organization_id,
         _request_auth,
         _content_type,
         _headers,
@@ -5048,10 +5048,10 @@ class OrganizationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if organization_id is not None:
-            _path_params['organizationId'] = organization_id
         # process the query parameters
         # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
@@ -5073,7 +5073,7 @@ class OrganizationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/organizations/{organizationId}/regions',
+            resource_path='/regions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6358,7 +6358,7 @@ class OrganizationsApi:
     async def regenerate_proxy_api_key(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6377,8 +6377,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6403,7 +6403,7 @@ class OrganizationsApi:
 
         _param = self._regenerate_proxy_api_key_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6428,7 +6428,7 @@ class OrganizationsApi:
     async def regenerate_proxy_api_key_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6447,8 +6447,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6473,7 +6473,7 @@ class OrganizationsApi:
 
         _param = self._regenerate_proxy_api_key_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6498,7 +6498,7 @@ class OrganizationsApi:
     async def regenerate_proxy_api_key_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6517,8 +6517,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6543,7 +6543,7 @@ class OrganizationsApi:
 
         _param = self._regenerate_proxy_api_key_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6563,7 +6563,7 @@ class OrganizationsApi:
     def _regenerate_proxy_api_key_serialize(
         self,
         id,
-        organization_id,
+        x_daytona_organization_id,
         _request_auth,
         _content_type,
         _headers,
@@ -6587,10 +6587,10 @@ class OrganizationsApi:
         # process the path parameters
         if id is not None:
             _path_params['id'] = id
-        if organization_id is not None:
-            _path_params['organizationId'] = organization_id
         # process the query parameters
         # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
@@ -6612,7 +6612,7 @@ class OrganizationsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/organizations/{organizationId}/regions/{id}/regenerate-proxy-api-key',
+            resource_path='/regions/{id}/regenerate-proxy-api-key',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6632,7 +6632,7 @@ class OrganizationsApi:
     async def regenerate_ssh_gateway_api_key(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6651,8 +6651,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6677,7 +6677,7 @@ class OrganizationsApi:
 
         _param = self._regenerate_ssh_gateway_api_key_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6702,7 +6702,7 @@ class OrganizationsApi:
     async def regenerate_ssh_gateway_api_key_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6721,8 +6721,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6747,7 +6747,7 @@ class OrganizationsApi:
 
         _param = self._regenerate_ssh_gateway_api_key_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6772,7 +6772,7 @@ class OrganizationsApi:
     async def regenerate_ssh_gateway_api_key_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Region ID")],
-        organization_id: Annotated[StrictStr, Field(description="Organization ID")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6791,8 +6791,8 @@ class OrganizationsApi:
 
         :param id: Region ID (required)
         :type id: str
-        :param organization_id: Organization ID (required)
-        :type organization_id: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6817,7 +6817,7 @@ class OrganizationsApi:
 
         _param = self._regenerate_ssh_gateway_api_key_serialize(
             id=id,
-            organization_id=organization_id,
+            x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6837,7 +6837,7 @@ class OrganizationsApi:
     def _regenerate_ssh_gateway_api_key_serialize(
         self,
         id,
-        organization_id,
+        x_daytona_organization_id,
         _request_auth,
         _content_type,
         _headers,
@@ -6861,10 +6861,10 @@ class OrganizationsApi:
         # process the path parameters
         if id is not None:
             _path_params['id'] = id
-        if organization_id is not None:
-            _path_params['organizationId'] = organization_id
         # process the query parameters
         # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
@@ -6886,7 +6886,7 @@ class OrganizationsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/organizations/{organizationId}/regions/{id}/regenerate-ssh-gateway-api-key',
+            resource_path='/regions/{id}/regenerate-ssh-gateway-api-key',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

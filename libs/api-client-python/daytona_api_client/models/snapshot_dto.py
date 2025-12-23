@@ -48,8 +48,10 @@ class SnapshotDto(BaseModel):
     last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
     region_ids: Optional[List[StrictStr]] = Field(default=None, description="IDs of regions where the snapshot is available", alias="regionIds")
+    initial_runner_id: Optional[StrictStr] = Field(default=None, description="The initial runner ID of the snapshot", alias="initialRunnerId")
+    ref: Optional[StrictStr] = Field(default=None, description="The snapshot reference")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -149,7 +151,9 @@ class SnapshotDto(BaseModel):
             "updatedAt": obj.get("updatedAt"),
             "lastUsedAt": obj.get("lastUsedAt"),
             "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-            "regionIds": obj.get("regionIds")
+            "regionIds": obj.get("regionIds"),
+            "initialRunnerId": obj.get("initialRunnerId"),
+            "ref": obj.get("ref")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

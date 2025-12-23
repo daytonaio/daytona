@@ -29,7 +29,9 @@ type BuildInfo struct {
 	// The creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 	// The last update timestamp
-	UpdatedAt            time.Time `json:"updatedAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The snapshot reference
+	SnapshotRef          string `json:"snapshotRef"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -39,10 +41,11 @@ type _BuildInfo BuildInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBuildInfo(createdAt time.Time, updatedAt time.Time) *BuildInfo {
+func NewBuildInfo(createdAt time.Time, updatedAt time.Time, snapshotRef string) *BuildInfo {
 	this := BuildInfo{}
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
+	this.SnapshotRef = snapshotRef
 	return &this
 }
 
@@ -166,6 +169,30 @@ func (o *BuildInfo) SetUpdatedAt(v time.Time) {
 	o.UpdatedAt = v
 }
 
+// GetSnapshotRef returns the SnapshotRef field value
+func (o *BuildInfo) GetSnapshotRef() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.SnapshotRef
+}
+
+// GetSnapshotRefOk returns a tuple with the SnapshotRef field value
+// and a boolean to check if the value has been set.
+func (o *BuildInfo) GetSnapshotRefOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.SnapshotRef, true
+}
+
+// SetSnapshotRef sets field value
+func (o *BuildInfo) SetSnapshotRef(v string) {
+	o.SnapshotRef = v
+}
+
 func (o BuildInfo) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -184,6 +211,7 @@ func (o BuildInfo) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+	toSerialize["snapshotRef"] = o.SnapshotRef
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -199,6 +227,7 @@ func (o *BuildInfo) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"createdAt",
 		"updatedAt",
+		"snapshotRef",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -232,6 +261,7 @@ func (o *BuildInfo) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "contextHashes")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "snapshotRef")
 		o.AdditionalProperties = additionalProperties
 	}
 
