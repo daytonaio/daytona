@@ -51,7 +51,7 @@ import {
   TriangleAlert,
   Users,
 } from 'lucide-react'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
@@ -183,6 +183,14 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     signoutRedirect()
   }
 
+  const sidebarGroups: { label: string; items: SidebarItem[] }[] = useMemo(() => {
+    return [
+      { label: 'Sandboxes', items: sidebarItems },
+      { label: 'Settings', items: settingsItems },
+      { label: 'Billing', items: billingItems },
+    ].filter((group) => group.items.length > 0)
+  }, [sidebarItems, settingsItems, billingItems])
+
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarHeader>
@@ -203,79 +211,39 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       </SidebarHeader>
       <SidebarContent>
         <ScrollArea fade="shadow" className="overflow-auto flex-1">
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {sidebarItems.map((item) => (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname.startsWith(item.path)}
-                      className="text-sm"
-                      tooltip={item.label}
-                    >
-                      {item.onClick ? (
-                        <button onClick={() => item.onClick?.()}>
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </button>
-                      ) : (
-                        <Link to={item.path}>
-                          {item.icon}
-                          <span>{item.label}</span>
-                        </Link>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarSeparator />
-
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {settingsItems.map((item) => (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname.startsWith(item.path)}
-                      className="text-sm"
-                      tooltip={item.label}
-                    >
-                      <Link to={item.path}>
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarSeparator />
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {billingItems.map((item) => (
-                  <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname.startsWith(item.path)}
-                      className="text-sm"
-                      tooltip={item.label}
-                    >
-                      <Link to={item.path}>
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {sidebarGroups.map((group, i) => (
+            <React.Fragment key={group.label}>
+              {i > 0 && <SidebarSeparator />}
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {group.items.map((item) => (
+                      <SidebarMenuItem key={item.label}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathname.startsWith(item.path)}
+                          className="text-sm"
+                          tooltip={item.label}
+                        >
+                          {item.onClick ? (
+                            <button onClick={() => item.onClick?.()}>
+                              {item.icon}
+                              <span>{item.label}</span>
+                            </button>
+                          ) : (
+                            <Link to={item.path}>
+                              {item.icon}
+                              <span>{item.label}</span>
+                            </Link>
+                          )}
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </React.Fragment>
+          ))}
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter className="pb-4">
