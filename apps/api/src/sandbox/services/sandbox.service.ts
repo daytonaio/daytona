@@ -71,7 +71,6 @@ import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { SnapshotService } from './snapshot.service'
 import { RegionType } from '../../region/enums/region-type.enum'
-import { Transactional } from 'typeorm-transactional'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 
 const DEFAULT_CPU = 1
@@ -313,7 +312,6 @@ export class SandboxService {
     return sandbox
   }
 
-  @Transactional()
   async createFromSnapshot(
     createSandboxDto: CreateSandboxDto,
     organization: Organization,
@@ -568,7 +566,6 @@ export class SandboxService {
     return SandboxDto.fromSandbox(result)
   }
 
-  @Transactional()
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
@@ -1072,7 +1069,6 @@ export class SandboxService {
     }
   }
 
-  @Transactional()
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1086,7 +1082,6 @@ export class SandboxService {
     return sandbox
   }
 
-  @Transactional()
   async start(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
@@ -1160,7 +1155,6 @@ export class SandboxService {
     }
   }
 
-  @Transactional()
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 

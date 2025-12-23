@@ -48,7 +48,6 @@ import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { RunnerService } from './runner.service'
 import { RegionService } from '../../region/services/region.service'
-import { Transactional } from 'typeorm-transactional'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -134,7 +133,6 @@ export class SnapshotService {
       .getExists()
   }
 
-  @Transactional()
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     if (!organization.defaultRegionId) {
       throw new DefaultRegionRequiredException()
@@ -249,7 +247,6 @@ export class SnapshotService {
     }
   }
 
-  @Transactional()
   async createFromBuildInfo(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     if (!organization.defaultRegionId) {
       throw new DefaultRegionRequiredException()

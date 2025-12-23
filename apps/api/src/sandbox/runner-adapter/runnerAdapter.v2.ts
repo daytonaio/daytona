@@ -24,7 +24,6 @@ import {
   PullSnapshotRequestDTO,
   UpdateNetworkSettingsDTO,
 } from '@daytonaio/runner-api-client'
-import { Transactional } from 'typeorm-transactional'
 
 /**
  * RunnerAdapterV2 implements RunnerAdapter for v2 runners.
@@ -124,7 +123,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     }
   }
 
-  @Transactional()
   async createSandbox(
     sandbox: Sandbox,
     registry?: DockerRegistry,
@@ -175,7 +173,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     return undefined
   }
 
-  @Transactional()
   async startSandbox(
     sandboxId: string,
     metadata?: { [key: string]: string },
@@ -195,26 +192,22 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     return undefined
   }
 
-  @Transactional()
   async stopSandbox(sandboxId: string): Promise<void> {
     await this.jobService.createJob(null, JobType.STOP_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId)
 
     this.logger.debug(`Created STOP_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  @Transactional()
   async destroySandbox(sandboxId: string): Promise<void> {
     await this.jobService.createJob(null, JobType.DESTROY_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId)
 
     this.logger.debug(`Created DESTROY_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  @Transactional()
   async removeDestroyedSandbox(_sandboxId: string): Promise<void> {
     throw new Error('removeDestroyedSandbox is not supported for V2 runners')
   }
 
-  @Transactional()
   async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
     const payload: CreateBackupDTO = {
       snapshot: backupSnapshotName,
@@ -242,7 +235,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created CREATE_BACKUP job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
   }
 
-  @Transactional()
   async buildSnapshot(
     buildInfo: BuildInfo,
     organizationId?: string,
@@ -288,7 +280,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created BUILD_SNAPSHOT job for ${buildInfo.snapshotRef} on runner ${this.runner.id}`)
   }
 
-  @Transactional()
   async pullSnapshot(
     snapshotName: string,
     registry?: DockerRegistry,
@@ -333,19 +324,16 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created PULL_SNAPSHOT job for ${snapshotName} on runner ${this.runner.id}`)
   }
 
-  @Transactional()
   async removeSnapshot(snapshotName: string): Promise<void> {
     await this.jobService.createJob(null, JobType.REMOVE_SNAPSHOT, this.runner.id, ResourceType.SNAPSHOT, snapshotName)
 
     this.logger.debug(`Created REMOVE_SNAPSHOT job for ${snapshotName} on runner ${this.runner.id}`)
   }
 
-  @Transactional()
   async tagImage(_sourceImage: string, _targetImage: string): Promise<void> {
     throw new Error('tagImage is not supported for V2 runners')
   }
 
-  @Transactional()
   async snapshotExists(snapshotRef: string): Promise<boolean> {
     // Find the latest job for this snapshot on this runner
     // We need to check both ResourceType.SNAPSHOT (for PULL/REMOVE) and ResourceType.SANDBOX (for BUILD)
@@ -379,7 +367,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     return false
   }
 
-  @Transactional()
   async getSnapshotInfo(snapshotRef: string): Promise<RunnerSnapshotInfo> {
     const latestJob = await this.jobRepository.findOne({
       where: [
@@ -421,12 +408,10 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     }
   }
 
-  @Transactional()
   async getSandboxDaemonVersion(_sandboxId: string): Promise<string> {
     throw new Error('getSandboxDaemonVersion is not supported for V2 runners')
   }
 
-  @Transactional()
   async updateNetworkSettings(
     sandboxId: string,
     networkBlockAll?: boolean,

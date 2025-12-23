@@ -40,8 +40,6 @@ import { Redis } from 'ioredis'
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { RegionModule } from './region/region.module'
 import { AdminModule } from './admin/admin.module'
-import { addTransactionalDataSource } from 'typeorm-transactional'
-import { DataSource } from 'typeorm'
 
 @Module({
   imports: [
@@ -99,13 +97,6 @@ import { DataSource } from 'typeorm'
           },
           entitySkipConstructor: true,
         }
-      },
-      async dataSourceFactory(options) {
-        if (!options) {
-          throw new Error('Invalid options passed')
-        }
-
-        return addTransactionalDataSource(new DataSource(options))
       },
     }),
     ServeStaticModule.forRoot({

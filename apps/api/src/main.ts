@@ -27,7 +27,6 @@ import { Partitioners } from 'kafkajs'
 import { isApiEnabled, isWorkerEnabled } from './common/utils/app-mode'
 import cluster from 'node:cluster'
 import { Logger as PinoLogger, LoggerErrorInterceptor } from 'nestjs-pino'
-import { initializeTransactionalContext } from 'typeorm-transactional'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -40,7 +39,6 @@ async function bootstrap() {
   if (process.env.OTEL_ENABLED === 'true') {
     await otelSdk.start()
   }
-  initializeTransactionalContext()
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
     httpsOptions: httpsEnabled ? httpsOptions : undefined,

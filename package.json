@@ -186,7 +186,6 @@
     "tailwindcss-animate": "^1.0.7",
     "tar": "^6.2.0",
     "typeorm": "^0.3.20",
-    "typeorm-transactional": "^0.5.0",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.3",
     "vite-plugin-svgr": "^4.3.0",
