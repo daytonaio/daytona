@@ -115,6 +115,7 @@
   "sidebarconfig.integrations": "Guides",
   "sidebarconfig.langchainIntegrations": "LangChain",
   "sidebarconfig.inngestAgentKit": "AgentKit",
+  "sidebarconfig.claude": "Claude",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
 }
