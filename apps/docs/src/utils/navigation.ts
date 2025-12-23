@@ -24,6 +24,7 @@ export interface NavigationLink extends NavigationItem {
     [key: string]: any
   }
   external?: boolean
+  hideInSidebar?: boolean
 }
 
 export interface MainNavigationLink extends NavigationLink {
@@ -284,7 +285,23 @@ export function getSidebar(
     }))
   }
 
-  return [mainGroup, ...relatedGroups]
+  // Filter out links with hideInSidebar from main group
+  const filteredMainGroup = {
+    ...mainGroup,
+    entries: mainGroup.entries?.filter(
+      entry => entry.type !== 'link' || !(entry as NavigationLink).hideInSidebar
+    ),
+  }
+
+  // Filter out links with hideInSidebar from related groups
+  const filteredRelatedGroups = relatedGroups.map(group => ({
+    ...group,
+    entries: group.entries?.filter(
+      entry => entry.type !== 'link' || !(entry as NavigationLink).hideInSidebar
+    ),
+  }))
+
+  return [filteredMainGroup, ...filteredRelatedGroups]
 }
 
 export function getExploreMoreData(
