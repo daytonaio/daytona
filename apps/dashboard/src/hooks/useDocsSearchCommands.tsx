@@ -4,7 +4,7 @@
  */
 
 import {
-  Kbd,
+  CommandHighlight,
   useCommandPalette,
   useCommandPaletteActions,
   useRegisterCommands,
@@ -254,7 +254,9 @@ export function useDocsSearchCommands() {
 
       results.push({
         id: `sdk-${hit.objectID}`,
-        label: <ResultRow hit={hit} tag={<Kbd className="text-xs h-auto">{sdkLanguage}</Kbd>} />,
+        label: (
+          <ResultRow hit={hit} tag={<CommandHighlight className="text-xs h-auto">{sdkLanguage}</CommandHighlight>} />
+        ),
         value: `sdk ${hit.title} ${hit.description || ''} ${sdkLanguage}`,
         icon: <Code2 className="w-4 h-4" />,
         onSelect: () => handleSelect(hit),

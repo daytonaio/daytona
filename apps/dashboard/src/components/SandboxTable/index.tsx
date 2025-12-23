@@ -289,9 +289,9 @@ export function SandboxTable({
         <AnimatePresence>
           {hasSelection && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
+              initial={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
               animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
-              exit={{ scale: 0.9, opacity: 0, y: 56, x: '-50%' }}
+              exit={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
               className="bg-popover absolute bottom-5 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs"
             >
               <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-1 py-1 flex items-center justify-between gap-4">
