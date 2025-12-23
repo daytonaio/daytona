@@ -422,15 +422,6 @@ export const getSidebarConfig = (
             icon: 'chart.svg',
           },
         },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/claude-code-run-tasks-stream-logs-sandbox',
-            locale
-          ),
-          label: labels['sidebarconfig.claude'],
-          disablePagination: true,
-        },
       ],
     },
     {
@@ -478,7 +469,20 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/connect-terminal-agent-sandbox', locale),
+          href: localizePath(
+            '/docs/claude-agent-sdk-interactive-terminal-sandbox',
+            locale
+          ),
+          label: labels['sidebarconfig.claude'],
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/claude-code-run-tasks-stream-logs-sandbox',
+            locale
+          ),
           label: labels['sidebarconfig.claude'],
           disablePagination: true,
           hideInSidebar: true,
