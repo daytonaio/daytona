@@ -422,45 +422,6 @@ paths:
       tags:
         - sandbox
   /sandboxes/{sandboxId}:
-    delete:
-      description: Remove a sandbox that has been previously destroyed
-      operationId: RemoveDestroyed
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Sandbox removed
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Remove a destroyed sandbox
-      tags:
-        - sandbox
     get:
       description: Get sandbox info
       operationId: Info

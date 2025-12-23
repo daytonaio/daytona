@@ -58,9 +58,9 @@ func (d *DockerClient) exportImportContainer(ctx context.Context, containerId, i
 	log.Infof("Exporting container %s and importing as image %s...", containerId, imageName)
 
 	// First, inspect the container to get its configuration
-	containerInfo, err := d.apiClient.ContainerInspect(ctx, containerId)
+	containerInfo, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
-		return fmt.Errorf("failed to inspect container %s: %w", containerId, err)
+		return err
 	}
 
 	// Export the container

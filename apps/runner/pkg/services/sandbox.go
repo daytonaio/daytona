@@ -5,7 +5,9 @@ package services
 
 import (
 	"context"
+	"fmt"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
@@ -15,46 +17,55 @@ import (
 )
 
 type SandboxService struct {
-	statesCache *cache.StatesCache
-	docker      *docker.DockerClient
+	backupInfoCache *cache.BackupInfoCache
+	docker          *docker.DockerClient
 }
 
-func NewSandboxService(statesCache *cache.StatesCache, docker *docker.DockerClient) *SandboxService {
+func NewSandboxService(backupInfoCache *cache.BackupInfoCache, docker *docker.DockerClient) *SandboxService {
 	return &SandboxService{
-		statesCache: statesCache,
-		docker:      docker,
+		backupInfoCache: backupInfoCache,
+		docker:          docker,
 	}
 }
 
-func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId string) *models.CachedStates {
-	sandboxState, err := s.docker.DeduceSandboxState(ctx, sandboxId)
+func (s *SandboxService) GetSandboxInfo(ctx context.Context, sandboxId string) (*models.SandboxInfo, error) {
+	sandboxState, err := s.docker.GetSandboxState(ctx, sandboxId)
 	if err != nil {
-		log.Warnf("Failed to deduce sandbox %s state: %v", sandboxId, err)
-	}
-
-	s.statesCache.SetSandboxState(ctx, sandboxId, sandboxState)
-
-	data, err := s.statesCache.Get(ctx, sandboxId)
-	if err != nil {
-		return &models.CachedStates{
+		return &models.SandboxInfo{
 			SandboxState:      enums.SandboxStateUnknown,
 			BackupState:       enums.BackupStateNone,
 			BackupErrorReason: nil,
-		}
+		}, err
 	}
 
-	return data
-}
+	if sandboxState == enums.SandboxStateDestroyed {
+		log.Warnf("Sandbox returned DESTROYED without error for sandbox %s indicating that sandbox is in DEAD state", sandboxId)
 
-func (s *SandboxService) RemoveDestroyedSandbox(ctx context.Context, sandboxId string) error {
-	info := s.GetSandboxStatesInfo(ctx, sandboxId)
-
-	if info != nil && info.SandboxState != enums.SandboxStateDestroyed && info.SandboxState != enums.SandboxStateDestroying {
-		err := s.docker.Destroy(ctx, sandboxId)
+		err := s.backupInfoCache.Delete(ctx, sandboxId)
 		if err != nil {
-			return err
+			log.Warnf("Failed to delete backup info cache for destroyed sandbox %s: %v", sandboxId, err)
 		}
+
+		return &models.SandboxInfo{
+			SandboxState:      enums.SandboxStateUnknown,
+			BackupState:       enums.BackupStateNone,
+			BackupErrorReason: nil,
+		}, common_errors.NewNotFoundError(fmt.Errorf("sandbox %s not found", sandboxId))
 	}
 
-	return nil
+	backupInfo, err := s.backupInfoCache.Get(ctx, sandboxId)
+	if err != nil {
+		errReason := err.Error()
+		return &models.SandboxInfo{
+			SandboxState:      sandboxState,
+			BackupState:       enums.BackupStateNone,
+			BackupErrorReason: &errReason,
+		}, nil
+	}
+
+	return &models.SandboxInfo{
+		SandboxState:      sandboxState,
+		BackupState:       backupInfo.State,
+		BackupErrorReason: backupInfo.ErrReason,
+	}, nil
 }

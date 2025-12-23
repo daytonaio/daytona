@@ -8,14 +8,11 @@ import (
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
-	"github.com/daytonaio/runner/pkg/models/enums"
 
 	"github.com/docker/docker/api/types/container"
 )
 
 func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto dto.ResizeSandboxDTO) error {
-	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateResizing)
-
 	_, err := d.apiClient.ContainerUpdate(ctx, sandboxId, container.UpdateConfig{
 		Resources: container.Resources{
 			CPUQuota:   sandboxDto.Cpu * 100000, // Convert CPU cores to quota (1 core = 100000)
