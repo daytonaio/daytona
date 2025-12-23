@@ -460,7 +460,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
-            '/docs/claude-agent-sdk-connect-service-sandbox',
+            '/docs/claude-agent-sdk-interactive-terminal-sandbox',
             locale
           ),
           label: labels['sidebarconfig.claude'],
@@ -470,7 +470,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
-            '/docs/claude-agent-sdk-interactive-terminal-sandbox',
+            '/docs/claude-agent-sdk-connect-service-sandbox',
             locale
           ),
           label: labels['sidebarconfig.claude'],
