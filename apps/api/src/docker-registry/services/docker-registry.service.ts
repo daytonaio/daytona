@@ -16,7 +16,7 @@ import {
   IDockerRegistryProvider,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
-import { parseDockerImage } from '../../common/utils/docker-image.util'
+import { parseDockerImage, getBaseImagesFromDockerfileContent } from '../../common/utils/docker-image.util'
 import axios from 'axios'
 import type { AxiosRequestHeaders } from 'axios'
 import { AxiosHeaders } from 'axios'
@@ -802,6 +802,70 @@ export class DockerRegistryService {
       this.logger.error(`Exception when deleting image ${imageName}: ${error.message}`)
       throw error
     }
+  }
+
+  /**
+   * Gets source registries for building a Docker image from a Dockerfile
+   * Optimizes DB calls by only querying if images have registry prefixes
+   *
+   * @param dockerfileContent - The Dockerfile content
+   * @param organizationId - The organization ID
+   * @returns Array of source registries (private registries + default Docker Hub)
+   */
+  async getSourceRegistriesForDockerfile(dockerfileContent: string, organizationId: string): Promise<DockerRegistry[]> {
+    // Extract base images from the Dockerfile
+    const baseImages = getBaseImagesFromDockerfileContent(dockerfileContent)
+
+    // Optimization: Check if any images have a registry prefix (contain '/')
+    // If not, we can skip the DB call since all images are from Docker Hub
+    const hasPrivateRegistry = baseImages.some((image) => {
+      try {
+        const parsed = parseDockerImage(image)
+        return parsed.registry !== undefined
+      } catch {
+        return false
+      }
+    })
+
+    const sourceRegistries: DockerRegistry[] = []
+    const registryUrlSet = new Set<string>() // Track unique registries
+
+    // Only query DB if we have images with registry prefixes
+    if (hasPrivateRegistry) {
+      // Get all user's docker registries from the database
+      const userRegistries = await this.findAll(organizationId)
+
+      // Match images with user registries
+      for (const imageName of baseImages) {
+        try {
+          const parsedImage = parseDockerImage(imageName)
+
+          // If the image has a registry specified, try to match it with user's registries
+          if (parsedImage.registry) {
+            const matchedRegistry = userRegistries.find((reg) => {
+              const registryUrl = reg.url.replace(/^https?:\/\//, '')
+              return registryUrl === parsedImage.registry || registryUrl.startsWith(parsedImage.registry + '/')
+            })
+
+            if (matchedRegistry && !registryUrlSet.has(matchedRegistry.url)) {
+              sourceRegistries.push(matchedRegistry)
+              registryUrlSet.add(matchedRegistry.url)
+            }
+          }
+        } catch (error) {
+          // Log parsing errors but continue processing other images
+          this.logger.warn(`Failed to parse image name "${imageName}": ${error.message}`)
+        }
+      }
+    }
+
+    // Add default Docker Hub registry if not already included
+    const defaultDockerHubRegistry = await this.getDefaultDockerHubRegistry()
+    if (defaultDockerHubRegistry && !registryUrlSet.has(defaultDockerHubRegistry.url)) {
+      sourceRegistries.push(defaultDockerHubRegistry)
+    }
+
+    return sourceRegistries
   }
 }
 

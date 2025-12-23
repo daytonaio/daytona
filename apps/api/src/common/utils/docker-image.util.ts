@@ -88,3 +88,44 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
 
   return result
 }
+
+/**
+ * Extracts base images from a Dockerfile content
+ *
+ * @param dockerfileContent - The full Dockerfile content as a string
+ * @returns Array of image names from FROM statements
+ *
+ * Example:
+ * - FROM node:18 -> ['node:18']
+ * - FROM node:18 AS builder\nFROM alpine:3.14 -> ['node:18', 'alpine:3.14']
+ * - FROM myregistry.com/myimage:latest -> ['myregistry.com/myimage:latest']
+ */
+export function getBaseImagesFromDockerfileContent(dockerfileContent: string): string[] {
+  const images: string[] = []
+  const lines = dockerfileContent.split('\n')
+
+  // Regex to match FROM statements
+  const fromRegex = /^\s*FROM\s+(?:--[a-z-]+=[^\s]+\s+)*([^\s]+)(?:\s+AS\s+[^\s]+)?/i
+
+  for (const line of lines) {
+    // Remove inline comments (everything after #)
+    const lineWithoutComment = line.split('#')[0]
+    const trimmedLine = lineWithoutComment.trim()
+
+    // Skip empty lines and comment-only lines
+    if (!trimmedLine) {
+      continue
+    }
+
+    const match = fromRegex.exec(trimmedLine)
+    if (match && match[1]) {
+      const imageName = match[1].trim()
+      // Skip scratch images as they don't need registry access
+      if (imageName.toLowerCase() !== 'scratch') {
+        images.push(imageName)
+      }
+    }
+  }
+
+  return images
+}
