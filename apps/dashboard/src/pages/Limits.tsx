@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils'
 import type { RegionUsageOverview } from '@daytonaio/api-client'
 import { keepPreviousData } from '@tanstack/react-query'
 import { RefreshCcw } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
 import { UserProfileIdentity } from './LinkedAccounts'
@@ -178,8 +178,20 @@ export default function Limits() {
                     </div>
                   )
                 )}
+                <RateLimits
+                  title="Sandbox Limits"
+                  description="Resources limit per sandbox."
+                  className="border-t border-border"
+                  rateLimits={[
+                    { label: 'Compute', value: selectedOrganization?.maxCpuPerSandbox, unit: 'vCPU' },
+                    { label: 'Memory', value: selectedOrganization?.maxMemoryPerSandbox, unit: 'GiB' },
+                    { label: 'Storage', value: selectedOrganization?.maxDiskPerSandbox, unit: 'GiB' },
+                  ]}
+                />
 
                 <RateLimits
+                  title="Rate Limits"
+                  description="How many requests you can make per minute."
                   className="border-t border-border"
                   rateLimits={[
                     {
@@ -240,15 +252,22 @@ export default function Limits() {
   )
 }
 
+interface LimitItem {
+  value?: number | null
+  unit?: string
+  label: string
+}
+
 function RateLimits({
   rateLimits,
   className,
+  title,
+  description,
 }: {
-  rateLimits: {
-    value?: number | null
-    label: string
-  }[]
+  rateLimits: LimitItem[]
   className?: string
+  title: ReactNode
+  description: ReactNode
 }) {
   const isEmpty = rateLimits.every(({ value }) => !value)
   if (isEmpty) {
@@ -258,17 +277,19 @@ function RateLimits({
   return (
     <div className={cn('p-4 border-t border-border flex flex-col gap-4', className)}>
       <div className="flex flex-col gap-1">
-        <div className="text-foreground text-sm font-medium">Rate Limits</div>
-        <div className="text-muted-foreground text-sm">How many requests you can make per minute.</div>
+        <div className="text-foreground text-sm font-medium">{title}</div>
+        <div className="text-muted-foreground text-sm">{description}</div>
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {rateLimits.map(({ label, value }) => value && <RateLimitItem key={label} label={label} value={value} />)}
+        {rateLimits.map(
+          ({ label, value, unit }) => value && <RateLimitItem key={label} label={label} value={value} unit={unit} />,
+        )}
       </div>
     </div>
   )
 }
 
-function RateLimitItem({ label, value }: { label: string; value?: number | null }) {
+function RateLimitItem({ label, value, unit }: LimitItem) {
   if (!value) {
     return null
   }
@@ -276,7 +297,9 @@ function RateLimitItem({ label, value }: { label: string; value?: number | null 
   return (
     <div className="flex flex-col">
       <div className="text-muted-foreground text-xs">{label}</div>
-      <div className="text-foreground text-sm font-medium">{value?.toLocaleString()}</div>
+      <div className="text-foreground text-sm font-medium">
+        {value?.toLocaleString()} {unit}
+      </div>
     </div>
   )
 }
