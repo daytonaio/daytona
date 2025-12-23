@@ -70,7 +70,7 @@ type CommandPaletteState = {
   pageStack: string[]
   searchByPage: Map<string, string>
   shouldFilter: boolean
-  barMode: 'flash' | 'pulse'
+  isLoading: boolean
   pages: Map<string, PageData>
 }
 
@@ -78,7 +78,7 @@ type CommandPaletteActions = {
   setIsOpen: (open: boolean) => void
   setSearch: (value: string) => void
   setShouldFilter: (value: boolean) => void
-  setBarMode: (mode: 'flash' | 'pulse') => void
+  setIsLoading: (value: boolean) => void
   pushPage: (pageId: string) => void
   popPage: () => void
   goToPage: (pageId: string) => void
@@ -97,7 +97,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
     pageStack: [defaultPage],
     searchByPage: new Map(),
     shouldFilter: true,
-    barMode: 'flash',
+    isLoading: false,
     pages: new Map([
       [
         defaultPage,
@@ -118,7 +118,7 @@ const createCommandPaletteStore = (defaultPage = 'root') => {
           return { searchByPage: newSearchByPage }
         }),
       setShouldFilter: (value) => set({ shouldFilter: value }),
-      setBarMode: (mode) => set({ barMode: mode }),
+      setIsLoading: (value) => set({ isLoading: value }),
 
       pushPage: (pageId) =>
         set((state) => {
@@ -337,7 +337,7 @@ export function CommandPalette({ className, overlay }: CommandPaletteProps) {
   const isOpen = useCommandPalette((state) => state.isOpen)
   const search = useCommandPalette((state) => state.searchByPage.get(state.activePageId) ?? '')
   const shouldFilter = useCommandPalette((state) => state.shouldFilter)
-  const barMode = useCommandPalette((state) => state.barMode)
+  const isLoading = useCommandPalette((state) => state.isLoading)
   const pageStack = useCommandPalette((state) => state.pageStack)
 
   const { setIsOpen, setSearch, popPage, popToRoot } = useCommandPaletteActions()
@@ -407,9 +407,16 @@ export function CommandPalette({ className, overlay }: CommandPaletteProps) {
             }}
           />
 
-          <PulseBar mode={barMode} isVisible={isOpen} />
+          <PulseBar mode={isLoading ? 'pulse' : 'flash'} isVisible={isOpen} />
 
-          <CommandList className="max-h-[400px] scroll-mask transition-[height] duration-150 ease-in-out h-[var(--cmdk-list-height)]">
+          <CommandList
+            className={cn(
+              'max-h-[400px] scroll-mask transition-[height,opacity] duration-150 ease-in-out h-[var(--cmdk-list-height)]',
+              {
+                'opacity-50': isLoading,
+              },
+            )}
+          >
             {sortedGroups.map((group) => (
               <CommandGroupRenderer key={group.id} group={group} />
             ))}

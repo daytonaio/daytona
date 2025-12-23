@@ -24,9 +24,6 @@ import { useCopyToClipboard } from 'usehooks-ts'
 import { CommandHighlight, useRegisterCommands, type CommandConfig } from '../CommandPalette'
 import { CreateOrganizationDialog } from './CreateOrganizationDialog'
 
-/**
- * Hook that registers organization-related commands to the command palette.
- */
 function useOrganizationCommands() {
   const { organizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()

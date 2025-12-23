@@ -4,6 +4,7 @@
  */
 
 import {
+  Kbd,
   useCommandPalette,
   useCommandPaletteActions,
   useRegisterCommands,
@@ -14,15 +15,16 @@ import { cn } from '@/lib/utils'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import { BookOpen, Code2, Container, Layers, Terminal } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 
-const ALGOLIA_APP_ID = import.meta.env.PUBLIC_ALGOLIA_APP_ID
-const ALGOLIA_API_KEY = import.meta.env.PUBLIC_ALGOLIA_API_KEY
-const DOCS_INDEX = import.meta.env.PUBLIC_ALGOLIA_DOCS_INDEX_NAME || 'docs_test'
-const CLI_INDEX = import.meta.env.PUBLIC_ALGOLIA_CLI_INDEX_NAME || 'cli_test'
-const SDK_INDEX = import.meta.env.PUBLIC_ALGOLIA_SDK_INDEX_NAME || 'sdk_test'
+const ALGOLIA_APP_ID = import.meta.env.VITE_ALGOLIA_APP_ID
+const ALGOLIA_API_KEY = import.meta.env.VITE_ALGOLIA_API_KEY
+const DOCS_INDEX = import.meta.env.VITE_ALGOLIA_DOCS_INDEX_NAME || 'docs_test'
+const CLI_INDEX = import.meta.env.VITE_ALGOLIA_CLI_INDEX_NAME || 'cli_test'
+const SDK_INDEX = import.meta.env.VITE_ALGOLIA_SDK_INDEX_NAME || 'sdk_test'
 
-const client = ALGOLIA_APP_ID && ALGOLIA_API_KEY ? algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY) : null
+const docSearchEnabled = Boolean(ALGOLIA_APP_ID && ALGOLIA_API_KEY)
+const client = docSearchEnabled ? algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY) : null
 
 export type AlgoliaHit = {
   objectID: string
@@ -110,7 +112,7 @@ const SearchSnippet = ({
   return (
     <span
       className={cn(
-        '[&_em]:not-italic [&_em]:rounded-[2px] [&_em]:bg-[#2fcc712b] [&_em]:text-[#058157] dark:[&_em]:text-[#2fcc71]',
+        '[&_em]:not-italic [&_em]:rounded [&_em]:bg-[#2fcc712b] [&_em]:text-[#058157] dark:[&_em]:text-[#2fcc71] [&_em]:px-[2px]',
         className,
       )}
       dangerouslySetInnerHTML={{ __html: content }}
@@ -118,51 +120,60 @@ const SearchSnippet = ({
   )
 }
 
-const ResultRow = ({ hit }: { hit: AlgoliaHit }) => (
+const ResultRow = ({ hit, tag }: { hit: AlgoliaHit; tag?: ReactNode }) => (
   <div className="flex flex-col overflow-hidden">
-    <SearchSnippet
-      hit={hit}
-      attribute="title"
-      className="font-medium truncate [&_em]:not-italic [&_em]:rounded-[2px] [&_em]:text-[#058157] dark:[&_em]:text-[#2fcc71] [&_em]:bg-[#2fcc712b]"
-    />
+    <div className="flex items-center gap-2">
+      <SearchSnippet hit={hit} attribute="title" className="font-mediumline-clamp-1" />
+      {tag}
+    </div>
     {hit.description && (
-      <SearchSnippet
-        hit={hit}
-        attribute="description"
-        className="text-xs text-muted-foreground truncate font-normal line-clamp-1 [&_em]:not-italic [&_em]:rounded-[2px] [&_em]:bg-[#2fcc712b] [&_em]:text-[#058157] dark:[&_em]:text-[#2fcc71]"
-      />
+      <SearchSnippet hit={hit} attribute="description" className="text-xs text-muted-foreground line-clamp-1" />
     )}
   </div>
 )
 
+// todo: something more robust here
+const parseSDKLanguage = (hit: AlgoliaHit) => {
+  const [, lang] = hit.slug.split('/')
+  if (lang.includes('python')) {
+    return 'Python'
+  }
+  if (lang.includes('typescript')) {
+    return 'TypeScript'
+  }
+
+  return lang
+}
+
 export function useDocsSearchCommands() {
   const activePageId = useCommandPalette((state) => state.activePageId)
   const search = useCommandPalette((state) => state.searchByPage.get('search-docs') ?? '')
-  const { setShouldFilter, setBarMode } = useCommandPaletteActions()
-  const isActive = activePageId === 'search-docs'
+
+  const { setShouldFilter, setIsLoading } = useCommandPaletteActions()
+  const enabled = activePageId === 'search-docs' && docSearchEnabled
   const debouncedQuery = useDebounce(search, 300)
 
   const { data, isError, isFetching } = useDocsSearchQuery({
     search: debouncedQuery,
-    enabled: isActive,
+    enabled,
   })
 
   useRegisterPage({ id: 'search-docs', label: 'Search Docs', placeholder: 'Search documentation...' })
 
   useEffect(() => {
-    if (!isActive) {
+    if (!enabled) {
       return
     }
     setShouldFilter(false)
     return () => setShouldFilter(true)
-  }, [isActive, setShouldFilter])
+  }, [enabled, setShouldFilter])
 
   useEffect(() => {
-    if (!isActive) {
+    if (!enabled) {
       return
     }
-    setBarMode(isFetching ? 'pulse' : 'flash')
-  }, [isActive, isFetching, setBarMode])
+    setIsLoading(isFetching)
+  }, [enabled, isFetching, setIsLoading])
 
   const commands: CommandConfig[] = useMemo(() => {
     const handleSelect = (hit: AlgoliaHit) => {
@@ -239,10 +250,12 @@ export function useDocsSearchCommands() {
     }
 
     for (const hit of data.sdk) {
+      const sdkLanguage = parseSDKLanguage(hit)
+
       results.push({
         id: `sdk-${hit.objectID}`,
-        label: <ResultRow hit={hit} />,
-        value: `sdk ${hit.title} ${hit.description || ''}`,
+        label: <ResultRow hit={hit} tag={<Kbd className="text-xs h-auto">{sdkLanguage}</Kbd>} />,
+        value: `sdk ${hit.title} ${hit.description || ''} ${sdkLanguage}`,
         icon: <Code2 className="w-4 h-4" />,
         onSelect: () => handleSelect(hit),
         chainable: true,

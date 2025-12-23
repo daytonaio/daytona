@@ -251,8 +251,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     ].filter((group) => group.items.length > 0)
   }, [sidebarItems, settingsItems, billingItems, infrastructureItems])
 
-  const { setIsOpen } = useCommandPaletteActions()
-
   const commandItems = useMemo(() => {
     return sidebarGroups
       .flatMap((group) => group.items)
@@ -275,6 +273,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       )
   }, [sidebarGroups])
 
+  const commandPaletteActions = useCommandPaletteActions()
+
   useNavCommands(commandItems)
 
   return (
@@ -291,25 +291,19 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           </div>
           <SidebarTrigger className="p-2 [&_svg]:size-5" />
         </div>
-        <SidebarMenu className="mb-2">
+        <SidebarMenu>
           <SidebarMenuItem className="mb-1">
-            <button
-              onClick={() => setIsOpen(true)}
-              className={cn(
-                'bg-background/30 border-input h-8 rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] flex items-center gap-2 justify-between text-muted-foreground hover:text-foreground w-full pr-1.5 hover:bg-background/50',
-                {
-                  'px-2 justify-center': !sidebar.open,
-                },
-              )}
+            <SidebarMenuButton
+              tooltip="Search"
+              variant="outline"
+              className="flex items-center gap-2 justify-between"
+              onClick={() => commandPaletteActions.setIsOpen(true)}
             >
-              {!sidebar.open ? (
-                <SearchIcon className="w-4 h-4" />
-              ) : (
-                <>
-                  Search <Kbd>⌘ K</Kbd>
-                </>
-              )}
-            </button>
+              <span className="flex items-center gap-2">
+                <SearchIcon className="w-4 h-4" /> Search
+              </span>
+              <Kbd className="whitespace-nowrap">⌘ K</Kbd>
+            </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <OrganizationPicker />
