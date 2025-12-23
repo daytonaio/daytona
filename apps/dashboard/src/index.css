@@ -25,22 +25,38 @@ body {
     --muted-foreground: 0 0% 45.1%;
     --accent: 0 0% 96.1%;
     --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
+
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
     --radius: 0.5rem;
     --spacing: 0.25rem;
-    --warning: 32 100% 35%;
-    --warning-foreground: 0 0% 98%;
+
+    --info-background: 217 90% 97%;
+    --info-foreground: 221 83% 53%;
+    --info-separator: 217 90% 92%;
+
     --success: 141 60% 30%;
-    --success-foreground: 0 0% 98%;
+    --success-background: 160 43% 96%;
+    --success-foreground: 161 95% 24%;
+    --success-separator: 151 47% 85%;
+
+    --warning: 32 100% 35%;
+    --warning-background: 43 75% 96%;
+    --warning-foreground: 32 98% 34%;
+    --warning-separator: 43 79% 85%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-background: 3 90% 97%;
+    --destructive-foreground: 0 71% 49%;
+    --destructive-separator: 2 95% 90%;
 
     --sidebar-background: 0 0% 99.5%;
     --sidebar-foreground: 0 0% 26.1%;
@@ -51,6 +67,7 @@ body {
     --sidebar-border: 0 0% 91%;
     --sidebar-ring: 0 0% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -66,20 +83,35 @@ body {
     --muted-foreground: 0 0% 63.9%;
     --accent: 0 0% 14.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 50.6%;
-    --destructive-foreground: 0 0% 98%;
+
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
+
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --warning: 45 100% 50%;
-    --warning-foreground: 0 0% 98%;
+
+    --info-background: 218 39% 10%;
+    --info-foreground: 220 96% 70%;
+    --info-separator: 217 46% 15%;
+
     --success: 141 71% 48%;
-    --success-foreground: 0 0% 98%;
+    --success-background: 152 30% 8%;
+    --success-foreground: 158 63% 52%;
+    --success-separator: 153 43% 12%;
+
+    --warning: 45 100% 50%;
+    --warning-background: 44 42% 9%;
+    --warning-foreground: 43 96% 56%;
+    --warning-separator: 43 57% 14%;
+
+    --destructive: 0 62.8% 50.6%;
+    --destructive-background: 4 35% 10%;
+    --destructive-foreground: 0 92% 71%;
+    --destructive-separator: 2 44% 15%;
 
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 95.9%;
