@@ -83,7 +83,7 @@ func (c *Config) GetActiveProfile() (Profile, error) {
 
 	if apiUrl != "" && apiKey != "" {
 		return Profile{
-			Id: "default",
+			Id: "env",
 			Api: ServerApi{
 				Url: apiUrl,
 				Key: &apiKey,
