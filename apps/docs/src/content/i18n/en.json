@@ -114,6 +114,7 @@
   "sidebarconfig.deployments": "Deployments",
   "sidebarconfig.integrations": "Guides",
   "sidebarconfig.langchainIntegrations": "LangChain",
+  "sidebarconfig.claudeCode": "Claude Code",
   "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.claude": "Claude",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
