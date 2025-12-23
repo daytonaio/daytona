@@ -12,7 +12,7 @@ You can run Claude Code and execute tasks with it directly inside a Daytona sand
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
-> **Note:** Streaming logs in Python is only supported when using `AsyncDaytona`.
+> **Note:** While both sync and async modes support streaming PTY output, `AsyncDaytona` is recommended as it provides automatic background callbacks via `on_data`. The synchronous API requires blocking iteration or manual threading to handle output.
 ```python
 import os
 import asyncio
