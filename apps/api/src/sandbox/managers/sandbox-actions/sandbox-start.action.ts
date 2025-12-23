@@ -96,6 +96,7 @@ export class SandboxStartAction extends SandboxAction {
             undefined,
             daemonVersion,
             BackupState.NONE,
+            false,
           )
           return DONT_SYNC_AGAIN
         }
