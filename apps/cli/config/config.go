@@ -15,6 +15,9 @@ import (
 	"github.com/daytonaio/daytona/cli/internal"
 )
 
+const DAYTONA_API_URL_ENV_VAR = "DAYTONA_API_URL"
+const DAYTONA_API_KEY_ENV_VAR = "DAYTONA_API_KEY"
+
 type Config struct {
 	ActiveProfileId string    `json:"activeProfile"`
 	Profiles        []Profile `json:"profiles"`
@@ -75,6 +78,19 @@ func GetConfig() (*Config, error) {
 var ErrNoProfilesFound = errors.New("no profiles found. Run `daytona login` to authenticate")
 
 func (c *Config) GetActiveProfile() (Profile, error) {
+	apiUrl := os.Getenv(DAYTONA_API_URL_ENV_VAR)
+	apiKey := os.Getenv(DAYTONA_API_KEY_ENV_VAR)
+
+	if apiUrl != "" && apiKey != "" {
+		return Profile{
+			Id: "default",
+			Api: ServerApi{
+				Url: apiUrl,
+				Key: &apiKey,
+			},
+		}, nil
+	}
+
 	if len(c.Profiles) == 0 {
 		return Profile{}, ErrNoProfilesFound
 	}
