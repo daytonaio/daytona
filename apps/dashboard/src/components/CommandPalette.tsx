@@ -620,8 +620,16 @@ const PulseBar = function PulseBar({
   )
 }
 
-export function CommandHighlight({ children }: { children: ReactNode }) {
-  return <span className="text-foreground bg-card rounded-sm px-1 border border-border">{children}</span>
+export function CommandHighlight({
+  children,
+  className,
+  ...props
+}: { children: ReactNode } & React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <Kbd className={cn('text-sm', className)} {...props}>
+      {children}
+    </Kbd>
+  )
 }
 
 export function CommandError({
