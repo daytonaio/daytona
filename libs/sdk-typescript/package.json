@@ -2,8 +2,22 @@
   "name": "@daytonaio/sdk",
   "version": "0.0.0-dev",
   "description": "TypeScript SDK for Daytona",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./esm/index.d.ts",
+        "default": "./esm/index.js"
+      },
+      "require": {
+        "types": "./cjs/index.d.ts",
+        "default": "./cjs/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./cjs/index.js",
+  "module": "./esm/index.js",
+  "types": "./cjs/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/daytonaio/daytona.git"

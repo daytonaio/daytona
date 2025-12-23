@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "../../dist/libs/sdk-typescript/cjs",
+    "paths": {
+      "@daytonaio/api-client": ["../../dist/libs/api-client/src"],
+      "@daytonaio/toolbox-api-client": ["../../dist/libs/toolbox-api-client/src"]
+    },
+    "baseUrl": "."
+  }
+}

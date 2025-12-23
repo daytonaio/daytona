@@ -192,6 +192,7 @@
     "yaml": "^2.8.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.3",
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-typescript": "^7.22.0",
     "@eslint/js": "^9.8.0",
@@ -242,6 +243,7 @@
     "eslint-plugin-jsx-a11y": "6.10.1",
     "eslint-plugin-react": "7.35.0",
     "eslint-plugin-react-hooks": "5.0.0",
+    "fix-esm-import-path": "^1.10.3",
     "husky": "^9.1.7",
     "is-ci": "^4.1.0",
     "jest": "30.0.5",

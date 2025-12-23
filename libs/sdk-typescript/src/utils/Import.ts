@@ -17,16 +17,6 @@ const loaderMap = {
   'form-data': () => import('form-data'),
 }
 
-const requireMap = {
-  'fast-glob': () => require('fast-glob'),
-  '@iarna/toml': () => require('@iarna/toml'),
-  stream: () => require('stream'),
-  tar: () => require('tar'),
-  'expand-tilde': () => require('expand-tilde'),
-  fs: () => require('fs'),
-  'form-data': () => require('form-data'),
-}
-
 const validateMap: Record<string, (mod: any) => boolean> = {
   'fast-glob': (mod: any) => typeof mod === 'function' && typeof mod?.sync === 'function',
   '@iarna/toml': (mod: any) => typeof mod.parse === 'function' && typeof mod.stringify === 'function',
@@ -51,32 +41,6 @@ export async function dynamicImport<K extends keyof ModuleMap>(
   let mod: any
   try {
     mod = (await loader()) as any
-    mod = mod?.default ?? mod
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    throw new DaytonaError(`${errorPrefix || ''} Module "${name}" is not available in the "${RUNTIME}" runtime: ${msg}`)
-  }
-
-  if (validateMap[name] && !validateMap[name](mod)) {
-    throw new DaytonaError(
-      `${errorPrefix || ''} Module "${name}" didn't pass import validation in the "${RUNTIME}" runtime`,
-    )
-  }
-
-  return mod
-}
-
-type RequireMap = typeof requireMap
-
-export function dynamicRequire<K extends keyof RequireMap>(name: K, errorPrefix?: string): ReturnType<RequireMap[K]> {
-  const loader = requireMap[name]
-  if (!loader) {
-    throw new DaytonaError(`${errorPrefix || ''} Unknown module "${name}"`)
-  }
-
-  let mod: any
-  try {
-    mod = loader()
     mod = mod?.default ?? mod
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)

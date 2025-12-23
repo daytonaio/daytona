@@ -6,7 +6,7 @@
 import * as pathe from 'pathe'
 import { quote, parse as parseShellQuote } from 'shell-quote'
 import { DaytonaError } from './errors/DaytonaError'
-import { dynamicRequire } from './utils/Import'
+import { dynamicImport } from './utils/Import'
 
 const SUPPORTED_PYTHON_SERIES = ['3.9', '3.10', '3.11', '3.12', '3.13'] as const
 type SupportedPythonSeries = (typeof SUPPORTED_PYTHON_SERIES)[number]
@@ -66,6 +66,7 @@ export interface PyprojectOptions extends PipInstallOptions {
 export class Image {
   private _dockerfile = ''
   private _contextList: Context[] = []
+  private _promiseChain: Promise<void> = Promise.resolve()
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private constructor() {}
@@ -76,6 +77,35 @@ export class Image {
 
   get contextList(): Context[] {
     return this._contextList
+  }
+
+  /**
+   * Makes the Image class thenable, allowing it to be used with `await`.
+   * When awaited, all queued async operations are executed and the Image instance resolves to itself.
+   *
+   * @param {function} onfulfilled - Called when the Image is resolved.
+   * @param {function} onrejected - Called when the Image is rejected.
+   * @returns {Promise} A promise that resolves to the transformation result.
+   *
+   * @example
+   * const image = await Image.debianSlim('3.12').pipInstall('numpy')
+   */
+  then<TResult1 = Image, TResult2 = never>(
+    onfulfilled?: ((value: Image) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
+  ): Promise<TResult1 | TResult2> {
+    return this._promiseChain.then(() => this).then(onfulfilled, onrejected)
+  }
+
+  /**
+   * Queues an async operation to be executed when the Image is awaited.
+   *
+   * @param {function} operation - The async operation to queue.
+   * @returns {Image} The Image instance for chaining.
+   */
+  private queueAsyncOperation(operation: () => Promise<void>): Image {
+    this._promiseChain = this._promiseChain.then(operation)
+    return this
   }
 
   /**
@@ -111,22 +141,22 @@ export class Image {
    * image.pipInstallFromRequirements('requirements.txt', { findLinks: ['https://pypi.org/simple'] })
    */
   pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Image {
-    const importErrorPrefix = '"pipInstallFromRequirements" is not supported: '
-    const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
-    const fs = dynamicRequire('fs', importErrorPrefix)
+    return this.queueAsyncOperation(async () => {
+      const importErrorPrefix = '"pipInstallFromRequirements" is not supported: '
+      const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
+      const fs = await dynamicImport('fs', importErrorPrefix)
 
-    const expandedPath = expandTilde(requirementsTxt)
-    if (!fs.existsSync(expandedPath)) {
-      throw new Error(`Requirements file ${requirementsTxt} does not exist`)
-    }
+      const expandedPath = expandTilde(requirementsTxt)
+      if (!fs.existsSync(expandedPath)) {
+        throw new Error(`Requirements file ${requirementsTxt} does not exist`)
+      }
 
-    const extraArgs = this.formatPipInstallArgs(options)
+      const extraArgs = this.formatPipInstallArgs(options)
 
-    this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
-    this._dockerfile += `COPY ${expandedPath} /.requirements.txt\n`
-    this._dockerfile += `RUN python -m pip install -r /.requirements.txt${extraArgs}\n`
-
-    return this
+      this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
+      this._dockerfile += `COPY ${expandedPath} /.requirements.txt\n`
+      this._dockerfile += `RUN python -m pip install -r /.requirements.txt${extraArgs}\n`
+    })
   }
 
   /**
@@ -141,35 +171,37 @@ export class Image {
    * image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] })
    */
   pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Image {
-    const importErrorPrefix = '"pipInstallFromPyproject" is not supported: '
-    const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
-    const toml = dynamicRequire('@iarna/toml', importErrorPrefix)
-    const fs = dynamicRequire('fs', importErrorPrefix)
+    return this.queueAsyncOperation(async () => {
+      const importErrorPrefix = '"pipInstallFromPyproject" is not supported: '
+      const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
+      const toml = await dynamicImport('@iarna/toml', importErrorPrefix)
+      const fs = await dynamicImport('fs', importErrorPrefix)
 
-    const tomlData = toml.parse(fs.readFileSync(expandTilde(pyprojectToml), 'utf-8')) as any
-    const dependencies: string[] = []
+      const tomlData = toml.parse(fs.readFileSync(expandTilde(pyprojectToml), 'utf-8')) as any
+      const dependencies: string[] = []
 
-    if (!tomlData || !tomlData.project || !Array.isArray(tomlData.project.dependencies)) {
-      const msg =
-        'No [project.dependencies] section in pyproject.toml file. ' +
-        'See https://packaging.python.org/en/latest/guides/writing-pyproject-toml ' +
-        'for further file format guidelines.'
-      throw new DaytonaError(msg)
-    }
+      if (!tomlData || !tomlData.project || !Array.isArray(tomlData.project.dependencies)) {
+        const msg =
+          'No [project.dependencies] section in pyproject.toml file. ' +
+          'See https://packaging.python.org/en/latest/guides/writing-pyproject-toml ' +
+          'for further file format guidelines.'
+        throw new DaytonaError(msg)
+      }
 
-    dependencies.push(...tomlData.project.dependencies)
+      dependencies.push(...tomlData.project.dependencies)
 
-    if (options?.optionalDependencies && tomlData.project['optional-dependencies']) {
-      const optionalGroups = tomlData.project['optional-dependencies'] as Record<string, string[]>
-      for (const group of options.optionalDependencies) {
-        const deps = optionalGroups[group]
-        if (Array.isArray(deps)) {
-          dependencies.push(...deps)
+      if (options?.optionalDependencies && tomlData.project['optional-dependencies']) {
+        const optionalGroups = tomlData.project['optional-dependencies'] as Record<string, string[]>
+        for (const group of options.optionalDependencies) {
+          const deps = optionalGroups[group]
+          if (Array.isArray(deps)) {
+            dependencies.push(...deps)
+          }
         }
       }
-    }
 
-    return this.pipInstall(dependencies, options)
+      this.pipInstall(dependencies, options)
+    })
   }
 
   /**
@@ -185,18 +217,18 @@ export class Image {
    *  .addLocalFile('requirements.txt', '/home/daytona/requirements.txt')
    */
   addLocalFile(localPath: string, remotePath: string): Image {
-    const importErrorPrefix = '"addLocalFile" is not supported: '
-    const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
+    return this.queueAsyncOperation(async () => {
+      const importErrorPrefix = '"addLocalFile" is not supported: '
+      const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
 
-    if (remotePath.endsWith('/')) {
-      remotePath = remotePath + pathe.basename(localPath)
-    }
+      if (remotePath.endsWith('/')) {
+        remotePath = remotePath + pathe.basename(localPath)
+      }
 
-    const expandedPath = expandTilde(localPath)
-    this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
-    this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
-
-    return this
+      const expandedPath = expandTilde(localPath)
+      this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
+      this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
+    })
   }
 
   /**
@@ -212,15 +244,15 @@ export class Image {
    *  .addLocalDir('src', '/home/daytona/src')
    */
   addLocalDir(localPath: string, remotePath: string): Image {
-    const importErrorPrefix = '"addLocalDir" is not supported: '
-    const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
+    return this.queueAsyncOperation(async () => {
+      const importErrorPrefix = '"addLocalDir" is not supported: '
+      const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
 
-    const expandedPath = expandTilde(localPath)
+      const expandedPath = expandTilde(localPath)
 
-    this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
-    this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
-
-    return this
+      this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
+      this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
+    })
   }
 
   /**
@@ -349,33 +381,34 @@ export class Image {
    *  .dockerfileCommands(['RUN echo "Hello, world!"'])
    */
   dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image {
-    if (contextDir) {
-      const importErrorPrefix = '"dockerfileCommands" is not supported: '
-      const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
-      const fs = dynamicRequire('fs', importErrorPrefix)
+    return this.queueAsyncOperation(async () => {
+      if (contextDir) {
+        const importErrorPrefix = '"dockerfileCommands" is not supported: '
+        const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
+        const fs = await dynamicImport('fs', importErrorPrefix)
 
-      const expandedPath = expandTilde(contextDir)
-      if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
-        throw new Error(`Context directory ${contextDir} does not exist`)
+        const expandedPath = expandTilde(contextDir)
+        if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
+          throw new Error(`Context directory ${contextDir} does not exist`)
+        }
       }
-    }
 
-    for (const [contextPath, originalPath] of Image.extractCopySources(
-      dockerfileCommands.join('\n'),
-      contextDir || '',
-    )) {
-      let archiveBasePath = contextPath
-      if (contextDir && !originalPath.startsWith(contextDir)) {
-        archiveBasePath = contextPath.substring(contextDir.length)
-        // Remove leading separators
-        // eslint-disable-next-line no-useless-escape
-        archiveBasePath = archiveBasePath.replace(/^[\/\\]+/, '')
+      for (const [contextPath, originalPath] of await Image.extractCopySources(
+        dockerfileCommands.join('\n'),
+        contextDir || '',
+      )) {
+        let archiveBasePath = contextPath
+        if (contextDir && !originalPath.startsWith(contextDir)) {
+          archiveBasePath = contextPath.substring(contextDir.length)
+          // Remove leading separators
+          // eslint-disable-next-line no-useless-escape
+          archiveBasePath = archiveBasePath.replace(/^[\/\\]+/, '')
+        }
+        this._contextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
       }
-      this._contextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
-    }
 
-    this._dockerfile += dockerfileCommands.join('\n') + '\n'
-    return this
+      this._dockerfile += dockerfileCommands.join('\n') + '\n'
+    })
   }
 
   /**
@@ -388,35 +421,36 @@ export class Image {
    * const image = Image.fromDockerfile('Dockerfile')
    */
   static fromDockerfile(path: string): Image {
-    const importErrorPrefix = '"fromDockerfile" is not supported: '
-    const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
-    const fs = dynamicRequire('fs', importErrorPrefix)
-
-    const expandedPath = pathe.resolve(expandTilde(path))
-    if (!fs.existsSync(expandedPath)) {
-      throw new Error(`Dockerfile ${path} does not exist`)
-    }
-
-    const dockerfileContent = fs.readFileSync(expandedPath, 'utf-8')
     const img = new Image()
-    img._dockerfile = dockerfileContent
+    return img.queueAsyncOperation(async () => {
+      const importErrorPrefix = '"fromDockerfile" is not supported: '
+      const expandTilde = await dynamicImport('expand-tilde', importErrorPrefix)
+      const fs = await dynamicImport('fs', importErrorPrefix)
 
-    // Remove dockerfile filename from path to get the path prefix
-    const pathPrefix = pathe.dirname(expandedPath) + pathe.sep
-
-    for (const [contextPath, originalPath] of Image.extractCopySources(dockerfileContent, pathPrefix)) {
-      let archiveBasePath = contextPath
-      if (!originalPath.startsWith(pathPrefix)) {
-        // Remove the path prefix from the context path to get the archive path
-        archiveBasePath = contextPath.substring(pathPrefix.length)
-        // Remove leading separators
-        // eslint-disable-next-line no-useless-escape
-        archiveBasePath = archiveBasePath.replace(/^[\/\\]+/, '')
+      const expandedPath = pathe.resolve(expandTilde(path))
+      if (!fs.existsSync(expandedPath)) {
+        throw new Error(`Dockerfile ${path} does not exist`)
       }
-      img._contextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
-    }
 
-    return img
+      const dockerfileContent = fs.readFileSync(expandedPath, 'utf-8')
+
+      img._dockerfile = dockerfileContent
+
+      // Remove dockerfile filename from path to get the path prefix
+      const pathPrefix = pathe.dirname(expandedPath) + pathe.sep
+
+      for (const [contextPath, originalPath] of await Image.extractCopySources(dockerfileContent, pathPrefix)) {
+        let archiveBasePath = contextPath
+        if (!originalPath.startsWith(pathPrefix)) {
+          // Remove the path prefix from the context path to get the archive path
+          archiveBasePath = contextPath.substring(pathPrefix.length)
+          // Remove leading separators
+          // eslint-disable-next-line no-useless-escape
+          archiveBasePath = archiveBasePath.replace(/^[\/\\]+/, '')
+        }
+        img._contextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
+      }
+    })
   }
 
   /**
@@ -564,7 +598,10 @@ export class Image {
    * @param {string} pathPrefix - The path prefix to use for the sources.
    * @returns {Array<[string, string]>} The list of the actual file path and its corresponding COPY-command source path.
    */
-  private static extractCopySources(dockerfileContent: string, pathPrefix = ''): Array<[string, string]> {
+  private static async extractCopySources(
+    dockerfileContent: string,
+    pathPrefix = '',
+  ): Promise<Array<[string, string]>> {
     const sources: Array<[string, string]> = []
     const lines = dockerfileContent.split('\n')
 
@@ -577,7 +614,7 @@ export class Image {
       // Check if the line contains a COPY command
       if (/^\s*COPY\s+(?!.*--from=)/i.test(line)) {
         const importErrorPrefix = '"extractCopySources" is not supported: '
-        const fg = dynamicRequire('fast-glob', importErrorPrefix)
+        const fg = await dynamicImport('fast-glob', importErrorPrefix)
 
         const commandParts = this.parseCopyCommand(line)
         if (commandParts) {

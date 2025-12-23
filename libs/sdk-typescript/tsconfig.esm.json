@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "../../dist/libs/sdk-typescript/esm",
+    "paths": {
+      "@daytonaio/api-client": ["../../dist/libs/api-client/src"],
+      "@daytonaio/toolbox-api-client": ["../../dist/libs/toolbox-api-client/src"]
+    },
+    "baseUrl": "."
+  }
+}
