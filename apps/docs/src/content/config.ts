@@ -424,12 +424,12 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/claude-code', locale),
-          label: labels['sidebarconfig.claudeCode'],
+          href: localizePath(
+            '/docs/claude-code-run-tasks-stream-logs-sandbox',
+            locale
+          ),
+          label: labels['sidebarconfig.claude'],
           disablePagination: true,
-          attrs: {
-            icon: 'claude.svg',
-          },
         },
       ],
     },
