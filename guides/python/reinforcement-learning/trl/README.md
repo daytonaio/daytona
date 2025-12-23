@@ -1,10 +1,10 @@
-# Running RL Rollouts on Sandboxes Example (TRL + Daytona)
+# Running RL Rollouts on Sandboxes Guide (TRL + Daytona)
 
 ## Overview
 
-This example demonstrates how to integrate Daytona with TRL in order to run code, generated in rollouts, in Daytona sandboxes. We combine TRL's synchronous trainer with parallelized, asynchronous execution in sandboxes.
+This guide demonstrates how to integrate Daytona with TRL ([Transformer Reinforcement Learning](https://github.com/huggingface/trl)) in order to run the code generated in rollouts, in Daytona sandboxes. We combine TRL's synchronous trainer with parallelized, asynchronous execution in sandboxes.
 
-In the example, GRPO is used to train `Qwen3-1.7B-Base` model on two code writing tasks: a sorting function, and a function to find the maximal contiguous subarray sum.
+In the guide, we use GRPO to train `Qwen3-1.7B-Base` model on two code writing tasks: a sorting function, and a function to find the maximal contiguous subarray sum.
 
 ## Features
 
@@ -17,7 +17,7 @@ In the example, GRPO is used to train `Qwen3-1.7B-Base` model on two code writin
 ## Requirements
 
 - **Python:** Version 3.10 or higher
-- **GPU:** Required for training and vLLM inference, 60 GB VRAM or more recommended
+- **GPU:** Required for training and vLLM inference, 80 GB VRAM or more recommended
 
 ## Environment Variables
 
@@ -27,30 +27,31 @@ In the example, GRPO is used to train `Qwen3-1.7B-Base` model on two code writin
 
 ### Setup and Run
 
-1. Install uv (skip if already installed):
+1. Create and activate a virtual environment:
 
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
+```bash
+python3.10 -m venv venv  
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
 2. Install dependencies:
 
-   ```bash
-   uv sync
-   ```
+```bash
+pip install -e .
+```
 
 3. Set your Daytona API key in `.env` (copy from `.env.example`):
 
-   ```bash
-   cp .env.example .env
-   # edit .env with your API key
-   ```
+```bash
+cp .env.example .env
+# edit .env with your API key
+```
 
 4. Run the training:
 
-   ```bash
-   uv run python train.py
-   ```
+```bash
+python train.py
+```
 
 ## Configuration
 
@@ -94,7 +95,7 @@ TASKS = {
 
 ## How It Works
 
-GRPO learns by generating multiple solutions per problem and reinforcing those that perform best:
+The script runs reinforcement learning training using TRL's GRPOTrainer.
 
 1. **Sandbox pool:** Daytona sandboxes are created upfront for safe, parallel code execution
 2. **Generation:** The model generates N completions per prompt via vLLM
@@ -107,11 +108,6 @@ GRPO learns by generating multiple solutions per problem and reinforcing those t
 ## Output
 
 After training finishes, the trained model is saved in `training_results` folder. The metrics computed during the training run can be found in `training_results/metrics.jsonl`.
-
-Below is a plot showing average rewards over the training steps:
-
-![Rewwards over training](./assets/rewards-plot.png)
-
 
 ## License
 
