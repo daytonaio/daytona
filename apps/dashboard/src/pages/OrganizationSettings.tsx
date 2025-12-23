@@ -159,12 +159,12 @@ const OrganizationSettings: React.FC = () => {
         </Card>
 
         {!selectedOrganization.personal && authenticatedUserOrganizationMember !== null && (
-          <Card className="bg-destructive/5 border-destructive/30">
+          <Card className="bg-destructive-background border-destructive-separator">
             <CardContent>
               <div className="flex sm:flex-row flex-col justify-between sm:items-center gap-2">
                 <div className="text-sm">
                   <div className="text-muted-foreground">
-                    <p className="font-semibold text-destructive">Danger Zone</p>
+                    <p className="font-semibold text-destructive-foreground">Danger Zone</p>
                     {isOwner ? (
                       <>Delete the organization and all associated data.</>
                     ) : (
