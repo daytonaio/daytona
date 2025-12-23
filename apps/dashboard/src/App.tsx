@@ -17,6 +17,7 @@ import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BannerProvider } from './components/Banner'
 import { CommandPaletteProvider, useIsCommandPaletteEnabled } from './components/CommandPalette'
 import LoadingFallback from './components/LoadingFallback'
 import { Button } from './components/ui/button'
@@ -29,6 +30,7 @@ import {
   DialogTitle,
 } from './components/ui/dialog'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
+import { FeatureFlags } from './enums/FeatureFlags'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { useConfig } from './hooks/useConfig'
 import { addPylonWidget } from './lib/pylon-widget'
@@ -41,7 +43,9 @@ import LandingPage from './pages/LandingPage'
 import Limits from './pages/Limits'
 import Logout from './pages/Logout'
 import NotFound from './pages/NotFound'
+import Regions from './pages/Regions'
 import Registries from './pages/Registries'
+import Runners from './pages/Runners'
 import Sandboxes from './pages/Sandboxes'
 import Snapshots from './pages/Snapshots'
 import Spending from './pages/Spending'
@@ -49,9 +53,6 @@ import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
-import Regions from './pages/Regions'
-import Runners from './pages/Runners'
-import { FeatureFlags } from './enums/FeatureFlags'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -141,7 +142,9 @@ function App() {
                     <UserOrganizationInvitationsProvider>
                       <NotificationSocketProvider>
                         <CommandPaletteProvider enableGlobalShortcut={cmdkEnabled}>
-                          <Dashboard />
+                          <BannerProvider>
+                            <Dashboard />
+                          </BannerProvider>
                         </CommandPaletteProvider>
                       </NotificationSocketProvider>
                     </UserOrganizationInvitationsProvider>
