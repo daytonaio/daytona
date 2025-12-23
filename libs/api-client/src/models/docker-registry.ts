@@ -41,7 +41,7 @@ export interface DockerRegistry {
    * @type {string}
    * @memberof DockerRegistry
    */
-  username: string
+  username: string | null
   /**
    * Registry project
    * @type {string}

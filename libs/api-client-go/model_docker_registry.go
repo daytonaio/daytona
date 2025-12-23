@@ -29,7 +29,7 @@ type DockerRegistry struct {
 	// Registry URL
 	Url string `json:"url"`
 	// Registry username
-	Username string `json:"username"`
+	Username NullableString `json:"username"`
 	// Registry project
 	Project string `json:"project"`
 	// Registry type
@@ -47,7 +47,7 @@ type _DockerRegistry DockerRegistry
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDockerRegistry(id string, name string, url string, username string, project string, registryType string, createdAt time.Time, updatedAt time.Time) *DockerRegistry {
+func NewDockerRegistry(id string, name string, url string, username NullableString, project string, registryType string, createdAt time.Time, updatedAt time.Time) *DockerRegistry {
 	this := DockerRegistry{}
 	this.Id = id
 	this.Name = name
@@ -141,27 +141,29 @@ func (o *DockerRegistry) SetUrl(v string) {
 }
 
 // GetUsername returns the Username field value
+// If the value is explicit nil, the zero value for string will be returned
 func (o *DockerRegistry) GetUsername() string {
-	if o == nil {
+	if o == nil || o.Username.Get() == nil {
 		var ret string
 		return ret
 	}
 
-	return o.Username
+	return *o.Username.Get()
 }
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DockerRegistry) GetUsernameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Username, true
+	return o.Username.Get(), o.Username.IsSet()
 }
 
 // SetUsername sets field value
 func (o *DockerRegistry) SetUsername(v string) {
-	o.Username = v
+	o.Username.Set(&v)
 }
 
 // GetProject returns the Project field value
@@ -273,7 +275,7 @@ func (o DockerRegistry) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
 	toSerialize["url"] = o.Url
-	toSerialize["username"] = o.Username
+	toSerialize["username"] = o.Username.Get()
 	toSerialize["project"] = o.Project
 	toSerialize["registryType"] = o.RegistryType
 	toSerialize["createdAt"] = o.CreatedAt

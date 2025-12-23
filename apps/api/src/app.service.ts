@@ -209,7 +209,7 @@ Admin user created with API key: ${value}
   }
 
   private async initializeInternalRegistry(): Promise<void> {
-    const existingRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    const existingRegistry = await this.dockerRegistryService.getAvailableInternalRegistry()
     if (existingRegistry) {
       return
     }

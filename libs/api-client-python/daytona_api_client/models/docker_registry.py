@@ -20,7 +20,7 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,7 +31,7 @@ class DockerRegistry(BaseModel):
     id: StrictStr = Field(description="Registry ID")
     name: StrictStr = Field(description="Registry name")
     url: StrictStr = Field(description="Registry URL")
-    username: StrictStr = Field(description="Registry username")
+    username: Optional[StrictStr] = Field(description="Registry username")
     project: StrictStr = Field(description="Registry project")
     registry_type: StrictStr = Field(description="Registry type", alias="registryType")
     created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
@@ -91,6 +91,11 @@ class DockerRegistry(BaseModel):
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
+
+        # set to None if username (nullable) is None
+        # and model_fields_set contains the field
+        if self.username is None and "username" in self.model_fields_set:
+            _dict['username'] = None
 
         return _dict
 

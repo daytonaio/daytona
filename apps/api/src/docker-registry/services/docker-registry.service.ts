@@ -5,9 +5,9 @@
 
 import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { In, IsNull, Repository } from 'typeorm'
+import { EntityManager, FindOptionsWhere, In, IsNull, Repository } from 'typeorm'
 import { DockerRegistry } from '../entities/docker-registry.entity'
-import { CreateDockerRegistryDto } from '../dto/create-docker-registry.dto'
+import { CreateDockerRegistryInternalDto } from '../dto/create-docker-registry-internal.dto'
 import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
 import { ApiOAuth2 } from '@nestjs/swagger'
 import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
@@ -20,6 +20,10 @@ import { parseDockerImage } from '../../common/utils/docker-image.util'
 import axios from 'axios'
 import type { AxiosRequestHeaders } from 'axios'
 import { AxiosHeaders } from 'axios'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { RegionEvents } from '../../region/constants/region-events.constant'
+import { RegionCreatedEvent } from '../../region/events/region-created.event'
+import { RegionService } from '../../region/services/region.service'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
@@ -45,16 +49,20 @@ export class DockerRegistryService {
     private readonly dockerRegistryRepository: Repository<DockerRegistry>,
     @Inject(DOCKER_REGISTRY_PROVIDER)
     private readonly dockerRegistryProvider: IDockerRegistryProvider,
+    private readonly regionService: RegionService,
   ) {}
 
   async create(
-    createDto: CreateDockerRegistryDto,
+    createDto: CreateDockerRegistryInternalDto,
     organizationId?: string,
     isFallback = false,
+    entityManager?: EntityManager,
   ): Promise<DockerRegistry> {
+    const repository = entityManager ? entityManager.getRepository(DockerRegistry) : this.dockerRegistryRepository
+
     //  set some limit to the number of registries
     if (organizationId) {
-      const registries = await this.dockerRegistryRepository.find({
+      const registries = await repository.find({
         where: { organizationId },
       })
       if (registries.length >= 100) {
@@ -62,17 +70,17 @@ export class DockerRegistryService {
       }
     }
 
-    const registry = this.dockerRegistryRepository.create({
+    const registry = repository.create({
       ...createDto,
       organizationId,
       isFallback,
     })
-    return this.dockerRegistryRepository.save(registry)
+    return repository.save(registry)
   }
 
-  async findAll(organizationId: string): Promise<DockerRegistry[]> {
+  async findAll(organizationId: string, registryType: RegistryType): Promise<DockerRegistry[]> {
     return this.dockerRegistryRepository.find({
-      where: { organizationId },
+      where: { organizationId, registryType },
       order: {
         createdAt: 'DESC',
       },
@@ -142,7 +150,30 @@ export class DockerRegistryService {
     await this.dockerRegistryRepository.update({ isDefault: true }, { isDefault: false })
   }
 
-  async getDefaultInternalRegistry(): Promise<DockerRegistry | null> {
+  /**
+   * Returns an available internal registry for storing snapshots.
+   *
+   * If a snapshot manager _is_ configured for the region identified by the provided _regionId_, only an internal registry that matches the region snapshot manager can be returned.
+   * If no matching internal registry is found, _null_ will be returned.
+   *
+   * If a snapshot manager _is not_ configured for the provided region or no region is provided, the default internal registry will be returned (if available).
+   * If no default internal registry is found, _null_ will be returned.
+   *
+   * @param regionId - (Optional) The ID of the region.
+   */
+  async getAvailableInternalRegistry(regionId?: string): Promise<DockerRegistry | null> {
+    if (regionId) {
+      const region = await this.regionService.findOne(regionId)
+      if (!region) {
+        return null
+      }
+      if (region.snapshotManagerUrl) {
+        return this.dockerRegistryRepository.findOne({
+          where: { region: regionId, registryType: RegistryType.INTERNAL },
+        })
+      }
+    }
+
     return this.dockerRegistryRepository.findOne({
       where: { isDefault: true, registryType: RegistryType.INTERNAL },
     })
@@ -165,7 +196,32 @@ export class DockerRegistryService {
     })
   }
 
-  async getAvailableBackupRegistry(preferredRegion: string): Promise<DockerRegistry | null> {
+  /**
+   * Returns an available backup registry for storing snapshots.
+   *
+   * If a snapshot manager _is_ configured for the region identified by the provided _preferredRegionId_, only a backup registry that matches the region snapshot manager can be returned.
+   * If no matching backup registry is found, _null_ will be returned.
+   *
+   * If a snapshot manager _is not_ configured for the provided region, a backup registry in the preferred region will be returned (if available).
+   * If no backup registry is found in the preferred region, a fallback backup registry will be returned (if available).
+   * If no fallback backup registry is found, _null_ will be returned.
+   *
+   * @param preferredRegionId - The ID of the preferred region.
+   */
+  async getAvailableBackupRegistry(preferredRegionId: string): Promise<DockerRegistry | null> {
+    const region = await this.regionService.findOne(preferredRegionId)
+
+    if (!region) {
+      return null
+    }
+
+    if (region.snapshotManagerUrl) {
+      // Find a backup registry that matches the region snapshot manager
+      return this.dockerRegistryRepository.findOne({
+        where: { region: preferredRegionId, registryType: RegistryType.BACKUP },
+      })
+    }
+
     const registries = await this.dockerRegistryRepository.find({
       where: { registryType: RegistryType.BACKUP, isDefault: true },
     })
@@ -175,7 +231,7 @@ export class DockerRegistryService {
     }
 
     // Filter registries by preferred region
-    const preferredRegionRegistries = registries.filter((registry) => registry.region === preferredRegion)
+    const preferredRegionRegistries = registries.filter((registry) => registry.region === preferredRegionId)
 
     // If we have registries in the preferred region, randomly select one
     if (preferredRegionRegistries.length > 0) {
@@ -195,19 +251,99 @@ export class DockerRegistryService {
     throw new Error('No backup registry available')
   }
 
-  async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
-    const whereCondition = organizationId
-      ? [
-          { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
-          { organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
-        ]
-      : [{ organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) }]
+  /**
+   * Returns an internal registry where the snapshot is stored.
+   *
+   * If the provided region has no internal registries, the search will fallback to shared registries.
+   *
+   * If no matching registry is found, _null_ will be returned.
+   *
+   * @param ref - The snapshot ref.
+   * @param preferredRegionId - The ID of the region to prefer when searching for a registry.
+   */
+  async findInternalRegistryBySnapshotRef(ref: string, preferredRegionId: string): Promise<DockerRegistry | null> {
+    let registries = await this.dockerRegistryRepository.find({
+      where: {
+        region: preferredRegionId,
+        registryType: RegistryType.INTERNAL,
+      },
+    })
+
+    // If no registries found in the region, fallback to shared registries
+    if (registries.length === 0) {
+      registries = await this.dockerRegistryRepository.find({
+        where: {
+          organizationId: IsNull(),
+          registryType: RegistryType.INTERNAL,
+        },
+      })
+    }
+
+    // Try to find a registry that matches the snapshot ref pattern
+    for (const registry of registries) {
+      const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
+      if (ref.startsWith(strippedUrl)) {
+        return registry
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Returns a registry that can be used as a source to pull the image.
+   *
+   * If the provided region is associated with an organization, the search will only include organization-specific registries.
+   * Otherwise, the search will only include shared registries.
+   *
+   * If no matching registry is found, _null_ will be returned.
+   *
+   * @param imageName - The user-provided image.
+   * @param regionId - The ID of the region which needs access to a source registry.
+   */
+  async findSourceRegistryBySnapshotImageName(imageName: string, regionId: string): Promise<DockerRegistry | null> {
+    const region = await this.regionService.findOne(regionId)
+    if (!region) {
+      return null
+    }
+
+    const whereCondition: FindOptionsWhere<DockerRegistry> = {
+      registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]),
+    }
+
+    if (region.organizationId) {
+      whereCondition.organizationId = region.organizationId
+    } else {
+      whereCondition.organizationId = IsNull()
+    }
 
     const registries = await this.dockerRegistryRepository.find({
       where: whereCondition,
     })
 
     // Try to find a registry that matches the snapshot image name pattern
+    for (const registry of registries) {
+      const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
+      if (imageName.startsWith(strippedUrl)) {
+        return registry
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Returns a transient registry that matches the snapshot image name pattern.
+   *
+   * If no matching registry is found, _null_ will be returned.
+   *
+   * @param imageName - The user-provided image.
+   */
+  async findTransientRegistryBySnapshotImageName(imageName: string): Promise<DockerRegistry | null> {
+    const registries = await this.dockerRegistryRepository.find({
+      where: { registryType: RegistryType.TRANSIENT },
+    })
+
     for (const registry of registries) {
       const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
       if (imageName.startsWith(strippedUrl)) {
@@ -313,6 +449,12 @@ export class DockerRegistryService {
     return registry.url.startsWith('http') ? registry.url : `https://${registry.url}`
   }
 
+  /**
+   * Returns a registry found in the database that matches the user-provided image, or a temporary registry config if no matching registry is found.
+   *
+   * @param imageName - The user-provided image.
+   * @param organizationId - (Optional) If provided, the search will include organization-specific registries.
+   */
   private async findRegistryByImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     // Remove docker.io prefix since it's the default registry
     imageName = imageName.replace(/^docker\.io\//, '')
@@ -410,6 +552,13 @@ export class DockerRegistryService {
     }
   }
 
+  /**
+   * Returns the details of an image.
+   *
+   * @param image - The user-provided image.
+   * @param organizationId - (Optional) If provided, the search for a registry that matches the user-provided image will include organization-specific registries.
+   * @throws An error if the image details cannot be retrieved.
+   */
   async getImageDetails(image: string, organizationId?: string): Promise<ImageDetails> {
     try {
       // Remove docker.io prefix since it's the default registry
@@ -802,6 +951,41 @@ export class DockerRegistryService {
       this.logger.error(`Exception when deleting image ${imageName}: ${error.message}`)
       throw error
     }
+  }
+
+  @OnAsyncEvent({
+    event: RegionEvents.CREATED,
+  })
+  async handleRegionCreatedEvent(payload: RegionCreatedEvent): Promise<void> {
+    const { entityManager, region, organizationId } = payload
+
+    if (!region.snapshotManagerUrl) {
+      return
+    }
+
+    await this.create(
+      {
+        name: `${region.name}-backup`,
+        url: region.snapshotManagerUrl,
+        registryType: RegistryType.BACKUP,
+        region: region.id,
+      },
+      organizationId ?? undefined,
+      false,
+      entityManager,
+    )
+
+    await this.create(
+      {
+        name: `${region.name}-internal`,
+        url: region.snapshotManagerUrl,
+        registryType: RegistryType.INTERNAL,
+        region: region.id,
+      },
+      organizationId ?? undefined,
+      false,
+      entityManager,
+    )
   }
 }
 

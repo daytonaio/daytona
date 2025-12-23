@@ -12,7 +12,7 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { In, IsNull, Repository } from 'typeorm'
+import { DataSource, In, IsNull, Repository } from 'typeorm'
 import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
 import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
@@ -21,6 +21,9 @@ import { RegionType } from '../enums/region-type.enum'
 import { CreateRegionResponseDto } from '../dto/create-region.dto'
 import { generateApiKeyHash, generateApiKeyValue } from '../../common/utils/api-key'
 import { RegionDto } from '../dto/region.dto'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { RegionEvents } from '../constants/region-events.constant'
+import { RegionCreatedEvent } from '../events/region-created.event'
 
 @Injectable()
 export class RegionService {
@@ -31,6 +34,8 @@ export class RegionService {
     private readonly regionRepository: Repository<Region>,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
+    private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -60,6 +65,7 @@ export class RegionService {
     try {
       const proxyApiKey = createRegionDto.proxyUrl ? generateApiKeyValue() : undefined
       const sshGatewayApiKey = createRegionDto.sshGatewayUrl ? generateApiKeyValue() : undefined
+      const snapshotManagerApiKey = createRegionDto.snapshotManagerUrl ? generateApiKeyValue() : undefined
 
       const region = new Region({
         name: createRegionDto.name,
@@ -71,11 +77,16 @@ export class RegionService {
         sshGatewayUrl: createRegionDto.sshGatewayUrl,
         proxyApiKeyHash: proxyApiKey ? generateApiKeyHash(proxyApiKey) : null,
         sshGatewayApiKeyHash: sshGatewayApiKey ? generateApiKeyHash(sshGatewayApiKey) : null,
+        snapshotManagerUrl: createRegionDto.snapshotManagerUrl,
+        snapshotManagerApiKeyHash: snapshotManagerApiKey ? generateApiKeyHash(snapshotManagerApiKey) : null,
       })
 
-      await this.regionRepository.save(region)
+      await this.dataSource.transaction(async (em) => {
+        await em.save(region)
+        await this.eventEmitter.emitAsync(RegionEvents.CREATED, new RegionCreatedEvent(em, region, organizationId))
+      })
 
-      return new CreateRegionResponseDto({ id: region.id, proxyApiKey, sshGatewayApiKey })
+      return new CreateRegionResponseDto({ id: region.id, proxyApiKey, sshGatewayApiKey, snapshotManagerApiKey })
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Region with name ${createRegionDto.name} already exists`)

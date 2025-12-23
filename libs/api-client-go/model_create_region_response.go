@@ -26,8 +26,10 @@ type CreateRegionResponse struct {
 	// Proxy API key for the region
 	ProxyApiKey NullableString `json:"proxyApiKey,omitempty"`
 	// SSH Gateway API key for the region
-	SshGatewayApiKey     NullableString `json:"sshGatewayApiKey,omitempty"`
-	AdditionalProperties map[string]interface{}
+	SshGatewayApiKey NullableString `json:"sshGatewayApiKey,omitempty"`
+	// Snapshot Manager API key for the region
+	SnapshotManagerApiKey NullableString `json:"snapshotManagerApiKey,omitempty"`
+	AdditionalProperties  map[string]interface{}
 }
 
 type _CreateRegionResponse CreateRegionResponse
@@ -160,6 +162,49 @@ func (o *CreateRegionResponse) UnsetSshGatewayApiKey() {
 	o.SshGatewayApiKey.Unset()
 }
 
+// GetSnapshotManagerApiKey returns the SnapshotManagerApiKey field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *CreateRegionResponse) GetSnapshotManagerApiKey() string {
+	if o == nil || IsNil(o.SnapshotManagerApiKey.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.SnapshotManagerApiKey.Get()
+}
+
+// GetSnapshotManagerApiKeyOk returns a tuple with the SnapshotManagerApiKey field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateRegionResponse) GetSnapshotManagerApiKeyOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SnapshotManagerApiKey.Get(), o.SnapshotManagerApiKey.IsSet()
+}
+
+// HasSnapshotManagerApiKey returns a boolean if a field has been set.
+func (o *CreateRegionResponse) HasSnapshotManagerApiKey() bool {
+	if o != nil && o.SnapshotManagerApiKey.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetSnapshotManagerApiKey gets a reference to the given NullableString and assigns it to the SnapshotManagerApiKey field.
+func (o *CreateRegionResponse) SetSnapshotManagerApiKey(v string) {
+	o.SnapshotManagerApiKey.Set(&v)
+}
+
+// SetSnapshotManagerApiKeyNil sets the value for SnapshotManagerApiKey to be an explicit nil
+func (o *CreateRegionResponse) SetSnapshotManagerApiKeyNil() {
+	o.SnapshotManagerApiKey.Set(nil)
+}
+
+// UnsetSnapshotManagerApiKey ensures that no value is present for SnapshotManagerApiKey, not even an explicit nil
+func (o *CreateRegionResponse) UnsetSnapshotManagerApiKey() {
+	o.SnapshotManagerApiKey.Unset()
+}
+
 func (o CreateRegionResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -176,6 +221,9 @@ func (o CreateRegionResponse) ToMap() (map[string]interface{}, error) {
 	}
 	if o.SshGatewayApiKey.IsSet() {
 		toSerialize["sshGatewayApiKey"] = o.SshGatewayApiKey.Get()
+	}
+	if o.SnapshotManagerApiKey.IsSet() {
+		toSerialize["snapshotManagerApiKey"] = o.SnapshotManagerApiKey.Get()
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -223,6 +271,7 @@ func (o *CreateRegionResponse) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "proxyApiKey")
 		delete(additionalProperties, "sshGatewayApiKey")
+		delete(additionalProperties, "snapshotManagerApiKey")
 		o.AdditionalProperties = additionalProperties
 	}
 

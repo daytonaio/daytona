@@ -30,8 +30,9 @@ export class DockerRegistryDto {
   @ApiProperty({
     description: 'Registry username',
     example: 'username',
+    nullable: true,
   })
-  username: string
+  username: string | null
 
   @ApiProperty({
     description: 'Registry project',

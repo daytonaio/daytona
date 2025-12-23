@@ -229,22 +229,17 @@ export class SandboxStartAction extends SandboxAction {
     } else {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.PULLING_SNAPSHOT)
-      this.pullSnapshotToRunner(snapshot.ref, runner)
+      this.pullSnapshotToRunner(snapshot, runner)
       await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
     }
 
     return SYNC_AGAIN
   }
 
-  async pullSnapshotToRunner(snapshotRef: string, runner: Runner) {
-    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef)
-
-    // If no registry found by image name, use the default internal registry
-    if (!dockerRegistry) {
-      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      if (!dockerRegistry) {
-        throw new Error('No registry found for snapshot and no default internal registry configured')
-      }
+  async pullSnapshotToRunner(snapshot: Snapshot, runner: Runner) {
+    const registry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshot.ref, runner.region)
+    if (!registry) {
+      throw new Error('No internal registry found for sandbox snapshot')
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
@@ -252,7 +247,7 @@ export class SandboxStartAction extends SandboxAction {
     let retries = 0
     while (retries < 10) {
       try {
-        await runnerAdapter.pullSnapshot(snapshotRef, dockerRegistry)
+        await runnerAdapter.pullSnapshot(snapshot.ref, registry)
         break
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
@@ -333,7 +328,7 @@ export class SandboxStartAction extends SandboxAction {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       const snapshotRef = snapshot.ref
 
-      registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef, sandbox.organizationId)
+      registry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshotRef, sandbox.region)
       if (!registry) {
         throw new Error('No registry found for snapshot')
       }

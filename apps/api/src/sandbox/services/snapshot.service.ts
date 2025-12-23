@@ -193,12 +193,12 @@ export class SnapshotService {
           }
         }
 
-        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(regionId)
         const hash =
           imageDetails.digest && imageDetails.digest.startsWith('sha256:')
             ? imageDetails.digest.substring('sha256:'.length)
             : imageDetails.digest
-        ref = `${defaultInternalRegistry.url.replace(/^https?:\/\//, '')}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
+        ref = `${internalRegistry.url.replace(/^https?:\/\//, '')}/${internalRegistry.project || 'daytona'}/daytona-${hash}:daytona`
 
         const exists = await this.readySnapshotRunnerExists(ref, regionId)
 
@@ -311,8 +311,8 @@ export class SnapshotService {
         snapshot.buildInfo = buildInfoEntity
       }
 
-      const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      snapshot.ref = `${defaultInternalRegistry.url.replace(/^(https?:\/\/)/, '')}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
+      const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(regionId)
+      snapshot.ref = `${internalRegistry.url.replace(/^(https?:\/\/)/, '')}/${internalRegistry.project || 'daytona'}/${buildSnapshotRef}`
 
       const exists = await this.readySnapshotRunnerExists(snapshot.ref, regionId)
 

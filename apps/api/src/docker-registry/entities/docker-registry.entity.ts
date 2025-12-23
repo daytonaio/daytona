@@ -17,11 +17,11 @@ export class DockerRegistry {
   @Column()
   url: string
 
-  @Column()
-  username: string
+  @Column({ nullable: true })
+  username: string | null
 
-  @Column()
-  password: string
+  @Column({ nullable: true })
+  password: string | null
 
   @Column({ default: false })
   isDefault: boolean

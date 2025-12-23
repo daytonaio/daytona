@@ -8996,6 +8996,7 @@ components:
       type: object
     CreateRegion:
       example:
+        snapshotManagerUrl: https://snapshot-manager.example.com
         proxyUrl: https://proxy.example.com
         name: us-east-1
         sshGatewayUrl: ssh://ssh-gateway.example.com
@@ -9014,6 +9015,11 @@ components:
           example: ssh://ssh-gateway.example.com
           nullable: true
           type: string
+        snapshotManagerUrl:
+          description: Snapshot Manager URL for the region
+          example: https://snapshot-manager.example.com
+          nullable: true
+          type: string
       required:
         - name
       type: object
@@ -9021,6 +9027,7 @@ components:
       example:
         proxyApiKey: proxy-api-key-xyz
         id: region_12345
+        snapshotManagerApiKey: snapshot-manager-api-key-xyz
         sshGatewayApiKey: ssh-gateway-api-key-abc
       properties:
         id:
@@ -9035,6 +9042,11 @@ components:
         sshGatewayApiKey:
           description: SSH Gateway API key for the region
           example: ssh-gateway-api-key-abc
+          nullable: true
+          type: string
+        snapshotManagerApiKey:
+          description: Snapshot Manager API key for the region
+          example: snapshot-manager-api-key-xyz
           nullable: true
           type: string
       required:
@@ -12446,6 +12458,7 @@ components:
         username:
           description: Registry username
           example: username
+          nullable: true
           type: string
         project:
           description: Registry project

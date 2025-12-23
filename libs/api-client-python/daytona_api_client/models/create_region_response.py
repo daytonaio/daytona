@@ -30,8 +30,9 @@ class CreateRegionResponse(BaseModel):
     id: StrictStr = Field(description="ID of the created region")
     proxy_api_key: Optional[StrictStr] = Field(default=None, description="Proxy API key for the region", alias="proxyApiKey")
     ssh_gateway_api_key: Optional[StrictStr] = Field(default=None, description="SSH Gateway API key for the region", alias="sshGatewayApiKey")
+    snapshot_manager_api_key: Optional[StrictStr] = Field(default=None, description="Snapshot Manager API key for the region", alias="snapshotManagerApiKey")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "proxyApiKey", "sshGatewayApiKey"]
+    __properties: ClassVar[List[str]] = ["id", "proxyApiKey", "sshGatewayApiKey", "snapshotManagerApiKey"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,6 +90,11 @@ class CreateRegionResponse(BaseModel):
         if self.ssh_gateway_api_key is None and "ssh_gateway_api_key" in self.model_fields_set:
             _dict['sshGatewayApiKey'] = None
 
+        # set to None if snapshot_manager_api_key (nullable) is None
+        # and model_fields_set contains the field
+        if self.snapshot_manager_api_key is None and "snapshot_manager_api_key" in self.model_fields_set:
+            _dict['snapshotManagerApiKey'] = None
+
         return _dict
 
     @classmethod
@@ -103,7 +109,8 @@ class CreateRegionResponse(BaseModel):
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "proxyApiKey": obj.get("proxyApiKey"),
-            "sshGatewayApiKey": obj.get("sshGatewayApiKey")
+            "sshGatewayApiKey": obj.get("sshGatewayApiKey"),
+            "snapshotManagerApiKey": obj.get("snapshotManagerApiKey")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
