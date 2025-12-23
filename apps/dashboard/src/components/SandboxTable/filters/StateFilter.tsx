@@ -3,12 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxState } from '@daytonaio/api-client'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Command, CommandList, CommandGroup, CommandItem, CommandInput } from '@/components/ui/command'
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandInputButton,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
-import { X } from 'lucide-react'
+import { SandboxState } from '@daytonaio/api-client'
+import { Check, X } from 'lucide-react'
 import { STATUSES, getStateLabel } from '../constants'
 
 interface StateFilterProps {
@@ -47,15 +53,15 @@ export function StateFilterIndicator({ value, onFilterChange }: StateFilterProps
 export function StateFilter({ value, onFilterChange }: StateFilterProps) {
   return (
     <Command>
-      <div className="flex items-center gap-2 justify-between px-2 pt-2 pb-1">
-        <CommandInput placeholder="Search..." className="border border-border rounded-md h-8" />
-        <button
+      <CommandInput placeholder="Search...">
+        <CommandInputButton
           className="text-sm text-muted-foreground hover:text-primary px-2"
           onClick={() => onFilterChange(undefined)}
         >
           Clear
-        </button>
-      </div>
+        </CommandInputButton>
+      </CommandInput>
+
       <CommandList>
         <CommandGroup>
           {STATUSES.map((status) => (
