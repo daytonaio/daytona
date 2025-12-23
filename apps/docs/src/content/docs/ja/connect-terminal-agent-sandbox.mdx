@@ -1,0 +1,298 @@
+---
+title: Claude Agent SDK と Daytona を使用してコーディングエージェントを構築する
+description: Claude Code と Daytona のサンドボックスを使って自律型コーディングエージェントを構築するためのステップバイステップのガイド。
+---
+
+import { Image } from 'astro:assets'
+
+import connectTerminalAgentSandboxResult from '../../../assets/docs/images/connect-terminal-agent-sandbox-result.gif'
+
+このガイドでは、[Claude Code](https://code.claude.com/docs/en/overview) をベースにした自律型コーディングエージェントを、Daytona のサンドボックス環境内で実行する方法を説明します。エージェントは [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) を使用して、ユーザーのプロンプトに従って動作します。
+
+このエージェントは、フルスタック Web アプリケーションの開発、任意の言語でのコード記述、依存関係のインストール、スクリプトの実行が可能です。また、開発サーバーを起動・管理し、稼働中のアプリ向けのプレビューリンクを生成することもできます。
+
+***
+
+### 1. ワークフローの概要 \{#1-workflow-overview\}
+
+メインモジュールを起動すると、Daytona のサンドボックスが作成され、その中で Python エージェントが初期化されます。エージェントは [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) をベースにしています。
+
+メインプログラムとは、コマンドラインのチャットインターフェースを通じて対話します。プログラムはあなたのプロンプトをサンドボックス内のエージェントに送信し、エージェントがそれを実行して結果を返します。
+
+<details>
+  <summary>クリックしてワークフロー例を表示</summary>
+
+  <div>
+    ```
+    $ npm run start                                   174s
+    Creating sandbox...
+    Installing Agent SDK...
+    Initializing Agent SDK...
+    Press Ctrl+C at any time to exit.
+    User: Build a Zelda-like game where I can move around the screen and talk to famous programmers
+    Thinking...
+    I'll build a Zelda-like game for you! This will be a fun project with player movement and NPC interactions with famous programmers.
+    🔨 Write
+    🔨 Write
+    Now let me start a simple HTTP server to host the game:
+    🔨 Bash
+    Perfect! I've created a Zelda-like game called "Programmer's Quest" for you! 🎮
+
+    ## Game Features:
+
+    ✨ Zelda-style gameplay:
+    - Top-down 2D view with classic retro aesthetics
+    - Player character with sword and shield
+    - Grid-based movement system
+    - Environmental obstacles (trees and rocks)
+
+    👥 Famous Programmers as NPCs:
+    1. Linus Torvalds - Creator of Linux
+    2. Grace Hopper - COBOL pioneer and Admiral
+    3. Alan Turing - Father of computer science
+    4. Ada Lovelace - First computer programmer
+    5. Dennis Ritchie - Creator of C and UNIX
+
+    🎮 Controls:
+    - Arrow Keys or WASD - Move your character
+    - SPACE - Talk to NPCs when you're near them
+
+    🌟 Gameplay:
+    - Explore the grassy map and find all 5 legendary programmers
+    - Each NPC has multiple quotes that cycle when you talk to them
+    - NPCs glow when you're near them
+    - Dialog boxes appear with their famous quotes
+    - Track your progress in the HUD
+
+    ## Play Now:
+    🎯 [Click here to play the game!](https://80-8e2c4d23-212a-4f1e-bb6c-abfa71aeed3a.proxy.daytona.works)
+
+    The game features smooth movement, collision detection with trees and rocks, and an immersive dialog system. Try to find and talk to all 5 famous programmers to learn their wisdom! Each has 3 different quotes that cycle as you keep talking to them.
+
+    Enjoy your adventure! 🗡️✨
+    User:
+    ```
+  </div>
+</details>
+
+エージェントは Web アプリケーションをホストし、[Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) 機能を使ってプレビューリンクを提供することもできます。タスクに Web アプリケーションの実行またはプレビューが含まれている場合、エージェントはその必要性を自動的に判断し、アプリをホストして、ライブの結果を確認できるプレビューリンクを生成します。
+
+<Image src={connectTerminalAgentSandboxResult} alt="コーディングエージェントによって生成された RPG ゲームデモ" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+作業が完了するまで、エージェントとの対話を続けることができます。プログラムを終了すると、サンドボックスは自動的に削除されます。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+まず、Daytona の [リポジトリ](https://github.com/daytonaio/daytona.git) をクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/claude-agent-sdk
+```
+
+#### 環境を設定する \{#configure-environment\}
+
+API キーを取得します：
+
+* **Daytona API キー:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys)
+* **Anthropic API キー:** [Anthropic Console](https://console.anthropic.com/)
+
+`.env.example` を `.env` にコピーし、取得したキーを追加します：
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+SANDBOX_ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+:::caution[API Key セキュリティ]
+注意：`SANDBOX_ANTHROPIC_API_KEY` キーは Daytona のサンドボックス環境に渡され、サンドボックス内で実行される任意のコードからアクセス可能です。
+:::
+
+#### ローカルでの使用 \{#local-usage\}
+
+:::note[Node.js のバージョン]
+このサンプルを実行するには Node.js 18 以上が必要です。先に進む前に、ご利用の環境がこの要件を満たしていることを確認してください。
+:::
+
+依存関係をインストールします:
+
+```bash
+npm install
+```
+
+エージェントを実行する:
+
+```bash
+npm run start
+```
+
+エージェントが起動し、プロンプトの入力を待機します。
+
+### 3. 使用例 \{#3-example-usage\}
+
+チャットセッションの例:
+
+<details>
+  <summary>クリックしてチャットセッションの例を表示</summary>
+
+  <div>
+    ```
+    $ npm run start
+    Creating sandbox...
+    Installing Agent SDK...
+    Initializing Agent SDK...
+    Press Ctrl+C at any time to exit.
+    User: Create a fun pet store landing page in Svelte
+    Thinking...
+    I'll create a fun pet store landing page in Svelte for you! Let me set up the project and build an engaging landing page with animations and a colorful design.
+    🔨 Bash
+    🔨 Bash
+    Now let me create a fun and engaging pet store landing page with animations, colorful sections, and interactive elements:
+    🔨 Read
+    > 🔨 Write
+    Now let me create the component files:
+    🔨 Write
+    🔨 Write
+    🔨 Write
+    🔨 Write
+    🔨 Write
+    Now let's update the main CSS file and start the development server:
+    🔨 Read
+    🔨 Write
+    Now let's start the development server:
+    🔨 Bash
+    🔨 TaskOutput
+    Perfect! 🎉 I've created a fun and colorful pet store landing page in Svelte! Here's what I built:
+
+    ## Features:
+
+    ✨ Hero Section
+
+    - Beautiful gradient background with animated floating cards
+    - Eye-catching navigation bar
+    - Call-to-action buttons with hover effects
+    - Bouncing emoji animations
+
+    🎯 Features Section
+
+    - 4 key benefits (Free Delivery, Premium Quality, Special Offers, Award Winning)
+    - Interactive cards with hover animations
+    - Icons that rotate and scale on hover
+
+    🛍️ Products Section
+
+    - 6 featured products with colorful backgrounds
+    - Star ratings
+    - Add to cart functionality
+    - Smooth hover animations
+
+    📧 Newsletter Section
+
+    - Vibrant gradient background with floating pet emojis
+    - Email subscription form
+    - Success message animation
+    - Special 20% off offer
+
+    👣 Footer
+
+    - Comprehensive navigation links
+    - Social media icons
+    - Dark gradient design
+
+    ## Live Preview:
+
+    Your pet store is now running at: https://80-b3739199-d90e-4bde-ab18-450d74c950e8.proxy.daytona.works
+
+    The page includes:
+
+    - Smooth scroll behavior
+    - Responsive design for mobile devices
+    - Fun animations throughout
+    - Interactive elements with hover effects
+    - Colorful gradients and modern styling
+    - Emoji-based icons for a playful feel
+
+    Click the link to see your fun pet store landing page in action! 🐾
+    User:
+
+    ```
+  </div>
+</details>
+
+### 4. エージェントのアーキテクチャを理解する \{#4-understanding-the-agents-architecture\}
+
+この例は、次の 2 つの主要なコンポーネントで構成されています。
+
+* **メインプログラム:** メインプログラムは、ローカル環境で実行される Node.js スクリプト (`index.ts`) です。Daytona SDK を使用して Daytona サンドボックスを作成および管理します。メインプログラムは、サンドボックス内のエージェントと対話するためのコマンドラインインターフェースを提供します。
+* **サンドボックスエージェント:** サンドボックスエージェントは、Daytona サンドボックス内で実行される Python スクリプト (`coding_agent.py`) です。Claude Agent SDK を使用して、Claude Code に似たカスタマイズされたコーディングエージェントを作成します。
+
+#### 初期化 \{#initialization\}
+
+初期化時に、メインプログラムは次の処理を行います。
+
+1. 環境変数に Anthropic の API キーを含めた、新しい [Daytona サンドボックス](/docs/ja/sandbox-management) を作成します。
+2. サンドボックス内で `pip install` を実行し、[プロセス実行](/docs/ja/process-code-execution#process-execution) を使って Claude Agent SDK をインストールします。
+3. 新しい [コードインタープリタコンテキスト](/docs/ja/process-code-execution#stateful-code-interpreter) を作成します。
+4. [ファイルアップロード](/docs/file-system-operations#uploading-a-single-file) を使って、コーディングエージェント用スクリプトをサンドボックスにアップロードします。
+5. コードインタープリタコンテキスト内で `import coding_agent` を実行して、Claude Agent SDK を初期化します。
+6. ユーザーからの入力を待ち、以下のとおりコードインタープリタコンテキスト内のエージェントにプロンプトを送信します。
+
+#### メインプログラムのコード \{#main-program-code\}
+
+エージェントが稼働すると、プログラムはユーザー入力を読み取るための readline インターフェースを作成し、その入力をエージェントに送信します。
+各ユーザーからのリクエストは、コードインタープリターコンテキスト内で Python コマンドを実行することでエージェントに渡されます。
+
+```typescript
+ const result = await sandbox.codeInterpreter.runCode(
+  `coding_agent.run_query_sync(os.environ.get('PROMPT', ''))`,
+  {
+    context: ctx,
+    envs: { PROMPT: prompt },
+    onStdout,
+    onStderr,
+  }
+);
+```
+
+`onStdout` と `onStderr` のコールバックは、エージェントの出力をメインプログラム側へ返すために使用されます。エージェントがプロンプトへの応答処理を終えると、メインプログラムは次のユーザー入力を待機します。
+
+#### サンドボックスエージェントのコード \{#sandbox-agent-code\}
+
+サンドボックスエージェントは、Claude Code を基盤としたカスタマイズ可能なコーディングエージェントを作成するために、[Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) を使用します。
+エージェントは、ワークスペースディレクトリと、[プレビュー URL の形式](/docs/ja/preview-and-authentication) の例を含むシステムプロンプトで初期化されます。
+
+```python
+system_prompt = """
+You are running in a Daytona sandbox.
+Use the /home/daytona directory instead of /workspace for file operations.
+Your public preview URL for port 80 is: {}.
+""".format(preview_url)
+```
+
+また、エージェントが使用する[ツールとパーミッションモード](https://platform.claude.com/docs/en/agent-sdk/quickstart#key-concepts)も指定します。
+
+```python
+client = ClaudeSDKClient(
+  options=ClaudeAgentOptions(
+    allowed_tools=["Read", "Edit", "Glob", "Grep", "Bash"],
+    permission_mode="acceptEdits",
+    system_prompt=system_prompt
+  )
+)
+```
+
+クエリを実行してレスポンスを受け取るためのコードは、Anthropic の [Claude Agent Python SDK ドキュメント](https://platform.claude.com/docs/en/agent-sdk/python) に掲載されているサンプルに準拠しています。
+
+#### クリーンアップ \{#clean-up\}
+
+メインプログラムを終了すると、Daytona サンドボックスとすべてのファイルは自動的に削除されます。
+
+**主な利点:**
+
+* Daytona サンドボックス内での安全かつ分離された実行環境
+* ターミナルからエージェントと直接やり取りできます
+* 開発サーバーの自動検出とライブなプレビューリンク
+* 複数の言語およびフルスタック開発に対応
+* シンプルなセットアップと自動クリーンアップ
