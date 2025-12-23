@@ -46,6 +46,9 @@ import { SnapshotRegion } from '../entities/snapshot-region.entity'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
+import { RunnerService } from './runner.service'
+import { RegionService } from '../../region/services/region.service'
+import { Transactional } from 'typeorm-transactional'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -68,6 +71,8 @@ export class SnapshotService {
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly runnerService: RunnerService,
+    private readonly regionService: RegionService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -129,6 +134,7 @@ export class SnapshotService {
       .getExists()
   }
 
+  @Transactional()
   async createFromPull(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     if (!organization.defaultRegionId) {
       throw new DefaultRegionRequiredException()
@@ -243,6 +249,7 @@ export class SnapshotService {
     }
   }
 
+  @Transactional()
   async createFromBuildInfo(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     if (!organization.defaultRegionId) {
       throw new DefaultRegionRequiredException()
@@ -326,6 +333,8 @@ export class SnapshotService {
       }
 
       try {
+        await this.eventEmitter.emitAsync(SnapshotEvents.CREATED, new SnapshotCreatedEvent(snapshot))
+
         return await this.snapshotRepository.save(snapshot)
       } catch (error) {
         if (error.code === '23505') {
@@ -453,6 +462,29 @@ export class SnapshotService {
 
     snapshot.general = general
     return await this.snapshotRepository.save(snapshot)
+  }
+
+  async getBuildLogsUrl(snapshot: Snapshot): Promise<string> {
+    if (!snapshot.initialRunnerId) {
+      throw new NotFoundException(`Snapshot ${snapshot.id} has no initial runner`)
+    }
+
+    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
+    if (!runner) {
+      throw new NotFoundException(`Initial runner for snapshot ${snapshot.id} not found`)
+    }
+
+    const region = await this.regionService.findOne(runner.region, true)
+
+    if (!region) {
+      throw new NotFoundException(`Region for initial runner for snapshot ${snapshot.id} not found`)
+    }
+
+    if (!region.proxyUrl) {
+      throw new NotFoundException(`Region for initial runner for snapshot ${snapshot.id} has no proxy URL`)
+    }
+
+    return region.proxyUrl + '/snapshots/' + snapshot.id + '/build-logs'
   }
 
   private async validateOrganizationQuotas(

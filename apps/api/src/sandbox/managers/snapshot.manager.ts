@@ -601,6 +601,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       : this.getInitialRunnerSnapshotTag(snapshot)
 
     const exists = await runnerAdapter.snapshotExists(initialImageRefOnRunner)
+
     if (!exists) {
       return DONT_SYNC_AGAIN
     }

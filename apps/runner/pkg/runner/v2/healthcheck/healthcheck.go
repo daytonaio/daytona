@@ -18,25 +18,27 @@ import (
 )
 
 type HealthcheckServiceConfig struct {
-	Interval        time.Duration
-	Timeout         time.Duration
-	Collector       *metrics.Collector
-	Logger          *slog.Logger
-	Domain          string
-	ProxyPort       int
-	ProxyTLSEnabled bool
+	Interval   time.Duration
+	Timeout    time.Duration
+	Collector  *metrics.Collector
+	Logger     *slog.Logger
+	Domain     string
+	ApiPort    int
+	ProxyPort  int
+	TlsEnabled bool
 }
 
 // Service handles healthcheck reporting to the API
 type Service struct {
-	log             *slog.Logger
-	interval        time.Duration
-	timeout         time.Duration
-	collector       *metrics.Collector
-	client          *apiclient.APIClient
-	domain          string
-	proxyPort       int
-	proxyTLSEnabled bool
+	log        *slog.Logger
+	interval   time.Duration
+	timeout    time.Duration
+	collector  *metrics.Collector
+	client     *apiclient.APIClient
+	domain     string
+	apiPort    int
+	proxyPort  int
+	tlsEnabled bool
 }
 
 // NewService creates a new healthcheck service
@@ -47,14 +49,15 @@ func NewService(cfg *HealthcheckServiceConfig) (*Service, error) {
 	}
 
 	return &Service{
-		log:             cfg.Logger.With(slog.String("component", "healthcheck")),
-		client:          apiClient,
-		interval:        cfg.Interval,
-		timeout:         cfg.Timeout,
-		collector:       cfg.Collector,
-		domain:          cfg.Domain,
-		proxyPort:       cfg.ProxyPort,
-		proxyTLSEnabled: cfg.ProxyTLSEnabled,
+		log:        cfg.Logger.With(slog.String("component", "healthcheck")),
+		client:     apiClient,
+		interval:   cfg.Interval,
+		timeout:    cfg.Timeout,
+		collector:  cfg.Collector,
+		domain:     cfg.Domain,
+		apiPort:    cfg.ApiPort,
+		proxyPort:  cfg.ProxyPort,
+		tlsEnabled: cfg.TlsEnabled,
 	}, nil
 }
 
@@ -115,13 +118,16 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	}
 
 	healthcheck.SetDomain(s.domain)
-	proxyUrl := ""
-	if s.proxyTLSEnabled {
+	proxyUrl := fmt.Sprintf("http://%s:%d", s.domain, s.proxyPort)
+	apiUrl := fmt.Sprintf("http://%s:%d", s.domain, s.apiPort)
+
+	if s.tlsEnabled {
+		apiUrl = fmt.Sprintf("https://%s:%d", s.domain, s.apiPort)
 		proxyUrl = fmt.Sprintf("https://%s:%d", s.domain, s.proxyPort)
-	} else {
-		proxyUrl = fmt.Sprintf("http://%s:%d", s.domain, s.proxyPort)
 	}
+
 	healthcheck.SetProxyUrl(proxyUrl)
+	healthcheck.SetApiUrl(apiUrl)
 
 	req := s.client.RunnersAPI.RunnerHealthcheck(reqCtx).RunnerHealthcheck(*healthcheck)
 	_, err = req.Execute()

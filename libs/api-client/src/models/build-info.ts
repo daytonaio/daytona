@@ -42,4 +42,10 @@ export interface BuildInfo {
    * @memberof BuildInfo
    */
   updatedAt: Date
+  /**
+   * The snapshot reference
+   * @type {string}
+   * @memberof BuildInfo
+   */
+  snapshotRef: string
 }

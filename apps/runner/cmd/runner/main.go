@@ -157,13 +157,14 @@ func main() {
 		metricsCollector := metrics.NewCollector(slogLogger)
 
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
-			Interval:        cfg.HealthcheckInterval,
-			Timeout:         cfg.HealthcheckTimeout,
-			Collector:       metricsCollector,
-			Logger:          slogLogger,
-			Domain:          cfg.Domain,
-			ProxyPort:       cfg.ApiPort,
-			ProxyTLSEnabled: cfg.EnableTLS,
+			Interval:   cfg.HealthcheckInterval,
+			Timeout:    cfg.HealthcheckTimeout,
+			Collector:  metricsCollector,
+			Logger:     slogLogger,
+			Domain:     cfg.Domain,
+			ApiPort:    cfg.ApiPort,
+			ProxyPort:  cfg.ApiPort,
+			TlsEnabled: cfg.EnableTLS,
 		})
 		if err != nil {
 			log.Fatalf("Failed to create healthcheck service: %v", err)
@@ -204,6 +205,7 @@ func main() {
 
 	apiServer := api.NewApiServer(api.ApiServerConfig{
 		ApiPort:     cfg.ApiPort,
+		ApiToken:    cfg.ApiToken,
 		TLSCertFile: cfg.TLSCertFile,
 		TLSKeyFile:  cfg.TLSKeyFile,
 		EnableTLS:   cfg.EnableTLS,

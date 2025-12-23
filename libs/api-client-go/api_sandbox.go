@@ -91,14 +91,32 @@ type SandboxAPI interface {
 	/*
 		GetBuildLogs Get build logs
 
+		This endpoint is deprecated. Use `getBuildLogsUrl` instead.
+
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIGetBuildLogsRequest
+
+		Deprecated
 	*/
 	GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest
 
 	// GetBuildLogsExecute executes the request
+	// Deprecated
 	GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest) (*http.Response, error)
+
+	/*
+		GetBuildLogsUrl Get build logs URL
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxIdOrName ID or name of the sandbox
+		@return SandboxAPIGetBuildLogsUrlRequest
+	*/
+	GetBuildLogsUrl(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsUrlRequest
+
+	// GetBuildLogsUrlExecute executes the request
+	//  @return Url
+	GetBuildLogsUrlExecute(r SandboxAPIGetBuildLogsUrlRequest) (*Url, *http.Response, error)
 
 	/*
 		GetPortPreviewUrl Get preview URL for a sandbox port
@@ -928,9 +946,13 @@ func (r SandboxAPIGetBuildLogsRequest) Execute() (*http.Response, error) {
 /*
 GetBuildLogs Get build logs
 
+This endpoint is deprecated. Use `getBuildLogsUrl` instead.
+
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIGetBuildLogsRequest
+
+Deprecated
 */
 func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest {
 	return SandboxAPIGetBuildLogsRequest{
@@ -941,6 +963,7 @@ func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxIdOrName st
 }
 
 // Execute executes the request
+// Deprecated
 func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodGet
@@ -1009,6 +1032,118 @@ func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest)
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetBuildLogsUrlRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxIdOrName        string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetBuildLogsUrlRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetBuildLogsUrlRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIGetBuildLogsUrlRequest) Execute() (*Url, *http.Response, error) {
+	return r.ApiService.GetBuildLogsUrlExecute(r)
+}
+
+/*
+GetBuildLogsUrl Get build logs URL
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIGetBuildLogsUrlRequest
+*/
+func (a *SandboxAPIService) GetBuildLogsUrl(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsUrlRequest {
+	return SandboxAPIGetBuildLogsUrlRequest{
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Url
+func (a *SandboxAPIService) GetBuildLogsUrlExecute(r SandboxAPIGetBuildLogsUrlRequest) (*Url, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Url
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetBuildLogsUrl")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/build-logs-url"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPIGetPortPreviewUrlRequest struct {

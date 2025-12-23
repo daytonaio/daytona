@@ -175,6 +175,7 @@ models/update-organization-quota.ts
 models/update-organization-region-quota.ts
 models/update-organization-role.ts
 models/update-sandbox-state-dto.ts
+models/url.ts
 models/user-home-dir-response.ts
 models/user-public-key.ts
 models/user.ts

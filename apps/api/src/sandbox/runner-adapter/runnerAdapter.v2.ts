@@ -280,7 +280,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       null,
       JobType.BUILD_SNAPSHOT,
       this.runner.id,
-      ResourceType.SANDBOX,
+      ResourceType.SNAPSHOT,
       buildInfo.snapshotRef,
       payload,
     )
@@ -380,8 +380,45 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   @Transactional()
-  async getSnapshotInfo(_snapshotName: string): Promise<RunnerSnapshotInfo> {
-    throw new Error('getSnapshotInfo is not supported for V2 runners')
+  async getSnapshotInfo(snapshotRef: string): Promise<RunnerSnapshotInfo> {
+    const latestJob = await this.jobRepository.findOne({
+      where: [
+        {
+          runnerId: this.runner.id,
+          resourceType: ResourceType.SNAPSHOT,
+          resourceId: snapshotRef,
+        },
+      ],
+      order: { createdAt: 'DESC' },
+    })
+
+    if (!latestJob) {
+      throw new Error(`Snapshot ${snapshotRef} not found on runner ${this.runner.id}`)
+    }
+
+    const metadata = latestJob.getResultMetadata()
+
+    switch (latestJob.status) {
+      case JobStatus.COMPLETED:
+        if (latestJob.type === JobType.PULL_SNAPSHOT || latestJob.type === JobType.BUILD_SNAPSHOT) {
+          return {
+            name: latestJob.resourceId,
+            sizeGB: metadata?.sizeGB,
+            entrypoint: metadata?.entrypoint,
+            cmd: metadata?.cmd,
+            hash: metadata?.hash,
+          }
+        }
+        throw new Error(
+          `Snapshot ${snapshotRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,
+        )
+      case JobStatus.FAILED:
+        throw new Error(`Snapshot ${snapshotRef} failed to build on runner ${this.runner.id}`)
+      default:
+        throw new Error(
+          `Snapshot ${snapshotRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,
+        )
+    }
   }
 
   @Transactional()

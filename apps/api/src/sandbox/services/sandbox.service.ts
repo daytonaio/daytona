@@ -568,6 +568,7 @@ export class SandboxService {
     return SandboxDto.fromSandbox(result)
   }
 
+  @Transactional()
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
@@ -686,6 +687,9 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -1090,57 +1094,7 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
-      return sandbox
-    }
-
-    if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      // Allow start of stopped | archived and archiving | archived sandboxes
-      if (
-        sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
-        (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
-      ) {
-        throw new SandboxError('State change in progress')
-      }
-    }
-
-    if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
-      throw new SandboxError('Sandbox is not in valid state')
-    }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-      await this.validateOrganizationQuotas(
-        organization,
-        sandbox.region,
-        sandbox.cpu,
-        sandbox.mem,
-        sandbox.disk,
-        sandbox.id,
-      )
-
-    if (pendingCpuIncremented) {
-      pendingCpuIncrement = sandbox.cpu
-    }
-    if (pendingMemoryIncremented) {
-      pendingMemoryIncrement = sandbox.mem
-    }
-    if (pendingDiskIncremented) {
-      pendingDiskIncrement = sandbox.disk
-    }
-
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.STARTED
-    sandbox.authToken = nanoid(32).toLocaleLowerCase()
-
     try {
-      const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
-
       if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
         return sandbox
       }
@@ -1274,6 +1228,26 @@ export class SandboxService {
     }
 
     return this.configService.getOrThrow('proxy.toolboxUrl')
+  }
+
+  async getBuildLogsUrl(sandboxIdOrName: string): Promise<string> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName)
+
+    if (!sandbox.buildInfo?.snapshotRef) {
+      throw new NotFoundException(`Sandbox ${sandboxIdOrName} has no build info`)
+    }
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+
+    if (!region) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} not found`)
+    }
+
+    if (!region.proxyUrl) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} has no proxy URL`)
+    }
+
+    return region.proxyUrl + '/sandboxes/' + sandbox.id + '/build-logs'
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, regionIdOrName?: string): Promise<string> {

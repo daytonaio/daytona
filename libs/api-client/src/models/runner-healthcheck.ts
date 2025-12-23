@@ -41,6 +41,12 @@ export interface RunnerHealthcheck {
    */
   proxyUrl?: string
   /**
+   * Runner API URL
+   * @type {string}
+   * @memberof RunnerHealthcheck
+   */
+  apiUrl?: string
+  /**
    * Runner app version
    * @type {string}
    * @memberof RunnerHealthcheck

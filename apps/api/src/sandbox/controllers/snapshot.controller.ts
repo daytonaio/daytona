@@ -61,6 +61,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { UrlDto } from '../../common/dto/url.dto'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
@@ -286,6 +287,8 @@ export class SnapshotController {
   @ApiOperation({
     summary: 'Get snapshot build logs',
     operationId: 'getSnapshotBuildLogs',
+    deprecated: true,
+    description: 'This endpoint is deprecated. Use `getSnapshotBuildLogsUrl` instead.',
   })
   @ApiParam({
     name: 'id',
@@ -349,6 +352,45 @@ export class SnapshotController {
       next,
     )
     return logProxy.create()
+  }
+
+  @Get(':id/build-logs-url')
+  @ApiOperation({
+    summary: 'Get snapshot build logs URL',
+    operationId: 'getSnapshotBuildLogsUrl',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Snapshot ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The snapshot build logs URL',
+    type: UrlDto,
+  })
+  @UseGuards(SnapshotAccessGuard)
+  async getSnapshotBuildLogsUrl(@Param('id') snapshotId: string): Promise<UrlDto> {
+    let snapshot = await this.snapshotService.getSnapshot(snapshotId)
+
+    // Check if the snapshot has build info
+    if (!snapshot.buildInfo) {
+      throw new NotFoundException(`Snapshot ${snapshotId} has no build info`)
+    }
+
+    // Retry until a runner is assigned or timeout after 30 seconds
+    const startTime = Date.now()
+    const timeoutMs = 30 * 1000
+
+    while (!snapshot.initialRunnerId) {
+      if (Date.now() - startTime > timeoutMs) {
+        throw new NotFoundException(`Timeout waiting for build runner assignment for snapshot ${snapshotId}`)
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      snapshot = await this.snapshotService.getSnapshot(snapshotId)
+    }
+
+    const url = await this.snapshotService.getBuildLogsUrl(snapshot)
+    return new UrlDto(url)
   }
 
   @Post(':id/activate')

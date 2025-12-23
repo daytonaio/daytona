@@ -68,7 +68,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 	// 	}
 	// }
 
-	runnerInfo, err := p.getRunnerInfo(ctx, sandboxID)
+	runnerInfo, err := p.getSandboxRunnerInfo(ctx, sandboxID)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
 		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
@@ -103,14 +103,14 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 	}, nil
 }
 
-func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInfo, error) {
-	has, err := p.runnerCache.Has(ctx, sandboxId)
+func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInfo, error) {
+	has, err := p.sandboxRunnerCache.Has(ctx, sandboxId)
 	if err != nil {
 		return nil, err
 	}
 
 	if has {
-		return p.runnerCache.Get(ctx, sandboxId)
+		return p.sandboxRunnerCache.Get(ctx, sandboxId)
 	}
 
 	runner, _, err := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
@@ -127,7 +127,7 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 		ApiKey: runner.ApiKey,
 	}
 
-	err = p.runnerCache.Set(ctx, sandboxId, info, 2*time.Minute)
+	err = p.sandboxRunnerCache.Set(ctx, sandboxId, info, 2*time.Minute)
 	if err != nil {
 		log.Errorf("Failed to set runner info in cache: %v", err)
 	}

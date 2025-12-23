@@ -29,4 +29,10 @@ export class BuildInfoDto {
     description: 'The last update timestamp',
   })
   updatedAt: Date
+
+  @ApiProperty({
+    description: 'The snapshot reference',
+    example: 'daytonaio/sandbox:latest',
+  })
+  snapshotRef: string
 }

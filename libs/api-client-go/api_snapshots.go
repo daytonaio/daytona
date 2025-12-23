@@ -99,14 +99,32 @@ type SnapshotsAPI interface {
 	/*
 		GetSnapshotBuildLogs Get snapshot build logs
 
+		This endpoint is deprecated. Use `getSnapshotBuildLogsUrl` instead.
+
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id Snapshot ID
 		@return SnapshotsAPIGetSnapshotBuildLogsRequest
+
+		Deprecated
 	*/
 	GetSnapshotBuildLogs(ctx context.Context, id string) SnapshotsAPIGetSnapshotBuildLogsRequest
 
 	// GetSnapshotBuildLogsExecute executes the request
+	// Deprecated
 	GetSnapshotBuildLogsExecute(r SnapshotsAPIGetSnapshotBuildLogsRequest) (*http.Response, error)
+
+	/*
+		GetSnapshotBuildLogsUrl Get snapshot build logs URL
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Snapshot ID
+		@return SnapshotsAPIGetSnapshotBuildLogsUrlRequest
+	*/
+	GetSnapshotBuildLogsUrl(ctx context.Context, id string) SnapshotsAPIGetSnapshotBuildLogsUrlRequest
+
+	// GetSnapshotBuildLogsUrlExecute executes the request
+	//  @return Url
+	GetSnapshotBuildLogsUrlExecute(r SnapshotsAPIGetSnapshotBuildLogsUrlRequest) (*Url, *http.Response, error)
 
 	/*
 		RemoveSnapshot Delete snapshot
@@ -896,9 +914,13 @@ func (r SnapshotsAPIGetSnapshotBuildLogsRequest) Execute() (*http.Response, erro
 /*
 GetSnapshotBuildLogs Get snapshot build logs
 
+This endpoint is deprecated. Use `getSnapshotBuildLogsUrl` instead.
+
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Snapshot ID
 	@return SnapshotsAPIGetSnapshotBuildLogsRequest
+
+Deprecated
 */
 func (a *SnapshotsAPIService) GetSnapshotBuildLogs(ctx context.Context, id string) SnapshotsAPIGetSnapshotBuildLogsRequest {
 	return SnapshotsAPIGetSnapshotBuildLogsRequest{
@@ -909,6 +931,7 @@ func (a *SnapshotsAPIService) GetSnapshotBuildLogs(ctx context.Context, id strin
 }
 
 // Execute executes the request
+// Deprecated
 func (a *SnapshotsAPIService) GetSnapshotBuildLogsExecute(r SnapshotsAPIGetSnapshotBuildLogsRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodGet
@@ -977,6 +1000,118 @@ func (a *SnapshotsAPIService) GetSnapshotBuildLogsExecute(r SnapshotsAPIGetSnaps
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type SnapshotsAPIGetSnapshotBuildLogsUrlRequest struct {
+	ctx                    context.Context
+	ApiService             SnapshotsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SnapshotsAPIGetSnapshotBuildLogsUrlRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SnapshotsAPIGetSnapshotBuildLogsUrlRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SnapshotsAPIGetSnapshotBuildLogsUrlRequest) Execute() (*Url, *http.Response, error) {
+	return r.ApiService.GetSnapshotBuildLogsUrlExecute(r)
+}
+
+/*
+GetSnapshotBuildLogsUrl Get snapshot build logs URL
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPIGetSnapshotBuildLogsUrlRequest
+*/
+func (a *SnapshotsAPIService) GetSnapshotBuildLogsUrl(ctx context.Context, id string) SnapshotsAPIGetSnapshotBuildLogsUrlRequest {
+	return SnapshotsAPIGetSnapshotBuildLogsUrlRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Url
+func (a *SnapshotsAPIService) GetSnapshotBuildLogsUrlExecute(r SnapshotsAPIGetSnapshotBuildLogsUrlRequest) (*Url, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Url
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.GetSnapshotBuildLogsUrl")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/snapshots/{id}/build-logs-url"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SnapshotsAPIRemoveSnapshotRequest struct {

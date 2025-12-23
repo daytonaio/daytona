@@ -2431,6 +2431,8 @@ paths:
         - sandbox
   /sandbox/{sandboxIdOrName}/build-logs:
     get:
+      deprecated: true
+      description: This endpoint is deprecated. Use `getBuildLogsUrl` instead.
       operationId: getBuildLogs
       parameters:
         - description: Use with JWT to specify the organization ID
@@ -2467,6 +2469,42 @@ paths:
             - profile
             - email
       summary: Get build logs
+      tags:
+        - sandbox
+  /sandbox/{sandboxIdOrName}/build-logs-url:
+    get:
+      operationId: getBuildLogsUrl
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Url'
+          description: Build logs URL
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get build logs URL
       tags:
         - sandbox
   /sandbox/{sandboxIdOrName}/ssh-access:
@@ -2779,6 +2817,34 @@ paths:
       summary: Get runner by ID
       tags:
         - runners
+  /runners/{id}/full:
+    get:
+      operationId: getRunnerFullById
+      parameters:
+        - description: Runner ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunnerFull'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get runner by ID
+      tags:
+        - runners
   /runners/{id}/scheduling:
     patch:
       operationId: updateRunnerScheduling
@@ -2870,6 +2936,34 @@ paths:
             - profile
             - email
       summary: Get runners by snapshot ref
+      tags:
+        - runners
+  /runners/inital-by-snapshot-id/{snapshotId}:
+    get:
+      operationId: getInitialRunnerBySnapshotId
+      parameters:
+        - description: Snapshot ID
+          explode: false
+          in: path
+          name: snapshotId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunnerFull'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get initial runner by snapshot ID
       tags:
         - runners
   /runners/healthcheck:
@@ -6200,6 +6294,8 @@ paths:
         - snapshots
   /snapshots/{id}/build-logs:
     get:
+      deprecated: true
+      description: This endpoint is deprecated. Use `getSnapshotBuildLogsUrl` instead.
       operationId: getSnapshotBuildLogs
       parameters:
         - description: Use with JWT to specify the organization ID
@@ -6236,6 +6332,42 @@ paths:
             - profile
             - email
       summary: Get snapshot build logs
+      tags:
+        - snapshots
+  /snapshots/{id}/build-logs-url:
+    get:
+      operationId: getSnapshotBuildLogsUrl
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Snapshot ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Url'
+          description: The snapshot build logs URL
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get snapshot build logs URL
       tags:
         - snapshots
   /snapshots/{id}/activate:
@@ -9465,8 +9597,13 @@ components:
           description: The last update timestamp
           format: date-time
           type: string
+        snapshotRef:
+          description: The snapshot reference
+          example: daytonaio/sandbox:latest
+          type: string
       required:
         - createdAt
+        - snapshotRef
         - updatedAt
       type: object
     Sandbox:
@@ -9480,6 +9617,7 @@ components:
         autoDeleteInterval: 30
         public: false
         errorReason: The sandbox is not running
+        runnerId: runner123
         id: sandbox123
         state: creating
         class: small
@@ -9647,6 +9785,10 @@ components:
           description: The version of the daemon running in the sandbox
           example: 1.0.0
           type: string
+        runnerId:
+          description: The runner ID of the sandbox
+          example: runner123
+          type: string
       required:
         - cpu
         - disk
@@ -9677,6 +9819,7 @@ components:
             autoDeleteInterval: 30
             public: false
             errorReason: The sandbox is not running
+            runnerId: runner123
             id: sandbox123
             state: creating
             class: small
@@ -9714,6 +9857,7 @@ components:
             autoDeleteInterval: 30
             public: false
             errorReason: The sandbox is not running
+            runnerId: runner123
             id: sandbox123
             state: creating
             class: small
@@ -9974,6 +10118,16 @@ components:
       required:
         - sandboxId
         - token
+        - url
+      type: object
+    Url:
+      example:
+        url: url
+      properties:
+        url:
+          description: URL response
+          type: string
+      required:
         - url
       type: object
     SshAccessDto:
@@ -10516,6 +10670,7 @@ components:
     RunnerHealthcheck:
       example:
         appVersion: v0.0.0-dev
+        apiUrl: http://api.daytona.example.com:8080
         proxyUrl: http://proxy.daytona.example.com:8080
         domain: runner-123.daytona.example.com
         metrics: ''
@@ -10531,6 +10686,10 @@ components:
         proxyUrl:
           description: Runner proxy URL
           example: http://proxy.daytona.example.com:8080
+          type: string
+        apiUrl:
+          description: Runner API URL
+          example: http://api.daytona.example.com:8080
           type: string
         appVersion:
           description: Runner app version
@@ -12054,6 +12213,7 @@ components:
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
         disk: 5.637376656633329
+        ref: daytonaio/sandbox:latest
         size: 0.8008281904610115
         mem: 5.962133916683182
         lastUsedAt: 2000-01-23T04:56:07.000+00:00
@@ -12064,6 +12224,7 @@ components:
         name: name
         id: id
         state: ''
+        initialRunnerId: runner123
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -12117,6 +12278,14 @@ components:
           items:
             type: string
           type: array
+        initialRunnerId:
+          description: The initial runner ID of the snapshot
+          example: runner123
+          type: string
+        ref:
+          description: The snapshot reference
+          example: daytonaio/sandbox:latest
+          type: string
       required:
         - cpu
         - createdAt
@@ -12150,6 +12319,7 @@ components:
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
             disk: 5.637376656633329
+            ref: daytonaio/sandbox:latest
             size: 0.8008281904610115
             mem: 5.962133916683182
             lastUsedAt: 2000-01-23T04:56:07.000+00:00
@@ -12160,6 +12330,7 @@ components:
             name: name
             id: id
             state: ''
+            initialRunnerId: runner123
             updatedAt: 2000-01-23T04:56:07.000+00:00
           - imageName: imageName
             buildInfo: ''
@@ -12172,6 +12343,7 @@ components:
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
             disk: 5.637376656633329
+            ref: daytonaio/sandbox:latest
             size: 0.8008281904610115
             mem: 5.962133916683182
             lastUsedAt: 2000-01-23T04:56:07.000+00:00
@@ -12182,6 +12354,7 @@ components:
             name: name
             id: id
             state: ''
+            initialRunnerId: runner123
             updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         items:
@@ -12243,6 +12416,7 @@ components:
         snapshotState: None
         public: false
         errorReason: The sandbox is not running
+        runnerId: runner123
         id: sandbox123
         state: creating
         class: small
@@ -12412,6 +12586,10 @@ components:
         daemonVersion:
           description: The version of the daemon running in the sandbox
           example: 1.0.0
+          type: string
+        runnerId:
+          description: The runner ID of the sandbox
+          example: runner123
           type: string
         image:
           description: The image used for the workspace

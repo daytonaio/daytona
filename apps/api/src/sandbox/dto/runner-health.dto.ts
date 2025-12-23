@@ -102,6 +102,13 @@ export class RunnerHealthcheckDto {
   @IsOptional()
   proxyUrl?: string
 
+  @ApiPropertyOptional({
+    description: 'Runner API URL',
+    example: 'http://api.daytona.example.com:8080',
+  })
+  @IsOptional()
+  apiUrl?: string
+
   @ApiProperty({
     description: 'Runner app version',
     example: 'v0.0.0-dev',

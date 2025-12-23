@@ -19,22 +19,17 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from daytona_api_client_async.models.runner_health_metrics import RunnerHealthMetrics
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class RunnerHealthcheck(BaseModel):
+class Url(BaseModel):
     """
-    RunnerHealthcheck
+    Url
     """ # noqa: E501
-    metrics: Optional[RunnerHealthMetrics] = Field(default=None, description="Runner metrics")
-    domain: Optional[StrictStr] = Field(default=None, description="Runner domain")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", alias="proxyUrl")
-    api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", alias="apiUrl")
-    app_version: StrictStr = Field(description="Runner app version", alias="appVersion")
+    url: StrictStr = Field(description="URL response")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["metrics", "domain", "proxyUrl", "apiUrl", "appVersion"]
+    __properties: ClassVar[List[str]] = ["url"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +49,7 @@ class RunnerHealthcheck(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of RunnerHealthcheck from a JSON string"""
+        """Create an instance of Url from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -77,9 +72,6 @@ class RunnerHealthcheck(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of metrics
-        if self.metrics:
-            _dict['metrics'] = self.metrics.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -89,7 +81,7 @@ class RunnerHealthcheck(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of RunnerHealthcheck from a dict"""
+        """Create an instance of Url from a dict"""
         if obj is None:
             return None
 
@@ -97,11 +89,7 @@ class RunnerHealthcheck(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "metrics": RunnerHealthMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None,
-            "domain": obj.get("domain"),
-            "proxyUrl": obj.get("proxyUrl"),
-            "apiUrl": obj.get("apiUrl"),
-            "appVersion": obj.get("appVersion")
+            "url": obj.get("url")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

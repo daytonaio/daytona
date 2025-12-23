@@ -20,7 +20,25 @@ func (e *Executor) buildSnapshot(ctx context.Context, job *apiclient.Job) (any, 
 		return nil, err
 	}
 
-	return nil, e.docker.BuildSnapshot(ctx, request)
+	err = e.docker.BuildSnapshot(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := e.docker.GetImageInfo(ctx, request.Snapshot)
+	if err != nil {
+		return nil, err
+	}
+
+	infoResponse := dto.SnapshotInfoResponse{
+		Name:       request.Snapshot,
+		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024), // Convert bytes to GB
+		Entrypoint: info.Entrypoint,
+		Cmd:        info.Cmd,
+		Hash:       dto.HashWithoutPrefix(info.Hash),
+	}
+
+	return infoResponse, nil
 }
 
 func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {

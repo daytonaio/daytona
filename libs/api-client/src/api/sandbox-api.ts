@@ -49,6 +49,8 @@ import type { SshAccessValidationDto } from '../models'
 import type { ToolboxProxyUrl } from '../models'
 // @ts-ignore
 import type { UpdateSandboxStateDto } from '../models'
+// @ts-ignore
+import type { Url } from '../models'
 /**
  * SandboxApi - axios parameter creator
  * @export
@@ -302,12 +304,13 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     *
+     * This endpoint is deprecated. Use `getBuildLogsUrl` instead.
      * @summary Get build logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     getBuildLogs: async (
@@ -342,6 +345,54 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       if (follow !== undefined) {
         localVarQueryParameter['follow'] = follow
       }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Get build logs URL
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getBuildLogsUrl: async (
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('getBuildLogsUrl', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/build-logs-url`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -1497,12 +1548,13 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     *
+     * This endpoint is deprecated. Use `getBuildLogsUrl` instead.
      * @summary Get build logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     async getBuildLogs(
@@ -1520,6 +1572,35 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.getBuildLogs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Get build logs URL
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getBuildLogsUrl(
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Url>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogsUrl(
+        sandboxIdOrName,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getBuildLogsUrl']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2209,12 +2290,13 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
-     *
+     * This endpoint is deprecated. Use `getBuildLogsUrl` instead.
      * @summary Get build logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     getBuildLogs(
@@ -2225,6 +2307,23 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<void> {
       return localVarFp
         .getBuildLogs(sandboxIdOrName, xDaytonaOrganizationID, follow, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Get build logs URL
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getBuildLogsUrl(
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Url> {
+      return localVarFp
+        .getBuildLogsUrl(sandboxIdOrName, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2690,12 +2789,13 @@ export class SandboxApi extends BaseAPI {
   }
 
   /**
-   *
+   * This endpoint is deprecated. Use `getBuildLogsUrl` instead.
    * @summary Get build logs
    * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [follow] Whether to follow the logs stream
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
@@ -2707,6 +2807,21 @@ export class SandboxApi extends BaseAPI {
   ) {
     return SandboxApiFp(this.configuration)
       .getBuildLogs(sandboxIdOrName, xDaytonaOrganizationID, follow, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get build logs URL
+   * @param {string} sandboxIdOrName ID or name of the sandbox
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getBuildLogsUrl(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return SandboxApiFp(this.configuration)
+      .getBuildLogsUrl(sandboxIdOrName, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

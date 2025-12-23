@@ -41,6 +41,7 @@ import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
+import { Snapshot } from '../entities/snapshot.entity'
 
 @Injectable()
 export class RunnerService {
@@ -57,6 +58,8 @@ export class RunnerService {
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
     private readonly regionService: RegionService,
+    @InjectRepository(Snapshot)
+    private readonly snapshotRepository: Repository<Snapshot>,
     @Inject(EventEmitter2)
     private eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
@@ -334,6 +337,7 @@ export class RunnerService {
   async updateRunnerHealth(
     runnerId: string,
     domain?: string,
+    apiUrl?: string,
     proxyUrl?: string,
     metrics?: {
       currentCpuUsagePercentage?: number
@@ -367,6 +371,10 @@ export class RunnerService {
 
     if (domain) {
       updateData.domain = domain
+    }
+
+    if (apiUrl) {
+      updateData.apiUrl = apiUrl
     }
 
     if (proxyUrl) {
@@ -503,6 +511,7 @@ export class RunnerService {
 
                   await this.updateRunnerHealth(
                     runner.id,
+                    undefined,
                     undefined,
                     undefined,
                     runnerInfo?.metrics,
@@ -700,6 +709,24 @@ export class RunnerService {
       const snapshotRunner = snapshotRunners.find((sr) => sr.runnerId === runner.id)
       return new RunnerSnapshotDto(snapshotRunner.id, runner.id, runner.domain)
     })
+  }
+
+  async getInitialRunnerBySnapshotId(snapshotId: string): Promise<Runner> {
+    const snapshot = await this.snapshotRepository.findOne({ where: { id: snapshotId } })
+    if (!snapshot) {
+      throw new NotFoundException('Snapshot runner not found')
+    }
+    if (!snapshot.initialRunnerId) {
+      throw new BadRequestException('Initial runner not found')
+    }
+
+    const runner = await this.runnerRepository.findOne({ where: { id: snapshot.initialRunnerId } })
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return runner
   }
 
   private calculateAvailabilityScore(runnerId: string, params: AvailabilityScoreParams): number {

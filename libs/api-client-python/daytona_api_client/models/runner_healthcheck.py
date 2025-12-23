@@ -31,9 +31,10 @@ class RunnerHealthcheck(BaseModel):
     metrics: Optional[RunnerHealthMetrics] = Field(default=None, description="Runner metrics")
     domain: Optional[StrictStr] = Field(default=None, description="Runner domain")
     proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", alias="proxyUrl")
+    api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", alias="apiUrl")
     app_version: StrictStr = Field(description="Runner app version", alias="appVersion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["metrics", "domain", "proxyUrl", "appVersion"]
+    __properties: ClassVar[List[str]] = ["metrics", "domain", "proxyUrl", "apiUrl", "appVersion"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -99,6 +100,7 @@ class RunnerHealthcheck(BaseModel):
             "metrics": RunnerHealthMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None,
             "domain": obj.get("domain"),
             "proxyUrl": obj.get("proxyUrl"),
+            "apiUrl": obj.get("apiUrl"),
             "appVersion": obj.get("appVersion")
         })
         # store additional fields in additional_properties

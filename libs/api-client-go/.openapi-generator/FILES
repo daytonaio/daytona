@@ -172,6 +172,7 @@ model_update_organization_quota.go
 model_update_organization_region_quota.go
 model_update_organization_role.go
 model_update_sandbox_state_dto.go
+model_url.go
 model_user.go
 model_user_home_dir_response.go
 model_user_public_key.go

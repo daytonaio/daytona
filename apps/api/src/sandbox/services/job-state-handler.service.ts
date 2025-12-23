@@ -249,7 +249,7 @@ export class JobStateHandlerService {
         const snapshot = await this.snapshotRepository.findOne({
           where: { initialRunnerId: runnerId, ref: snapshotRef },
         })
-        if (snapshot && snapshot.state === SnapshotState.PULLING) {
+        if (snapshot && (snapshot.state === SnapshotState.PULLING || snapshot.state === SnapshotState.BUILDING)) {
           this.logger.log(`Marking snapshot ${snapshot.id} as ACTIVE after initial pull completed`)
           snapshot.state = SnapshotState.ACTIVE
           snapshot.errorReason = null
@@ -292,20 +292,15 @@ export class JobStateHandlerService {
         .andWhere('buildInfo.snapshotRef = :snapshotRef', { snapshotRef })
         .getOne()
 
-      if (!snapshot) {
-        this.logger.warn(`Snapshot not found for build ref ${snapshotRef} on runner ${runnerId}`)
-        return
-      }
-
       // Update SnapshotRunner state
       const snapshotRunner = await this.snapshotRunnerRepository.findOne({
         where: { snapshotRef, runnerId },
       })
 
       if (job.status === JobStatus.COMPLETED) {
-        this.logger.log(`BUILD_SNAPSHOT job ${job.id} completed successfully for snapshot ${snapshot.id}`)
+        this.logger.log(`BUILD_SNAPSHOT job ${job.id} completed successfully for snapshot ref ${snapshotRef}`)
 
-        if (snapshot.state === SnapshotState.BUILDING) {
+        if (snapshot?.state === SnapshotState.BUILDING) {
           snapshot.state = SnapshotState.ACTIVE
           snapshot.errorReason = null
           await this.snapshotRepository.save(snapshot)
@@ -318,9 +313,9 @@ export class JobStateHandlerService {
           await this.snapshotRunnerRepository.save(snapshotRunner)
         }
       } else if (job.status === JobStatus.FAILED) {
-        this.logger.error(`BUILD_SNAPSHOT job ${job.id} failed for snapshot ${snapshot.id}: ${job.errorMessage}`)
+        this.logger.error(`BUILD_SNAPSHOT job ${job.id} failed for snapshot ref ${snapshotRef}: ${job.errorMessage}`)
 
-        if (snapshot.state === SnapshotState.BUILDING) {
+        if (snapshot?.state === SnapshotState.BUILDING) {
           snapshot.state = SnapshotState.ERROR
           snapshot.errorReason = job.errorMessage || 'Failed to build snapshot'
           await this.snapshotRepository.save(snapshot)

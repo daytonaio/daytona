@@ -7,6 +7,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { BuildInfoDto } from './build-info.dto'
+import { IsOptional } from 'class-validator'
 
 export class SnapshotDto {
   @ApiProperty()
@@ -72,6 +73,22 @@ export class SnapshotDto {
   })
   regionIds?: string[]
 
+  @ApiPropertyOptional({
+    description: 'The initial runner ID of the snapshot',
+    example: 'runner123',
+    required: false,
+  })
+  @IsOptional()
+  initialRunnerId?: string
+
+  @ApiPropertyOptional({
+    description: 'The snapshot reference',
+    example: 'daytonaio/sandbox:latest',
+    required: false,
+  })
+  @IsOptional()
+  ref?: string
+
   static fromSnapshot(snapshot: Snapshot): SnapshotDto {
     return {
       id: snapshot.id,
@@ -96,9 +113,12 @@ export class SnapshotDto {
             contextHashes: snapshot.buildInfo.contextHashes,
             createdAt: snapshot.buildInfo.createdAt,
             updatedAt: snapshot.buildInfo.updatedAt,
+            snapshotRef: snapshot.buildInfo.snapshotRef,
           }
         : undefined,
       regionIds: snapshot.snapshotRegions?.map((sr) => sr.regionId) ?? undefined,
+      initialRunnerId: snapshot.initialRunnerId,
+      ref: snapshot.ref,
     }
   }
 }

@@ -166,6 +166,33 @@ export class RunnerController {
     return RunnerDto.fromRunner(runner)
   }
 
+  @Get(':id/full')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get runner by ID',
+    operationId: 'getRunnerFullById',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerFullDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Runner ID',
+    type: String,
+  })
+  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RunnerAccessGuard]))
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
+  async getRunnerByIdFull(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerFullDto> {
+    const runner = await this.runnerService.findOne(id)
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return RunnerFullDto.fromRunner(runner)
+  }
+
   @Get()
   @HttpCode(200)
   @ApiOperation({
@@ -292,6 +319,29 @@ export class RunnerController {
     return this.runnerService.getRunnersBySnapshotRef(ref)
   }
 
+  @Get('/inital-by-snapshot-id/:snapshotId')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get initial runner by snapshot ID',
+    operationId: 'getInitialRunnerBySnapshotId',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerFullDto,
+  })
+  @ApiParam({
+    name: 'snapshotId',
+    description: 'Snapshot ID',
+    type: String,
+    required: true,
+  })
+  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
+  async getInitialRunnerBySnapshotId(@Param('snapshotId') snapshotId: string): Promise<RunnerFullDto> {
+    const runner = await this.runnerService.getInitialRunnerBySnapshotId(snapshotId)
+    return RunnerFullDto.fromRunner(runner)
+  }
+
   @Post('healthcheck')
   @ApiOperation({
     summary: 'Runner healthcheck',
@@ -310,6 +360,7 @@ export class RunnerController {
     await this.runnerService.updateRunnerHealth(
       runnerContext.runnerId,
       healthcheck.domain,
+      healthcheck.apiUrl,
       healthcheck.proxyUrl,
       healthcheck.metrics,
       healthcheck.appVersion,

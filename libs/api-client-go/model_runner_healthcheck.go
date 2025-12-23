@@ -27,6 +27,8 @@ type RunnerHealthcheck struct {
 	Domain *string `json:"domain,omitempty"`
 	// Runner proxy URL
 	ProxyUrl *string `json:"proxyUrl,omitempty"`
+	// Runner API URL
+	ApiUrl *string `json:"apiUrl,omitempty"`
 	// Runner app version
 	AppVersion           string `json:"appVersion"`
 	AdditionalProperties map[string]interface{}
@@ -148,6 +150,38 @@ func (o *RunnerHealthcheck) SetProxyUrl(v string) {
 	o.ProxyUrl = &v
 }
 
+// GetApiUrl returns the ApiUrl field value if set, zero value otherwise.
+func (o *RunnerHealthcheck) GetApiUrl() string {
+	if o == nil || IsNil(o.ApiUrl) {
+		var ret string
+		return ret
+	}
+	return *o.ApiUrl
+}
+
+// GetApiUrlOk returns a tuple with the ApiUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RunnerHealthcheck) GetApiUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.ApiUrl) {
+		return nil, false
+	}
+	return o.ApiUrl, true
+}
+
+// HasApiUrl returns a boolean if a field has been set.
+func (o *RunnerHealthcheck) HasApiUrl() bool {
+	if o != nil && !IsNil(o.ApiUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetApiUrl gets a reference to the given string and assigns it to the ApiUrl field.
+func (o *RunnerHealthcheck) SetApiUrl(v string) {
+	o.ApiUrl = &v
+}
+
 // GetAppVersion returns the AppVersion field value
 func (o *RunnerHealthcheck) GetAppVersion() string {
 	if o == nil {
@@ -190,6 +224,9 @@ func (o RunnerHealthcheck) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ProxyUrl) {
 		toSerialize["proxyUrl"] = o.ProxyUrl
+	}
+	if !IsNil(o.ApiUrl) {
+		toSerialize["apiUrl"] = o.ApiUrl
 	}
 	toSerialize["appVersion"] = o.AppVersion
 
@@ -238,6 +275,7 @@ func (o *RunnerHealthcheck) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "metrics")
 		delete(additionalProperties, "domain")
 		delete(additionalProperties, "proxyUrl")
+		delete(additionalProperties, "apiUrl")
 		delete(additionalProperties, "appVersion")
 		o.AdditionalProperties = additionalProperties
 	}

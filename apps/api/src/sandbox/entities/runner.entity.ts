@@ -16,7 +16,6 @@ export class Runner {
 
   @Column({
     nullable: true,
-    unique: true,
   })
   domain: string | null
 
