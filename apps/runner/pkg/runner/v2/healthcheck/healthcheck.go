@@ -92,23 +92,19 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	defer cancel()
 
 	// Collect metrics
-	var metricsPtr *apiclient.RunnerHealthMetrics
-	m, err := s.collector.Collect(reqCtx)
-	if err != nil {
-		s.log.Warn("Failed to collect metrics", slog.Any("error", err))
-	} else {
-		metricsPtr = &apiclient.RunnerHealthMetrics{
-			CurrentCpuUsagePercentage:    m.CPUUsagePercentage,
-			CurrentMemoryUsagePercentage: m.MemoryUsagePercentage,
-			CurrentDiskUsagePercentage:   m.DiskUsagePercentage,
-			CurrentAllocatedCpu:          m.AllocatedCPU,
-			CurrentAllocatedMemoryGiB:    m.AllocatedMemoryGiB,
-			CurrentAllocatedDiskGiB:      m.AllocatedDiskGiB,
-			CurrentSnapshotCount:         m.SnapshotCount,
-			Cpu:                          m.TotalCPU,
-			MemoryGiB:                    m.TotalRAMGiB,
-			DiskGiB:                      m.TotalDiskGiB,
-		}
+	m := s.collector.Collect(reqCtx)
+
+	metricsPtr := &apiclient.RunnerHealthMetrics{
+		CurrentCpuUsagePercentage:    m.CPUUsagePercentage,
+		CurrentMemoryUsagePercentage: m.MemoryUsagePercentage,
+		CurrentDiskUsagePercentage:   m.DiskUsagePercentage,
+		CurrentAllocatedCpu:          m.AllocatedCPU,
+		CurrentAllocatedMemoryGiB:    m.AllocatedMemoryGiB,
+		CurrentAllocatedDiskGiB:      m.AllocatedDiskGiB,
+		CurrentSnapshotCount:         m.SnapshotCount,
+		Cpu:                          m.TotalCPU,
+		MemoryGiB:                    m.TotalRAMGiB,
+		DiskGiB:                      m.TotalDiskGiB,
 	}
 
 	// Build healthcheck request
@@ -130,7 +126,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	healthcheck.SetApiUrl(apiUrl)
 
 	req := s.client.RunnersAPI.RunnerHealthcheck(reqCtx).RunnerHealthcheck(*healthcheck)
-	_, err = req.Execute()
+	_, err := req.Execute()
 	if err != nil {
 		return err
 	}

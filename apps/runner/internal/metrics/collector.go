@@ -47,7 +47,7 @@ func NewCollector(logger *slog.Logger) *Collector {
 }
 
 // Collect gathers current system metrics
-func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
+func (c *Collector) Collect(ctx context.Context) *Metrics {
 	metrics := &Metrics{
 		AllocatedCPU:       c.allocatedCPU,
 		AllocatedMemoryGiB: c.allocatedMemoryGiB,
@@ -91,7 +91,7 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 		metrics.TotalDiskGiB = float32(diskStats.Total) / (1024 * 1024 * 1024)
 	}
 
-	return metrics, nil
+	return metrics
 }
 
 // UpdateAllocations updates the allocation metrics
