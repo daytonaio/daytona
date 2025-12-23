@@ -143,9 +143,9 @@ interface BannerProps extends VariantProps<typeof bannerVariants> {
   total?: number
   currentIndex?: number
   onNext?: () => void
-  isDismissible?: boolean
   className?: string
   icon?: React.ReactNode
+  bannerClassName?: string
 }
 
 export const Banner = ({
@@ -157,8 +157,8 @@ export const Banner = ({
   total = 0,
   currentIndex = 0,
   onNext,
-  isDismissible = true,
   className,
+  bannerClassName,
   icon,
   ...props
 }: BannerProps & React.ComponentProps<typeof motion.div>) => {
@@ -168,7 +168,12 @@ export const Banner = ({
   return (
     <motion.div layout className={cn('w-full relative z-30 origin-top', className)} {...props}>
       <div className={cn(bannerVariants({ variant }))} role={role}>
-        <div className="grid sm:grid-cols-[auto_1fr_auto_auto] grid-cols-[auto_1fr_auto_auto] grid-rows-[auto_auto] sm:grid-rows-1 items-center gap-x-2 px-4 sm:px-5 py-2 max-w-5xl mx-auto">
+        <div
+          className={cn(
+            'grid grid-cols-[auto_1fr_auto_auto] grid-rows-[auto_auto] sm:grid-rows-1 items-center gap-x-2 px-4 sm:px-5 py-2 mx-auto justify-center',
+            bannerClassName,
+          )}
+        >
           {icon || <IconComponent className="h-4 w-4 flex-shrink-0 text-current" />}
 
           <div className="flex items-center gap-3 overflow-hidden">
@@ -192,8 +197,8 @@ export const Banner = ({
           )}
 
           {total > 1 && (
-            <div className="flex items-center gap-2">
-              <span className="opacity-20 border-l border-current h-6" />
+            <div className="flex items-center gap-3">
+              <span className="opacity-20 border-l border-current h-6 ml-1" />
               <div className="flex items-center gap-1">
                 <span className="text-xs font-medium tabular-nums">
                   {currentIndex + 1}/{total}
@@ -205,9 +210,9 @@ export const Banner = ({
             </div>
           )}
 
-          <div className="flex items-center justify-center min-w-6 col-[-1]">
-            {isDismissible && (
-              <BannerButton onClick={() => onDismiss?.()} aria-label="Dismiss">
+          <div className="flex items-center justify-center min-w-6 col-[-1] empty:hidden">
+            {onDismiss && (
+              <BannerButton onClick={() => onDismiss()} aria-label="Dismiss">
                 <XIcon className="w-4 h-4" />
               </BannerButton>
             )}
@@ -231,11 +236,9 @@ function BannerButton({ className, ...props }: React.ComponentProps<'button'>) {
   )
 }
 
-export const BannerStack = () => {
+export const BannerStack = ({ className, bannerClassName }: { className?: string; bannerClassName?: string }) => {
   const { notifications, removeBanner } = useBanner()
   const [activeIndex, setActiveIndex] = useState(0)
-
-  const next = () => setActiveIndex((prev) => (prev + 1) % notifications.length)
 
   useEffect(() => {
     if (notifications.length > 0 && activeIndex >= notifications.length) {
@@ -245,6 +248,20 @@ export const BannerStack = () => {
 
   const activeItem = notifications.length > 0 ? notifications[activeIndex] : null
 
+  const handleNext = useCallback(
+    () => setActiveIndex((prev) => (prev + 1) % notifications.length),
+    [notifications.length],
+  )
+
+  const handleDismiss = useCallback(() => {
+    activeItem?.onDismiss?.()
+    if (activeItem?.id) {
+      removeBanner(activeItem.id)
+    }
+  }, [activeItem, removeBanner])
+
+  const _handleDismiss = activeItem?.onDismiss ? handleDismiss : undefined
+
   if (!activeItem) {
     return null
   }
@@ -252,7 +269,7 @@ export const BannerStack = () => {
   return (
     <motion.div
       layout
-      className="relative w-full overflow-hidden"
+      className={cn('relative w-full overflow-hidden', className)}
       initial={false}
       animate={{ height: activeItem ? 'auto' : 0 }}
       transition={{ duration: 0.2 }}
@@ -260,17 +277,13 @@ export const BannerStack = () => {
       <AnimatePresence mode="popLayout" initial={false}>
         {activeItem && (
           <Banner
+            bannerClassName={bannerClassName}
             key={activeItem.id}
             {...activeItem}
             total={notifications.length}
             currentIndex={activeIndex}
-            onNext={next}
-            onDismiss={() => {
-              activeItem.onDismiss?.()
-              if (activeItem.id) {
-                removeBanner(activeItem.id)
-              }
-            }}
+            onNext={handleNext}
+            onDismiss={_handleDismiss}
             initial={{ opacity: 0, y: -20, filter: 'blur(2px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 20, filter: 'blur(2px)' }}
