@@ -5,7 +5,7 @@
 
 import { useTheme } from '@/contexts/ThemeContext'
 import { CheckIcon, ClipboardIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Highlight, themes, type PrismTheme, type Token } from 'prism-react-renderer'
 
 interface CodeSnippet {
@@ -13,12 +13,23 @@ interface CodeSnippet {
   code: string
 }
 
-interface CodeBlockProps {
-  code?: string
-  snippets?: CodeSnippet[]
-  language: string
-  showCopy?: boolean
-}
+type CodeBlockProps =
+  | {
+      code?: string
+      snippets?: never
+      language: string
+      showCopy?: boolean
+      selectedSnippetLabel?: never
+      onSelectSnippet?: never
+    }
+  | {
+      code?: never
+      snippets: CodeSnippet[]
+      language: string
+      showCopy?: boolean
+      selectedSnippetLabel?: string
+      onSelectSnippet?: (label: string) => void
+    }
 
 interface HighlightProps {
   style: React.CSSProperties
@@ -27,10 +38,28 @@ interface HighlightProps {
   getTokenProps: (props: { token: Token; key: number }) => React.HTMLAttributes<HTMLSpanElement>
 }
 
-const CodeBlock: React.FC<CodeBlockProps> = ({ code, snippets, language, showCopy = true }) => {
+const CodeBlock: React.FC<CodeBlockProps> = ({
+  code,
+  snippets,
+  language,
+  showCopy = true,
+  selectedSnippetLabel,
+  onSelectSnippet,
+}) => {
   const [copied, setCopied] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const { theme } = useTheme()
+
+  useEffect(() => {
+    if (snippets) {
+      const index = selectedSnippetLabel ? snippets.findIndex((snippet) => snippet.label === selectedSnippetLabel) : 0
+      if (index !== -1 && index !== activeTab) {
+        setActiveTab(index)
+      } else if (index === -1 && activeTab !== 0) {
+        setActiveTab(0) // Fallback to first tab if selected label is not found
+      }
+    }
+  }, [selectedSnippetLabel, snippets, activeTab])
 
   const hasMultipleSnippets = snippets && snippets.length > 1
   const currentCode = snippets ? snippets[activeTab].code : code
@@ -47,11 +76,24 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, snippets, language, showCop
   return (
     <div className="relative rounded-lg">
       {hasMultipleSnippets && (
-        <div className="flex border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg overflow-x-auto">
+        <div
+          role="tablist"
+          className="flex border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg overflow-x-auto"
+        >
           {snippets!.map((snippet, idx) => (
             <button
               key={idx}
-              onClick={() => setActiveTab(idx)}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === idx}
+              aria-controls={`code-tabpanel-${idx}`}
+              tabIndex={activeTab === idx ? 0 : -1}
+              onClick={() => {
+                setActiveTab(idx)
+                if (onSelectSnippet) {
+                  onSelectSnippet(snippet.label)
+                }
+              }}
               className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
                 activeTab === idx
                   ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'

@@ -29,6 +29,7 @@ const Onboarding: React.FC = () => {
   const navigate = useNavigate()
 
   const [language, setLanguage] = useState<'typescript' | 'python'>('python')
+  const [selectedPackageManager, setSelectedPackageManager] = useState<'npm' | 'pnpm' | 'yarn' | 'bun'>('npm')
   const [apiKeyName, setApiKeyName] = useState('')
   const [apiKeyPermissions, setApiKeyPermissions] = useState<CreateApiKeyPermissionsEnum[]>([])
   const [createdApiKey, setCreatedApiKey] = useState<ApiKeyResponse | null>(null)
@@ -161,9 +162,15 @@ const Onboarding: React.FC = () => {
                         ]}
                         language="bash"
                         showCopy
+                        selectedSnippetLabel={selectedPackageManager}
+                        onSelectSnippet={(label) => setSelectedPackageManager(label as 'npm' | 'pnpm' | 'yarn' | 'bun')}
                       />
                     ) : (
-                      <CodeBlock code={codeExamples.python.install} language="bash" showCopy />
+                      <CodeBlock
+                        snippets={[{ label: 'pip', code: codeExamples.python.pip.install }]}
+                        language="bash"
+                        showCopy
+                      />
                     )}
                   </div>
                 </div>
@@ -298,9 +305,15 @@ const Onboarding: React.FC = () => {
                         ]}
                         language="bash"
                         showCopy
+                        selectedSnippetLabel={selectedPackageManager}
+                        onSelectSnippet={(label) => setSelectedPackageManager(label as 'npm' | 'pnpm' | 'yarn' | 'bun')}
                       />
                     ) : (
-                      <CodeBlock code={codeExamples.python.run} language="bash" showCopy />
+                      <CodeBlock
+                        snippets={[{ label: 'python', code: codeExamples.python.pip.run }]}
+                        language="bash"
+                        showCopy
+                      />
                     )}
                   </div>
                 </div>
@@ -368,8 +381,10 @@ console.log(response.result);
   `,
   },
   python: {
-    install: `pip install daytona`,
-    run: `python main.py`,
+    pip: {
+      install: `pip install daytona`,
+      run: `python main.py`,
+    },
     example: `from daytona import Daytona, DaytonaConfig
   
 # Define the configuration
