@@ -3,23 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
-import { useApi } from '@/hooks/useApi'
 import { OrganizationSuspendedError } from '@/api/errors'
-import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { toast } from 'sonner'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useNavigate } from 'react-router-dom'
-import { useNotificationSocket } from '@/hooks/useNotificationSocket'
-import { handleApiError } from '@/lib/error-handling'
-import { RoutePath } from '@/enums/RoutePath'
-import { useAuth } from 'react-oidc-context'
-import { LocalStorageKey } from '@/enums/LocalStorageKey'
-import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
-import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,22 +17,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
-import { formatDuration } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Check, Copy } from 'lucide-react'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { RoutePath } from '@/enums/RoutePath'
+import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
-import { QueryKey, useQueryClient } from '@tanstack/react-query'
+import { useNotificationSocket } from '@/hooks/useNotificationSocket'
+import { useRegions } from '@/hooks/useRegions'
 import {
+  DEFAULT_SANDBOX_SORTING,
   getSandboxesQueryKey,
   SandboxFilters,
-  SandboxSorting,
   SandboxQueryParams,
+  SandboxSorting,
   useSandboxes,
-  DEFAULT_SANDBOX_SORTING,
 } from '@/hooks/useSandboxes'
-import { useRegions } from '@/hooks/useRegions'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshots } from '@/hooks/useSnapshots'
+import { handleApiError } from '@/lib/error-handling'
+import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
+import { formatDuration } from '@/lib/utils'
+import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
+import { QueryKey, useQueryClient } from '@tanstack/react-query'
+import { Check, Copy } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useAuth } from 'react-oidc-context'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi } = useApi()
@@ -792,236 +793,237 @@ const Sandboxes: React.FC = () => {
   }, [navigate, user, selectedOrganization, apiKeyApi])
 
   return (
-    <div className="flex flex-col min-h-dvh px-10 py-3">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Sandboxes</h1>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Sandboxes</PageTitle>
         {!sandboxesDataIsLoading && (!sandboxesData?.items || sandboxesData.items.length === 0) && (
-          <div className="flex items-center gap-2">
-            <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)}>
+          <div className="flex items-center gap-2 ml-auto">
+            <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
               Onboarding guide
             </Button>
-            <Button variant="link" className="text-primary" asChild>
+            <Button variant="link" className="text-primary" asChild size="sm">
               <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
                 Docs
               </a>
             </Button>
           </div>
         )}
-      </div>
+      </PageHeader>
+      <PageContent size="full" className="flex-1">
+        <SandboxTable
+          sandboxIsLoading={sandboxIsLoading}
+          sandboxStateIsTransitioning={sandboxStateIsTransitioning}
+          handleStart={handleStart}
+          handleStop={handleStop}
+          handleDelete={(id: string) => {
+            setSandboxToDelete(id)
+            setShowDeleteDialog(true)
+          }}
+          handleBulkDelete={handleBulkDelete}
+          handleArchive={handleArchive}
+          handleVnc={handleVnc}
+          getWebTerminalUrl={getWebTerminalUrl}
+          handleCreateSshAccess={openCreateSshDialog}
+          handleRevokeSshAccess={openRevokeSshDialog}
+          handleRefresh={handleRefresh}
+          isRefreshing={sandboxDataIsRefreshing}
+          data={sandboxesData?.items || []}
+          loading={sandboxesDataIsLoading}
+          snapshots={snapshotsData?.items || []}
+          snapshotsDataIsLoading={snapshotsDataIsLoading}
+          snapshotsDataHasMore={snapshotsDataHasMore}
+          onChangeSnapshotSearchValue={(name?: string) => handleSnapshotFiltersChange({ name })}
+          regionsData={regionsData || []}
+          regionsDataIsLoading={regionsDataIsLoading}
+          onRowClick={(sandbox: Sandbox) => {
+            setSelectedSandbox(sandbox)
+            setShowSandboxDetails(true)
+          }}
+          pageCount={sandboxesData?.totalPages || 0}
+          totalItems={sandboxesData?.total || 0}
+          onPaginationChange={handlePaginationChange}
+          pagination={{
+            pageIndex: paginationParams.pageIndex,
+            pageSize: paginationParams.pageSize,
+          }}
+          sorting={sorting}
+          onSortingChange={handleSortingChange}
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          handleRecover={handleRecover}
+        />
 
-      <SandboxTable
-        sandboxIsLoading={sandboxIsLoading}
-        sandboxStateIsTransitioning={sandboxStateIsTransitioning}
-        handleStart={handleStart}
-        handleStop={handleStop}
-        handleDelete={(id: string) => {
-          setSandboxToDelete(id)
-          setShowDeleteDialog(true)
-        }}
-        handleBulkDelete={handleBulkDelete}
-        handleArchive={handleArchive}
-        handleVnc={handleVnc}
-        getWebTerminalUrl={getWebTerminalUrl}
-        handleCreateSshAccess={openCreateSshDialog}
-        handleRevokeSshAccess={openRevokeSshDialog}
-        handleRefresh={handleRefresh}
-        isRefreshing={sandboxDataIsRefreshing}
-        data={sandboxesData?.items || []}
-        loading={sandboxesDataIsLoading}
-        snapshots={snapshotsData?.items || []}
-        snapshotsDataIsLoading={snapshotsDataIsLoading}
-        snapshotsDataHasMore={snapshotsDataHasMore}
-        onChangeSnapshotSearchValue={(name?: string) => handleSnapshotFiltersChange({ name })}
-        regionsData={regionsData || []}
-        regionsDataIsLoading={regionsDataIsLoading}
-        onRowClick={(sandbox: Sandbox) => {
-          setSelectedSandbox(sandbox)
-          setShowSandboxDetails(true)
-        }}
-        pageCount={sandboxesData?.totalPages || 0}
-        totalItems={sandboxesData?.total || 0}
-        onPaginationChange={handlePaginationChange}
-        pagination={{
-          pageIndex: paginationParams.pageIndex,
-          pageSize: paginationParams.pageSize,
-        }}
-        sorting={sorting}
-        onSortingChange={handleSortingChange}
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        handleRecover={handleRecover}
-      />
+        {sandboxToDelete && (
+          <AlertDialog
+            open={showDeleteDialog}
+            onOpenChange={(isOpen) => {
+              setShowDeleteDialog(isOpen)
+              if (!isOpen) {
+                setSandboxToDelete(null)
+              }
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Sandbox Deletion</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this sandbox? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className={buttonVariants({ variant: 'destructive' })}
+                  onClick={() => handleDelete(sandboxToDelete)}
+                  disabled={sandboxIsLoading[sandboxToDelete]}
+                >
+                  {sandboxIsLoading[sandboxToDelete] ? 'Deleting...' : 'Delete'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
 
-      {sandboxToDelete && (
+        {/* Create SSH Access Dialog */}
         <AlertDialog
-          open={showDeleteDialog}
+          open={showCreateSshDialog}
           onOpenChange={(isOpen) => {
-            setShowDeleteDialog(isOpen)
+            setShowCreateSshDialog(isOpen)
             if (!isOpen) {
-              setSandboxToDelete(null)
+              setSshToken('')
+              setSshExpiryMinutes(60)
+              setSshSandboxId('')
             }
           }}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Sandbox Deletion</AlertDialogTitle>
+              <AlertDialogTitle>Create SSH Access</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this sandbox? This action cannot be undone.
+                {sshToken
+                  ? 'SSH access has been created successfully. Use the token below to connect:'
+                  : 'Set the expiration time for SSH access:'}
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="space-y-4">
+              {!sshToken ? (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Expiry (minutes):</Label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="1440"
+                    value={sshExpiryMinutes}
+                    onChange={(e) => setSshExpiryMinutes(Number(e.target.value))}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              ) : (
+                <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                  <span className="overflow-x-auto pr-2 cursor-text select-all">
+                    {config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
+                      `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`}
+                  </span>
+                  {(copied === 'SSH Command' && <Check className="w-4 h-4" />) || (
+                    <Copy
+                      className="w-4 h-4 cursor-pointer"
+                      onClick={() =>
+                        copyToClipboard(
+                          config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
+                            `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`,
+                          'SSH Command',
+                        )
+                      }
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+            <AlertDialogFooter>
+              {!sshToken ? (
+                <>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleCreateSshAccess(sshSandboxId)}
+                    disabled={!sshSandboxId}
+                    className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  >
+                    Create
+                  </AlertDialogAction>
+                </>
+              ) : (
+                <AlertDialogAction
+                  onClick={() => setShowCreateSshDialog(false)}
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                >
+                  Close
+                </AlertDialogAction>
+              )}
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Revoke SSH Access Dialog */}
+        <AlertDialog
+          open={showRevokeSshDialog}
+          onOpenChange={(isOpen) => {
+            setShowRevokeSshDialog(isOpen)
+            if (!isOpen) {
+              setRevokeSshToken('')
+              setSshSandboxId('')
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Revoke SSH Access</AlertDialogTitle>
+              <AlertDialogDescription>Enter the SSH access token you want to revoke:</AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <label className="text-sm font-medium">SSH Token:</label>
+                <input
+                  type="text"
+                  value={revokeSshToken}
+                  onChange={(e) => setRevokeSshToken(e.target.value)}
+                  placeholder="Enter SSH token to revoke"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            </div>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className={buttonVariants({ variant: 'destructive' })}
-                onClick={() => handleDelete(sandboxToDelete)}
-                disabled={sandboxIsLoading[sandboxToDelete]}
+                onClick={() => handleRevokeSshAccess(sshSandboxId)}
+                disabled={!revokeSshToken.trim() || !sshSandboxId}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               >
-                {sandboxIsLoading[sandboxToDelete] ? 'Deleting...' : 'Delete'}
+                Revoke Access
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      )}
 
-      {/* Create SSH Access Dialog */}
-      <AlertDialog
-        open={showCreateSshDialog}
-        onOpenChange={(isOpen) => {
-          setShowCreateSshDialog(isOpen)
-          if (!isOpen) {
-            setSshToken('')
-            setSshExpiryMinutes(60)
-            setSshSandboxId('')
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Create SSH Access</AlertDialogTitle>
-            <AlertDialogDescription>
-              {sshToken
-                ? 'SSH access has been created successfully. Use the token below to connect:'
-                : 'Set the expiration time for SSH access:'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4">
-            {!sshToken ? (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Expiry (minutes):</Label>
-                <input
-                  type="number"
-                  min="1"
-                  max="1440"
-                  value={sshExpiryMinutes}
-                  onChange={(e) => setSshExpiryMinutes(Number(e.target.value))}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-              </div>
-            ) : (
-              <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                <span className="overflow-x-auto pr-2 cursor-text select-all">
-                  {config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
-                    `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`}
-                </span>
-                {(copied === 'SSH Command' && <Check className="w-4 h-4" />) || (
-                  <Copy
-                    className="w-4 h-4 cursor-pointer"
-                    onClick={() =>
-                      copyToClipboard(
-                        config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
-                          `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`,
-                        'SSH Command',
-                      )
-                    }
-                  />
-                )}
-              </div>
-            )}
-          </div>
-          <AlertDialogFooter>
-            {!sshToken ? (
-              <>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => handleCreateSshAccess(sshSandboxId)}
-                  disabled={!sshSandboxId}
-                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                >
-                  Create
-                </AlertDialogAction>
-              </>
-            ) : (
-              <AlertDialogAction
-                onClick={() => setShowCreateSshDialog(false)}
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              >
-                Close
-              </AlertDialogAction>
-            )}
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Revoke SSH Access Dialog */}
-      <AlertDialog
-        open={showRevokeSshDialog}
-        onOpenChange={(isOpen) => {
-          setShowRevokeSshDialog(isOpen)
-          if (!isOpen) {
-            setRevokeSshToken('')
-            setSshSandboxId('')
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Revoke SSH Access</AlertDialogTitle>
-            <AlertDialogDescription>Enter the SSH access token you want to revoke:</AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <label className="text-sm font-medium">SSH Token:</label>
-              <input
-                type="text"
-                value={revokeSshToken}
-                onChange={(e) => setRevokeSshToken(e.target.value)}
-                placeholder="Enter SSH token to revoke"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => handleRevokeSshAccess(sshSandboxId)}
-              disabled={!revokeSshToken.trim() || !sshSandboxId}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-            >
-              Revoke Access
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <SandboxDetailsSheet
-        sandbox={selectedSandbox}
-        open={showSandboxDetails}
-        onOpenChange={setShowSandboxDetails}
-        sandboxIsLoading={sandboxIsLoading}
-        handleStart={handleStart}
-        handleStop={handleStop}
-        handleDelete={(id) => {
-          setSandboxToDelete(id)
-          setShowDeleteDialog(true)
-          setShowSandboxDetails(false)
-        }}
-        handleArchive={handleArchive}
-        getWebTerminalUrl={getWebTerminalUrl}
-        writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
-        deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
-        handleRecover={handleRecover}
-      />
-    </div>
+        <SandboxDetailsSheet
+          sandbox={selectedSandbox}
+          open={showSandboxDetails}
+          onOpenChange={setShowSandboxDetails}
+          sandboxIsLoading={sandboxIsLoading}
+          handleStart={handleStart}
+          handleStop={handleStop}
+          handleDelete={(id) => {
+            setSandboxToDelete(id)
+            setShowDeleteDialog(true)
+            setShowSandboxDetails(false)
+          }}
+          handleArchive={handleArchive}
+          getWebTerminalUrl={getWebTerminalUrl}
+          writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
+          deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
+          handleRecover={handleRecover}
+        />
+      </PageContent>
+    </PageLayout>
   )
 }
 

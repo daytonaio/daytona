@@ -278,14 +278,13 @@ export class SnapshotService {
         where: { snapshotRef: buildSnapshotRef },
       })
 
-      if (
-        existingBuildInfo &&
-        // Update lastUsed once per minute at most
-        (await this.redisLockProvider.lock(`build-info:${existingBuildInfo.snapshotRef}:update`, 60))
-      ) {
+      if (existingBuildInfo) {
         snapshot.buildInfo = existingBuildInfo
-        existingBuildInfo.lastUsedAt = new Date()
-        await this.buildInfoRepository.save(existingBuildInfo)
+        // Update lastUsed once per minute at most
+        if (await this.redisLockProvider.lock(`build-info:${existingBuildInfo.snapshotRef}:update`, 60)) {
+          existingBuildInfo.lastUsedAt = new Date()
+          await this.buildInfoRepository.save(existingBuildInfo)
+        }
       } else {
         const buildInfoEntity = this.buildInfoRepository.create({
           ...createSnapshotDto.buildInfo,

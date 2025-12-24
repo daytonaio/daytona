@@ -8,8 +8,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
-import React, { useState } from 'react'
 import { Archive, Copy, Play, Tag, Trash, Wrench, X } from 'lucide-react'
+import React, { useState } from 'react'
 import { toast } from 'sonner'
 import { ResourceChip } from './ResourceChip'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
@@ -254,10 +254,10 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1">
               <div>
                 <h3 className="text-sm text-muted-foreground">Resources</h3>
-                <div className="mt-1 text-sm font-medium flex items-center gap-1">
+                <div className="mt-1 text-sm font-medium flex items-center gap-1 flex-wrap">
                   <ResourceChip resource="cpu" value={sandbox.cpu} />
                   <ResourceChip resource="memory" value={sandbox.memory} />
                   <ResourceChip resource="disk" value={sandbox.disk} />

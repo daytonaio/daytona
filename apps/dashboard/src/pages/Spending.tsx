@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useEffect, useState } from 'react'
-import { useCallback } from 'react'
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { UsageChart, UsageChartData } from '@/components/UsageChart'
 import { useApi } from '@/hooks/useApi'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useCallback, useEffect, useState } from 'react'
 
 const Spending = () => {
   const { selectedOrganization } = useSelectedOrganization()
@@ -57,16 +57,21 @@ const Spending = () => {
   }, [fetchOrganizationUsage, fetchPastOrganizationUsage, selectedOrganization])
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Spending</h1>
-      <UsageChart
-        title="Cost Breakdown"
-        usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
-          convertUsageToChartData,
-        )}
-        showTotal
-      />
-    </div>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Spending</PageTitle>
+      </PageHeader>
+
+      <PageContent size="full">
+        <UsageChart
+          title="Cost Breakdown"
+          usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
+            convertUsageToChartData,
+          )}
+          showTotal
+        />
+      </PageContent>
+    </PageLayout>
   )
 }
 

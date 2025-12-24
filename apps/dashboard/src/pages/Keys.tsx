@@ -3,20 +3,21 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { CreateApiKeyDialog } from '@/components/CreateApiKeyDialog'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { useApi } from '@/hooks/useApi'
+import { useConfig } from '@/hooks/useConfig'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
 import {
   ApiKeyList,
   ApiKeyResponse,
   CreateApiKeyPermissionsEnum,
   OrganizationUserRoleEnum,
 } from '@daytonaio/api-client'
-import { ApiKeyTable } from '../components/ApiKeyTable'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { CreateApiKeyDialog } from '@/components/CreateApiKeyDialog'
-import { handleApiError } from '@/lib/error-handling'
-import { useConfig } from '@/hooks/useConfig'
+import { ApiKeyTable } from '../components/ApiKeyTable'
 
 const Keys: React.FC = () => {
   const { apiKeyApi } = useApi()
@@ -104,18 +105,21 @@ const Keys: React.FC = () => {
   )
 
   return (
-    <div className="px-6 py-2">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">API Keys</h1>
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>API Keys</PageTitle>
         <CreateApiKeyDialog
+          className="ml-auto"
           availablePermissions={availablePermissions}
           onCreateApiKey={handleCreateKey}
           apiUrl={apiUrl}
         />
-      </div>
+      </PageHeader>
 
-      <ApiKeyTable data={keys} loading={loading} isLoadingKey={isLoadingKey} onRevoke={handleRevoke} />
-    </div>
+      <PageContent size="full">
+        <ApiKeyTable data={keys} loading={loading} isLoadingKey={isLoadingKey} onRevoke={handleRevoke} />
+      </PageContent>
+    </PageLayout>
   )
 }
 

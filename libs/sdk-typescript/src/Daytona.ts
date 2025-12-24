@@ -220,7 +220,7 @@ export class Daytona {
   private readonly jwtToken?: string
   private readonly organizationId?: string
   private readonly apiUrl: string
-  private proxyToolboxUrl?: string
+  private proxyToolboxUrlPromise?: Promise<string>
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -726,11 +726,15 @@ export class Daytona {
   }
 
   public async getProxyToolboxUrl(): Promise<string> {
-    if (this.proxyToolboxUrl) {
-      return this.proxyToolboxUrl
+    if (this.proxyToolboxUrlPromise) {
+      return await this.proxyToolboxUrlPromise
     }
 
-    this.proxyToolboxUrl = (await this.configApi.configControllerGetConfig()).data.proxyToolboxUrl
-    return this.proxyToolboxUrl
+    this.proxyToolboxUrlPromise = (async () => {
+      const config = await this.configApi.configControllerGetConfig()
+      return config.data.proxyToolboxUrl
+    })()
+
+    return await this.proxyToolboxUrlPromise
   }
 }

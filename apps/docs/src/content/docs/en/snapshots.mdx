@@ -48,6 +48,16 @@ To use a private Docker Hub image, you'll need to [add a Container Registry](/do
 - **Password**: Use a [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/) (not your account password)
 - **Create the Snapshot**: Once the registry is added, you can create a Snapshot using the full image path as the image name: `docker.io/<username>/<image>:<tag>`
 
+#### Using Google Artifact Registry
+
+To use an image from Google Artifact Registry, you need to configure the registry using a [Service Account key](https://cloud.google.com/iam/docs/keys-create-delete) in JSON format:
+
+- **Registry URL**: The base URL for your region (e.g., `https://us-central1-docker.pkg.dev` or `https://us-central1-docker.pkg.dev/your-org`).
+- **Username**: Set this specifically to `_json_key`.
+- **Password**: Paste the full contents of your Service Account JSON key file.
+- **Project**: Your Google Cloud Project ID.
+- **Create the Snapshot**: Once added, create a Snapshot using the full image path: `us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`.
+
 ### Using a Local Image
 
 In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.

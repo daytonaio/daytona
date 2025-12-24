@@ -3,11 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { Building2, ChevronsUpDown, PlusCircle, SquareUserRound } from 'lucide-react'
-import { Organization } from '@daytonaio/api-client'
-import { useApi } from '@/hooks/useApi'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,12 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
+import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { CreateOrganizationDialog } from './CreateOrganizationDialog'
-import { SidebarMenuItem, SidebarMenuButton, SidebarMenu } from '@/components/ui/sidebar'
-import { handleApiError } from '@/lib/error-handling'
 import { useRegions } from '@/hooks/useRegions'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
+import { Organization } from '@daytonaio/api-client'
+import { Building2, ChevronsUpDown, PlusCircle, SquareUserRound } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import { CreateOrganizationDialog } from './CreateOrganizationDialog'
 
 export const OrganizationPicker: React.FC = () => {
   const { organizationsApi } = useApi()
@@ -95,47 +95,46 @@ export const OrganizationPicker: React.FC = () => {
   }
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem className={`mb-1 ${loadingSelectOrganization ? 'cursor-progress' : ''}`}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              disabled={loadingSelectOrganization}
-              className="outline outline-1 outline-border outline-offset-0 mb-2 bg-muted px-3"
-            >
-              <div className="w-4 h-4 flex-shrink-0 bg-black rounded-full text-white flex items-center justify-center text-[10px] font-bold">
-                {optimisticSelectedOrganization.name[0].toUpperCase()}
-              </div>
-              <span className="truncate text-foreground">{optimisticSelectedOrganization.name}</span>
-              <ChevronsUpDown className="ml-auto w-4 h-4 opacity-50" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
-            <div className="max-h-44 overflow-y-auto">
-              {sortedOrganizations.map((org) => (
-                <DropdownMenuItem
-                  key={org.id}
-                  onClick={() => handleSelectOrganization(org.id)}
-                  className="cursor-pointer flex items-center gap-2"
-                >
-                  {getOrganizationIcon(org)}
-                  <span className="truncate">{org.name}</span>
-                </DropdownMenuItem>
-              ))}
+    <SidebarMenuItem>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuButton
+            disabled={loadingSelectOrganization}
+            className="outline outline-1 outline-border outline-offset-0 mb-2 bg-muted"
+            tooltip={optimisticSelectedOrganization.name}
+          >
+            <div className="w-4 h-4 flex-shrink-0 bg-black rounded-full text-white flex items-center justify-center text-[10px] font-bold">
+              {optimisticSelectedOrganization.name[0].toUpperCase()}
             </div>
-            <DropdownMenuSeparator />
-            <div>
+            <span className="truncate text-foreground">{optimisticSelectedOrganization.name}</span>
+            <ChevronsUpDown className="ml-auto w-4 h-4 opacity-50" />
+          </SidebarMenuButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
+          <div className="max-h-44 overflow-y-auto">
+            {sortedOrganizations.map((org) => (
               <DropdownMenuItem
-                className="cursor-pointer text-primary flex items-center gap-2"
-                onClick={() => setShowCreateOrganizationDialog(true)}
+                key={org.id}
+                onClick={() => handleSelectOrganization(org.id)}
+                className="cursor-pointer flex items-center gap-2"
               >
-                <PlusCircle className="w-4 h-4 flex-shrink-0" />
-                <span>Create Organization</span>
+                {getOrganizationIcon(org)}
+                <span className="truncate">{org.name}</span>
               </DropdownMenuItem>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
+            ))}
+          </div>
+          <DropdownMenuSeparator />
+          <div>
+            <DropdownMenuItem
+              className="cursor-pointer text-primary flex items-center gap-2"
+              onClick={() => setShowCreateOrganizationDialog(true)}
+            >
+              <PlusCircle className="w-4 h-4 flex-shrink-0" />
+              <span>Create Organization</span>
+            </DropdownMenuItem>
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <CreateOrganizationDialog
         open={showCreateOrganizationDialog}
@@ -145,6 +144,6 @@ export const OrganizationPicker: React.FC = () => {
         getRegionName={getRegionName}
         onCreateOrganization={handleCreateOrganization}
       />
-    </SidebarMenu>
+    </SidebarMenuItem>
   )
 }

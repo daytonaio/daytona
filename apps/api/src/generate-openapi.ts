@@ -5,6 +5,15 @@ import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
 import { getOpenApiConfig } from './openapi.config'
 import { addWebhookDocumentation } from './openapi-webhooks'
+import {
+  SandboxCreatedWebhookDto,
+  SandboxStateUpdatedWebhookDto,
+  SnapshotCreatedWebhookDto,
+  SnapshotStateUpdatedWebhookDto,
+  SnapshotRemovedWebhookDto,
+  VolumeCreatedWebhookDto,
+  VolumeStateUpdatedWebhookDto,
+} from './webhook/dto/webhook-event-payloads.dto'
 
 async function generateOpenAPI() {
   const app = await NestFactory.create(AppModule, {
@@ -21,7 +30,17 @@ async function generateOpenAPI() {
   // Generate 3.1.0 version of the OpenAPI specification
   // Needed for the webhook documentation
   const document_3_1_0 = {
-    ...SwaggerModule.createDocument(app, config),
+    ...SwaggerModule.createDocument(app, config, {
+      extraModels: [
+        SandboxCreatedWebhookDto,
+        SandboxStateUpdatedWebhookDto,
+        SnapshotCreatedWebhookDto,
+        SnapshotStateUpdatedWebhookDto,
+        SnapshotRemovedWebhookDto,
+        VolumeCreatedWebhookDto,
+        VolumeStateUpdatedWebhookDto,
+      ],
+    }),
     openapi: '3.1.0',
   }
   const documentWithWebhooks = addWebhookDocumentation(document_3_1_0)

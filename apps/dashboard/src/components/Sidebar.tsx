@@ -11,11 +11,13 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -23,6 +25,7 @@ import { RoutePath } from '@/enums/RoutePath'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
+import { cn } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { addHours, formatRelative } from 'date-fns'
 import {
@@ -50,10 +53,11 @@ import {
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 interface SidebarProps {
   isBannerVisible: boolean
@@ -61,28 +65,29 @@ interface SidebarProps {
   version: string
 }
 
+interface SidebarItem {
+  icon: React.ReactElement
+  label: string
+  path: RoutePath | string
+  onClick?: () => void
+}
+
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
-  const navigate = useNavigate()
   const { pathname } = useLocation()
+  const sidebar = useSidebar()
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
   const sidebarItems = useMemo(() => {
-    const arr: Array<{
-      icon: React.ReactElement
-      label: string
-      path: RoutePath | string
-      onClick?: () => void
-    }> = [
+    const arr: SidebarItem[] = [
       {
         icon: <Container size={16} strokeWidth={1.5} />,
         label: 'Sandboxes',
         path: RoutePath.SANDBOXES,
       },
-      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'Keys', path: RoutePath.KEYS },
       {
         icon: <Box size={16} strokeWidth={1.5} />,
         label: 'Snapshots',
@@ -101,6 +106,38 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         path: RoutePath.VOLUMES,
       })
     }
+
+    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_AUDIT_LOGS)) {
+      arr.push({
+        icon: <TextSearch size={16} strokeWidth={1.5} />,
+        label: 'Audit Logs',
+        path: RoutePath.AUDIT_LOGS,
+      })
+    }
+
+    return arr
+  }, [authenticatedUserHasPermission])
+
+  const settingsItems = useMemo(() => {
+    const arr: SidebarItem[] = [
+      {
+        icon: <Settings size={16} strokeWidth={1.5} />,
+        label: 'Settings',
+        path: RoutePath.SETTINGS,
+      },
+      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
+    ]
+
+    // Add Webhooks link if webhooks are initialized
+    if (webhooksInitialized) {
+      arr.push({
+        icon: <Mail size={16} strokeWidth={1.5} />,
+        label: 'Webhooks',
+        path: '#webhooks' as any, // This will be handled by onClick
+        onClick: () => openAppPortal(),
+      })
+    }
+
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({
         icon: <LockKeyhole size={16} strokeWidth={1.5} />,
@@ -119,36 +156,9 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
     }
-    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_AUDIT_LOGS)) {
-      arr.push({
-        icon: <TextSearch size={16} strokeWidth={1.5} />,
-        label: 'Audit Logs',
-        path: RoutePath.AUDIT_LOGS,
-      })
-    }
 
-    // Add Webhooks link if webhooks are initialized
-    if (webhooksInitialized) {
-      arr.push({
-        icon: <Mail size={16} strokeWidth={1.5} />,
-        label: 'Webhooks',
-        path: '#webhooks' as any, // This will be handled by onClick
-        onClick: () => openAppPortal(),
-      })
-    }
-    arr.push({
-      icon: <Settings size={16} strokeWidth={1.5} />,
-      label: 'Settings',
-      path: RoutePath.SETTINGS,
-    })
     return arr
-  }, [
-    authenticatedUserOrganizationMember?.role,
-    selectedOrganization?.personal,
-    authenticatedUserHasPermission,
-    webhooksInitialized,
-    openAppPortal,
-  ])
+  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized, openAppPortal])
 
   const billingItems = useMemo(() => {
     if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
@@ -175,57 +185,100 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
 
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
-      <SidebarContent>
-        <SidebarGroup>
-          <div className="flex justify-between items-center gap-2 px-2 mb-2 h-12">
-            <div className="flex items-center gap-2 group-data-[state=collapsed]:hidden text-primary">
-              <Logo />
-              <LogoText />
-            </div>
-            <SidebarTrigger className="p-2 [&_svg]:size-5" />
+      <SidebarHeader>
+        <div
+          className={cn('flex justify-between items-center gap-2 px-2 mb-2 h-12', {
+            'justify-center px-0': !sidebar.open,
+          })}
+        >
+          <div className="flex items-center gap-2 group-data-[state=collapsed]:hidden text-primary">
+            <Logo />
+            <LogoText />
           </div>
+          <SidebarTrigger className="p-2 [&_svg]:size-5" />
+        </div>
+        <SidebarMenu>
           <OrganizationPicker />
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {sidebarItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
-                    {item.onClick ? (
-                      <button onClick={() => item.onClick?.()}>
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </button>
-                    ) : (
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <ScrollArea fade="shadow" className="overflow-auto flex-1">
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {sidebarItems.map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(item.path)}
+                      className="text-sm"
+                      tooltip={item.label}
+                    >
+                      {item.onClick ? (
+                        <button onClick={() => item.onClick?.()}>
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </button>
+                      ) : (
+                        <Link to={item.path}>
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </Link>
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarSeparator />
+
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {settingsItems.map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(item.path)}
+                      className="text-sm"
+                      tooltip={item.label}
+                    >
                       <Link to={item.path}>
                         {item.icon}
                         <span>{item.label}</span>
                       </Link>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          {billingItems.length > 0 && <SidebarGroupLabel>Billing</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {billingItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)} className="text-sm">
-                    <Link to={item.path}>
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarSeparator />
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {billingItems.map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(item.path)}
+                      className="text-sm"
+                      tooltip={item.label}
+                    >
+                      <Link to={item.path}>
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </ScrollArea>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="pb-4">
         <SidebarMenu>
           {selectedOrganization?.suspended && (
             <SidebarMenuItem key="suspended">
@@ -293,13 +346,14 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="h-8 py-0"
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              tooltip="Toggle theme"
             >
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem key="slack">
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip="Slack">
               <a href={DAYTONA_SLACK_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <Slack size={16} strokeWidth={1.5} />
                 <span>Slack</span>
@@ -307,7 +361,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem key="docs">
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip="Docs">
               <a href={DAYTONA_DOCS_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <BookOpen size={16} strokeWidth={1.5} />
                 <span>Docs</span>
@@ -317,7 +371,15 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="h-12 flex flex-shrink-0 items-center outline outline-1 outline-border outline-offset-0 bg-muted font-medium mt-2">
+                <SidebarMenuButton
+                  className={cn(
+                    'flex flex-shrink-0 items-center outline outline-1 outline-border outline-offset-0 bg-muted font-medium mt-2',
+                    {
+                      'h-12': sidebar.open,
+                    },
+                  )}
+                  tooltip="Profile"
+                >
                   {user?.profile.picture ? (
                     <img
                       src={user.profile.picture}
@@ -374,8 +436,12 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </DropdownMenu>
           </SidebarMenuItem>
           <SidebarMenuItem key="version">
-            <div className="flex items-center w-full justify-center gap-2 pt-2">
-              <span className="text-xs text-muted-foreground">Version {version}</span>
+            <div
+              className={cn(
+                'flex items-center w-full justify-center gap-2 mt-2 overflow-auto min-h-4 whitespace-nowrap',
+              )}
+            >
+              {sidebar.open && <span className="text-xs text-muted-foreground">Version {version}</span>}
             </div>
           </SidebarMenuItem>
         </SidebarMenu>

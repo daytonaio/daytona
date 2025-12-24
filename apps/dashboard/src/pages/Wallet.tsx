@@ -5,6 +5,7 @@
 
 import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { OrganizationEmailsTable } from '@/components/OrganizationEmails'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -212,80 +213,83 @@ const Wallet = () => {
   const isBillingLoading = walletQuery.isLoading || billingPortalUrlQuery.isLoading
 
   return (
-    <div className="p-6 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-3">Wallet</h1>
-      {isBillingLoading && (
-        <div className="flex flex-col gap-6">
-          <Card className="flex flex-col gap-4">
-            <CardContent className="flex flex-col gap-4">
-              <Skeleton className="h-5 w-full max-w-sm" />
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-10 flex-1" />
-                <Skeleton className="h-10 flex-1" />
-              </div>
-              <Skeleton className=" h-10" />
-              <Skeleton className=" h-10" />
-            </CardContent>
-          </Card>
-          <Card className="flex flex-col gap-4">
-            <CardContent className="flex flex-col gap-4">
-              <Skeleton className="h-5 w-full max-w-sm" />
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-10 flex-1" />
-                <Skeleton className="h-10 flex-1" />
-              </div>
-              <Skeleton className=" h-10" />
-            </CardContent>
-          </Card>
-        </div>
-      )}
-      {wallet && (
-        <>
-          {user && (
-            <>
-              {!user.profile.email_verified && (
-                <Alert variant="destructive">
-                  <TriangleAlertIcon />
-                  <AlertTitle>Verify your email</AlertTitle>
-                  <AlertDescription>
-                    {wallet.balanceCents && wallet.balanceCents > 0 ? (
-                      <>
-                        Please verify your email address to complete your account setup.
-                        <br />A verification email was sent to you.
-                      </>
-                    ) : (
-                      <>
-                        Verify your email address to recieve $100 of credits.
-                        <br />A verification email was sent to you.
-                      </>
-                    )}
-                  </AlertDescription>
-                </Alert>
-              )}
-              {!wallet.creditCardConnected && user.profile.email_verified && (
-                <Alert variant="warning">
-                  <CreditCardIcon />
-                  <AlertTitle> Credit card not connected</AlertTitle>
-                  <AlertDescription>
-                    {selectedOrganization?.personal ? (
-                      <>Connect a credit card to receive an additional $100 of credits.</>
-                    ) : (
-                      <>Please connect your credit card to your account to continue using our service.</>
-                    )}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </>
-          )}
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Wallet</PageTitle>
+      </PageHeader>
 
-          <div className="flex flex-col gap-6 mt-4">
+      <PageContent>
+        {isBillingLoading && (
+          <div className="flex flex-col gap-6">
+            <Card className="flex flex-col gap-4">
+              <CardContent className="flex flex-col gap-4">
+                <Skeleton className="h-5 w-full max-w-sm" />
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-10 flex-1" />
+                </div>
+                <Skeleton className=" h-10" />
+                <Skeleton className=" h-10" />
+              </CardContent>
+            </Card>
+            <Card className="flex flex-col gap-4">
+              <CardContent className="flex flex-col gap-4">
+                <Skeleton className="h-5 w-full max-w-sm" />
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-10 flex-1" />
+                </div>
+                <Skeleton className=" h-10" />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        {wallet && (
+          <>
+            {user && (
+              <>
+                {!user.profile.email_verified && (
+                  <Alert variant="destructive">
+                    <TriangleAlertIcon />
+                    <AlertTitle>Verify your email</AlertTitle>
+                    <AlertDescription>
+                      {wallet.balanceCents && wallet.balanceCents > 0 ? (
+                        <>
+                          Please verify your email address to complete your account setup.
+                          <br />A verification email was sent to you.
+                        </>
+                      ) : (
+                        <>
+                          Verify your email address to recieve $100 of credits.
+                          <br />A verification email was sent to you.
+                        </>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {!wallet.creditCardConnected && user.profile.email_verified && (
+                  <Alert variant="warning">
+                    <CreditCardIcon />
+                    <AlertTitle> Credit card not connected</AlertTitle>
+                    <AlertDescription>
+                      {selectedOrganization?.personal ? (
+                        <>Connect a credit card to receive an additional $100 of credits.</>
+                      ) : (
+                        <>Please connect your credit card to your account to continue using our service.</>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </>
+            )}
+
             <Card className="h-full">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent className="">
                 <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-center justify-between">
-                  <div className="flex gap-4 sm:gap-12 items-end sm:flex-row flex-col">
+                  <div className="flex gap-4 sm:gap-12 sm:flex-row flex-col">
                     <div className="flex flex-col gap-1">
                       <div className="">Current balance</div>
                       <div className="text-xl text-foreground font-semibold">
@@ -470,12 +474,10 @@ const Wallet = () => {
                 </CardFooter>
               </Card>
             )}
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      {/* Organization Emails Section */}
-      <div className="mt-8">
+        {/* Organization Emails Section */}
         <Card>
           <CardHeader>
             <CardTitle>Billing emails</CardTitle>
@@ -494,8 +496,8 @@ const Wallet = () => {
             />
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </PageContent>
+    </PageLayout>
   )
 }
 

@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import * as React from 'react'
 import { Column } from '@tanstack/react-table'
 import { Check, PlusCircle } from 'lucide-react'
+import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 import { Badge } from './badge'
@@ -47,7 +47,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className={cn('h-10 border-dashed', className)}>
+        <Button variant="outline" size="sm" className={cn('border-dashed', className)}>
           <PlusCircle />
           {title}
           {selectedValues?.size > 0 && (

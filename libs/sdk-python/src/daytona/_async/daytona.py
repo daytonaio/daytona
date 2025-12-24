@@ -194,7 +194,8 @@ class AsyncDaytona:
         self._sandbox_api = SandboxApi(self._api_client)
         self._object_storage_api = ObjectStorageApi(self._api_client)
         self._config_api = ConfigApi(self._api_client)
-        self._proxy_toolbox_url = None
+        self._proxy_toolbox_url_task: Optional[asyncio.Task] = None
+        self._proxy_toolbox_url_task_lock = asyncio.Lock()
 
         # Initialize services
         self.volume = AsyncVolumeService(VolumesApi(self._api_client))
@@ -686,6 +687,18 @@ class AsyncDaytona:
         return new_client
 
     async def _get_proxy_toolbox_url(self):
-        if self._proxy_toolbox_url is None:
-            self._proxy_toolbox_url = (await self._config_api.config_controller_get_config()).proxy_toolbox_url
-        return self._proxy_toolbox_url
+        if self._proxy_toolbox_url_task is not None:
+            return await self._proxy_toolbox_url_task
+
+        async with self._proxy_toolbox_url_task_lock:
+            # Double-check: another coroutine might have created the task
+            if self._proxy_toolbox_url_task is None:
+
+                async def _fetch():
+                    config = await self._config_api.config_controller_get_config()
+                    return config.proxy_toolbox_url
+
+                self._proxy_toolbox_url_task = asyncio.create_task(_fetch())
+
+        # All coroutines that made it here can now await the same task in parallel
+        return await self._proxy_toolbox_url_task

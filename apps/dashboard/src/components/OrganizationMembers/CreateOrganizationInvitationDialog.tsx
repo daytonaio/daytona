@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
-import { CreateOrganizationInvitationRoleEnum, OrganizationRole } from '@daytonaio/api-client'
+import { ViewerOrganizationRoleCheckbox } from '@/components/OrganizationMembers/ViewerOrganizationRoleCheckbox'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -21,7 +19,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { ViewerOrganizationRoleCheckbox } from '@/components/OrganizationMembers/ViewerOrganizationRoleCheckbox'
+import { CreateOrganizationInvitationRoleEnum, OrganizationRole } from '@daytonaio/api-client'
+import { Plus } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 
 interface CreateOrganizationInvitationDialogProps {
   availableRoles: OrganizationRole[]
@@ -31,12 +31,14 @@ interface CreateOrganizationInvitationDialogProps {
     role: CreateOrganizationInvitationRoleEnum,
     assignedRoleIds: string[],
   ) => Promise<boolean>
+  className?: string
 }
 
 export const CreateOrganizationInvitationDialog: React.FC<CreateOrganizationInvitationDialogProps> = ({
   availableRoles,
   loadingAvailableRoles,
   onCreateInvitation,
+  className,
 }) => {
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
@@ -103,7 +105,7 @@ export const CreateOrganizationInvitationDialog: React.FC<CreateOrganizationInvi
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="default" size="sm" className="w-auto px-4" title="Add Registry">
+        <Button variant="default" size="sm" className={className} title="Add Registry">
           <Plus className="w-4 h-4" />
           Invite Member
         </Button>

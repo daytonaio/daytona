@@ -448,6 +448,45 @@ export const getSidebarConfig = (
             icon: 'langchain.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/claude', locale),
+          label: labels['sidebarconfig.claude'],
+          disablePagination: true,
+          attrs: {
+            icon: 'claude.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/claude-agent-sdk-interactive-terminal-sandbox',
+            locale
+          ),
+          label: labels['sidebarconfig.claude'],
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/claude-agent-sdk-connect-service-sandbox',
+            locale
+          ),
+          label: labels['sidebarconfig.claude'],
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/claude-code-run-tasks-stream-logs-sandbox',
+            locale
+          ),
+          label: labels['sidebarconfig.claude'],
+          disablePagination: true,
+          hideInSidebar: true,
+        },
       ],
     },
     {
