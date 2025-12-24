@@ -18,6 +18,7 @@ import { SnapshotRunner } from './snapshot-runner.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { BuildInfo } from './build-info.entity'
 import { SnapshotRegion } from './snapshot-region.entity'
+import { RunnerClass } from '../enums/runner-class'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -106,4 +107,11 @@ export class Snapshot {
     onDelete: 'CASCADE',
   })
   snapshotRegions: SnapshotRegion[]
+
+  @Column({
+    type: 'enum',
+    enum: RunnerClass,
+    default: RunnerClass.LINUX,
+  })
+  runnerClass: RunnerClass
 }

@@ -40,7 +40,7 @@ type RunnerFull struct {
 	// The type of GPU
 	GpuType *string `json:"gpuType,omitempty"`
 	// The class of the runner
-	Class SandboxClass `json:"class"`
+	Class RunnerClass `json:"class"`
 	// Current CPU usage percentage
 	CurrentCpuUsagePercentage *float32 `json:"currentCpuUsagePercentage,omitempty"`
 	// Current RAM usage percentage
@@ -93,7 +93,7 @@ type _RunnerFull RunnerFull
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string, apiKey string) *RunnerFull {
+func NewRunnerFull(id string, cpu float32, memory float32, disk float32, class RunnerClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string, apiKey string) *RunnerFull {
 	this := RunnerFull{}
 	this.Id = id
 	this.Cpu = cpu
@@ -377,9 +377,9 @@ func (o *RunnerFull) SetGpuType(v string) {
 }
 
 // GetClass returns the Class field value
-func (o *RunnerFull) GetClass() SandboxClass {
+func (o *RunnerFull) GetClass() RunnerClass {
 	if o == nil {
-		var ret SandboxClass
+		var ret RunnerClass
 		return ret
 	}
 
@@ -388,7 +388,7 @@ func (o *RunnerFull) GetClass() SandboxClass {
 
 // GetClassOk returns a tuple with the Class field value
 // and a boolean to check if the value has been set.
-func (o *RunnerFull) GetClassOk() (*SandboxClass, bool) {
+func (o *RunnerFull) GetClassOk() (*RunnerClass, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -396,7 +396,7 @@ func (o *RunnerFull) GetClassOk() (*SandboxClass, bool) {
 }
 
 // SetClass sets field value
-func (o *RunnerFull) SetClass(v SandboxClass) {
+func (o *RunnerFull) SetClass(v RunnerClass) {
 	o.Class = v
 }
 

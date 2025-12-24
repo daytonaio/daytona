@@ -4,8 +4,8 @@
  */
 
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
+import { RunnerClass } from '../enums/runner-class'
 
 @Entity()
 @Unique(['region', 'name'])
@@ -63,10 +63,10 @@ export class Runner {
 
   @Column({
     type: 'enum',
-    enum: SandboxClass,
-    default: SandboxClass.SMALL,
+    enum: RunnerClass,
+    default: RunnerClass.LINUX,
   })
-  class: SandboxClass
+  class: RunnerClass
 
   @Column({
     type: 'float',
@@ -178,7 +178,7 @@ export class Runner {
     this.domain = params.domain ?? null
     this.apiUrl = params.apiUrl
     this.proxyUrl = params.proxyUrl
-    this.class = SandboxClass.SMALL
+    this.class = RunnerClass.LINUX
     this.apiVersion = params.apiVersion
     this.appVersion = params.appVersion ?? null
     this.gpu = null

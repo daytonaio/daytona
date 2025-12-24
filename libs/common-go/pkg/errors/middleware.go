@@ -81,7 +81,7 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 					Method:     ctx.Request.Method,
 				}
 			default:
-				errorResponse = defaultErrorHandler(ctx, err)
+				errorResponse = defaultErrorHandler(ctx, err.Err)
 			}
 
 			if errorResponse.StatusCode == http.StatusInternalServerError {

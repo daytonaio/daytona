@@ -25,6 +25,7 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { RunnerClass } from '../../enums/runner-class'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -139,18 +140,21 @@ export class SandboxStartAction extends SandboxAction {
     // Get snapshot reference based on whether it's a pull or build operation
     let snapshotRef: string
 
+    let runnerClass = RunnerClass.LINUX
+
     if (isBuild) {
       snapshotRef = sandbox.buildInfo.snapshotRef
     } else {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       snapshotRef = snapshot.ref
+      runnerClass = snapshot.runnerClass
     }
 
     // Try to assign an available runner with the snapshot already available
     try {
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        runnerClass,
         snapshotRef: snapshotRef,
       })
       if (runner) {
@@ -192,7 +196,7 @@ export class SandboxStartAction extends SandboxAction {
     try {
       runner = await this.runnerService.getRandomAvailableRunner({
         regions: [sandbox.region],
-        sandboxClass: sandbox.class,
+        runnerClass,
         excludedRunnerIds: excludedRunnerIds,
       })
     } catch {
@@ -382,9 +386,14 @@ export class SandboxStartAction extends SandboxAction {
       // but there are too many running sandboxes on that runner, move it to a less used runner
       if (sandbox.backupState === BackupState.COMPLETED) {
         if (runner.availabilityScore < this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')) {
+          let runnerClass = RunnerClass.LINUX
+          if (sandbox.snapshot) {
+            const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+            runnerClass = snapshot.runnerClass
+          }
           const availableRunners = await this.runnerService.findAvailableRunners({
             regions: [sandbox.region],
-            sandboxClass: sandbox.class,
+            runnerClass,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== originalRunnerId)
 
@@ -712,10 +721,15 @@ export class SandboxStartAction extends SandboxAction {
 
     const excludedRunnerIds: string[] = excludedRunnerId ? [excludedRunnerId] : []
 
+    let runnerClass = RunnerClass.LINUX
+    if (baseSnapshot) {
+      runnerClass = baseSnapshot.runnerClass
+    }
+
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
           regions: [sandbox.region],
-          sandboxClass: sandbox.class,
+          runnerClass,
           snapshotRef,
           excludedRunnerIds,
         })

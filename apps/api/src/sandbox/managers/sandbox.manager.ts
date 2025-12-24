@@ -393,9 +393,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       return
     }
 
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
+    //  workaround until the side-effect issue is fixed
+    const sandbox = await this.sandboxRepository.findOneBy({
       id: sandboxId,
     })
+    if (!sandbox) {
+      await this.redisLockProvider.unlock(lockKey)
+      return // Sandbox was deleted, nothing to sync
+    }
 
     if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
       await this.redisLockProvider.unlock(lockKey)

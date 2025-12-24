@@ -140,13 +140,13 @@ models/region.ts
 models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts
+models/runner-class.ts
 models/runner-full.ts
 models/runner-health-metrics.ts
 models/runner-healthcheck.ts
 models/runner-snapshot-dto.ts
 models/runner-state.ts
 models/runner.ts
-models/sandbox-class.ts
 models/sandbox-desired-state.ts
 models/sandbox-info.ts
 models/sandbox-labels.ts

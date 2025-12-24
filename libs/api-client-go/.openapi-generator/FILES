@@ -138,13 +138,13 @@ model_registry_push_access_dto.go
 model_replace_request.go
 model_replace_result.go
 model_runner.go
+model_runner_class.go
 model_runner_full.go
 model_runner_health_metrics.go
 model_runner_healthcheck.go
 model_runner_snapshot_dto.go
 model_runner_state.go
 model_sandbox.go
-model_sandbox_class.go
 model_sandbox_desired_state.go
 model_sandbox_info.go
 model_sandbox_labels.go

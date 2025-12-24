@@ -14,10 +14,10 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RunnerState } from './runner-state'
+import type { RunnerClass } from './runner-class'
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SandboxClass } from './sandbox-class'
+import type { RunnerState } from './runner-state'
 
 /**
  *
@@ -81,10 +81,10 @@ export interface Runner {
   gpuType?: string
   /**
    * The class of the runner
-   * @type {SandboxClass}
+   * @type {RunnerClass}
    * @memberof Runner
    */
-  class: SandboxClass
+  class: RunnerClass
   /**
    * Current CPU usage percentage
    * @type {number}

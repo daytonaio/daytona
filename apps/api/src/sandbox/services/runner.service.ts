@@ -18,7 +18,6 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { EventEmitter2 } from '@nestjs/event-emitter'
@@ -41,6 +40,7 @@ import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
+import { RunnerClass } from '../enums/runner-class'
 
 @Injectable()
 export class RunnerService {
@@ -286,8 +286,8 @@ export class RunnerService {
       runnerFilter.region = In(params.regions)
     }
 
-    if (params.sandboxClass !== undefined) {
-      runnerFilter.class = params.sandboxClass
+    if (params.runnerClass !== undefined) {
+      runnerFilter.class = params.runnerClass
     }
 
     const runners = await this.runnerRepository.find({
@@ -828,7 +828,7 @@ export class RunnerService {
 
 export class GetRunnerParams {
   regions?: string[]
-  sandboxClass?: SandboxClass
+  runnerClass?: RunnerClass
   snapshotRef?: string
   excludedRunnerIds?: string[]
   availabilityScoreThreshold?: number

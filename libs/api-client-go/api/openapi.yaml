@@ -10084,12 +10084,12 @@ components:
         - apiKey
         - id
       type: object
-    SandboxClass:
+    RunnerClass:
       description: The class of the runner
       enum:
-        - small
-        - medium
-        - large
+        - linux
+        - linux-exp
+        - windows-exp
       type: string
     RunnerState:
       description: The state of the runner
@@ -10116,7 +10116,7 @@ components:
         id: runner123
         state: initializing
         unschedulable: false
-        class: small
+        class: linux
         currentAllocatedDiskGiB: 50000
         currentAllocatedMemoryGiB: 8000
         gpuType: gpuType
@@ -10170,9 +10170,9 @@ components:
           type: string
         class:
           allOf:
-            - $ref: '#/components/schemas/SandboxClass'
+            - $ref: '#/components/schemas/RunnerClass'
           description: The class of the runner
-          example: small
+          example: linux
         currentCpuUsagePercentage:
           description: Current CPU usage percentage
           example: 45.6
@@ -10288,7 +10288,7 @@ components:
         id: runner123
         state: initializing
         unschedulable: false
-        class: small
+        class: linux
         currentAllocatedDiskGiB: 50000
         currentAllocatedMemoryGiB: 8000
         gpuType: gpuType
@@ -10342,9 +10342,9 @@ components:
           type: string
         class:
           allOf:
-            - $ref: '#/components/schemas/SandboxClass'
+            - $ref: '#/components/schemas/RunnerClass'
           description: The class of the runner
-          example: small
+          example: linux
         currentCpuUsagePercentage:
           description: Current CPU usage percentage
           example: 45.6

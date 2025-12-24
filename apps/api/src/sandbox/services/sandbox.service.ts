@@ -302,7 +302,7 @@ export class SandboxService {
 
     const runner = await this.runnerService.getRandomAvailableRunner({
       regions: [sandbox.region],
-      sandboxClass: sandbox.class,
+      runnerClass: snapshot.runnerClass,
       snapshotRef: snapshot.ref,
     })
 
@@ -430,7 +430,7 @@ export class SandboxService {
 
       const runner = await this.runnerService.getRandomAvailableRunner({
         regions: [regionId],
-        sandboxClass,
+        runnerClass: snapshot.runnerClass,
         snapshotRef: snapshot.ref,
       })
 
@@ -668,7 +668,7 @@ export class SandboxService {
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
           regions: [sandbox.region],
-          sandboxClass: sandbox.class,
+          // no need to specify runner class here, only default runner class will be used for builds
           snapshotRef: sandbox.buildInfo.snapshotRef,
         })
         sandbox.runnerId = runner.id

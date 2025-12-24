@@ -40,7 +40,7 @@ type Runner struct {
 	// The type of GPU
 	GpuType *string `json:"gpuType,omitempty"`
 	// The class of the runner
-	Class SandboxClass `json:"class"`
+	Class RunnerClass `json:"class"`
 	// Current CPU usage percentage
 	CurrentCpuUsagePercentage *float32 `json:"currentCpuUsagePercentage,omitempty"`
 	// Current RAM usage percentage
@@ -89,7 +89,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, cpu float32, memory float32, disk float32, class SandboxClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string) *Runner {
+func NewRunner(id string, cpu float32, memory float32, disk float32, class RunnerClass, region string, name string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string, apiVersion string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Cpu = cpu
@@ -372,9 +372,9 @@ func (o *Runner) SetGpuType(v string) {
 }
 
 // GetClass returns the Class field value
-func (o *Runner) GetClass() SandboxClass {
+func (o *Runner) GetClass() RunnerClass {
 	if o == nil {
-		var ret SandboxClass
+		var ret RunnerClass
 		return ret
 	}
 
@@ -383,7 +383,7 @@ func (o *Runner) GetClass() SandboxClass {
 
 // GetClassOk returns a tuple with the Class field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetClassOk() (*SandboxClass, bool) {
+func (o *Runner) GetClassOk() (*RunnerClass, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -391,7 +391,7 @@ func (o *Runner) GetClassOk() (*SandboxClass, bool) {
 }
 
 // SetClass sets field value
-func (o *Runner) SetClass(v SandboxClass) {
+func (o *Runner) SetClass(v RunnerClass) {
 	o.Class = v
 }
 

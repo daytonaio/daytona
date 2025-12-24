@@ -21,8 +21,8 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client_async.models.region_type import RegionType
+from daytona_api_client_async.models.runner_class import RunnerClass
 from daytona_api_client_async.models.runner_state import RunnerState
-from daytona_api_client_async.models.sandbox_class import SandboxClass
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -39,7 +39,7 @@ class RunnerFull(BaseModel):
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB")
     gpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The GPU capacity of the runner")
     gpu_type: Optional[StrictStr] = Field(default=None, description="The type of GPU", alias="gpuType")
-    var_class: SandboxClass = Field(description="The class of the runner", alias="class")
+    var_class: RunnerClass = Field(description="The class of the runner", alias="class")
     current_cpu_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU usage percentage", alias="currentCpuUsagePercentage")
     current_memory_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current RAM usage percentage", alias="currentMemoryUsagePercentage")
     current_disk_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current disk usage percentage", alias="currentDiskUsagePercentage")
