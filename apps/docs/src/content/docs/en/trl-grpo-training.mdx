@@ -1,6 +1,6 @@
 ---
 title: Train LLMs with Reinforcement Learning Using TRL and Daytona
-description: Use 500 parallel Daytona sandboxes to train code-generating LLMs with TRL's GRPO trainer.
+description: Use parallel Daytona sandboxes to train code-generating LLMs with TRL's GRPO trainer.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -8,26 +8,31 @@ import { Image } from 'astro:assets'
 
 import rewardsPlot from '../../../assets/docs/images/trl-grpo-rewards-plot.png'
 
-This guide demonstrates how to use Daytona sandboxes to safely execute hundreds of code completions in parallel during reinforcement learning training. We'll use [TRL's](https://huggingface.co/docs/trl/) GRPOTrainer together with **500 Daytona sandboxes evaluating completions concurrently**, in order to train the `Qwen3-1.7B-Base` model on code-writing tasks.
+This guide demonstrates how to use Daytona sandboxes to safely execute hundreds of code completions in parallel during reinforcement learning training.
+
+We use [TRL](https://huggingface.co/docs/trl/)'s GRPOTrainer together with 500 Daytona sandboxes evaluating completions concurrently, in order to train the `Qwen3-1.7B-Base` model on some basic code-writing tasks.
 
 ---
 
-### 1. Overview
+### 1. Workflow Overview
+
+This guide presents a simple, self-contained script that performs reinforcement learning training of `Qwen3-1.7B-Base`. In particular, we use **reinforcement learning with verifiable rewards**, with the reward being computed from the test pass rate of model-written functions.
 
 The training loop consists of following steps:
-
 1. **Generate**: The model produces many code completions for each prompt (e.g., 250 completions per prompt per step)
 2. **Evaluate**: Each completion runs in its own Daytona sandbox against a test suite
 3. **Reward**: Completions that pass more tests get higher rewards; errors or banned patterns get negative rewards
 4. **Update**: GRPO reinforces completions that scored above their group average
 
-The evaluation step happens in parallel across all 500 sandboxes.
+The evaluation step happens in parallel across all 500 sandboxes. The sandboxes are spawned once at the start of the training and reused throughout it, and cleaned up after the training completes.
 
 ### 2. Setup
 
-The code in this guide is written to run on a single 80GB VRAM GPU. If you want to run it on a GPU with less VRAM, you can decrease `per_device_train_batch_size` parameter, possibly increasing `gradient_accumulation_steps` proportionally if you wish to keep effective batch size at 500.
-
 #### Clone the Repository
+
+:::note[GPU Requirement]
+This guide is written to run on a single 80GB VRAM GPU. If you want to run it on a GPU with less VRAM, you can decrease `per_device_train_batch_size` parameter, possibly increasing `gradient_accumulation_steps` proportionally if you wish to keep effective batch size at 500.
+:::
 
 Clone the [Daytona repository](https://github.com/daytonaio/daytona.git) and navigate to the example directory:
 
@@ -217,36 +222,42 @@ The main evaluation function ties everything together - it sanitizes the complet
     ) -> EvalResult:
         task = PROMPT_TO_TASK[prompt]
         num_task_tests = len(task["tests"])
-
-        # Step 1: Extract just the function body
         body = sanitize_completion(raw_completion)
 
-        # Step 2: Reject empty completions
         if not body.strip():
             return _fail_result(num_task_tests)
-
-        # Step 3: Reject completions with banned patterns
         if has_banned_pattern(body, task):
             return _fail_result(num_task_tests)
 
-        # Step 4: Build executable test code
         code = build_test_harness(task, body)
 
-        # Step 5: Run in sandbox with timeout
         try:
             response = await sandbox.code_interpreter.run_code(
                 code, timeout=MAX_TIMEOUT_SECONDS
             )
         except DaytonaTimeoutError:
+            print(
+                f"Completion timed out after {MAX_TIMEOUT_SECONDS}s "
+                f"in sandbox {getattr(sandbox, 'id', '?')}"
+            )
+            return _fail_result(num_task_tests)
+        except Exception as e:
+            print(
+                f"Error evaluating completion in sandbox {getattr(sandbox, 'id', '?')}: "
+                f"{type(e).__name__}: {e}",
+            )
             return _fail_result(num_task_tests)
 
-        # Step 6: Parse results from stdout
         if response.error is not None:
             return _fail_result(num_task_tests)
-
         raw_output = response.stdout.strip()
+        if not raw_output:
+            return _fail_result(num_task_tests)
         last_line = raw_output.splitlines()[-1]
-        results = json.loads(last_line)
+        try:
+            results = json.loads(last_line)
+        except Exception:
+            return _fail_result(num_task_tests)
         correct = results.get("results", [])
 
         return {
