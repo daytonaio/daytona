@@ -130,6 +130,24 @@ func IsBadRequestError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "bad request")
 }
 
+type ForbiddenError struct {
+	Message string
+}
+
+func (e *ForbiddenError) Error() string {
+	return e.Message
+}
+
+func NewForbiddenError(err error) error {
+	return &ForbiddenError{
+		Message: fmt.Sprintf("forbidden: %s", err.Error()),
+	}
+}
+
+func IsForbiddenError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "forbidden")
+}
+
 type RequestTimeoutError struct {
 	Message string
 }

@@ -13,11 +13,13 @@ import (
 )
 
 type Config struct {
-	DaemonLogFilePath            string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
-	EntrypointLogFilePath        string `envconfig:"DAYTONA_ENTRYPOINT_LOG_FILE_PATH"`
-	EntrypointShutdownTimeoutSec int    `envconfig:"ENTRYPOINT_SHUTDOWN_TIMEOUT_SEC"`
-	SigtermShutdownTimeoutSec    int    `envconfig:"SIGTERM_SHUTDOWN_TIMEOUT_SEC"`
-	UserHomeAsWorkDir            bool   `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
+	DaemonLogFilePath                    string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
+	EntrypointLogFilePath                string `envconfig:"DAYTONA_ENTRYPOINT_LOG_FILE_PATH"`
+	EntrypointShutdownTimeoutSec         int    `envconfig:"ENTRYPOINT_SHUTDOWN_TIMEOUT_SEC"`
+	SigtermShutdownTimeoutSec            int    `envconfig:"SIGTERM_SHUTDOWN_TIMEOUT_SEC"`
+	UserHomeAsWorkDir                    bool   `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
+	TerminationGracePeriodSeconds        int    `envconfig:"DAYTONA_TERMINATION_GRACE_PERIOD_SECONDS"`        // Period in seconds to wait before forcefully terminating processes
+	TerminationCheckIntervalMilliseconds int    `envconfig:"DAYTONA_TERMINATION_CHECK_INTERVAL_MILLISECONDS"` // Interval in milliseconds to check for process termination
 }
 
 var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"
@@ -60,6 +62,16 @@ func GetConfig() (*Config, error) {
 	if config.SigtermShutdownTimeoutSec <= 0 {
 		// Default to 5 seconds
 		config.SigtermShutdownTimeoutSec = 5
+	}
+
+	if config.TerminationGracePeriodSeconds <= 0 {
+		// Default to 5 seconds
+		config.TerminationGracePeriodSeconds = 5
+	}
+
+	if config.TerminationCheckIntervalMilliseconds <= 0 {
+		// Default to 100 milliseconds
+		config.TerminationCheckIntervalMilliseconds = 100
 	}
 
 	return config, nil

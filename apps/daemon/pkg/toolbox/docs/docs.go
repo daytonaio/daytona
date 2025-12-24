@@ -2210,7 +2210,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Session"
+                                "$ref": "#/definitions/SessionDTO"
                             }
                         }
                     }
@@ -2271,7 +2271,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Session"
+                            "$ref": "#/definitions/SessionDTO"
                         }
                     }
                 }
@@ -2330,7 +2330,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Command"
+                            "$ref": "#/definitions/CommandDTO"
                         }
                     }
                 }
@@ -2495,7 +2495,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "Command": {
+        "CommandDTO": {
             "type": "object",
             "required": [
                 "command",
@@ -3555,7 +3555,7 @@ const docTemplate = `{
                 }
             }
         },
-        "Session": {
+        "SessionDTO": {
             "type": "object",
             "required": [
                 "commands",
@@ -3565,7 +3565,7 @@ const docTemplate = `{
                 "commands": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Command"
+                        "$ref": "#/definitions/CommandDTO"
                     }
                 },
                 "sessionId": {

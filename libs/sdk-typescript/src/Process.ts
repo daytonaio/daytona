@@ -6,8 +6,8 @@
 import {
   Configuration,
   ProcessApi,
-  Command,
-  Session,
+  CommandDTO,
+  SessionDTO,
   SessionExecuteRequest,
   SessionExecuteResponse as ApiSessionExecuteResponse,
   PtyCreateRequest,
@@ -221,7 +221,7 @@ export class Process {
    * Get a session in the sandbox.
    *
    * @param {string} sessionId - Unique identifier of the session to retrieve
-   * @returns {Promise<Session>} Session information including:
+   * @returns {Promise<SessionDTO>} SessionDTO information including:
    *                            - sessionId: The session's unique identifier
    *                            - commands: List of commands executed in the session
    *
@@ -231,7 +231,7 @@ export class Process {
    *   console.log(`Command: ${cmd.command}`);
    * });
    */
-  public async getSession(sessionId: string): Promise<Session> {
+  public async getSession(sessionId: string): Promise<SessionDTO> {
     const response = await this.apiClient.getSession(sessionId)
     return response.data
   }
@@ -241,7 +241,7 @@ export class Process {
    *
    * @param {string} sessionId - Unique identifier of the session
    * @param {string} commandId - Unique identifier of the command
-   * @returns {Promise<Command>} Command information including:
+   * @returns {Promise<CommandDTO>} CommandDTO information including:
    *                            - id: The command's unique identifier
    *                            - command: The executed command string
    *                            - exitCode: Command's exit status (if completed)
@@ -252,7 +252,7 @@ export class Process {
    *   console.log(`Command ${cmd.command} completed successfully`);
    * }
    */
-  public async getSessionCommand(sessionId: string, commandId: string): Promise<Command> {
+  public async getSessionCommand(sessionId: string, commandId: string): Promise<CommandDTO> {
     const response = await this.apiClient.getSessionCommand(sessionId, commandId)
     return response.data
   }
@@ -387,7 +387,7 @@ export class Process {
   /**
    * Lists all active sessions in the Sandbox.
    *
-   * @returns {Promise<Session[]>} Array of active sessions
+   * @returns {Promise<SessionDTO[]>} Array of active sessions
    *
    * @example
    * const sessions = await process.listSessions();
@@ -398,7 +398,7 @@ export class Process {
    *   });
    * });
    */
-  public async listSessions(): Promise<Session[]> {
+  public async listSessions(): Promise<SessionDTO[]> {
     const response = await this.apiClient.listSessions()
     return response.data
   }

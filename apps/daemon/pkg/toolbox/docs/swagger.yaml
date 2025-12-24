@@ -1,5 +1,5 @@
 definitions:
-  Command:
+  CommandDTO:
     properties:
       command:
         type: string
@@ -704,11 +704,11 @@ definitions:
     required:
       - files
     type: object
-  Session:
+  SessionDTO:
     properties:
       commands:
         items:
-          $ref: '#/definitions/Command'
+          $ref: '#/definitions/CommandDTO'
         type: array
       sessionId:
         type: string
@@ -2278,7 +2278,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Session'
+              $ref: '#/definitions/SessionDTO'
             type: array
       summary: List all sessions
       tags:
@@ -2334,7 +2334,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Session'
+            $ref: '#/definitions/SessionDTO'
       summary: Get session details
       tags:
         - process
@@ -2359,7 +2359,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/Command'
+            $ref: '#/definitions/CommandDTO'
       summary: Get session command details
       tags:
         - process
