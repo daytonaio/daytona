@@ -8,7 +8,7 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "daytona>=0.128.0",
+    "daytona>=0.128.1,<1.0.0",
     "datasets>=3.0.0",
     "trl[vllm]>=0.26.0",
     "python-dotenv>=1.2.1",
