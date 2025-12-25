@@ -20,6 +20,7 @@ type CreateSandboxDTO struct {
 	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
 	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
 	Metadata         map[string]string `json:"metadata,omitempty"`
+	SkipStart        *bool             `json:"skipStart,omitempty"`
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {

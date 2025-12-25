@@ -99,6 +99,12 @@ export interface CreateSandboxDTO {
   registry?: RegistryDTO
   /**
    *
+   * @type {boolean}
+   * @memberof CreateSandboxDTO
+   */
+  skipStart?: boolean
+  /**
+   *
    * @type {string}
    * @memberof CreateSandboxDTO
    */
