@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { Daytona, Image, Sandbox } from '@daytonaio/sdk'
 import { InterpreterContext } from '@daytonaio/toolbox-api-client'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
@@ -60,6 +60,8 @@ async function main() {
     // The sandbox language is irrelevant since we will use the code interpreter SDK
     console.log('Creating sandbox...')
     sandbox = await daytona.create({
+      image: Image.base("nikolaik/python-nodejs:latest"),
+      resources: { memory: 2 }, // Claude Code is memory-intensive
       envVars: {
         ANTHROPIC_API_KEY: process.env.SANDBOX_ANTHROPIC_API_KEY,
       },
