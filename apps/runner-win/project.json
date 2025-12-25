@@ -1,0 +1,130 @@
+{
+  "name": "runner-win",
+  "$schema": "../../runner_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/runner-win",
+  "tags": [],
+  "targets": {
+    "copy-daemon-bin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static/daemon-amd64"
+      },
+      "dependsOn": [
+        {
+          "target": "build-amd64",
+          "projects": "daemon"
+        }
+      ]
+    },
+    "copy-computeruse-plugin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
+      },
+      "dependsOn": [
+        {
+          "target": "build-amd64",
+          "projects": "computer-use"
+        }
+      ]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go build -o ../../dist/apps/runner-win ./cmd/runner"
+      },
+      "configurations": {
+        "production": {
+          "command": "go build -o ../../dist/apps/runner-win -ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\" ./cmd/runner"
+        }
+      },
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
+    },
+    "build-amd64": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "GOARCH=amd64 GOOS=linux go build -o ../../dist/apps/runner-win-amd64 ./cmd/runner"
+      },
+      "configurations": {
+        "production": {
+          "command": "GOARCH=amd64 GOOS=linux go build -o ../../dist/apps/runner-win-amd64 -ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\" ./cmd/runner"
+        }
+      },
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "cmd": "sudo -E PATH=/usr/local/go/bin:$PATH $(which gow)",
+        "cwd": "apps/runner-win",
+        "main": "./cmd/runner/main.go"
+      },
+      "configurations": {
+        "production": {}
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        },
+        "build",
+        "copy-daemon-bin",
+        "copy-computeruse-plugin"
+      ]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,json}\""
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}/pkg/api",
+        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
+      }
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "runner"
+      },
+      "dependsOn": [
+        "check-version-env",
+        {
+          "target": "build-amd64",
+          "projects": "computer-use"
+        }
+      ]
+    },
+    "package-deb": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p dist/apps/runner-win-deb/deb/opt/daytona",
+          "mkdir -p dist/apps/runner-win-deb/deb/etc/systemd/system",
+          "mkdir -p dist/apps/runner-win-deb/deb/DEBIAN",
+          "cp dist/apps/runner-win-amd64 dist/apps/runner-win-deb/deb/opt/daytona/runner-win",
+          "cp {projectRoot}/packaging/systemd/daytona-runner.service dist/apps/runner-win-deb/deb/etc/systemd/system/",
+          "cp {projectRoot}/packaging/deb/DEBIAN/postinst {projectRoot}/packaging/deb/DEBIAN/prerm {projectRoot}/packaging/deb/DEBIAN/postrm dist/apps/runner-win-deb/deb/DEBIAN/",
+          "VERSION=${VERSION:-0.1.0} envsubst < {projectRoot}/packaging/deb/DEBIAN/control > dist/apps/runner-win-deb/deb/DEBIAN/control",
+          "dpkg-deb --build dist/apps/runner-win-deb/deb dist/apps/runner-win-deb/daytona-runner_${VERSION:-0.0.0-dev}_amd64.deb"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build-amd64", "check-version-env"]
+    },
+    "push-manifest": {}
+  },
+  "implicitDependencies": ["computer-use", "daemon"]
+}

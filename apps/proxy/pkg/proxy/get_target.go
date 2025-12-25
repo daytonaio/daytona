@@ -70,6 +70,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 
 	runnerInfo, err := p.getRunnerInfo(ctx, sandboxID)
 	if err != nil {
+		log.Errorf("failed to get runner info: %v", err)
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
 		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
 	}
