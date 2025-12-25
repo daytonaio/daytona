@@ -38,6 +38,10 @@ Install the Daytona SDK and Anthropic SDK to your project:
   <TabItem label="TypeScript" icon="seti:typescript">
     `bash npm install @daytonaio/sdk @anthropic-ai/sdk dotenv `
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    `bash gem install daytona anthropic dotenv `
+  </TabItem>
 </Tabs>
 
 #### 1.2 Configure Environment
@@ -100,6 +104,20 @@ Now create a [Daytona sandbox](/docs/en/sandbox-management/#basic-sandbox-creati
 
     // Upload the dataset to the sandbox
     await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+    require 'dotenv/load'
+
+    # Create sandbox
+    daytona = Daytona::Daytona.new # The sandbox language is Python by default.
+    sandbox = daytona.create
+
+    # Upload the dataset to the sandbox
+    sandbox.fs.upload_file(File.read('dataset.csv'), '/home/daytona/dataset.csv')
     ```
   </TabItem>
 </Tabs>

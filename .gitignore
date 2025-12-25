@@ -66,6 +66,11 @@ vitest.config.*.timestamp*
 *.pyc
 __pycache__/
 
+# Ruby gem artifacts
+*.gem
+**/.bundle/
+**/vendor/bundle
+
 examples/**/*.png
 
 **/.venv

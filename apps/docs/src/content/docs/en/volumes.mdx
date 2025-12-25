@@ -25,9 +25,14 @@ volume = daytona.volume.get("my-volume", create=True)
 const volume = await daytona.volume.get('my-volume', true)
 ```
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+volume = daytona.volume.get('my-volume', create: true)
+```
+</TabItem>
 </Tabs>
 
-See: [volume.get (Python SDK)](/docs/python-sdk/sync/volume/#volumeserviceget), [volume.get (TypeScript SDK)](/docs/typescript-sdk/volume/#get)
+See: [volume.get (Python SDK)](/docs/python-sdk/sync/volume/#volumeserviceget), [volume.get (TypeScript SDK)](/docs/typescript-sdk/volume/#get), [volume.get (Ruby SDK)](/docs/ruby-sdk/volume/#get)
 
 ## Mounting Volumes
 
@@ -97,9 +102,42 @@ const sandbox2 = await daytona.create({
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# Create a new volume or get an existing one
+volume = daytona.volume.get('my-volume', create: true)
+
+# Mount the volume to the sandbox
+mount_dir = '/home/daytona/volume'
+
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [DaytonaApiClient::SandboxVolume.new(volume_id: volume.id, mount_path: mount_dir)]
+)
+sandbox = daytona.create(params)
+
+# Mount a specific subpath within the volume
+# This is useful for isolating data or implementing multi-tenancy
+params2 = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [DaytonaApiClient::SandboxVolume.new(
+    volume_id: volume.id,
+    mount_path: mount_dir,
+    subpath: 'users/alice'
+  )]
+)
+sandbox2 = daytona.create(params2)
+```
+
+</TabItem>
 </Tabs>
 
-See: [CreateSandboxFromSnapshotParams (Python SDK)](/docs/python-sdk/sync/daytona#createSandboxBaseParams), [CreateSandboxFromSnapshotParams (TypeScript SDK)](/docs/typescript-sdk/daytona#createSandboxBaseParams)
+See: [CreateSandboxFromSnapshotParams (Python SDK)](/docs/python-sdk/sync/daytona#createSandboxBaseParams), [CreateSandboxFromSnapshotParams (TypeScript SDK)](/docs/typescript-sdk/daytona#createSandboxBaseParams), [CreateSandboxFromSnapshotParams (Ruby SDK)](/docs/ruby-sdk/daytona#createsandboxfromsnapshotparams)
 
 ## Working with Volumes
 
@@ -129,6 +167,17 @@ Once mounted, you can read from and write to the volume just like any other dire
     await daytona.delete(sandbox1)
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Write to a file in the mounted volume using the Sandbox file system API
+    sandbox.fs.upload_file('Hello from Daytona volume!', '/home/daytona/volume/example.txt')
+
+    # When you're done with the sandbox, you can remove it
+    # The volume will persist even after the sandbox is removed
+    daytona.delete(sandbox)
+    ```
+  </TabItem>
 </Tabs>
 
 ## Deleting Volumes
@@ -146,6 +195,12 @@ daytona.volume.delete(volume)
 ```typescript
 const volume = await daytona.volume.get('my-volume', true)
 await daytona.volume.delete(volume)
+```
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+volume = daytona.volume.get('my-volume', create: true)
+daytona.volume.delete(volume)
 ```
 </TabItem>
 </Tabs>

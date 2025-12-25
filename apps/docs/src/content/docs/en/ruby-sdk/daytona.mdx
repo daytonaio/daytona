@@ -1,0 +1,422 @@
+---
+title: "Daytona"
+hideTitleOnPage: true
+---
+
+## Daytona
+
+Main class for interacting with the Daytona API.
+Provides methods for creating, managing, and interacting with Daytona Sandboxes.
+Can be initialized either with explicit configuration or using environment variables.
+
+**Attributes**:
+
+- `config` _Daytona::Config_ - Configuration for the Daytona client
+- `volume` _Daytona::VolumeService_ - Service for managing Daytona Volumes
+- `snapshot` _Daytona::SnapshotService_ - Service for managing Daytona Snapshots
+
+**Examples:**
+
+```ruby
+# Using environment variables
+# Uses DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET
+daytona = Daytona::Daytona.new
+sandbox = daytona.create
+```
+
+```ruby
+# Using explicit configuration
+config = Daytona::Config.new(
+  api_key: 'your-api-key',
+  api_url: 'https://your-api.com',
+  target: 'us'
+)
+daytona = Daytona::Daytona.new(config)
+```
+
+### Constructors
+
+#### new Daytona()
+
+```ruby
+def initialize(config = Config.new)
+```
+
+Creates a new Daytona client instance.
+
+**Parameters**:
+
+- `config` _Daytona::Config_ - Configuration options. Defaults to `Daytona::Config.new`
+
+**Returns**:
+
+- `Daytona::Daytona`
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - When API key or JWT token is missing
+
+### Methods
+
+#### create()
+
+```ruby
+def create(params = nil, on_snapshot_create_logs: nil)
+```
+
+Creates a Sandbox with the specified parameters. If no params are provided,
+creates a default Python Sandbox.
+
+**Parameters**:
+
+- `params` _CreateSandboxFromSnapshotParams, CreateSandboxFromImageParams, nil_ - Parameters for Sandbox creation
+- `on_snapshot_create_logs` _Proc, nil_ - Callback proc to handle snapshot creation logs
+
+**Returns**:
+
+- `Daytona::Sandbox` - The created Sandbox instance
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If auto_stop_interval or auto_archive_interval is negative
+
+**Examples:**
+
+```ruby
+# Create a default Python Sandbox
+sandbox = daytona.create
+```
+
+```ruby
+# Create a custom Sandbox from snapshot
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  snapshot: 'my-snapshot-id',
+  env_vars: { 'DEBUG' => 'true' },
+  auto_stop_interval: 0,
+  auto_archive_interval: 60,
+  auto_delete_interval: 120
+)
+sandbox = daytona.create(params)
+```
+
+```ruby
+# Create a Sandbox from image with logs
+params = Daytona::CreateSandboxFromImageParams.new(
+  image: 'debian:12.9',
+  resources: Daytona::Resources.new(cpu: 2, memory: 4)
+)
+sandbox = daytona.create(params, on_snapshot_create_logs: ->(chunk) { print chunk })
+```
+
+***
+
+#### delete()
+
+```ruby
+def delete(sandbox)
+```
+
+Deletes a Sandbox.
+
+**Parameters**:
+
+- `sandbox` _Daytona::Sandbox_ - The Sandbox instance to delete
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+sandbox = daytona.create
+# ... use sandbox ...
+daytona.delete(sandbox)
+```
+
+***
+
+#### get()
+
+```ruby
+def get(id)
+```
+
+Gets a Sandbox by its ID or name.
+
+**Parameters**:
+
+- `id` _String_ - The ID or name of the Sandbox to retrieve
+
+**Returns**:
+
+- `Daytona::Sandbox` - The Sandbox instance
+
+**Example:**
+
+```ruby
+sandbox = daytona.get('my-sandbox-id')
+puts sandbox.state
+```
+
+***
+
+#### find_one()
+
+```ruby
+def find_one(id: nil, labels: nil)
+```
+
+Finds a Sandbox by its ID or labels.
+
+**Parameters**:
+
+- `id` _String, nil_ - The ID or name of the Sandbox to retrieve
+- `labels` _Hash\<String, String\>, nil_ - Labels to filter Sandboxes
+
+**Returns**:
+
+- `Daytona::Sandbox` - First Sandbox that matches the ID or labels
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If no Sandbox is found
+
+**Example:**
+
+```ruby
+sandbox = daytona.find_one(labels: { 'my-label' => 'my-value' })
+puts "Sandbox ID: #{sandbox.id} State: #{sandbox.state}"
+```
+
+***
+
+#### list()
+
+```ruby
+def list(labels = {}, page: nil, limit: nil)
+```
+
+Returns paginated list of Sandboxes filtered by labels.
+
+**Parameters**:
+
+- `labels` _Hash\<String, String\>_ - Labels to filter Sandboxes
+- `page` _Integer, nil_ - Page number for pagination (starting from 1)
+- `limit` _Integer, nil_ - Maximum number of items per page
+
+**Returns**:
+
+- `Daytona::PaginatedResource` - Paginated list of Sandbox instances
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If page or limit is not a positive integer
+
+**Example:**
+
+```ruby
+result = daytona.list({ 'my-label' => 'my-value' }, page: 2, limit: 10)
+result.items.each do |sandbox|
+  puts "#{sandbox.id}: #{sandbox.state}"
+end
+```
+
+***
+
+#### start()
+
+```ruby
+def start(sandbox, timeout = 60)
+```
+
+Starts a Sandbox and waits for it to be ready.
+
+**Parameters**:
+
+- `sandbox` _Daytona::Sandbox_ - The Sandbox to start
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60s)
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+sandbox = daytona.get('my-sandbox-id')
+daytona.start(sandbox, 60)
+```
+
+***
+
+#### stop()
+
+```ruby
+def stop(sandbox, timeout = 60)
+```
+
+Stops a Sandbox and waits for it to be stopped.
+
+**Parameters**:
+
+- `sandbox` _Daytona::Sandbox_ - The Sandbox to stop
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60s)
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+sandbox = daytona.get('my-sandbox-id')
+daytona.stop(sandbox)
+```
+
+## CodeLanguage
+
+Supported programming languages for code execution.
+
+Python is used as the default sandbox language when no language is explicitly specified.
+
+**Module Members**:
+
+- `PYTHON` (`:python`)
+- `TYPESCRIPT` (`:typescript`)
+- `JAVASCRIPT` (`:javascript`)
+
+## Config
+
+Configuration options for initializing the Daytona client.
+
+**Attributes**:
+
+- `api_key` _String, nil_ - API key for authentication with the Daytona API. If not set, it must be provided
+  via the environment variable `DAYTONA_API_KEY`, or a JWT token must be provided instead.
+- `jwt_token` _String, nil_ - JWT token for authentication with the Daytona API. If not set, it must be provided
+  via the environment variable `DAYTONA_JWT_TOKEN`, or an API key must be provided instead.
+- `organization_id` _String, nil_ - Organization ID used for JWT-based authentication. Required if a JWT token
+  is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
+- `api_url` _String, nil_ - URL of the Daytona API. Defaults to `'https://app.daytona.io/api'` if not set
+  here or in the environment variable `DAYTONA_API_URL`.
+- `target` _String, nil_ - Target runner location for the Sandbox. Default region for the organization is used
+  if not set here or in the environment variable `DAYTONA_TARGET`.
+
+**Example:**
+
+```ruby
+config = Daytona::Config.new(api_key: 'your-api-key')
+```
+
+```ruby
+config = Daytona::Config.new(
+  jwt_token: 'your-jwt-token',
+  organization_id: 'your-organization-id'
+)
+```
+
+## CreateSandboxBaseParams
+
+Base parameters for creating a new Sandbox.
+
+**Attributes**:
+
+- `language` _Symbol, nil_ - Programming language for the Sandbox. Defaults to `:python`.
+- `os_user` _String, nil_ - OS user for the Sandbox.
+- `env_vars` _Hash\<String, String\>, nil_ - Environment variables to set in the Sandbox.
+- `labels` _Hash\<String, String\>, nil_ - Custom labels for the Sandbox.
+- `public` _Boolean, nil_ - Whether the Sandbox should be public.
+- `timeout` _Float, nil_ - Timeout in seconds for Sandbox to be created and started.
+- `auto_stop_interval` _Integer, nil_ - Interval in minutes after which Sandbox will
+  automatically stop if no Sandbox event occurs during that time. Default is 15 minutes.
+  0 means no auto-stop.
+- `auto_archive_interval` _Integer, nil_ - Interval in minutes after which a continuously stopped Sandbox will
+  automatically archive. Default is 7 days.
+  0 means the maximum interval will be used.
+- `auto_delete_interval` _Integer, nil_ - Interval in minutes after which a continuously stopped Sandbox will
+  automatically be deleted. By default, auto-delete is disabled.
+  Negative value means disabled, 0 means delete immediately upon stopping.
+- `volumes` _Array, nil_ - List of volume mounts to attach to the Sandbox.
+- `network_block_all` _Boolean, nil_ - Whether to block all network access for the Sandbox.
+- `network_allow_list` _String, nil_ - Comma-separated list of allowed CIDR network addresses for the Sandbox.
+- `ephemeral` _Boolean, nil_ - Whether the Sandbox should be ephemeral.
+  If true, auto_delete_interval will be set to 0.
+
+## CreateSandboxFromImageParams
+
+Parameters for creating a new Sandbox from an image.
+
+Inherits from `CreateSandboxBaseParams`.
+
+**Additional Attributes**:
+
+- `image` _String, Image_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
+  the image will be dynamically built.
+- `resources` _Daytona::Resources, nil_ - Resource configuration for the Sandbox. If not provided, sandbox will
+  have default resources.
+
+**Example:**
+
+```ruby
+params = Daytona::CreateSandboxFromImageParams.new(
+  image: 'debian:12.9',
+  resources: Daytona::Resources.new(cpu: 2, memory: 4),
+  language: Daytona::CodeLanguage::PYTHON,
+  env_vars: { 'DEBUG' => 'true' }
+)
+```
+
+## CreateSandboxFromSnapshotParams
+
+Parameters for creating a new Sandbox from a snapshot.
+
+Inherits from `CreateSandboxBaseParams`.
+
+**Additional Attributes**:
+
+- `snapshot` _String, nil_ - Name of the snapshot to use for the Sandbox.
+
+**Example:**
+
+```ruby
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  snapshot: 'my-snapshot',
+  language: Daytona::CodeLanguage::PYTHON,
+  env_vars: { 'DEBUG' => 'true' }
+)
+```
+
+## Resources
+
+Resource allocation for a Sandbox.
+
+**Attributes**:
+
+- `cpu` _Integer, nil_ - Number of CPU cores to allocate
+- `memory` _Integer, nil_ - Amount of memory in GiB to allocate
+- `disk` _Integer, nil_ - Amount of disk space in GiB to allocate
+- `gpu` _Integer, nil_ - Number of GPUs to allocate
+
+**Example:**
+
+```ruby
+resources = Daytona::Resources.new(
+  cpu: 2,
+  memory: 4,  # 4 GiB RAM
+  disk: 20    # 20 GiB disk
+)
+```
+
+## PaginatedResource
+
+Represents a paginated list of resources.
+
+**Attributes**:
+
+- `items` _Array_ - List of items in the current page
+- `page` _Integer_ - Current page number
+- `total` _Integer_ - Total number of items across all pages
+- `total_pages` _Integer_ - Total number of pages available
+

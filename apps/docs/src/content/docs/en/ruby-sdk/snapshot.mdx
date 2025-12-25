@@ -1,0 +1,193 @@
+---
+title: "Snapshot"
+hideTitleOnPage: true
+---
+
+## SnapshotService
+
+Service for managing Daytona Snapshots. Can be used to list, get, create and delete Snapshots.
+
+### Methods
+
+#### list()
+
+```ruby
+def list(page: nil, limit: nil)
+```
+
+List all Snapshots with pagination support.
+
+**Parameters**:
+
+- `page` _Integer, nil_ - Page number for pagination (starting from 1)
+- `limit` _Integer, nil_ - Maximum number of items per page
+
+**Returns**:
+
+- `Daytona::PaginatedResource` - Paginated list of all Snapshots
+
+**Raises**:
+
+- `Daytona::Sdk::Error` - If page or limit is not a positive integer
+
+**Example:**
+
+```ruby
+daytona = Daytona::Daytona.new
+response = daytona.snapshot.list(page: 1, limit: 10)
+response.items.each { |snapshot| puts "#{snapshot.name} (#{snapshot.image_name})" }
+```
+
+***
+
+#### get()
+
+```ruby
+def get(name)
+```
+
+Gets a Snapshot by name.
+
+**Parameters**:
+
+- `name` _String_ - Name of the Snapshot to get
+
+**Returns**:
+
+- `Daytona::Snapshot` - The Snapshot object
+
+**Example:**
+
+```ruby
+daytona = Daytona::Daytona.new
+snapshot = daytona.snapshot.get('demo')
+puts "#{snapshot.name} (#{snapshot.image_name})"
+```
+
+***
+
+#### create()
+
+```ruby
+def create(params, on_logs: nil)
+```
+
+Creates and registers a new snapshot from the given Image definition.
+
+**Parameters**:
+
+- `params` _Daytona::CreateSnapshotParams_ - Parameters for snapshot creation
+- `on_logs` _Proc, nil_ - Callback proc handling snapshot creation logs
+
+**Returns**:
+
+- `Daytona::Snapshot` - The created snapshot
+
+**Example:**
+
+```ruby
+image = Daytona::Image.debian_slim('3.12').pip_install('numpy')
+params = Daytona::CreateSnapshotParams.new(name: 'my-snapshot', image: image)
+snapshot = daytona.snapshot.create(params, on_logs: ->(chunk) { print chunk })
+```
+
+***
+
+#### delete()
+
+```ruby
+def delete(snapshot)
+```
+
+Deletes a Snapshot.
+
+**Parameters**:
+
+- `snapshot` _Daytona::Snapshot_ - Snapshot to delete
+
+**Returns**:
+
+- `void`
+
+**Example:**
+
+```ruby
+daytona = Daytona::Daytona.new
+snapshot = daytona.snapshot.get('demo')
+daytona.snapshot.delete(snapshot)
+puts 'Snapshot deleted'
+```
+
+***
+
+#### activate()
+
+```ruby
+def activate(snapshot)
+```
+
+Activates a snapshot.
+
+**Parameters**:
+
+- `snapshot` _Daytona::Snapshot_ - The snapshot instance to activate
+
+**Returns**:
+
+- `Daytona::Snapshot` - The activated Snapshot
+
+## Snapshot
+
+Represents a Daytona Snapshot which is a pre-configured sandbox image.
+
+**Attributes**:
+
+- `id` _String_ - Unique identifier for the Snapshot
+- `organization_id` _String, nil_ - Organization ID of the Snapshot
+- `general` _Boolean, nil_ - Whether the Snapshot is general
+- `name` _String_ - Name of the Snapshot
+- `image_name` _String_ - Name of the Image of the Snapshot
+- `state` _String_ - State of the Snapshot
+- `size` _Float, nil_ - Size of the Snapshot
+- `entrypoint` _Array\<String\>, nil_ - Entrypoint of the Snapshot
+- `cpu` _Float_ - CPU allocation for the Snapshot
+- `gpu` _Float_ - GPU allocation for the Snapshot
+- `mem` _Float_ - Memory allocation in GiB
+- `disk` _Float_ - Disk allocation in GiB
+- `error_reason` _String, nil_ - Error reason if the Snapshot failed
+- `created_at` _String_ - Timestamp when the Snapshot was created
+- `updated_at` _String_ - Timestamp when the Snapshot was last updated
+- `last_used_at` _String, nil_ - Timestamp when the Snapshot was last used
+- `build_info` _DaytonaApiClient::BuildInfo, nil_ - Build information for the snapshot
+
+## CreateSnapshotParams
+
+Parameters for creating a new snapshot.
+
+**Attributes**:
+
+- `name` _String_ - Name of the snapshot
+- `image` _String, Daytona::Image_ - Image of the snapshot. If a string is provided,
+  it should be available on some registry. If an Image instance is provided,
+  it will be used to create a new image in Daytona.
+- `resources` _Daytona::Resources, nil_ - Resources of the snapshot
+- `entrypoint` _Array\<String\>, nil_ - Entrypoint of the snapshot
+
+**Example:**
+
+```ruby
+# Create from a registry image
+params = Daytona::CreateSnapshotParams.new(
+  name: 'my-snapshot',
+  image: 'python:3.12-slim'
+)
+
+# Create from a declarative Image
+image = Daytona::Image.debian_slim('3.12').pip_install('numpy', 'pandas')
+params = Daytona::CreateSnapshotParams.new(
+  name: 'data-science-snapshot',
+  image: image,
+  resources: Daytona::Resources.new(cpu: 2, memory: 4)
+)
+```
+

@@ -89,6 +89,36 @@ Complete API reference for computer use operations in Python (sync & async).
     await sandbox.computerUse.keyboard.hotkey('ctrl+s');
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # Initialize using environment variables (recommended)
+    daytona = Daytona::Daytona.new
+    # Or explicitly configure:
+    # config = Daytona::Config.new(
+    #   api_key: ENV['DAYTONA_API_KEY'],
+    #   api_url: ENV.fetch('DAYTONA_API_URL', 'https://app.daytona.io/api')
+    # )
+    # daytona = Daytona::Daytona.new(config)
+
+    # Create sandbox from default snapshot (includes desktop environment)
+    sandbox = daytona.create
+
+    # Start computer use processes
+    result = sandbox.computer_use.start
+    puts "Computer use started: #{result.message}"
+
+    # Take a screenshot
+    screenshot = sandbox.computer_use.screenshot.take_full_screen
+
+    # Click and type
+    sandbox.computer_use.mouse.click(100, 200)
+    sandbox.computer_use.keyboard.type('Hello, Linux!')
+    sandbox.computer_use.keyboard.hotkey('ctrl+s')
+    ```
+  </TabItem>
 </Tabs>
 
 **Environment Variables (.env file):**

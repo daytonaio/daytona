@@ -4,7 +4,7 @@ title: Getting Started
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-The Daytona SDK provides official [Python](/docs/en/python-sdk) and [TypeScript](/docs/en/typescript-sdk) interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code. [Python SDK](/docs/en/python-sdk) supports both sync and async programming models where async classes are prefixed with `Async`.
+The Daytona SDK provides official [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), and [Ruby](/docs/en/ruby-sdk) interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code. [Python SDK](/docs/en/python-sdk) supports both sync and async programming models where async classes are prefixed with `Async`.
 
 Follow the step-by-step guide to create and run your first Daytona Sandbox for an AI Agent.
 
@@ -12,7 +12,7 @@ For steps on additional configuration, including setting environment variables a
 
 ## Install the Daytona SDK
 
-Daytona provides official Python and TypeScript SDKs for interacting with the Daytona platform. Install the SDK using your preferred method:
+Daytona provides official Python, TypeScript, and Ruby SDKs for interacting with the Daytona platform. Install the SDK using your preferred method:
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -34,6 +34,17 @@ Daytona provides official Python and TypeScript SDKs for interacting with the Da
 
     pnpm add @daytonaio/sdk
 
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```bash
+    # Using Bundler (add to Gemfile)
+    gem 'daytona'
+
+    # Or install directly
+
+    gem install daytona
     ```
   </TabItem>
 </Tabs>
@@ -103,6 +114,32 @@ Run the following code to create a Daytona Sandbox and execute commands:
     main().catch(console.error)
 
     ```
+
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # Initialize the Daytona client
+    config = Daytona::Config.new(api_key: 'YOUR_API_KEY')
+    daytona = Daytona::Daytona.new(config)
+
+    # Create the Sandbox instance
+    sandbox = daytona.create
+
+    # Run code securely inside the Sandbox
+    response = sandbox.process.code_run(code: 'print("Sum of 3 and 4 is " + str(3 + 4))')
+    if response.exit_code != 0
+      puts "Error running code: #{response.exit_code} #{response.result}"
+    else
+      puts response.result
+    end
+
+    # Clean up the Sandbox
+    daytona.delete(sandbox)
+    ```
+
   </TabItem>
 </Tabs>
 
@@ -113,9 +150,13 @@ Run the following code to create a Daytona Sandbox and execute commands:
     ```
   </TabItem>
 
-  <TabItem label="TypeScript" icon="seti:typescript">
+<TabItem label="TypeScript" icon="seti:typescript">
+  ```npx tsx ./index.ts ```
+</TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
     ```bash
-    npx tsx ./index.ts
+    ruby main.rb
     ```
   </TabItem>
 </Tabs>
@@ -240,6 +281,62 @@ The following snippet uploads a file containing a simple Flask app to a Daytona 
     main().catch(error => console.error("Error:", error));
 
     ```
+
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    config = Daytona::Config.new(api_key: 'YOUR_API_KEY')
+    daytona = Daytona::Daytona.new(config)
+
+    sandbox = daytona.create
+
+    app_code = <<~PYTHON
+      from flask import Flask
+
+      app = Flask(__name__)
+
+      @app.route('/')
+      def hello():
+          return """
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Hello World</title>
+              <link rel="icon" href="https://www.daytona.io/favicon.ico">
+          </head>
+          <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+              <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                  <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+                  <p>This web app is running in a Daytona sandbox!</p>
+              </div>
+          </body>
+          </html>
+          """
+
+      if __name__ == '__main__':
+          app.run(host='0.0.0.0', port=3000)
+    PYTHON
+
+    # Save the Flask app to a file
+    sandbox.fs.upload_file(app_code, 'app.py')
+
+    # Create a new session and execute a command
+    exec_session_id = 'python-app-session'
+    sandbox.process.create_session(exec_session_id)
+
+    sandbox.process.execute_session_command(
+      exec_session_id,
+      Daytona::SessionExecuteRequest.new(command: 'python app.py', var_async: true)
+    )
+
+    # Get the preview link for the Flask app
+    preview_info = sandbox.get_preview_link(3000)
+    puts "Flask app is available at: #{preview_info.url}"
+    ```
+
   </TabItem>
 </Tabs>
 
@@ -390,12 +487,77 @@ The following snippet connects to an LLM using the Anthropic API and asks Claude
     ```bash
     > The factorial of 25 is 15511210043330985984000000
     ```
+
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ````ruby
+    require 'daytona'
+    require 'net/http'
+    require 'json'
+
+    def get_claude_response(api_key, prompt)
+      uri = URI('https://api.anthropic.com/v1/messages')
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      request = Net::HTTP::Post.new(uri.path)
+      request['x-api-key'] = api_key
+      request['anthropic-version'] = '2023-06-01'
+      request['Content-Type'] = 'application/json'
+      request.body = JSON.dump({
+        model: 'claude-3-7-sonnet-latest',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: prompt }]
+      })
+
+      response = http.request(request)
+      return "Error #{response.code}: #{response.message}" unless response.is_a?(Net::HTTPSuccess)
+
+      data = JSON.parse(response.body)
+      content = data['content'] || []
+      content.select { |item| item['type'] == 'text' }.map { |item| item['text'] }.join
+    rescue StandardError => e
+      "Error: #{e.message}"
+    end
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+
+    prompt = 'Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block.'
+
+    result = get_claude_response(ENV['ANTHROPIC_API_KEY'], prompt)
+
+    # Extract code from the response using regex
+    code_match = result.match(/```python\n(.*?)```/m)
+
+    code = code_match ? code_match[1] : result
+    code = code.gsub('\\', '\\\\')
+
+    # Run the extracted code in the sandbox
+    response = sandbox.process.code_run(code: code)
+    puts "The factorial of 25 is #{response.result}"
+    ````
+
+    Running the snippet:
+
+    ```bash
+    ANTHROPIC_API_KEY="your-anthropic-api-key"
+    DAYTONA_API_KEY="your-daytona-api-key"
+    DAYTONA_TARGET=us
+    ruby claude-example.rb
+    ```
+
+    ```bash
+    > The factorial of 25 is 15511210043330985984000000
+    ```
+
   </TabItem>
 </Tabs>
 
 ## Additional Examples
 
-Use the Daytona SDK [Python examples](https://github.com/daytonaio/daytona/tree/main/examples/python) or [TypeScript/JavaScript examples](https://github.com/daytonaio/daytona/tree/main/examples/typescript) to create a Sandbox and run your code.
+Use the Daytona SDK [Python examples](https://github.com/daytonaio/daytona/tree/main/examples/python), [TypeScript/JavaScript examples](https://github.com/daytonaio/daytona/tree/main/examples/typescript), or [Ruby examples](https://github.com/daytonaio/daytona/tree/main/examples/ruby) to create a Sandbox and run your code.
 
 Speed up your development on Daytona using LLMs. Copy the /llms.txt files and include them into your projects or chat context: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt)
 
