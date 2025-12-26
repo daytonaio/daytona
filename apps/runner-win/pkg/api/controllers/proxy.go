@@ -61,7 +61,7 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 		return nil, nil, fmt.Errorf("sandbox container not found: %w", err)
 	}
 
-	containerIP := libvirt.GetContainerIpAddress(ctx.Request.Context(), container)
+	containerIP := libvirt.GetDomainIpAddress(ctx.Request.Context(), container)
 
 	if containerIP == "" {
 		message := "no IP address found. Is the Sandbox started?"

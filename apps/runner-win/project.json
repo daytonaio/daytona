@@ -58,7 +58,7 @@
     "serve": {
       "executor": "@nx-go/nx-go:serve",
       "options": {
-        "cmd": "sudo -E PATH=/usr/local/go/bin:$PATH $(which gow)",
+        "cmd": "sudo -E HOME=/home/daytona PATH=/usr/local/go/bin:$PATH $(which gow)",
         "cwd": "apps/runner-win",
         "main": "./cmd/runner/main.go"
       },

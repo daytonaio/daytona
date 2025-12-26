@@ -267,7 +267,7 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 	}
 
 	// Get container IP address
-	containerIP := libvirt.GetContainerIpAddress(context.Background(), container)
+	containerIP := libvirt.GetDomainIpAddress(context.Background(), container)
 	if containerIP == "" {
 		return nil, fmt.Errorf("sandbox IP not found for %s", sandboxId)
 	}

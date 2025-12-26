@@ -34,7 +34,7 @@ func NewSandboxSyncService(config SandboxSyncServiceConfig) *SandboxSyncService 
 }
 
 func (s *SandboxSyncService) GetLocalContainerStates(ctx context.Context) (map[string]enums.SandboxState, error) {
-	containers, err := s.libvirt.ContainerList(ctx, libvirt.ContainerListOptions{
+	containers, err := s.libvirt.ContainerList(ctx, libvirt.DomainListOptions{
 		All: true, // Include stopped containers
 	})
 	if err != nil {
@@ -170,13 +170,9 @@ func (s *SandboxSyncService) StartSyncProcess(ctx context.Context) {
 	}()
 }
 
-func (s *SandboxSyncService) extractSandboxId(container libvirt.ContainerSummary) string {
-	if len(container.Names) > 0 && len(container.Names[0]) > 1 {
-		name := container.Names[0][1:] // Remove leading "/"
-		return name
-	}
-
-	return ""
+func (s *SandboxSyncService) extractSandboxId(container libvirt.DomainSummary) string {
+	// For libvirt domains, the name is the sandbox ID
+	return container.Name
 }
 
 func (s *SandboxSyncService) convertToApiState(localState enums.SandboxState) apiclient.SandboxState {

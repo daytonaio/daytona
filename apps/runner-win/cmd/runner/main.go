@@ -88,7 +88,8 @@ func main() {
 
 	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
 
-	libvirtClient := libvirt.NewLibVirt(libvirt.LibVirtConfig{
+	libvirtClient, err := libvirt.NewLibVirt(libvirt.LibVirtConfig{
+		LibvirtURI:             cfg.LibvirtURI,
 		StatesCache:            statesCache,
 		LogWriter:              os.Stdout,
 		AWSRegion:              cfg.AWSRegion,
@@ -101,6 +102,10 @@ func main() {
 		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
 		UseSnapshotEntrypoint:  cfg.UseSnapshotEntrypoint,
 	})
+	if err != nil {
+		log.Fatalf("Failed to create libvirt client: %v", err)
+	}
+	defer libvirtClient.Close()
 
 	sandboxService := services.NewSandboxService(statesCache, libvirtClient)
 

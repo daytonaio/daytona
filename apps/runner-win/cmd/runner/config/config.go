@@ -37,6 +37,7 @@ type Config struct {
 	DaemonStartTimeoutSec  int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
 	SandboxStartTimeoutSec int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
 	UseSnapshotEntrypoint  bool          `envconfig:"USE_SNAPSHOT_ENTRYPOINT"`
+	LibvirtURI             string        `envconfig:"LIBVIRT_URI" default:"qemu:///system"`
 	Domain                 string        `envconfig:"RUNNER_DOMAIN" validate:"omitempty,hostname|ip"`
 	PollTimeout            time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
 	PollLimit              int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`

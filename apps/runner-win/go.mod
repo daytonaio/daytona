@@ -105,4 +105,6 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
+	libvirt.org/go/libvirt v1.11010.0 // indirect
+	libvirt.org/go/libvirtxml v1.11010.0 // indirect
 )

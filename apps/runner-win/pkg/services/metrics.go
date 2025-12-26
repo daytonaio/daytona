@@ -101,7 +101,8 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	if err != nil {
 		log.Errorf("Error getting snapshot count: %v", err)
 	} else {
-		metrics.SnapshotCount = info.Images
+		// For libvirt, we don't track images separately, use total domains
+		metrics.SnapshotCount = info.DomainsTotal
 	}
 
 	// Get container allocated resources
@@ -134,7 +135,7 @@ func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMet
 }
 
 func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *models.SystemMetrics) {
-	containers, err := s.libvirt.ContainerList(ctx, libvirt.ContainerListOptions{All: true})
+	containers, err := s.libvirt.ContainerList(ctx, libvirt.DomainListOptions{All: true})
 	if err != nil {
 		log.Errorf("Error listing containers when getting allocated resources: %v", err)
 		return
@@ -145,12 +146,12 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 	var totalAllocatedDiskGB int64 = 0          // Disk in GB
 
 	for _, ctr := range containers {
-		cpu, memory, disk, err := s.getContainerAllocatedResources(ctx, ctr.ID)
+		cpu, memory, disk, err := s.getContainerAllocatedResources(ctx, ctr.UUID)
 		if err != nil {
-			log.Errorf("Error getting allocated resources for container %s: %v", ctr.ID, err)
+			log.Errorf("Error getting allocated resources for container %s: %v", ctr.UUID, err)
 		} else {
 			// For CPU and memory: only count running containers
-			if ctr.State == "running" {
+			if ctr.State == libvirt.DomainStateRunning {
 				totalAllocatedCpuMicroseconds += cpu
 				totalAllocatedMemoryBytes += memory
 			}
@@ -166,8 +167,8 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 }
 
 func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, containerId string) (int64, int64, int64, error) {
-	// Inspect the container to get its resource configuration
-	containerJSON, err := s.libvirt.ContainerInspect(ctx, containerId)
+	// Inspect the domain to get its resource configuration
+	domainInfo, err := s.libvirt.ContainerInspect(ctx, containerId)
 	if err != nil {
 		return 0, 0, 0, err
 	}
@@ -176,34 +177,16 @@ func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, con
 	var allocatedMemory int64 = 0
 	var allocatedDisk int64 = 0
 
-	if containerJSON.HostConfig != nil {
-		resources := containerJSON.HostConfig.Resources
+	// For libvirt domains, get CPU and memory from domain info
+	// VCPUs * 100000 microseconds (1 vCPU = 100000 microseconds in CPU quota)
+	allocatedCpu = int64(domainInfo.VCPUs) * 100000
 
-		// CPU allocation
-		if resources.CPUQuota > 0 {
-			allocatedCpu = resources.CPUQuota
-		}
+	// Memory is in KiB, convert to bytes
+	allocatedMemory = int64(domainInfo.Memory) * 1024
 
-		// Memory allocation
-		if resources.Memory > 0 {
-			allocatedMemory = resources.Memory
-		}
-
-		// Disk allocation from StorageOpt (assuming xfs filesystem)
-		if containerJSON.HostConfig.StorageOpt != nil {
-			if sizeStr, exists := containerJSON.HostConfig.StorageOpt["size"]; exists {
-				// Parse size string like "10G" and convert to GB
-				diskGB, err := s.parseStorageQuotaGB(sizeStr)
-				if err != nil {
-					log.Errorf("Error parsing storage quota for container %s: %v", containerId, err)
-				} else {
-					if diskGB > 0 {
-						allocatedDisk = diskGB
-					}
-				}
-			}
-		}
-	}
+	// Disk allocation - for now we'll estimate or set a default
+	// TODO: Query actual disk size from domain disk configuration
+	allocatedDisk = 10 // Default 10 GB per VM
 
 	return allocatedCpu, allocatedMemory, allocatedDisk, nil
 }
