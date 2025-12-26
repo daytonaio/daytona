@@ -70,7 +70,7 @@ This configures dnsmasq with `address=/proxy.localhost/127.0.0.1`.
 
 ### HTTP Proxy
 
-To configurate an outbound HTTP proxy for the Daytona services, you can set the following environment variables in the `docker-compose.yaml` file for each service that requires proxy access (the API service is the only that requires outbound access to pull images):
+To configure an outbound HTTP proxy for the Daytona services, you can set the following environment variables in the `docker-compose.yaml` file for each service that requires proxy access (the API service is the only that requires outbound access to pull images):
 
 - `HTTP_PROXY`: URL of the HTTP proxy server
 - `HTTPS_PROXY`: URL of the HTTPS proxy server
@@ -352,8 +352,8 @@ OIDC_AUDIENCE=your_custom_api_identifier
 OIDC_MANAGEMENT_API_ENABLED=true
 OIDC_MANAGEMENT_API_CLIENT_ID=your_m2m_app_client_id
 OIDC_MANAGEMENT_API_CLIENT_SECRET=your_m2m_app_client_secret
-OIDC_MANAGEMENT_API_AUDIENCE=your_auth0_managment_api_identifier
-```
+OIDC_MANAGEMENT_API_AUDIENCE=your_auth0_management_api_identifier
+``` 
 
 #### Proxy Service Configuration
 

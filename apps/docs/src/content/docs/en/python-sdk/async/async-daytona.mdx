@@ -192,7 +192,7 @@ async def create(
 
 Creates Sandboxes from specified image available on some registry or declarative Daytona Image.
 You can specify various parameters, including resources, language, image, environment variables,
-and volumes. Daytona creates snapshot from provided image and uses it to create Sandbox.
+and volumes. Daytona creates a snapshot from the provided image and uses it to create the Sandbox.
 
 **Arguments**:
 
@@ -478,7 +478,7 @@ Base parameters for creating a new Sandbox.
 - `auto_delete_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
   automatically be deleted. By default, auto-delete is disabled.
   Negative value means disabled, 0 means delete immediately upon stopping.
-- `volumes` _Optional[List[VolumeMount]]_ - List of volumes mounts to attach to the Sandbox.
+- `volumes` _Optional[List[VolumeMount]]_ - List of volume mounts to attach to the Sandbox.
 - `network_block_all` _Optional[bool]_ - Whether to block all network access for the Sandbox.
 - `network_allow_list` _Optional[str]_ - Comma-separated list of allowed CIDR network addresses for the Sandbox.
 - `ephemeral` _Optional[bool]_ - Whether the Sandbox should be ephemeral.
