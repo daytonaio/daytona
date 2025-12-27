@@ -88,8 +88,8 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 		metrics.RAMUsage = (float64(memory.Total-memory.Available) / float64(memory.Total)) * 100
 	}
 
-	// Get disk metrics
-	diskUsage, err := disk.Usage("/var/lib/docker")
+	// Get disk metrics from root filesystem
+	diskUsage, err := disk.Usage("/")
 	if err != nil {
 		log.Errorf("Error getting disk metrics: %v", err)
 	} else {
@@ -116,7 +116,11 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMetrics {
 	metrics, err := s.cache.Get(ctx, systemMetricsKey)
 	if err != nil || metrics == nil {
-		log.Errorf("Error getting system metrics: %v", err)
+		// This is expected on first call before metrics are collected
+		// Don't log error for "key not found" which is normal
+		if err != nil && err.Error() != "key not found" {
+			log.Warnf("Error getting system metrics: %v", err)
+		}
 
 		// Return default values if no metrics are cached
 		return &models.SystemMetrics{
@@ -167,8 +171,8 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 }
 
 func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, containerId string) (int64, int64, int64, error) {
-	// Inspect the domain to get its resource configuration
-	domainInfo, err := s.libvirt.ContainerInspect(ctx, containerId)
+	// Get basic domain info without waiting for IP address (faster)
+	domainInfo, err := s.libvirt.ContainerInspectBasic(ctx, containerId)
 	if err != nil {
 		return 0, 0, 0, err
 	}

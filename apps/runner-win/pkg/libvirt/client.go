@@ -110,7 +110,24 @@ func (l *LibVirt) getConnection() (*libvirt.Connect, error) {
 	conn := l.conn
 	l.connMutex.RUnlock()
 
-	if conn == nil {
+	// Check if connection exists and is still alive
+	needsReconnect := conn == nil
+	if conn != nil {
+		alive, err := conn.IsAlive()
+		if err != nil || !alive {
+			log.Warnf("Libvirt connection is dead, will reconnect: %v", err)
+			needsReconnect = true
+			// Close the dead connection
+			l.connMutex.Lock()
+			if l.conn != nil {
+				l.conn.Close()
+				l.conn = nil
+			}
+			l.connMutex.Unlock()
+		}
+	}
+
+	if needsReconnect {
 		// Try to reconnect
 		if err := l.connect(); err != nil {
 			return nil, err

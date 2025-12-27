@@ -47,6 +47,7 @@ type DomainInfo struct {
 	OSType       string
 	Architecture string
 	Metadata     map[string]string
+	IPAddress    string // Primary IP address of the domain
 }
 
 // SystemInfo represents system-wide information from libvirt

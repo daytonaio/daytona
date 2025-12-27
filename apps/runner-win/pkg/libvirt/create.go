@@ -82,17 +82,30 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 	return uuid, name, nil
 }
 
-func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string) (string, error) {
-	// Convert memory from MB to KiB (libvirt uses KiB)
-	memoryKiB := uint(sandboxDto.MemoryQuota * 1024)
+// Minimum resource requirements for Windows VMs
+const (
+	minWindowsMemoryMB = 4096 // 4 GB minimum for Windows 11
+	minWindowsVCPUs    = 2    // 2 vCPUs minimum for Windows 11
+)
 
-	// Use CPU quota as number of VCPUs (simplified for first implementation)
+func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string) (string, error) {
+	// Get memory in MB, enforce minimum for Windows
+	memoryMB := sandboxDto.MemoryQuota
+	if memoryMB < minWindowsMemoryMB {
+		log.Warnf("Memory quota %d MB is below minimum %d MB for Windows, using minimum", memoryMB, minWindowsMemoryMB)
+		memoryMB = minWindowsMemoryMB
+	}
+	// Convert memory from MB to KiB (libvirt uses KiB)
+	memoryKiB := uint(memoryMB * 1024)
+
+	// Use CPU quota as number of VCPUs, enforce minimum for Windows
 	vcpus := uint(sandboxDto.CpuQuota)
-	if vcpus == 0 {
-		vcpus = 1
+	if vcpus < minWindowsVCPUs {
+		log.Warnf("CPU quota %d is below minimum %d for Windows, using minimum", vcpus, minWindowsVCPUs)
+		vcpus = minWindowsVCPUs
 	}
 
-	// Build the domain configuration
+	// Build the domain configuration for Windows 11 (requires UEFI + SecureBoot)
 	domainCfg := &libvirtxml.Domain{
 		Type: "kvm",
 		Name: sandboxDto.Id,
@@ -108,17 +121,37 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 			Value: vcpus,
 		},
 		OS: &libvirtxml.DomainOS{
+			Firmware: "efi",
 			Type: &libvirtxml.DomainOSType{
-				Type: "hvm",
-				Arch: "x86_64",
+				Type:    "hvm",
+				Arch:    "x86_64",
+				Machine: "q35",
 			},
 			BootDevices: []libvirtxml.DomainBootDevice{
 				{Dev: "hd"},
+			},
+			Loader: &libvirtxml.DomainLoader{
+				Readonly: "yes",
+				Secure:   "yes",
+				Type:     "pflash",
+				Path:     "/usr/share/OVMF/OVMF_CODE_4M.ms.fd",
+			},
+			NVRam: &libvirtxml.DomainNVRam{
+				Template: "/usr/share/OVMF/OVMF_VARS_4M.ms.fd",
 			},
 		},
 		Features: &libvirtxml.DomainFeatureList{
 			ACPI: &libvirtxml.DomainFeature{},
 			APIC: &libvirtxml.DomainFeatureAPIC{},
+			HyperV: &libvirtxml.DomainFeatureHyperV{
+				Mode:    "custom",
+				Relaxed: &libvirtxml.DomainFeatureState{State: "on"},
+				VAPIC:   &libvirtxml.DomainFeatureState{State: "on"},
+				Spinlocks: &libvirtxml.DomainFeatureHyperVSpinlocks{
+					DomainFeatureState: libvirtxml.DomainFeatureState{State: "on"},
+					Retries:            8191,
+				},
+			},
 		},
 		CPU: &libvirtxml.DomainCPU{
 			Mode: "host-passthrough",
