@@ -3,6 +3,7 @@ go 1.25.4
 use (
 	./apps/cli
 	./apps/daemon
+	./apps/daemon-win
 	./apps/proxy
 	./apps/runner
 	./apps/runner-win

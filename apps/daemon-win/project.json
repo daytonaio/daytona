@@ -1,0 +1,81 @@
+{
+  "name": "daemon-win",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/daemon-win",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/daemon-win/main.go",
+        "outputPath": "dist/apps/daemon-win"
+      },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon-win/internal.Version=$VERSION'\""]
+        }
+      }
+    },
+    "build-windows": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/daemon-win/main.go",
+        "outputPath": "dist/apps/daemon-win.exe",
+        "env": {
+          "GOOS": "windows",
+          "GOARCH": "amd64",
+          "CGO_ENABLED": "0"
+        }
+      },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon-win/internal.Version=$VERSION'\""]
+        }
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "echo 'Deploying daemon-win.exe to win11-clone VM...'",
+          "{projectRoot}/scripts/deploy.sh"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build-windows"]
+    },
+    "run-remote": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "{projectRoot}/scripts/run-remote.sh"
+      },
+      "dependsOn": ["deploy"]
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "cmd": "gow",
+        "cwd": ".",
+        "main": "{projectRoot}/cmd/daemon-win/main.go"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./..."
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    }
+  }
+}
+
+
