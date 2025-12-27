@@ -352,7 +352,7 @@ const Snapshots: React.FC = () => {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
   }
-  const [search, setSearch] = useState('')
+  
 
 const filteredSnapshots = useMemo(() => {
   if (!search.trim()) return snapshotsData.items
@@ -360,19 +360,23 @@ const filteredSnapshots = useMemo(() => {
   const query = search.toLowerCase()
 
   return snapshotsData.items.filter((s) =>
-    `${s.name} ${s.imageName ?? ''} ${s.tag ?? ''}`
+    `${s.name} ${s.imageName ?? ''}`
       .toLowerCase()
       .includes(query),
   )
 }, [search, snapshotsData.items])
 
-const writePermitted = useMemo(
+
+const writePermitted = useMemo(  
+  () => authenticatedUserHasPermission(
+    OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS
+  ),
+  [authenticatedUserHasPermission],
+)
 
 
-  const writePermitted = useMemo(
-    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS),
-    [authenticatedUserHasPermission],
-  )
+
+
 
   const handleBulkDelete = async (snapshots: SnapshotDto[]) => {
     setLoadingSnapshots((prev) => ({ ...prev, ...snapshots.reduce((acc, img) => ({ ...acc, [img.id]: true }), {}) }))
