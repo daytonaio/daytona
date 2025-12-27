@@ -62,6 +62,13 @@ func (l *LibVirt) Destroy(ctx context.Context, domainId string) error {
 		return fmt.Errorf("failed to undefine domain: %w", err)
 	}
 
+	// Clean up DHCP reservation to free the IP
+	mac := GetReservedMAC(domainId)
+	if err := l.RemoveDHCPReservation(mac); err != nil {
+		log.Warnf("Failed to remove DHCP reservation for %s: %v", domainId, err)
+		// Don't fail the destroy operation for DHCP cleanup failure
+	}
+
 	if l.statesCache != nil {
 		l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateDestroyed)
 	}

@@ -29,14 +29,25 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 		return "", "", fmt.Errorf("failed to get connection: %w", err)
 	}
 
+	// Generate deterministic MAC and IP from sandbox ID
+	mac := GenerateMACFromSandboxID(sandboxDto.Id)
+	ip := CalculateIPFromSandboxID(sandboxDto.Id)
+	log.Infof("Generated MAC=%s IP=%s for sandbox %s", mac, ip, sandboxDto.Id)
+
+	// Add DHCP reservation BEFORE starting the VM
+	// This ensures the VM gets the expected IP immediately
+	if err := l.AddDHCPReservation(mac, ip, sandboxDto.Id); err != nil {
+		log.Warnf("Failed to add DHCP reservation: %v (continuing anyway)", err)
+	}
+
 	// Create the disk for the VM
 	diskPath, err := l.createDisk(ctx, sandboxDto)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create disk: %w", err)
 	}
 
-	// Build domain XML configuration
-	domainXML, err := l.buildDomainXML(sandboxDto, diskPath)
+	// Build domain XML configuration with specific MAC address
+	domainXML, err := l.buildDomainXML(sandboxDto, diskPath, mac)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to build domain XML: %w", err)
 	}
@@ -77,7 +88,7 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 	if l.statesCache != nil {
 		l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateStarted)
 	}
-	log.Infof("Domain %s created and started successfully with UUID %s", name, uuid)
+	log.Infof("Domain %s created and started successfully with UUID %s, reserved IP %s", name, uuid, ip)
 
 	return uuid, name, nil
 }
@@ -88,7 +99,7 @@ const (
 	minWindowsVCPUs    = 2    // 2 vCPUs minimum for Windows 11
 )
 
-func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string) (string, error) {
+func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string, macAddress string) (string, error) {
 	// Get memory in MB, enforce minimum for Windows
 	memoryMB := sandboxDto.MemoryQuota
 	if memoryMB < minWindowsMemoryMB {
@@ -178,6 +189,9 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 			},
 			Interfaces: []libvirtxml.DomainInterface{
 				{
+					MAC: &libvirtxml.DomainInterfaceMAC{
+						Address: macAddress,
+					},
 					Source: &libvirtxml.DomainInterfaceSource{
 						Network: &libvirtxml.DomainInterfaceSourceNetwork{
 							Network: "default",

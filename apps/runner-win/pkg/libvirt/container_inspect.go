@@ -15,8 +15,8 @@ import (
 
 // IP address wait configuration
 const (
-	ipAddressWaitTimeout  = 60 * time.Second // Max time to wait for IP address
-	ipAddressWaitInterval = 2 * time.Second  // Interval between retries
+	ipAddressWaitTimeout  = 60 * time.Second       // Max time to wait for IP address
+	ipAddressWaitInterval = 500 * time.Millisecond // Faster polling interval (500ms)
 )
 
 func (l *LibVirt) ContainerInspect(ctx context.Context, domainId string) (DomainInfo, error) {
@@ -81,7 +81,17 @@ func (l *LibVirt) ContainerInspect(ctx context.Context, domainId string) (Domain
 
 // waitForDomainIP waits for the domain to get an IP address with retry logic
 func (l *LibVirt) waitForDomainIP(ctx context.Context, conn *libvirt.Connect, domain *libvirt.Domain, domainName string) string {
-	// First try immediately
+	// First, check if this is a sandbox with a static DHCP reservation
+	// The domain name is the sandbox ID, so we can calculate the reserved IP
+	reservedIP := GetReservedIP(domainName)
+	if reservedIP != "" {
+		// Verify the reserved IP is in the DHCP leases or just return it
+		// For static reservations, we trust the pre-calculated IP
+		log.Infof("Using reserved IP %s for domain %s", reservedIP, domainName)
+		return reservedIP
+	}
+
+	// Fallback: try to get IP from DHCP lease immediately
 	if ip := l.getDomainIP(conn, domain); ip != "" {
 		return ip
 	}
