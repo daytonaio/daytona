@@ -37,11 +37,7 @@
     "deploy": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "echo 'Deploying daemon-win.exe to win11-clone VM...'",
-          "{projectRoot}/scripts/deploy.sh"
-        ],
-        "parallel": false
+        "command": "{projectRoot}/scripts/deploy.sh"
       },
       "dependsOn": ["build-windows"]
     },
@@ -50,7 +46,7 @@
       "options": {
         "command": "{projectRoot}/scripts/run-remote.sh"
       },
-      "dependsOn": ["deploy"]
+      "dependsOn": ["build-windows"]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
