@@ -6,6 +6,8 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"regexp"
 	"strings"
@@ -42,7 +44,40 @@ func ProxyRequest(ctx *gin.Context) {
 		}
 	}
 
+	r := runner.GetInstance(nil)
+
+	// Dev environment: use SSH tunnel for remote libvirt
+	if libvirt.ShouldUseSSHTunnel(r.LibVirt.GetURI()) {
+		proxyWithSSHTunnel(ctx, r.LibVirt)
+		return
+	}
+
 	proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+}
+
+// proxyWithSSHTunnel proxies requests through an SSH tunnel for dev environments
+// where libvirt runs on a remote machine
+func proxyWithSSHTunnel(ctx *gin.Context, lv *libvirt.LibVirt) {
+	target, _, err := getProxyTarget(ctx)
+	if err != nil {
+		return
+	}
+
+	sshHost := lv.GetSSHHost()
+	transport := libvirt.GetSSHTunnelTransport(sshHost)
+
+	reverseProxy := &httputil.ReverseProxy{
+		Director: func(req *http.Request) {
+			req.Host = target.Host
+			req.URL.Scheme = target.Scheme
+			req.URL.Host = target.Host
+			req.URL.Path = target.Path
+			req.URL.RawQuery = target.RawQuery
+		},
+		Transport: transport,
+	}
+
+	reverseProxy.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {

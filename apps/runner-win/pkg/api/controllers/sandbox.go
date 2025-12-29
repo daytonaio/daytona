@@ -5,14 +5,22 @@ package controllers
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/daytonaio/runner-win/pkg/api/dto"
 	"github.com/daytonaio/runner-win/pkg/common"
 	"github.com/daytonaio/runner-win/pkg/models/enums"
 	"github.com/daytonaio/runner-win/pkg/runner"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+)
+
+// Track sandboxes currently being created to prevent duplicate requests
+var (
+	creatingMutex     sync.Mutex
+	creatingSandboxes = make(map[string]bool)
 )
 
 // Create 			godoc
@@ -38,6 +46,24 @@ func Create(ctx *gin.Context) {
 		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
+
+	// Check if this sandbox is already being created (prevent duplicate requests)
+	creatingMutex.Lock()
+	if creatingSandboxes[createSandboxDto.Id] {
+		creatingMutex.Unlock()
+		log.Warnf("Create request for sandbox %s already in progress, ignoring duplicate", createSandboxDto.Id)
+		ctx.JSON(http.StatusConflict, gin.H{"error": "sandbox creation already in progress"})
+		return
+	}
+	creatingSandboxes[createSandboxDto.Id] = true
+	creatingMutex.Unlock()
+
+	// Ensure we remove the tracking when done
+	defer func() {
+		creatingMutex.Lock()
+		delete(creatingSandboxes, createSandboxDto.Id)
+		creatingMutex.Unlock()
+	}()
 
 	runner := runner.GetInstance(nil)
 

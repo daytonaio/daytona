@@ -7,8 +7,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"time"
 
+	"github.com/daytonaio/runner-win/pkg/api/dto"
 	"github.com/daytonaio/runner-win/pkg/libvirt"
 )
 
@@ -20,6 +23,9 @@ func main() {
 	if uri == "" {
 		uri = "qemu+ssh://root@h1001.blinkbox.dev/system"
 	}
+
+	// Check if we should run create test
+	runCreateTest := os.Getenv("TEST_CREATE") == "1"
 
 	log.Printf("Connecting to libvirt at: %s", uri)
 
@@ -91,6 +97,62 @@ func main() {
 			fmt.Printf("  Max Memory: %d KiB\n", domainInfo.MaxMemory)
 			fmt.Printf("  VCPUs: %d\n", domainInfo.VCPUs)
 		}
+	}
+
+	// Test 5: Create and destroy sandbox (optional)
+	if runCreateTest {
+		log.Println("\n=== Test 5: Create Sandbox ===")
+		sandboxId := fmt.Sprintf("test-sandbox-%d", time.Now().Unix())
+
+		createDto := dto.CreateSandboxDTO{
+			Id:          sandboxId,
+			CpuQuota:    2,
+			MemoryQuota: 4096, // 4 GB
+		}
+
+		log.Printf("Creating sandbox: %s", sandboxId)
+		startTime := time.Now()
+
+		uuid, name, err := client.Create(ctx, createDto)
+		if err != nil {
+			log.Fatalf("Failed to create sandbox: %v", err)
+		}
+
+		createTime := time.Since(startTime)
+		log.Printf("Sandbox created in %v - UUID: %s, Name: %s", createTime, uuid, name)
+
+		// Get the reserved IP
+		ip := libvirt.GetReservedIP(sandboxId)
+		log.Printf("Reserved IP: %s", ip)
+
+		// Wait for daemon API to be ready
+		log.Println("Waiting for daemon API...")
+		apiReady := false
+		for i := 0; i < 60; i++ {
+			resp, err := http.Get(fmt.Sprintf("http://%s:2280/version", ip))
+			if err == nil && resp.StatusCode == 200 {
+				resp.Body.Close()
+				apiReady = true
+				totalTime := time.Since(startTime)
+				log.Printf("Daemon API ready! Total time: %v", totalTime)
+				break
+			}
+			time.Sleep(1 * time.Second)
+		}
+
+		if !apiReady {
+			log.Printf("Warning: Daemon API not ready after 60 seconds")
+		}
+
+		// Clean up - destroy the sandbox
+		log.Println("\n=== Test 6: Destroy Sandbox ===")
+		log.Printf("Destroying sandbox: %s", sandboxId)
+
+		if err := client.Destroy(ctx, sandboxId); err != nil {
+			log.Fatalf("Failed to destroy sandbox: %v", err)
+		}
+
+		log.Printf("Sandbox %s destroyed successfully", sandboxId)
 	}
 
 	log.Println("\n=== All tests completed successfully! ===")

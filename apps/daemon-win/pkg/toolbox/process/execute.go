@@ -40,12 +40,21 @@ func ExecuteCommand(c *gin.Context) {
 		return
 	}
 
+	// Parse Linux shell wrapper (sh -c "...") and extract actual command
+	parsedCommand, envVars := common.ParseShellWrapper(request.Command)
+	if parsedCommand != request.Command {
+		log.Debugf("Parsed shell wrapper: %q -> %q (env: %v)", request.Command, parsedCommand, envVars)
+	}
+
+	// Build Windows command with env vars if any
+	finalCommand := common.BuildWindowsCommand(parsedCommand, envVars)
+
 	// Get the shell and appropriate arguments
 	shell := common.GetShell()
 	shellArgs := common.GetShellArgs(shell)
 
 	// Build the command with the shell
-	args := append(shellArgs, request.Command)
+	args := append(shellArgs, finalCommand)
 	cmd := exec.Command(shell, args...)
 
 	if request.Cwd != nil {

@@ -58,7 +58,8 @@ func (l *LibVirt) ContainerInspect(ctx context.Context, domainId string) (Domain
 
 	id, err := domain.GetID()
 	if err != nil {
-		log.Warnf("Failed to get domain ID: %v", err)
+		// GetID only works for running domains, not paused/stopped ones - this is expected
+		log.Debugf("Failed to get domain ID (domain may not be running): %v", err)
 		id = 0
 	}
 
@@ -81,18 +82,10 @@ func (l *LibVirt) ContainerInspect(ctx context.Context, domainId string) (Domain
 
 // waitForDomainIP waits for the domain to get an IP address with retry logic
 func (l *LibVirt) waitForDomainIP(ctx context.Context, conn *libvirt.Connect, domain *libvirt.Domain, domainName string) string {
-	// First, check if this is a sandbox with a static DHCP reservation
-	// The domain name is the sandbox ID, so we can calculate the reserved IP
-	reservedIP := GetReservedIP(domainName)
-	if reservedIP != "" {
-		// Verify the reserved IP is in the DHCP leases or just return it
-		// For static reservations, we trust the pre-calculated IP
-		log.Infof("Using reserved IP %s for domain %s", reservedIP, domainName)
-		return reservedIP
-	}
-
-	// Fallback: try to get IP from DHCP lease immediately
+	// Always get actual IP from DHCP lease, not pre-calculated reservation
+	// The DHCP reservation may not work reliably with Windows VMs
 	if ip := l.getDomainIP(conn, domain); ip != "" {
+		log.Infof("Domain %s has actual IP: %s", domainName, ip)
 		return ip
 	}
 
@@ -240,7 +233,8 @@ func (l *LibVirt) ContainerInspectBasic(ctx context.Context, domainId string) (D
 
 	id, err := domain.GetID()
 	if err != nil {
-		log.Warnf("Failed to get domain ID: %v", err)
+		// GetID only works for running domains, not paused/stopped ones - this is expected
+		log.Debugf("Failed to get domain ID (domain may not be running): %v", err)
 		id = 0
 	}
 

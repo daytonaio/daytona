@@ -8,7 +8,9 @@ import (
 	"io"
 	golog "log"
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 
 	"github.com/daytonaio/daemon-win/cmd/daemon-win/config"
 	"github.com/daytonaio/daemon-win/pkg/toolbox"
@@ -53,6 +55,9 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("failed to get current working directory: %w", err))
 	}
+
+	// Ensure Windows Firewall allows daemon port
+	ensureFirewallRule()
 
 	toolBoxServer := &toolbox.Server{
 		WorkDir: workDir,
@@ -106,4 +111,30 @@ func initLogs(logWriter io.Writer) {
 	log.SetFormatter(logFormatter)
 
 	golog.SetOutput(log.New().WriterLevel(log.DebugLevel))
+}
+
+// ensureFirewallRule adds a Windows Firewall rule to allow incoming connections
+// on the daemon port (2280). This is idempotent - it won't fail if the rule exists.
+func ensureFirewallRule() {
+	if runtime.GOOS != "windows" {
+		return
+	}
+
+	// Use netsh to add firewall rule (works on all Windows versions)
+	// The rule allows incoming TCP connections on port 2280
+	cmd := exec.Command("netsh", "advfirewall", "firewall", "add", "rule",
+		"name=Daytona Daemon",
+		"dir=in",
+		"action=allow",
+		"protocol=tcp",
+		"localport=2280",
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Error might mean rule already exists, which is fine
+		log.Debugf("Firewall rule setup: %v (output: %s)", err, string(output))
+	} else {
+		log.Info("Windows Firewall rule added for Daytona Daemon (port 2280)")
+	}
 }

@@ -160,6 +160,43 @@ func (l *LibVirt) getDomainMutex(domainName string) *sync.Mutex {
 	return l.domainMutexes[domainName]
 }
 
+// GetURI returns the libvirt connection URI
+func (l *LibVirt) GetURI() string {
+	return l.libvirtURI
+}
+
+// GetSSHHost extracts user@host from the libvirt URI for SSH connections
+// Returns empty string if the URI is not an SSH connection
+func (l *LibVirt) GetSSHHost() string {
+	uri := l.libvirtURI
+	if len(uri) == 0 {
+		return ""
+	}
+
+	// Find the start after "://"
+	startIdx := -1
+	for i := 0; i < len(uri)-2; i++ {
+		if uri[i] == ':' && uri[i+1] == '/' && uri[i+2] == '/' {
+			startIdx = i + 3
+			break
+		}
+	}
+	if startIdx == -1 {
+		return ""
+	}
+
+	// Find the end before the path "/"
+	endIdx := len(uri)
+	for i := startIdx; i < len(uri); i++ {
+		if uri[i] == '/' {
+			endIdx = i
+			break
+		}
+	}
+
+	return uri[startIdx:endIdx]
+}
+
 type LibVirt struct {
 	conn                   *libvirt.Connect
 	connMutex              sync.RWMutex

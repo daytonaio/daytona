@@ -6,8 +6,11 @@ package libvirt
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os/exec"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/daytonaio/runner-win/pkg/api/dto"
 	"github.com/daytonaio/runner-win/pkg/models/enums"
@@ -20,13 +23,27 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 	domainMutex.Lock()
 	defer domainMutex.Unlock()
 
-	if l.statesCache != nil {
-		l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
-	}
-
 	conn, err := l.getConnection()
 	if err != nil {
 		return "", "", fmt.Errorf("failed to get connection: %w", err)
+	}
+
+	// Check if domain already exists (idempotency)
+	existingDomain, err := conn.LookupDomainByName(sandboxDto.Id)
+	if err == nil && existingDomain != nil {
+		// Domain already exists - return success
+		uuid, _ := existingDomain.GetUUIDString()
+		name, _ := existingDomain.GetName()
+		log.Infof("Domain %s already exists (UUID: %s), returning existing", sandboxDto.Id, uuid)
+		existingDomain.Free()
+		if l.statesCache != nil {
+			l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateStarted)
+		}
+		return uuid, name, nil
+	}
+
+	if l.statesCache != nil {
+		l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 	}
 
 	// Generate deterministic MAC and IP from sandbox ID
@@ -40,14 +57,20 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 		log.Warnf("Failed to add DHCP reservation: %v (continuing anyway)", err)
 	}
 
-	// Create the disk for the VM
+	// Create the disk for the VM (linked clone from base image)
 	diskPath, err := l.createDisk(ctx, sandboxDto)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create disk: %w", err)
 	}
 
-	// Build domain XML configuration with specific MAC address
-	domainXML, err := l.buildDomainXML(sandboxDto, diskPath, mac)
+	// Copy NVRAM for UEFI boot
+	nvramPath, err := l.copyNVRAM(ctx, sandboxDto.Id)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to copy NVRAM: %w", err)
+	}
+
+	// Build domain XML configuration with specific MAC address and NVRAM path
+	domainXML, err := l.buildDomainXML(sandboxDto, diskPath, nvramPath, mac)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to build domain XML: %w", err)
 	}
@@ -85,6 +108,12 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 		return uuid, name, fmt.Errorf("domain created but failed to start: %w", err)
 	}
 
+	// Wait for daemon API to be ready
+	if err := l.waitForDaemonReady(ctx, sandboxDto.Id, ip); err != nil {
+		log.Warnf("Domain started but daemon not ready: %v", err)
+		// Don't fail - the sandbox is running, daemon might just be slow
+	}
+
 	if l.statesCache != nil {
 		l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateStarted)
 	}
@@ -99,7 +128,7 @@ const (
 	minWindowsVCPUs    = 2    // 2 vCPUs minimum for Windows 11
 )
 
-func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string, macAddress string) (string, error) {
+func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string, nvramPath string, macAddress string) (string, error) {
 	// Get memory in MB, enforce minimum for Windows
 	memoryMB := sandboxDto.MemoryQuota
 	if memoryMB < minWindowsMemoryMB {
@@ -148,6 +177,7 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 				Path:     "/usr/share/OVMF/OVMF_CODE_4M.ms.fd",
 			},
 			NVRam: &libvirtxml.DomainNVRam{
+				NVRam:    nvramPath,
 				Template: "/usr/share/OVMF/OVMF_VARS_4M.ms.fd",
 			},
 		},
@@ -236,34 +266,40 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 	return xml, nil
 }
 
+// Base image and NVRAM paths for Windows sandboxes
+const (
+	baseImagePath  = "/var/lib/libvirt/images/winserver-sandbox-base.qcow2"
+	templateNVRAM  = "/var/lib/libvirt/qemu/nvram/winserver-core_VARS.fd"
+	imagesBasePath = "/var/lib/libvirt/images"
+	nvramBasePath  = "/var/lib/libvirt/qemu/nvram"
+)
+
 func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, error) {
-	basePath := "/var/lib/libvirt/images"
+	newDiskPath := filepath.Join(imagesBasePath, fmt.Sprintf("%s.qcow2", sandboxDto.Id))
 
-	// Use a default base image for now
-	// Snapshots are not used in this implementation yet
-	baseImage := "win11-clone-base"
-
-	baseImagePath := filepath.Join(basePath, fmt.Sprintf("%s.qcow2", baseImage))
-	newDiskPath := filepath.Join(basePath, fmt.Sprintf("%s.qcow2", sandboxDto.Id))
-
-	log.Infof("Creating disk %s from base image %s", newDiskPath, baseImagePath)
-
-	// Create a qcow2 overlay disk with the base image as backing file
-	// This uses copy-on-write, so each VM has its own changes without modifying the base
-	createCmd := fmt.Sprintf("qemu-img create -f qcow2 -F qcow2 -b %s %s", baseImagePath, newDiskPath)
-
-	log.Infof("Executing on remote server: %s", createCmd)
-
-	// Execute the command on the remote server via SSH
-	// We extract the hostname from the libvirt URI
-	// For qemu+ssh://root@h1001.blinkbox.dev/system, we need h1001.blinkbox.dev
+	// Get the remote host from libvirt URI
 	host := l.extractHostFromURI()
 	if host == "" {
 		return "", fmt.Errorf("could not extract host from libvirt URI: %s", l.libvirtURI)
 	}
 
-	// Execute the disk creation command via SSH
-	cmd := exec.CommandContext(ctx, "ssh", host, createCmd)
+	// Check if disk already exists (idempotency - avoid duplicate create attempts)
+	checkCmd := exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("test -f %s && echo exists", newDiskPath))
+	if output, _ := checkCmd.Output(); strings.TrimSpace(string(output)) == "exists" {
+		log.Infof("Disk %s already exists, skipping creation", newDiskPath)
+		return newDiskPath, nil
+	}
+
+	log.Infof("Creating disk %s from base image %s", newDiskPath, baseImagePath)
+
+	// Create a qcow2 overlay disk with the base image as backing file
+	// This uses copy-on-write, so each VM has its own changes without modifying the base
+	createDiskCmd := fmt.Sprintf("qemu-img create -f qcow2 -F qcow2 -b %s %s && chown libvirt-qemu:kvm %s",
+		baseImagePath, newDiskPath, newDiskPath)
+
+	log.Infof("Executing on remote server: %s", createDiskCmd)
+
+	cmd := exec.CommandContext(ctx, "ssh", host, createDiskCmd)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Errorf("Failed to create disk: %v, output: %s", err, string(output))
@@ -272,6 +308,29 @@ func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDT
 
 	log.Infof("Successfully created disk %s", newDiskPath)
 	return newDiskPath, nil
+}
+
+func (l *LibVirt) copyNVRAM(ctx context.Context, sandboxId string) (string, error) {
+	nvramPath := filepath.Join(nvramBasePath, fmt.Sprintf("%s_VARS.fd", sandboxId))
+
+	log.Infof("Copying NVRAM from %s to %s", templateNVRAM, nvramPath)
+
+	host := l.extractHostFromURI()
+	if host == "" {
+		return "", fmt.Errorf("could not extract host from libvirt URI: %s", l.libvirtURI)
+	}
+
+	copyCmd := fmt.Sprintf("cp %s %s && chown libvirt-qemu:kvm %s", templateNVRAM, nvramPath, nvramPath)
+
+	cmd := exec.CommandContext(ctx, "ssh", host, copyCmd)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Errorf("Failed to copy NVRAM: %v, output: %s", err, string(output))
+		return "", fmt.Errorf("failed to copy NVRAM: %w (output: %s)", err, string(output))
+	}
+
+	log.Infof("Successfully copied NVRAM to %s", nvramPath)
+	return nvramPath, nil
 }
 
 func (l *LibVirt) extractHostFromURI() string {
@@ -305,4 +364,86 @@ func (l *LibVirt) extractHostFromURI() string {
 	}
 
 	return uri[atIndex+1 : slashIndex]
+}
+
+// getActualDomainIP gets the actual IP address from DHCP lease (not pre-calculated)
+func (l *LibVirt) getActualDomainIP(sandboxId string) string {
+	conn, err := l.getConnection()
+	if err != nil {
+		return ""
+	}
+
+	domain, err := conn.LookupDomainByName(sandboxId)
+	if err != nil {
+		return ""
+	}
+	defer domain.Free()
+
+	// Get actual IP from DHCP lease
+	return l.getDomainIP(conn, domain)
+}
+
+// waitForDaemonReady waits for the daemon API to be accessible on the sandbox
+// It polls for the actual IP from DHCP lease, not the pre-calculated one
+func (l *LibVirt) waitForDaemonReady(ctx context.Context, sandboxId, _ string) error {
+	timeout := time.Duration(l.daemonStartTimeoutSec) * time.Second
+	deadline := time.Now().Add(timeout)
+
+	log.Infof("Waiting for daemon to be ready on sandbox %s (timeout: %v)", sandboxId, timeout)
+
+	// Create HTTP client with SSH tunnel if remote
+	var client *http.Client
+	if IsRemoteURI(l.libvirtURI) {
+		sshHost := l.extractHostFromURI()
+		transport := GetSSHTunnelTransport(sshHost)
+		client = &http.Client{
+			Transport: transport,
+			Timeout:   5 * time.Second,
+		}
+		log.Infof("Using SSH tunnel via %s to reach daemon", sshHost)
+	} else {
+		client = &http.Client{
+			Timeout: 5 * time.Second,
+		}
+	}
+
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
+	var lastIP string
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if time.Now().After(deadline) {
+				return fmt.Errorf("daemon not ready after %v", timeout)
+			}
+
+			// Get actual IP from domain (not pre-calculated)
+			actualIP := l.getActualDomainIP(sandboxId)
+			if actualIP == "" {
+				log.Debugf("Waiting for domain %s to get IP address...", sandboxId)
+				continue
+			}
+			if actualIP != lastIP {
+				log.Infof("Domain %s has IP: %s", sandboxId, actualIP)
+				lastIP = actualIP
+			}
+
+			daemonURL := fmt.Sprintf("http://%s:2280/version", actualIP)
+			resp, err := client.Get(daemonURL)
+			if err != nil {
+				log.Debugf("Daemon not ready yet at %s: %v", actualIP, err)
+				continue
+			}
+			resp.Body.Close()
+
+			if resp.StatusCode == http.StatusOK {
+				log.Infof("Daemon is ready on sandbox %s", sandboxId)
+				return nil
+			}
+			log.Debugf("Daemon returned status %d, waiting...", resp.StatusCode)
+		}
+	}
 }

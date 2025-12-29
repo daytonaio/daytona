@@ -2,6 +2,13 @@
 
 This document lists components and features that are planned for future implementation in the Windows daemon. These features exist in the Linux daemon (`apps/daemon`) and should be ported with Windows-specific adaptations.
 
+## Recently Implemented
+
+- ✅ **SDK Command Compatibility** (`pkg/common/command_parser.go`): Transparent handling of Linux-style `sh -c "..."` wrappers from Python/TypeScript SDKs
+- ✅ **Auto Firewall Rule**: Daemon automatically configures Windows Firewall on startup (port 2280)
+- ✅ **Process Execution**: PowerShell-based command execution with proper output capture
+- ✅ **Session Management**: Persistent shell sessions for command execution
+
 ---
 
 ## 1. SSH Server

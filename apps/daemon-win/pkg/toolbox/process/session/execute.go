@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon-win/internal/util"
+	"github.com/daytonaio/daemon-win/pkg/common"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
@@ -52,6 +53,15 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, errors.New("command cannot be empty"))
 		return
 	}
+
+	// Parse Linux shell wrapper (sh -c "...") and extract actual command
+	parsedCommand, envVars := common.ParseShellWrapper(request.Command)
+	if parsedCommand != request.Command {
+		log.Debugf("Parsed shell wrapper: %q -> %q (env: %v)", request.Command, parsedCommand, envVars)
+	}
+
+	// Build Windows command with env vars if any
+	finalCommand := common.BuildWindowsCommand(parsedCommand, envVars)
 
 	session, ok := sessions[sessionId]
 	if !ok {
@@ -98,7 +108,7 @@ try {
 `,
 		strings.ReplaceAll(logFilePath, `\`, `\\`),
 		strings.ReplaceAll(exitCodeFilePath, `\`, `\\`),
-		request.Command,
+		finalCommand,
 	)
 
 	_, err := session.stdinWriter.Write([]byte(cmdToExec + "\n"))
