@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daemon-win/internal"
+	"github.com/daytonaio/daemon-win/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/config"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/git"
@@ -211,6 +212,38 @@ func (s *Server) Start() error {
 	proxyController := r.Group("/proxy")
 	{
 		proxyController.Any("/:port/*path", proxy.ProxyHandler)
+	}
+
+	// Computer use endpoints
+	computerUseController := r.Group("/computeruse")
+	{
+		// Status endpoint checks VNC on port 6080
+		computerUseController.GET("/status", computeruse.GetStatus)
+
+		// Start/Stop endpoints
+		computerUseController.POST("/start", computeruse.Start)
+		computerUseController.POST("/stop", computeruse.Stop)
+
+		// Other endpoints return service unavailable
+		computerUseController.GET("/process-status", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/process/:processName/status", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/process/:processName/restart", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/process/:processName/logs", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/process/:processName/errors", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/screenshot", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/screenshot/region", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/screenshot/compressed", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/screenshot/region/compressed", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/mouse/position", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/mouse/move", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/mouse/click", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/mouse/drag", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/mouse/scroll", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/keyboard/type", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/keyboard/key", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.POST("/keyboard/hotkey", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/display/info", computeruse.ComputerUseDisabledMiddleware())
+		computerUseController.GET("/display/windows", computeruse.ComputerUseDisabledMiddleware())
 	}
 
 	go portDetector.Start(context.Background())

@@ -62,6 +62,9 @@ func ProxyHandler(c *gin.Context) {
 	// Copy query string
 	target.RawQuery = c.Request.URL.RawQuery
 
+	// Check if this is a WebSocket upgrade request
+	isWebSocket := c.Request.Header.Get("Upgrade") == "websocket"
+
 	// Create reverse proxy
 	proxy := &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
@@ -69,8 +72,13 @@ func ProxyHandler(c *gin.Context) {
 			req.Host = target.Host
 			req.Header = c.Request.Header.Clone()
 
-			// Remove hop-by-hop headers
-			for _, h := range []string{"Connection", "Keep-Alive", "Proxy-Authenticate", "Proxy-Authorization", "Te", "Trailers", "Transfer-Encoding", "Upgrade"} {
+			// Remove hop-by-hop headers, but preserve WebSocket headers for upgrades
+			headersToRemove := []string{"Keep-Alive", "Proxy-Authenticate", "Proxy-Authorization", "Te", "Trailers", "Transfer-Encoding"}
+			if !isWebSocket {
+				// Only remove Connection and Upgrade for non-WebSocket requests
+				headersToRemove = append(headersToRemove, "Connection", "Upgrade")
+			}
+			for _, h := range headersToRemove {
 				req.Header.Del(h)
 			}
 		},
