@@ -1,6 +1,6 @@
 # Daytona Windows Daemon
 
-A Windows Go application for Daytona platform development. This daemon runs inside Windows VMs (sandboxes) and provides the Toolbox API for process execution, file operations, and git commands.
+A Windows Go application for Daytona platform development. This daemon runs inside Windows VMs (sandboxes) and provides the Toolbox API for process execution, file operations, git commands, and remote desktop access via VNC.
 
 ## Features
 
@@ -10,15 +10,28 @@ A Windows Go application for Daytona platform development. This daemon runs insi
 - **Session Management**: Persistent shell sessions for command execution
 - **File System Operations**: Create, read, write, delete files and directories
 - **Git Integration**: Clone, commit, push, pull, and branch operations
+- **Computer Use Status**: Check VNC availability via `/computeruse/status` endpoint
+- **Remote Desktop**: Web-based VNC access via noVNC on port 6080
 
 ## Architecture
 
-The daemon is deployed as a Windows Service (`DaytonaDaemon`) that:
+The daemon is deployed as a scheduled task (`DaytonaDaemon`) that:
 
 1. Listens on port 2280 for HTTP API requests
 2. Automatically configures Windows Firewall on first start
 3. Parses SDK command wrappers to extract actual commands
 4. Executes commands via PowerShell
+
+### Remote Desktop Stack
+
+```
+Browser ─────► noVNC (6080) ─────► websockify ─────► TightVNC (5900)
+               (Web Client)        (WebSocket)        (VNC Server)
+```
+
+- **TightVNC Server**: Runs on port 5900, provides RFB protocol
+- **websockify**: Python bridge that converts WebSocket to VNC protocol
+- **noVNC**: Web-based VNC client accessible via browser
 
 ## Quick Start
 
@@ -30,20 +43,16 @@ yarn nx build-windows daemon-win
 
 This creates `dist/apps/daemon-win.exe` - a Windows AMD64 executable.
 
-### 2. Setup Windows VM (First Time Only)
+### 2. Base Image Setup
 
-The Windows VM needs OpenSSH Server enabled. Copy `scripts/setup-windows-ssh.ps1` to the Windows VM and run it as Administrator:
+The Windows sandbox base image (`winserver-desktop-base.qcow2`) includes:
 
-```powershell
-# On Windows VM (via VNC/RDP):
-PowerShell -ExecutionPolicy Bypass -File setup-windows-ssh.ps1
-```
-
-Or manually enable OpenSSH:
-
-1. Settings → Apps → Optional Features → Add a feature → OpenSSH Server
-2. Start the service: `Start-Service sshd`
-3. Set to auto-start: `Set-Service -Name sshd -StartupType 'Automatic'`
+- Windows Server 2022 with **Desktop Experience** (full GUI)
+- TightVNC Server (port 5900, no authentication)
+- noVNC + websockify (port 6080)
+- Daytona daemon (port 2280)
+- Auto-start scheduled tasks for all services
+- Firewall disabled for development
 
 ### 3. Deploy to Windows VM
 
@@ -67,10 +76,10 @@ yarn nx run-remote daemon-win
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `WIN_VM_NAME` | `winserver-core` | VM name in libvirt |
+| `WIN_VM_NAME` | `winserver-desktop` | VM name in libvirt |
 | `WIN_VM_IP` | (auto-detected) | Override VM IP address |
 | `WIN_USER` | `Administrator` | Windows SSH username |
-| `WIN_PASS` | `DaytonaWinAcc3ss!` | Windows SSH password |
+| `WIN_PASS` | `Daytona123!` | Windows SSH/RDP password |
 | `WIN_DEPLOY_PATH` | `C:\daytona` | Deployment directory on Windows |
 
 ### Runner Environment Variables
@@ -82,6 +91,15 @@ These are used by runner-win when connecting to the daemon:
 | `LIBVIRT_URI` | `qemu:///system` | Libvirt connection URI |
 | `LIBVIRT_SSH_TUNNEL` | `true` (if remote) | Enable/disable SSH tunneling for proxy |
 | `DAEMON_START_TIMEOUT_SEC` | `60` | Seconds to wait for daemon startup |
+
+### Service Ports
+
+| Port | Service | Description |
+|------|---------|-------------|
+| 2280 | Daytona Daemon | Toolbox API |
+| 5900 | TightVNC | VNC server (RFB protocol) |
+| 6080 | noVNC | Web-based VNC client |
+| 3389 | RDP | Remote Desktop (optional) |
 
 ## Available Targets
 
@@ -102,11 +120,11 @@ Linux DevContainer                    h1001.blinkbox.dev
 ┌─────────────────┐                   ┌─────────────────┐
 │  Edit Go code   │                   │ libvirt/QEMU    │
 │        ↓        │                   │       ↓         │
-│  nx build-win   │ ──── SSH ────►    │  win11-clone    │
-│        ↓        │                   │   (Windows VM)  │
+│  nx build-win   │ ──── SSH ────►    │  Windows VM     │
+│        ↓        │                   │  (Desktop Exp)  │
 │  nx deploy      │ ──── SCP ────►    │  daemon-win.exe │
-│        ↓        │                   │       ↓         │
-│  nx run-remote  │ ◄─── Output ────  │   Execution     │
+│        ↓        │                   │  TightVNC       │
+│  nx run-remote  │ ◄─── Output ────  │  noVNC          │
 └─────────────────┘                   └─────────────────┘
 ```
 
@@ -143,6 +161,26 @@ When developing with libvirt on a remote machine (e.g., h1001.blinkbox.dev):
    - Create Windows sandboxes from the base image
    - Proxy API requests to the daemon via SSH tunnels
 
+## API Endpoints
+
+### Computer Use
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/computeruse/status` | Returns `{"status": "active"}` if VNC is running |
+| POST | `/computeruse/start` | Start computer use (placeholder) |
+| POST | `/computeruse/stop` | Stop computer use (placeholder) |
+
+### VNC Access via Proxy
+
+Access noVNC through the runner proxy:
+
+```
+http://localhost:3000/api/toolbox/{sandbox-id}/toolbox/6080/vnc.html
+```
+
+This proxies to the noVNC web client running on port 6080 inside the Windows VM.
+
 ## Troubleshooting
 
 ### Cannot connect to Windows VM
@@ -156,18 +194,52 @@ When developing with libvirt on a remote machine (e.g., h1001.blinkbox.dev):
 2. Get VM IP:
 
    ```bash
-   ssh h1001.blinkbox.dev "virsh domifaddr win11-clone --source agent"
+   ssh h1001.blinkbox.dev "virsh domifaddr winserver-desktop"
    ```
 
-3. Test SSH connectivity:
+3. Test connectivity:
 
    ```bash
-   ssh -J h1001.blinkbox.dev daytona@<VM_IP> "hostname"
+   ssh h1001.blinkbox.dev "curl -s http://VM_IP:2280/health"
    ```
 
-### SSH connection times out
+### VNC shows black screen
 
-The Windows VM may not have OpenSSH Server enabled. Connect via VNC/RDP and run the setup script.
+1. Verify Windows has Desktop Experience (not Server Core):
+
+   ```bash
+   # Via daemon API
+   curl -X POST "http://VM_IP:2280/process/execute" \
+     -H "Content-Type: application/json" \
+     -d '{"command": "Get-ComputerInfo | Select WindowsInstallationType"}'
+   ```
+
+   Should return `Server` (Desktop Experience), not `Server Core`.
+
+2. Check TightVNC is running:
+
+   ```bash
+   curl -X POST "http://VM_IP:2280/process/execute" \
+     -H "Content-Type: application/json" \
+     -d '{"command": "Get-Service tvnserver | Select Status"}'
+   ```
+
+3. Check noVNC/websockify:
+
+   ```bash
+   curl -X POST "http://VM_IP:2280/process/execute" \
+     -H "Content-Type: application/json" \
+     -d '{"command": "netstat -an | Select-String 6080"}'
+   ```
+
+### Daemon not starting on boot
+
+Check the scheduled task:
+
+```powershell
+Get-ScheduledTask -TaskName "DaytonaDaemon"
+Start-ScheduledTask -TaskName "DaytonaDaemon"
+```
 
 ### Cross-compilation issues
 
@@ -200,52 +272,89 @@ To create or update the Windows base image for sandboxes:
 
 ### Prerequisites
 
-- Windows Server VM (`winserver-core`) with:
-  - OpenSSH Server enabled
-  - Daemon installed at `C:\daytona\daemon-win.exe`
-  - Service configured via `install-service.ps1`
-  - Windows Firewall rule for port 2280
+- Windows Server 2022 VM with **Desktop Experience** (not Server Core)
+- Administrator password: `Daytona123!`
 
-### Updating the Base Image
+### Components to Install
 
-1. Deploy the new daemon to the running VM:
+1. **Daytona Daemon**:
 
-   ```bash
-   # Build for Windows
-   GOOS=windows GOARCH=amd64 go build -o /tmp/daemon-win.exe apps/daemon-win/cmd/daemon-win/main.go
+   ```powershell
+   # Download daemon
+   Invoke-WebRequest -Uri "http://10.100.0.1:8888/daemon-win.exe" -OutFile "C:\daemon-win.exe"
    
-   # Copy to hypervisor then to VM (replace IP)
-   scp /tmp/daemon-win.exe h1001.blinkbox.dev:/tmp/
-   ssh h1001.blinkbox.dev "
-     sshpass -p 'PASSWORD' scp -o StrictHostKeyChecking=no /tmp/daemon-win.exe Administrator@VM_IP:/C:/daytona/daemon-win.exe
-   "
+   # Create auto-start task
+   $action = New-ScheduledTaskAction -Execute "C:\daemon-win.exe"
+   $trigger = New-ScheduledTaskTrigger -AtStartup
+   $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+   Register-ScheduledTask -TaskName "DaytonaDaemon" -Action $action -Trigger $trigger -Settings $settings -User "SYSTEM" -RunLevel Highest -Force
    ```
 
-2. Ensure firewall rule exists:
+2. **TightVNC Server** (no authentication):
 
-   ```bash
-   ssh h1001.blinkbox.dev "
-     sshpass -p 'PASSWORD' ssh Administrator@VM_IP 'netsh advfirewall firewall add rule name=\"Daytona Daemon\" dir=in action=allow protocol=tcp localport=2280'
-   "
+   ```powershell
+   # Download TightVNC
+   Invoke-WebRequest -Uri "https://www.tightvnc.com/download/2.8.85/tightvnc-2.8.85-gpl-setup-64bit.msi" -OutFile "$env:TEMP\tightvnc.msi"
+   
+   # Install silently without password, allow loopback
+   Start-Process msiexec.exe -ArgumentList "/i `"$env:TEMP\tightvnc.msi`" /quiet /norestart ADDLOCAL=Server SET_USEVNCAUTHENTICATION=1 VALUE_OF_USEVNCAUTHENTICATION=0 SET_ALLOWLOOPBACK=1 VALUE_OF_ALLOWLOOPBACK=1" -Wait
    ```
 
-3. Shutdown the VM and commit changes:
+3. **Python + noVNC + websockify**:
+
+   ```powershell
+   # Install Python
+   Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.12.0/python-3.12.0-amd64.exe" -OutFile "$env:TEMP\python.exe"
+   Start-Process "$env:TEMP\python.exe" -ArgumentList '/quiet', 'InstallAllUsers=1', 'PrependPath=1' -Wait
+   
+   # Refresh PATH
+   $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
+   
+   # Install websockify
+   & "C:\Program Files\Python312\Scripts\pip.exe" install websockify
+   
+   # Download noVNC
+   Invoke-WebRequest -Uri "https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.zip" -OutFile "$env:TEMP\novnc.zip"
+   Expand-Archive -Path "$env:TEMP\novnc.zip" -DestinationPath "C:\" -Force
+   Rename-Item "C:\noVNC-1.4.0" "C:\noVNC"
+   
+   # Create noVNC auto-start task
+   $action = New-ScheduledTaskAction -Execute "C:\Program Files\Python312\python.exe" -Argument "-m websockify --web C:\noVNC 6080 localhost:5900"
+   $trigger = New-ScheduledTaskTrigger -AtStartup
+   Register-ScheduledTask -TaskName "noVNC" -Action $action -Trigger $trigger -Settings $settings -User "SYSTEM" -RunLevel Highest -Force
+   ```
+
+4. **Disable Firewall** (for development):
+
+   ```powershell
+   Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+   ```
+
+### Creating the Base Image
+
+1. Shut down the VM:
 
    ```bash
-   ssh h1001.blinkbox.dev "
-     # Shutdown gracefully
-     virsh shutdown winserver-core
-     sleep 60
-     
-     # Commit overlay to base (if using overlay disk)
-     qemu-img commit /var/lib/libvirt/images/winserver-core-overlay.qcow2
-     
-     # Copy to sandbox base image
-     cp /var/lib/libvirt/images/winserver-core.qcow2 /var/lib/libvirt/images/winserver-sandbox-base.qcow2
-     
-     # Restart VM
-     virsh start winserver-core
-   "
+   virsh shutdown winserver-desktop
+   ```
+
+2. Create standalone base image (flatten backing chain):
+
+   ```bash
+   qemu-img convert -O qcow2 /var/lib/libvirt/images/winserver-desktop.qcow2 /var/lib/libvirt/images/winserver-desktop-base.qcow2
+   ```
+
+3. Copy NVRAM template:
+
+   ```bash
+   cp /var/lib/libvirt/qemu/nvram/winserver-desktop_VARS.fd /var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd
+   ```
+
+4. Set permissions:
+
+   ```bash
+   chown libvirt-qemu:kvm /var/lib/libvirt/images/winserver-desktop-base.qcow2
+   chown libvirt-qemu:kvm /var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd
    ```
 
 ### Verifying the Base Image
@@ -253,5 +362,7 @@ To create or update the Windows base image for sandboxes:
 New sandboxes created from the base image should:
 
 - Have the daemon running on port 2280
-- Have the firewall rule configured
-- Successfully execute SDK commands (e.g., `sandbox.process.exec('dir')`)
+- Have TightVNC running on port 5900
+- Have noVNC/websockify running on port 6080
+- Return `{"status": "active"}` from `/computeruse/status`
+- Show Windows desktop via noVNC at `http://VM_IP:6080/vnc.html`
