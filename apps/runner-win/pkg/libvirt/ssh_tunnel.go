@@ -108,6 +108,24 @@ func (c *sshConn) SetWriteDeadline(t time.Time) error {
 	return nil
 }
 
+// DialSSHTunnel creates a net.Conn that tunnels through SSH to reach a target address.
+// Used by SSH gateway to connect to VMs in dev environments.
+func DialSSHTunnel(sshHost, targetAddr string) (net.Conn, error) {
+	log.Infof("SSH tunnel: dialing %s via %s", targetAddr, sshHost)
+	cmd := exec.Command("ssh",
+		"-i", SSHKeyPath,
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "BatchMode=yes",
+		sshHost, "-W", targetAddr)
+	conn, err := newCmdConn(cmd)
+	if err != nil {
+		log.Errorf("SSH tunnel: failed to dial %s: %v", targetAddr, err)
+		return nil, err
+	}
+	log.Infof("SSH tunnel: connected to %s", targetAddr)
+	return conn, nil
+}
+
 // newCmdConn wraps an exec.Cmd's stdin/stdout as a net.Conn using ssh -W
 func newCmdConn(cmd *exec.Cmd) (net.Conn, error) {
 	stdin, err := cmd.StdinPipe()

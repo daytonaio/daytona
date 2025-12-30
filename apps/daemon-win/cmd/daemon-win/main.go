@@ -13,6 +13,8 @@ import (
 	"runtime"
 
 	"github.com/daytonaio/daemon-win/cmd/daemon-win/config"
+	"github.com/daytonaio/daemon-win/pkg/ssh"
+	"github.com/daytonaio/daemon-win/pkg/terminal"
 	"github.com/daytonaio/daemon-win/pkg/toolbox"
 	log "github.com/sirupsen/logrus"
 )
@@ -56,17 +58,45 @@ func main() {
 		panic(fmt.Errorf("failed to get current working directory: %w", err))
 	}
 
-	// Ensure Windows Firewall allows daemon port
+	// Ensure Windows Firewall allows daemon, SSH, and terminal ports
 	ensureFirewallRule()
+	ensureSSHFirewallRule()
+	ensureTerminalFirewallRule()
+
+	// Get default work directory (user home)
+	defaultWorkDir, err := os.UserHomeDir()
+	if err != nil {
+		defaultWorkDir = workDir
+	}
 
 	toolBoxServer := &toolbox.Server{
 		WorkDir: workDir,
+	}
+
+	sshServer := &ssh.Server{
+		WorkDir:        workDir,
+		DefaultWorkDir: defaultWorkDir,
 	}
 
 	// Start the toolbox server in a go routine
 	go func() {
 		err := toolBoxServer.Start()
 		if err != nil {
+			errChan <- err
+		}
+	}()
+
+	// Start the SSH server in a go routine
+	go func() {
+		err := sshServer.Start()
+		if err != nil {
+			errChan <- err
+		}
+	}()
+
+	// Start the terminal server in a go routine (port 22222)
+	go func() {
+		if err := terminal.StartTerminalServer(22222); err != nil {
 			errChan <- err
 		}
 	}()
@@ -136,5 +166,57 @@ func ensureFirewallRule() {
 		log.Debugf("Firewall rule setup: %v (output: %s)", err, string(output))
 	} else {
 		log.Info("Windows Firewall rule added for Daytona Daemon (port 2280)")
+	}
+}
+
+// ensureSSHFirewallRule adds a Windows Firewall rule to allow incoming connections
+// on the SSH port (22220). This is idempotent - it won't fail if the rule exists.
+func ensureSSHFirewallRule() {
+	if runtime.GOOS != "windows" {
+		return
+	}
+
+	// Use netsh to add firewall rule (works on all Windows versions)
+	// The rule allows incoming TCP connections on port 22220
+	cmd := exec.Command("netsh", "advfirewall", "firewall", "add", "rule",
+		"name=Daytona SSH",
+		"dir=in",
+		"action=allow",
+		"protocol=tcp",
+		"localport=22220",
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Error might mean rule already exists, which is fine
+		log.Debugf("SSH Firewall rule setup: %v (output: %s)", err, string(output))
+	} else {
+		log.Info("Windows Firewall rule added for Daytona SSH (port 22220)")
+	}
+}
+
+// ensureTerminalFirewallRule adds a Windows Firewall rule to allow incoming connections
+// on the terminal port (22222). This is idempotent - it won't fail if the rule exists.
+func ensureTerminalFirewallRule() {
+	if runtime.GOOS != "windows" {
+		return
+	}
+
+	// Use netsh to add firewall rule (works on all Windows versions)
+	// The rule allows incoming TCP connections on port 22222
+	cmd := exec.Command("netsh", "advfirewall", "firewall", "add", "rule",
+		"name=Daytona Terminal",
+		"dir=in",
+		"action=allow",
+		"protocol=tcp",
+		"localport=22222",
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Error might mean rule already exists, which is fine
+		log.Debugf("Terminal Firewall rule setup: %v (output: %s)", err, string(output))
+	} else {
+		log.Info("Windows Firewall rule added for Daytona Terminal (port 22222)")
 	}
 }

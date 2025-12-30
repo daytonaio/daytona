@@ -5,78 +5,19 @@ This document lists components and features that are planned for future implemen
 ## Recently Implemented
 
 - ✅ **SDK Command Compatibility** (`pkg/common/command_parser.go`): Transparent handling of Linux-style `sh -c "..."` wrappers from Python/TypeScript SDKs
-- ✅ **Auto Firewall Rule**: Daemon automatically configures Windows Firewall on startup (port 2280)
+- ✅ **Auto Firewall Rule**: Daemon automatically configures Windows Firewall on startup (ports 2280, 22220, 22222)
 - ✅ **Process Execution**: PowerShell-based command execution with proper output capture
 - ✅ **Session Management**: Persistent shell sessions for command execution
 - ✅ **Computer Use Status** (`pkg/toolbox/computeruse/`): VNC-based status endpoint returning `active`/`inactive`
 - ✅ **Remote Desktop via VNC**: TightVNC + noVNC for web-based remote desktop access
 - ✅ **WebSocket Proxy Support**: Proxy correctly handles WebSocket connections for noVNC
+- ✅ **SSH Server** (`pkg/ssh/`): Built-in SSH server with password/public key auth, SFTP, TCP port forwarding, and ConPTY interactive shells
+- ✅ **Web Terminal** (`pkg/terminal/`): Browser-based terminal using xterm.js on port 22222 with ConPTY backend
+- ✅ **Toolbox Proxy** (`pkg/toolbox/proxy/`): Internal proxy route to access daemon services (e.g., `/proxy/22222/` for terminal)
 
 ---
 
-## 1. SSH Server
-
-**Reference**: `apps/daemon/pkg/ssh/`
-
-Provides remote shell access and file transfer capabilities.
-
-### Components to Implement
-
-- **Authentication**: Public key and password authentication
-- **SFTP Handler**: Secure file transfer protocol
-- **Port Forwarding**: TCP port forwarding (local and remote)
-- **Named Pipe Forwarding**: Windows equivalent of Unix socket forwarding (`streamlocal-forward`)
-- **Interactive Shell**: Integration with ConPTY for interactive sessions
-
-### Windows-Specific Considerations
-
-- Replace Unix socket forwarding with Windows Named Pipes
-- Use ConPTY instead of Unix PTY for interactive shells
-- Windows signal handling for session termination
-- Replace `golang.org/x/sys/unix` signals with Windows equivalents
-
-### Key Dependencies
-
-- `github.com/gliderlabs/ssh` - SSH server library
-- `github.com/pkg/sftp` - SFTP implementation
-- `golang.org/x/crypto/ssh` - SSH protocol
-
----
-
-## 2. Terminal Server
-
-**Reference**: `apps/daemon/pkg/terminal/`
-
-Web-based terminal accessible via browser using xterm.js.
-
-### Components to Implement
-
-- **HTTP Server**: Serve xterm.js frontend (static files)
-- **WebSocket Handler**: Bidirectional communication with terminal
-- **ConPTY Integration**: Windows pseudo-terminal backend
-- **Window Resize**: Handle terminal resize events
-- **UTF-8 Decoder**: Handle multi-byte character sequences
-
-### Windows-Specific Considerations
-
-- Use Windows ConPTY API instead of Unix PTY
-- Spawn `powershell.exe` or `cmd.exe` as the shell
-- Handle Windows-specific escape sequences
-
-### Key Dependencies
-
-- `github.com/gorilla/websocket` - WebSocket support
-- `github.com/UserExistsError/conpty` or similar - ConPTY wrapper
-
-### Static Assets
-
-- `xterm.js` - Terminal emulator
-- `xterm.css` - Terminal styles
-- `xterm-addon-fit.js` - Auto-fit addon
-
----
-
-## 3. PTY Sessions (Toolbox API)
+## 2. PTY Sessions (Toolbox API)
 
 **Reference**: `apps/daemon/pkg/toolbox/process/pty/`
 
@@ -109,7 +50,7 @@ POST   /process/pty/:id/resize  - Resize terminal
 
 ---
 
-## 4. Interpreter REPL
+## 3. Interpreter REPL
 
 **Reference**: `apps/daemon/pkg/toolbox/process/interpreter/`
 
@@ -139,7 +80,7 @@ GET    /process/interpreter/execute     - Execute code (WebSocket)
 
 ---
 
-## 5. Computer Use - Full Implementation
+## 4. Computer Use - Full Implementation
 
 **Reference**: `apps/daemon/pkg/toolbox/computeruse/`
 
@@ -195,7 +136,7 @@ Browser ─────► noVNC (6080) ─────► websockify ───�
 
 ---
 
-## 6. LSP Support (Language Server Protocol)
+## 5. LSP Support (Language Server Protocol)
 
 **Reference**: `apps/daemon/pkg/toolbox/lsp/`
 
@@ -235,11 +176,14 @@ GET    /lsp/workspacesymbols - Get workspace symbols
 ## Implementation Priority Suggestion
 
 1. **PTY Sessions** - Enables interactive terminal via API
-2. **Terminal Server** - Web-based terminal access
-3. **Computer Use (Full)** - Programmatic screenshot/input control
-4. **SSH Server** - Remote access capability
-5. **LSP Support** - Developer tooling
-6. **Interpreter REPL** - Python execution
+2. **Computer Use (Full)** - Programmatic screenshot/input control
+3. **LSP Support** - Developer tooling
+4. **Interpreter REPL** - Python execution
+
+### Already Implemented
+
+- ✅ **SSH Server** - Built-in SSH with SFTP and port forwarding
+- ✅ **Web Terminal** - Browser-based terminal via xterm.js
 
 ---
 
@@ -251,12 +195,14 @@ The Windows sandbox base image includes these pre-installed components:
 |-----------|---------|------|---------|
 | Windows Server | 2022 Desktop Experience | - | Full GUI support |
 | Daytona Daemon | Latest | 2280 | Toolbox API |
+| Daytona SSH Server | (built-in) | 22220 | SSH, SFTP, port forwarding |
+| Daytona Web Terminal | (built-in) | 22222 | Browser-based terminal |
 | TightVNC | 2.8.85 | 5900 | VNC server |
 | Python | 3.12 | - | For websockify |
 | websockify | Latest | - | WebSocket bridge |
 | noVNC | 1.4.0 | 6080 | Web VNC client |
 
-All services are configured to auto-start via Windows Scheduled Tasks.
+All services are configured to auto-start via Windows Scheduled Tasks (DaytonaDaemon task runs `C:\daemon-win.exe` at boot).
 
 ---
 

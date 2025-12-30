@@ -107,10 +107,12 @@ sshpass -p "$WIN_PASS" ssh $SSH_OPTS -J "$LIBVIRT_HOST" "$WIN_USER@$VM_IP" "powe
     echo "Warning: Service installation may have had issues, checking status..."
 }
 
-# Ensure firewall rule exists (idempotent)
+# Ensure firewall rules exist (idempotent)
 echo ""
 echo "Configuring Windows Firewall..."
 run_remote "netsh advfirewall firewall add rule name=\"Daytona Daemon\" dir=in action=allow protocol=tcp localport=2280" || true
+run_remote "netsh advfirewall firewall add rule name=\"Daytona SSH\" dir=in action=allow protocol=tcp localport=22220" || true
+run_remote "netsh advfirewall firewall add rule name=\"Daytona Terminal\" dir=in action=allow protocol=tcp localport=22222" || true
 
 # Verify service is running
 echo ""

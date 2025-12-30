@@ -241,10 +241,35 @@ func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []by
 		Timeout:         30 * time.Second,
 	}
 
-	// Connect to the sandbox container via toolbox
-	sandboxClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:22220", sandboxDetails.Hostname), clientConfig)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to connect to sandbox: %w", err)
+	sandboxAddr := fmt.Sprintf("%s:22220", sandboxDetails.Hostname)
+
+	var sandboxClient *ssh.Client
+
+	// Dev environment: use SSH tunnel for remote libvirt
+	if libvirt.ShouldUseSSHTunnel(s.libvirtClient.GetURI()) {
+		sshHost := s.libvirtClient.GetSSHHost()
+		log.Infof("SSH Gateway: tunneling to %s via %s", sandboxAddr, sshHost)
+
+		// Dial through SSH tunnel
+		tunnelConn, err := libvirt.DialSSHTunnel(sshHost, sandboxAddr)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to create SSH tunnel: %w", err)
+		}
+
+		// Create SSH client over the tunnel connection
+		sshConn, chans, reqs, err := ssh.NewClientConn(tunnelConn, sandboxAddr, clientConfig)
+		if err != nil {
+			tunnelConn.Close()
+			return nil, nil, fmt.Errorf("failed to create SSH connection over tunnel: %w", err)
+		}
+
+		sandboxClient = ssh.NewClient(sshConn, chans, reqs)
+	} else {
+		// Direct connection (production)
+		sandboxClient, err = ssh.Dial("tcp", sandboxAddr, clientConfig)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to connect to sandbox: %w", err)
+		}
 	}
 
 	// Open channel to the sandbox
@@ -273,7 +298,7 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 	}
 
 	return &SandboxDetails{
-		User:     "daytona",
+		User:     GetSandboxSSHUser(),
 		Hostname: containerIP,
 	}, nil
 }

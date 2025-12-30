@@ -55,8 +55,13 @@ func GetShellArgs(shell string) []string {
 	return []string{"/C"}
 }
 
-// isPowerShell checks if the shell path refers to PowerShell
+// isPowerShell checks if the shell path refers to PowerShell (internal use)
 func isPowerShell(shell string) bool {
+	return IsPowerShell(shell)
+}
+
+// IsPowerShell checks if the shell path refers to PowerShell
+func IsPowerShell(shell string) bool {
 	return shell == "pwsh.exe" ||
 		shell == "powershell.exe" ||
 		len(shell) > 8 && (shell[len(shell)-8:] == "pwsh.exe" || shell[len(shell)-14:] == "powershell.exe")

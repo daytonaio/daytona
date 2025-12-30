@@ -19,6 +19,9 @@ import (
 
 const (
 	SSH_GATEWAY_PORT = 2220
+	// Default SSH user for connecting to Windows sandboxes
+	// The daemon-win SSH server accepts any username (password-based auth)
+	DEFAULT_SANDBOX_SSH_USER = "daytona"
 )
 
 // IsSSHGatewayEnabled checks if the SSH gateway should be enabled
@@ -59,6 +62,15 @@ func GetSSHHostKeyPath() string {
 		return path
 	}
 	return "/root/.ssh/id_rsa"
+}
+
+// GetSandboxSSHUser returns the SSH username to use when connecting to sandboxes
+// This can be overridden via the SANDBOX_SSH_USER environment variable
+func GetSandboxSSHUser() string {
+	if user := os.Getenv("SANDBOX_SSH_USER"); user != "" {
+		return user
+	}
+	return DEFAULT_SANDBOX_SSH_USER
 }
 
 // GetSSHHostKey returns the SSH host key from configuration

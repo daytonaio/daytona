@@ -5,7 +5,9 @@ A Windows Go application for Daytona platform development. This daemon runs insi
 ## Features
 
 - **SDK Compatibility**: Transparently handles Linux-style command wrappers (`sh -c "..."`) from the Python/TypeScript SDKs
-- **Auto Firewall Configuration**: Automatically adds Windows Firewall rule on startup (port 2280)
+- **Auto Firewall Configuration**: Automatically adds Windows Firewall rules on startup (ports 2280, 22220, 22222)
+- **SSH Server**: Built-in SSH server on port 22220 with password authentication, SFTP, and port forwarding
+- **Web Terminal**: Browser-based terminal using xterm.js on port 22222 with ConPTY backend
 - **Process Execution**: Execute commands via PowerShell with proper output capture
 - **Session Management**: Persistent shell sessions for command execution
 - **File System Operations**: Create, read, write, delete files and directories
@@ -17,10 +19,12 @@ A Windows Go application for Daytona platform development. This daemon runs insi
 
 The daemon is deployed as a scheduled task (`DaytonaDaemon`) that:
 
-1. Listens on port 2280 for HTTP API requests
-2. Automatically configures Windows Firewall on first start
-3. Parses SDK command wrappers to extract actual commands
-4. Executes commands via PowerShell
+1. Listens on port 2280 for HTTP API requests (Toolbox API)
+2. Listens on port 22220 for SSH connections (interactive shells, SFTP, port forwarding)
+3. Listens on port 22222 for Web Terminal (xterm.js + WebSocket)
+4. Automatically configures Windows Firewall on first start
+5. Parses SDK command wrappers to extract actual commands
+6. Executes commands via PowerShell
 
 ### Remote Desktop Stack
 
@@ -97,6 +101,8 @@ These are used by runner-win when connecting to the daemon:
 | Port | Service | Description |
 |------|---------|-------------|
 | 2280 | Daytona Daemon | Toolbox API |
+| 22220 | Daytona SSH | SSH server (shells, SFTP, port forwarding) |
+| 22222 | Web Terminal | Browser-based terminal (xterm.js + WebSocket) |
 | 5900 | TightVNC | VNC server (RFB protocol) |
 | 6080 | noVNC | Web-based VNC client |
 | 3389 | RDP | Remote Desktop (optional) |
@@ -275,20 +281,34 @@ To create or update the Windows base image for sandboxes:
 - Windows Server 2022 VM with **Desktop Experience** (not Server Core)
 - Administrator password: `Daytona123!`
 
+### Important Paths
+
+| Component | Path | Notes |
+|-----------|------|-------|
+| Daemon Executable | `C:\daemon-win.exe` | Main daemon binary |
+| Scheduled Task | `DaytonaDaemon` | Auto-start at boot |
+| Logs | Configured via `DAEMON_LOG_FILE_PATH` env var | Optional |
+
 ### Components to Install
 
 1. **Daytona Daemon**:
 
    ```powershell
-   # Download daemon
-   Invoke-WebRequest -Uri "http://10.100.0.1:8888/daemon-win.exe" -OutFile "C:\daemon-win.exe"
+   # Download daemon (or copy from build output)
+   # The daemon must be placed at C:\daemon-win.exe for the scheduled task
+   Copy-Item daemon-win.exe C:\daemon-win.exe
    
-   # Create auto-start task
+   # Create auto-start task (runs at boot as SYSTEM)
    $action = New-ScheduledTaskAction -Execute "C:\daemon-win.exe"
    $trigger = New-ScheduledTaskTrigger -AtStartup
-   $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+   $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
    Register-ScheduledTask -TaskName "DaytonaDaemon" -Action $action -Trigger $trigger -Settings $settings -User "SYSTEM" -RunLevel Highest -Force
    ```
+
+   **Note**: The daemon provides three servers:
+   - Toolbox API on port 2280
+   - SSH server on port 22220
+   - Web Terminal on port 22222
 
 2. **TightVNC Server** (no authentication):
 
@@ -330,31 +350,80 @@ To create or update the Windows base image for sandboxes:
    Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
    ```
 
+### Updating the Daemon in an Existing Image
+
+To update the daemon in the `winserver-desktop` VM and create a new base image:
+
+1. **Upload and deploy the new daemon**:
+
+   ```bash
+   # Build the daemon
+   cd apps/daemon-win && GOOS=windows GOARCH=amd64 go build -o daemon-win.exe ./cmd/daemon-win/
+   
+   # Get the VM IP
+   VM_IP=$(ssh h1001.blinkbox.dev "virsh domifaddr winserver-desktop" | grep -oP '10\.\d+\.\d+\.\d+')
+   
+   # Upload via toolbox API
+   ssh h1001.blinkbox.dev "curl -s -X POST 'http://$VM_IP:2280/files/upload?path=C%3A%5Cdaemon-win.exe.new' -F 'file=@-'" < daemon-win.exe
+   
+   # Stop task, replace binary, restart
+   ssh h1001.blinkbox.dev "curl -s -X POST 'http://$VM_IP:2280/process/execute' -H 'Content-Type: application/json' -d '{
+     \"command\": \"Start-Process powershell -ArgumentList \\\"-Command\\\", \\\"Start-Sleep 3; Stop-ScheduledTask -TaskName DaytonaDaemon; Copy-Item C:\\\\daemon-win.exe.new C:\\\\daemon-win.exe -Force; Start-ScheduledTask -TaskName DaytonaDaemon\\\" -WindowStyle Hidden\"
+   }'"
+   ```
+
+2. **Verify the new daemon is working**:
+
+   ```bash
+   # Wait for restart
+   sleep 15
+   
+   # Check all ports are listening
+   ssh h1001.blinkbox.dev "curl -s http://$VM_IP:2280/version"    # Toolbox API
+   ssh h1001.blinkbox.dev "nc -zv $VM_IP 22220 -w 5 2>&1"         # SSH
+   ssh h1001.blinkbox.dev "nc -zv $VM_IP 22222 -w 5 2>&1"         # Terminal
+   ```
+
 ### Creating the Base Image
 
-1. Shut down the VM:
+1. Shut down the VM (force if necessary):
 
    ```bash
    virsh shutdown winserver-desktop
+   # Wait 60 seconds, then force if still running:
+   virsh destroy winserver-desktop
    ```
 
 2. Create standalone base image (flatten backing chain):
 
    ```bash
-   qemu-img convert -O qcow2 /var/lib/libvirt/images/winserver-desktop.qcow2 /var/lib/libvirt/images/winserver-desktop-base.qcow2
+   sudo qemu-img convert -p -O qcow2 /var/lib/libvirt/images/winserver-desktop.qcow2 /var/lib/libvirt/images/winserver-desktop-base-new.qcow2
    ```
 
-3. Copy NVRAM template:
+3. Replace the old base image:
+
+   ```bash
+   sudo mv /var/lib/libvirt/images/winserver-desktop-base.qcow2 /var/lib/libvirt/images/winserver-desktop-base.qcow2.old
+   sudo mv /var/lib/libvirt/images/winserver-desktop-base-new.qcow2 /var/lib/libvirt/images/winserver-desktop-base.qcow2
+   ```
+
+4. Copy NVRAM template (if needed):
 
    ```bash
    cp /var/lib/libvirt/qemu/nvram/winserver-desktop_VARS.fd /var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd
    ```
 
-4. Set permissions:
+5. Set permissions:
 
    ```bash
-   chown libvirt-qemu:kvm /var/lib/libvirt/images/winserver-desktop-base.qcow2
-   chown libvirt-qemu:kvm /var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd
+   sudo chown libvirt-qemu:kvm /var/lib/libvirt/images/winserver-desktop-base.qcow2
+   sudo chown libvirt-qemu:kvm /var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd
+   ```
+
+6. Restart the source VM:
+
+   ```bash
+   virsh start winserver-desktop
    ```
 
 ### Verifying the Base Image
@@ -362,7 +431,62 @@ To create or update the Windows base image for sandboxes:
 New sandboxes created from the base image should:
 
 - Have the daemon running on port 2280
+- Have SSH server running on port 22220
+- Have Web Terminal running on port 22222
 - Have TightVNC running on port 5900
 - Have noVNC/websockify running on port 6080
 - Return `{"status": "active"}` from `/computeruse/status`
 - Show Windows desktop via noVNC at `http://VM_IP:6080/vnc.html`
+- Show PowerShell terminal via Web Terminal at `http://VM_IP:22222/`
+- Accept SSH connections: `ssh -p 22220 daytona@VM_IP` (password: `sandbox-ssh`)
+
+### Web Terminal Access
+
+The Web Terminal provides browser-based access to an interactive PowerShell session:
+
+- **Direct access**: `http://<vm-ip>:22222/`
+- **Via toolbox proxy**: `http://<vm-ip>:2280/proxy/22222/`
+- **WebSocket endpoint**: `ws://<vm-ip>:22222/ws`
+
+The terminal uses xterm.js for the frontend and Windows ConPTY for the backend, providing a full interactive PowerShell experience.
+
+## SSH Server
+
+The daemon includes a built-in SSH server that provides:
+
+### Features
+
+- **Password Authentication**: Default password is `sandbox-ssh`
+- **Public Key Authentication**: Accepts any public key
+- **Interactive Shells**: PowerShell sessions via ConPTY
+- **SFTP**: Full file transfer support
+- **TCP Port Forwarding**: Local and remote port forwarding
+
+### Connecting via SSH Gateway
+
+The runner-win SSH gateway (port 2220) proxies SSH connections to Windows sandboxes:
+
+```
+SSH Client → runner-win:2220 → Windows VM:22220
+```
+
+Connect using sandbox ID as username:
+
+```bash
+ssh -p 2220 <sandbox-id>@<runner-host>
+```
+
+### Direct SSH Connection
+
+For debugging, connect directly to a Windows VM:
+
+```bash
+ssh -p 22220 daytona@<vm-ip>
+# Password: sandbox-ssh
+```
+
+### SFTP File Transfer
+
+```bash
+sftp -P 22220 daytona@<vm-ip>
+```
