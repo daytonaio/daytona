@@ -33,9 +33,10 @@ async function processPrompt(prompt: string, sandbox: Sandbox): Promise<void> {
   })
 
   // Stream agent output as it arrives
+  if (!command.cmdId) throw new Error('Failed to start agent command in sandbox')
   await sandbox.process.getSessionCommandLogs(
     sessionId,
-    command.cmdId!,
+    command.cmdId,
     (stdout: string) => console.log(renderMarkdown(stdout.trim())),
     (stderr: string) => console.error(stderr.trim()),
   )
@@ -71,13 +72,13 @@ async function main() {
 
   // Get the preview URL for the sandbox
   const previewLink = await sandbox.getPreviewLink(1234)
-  const previewUrl = previewLink?.url.replace('1234', 'PORTNUMBER')
+  const previewUrlPattern = previewLink.url.replace('1234', 'PORTNUMBER')
 
   // Configure the Codex system prompt
   const systemPrompt = [
     'You are running in a Daytona sandbox.',
     'Use the /home/daytona directory instead of /workspace for file operations.',
-    `When running services on localhost, they will be accessible as: ${previewUrl}`,
+    `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
   ].join(' ')
   const config = `developer_instructions = "${systemPrompt}"`
   await sandbox.fs.createFolder('.codex', '755')
