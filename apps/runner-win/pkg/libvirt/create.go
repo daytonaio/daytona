@@ -268,8 +268,8 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 
 // Base image and NVRAM paths for Windows sandboxes
 const (
-	baseImagePath  = "/var/lib/libvirt/images/winserver-desktop-base.qcow2"
-	templateNVRAM  = "/var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd"
+	baseImagePath  = "/var/lib/libvirt/images/winserver-autologin-base.qcow2"
+	templateNVRAM  = "/var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd"
 	imagesBasePath = "/var/lib/libvirt/images"
 	nvramBasePath  = "/var/lib/libvirt/qemu/nvram"
 )
