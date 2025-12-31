@@ -13,13 +13,37 @@ COPY . .
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
 
+RUN ls -la /daytona
+
 RUN yarn
 
 RUN SKIP_COMPUTER_USE_BUILD=true yarn nx build runner --configuration=production --nxBail=true
 
 FROM docker:28.2.2-dind-alpine3.22 AS runner
+ 
+# Install dependencies
+RUN apk add --no-cache \
+    curl \
+    rsync \
+    fuse3 \
+    ca-certificates \
+    tar
 
-RUN apk add --no-cache curl rsync
+# Install AWS Mountpoint for S3 (mount-s3) from official AWS releases
+RUN set -eux; \
+    ARCH="$(uname -m)"; \
+    case "$ARCH" in \
+      x86_64) ARCH=x86_64 ;; \
+      aarch64) ARCH=aarch64 ;; \
+      *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
+    esac; \
+    curl -fL "https://s3.amazonaws.com/mountpoint-s3-release/latest/mountpoint-s3-linux-${ARCH}.tar.gz" \
+      -o /tmp/mountpoint-s3.tar.gz; \
+    tar -xzf /tmp/mountpoint-s3.tar.gz -C /tmp; \
+    mv /tmp/mount-s3 /usr/local/bin/mount-s3; \
+    chmod +x /usr/local/bin/mount-s3; \
+    rm -rf /tmp/mountpoint-s3.tar.gz
+
 
 WORKDIR /usr/local/bin
 

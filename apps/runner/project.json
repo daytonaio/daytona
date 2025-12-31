@@ -20,7 +20,7 @@
     "copy-computeruse-plugin": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
+        "command": "if [ -f dist/libs/computer-use-amd64 ]; then cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use; else echo \"computer-use artifact not present, skipping copy\"; fi"
       },
       "dependsOn": [
         {
