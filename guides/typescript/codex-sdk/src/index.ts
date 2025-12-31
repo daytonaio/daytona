@@ -19,7 +19,7 @@ function environmentPrefix(variables: Record<string, string>): string {
     .join(' ')
 }
 
-async function processPrompt(prompt: string, sandbox: any, previewUrl: string): Promise<void> {
+async function processPrompt(prompt: string, sandbox: any): Promise<void> {
   console.log('Thinking...')
 
   // Create a session to stream the agent output
@@ -108,7 +108,7 @@ async function main() {
   while (true) {
     const prompt = await new Promise<string>((resolve) => rl.question('User: ', resolve))
     if (!prompt.trim()) continue
-    await processPrompt(prompt, sandbox, previewUrl)
+    await processPrompt(prompt, sandbox)
   }
 }
 
