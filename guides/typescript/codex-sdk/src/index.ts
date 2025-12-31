@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytonaio/sdk'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 
@@ -19,7 +19,7 @@ function environmentPrefix(variables: Record<string, string>): string {
     .join(' ')
 }
 
-async function processPrompt(prompt: string, sandbox: any): Promise<void> {
+async function processPrompt(prompt: string, sandbox: Sandbox): Promise<void> {
   console.log('Thinking...')
 
   // Create a session to stream the agent output
