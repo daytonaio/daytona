@@ -32,7 +32,7 @@ RUN set -eux; \
     case "$ARCH" in \
       x86_64) ARCH=x86_64 ;; \
       aarch64) ARCH=aarch64 ;; \
-      *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
+      *) echo "Unsupported architecture for AWS Mountpoint for S3 (mount-s3): $ARCH. Supported architectures are: x86_64, aarch64. Failing image build because no fallback installation is available for this architecture." >&2; exit 1 ;; \
     esac; \
     curl -fL --retry 3 --retry-delay 5 --retry-all-errors \
       "https://s3.amazonaws.com/mountpoint-s3-release/latest/mountpoint-s3-linux-${ARCH}.tar.gz" \
