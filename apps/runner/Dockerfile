@@ -42,10 +42,15 @@ RUN set -eux; \
       exit 1; \
     fi; \
     tar -tzf /tmp/mountpoint-s3.tar.gz >/dev/null; \
-    tar -xzf /tmp/mountpoint-s3.tar.gz -C /tmp; \
-    mv /tmp/mount-s3 /usr/local/bin/mount-s3; \
+    mkdir -p /tmp/mountpoint-s3-extract; \
+    tar -xzf /tmp/mountpoint-s3.tar.gz -C /tmp/mountpoint-s3-extract --strip-components=1; \
+    if [ ! -f /tmp/mountpoint-s3-extract/mount-s3 ]; then \
+      echo "mount-s3 binary not found in extracted archive"; \
+      exit 1; \
+    fi; \
+    mv /tmp/mountpoint-s3-extract/mount-s3 /usr/local/bin/mount-s3; \
     chmod +x /usr/local/bin/mount-s3; \
-    rm -rf /tmp/mountpoint-s3.tar.gz
+    rm -rf /tmp/mountpoint-s3.tar.gz /tmp/mountpoint-s3-extract
 
 WORKDIR /usr/local/bin
 
