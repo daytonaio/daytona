@@ -13,8 +13,6 @@ COPY . .
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
 
-RUN ls -la /daytona
-
 RUN yarn
 
 RUN SKIP_COMPUTER_USE_BUILD=true yarn nx build runner --configuration=production --nxBail=true
