@@ -18,7 +18,6 @@ RUN yarn
 RUN SKIP_COMPUTER_USE_BUILD=true yarn nx build runner --configuration=production --nxBail=true
 
 FROM docker:28.2.2-dind-alpine3.22 AS runner
- 
 # Install dependencies
 RUN apk add --no-cache \
     curl \
