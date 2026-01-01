@@ -47,7 +47,6 @@ RUN set -eux; \
     chmod +x /usr/local/bin/mount-s3; \
     rm -rf /tmp/mountpoint-s3.tar.gz
 
-
 WORKDIR /usr/local/bin
 
 COPY --from=build /daytona/dist/apps/runner daytona-runner
