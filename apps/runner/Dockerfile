@@ -34,8 +34,14 @@ RUN set -eux; \
       aarch64) ARCH=aarch64 ;; \
       *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
     esac; \
-    curl -fL "https://s3.amazonaws.com/mountpoint-s3-release/latest/mountpoint-s3-linux-${ARCH}.tar.gz" \
+    curl -fL --retry 3 --retry-delay 5 --retry-all-errors \
+      "https://s3.amazonaws.com/mountpoint-s3-release/latest/mountpoint-s3-linux-${ARCH}.tar.gz" \
       -o /tmp/mountpoint-s3.tar.gz; \
+    if [ ! -s /tmp/mountpoint-s3.tar.gz ]; then \
+      echo "Downloaded mountpoint-s3 archive is missing or empty"; \
+      exit 1; \
+    fi; \
+    tar -tzf /tmp/mountpoint-s3.tar.gz >/dev/null; \
     tar -xzf /tmp/mountpoint-s3.tar.gz -C /tmp; \
     mv /tmp/mount-s3 /usr/local/bin/mount-s3; \
     chmod +x /usr/local/bin/mount-s3; \
