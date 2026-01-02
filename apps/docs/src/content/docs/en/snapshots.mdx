@@ -16,7 +16,7 @@ Daytona provides options to create snapshots using [public images](#using-public
 3. Enter the snapshot name, image (tag or digest), entrypoint, and resources
 
 - **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI
-- **Image**: Base image for the snapshot. Must include either a tag (e.g., **`ubuntu:22.04`**) or a digest. The tag **`latest`** is not allowed.
+- **Image**: Base image for the snapshot. Must include either a tag (e.g., **`ubuntu:22.04`**) or a digest. The **`latest`** tag is not allowed.
 - **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
 - **Resources** (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
 
@@ -36,7 +36,7 @@ Daytona supports creating snapshots from public images from Docker Hub or other 
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
-3. Enter the snapshot name and image (tag or digest) of any publicly accessible image from Docker Hub or from another public container registry.
+3. Enter the snapshot name and image tag or digest of any publicly accessible image from Docker Hub or from another public container registry.
 
 Once the snapshot is pulled, validated, and has an `Active` state, it is ready to be used.
 
@@ -85,7 +85,7 @@ Daytona supports creating snapshots from images from [Docker Hub](#docker-hub), 
 3. Enter the registry name, registry URL, username, password, and project (if applicable)
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image (tag or digest) of the private image. When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
+6. Enter the snapshot name and private image tag or digest. When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
 
 Optionally, set the **`CreateSandboxFromSnapshotParams`** field to use the custom snapshot.
 
@@ -104,7 +104,7 @@ Daytona supports creating snapshots from Docker Hub images.
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image (tag or digest) of the image. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`docker.io/<username>/<image>:<tag>`**)
+6. Enter the snapshot name and image tag or digest. When creating the snapshot, input the entire image name, including the registry location and project name (e.g. **`docker.io/<username>/<image>:<tag>`**)
 
 #### Google Artifact Registry
 
@@ -124,7 +124,7 @@ To use an image from Google Artifact Registry, configure the registry using a [s
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image (tag or digest) of the image. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
+6. Enter the snapshot name and image tag or digest. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
 
 #### GitHub Container Registry (GHCR) 
 
@@ -140,7 +140,7 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image (tag or digest) of the image. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`ghcr.io/<my-project>/custom-alpine:3.21`**)
+6. Enter the snapshot name and image tag or digest. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`ghcr.io/<my-project>/custom-alpine:3.21`**)
 
 ### Using the declarative builder
 
