@@ -148,9 +148,11 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 ### Snapshot resources
 
-Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk**.
+Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk**. For more information, see [sandbox resources](/docs/en/sandboxes#resources).
 
-To customize these resources, use the `Resources` class to define exactly what you need:
+To view your available resources and limits, see [limits](/docs/limits) or navigate to [Daytona Limits ↗](https://app.daytona.io/dashboard/limits).
+
+Snapshot resources can be customized using the `Resources` class.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -206,7 +208,11 @@ await daytona.snapshot.create(
 </TabItem>
 </Tabs>
 
-To check your available resources and limits, navigate to the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/limits).
+For more information, see the [Python SDK](/docs/python-sdk) and [TypeScript SDK](/docs/typescript-sdk) references:
+
+> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
+>
+> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
 
 ## Get a Snapshot by name
 
