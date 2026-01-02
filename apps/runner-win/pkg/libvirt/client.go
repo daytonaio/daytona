@@ -217,3 +217,18 @@ type LibVirt struct {
 	domainMutexes          map[string]*sync.Mutex
 	domainMutexesMutex     sync.Mutex
 }
+
+// LookupDomainBySandboxId looks up a domain by sandbox ID.
+// It first tries to find the domain by UUID, then falls back to looking up by name.
+func (l *LibVirt) LookupDomainBySandboxId(conn *libvirt.Connect, sandboxId string) (*libvirt.Domain, error) {
+	// First try to look up by UUID string
+	domain, err := conn.LookupDomainByUUIDString(sandboxId)
+	if err != nil {
+		// Fallback to looking up by name
+		domain, err = conn.LookupDomainByName(sandboxId)
+		if err != nil {
+			return nil, fmt.Errorf("domain not found by UUID or name: %s: %w", sandboxId, err)
+		}
+	}
+	return domain, nil
+}
