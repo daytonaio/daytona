@@ -25,7 +25,7 @@
   "pagefind.searching": "[SEARCH_TERM] を検索しています...",
   "sidebarconfig.home": "ホーム",
   "sidebarconfig.documentation": "ドキュメント",
-  "sidebarconfig.tsSdkReference": "TS SDK リファレンス",
+  "sidebarconfig.tsSdkReference": "TypeScript SDK リファレンス",
   "sidebarconfig.pythonSdkReference": "Python SDK リファレンス",
   "sidebarconfig.apiReference": "APIリファレンス",
   "sidebarconfig.cliReference": "CLI リファレンス",
