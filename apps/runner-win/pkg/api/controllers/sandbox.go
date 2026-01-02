@@ -296,8 +296,7 @@ func Start(ctx *gin.Context) {
 		return
 	}
 
-	daemonVersion, err := runner.LibVirt.Start(ctx.Request.Context(), sandboxId, metadata)
-
+	daemonVersion, err := runner.LibVirt.ResumeFromDisk(ctx.Request.Context(), sandboxId, metadata)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
@@ -330,7 +329,7 @@ func Stop(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err := runner.LibVirt.Stop(ctx.Request.Context(), sandboxId)
+	err := runner.LibVirt.SuspendToDisk(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)

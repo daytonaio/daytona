@@ -6,7 +6,9 @@ package libvirt
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/daytonaio/runner-win/pkg/models/enums"
 	log "github.com/sirupsen/logrus"
 	"libvirt.org/go/libvirt"
 )
@@ -202,6 +204,170 @@ func (l *LibVirt) GetSandboxMetadata(ctx context.Context, domainId string) (stri
 	}
 
 	return metadata, nil
+}
+
+// SuspendToDisk saves the domain's memory state to disk and stops the domain.
+// This frees up system RAM while preserving the exact VM state.
+// The domain transitions to SHUTOFF state with a managed save image.
+func (l *LibVirt) SuspendToDisk(ctx context.Context, domainId string) error {
+	domainMutex := l.getDomainMutex(domainId)
+	domainMutex.Lock()
+	defer domainMutex.Unlock()
+
+	if l.statesCache != nil {
+		l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStopping)
+	}
+
+	conn, err := l.getConnection()
+	if err != nil {
+		return fmt.Errorf("failed to get connection: %w", err)
+	}
+
+	// Try to find domain (handles both cold boot and memory snapshot naming)
+	domain, err := l.LookupDomainBySandboxId(conn, domainId)
+	if err != nil {
+		return fmt.Errorf("domain not found: %w", err)
+	}
+	defer domain.Free()
+
+	// Check current state
+	state, _, err := domain.GetState()
+	if err != nil {
+		return fmt.Errorf("failed to get domain state: %w", err)
+	}
+
+	// If already shut off, check if it has a managed save image
+	if state == libvirt.DOMAIN_SHUTOFF {
+		hasManagedSave, err := domain.HasManagedSaveImage(0)
+		if err == nil && hasManagedSave {
+			log.Infof("Domain %s is already suspended to disk", domainId)
+			if l.statesCache != nil {
+				l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStopped)
+			}
+			return nil
+		}
+		log.Infof("Domain %s is already stopped (no managed save image)", domainId)
+		if l.statesCache != nil {
+			l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStopped)
+		}
+		return nil
+	}
+
+	if state != libvirt.DOMAIN_RUNNING && state != libvirt.DOMAIN_PAUSED {
+		return fmt.Errorf("domain %s is not running or paused (state: %d), cannot suspend to disk", domainId, state)
+	}
+
+	// Save domain state to disk using ManagedSave
+	// This saves memory to disk and stops the domain, freeing system RAM
+	log.Infof("Suspending domain %s to disk (saving memory state)", domainId)
+	if err := domain.ManagedSave(0); err != nil {
+		return fmt.Errorf("failed to suspend domain to disk: %w", err)
+	}
+
+	if l.statesCache != nil {
+		l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStopped)
+	}
+	log.Infof("Domain %s suspended to disk successfully", domainId)
+	return nil
+}
+
+// ResumeFromDisk restores a domain from its managed save image on disk.
+// If the domain has a saved state, it will be restored exactly as it was.
+// Returns the daemon version after the domain is running.
+func (l *LibVirt) ResumeFromDisk(ctx context.Context, domainId string, metadata map[string]string) (string, error) {
+	domainMutex := l.getDomainMutex(domainId)
+	domainMutex.Lock()
+	defer domainMutex.Unlock()
+
+	if l.statesCache != nil {
+		l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStarting)
+	}
+
+	conn, err := l.getConnection()
+	if err != nil {
+		return "", fmt.Errorf("failed to get connection: %w", err)
+	}
+
+	// Try to find domain (handles both cold boot and memory snapshot naming)
+	domain, err := l.LookupDomainBySandboxId(conn, domainId)
+	if err != nil {
+		return "", fmt.Errorf("domain not found: %w", err)
+	}
+	defer domain.Free()
+
+	// Check current state
+	state, _, err := domain.GetState()
+	if err != nil {
+		return "", fmt.Errorf("failed to get domain state: %w", err)
+	}
+
+	if state == libvirt.DOMAIN_RUNNING {
+		log.Infof("Domain %s is already running", domainId)
+		if l.statesCache != nil {
+			l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStarted)
+		}
+		return l.getDaemonVersion(ctx, domain)
+	}
+
+	// Check if domain has a managed save image
+	hasManagedSave, err := domain.HasManagedSaveImage(0)
+	if err != nil {
+		log.Warnf("Failed to check managed save image for domain %s: %v", domainId, err)
+	}
+
+	if hasManagedSave {
+		log.Infof("Resuming domain %s from disk (restoring saved memory state)", domainId)
+	} else {
+		log.Infof("Starting domain %s (no saved state found, cold boot)", domainId)
+	}
+
+	// Create (start) the domain - libvirt automatically restores from managed save if available
+	if err := domain.Create(); err != nil {
+		return "", fmt.Errorf("failed to resume domain from disk: %w", err)
+	}
+
+	// Wait for domain to be running
+	if err := l.waitForDomainRunningWithDomain(ctx, domain); err != nil {
+		return "", fmt.Errorf("domain failed to start: %w", err)
+	}
+
+	if l.statesCache != nil {
+		l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStarted)
+	}
+	log.Infof("Domain %s resumed from disk successfully", domainId)
+
+	return l.getDaemonVersion(ctx, domain)
+}
+
+// waitForDomainRunningWithDomain waits for a domain to reach running state
+func (l *LibVirt) waitForDomainRunningWithDomain(ctx context.Context, domain *libvirt.Domain) error {
+	timeout := time.Duration(l.sandboxStartTimeoutSec) * time.Second
+	deadline := time.Now().Add(timeout)
+
+	for time.Now().Before(deadline) {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		state, _, err := domain.GetState()
+		if err != nil {
+			return fmt.Errorf("failed to get domain state: %w", err)
+		}
+
+		if state == libvirt.DOMAIN_RUNNING {
+			return nil
+		}
+
+		if state == libvirt.DOMAIN_CRASHED || state == libvirt.DOMAIN_SHUTOFF {
+			return fmt.Errorf("domain entered unexpected state: %d", state)
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	return fmt.Errorf("timeout waiting for domain to start after %v", timeout)
 }
 
 // WaitForDaemonReady is an exported version that waits for the daemon API to be accessible

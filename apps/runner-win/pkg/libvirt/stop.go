@@ -62,9 +62,24 @@ func (l *LibVirt) Stop(ctx context.Context, domainId string) error {
 		}
 	}
 
-	// Wait for domain to be stopped
+	// Wait for domain to be stopped after graceful shutdown
 	if err := l.waitForDomainStopped(ctx, domain); err != nil {
-		return fmt.Errorf("domain failed to stop: %w", err)
+		// Graceful shutdown timed out, force destroy
+		log.Warnf("Graceful shutdown timed out for domain %s: %v, forcing destroy", domainId, err)
+		if err := domain.Destroy(); err != nil {
+			// Domain might already be stopped or in transition, check state
+			state, _, stateErr := domain.GetState()
+			if stateErr != nil || state != libvirt.DOMAIN_SHUTOFF {
+				return fmt.Errorf("failed to force stop domain after timeout: %w", err)
+			}
+			// Domain is already stopped, continue
+			log.Infof("Domain %s is already stopped", domainId)
+			return nil
+		}
+		// Wait again after force destroy
+		if err := l.waitForDomainStopped(ctx, domain); err != nil {
+			return fmt.Errorf("domain failed to stop after force destroy: %w", err)
+		}
 	}
 
 	if l.statesCache != nil {
