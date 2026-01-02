@@ -39,6 +39,8 @@ import type { PaginatedSnapshots } from '../models'
 import type { SetSnapshotGeneralStatusDto } from '../models'
 // @ts-ignore
 import type { SnapshotDto } from '../models'
+// @ts-ignore
+import type { SnapshotRunnerClassDto } from '../models'
 /**
  * SnapshotsApi - axios parameter creator
  * @export
@@ -401,6 +403,51 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
+     * @summary Get runner class for a snapshot by name
+     * @param {string} name Snapshot name
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSnapshotRunnerClass: async (
+      name: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'name' is not null or undefined
+      assertParamExists('getSnapshotRunnerClass', 'name', name)
+      const localVarPath = `/snapshots/{name}/runner-class`.replace(`{${'name'}}`, encodeURIComponent(String(name)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Delete snapshot
      * @param {string} id Snapshot ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -718,6 +765,35 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get runner class for a snapshot by name
+     * @param {string} name Snapshot name
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSnapshotRunnerClass(
+      name: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotRunnerClassDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSnapshotRunnerClass(
+        name,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SnapshotsApi.getSnapshotRunnerClass']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Delete snapshot
      * @param {string} id Snapshot ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -912,6 +988,23 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
     },
     /**
      *
+     * @summary Get runner class for a snapshot by name
+     * @param {string} name Snapshot name
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSnapshotRunnerClass(
+      name: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<SnapshotRunnerClassDto> {
+      return localVarFp
+        .getSnapshotRunnerClass(name, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Delete snapshot
      * @param {string} id Snapshot ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -1074,6 +1167,21 @@ export class SnapshotsApi extends BaseAPI {
   ) {
     return SnapshotsApiFp(this.configuration)
       .getSnapshotBuildLogs(id, xDaytonaOrganizationID, follow, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get runner class for a snapshot by name
+   * @param {string} name Snapshot name
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SnapshotsApi
+   */
+  public getSnapshotRunnerClass(name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return SnapshotsApiFp(this.configuration)
+      .getSnapshotRunnerClass(name, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

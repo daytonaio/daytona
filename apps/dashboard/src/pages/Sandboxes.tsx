@@ -52,6 +52,7 @@ import {
 } from '@/hooks/useSandboxes'
 import { useRegions } from '@/hooks/useRegions'
 import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshots } from '@/hooks/useSnapshots'
+import { useSnapshotRunnerClasses } from '@/hooks/useSnapshotRunnerClasses'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi } = useApi()
@@ -308,6 +309,14 @@ const Sandboxes: React.FC = () => {
   // Region Filter
 
   const { availableRegions: regionsData, loadingAvailableRegions: regionsDataIsLoading, getRegionName } = useRegions()
+
+  // Runner Class Map
+
+  const snapshotNamesForRunnerClass = useMemo(() => {
+    return sandboxesData?.items?.map((s) => s.snapshot).filter((name): name is string => !!name) ?? []
+  }, [sandboxesData?.items])
+
+  const { runnerClassMap } = useSnapshotRunnerClasses(snapshotNamesForRunnerClass)
 
   // Subscribe to Sandbox Events
 
@@ -816,6 +825,7 @@ const Sandboxes: React.FC = () => {
         regionsData={regionsData || []}
         regionsDataIsLoading={regionsDataIsLoading}
         getRegionName={getRegionName}
+        runnerClassMap={runnerClassMap}
         onRowClick={(sandbox: Sandbox) => {
           setSelectedSandbox(sandbox)
           setShowSandboxDetails(true)

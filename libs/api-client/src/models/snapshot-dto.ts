@@ -17,6 +17,9 @@
 import type { BuildInfo } from './build-info'
 // May contain unused imports in some cases
 // @ts-ignore
+import type { RunnerClass } from './runner-class'
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SnapshotState } from './snapshot-state'
 
 /**
@@ -97,6 +100,12 @@ export interface SnapshotDto {
    * @memberof SnapshotDto
    */
   disk: number
+  /**
+   *
+   * @type {RunnerClass}
+   * @memberof SnapshotDto
+   */
+  runnerClass: RunnerClass
   /**
    *
    * @type {string}

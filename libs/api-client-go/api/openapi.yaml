@@ -6156,6 +6156,44 @@ paths:
       summary: Get snapshot by ID or name
       tags:
         - snapshots
+  /snapshots/{name}/runner-class:
+    get:
+      operationId: getSnapshotRunnerClass
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Snapshot name
+          explode: false
+          in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotRunnerClassDto'
+          description: The runner class of the snapshot
+        '404':
+          description: Snapshot not found
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get runner class for a snapshot by name
+      tags:
+        - snapshots
   /snapshots/{id}/general:
     patch:
       operationId: setSnapshotGeneralStatus
@@ -12062,6 +12100,7 @@ components:
           - entrypoint
         errorReason: errorReason
         name: name
+        runnerClass: ''
         id: id
         state: ''
         updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -12095,6 +12134,9 @@ components:
           type: number
         disk:
           type: number
+        runnerClass:
+          allOf:
+            - $ref: '#/components/schemas/RunnerClass'
         errorReason:
           nullable: true
           type: string
@@ -12129,9 +12171,21 @@ components:
         - lastUsedAt
         - mem
         - name
+        - runnerClass
         - size
         - state
         - updatedAt
+      type: object
+    SnapshotRunnerClassDto:
+      example:
+        runnerClass: ''
+      properties:
+        runnerClass:
+          allOf:
+            - $ref: '#/components/schemas/RunnerClass'
+          description: The runner class of the snapshot
+      required:
+        - runnerClass
       type: object
     PaginatedSnapshots:
       example:
@@ -12158,6 +12212,7 @@ components:
               - entrypoint
             errorReason: errorReason
             name: name
+            runnerClass: ''
             id: id
             state: ''
             updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -12180,6 +12235,7 @@ components:
               - entrypoint
             errorReason: errorReason
             name: name
+            runnerClass: ''
             id: id
             state: ''
             updatedAt: 2000-01-23T04:56:07.000+00:00

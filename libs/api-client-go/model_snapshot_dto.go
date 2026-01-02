@@ -34,6 +34,7 @@ type SnapshotDto struct {
 	Gpu            float32         `json:"gpu"`
 	Mem            float32         `json:"mem"`
 	Disk           float32         `json:"disk"`
+	RunnerClass    RunnerClass     `json:"runnerClass"`
 	ErrorReason    NullableString  `json:"errorReason"`
 	CreatedAt      time.Time       `json:"createdAt"`
 	UpdatedAt      time.Time       `json:"updatedAt"`
@@ -51,7 +52,7 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, runnerClass RunnerClass, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
@@ -63,6 +64,7 @@ func NewSnapshotDto(id string, general bool, name string, state SnapshotState, s
 	this.Gpu = gpu
 	this.Mem = mem
 	this.Disk = disk
+	this.RunnerClass = runnerClass
 	this.ErrorReason = errorReason
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
@@ -386,6 +388,30 @@ func (o *SnapshotDto) SetDisk(v float32) {
 	o.Disk = v
 }
 
+// GetRunnerClass returns the RunnerClass field value
+func (o *SnapshotDto) GetRunnerClass() RunnerClass {
+	if o == nil {
+		var ret RunnerClass
+		return ret
+	}
+
+	return o.RunnerClass
+}
+
+// GetRunnerClassOk returns a tuple with the RunnerClass field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetRunnerClassOk() (*RunnerClass, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.RunnerClass, true
+}
+
+// SetRunnerClass sets field value
+func (o *SnapshotDto) SetRunnerClass(v RunnerClass) {
+	o.RunnerClass = v
+}
+
 // GetErrorReason returns the ErrorReason field value
 // If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotDto) GetErrorReason() string {
@@ -578,6 +604,7 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["gpu"] = o.Gpu
 	toSerialize["mem"] = o.Mem
 	toSerialize["disk"] = o.Disk
+	toSerialize["runnerClass"] = o.RunnerClass
 	toSerialize["errorReason"] = o.ErrorReason.Get()
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
@@ -611,6 +638,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		"gpu",
 		"mem",
 		"disk",
+		"runnerClass",
 		"errorReason",
 		"createdAt",
 		"updatedAt",
@@ -656,6 +684,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "gpu")
 		delete(additionalProperties, "mem")
 		delete(additionalProperties, "disk")
+		delete(additionalProperties, "runnerClass")
 		delete(additionalProperties, "errorReason")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")

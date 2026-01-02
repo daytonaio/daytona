@@ -161,6 +161,7 @@ models/session-execute-response.ts
 models/session.ts
 models/set-snapshot-general-status-dto.ts
 models/snapshot-dto.ts
+models/snapshot-runner-class-dto.ts
 models/snapshot-state.ts
 models/ssh-access-dto.ts
 models/ssh-access-validation-dto.ts

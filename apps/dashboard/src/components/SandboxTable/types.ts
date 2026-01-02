@@ -11,6 +11,7 @@ import {
   ListSandboxesPaginatedOrderEnum,
   ListSandboxesPaginatedStatesEnum,
   Region,
+  RunnerClass,
 } from '@daytonaio/api-client'
 import { Table, SortingState, ColumnFiltersState } from '@tanstack/react-table'
 import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
@@ -27,6 +28,7 @@ export interface SandboxTableProps {
   regionsData: Region[]
   regionsDataIsLoading: boolean
   getRegionName: (regionId: string) => string | undefined
+  runnerClassMap: Record<string, RunnerClass>
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void

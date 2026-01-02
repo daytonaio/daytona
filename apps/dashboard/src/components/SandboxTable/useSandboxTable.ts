@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Sandbox, Region } from '@daytonaio/api-client'
+import { Sandbox, Region, RunnerClass } from '@daytonaio/api-client'
 import {
   useReactTable,
   getCoreRowModel,
@@ -51,6 +51,7 @@ interface UseSandboxTableProps {
   onFiltersChange: (filters: SandboxFilters) => void
   regionsData: Region[]
   getRegionName: (regionId: string) => string | undefined
+  runnerClassMap: Record<string, RunnerClass>
 }
 
 export function useSandboxTable({
@@ -75,6 +76,7 @@ export function useSandboxTable({
   onFiltersChange,
   regionsData,
   getRegionName,
+  runnerClassMap,
 }: UseSandboxTableProps) {
   // Column visibility state management with persistence
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
@@ -119,6 +121,7 @@ export function useSandboxTable({
         handleCreateSshAccess,
         handleRevokeSshAccess,
         getRegionName,
+        runnerClassMap,
       }),
     [
       handleStart,
@@ -133,6 +136,7 @@ export function useSandboxTable({
       handleCreateSshAccess,
       handleRevokeSshAccess,
       getRegionName,
+      runnerClassMap,
     ],
   )
 

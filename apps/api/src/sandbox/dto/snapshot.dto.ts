@@ -5,6 +5,7 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { SnapshotState } from '../enums/snapshot-state.enum'
+import { RunnerClass } from '../enums/runner-class'
 import { Snapshot } from '../entities/snapshot.entity'
 import { BuildInfoDto } from './build-info.dto'
 
@@ -48,6 +49,12 @@ export class SnapshotDto {
   @ApiProperty()
   disk: number
 
+  @ApiProperty({
+    enum: RunnerClass,
+    enumName: 'RunnerClass',
+  })
+  runnerClass: RunnerClass
+
   @ApiProperty({ nullable: true })
   errorReason?: string
 
@@ -86,6 +93,7 @@ export class SnapshotDto {
       gpu: snapshot.gpu,
       mem: snapshot.mem,
       disk: snapshot.disk,
+      runnerClass: snapshot.runnerClass,
       errorReason: snapshot.errorReason,
       createdAt: snapshot.createdAt,
       updatedAt: snapshot.updatedAt,

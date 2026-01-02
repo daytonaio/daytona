@@ -39,6 +39,7 @@ import {
 } from '@nestjs/swagger'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { SnapshotDto } from '../dto/snapshot.dto'
+import { SnapshotRunnerClassDto } from '../dto/snapshot-runner-class.dto'
 import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -191,6 +192,33 @@ export class SnapshotController {
       snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
     }
     return SnapshotDto.fromSnapshot(snapshot)
+  }
+
+  @Get(':name/runner-class')
+  @ApiOperation({
+    summary: 'Get runner class for a snapshot by name',
+    operationId: 'getSnapshotRunnerClass',
+  })
+  @ApiParam({
+    name: 'name',
+    description: 'Snapshot name',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The runner class of the snapshot',
+    type: SnapshotRunnerClassDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Snapshot not found',
+  })
+  async getSnapshotRunnerClass(
+    @Param('name') snapshotName: string,
+    @AuthContext() authContext: OrganizationAuthContext,
+  ): Promise<SnapshotRunnerClassDto> {
+    // First looks for organization snapshots, then general snapshots
+    const snapshot = await this.snapshotService.getSnapshotByName(snapshotName, authContext.organizationId)
+    return { runnerClass: snapshot.runnerClass }
   }
 
   @Delete(':id')

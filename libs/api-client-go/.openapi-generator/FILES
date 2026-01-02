@@ -158,6 +158,7 @@ model_session_execute_request.go
 model_session_execute_response.go
 model_set_snapshot_general_status_dto.go
 model_snapshot_dto.go
+model_snapshot_runner_class_dto.go
 model_snapshot_state.go
 model_ssh_access_dto.go
 model_ssh_access_validation_dto.go

@@ -22,6 +22,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client_async.models.build_info import BuildInfo
+from daytona_api_client_async.models.runner_class import RunnerClass
 from daytona_api_client_async.models.snapshot_state import SnapshotState
 from typing import Optional, Set
 from typing_extensions import Self
@@ -42,6 +43,7 @@ class SnapshotDto(BaseModel):
     gpu: Union[StrictFloat, StrictInt]
     mem: Union[StrictFloat, StrictInt]
     disk: Union[StrictFloat, StrictInt]
+    runner_class: RunnerClass = Field(alias="runnerClass")
     error_reason: Optional[StrictStr] = Field(alias="errorReason")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
@@ -49,7 +51,7 @@ class SnapshotDto(BaseModel):
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
     region_ids: Optional[List[StrictStr]] = Field(default=None, description="IDs of regions where the snapshot is available", alias="regionIds")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "runnerClass", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -144,6 +146,7 @@ class SnapshotDto(BaseModel):
             "gpu": obj.get("gpu"),
             "mem": obj.get("mem"),
             "disk": obj.get("disk"),
+            "runnerClass": obj.get("runnerClass"),
             "errorReason": obj.get("errorReason"),
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
