@@ -138,7 +138,7 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/sandbox-management', locale),
+          href: localizePath('/docs/sandboxes', locale),
           label: labels['sidebarconfig.sandboxes'],
           description: labels['sidebarconfig.sandboxesDescription'],
           attrs: {

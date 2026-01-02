@@ -2,46 +2,64 @@
 title: Volumes
 ---
 
+import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
-import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Volumes are FUSE-based mounts that provide shared file access across Sandboxes. They allow Sandboxes to read from large files instantly - no need to upload files manually to each Sandbox. Volume data is stored on an S3-compatible object store.
+Volumes are FUSE-based mounts that provide shared file access across Daytona Sandboxes. They enable sandboxes to read from large files instantly - no need to upload files manually to each sandbox. Volume data is stored in an S3-compatible object store.
 
-- Multiple volumes can be mounted to a single Sandbox  
-- A single volume can be mounted to multiple Sandboxes
+- multiple volumes can be mounted to a single sandbox
+- a single volume can be mounted to multiple sandboxes
 
-## Creating Volumes
+## Create Volumes
 
-Before mounting a volume to a Sandbox, it must be created.
+Daytona provides volumes as a shared storage solution for sandboxes. To create a volume:
+
+1. Navigate to [Daytona Volumes ↗](https://app.daytona.io/dashboard/volumes)
+2. Click the **Create Volume** button
+3. Enter the volume name
+
+The following snippets demonstrate how to create a volume using the Daytona SDK:
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```bash
-volume = daytona.volume.get("my-volume", create=True)
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```bash
-const volume = await daytona.volume.get('my-volume', true)
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+
+    ```python
+    daytona = Daytona()
+    volume = daytona.volume.create("my-awesome-volume")
+    ```
+
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+
+    ```typescript
+    const daytona = new Daytona();
+    const volume = await daytona.volume.create("my-awesome-volume");
+    ```
+
+  </TabItem>
 </Tabs>
 
-See: [volume.get (Python SDK)](/docs/python-sdk/sync/volume/#volumeserviceget), [volume.get (TypeScript SDK)](/docs/typescript-sdk/volume/#get)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-## Mounting Volumes
+> [**volume.get (Python SDK)**](/docs/python-sdk/sync/volume/#volumeserviceget)
+>
+> [**volume.get (TypeScript SDK)**](/docs/typescript-sdk/volume/#get)
 
-Once a volume is created, it can be mounted to a Sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object. Volume mount paths must meet the following requirements:
+## Mount Volumes
+
+Daytona provides an option to mount a volume to a sandbox. Once a volume is created, it can be mounted to a sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object. Volume mount paths must meet the following requirements:
 
 - **Must be absolute paths**: Mount paths must start with `/` (e.g., `/home/daytona/volume`)
 - **Cannot be root directory**: Cannot mount to `/` or `//`
 - **No relative path components**: Cannot contain `/../`, `/./`, or end with `/..` or `/.`
 - **No consecutive slashes**: Cannot contain multiple consecutive slashes like `//` (except at the beginning)
-- **Cannot mount to system directories**: The following system directories are prohibited:
-  - `/proc`, `/sys`, `/dev`, `/boot`, `/etc`, `/bin`, `/sbin`, `/lib`, `/lib64`
+- **Cannot mount to system directories**: The following system directories are prohibited: `/proc`, `/sys`, `/dev`, `/boot`, `/etc`, `/bin`, `/sbin`, `/lib`, `/lib64`
+
+The following snippets demonstrate how to mount a volume to a sandbox:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 import os
 from daytona import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
@@ -71,6 +89,7 @@ sandbox2 = daytona.create(params)
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 import { Daytona } from '@daytonaio/sdk'
 import path from 'path'
@@ -92,21 +111,30 @@ const sandbox1 = await daytona.create({
 // This is useful for isolating data or implementing multi-tenancy
 const sandbox2 = await daytona.create({
   language: 'typescript',
-  volumes: [{ volumeId: volume.id, mountPath: mountDir, subpath: 'users/alice' }],
+  volumes: [
+    { volumeId: volume.id, mountPath: mountDir, subpath: 'users/alice' },
+  ],
 })
 ```
 
 </TabItem>
 </Tabs>
 
-See: [CreateSandboxFromSnapshotParams (Python SDK)](/docs/python-sdk/sync/daytona#createSandboxBaseParams), [CreateSandboxFromSnapshotParams (TypeScript SDK)](/docs/typescript-sdk/daytona#createSandboxBaseParams)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-## Working with Volumes
+> [**CreateSandboxFromSnapshotParams (Python SDK)**](/docs/python-sdk/sync/daytona#createSandboxBaseParams)
+>
+> [**CreateSandboxFromSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createSandboxBaseParams)
 
-Once mounted, you can read from and write to the volume just like any other directory in the Sandbox file system. Files written to the volume persist beyond the lifecycle of any individual Sandbox.
+## Work with Volumes
+
+Daytona provides an option to read from and write to the volume just like any other directory in the sandbox file system. Files written to the volume persist beyond the lifecycle of any individual sandbox.
+
+The following snippet demonstrate how to read from and write to a volume:
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
+
     ```python
     # Write to a file in the mounted volume
     with open("/home/daytona/volume/example.txt", "w") as f:
@@ -116,8 +144,10 @@ Once mounted, you can read from and write to the volume just like any other dire
     # The volume will persist even after the sandbox is removed
     sandbox.delete()
     ```
+
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
+
     ```typescript
     import fs from 'fs/promises'
 
@@ -128,29 +158,109 @@ Once mounted, you can read from and write to the volume just like any other dire
     // The volume will persist even after the sandbox is removed
     await daytona.delete(sandbox1)
     ```
+
   </TabItem>
 </Tabs>
 
-## Deleting Volumes
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references.
 
-When a volume is no longer needed, it can be deleted.
+## Get a Volume by name
+
+Daytona provides an option to get a volume by its name.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
+```python
+daytona = Daytona()
+volume = daytona.volume.get("my-awesome-volume", create=True)
+print(f"{volume.name} ({volume.id})")
+```
+
+</TabItem>
+
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const daytona = new Daytona()
+const volume = await daytona.volume.get('my-awesome-volume', true)
+console.log(`Volume ${volume.name} is in state ${volume.state}`)
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**volume.get (Python SDK)**](/docs/en/python-sdk/sync/volume#volumeserviceget)
+>
+> [**volume.get (TypeScript SDK)**](/docs/en/typescript-sdk/volume#get)
+
+## List Volumes
+
+Daytona provides an option to list all volumes.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+daytona = Daytona()
+volumes = daytona.volume.list()
+for volume in volumes:
+    print(f"{volume.name} ({volume.id})")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const daytona = new Daytona()
+const volumes = await daytona.volume.list()
+console.log(`Found ${volumes.length} volumes`)
+volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`))
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**volume.list (Python SDK)**](/docs/en/python-sdk/sync/volume#volumeservicelist)
+>
+> [**volume.list (TypeScript SDK)**](/docs/en/typescript-sdk/volume#list)
+
+## Delete Volumes
+
+Daytona provides an option to delete a volume. Deleted volumes cannot be recovered.
+
+The following snippet demonstrate how to delete a volume:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
 ```python
 volume = daytona.volume.get("my-volume", create=True)
 daytona.volume.delete(volume)
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 const volume = await daytona.volume.get('my-volume', true)
 await daytona.volume.delete(volume)
 ```
+
 </TabItem>
 </Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**volume.delete (Python SDK)**](/docs/python-sdk/sync/volume/#volumeservicedelete)
+>
+> [**volume.delete (TypeScript SDK)**](/docs/typescript-sdk/volume/#delete)
 
 ## Limitations
 
 Since volumes are FUSE-based mounts, they can not be used for applications that require block storage access (like database tables).
-Volumes are generally slower for both read and write operations compared to the local Sandbox file system.
+Volumes are generally slower for both read and write operations compared to the local sandbox file system.

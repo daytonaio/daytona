@@ -465,11 +465,6 @@
     border-radius: 3px;
 
     .copy {
-      display: none;
-    }
-
-    &[data-language='shell'] .copy,
-    .frame.is-terminal .copy {
       display: flex;
     }
 

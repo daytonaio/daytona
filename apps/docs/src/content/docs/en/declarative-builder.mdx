@@ -4,47 +4,48 @@ title: Declarative Builder
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona's declarative builder provides a powerful, code-first approach to defining dependencies for Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the SDK.
-
-## Overview
+Declarative Builder provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona SDK.
 
 The declarative builder system supports two primary workflows:
 
-1. [**Declarative Images**](#declarative-image-building): Build images with varying dependencies _on demand_ when creating Sandboxes
-2. [**Pre-built Snapshots**](#creating-pre-built-snapshots): Create and register _ready-to-use_ [Snapshots](/docs/snapshots) that can be shared across multiple Sandboxes
+1. [**Declarative images**](#declarative-image-building): build images with varying dependencies _on demand_ when creating sandboxes
+2. [**Pre-built Snapshots**](#creating-pre-built-snapshots): create and register _ready-to-use_ [Snapshots](/docs/snapshots) that can be shared across multiple sandboxes
 
-### Declarative Image Building
+## Build declarative images
 
-You can create declarative images on-the-fly when creating Sandboxes. This is ideal for iterating quickly without creating separate Snapshots.
+Daytona provides an option to create declarative images on-the-fly when creating sandboxes. This is ideal for iterating quickly without creating separate snapshots.
 
-Declarative images are cached for 24 hours, and will be automatically reused when running the same script. Thus, subsequent runs on the same Runner will be almost instantaneous.
+Declarative images are cached for 24 hours, and are automatically reused when running the same script. Thus, subsequent runs on the same runner will be almost instantaneous.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
-# Define a simple declarative image with Python packages
+# Define a declarative image with python packages
 declarative_image = (
-    Image.debian_slim("3.12")
-    .pip_install(["requests", "pytest"])
-    .workdir("/home/daytona")
+  Image.debian_slim("3.12")
+  .pip_install(["requests", "pytest"])
+  .workdir("/home/daytona")
 )
 
-# Create a new Sandbox with the declarative image and stream the build logs
+# Create a new sandbox with the declarative image and stream the build logs
 sandbox = daytona.create(
-    CreateSandboxFromImageParams(image=declarative_image),
-    timeout=0,
-    on_snapshot_create_logs=print,
+  CreateSandboxFromImageParams(image=declarative_image),
+  timeout=0,
+  on_snapshot_create_logs=print,
 )
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
-// Define a simple declarative image with Python packages
+// Define a declarative image with python packages
 const declarativeImage = Image.debianSlim('3.12')
   .pipInstall(['requests', 'pytest'])
   .workdir('/home/daytona')
 
-// Create a new Sandbox with the declarative image and stream the build logs
+// Create a new sandbox with the declarative image and stream the build logs
 const sandbox = await daytona.create(
   {
     image: declarativeImage,
@@ -55,84 +56,115 @@ const sandbox = await daytona.create(
   }
 )
 ```
+
 </TabItem>
 </Tabs>
 
-See: [CreateSandboxFromImageParams (Python SDK)](/docs/python-sdk/sync/daytona#createsandboxfromimageparams), [CreateSandboxFromImageParams (TypeScript SDK)](/docs/typescript-sdk/daytona#createsandboxfromimageparams)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-### Creating Pre-built Snapshots
+> [**CreateSandboxFromImageParams (Python SDK)**](/docs/python-sdk/sync/daytona#createsandboxfromimageparams)
+>
+> [**CreateSandboxFromImageParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createsandboxfromimageparams)
 
-For images that will be reused across multiple Sandboxes, create a pre-built Snapshot. This Snapshot will remain visible in the Daytona dashboard and be permanently cached, ensuring instant availability without rebuilding.
+:::note
+Use the following best practices when working with the declarative builder:
+
+- **Layer Optimization**: Group related operations to minimize Docker layers
+
+- **Cache Utilization**: Identical build commands and context will be cached and subsequent builds will be almost instant
+
+- **Security**: Create non-root users for application workloads
+
+- **Resource Efficiency**: Use slim base images when appropriate
+
+- **Context Minimization**: Only include necessary files in the build context
+  :::
+
+## Create pre-built Snapshots
+
+Daytona provides an option to create pre-built snapshots that will be reused across multiple sandboxes.
+
+The snapshot remains visible in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) and is permanently cached, ensuring instant availability without rebuilding.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
-# Create a simple Python data science image
+# Create a python data science image
 snapshot_name = "data-science-snapshot"
 
 image = (
-    Image.debian_slim("3.12")
-    .pip_install(["pandas", "numpy"])
-    .workdir("/home/daytona")
+  Image.debian_slim("3.12")
+  .pip_install(["pandas", "numpy"])
+  .workdir("/home/daytona")
 )
 
-# Create the Snapshot and stream the build logs
+# Create the snapshot and stream the build logs
 daytona.snapshot.create(
-    CreateSnapshotParams(
-        name=snapshot_name,
-        image=image,
-    ),
-    on_logs=print,
+  CreateSnapshotParams(
+    name=snapshot_name,
+    image=image,
+  ),
+on_logs=print,
 )
 
-# Create a new Sandbox using the pre-built Snapshot
+# Create a new sandbox using the pre-built snapshot
 sandbox = daytona.create(
-  CreateSandboxFromSnapshotParams(snapshot=snapshot_name)
+CreateSandboxFromSnapshotParams(snapshot=snapshot_name)
 )
+
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
-// Create a simple Python data science image
+// Create a python data science image
 const snapshotName = 'data-science-snapshot'
 
 const image = Image.debianSlim('3.12')
   .pipInstall(['pandas', 'numpy'])
   .workdir('/home/daytona')
 
-// Create the Snapshot and stream the build logs
+// Create the snapshot and stream the build logs
 await daytona.snapshot.create(
   {
-      name: snapshotName,
-      image,
+    name: snapshotName,
+    image,
   },
   {
-      onLogs: console.log,
+    onLogs: console.log,
   }
 )
 
-// Create a new Sandbox using the pre-built Snapshot
+// Create a new sandbox using the pre-built snapshot
 const sandbox = await daytona.create({
   snapshot: snapshotName,
 })
 ```
+
 </TabItem>
 </Tabs>
 
-See: [CreateSnapshotParams (Python SDK)](/docs/python-sdk/sync/snapshot#createsnapshotparams), [CreateSnapshotParams (TypeScript SDK)](/docs/typescript-sdk/snapshot#createsnapshotparams)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-## Image Configuration
+> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
+>
+> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#createsnapshotparams)
 
-The Daytona SDK provides methods to define images programmatically using the Daytona SDK. You can specify base images, install packages, add files, set environment variables, and more.
+## Image configuration
 
-For a complete API reference and method signatures, check the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+Daytona provides an option to define images programmatically using the Daytona SDK. You can specify base images, install packages, add files, set environment variables, and more.
 
-### Base Image Selection
+For a complete API reference and method signatures, see the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
 
-These examples demonstrate how to select and configure base images:
+### Base image selection
+
+Daytona provides an option to select base images. The following snippets demonstrate how to select and configure base images:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Create an image from a base
 image = Image.base("python:3.12-slim-bookworm")
@@ -140,8 +172,11 @@ image = Image.base("python:3.12-slim-bookworm")
 # Use a Debian slim image with Python 3.12
 image = Image.debian_slim("3.12")
 ```
+
 </TabItem>
+
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Create an image from a base
 const image = Image.base('python:3.12-slim-bookworm')
@@ -149,17 +184,28 @@ const image = Image.base('python:3.12-slim-bookworm')
 // Use a Debian slim image with Python 3.12
 const image = Image.debianSlim('3.12')
 ```
+
 </TabItem>
 </Tabs>
 
-See: [base (Python SDK)](/docs/python-sdk/common/image#imagebase), [debian_slim (Python SDK)](/docs/python-sdk/common/image#imagedebian_slim), [base (TypeScript SDK)](/docs/typescript-sdk/image#base), [debianSlim (TypeScript SDK)](/docs/typescript-sdk/image#debianslim)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-### Package Management
+> [**base (Python SDK)**](/docs/python-sdk/common/image#imagebase)
+>
+> [**base (TypeScript SDK)**](/docs/typescript-sdk/image#base)
+>
+> [**debian_slim (Python SDK)**](/docs/python-sdk/common/image#imagedebian_slim)
+>
+> [**debianSlim (TypeScript SDK)**](/docs/typescript-sdk/image#debianslim)
 
-Use these methods to install Python packages and dependencies:
+### Package management
+
+Daytona provides an option to install packages and dependencies to your image.
+The following snippets demonstrate how to install packages and dependencies to your image:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Add pip packages
 image = Image.debian_slim("3.12").pip_install("requests", "pandas")
@@ -169,9 +215,12 @@ image = Image.debian_slim("3.12").pip_install_from_requirements("requirements.tx
 
 # Install from pyproject.toml (with optional dependencies)
 image = Image.debian_slim("3.12").pip_install_from_pyproject("pyproject.toml", optional_dependencies=["dev"])
+
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Add pip packages
 const image = Image.debianSlim('3.12').pipInstall(['requests', 'pandas'])
@@ -180,21 +229,36 @@ const image = Image.debianSlim('3.12').pipInstall(['requests', 'pandas'])
 const image = Image.debianSlim('3.12').pipInstallFromRequirements('requirements.txt')
 
 // Install from pyproject.toml (with optional dependencies)
-const image = Image.debianSlim('3.12').pipInstallFromPyproject('pyproject.toml', { 
-  optionalDependencies: ['dev'] 
+const image = Image.debianSlim('3.12').pipInstallFromPyproject('pyproject.toml', {
+  optionalDependencies: ['dev']
 })
 ```
+
 </TabItem>
 </Tabs>
 
-See: [pip_install (Python SDK)](/docs/python-sdk/common/image#imagepip_install), [pip_install_from_requirements (Python SDK)](/docs/python-sdk/common/image#imagepip_install_from_requirements), [pip_install_from_pyproject (Python SDK)](/docs/python-sdk/common/image#imagepip_install_from_pyproject), [pipInstall (TypeScript SDK)](/docs/typescript-sdk/image#pipinstall), [pipInstallFromRequirements (TypeScript SDK)](/docs/typescript-sdk/image#pipinstallfromrequirements), [pipInstallFromPyproject (TypeScript SDK)](/docs/typescript-sdk/image#pipinstallfrompyproject)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-### File System Operations
+> [**pip_install (Python SDK)**](/docs/python-sdk/common/image#imagepip_install)
+>
+> [**pipInstall (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstall)
+>
+> [**pip_install_from_requirements (Python SDK)**](/docs/python-sdk/common/image#imagepip_install_from_requirements)
+>
+> [**pipInstallFromRequirements (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstallfromrequirements)
+>
+> [**pip_install_from_pyproject (Python SDK)**](/docs/python-sdk/common/image#imagepip_install_from_pyproject)
+>
+> [**pipInstallFromPyproject (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstallfrompyproject)
 
-These examples show how to add files and directories to your image:
+### File system operations
+
+Daytona provides an option to add files and directories to your image.
+The following snippets demonstrate how to add files and directories to your image:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Add a local file
 image = Image.debian_slim("3.12").add_local_file("package.json", "/home/daytona/package.json")
@@ -202,8 +266,10 @@ image = Image.debian_slim("3.12").add_local_file("package.json", "/home/daytona/
 # Add a local directory
 image = Image.debian_slim("3.12").add_local_dir("src", "/home/daytona/src")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Add a local file
 const image = Image.debianSlim('3.12').addLocalFile('package.json', '/home/daytona/package.json')
@@ -211,17 +277,28 @@ const image = Image.debianSlim('3.12').addLocalFile('package.json', '/home/dayto
 // Add a local directory
 const image = Image.debianSlim('3.12').addLocalDir('src', '/home/daytona/src')
 ```
+
 </TabItem>
 </Tabs>
 
-See: [add_local_file (Python SDK)](/docs/python-sdk/common/image#imageadd_local_file), [add_local_dir (Python SDK)](/docs/python-sdk/common/image#imageadd_local_dir), [addLocalFile (TypeScript SDK)](/docs/typescript-sdk/image#addlocalfile), [addLocalDir (TypeScript SDK)](/docs/typescript-sdk/image#addlocaldir)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-### Environment Configuration
+> [**add_local_file (Python SDK)**](/docs/python-sdk/common/image#imageadd_local_file)
+>
+> [**add_local_dir (Python SDK)**](/docs/python-sdk/common/image#imageadd_local_dir)
+>
+> [**addLocalFile (TypeScript SDK)**](/docs/typescript-sdk/image#addlocalfile)
+>
+> [**addLocalDir (TypeScript SDK)**](/docs/typescript-sdk/image#addlocaldir)
 
-Configure environment variables and working directories with these methods:
+### Environment configuration
+
+Daytona provides an option to configure environment variables and working directories.
+The following snippets demonstrate how to configure environment variables and working directories:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Set environment variables
 image = Image.debian_slim("3.12").env({"PROJECT_ROOT": "/home/daytona"})
@@ -229,8 +306,10 @@ image = Image.debian_slim("3.12").env({"PROJECT_ROOT": "/home/daytona"})
 # Set working directory
 image = Image.debian_slim("3.12").workdir("/home/daytona")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Set environment variables
 const image = Image.debianSlim('3.12').env({ PROJECT_ROOT: '/home/daytona' })
@@ -238,17 +317,28 @@ const image = Image.debianSlim('3.12').env({ PROJECT_ROOT: '/home/daytona' })
 // Set working directory
 const image = Image.debianSlim('3.12').workdir('/home/daytona')
 ```
+
 </TabItem>
 </Tabs>
 
-See: [env (Python SDK)](/docs/python-sdk/common/image#imageenv), [workdir (Python SDK)](/docs/python-sdk/common/image#imageworkdir), [env (TypeScript SDK)](/docs/typescript-sdk/image#env), [workdir (TypeScript SDK)](/docs/typescript-sdk/image#workdir)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-### Commands and Entrypoints
+> [**env (Python SDK)**](/docs/python-sdk/common/image#imageenv)
+>
+> [**workdir (Python SDK)**](/docs/python-sdk/common/image#imageworkdir)
+>
+> [**env (TypeScript SDK)**](/docs/typescript-sdk/image#env)
+>
+> [**workdir (TypeScript SDK)**](/docs/typescript-sdk/image#workdir)
 
-Execute commands during build and configure container startup behavior:
+### Commands and entrypoints
+
+Daytona provides an option to execute commands during build and configure container startup behavior.
+The following snippets demonstrate how to execute commands during build and configure container startup behavior:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Run shell commands during build
 image = Image.debian_slim("3.12").run_commands(
@@ -263,8 +353,10 @@ image = Image.debian_slim("3.12").entrypoint(["/bin/bash"])
 # Set default command
 image = Image.debian_slim("3.12").cmd(["/bin/bash"])
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Run shell commands during build
 const image = Image.debianSlim('3.12').runCommands(
@@ -279,17 +371,32 @@ const image = Image.debianSlim('3.12').entrypoint(['/bin/bash'])
 // Set default command
 const image = Image.debianSlim('3.12').cmd(['/bin/bash'])
 ```
+
 </TabItem>
 </Tabs>
 
-See: [run_commands (Python SDK)](/docs/python-sdk/common/image#imagerun_commands), [entrypoint (Python SDK)](/docs/python-sdk/common/image#imageentrypoint), [cmd (Python SDK)](/docs/python-sdk/common/image#imagecmd), [runCommands (TypeScript SDK)](/docs/typescript-sdk/image#runcommands), [entrypoint (TypeScript SDK)](/docs/typescript-sdk/image#entrypoint), [cmd (TypeScript SDK)](/docs/typescript-sdk/image#cmd)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-### Dockerfile Integration
+> [**run_commands (Python SDK)**](/docs/python-sdk/common/image#imagerun_commands)
+>
+> [**entrypoint (Python SDK)**](/docs/python-sdk/common/image#imageentrypoint)
+>
+> [**cmd (Python SDK)**](/docs/python-sdk/common/image#imagecmd)
+>
+> [**runCommands (TypeScript SDK)**](/docs/typescript-sdk/image#runcommands)
+>
+> [**entrypoint (TypeScript SDK)**](/docs/typescript-sdk/image#entrypoint)
+>
+> [**cmd (TypeScript SDK)**](/docs/typescript-sdk/image#cmd)
 
-Integrate existing Dockerfiles or add custom Dockerfile commands:
+### Dockerfile integration
+
+Daytona provides an option to integrate existing Dockerfiles or add custom Dockerfile commands.
+The following snippets demonstrate how to integrate existing Dockerfiles or add custom Dockerfile commands:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Add custom Dockerfile commands
 image = Image.debian_slim("3.12").dockerfile_commands(["RUN echo 'Hello, world!'"])
@@ -300,8 +407,10 @@ image = Image.from_dockerfile("Dockerfile")
 # Extend an existing Dockerfile
 image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Add custom Dockerfile commands
 const image = Image.debianSlim('3.12').dockerfileCommands(['RUN echo "Hello, world!"'])
@@ -312,17 +421,16 @@ const image = Image.fromDockerfile('Dockerfile')
 // Extend an existing Dockerfile
 const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
 ```
+
 </TabItem>
 </Tabs>
 
-See: [dockerfile_commands (Python SDK)](/docs/python-sdk/common/image#imagedockerfile_commands), [from_dockerfile (Python SDK)](/docs/python-sdk/common/image#imagefrom_dockerfile), [dockerfileCommands (TypeScript SDK)](/docs/typescript-sdk/image#dockerfilecommands), [fromDockerfile (TypeScript SDK)](/docs/typescript-sdk/image#fromdockerfile)
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
 
-## Best Practices
-
-Use the following best practices when working with the declarative builder:
-
-1. **Layer Optimization**: Group related operations to minimize Docker layers
-2. **Cache Utilization**: Identical build commands and context will be cached and subsequent builds will be almost instant
-3. **Security**: Create non-root users for application workloads
-4. **Resource Efficiency**: Use slim base images when appropriate
-5. **Context Minimization**: Only include necessary files in the build context
+> [**dockerfile_commands (Python SDK)**](/docs/python-sdk/common/image#imagedockerfile_commands)
+>
+> [**from_dockerfile (Python SDK)**](/docs/python-sdk/common/image#imagefrom_dockerfile)
+>
+> [**dockerfileCommands (TypeScript SDK)**](/docs/typescript-sdk/image#dockerfilecommands)
+>
+> [**fromDockerfile (TypeScript SDK)**](/docs/typescript-sdk/image#fromdockerfile)

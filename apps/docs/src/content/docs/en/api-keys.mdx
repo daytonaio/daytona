@@ -2,33 +2,31 @@
 title: API Keys
 ---
 
-Daytona API keys are used to authenticate requests to the [Daytona API](/docs/en/tools/api). You can view, create, or delete your API Keys on the [API Keys](https://app.daytona.io/dashboard/keys) page.
+Daytona API keys are used to authenticate requests to the [Daytona API](/docs/en/tools/api).
 
-## Creating an API key
+## Create an API key
 
-You can obtain an API key from the Daytona platform:
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys)
+2. Click the **`Create Key`** button
+3. Enter the name of the API key, set the expiration date, and [select permissions](#permissions--scopes)
+4. Click the **`Create`** button to create the API key
+5. Copy the API key to your clipboard
 
-1. Navigate to [API Keys](https://app.daytona.io/dashboard/keys), on the [Daytona Dashboard](https://app.daytona.io/dashboard/).
-2. Click the **`Create Key`** button.
-3. In the open modal, create and copy a new key to your clipboard.
+To use the API key in your application, set the `DAYTONA_API_KEY` environment variable.
 
-To use an API key in your application, set the `DAYTONA_API_KEY` environment variable as described on the [Configuration](/docs/en/configuration) page.
+Daytona supports multiple options to configure your environment: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
 
 ## Permissions & Scopes
 
-When creating a new API Key, you can select the specific permissions (scopes) it should have. Scopes control what actions the key can perform. Grant only the scopes you need for each key.
-
-Below is a list of available scopes and their descriptions:
-
-| Resource    | Scope                | Description                          |
-|-------------|----------------------|--------------------------------------|
-| Sandboxes   | `write:sandboxes`    | Create/modify sandboxes           |
-|             | `delete:sandboxes`   | Delete sandboxes                     |
-| Snapshots   | `write:snapshots`    | Create/modify snapshots           |
-|             | `delete:snapshots`   | Delete snapshots                     |
-| Registries  | `write:registries`   | Create/modify registries          |
-|             | `delete:registries`  | Delete registries                    |
-| Volumes     | `read:volumes`       | View volumes                         |
-|             | `write:volumes`      | Create/modify volumes             |
-|             | `delete:volumes`     | Delete volumes                       |
-| Audit       | `read:audit_logs`    | View audit logs                      |
+| Resource   | Scope                   | Description              |
+| ---------- | ----------------------- | ------------------------ |
+| Sandboxes  | **`write:sandboxes`**   | Create/modify sandboxes  |
+|            | **`delete:sandboxes`**  | Delete sandboxes         |
+| Snapshots  | **`write:snapshots`**   | Create/modify snapshots  |
+|            | **`delete:snapshots`**  | Delete snapshots         |
+| Registries | **`write:registries`**  | Create/modify registries |
+|            | **`delete:registries`** | Delete registries        |
+| Volumes    | **`read:volumes`**      | View volumes             |
+|            | **`write:volumes`**     | Create/modify volumes    |
+|            | **`delete:volumes`**    | Delete volumes           |
+| Audit      | **`read:audit_logs`**   | View audit logs          |

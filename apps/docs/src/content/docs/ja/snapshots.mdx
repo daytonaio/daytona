@@ -206,7 +206,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 
 ### ローカルイメージの使用
 
-プライベートコンテナレジストリを手動で用意してイメージをプッシュする手間を避けるために、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli)を使ってローカルイメージやローカルの Dockerfile からスナップショットを作成し、サンドボックスで使用できます。
+プライベートコンテナレジストリを手動で用意してイメージをプッシュする手間を避けるために、[Daytona CLI](/docs/ja/getting-started#cli)を使ってローカルイメージやローカルの Dockerfile からスナップショットを作成し、サンドボックスで使用できます。
 
 `docker images` を実行して使用したいイメージとタグが存在することを確認したら、`daytona snapshot push <your_local_docker_image>` コマンドでスナップショットを作成して Daytona にプッシュします。例:
 

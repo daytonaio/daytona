@@ -4,43 +4,122 @@ title: Getting Started
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-The Daytona SDK provides official [Python](/docs/en/python-sdk) and [TypeScript](/docs/en/typescript-sdk) interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code. [Python SDK](/docs/en/python-sdk) supports both sync and async programming models where async classes are prefixed with `Async`.
+This section introduces core concepts, common workflows, and next steps for using Daytona after completing the [Quick Start](/docs/) guide.
 
-Follow the step-by-step guide to create and run your first Daytona Sandbox for an AI Agent.
+## Dashboard
 
-For steps on additional configuration, including setting environment variables as well as accessing experimental features on our staging deployment, visit [Configuration](/docs/en/configuration).
+[Daytona Dashboard ↗](https://app.daytona.io/) is a visual user interface where you can manage sandboxes, access API keys, view usage, and more.
+It serves as the primary point of control for managing your Daytona resources.
 
-## Install the Daytona SDK
+## SDKs
 
-Daytona provides official Python and TypeScript SDKs for interacting with the Daytona platform. Install the SDK using your preferred method:
+Daytona provides Python and TypeScript SDKs to programmatically interact with Daytona Sandboxes. They support sandbox lifecycle management, code execution, resource access, and more.
+
+To interact with Daytona Sandboxes from the SDK, see the [Python SDK](/docs/en/python-sdk) and [TypeScript SDK](/docs/en/typescript-sdk) references.
+
+:::tip
+Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python) and [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) examples to create Daytona Sandboxes and run your code.
+:::
+
+## CLI
+
+Daytona provides command-line access to core features for interacting with Daytona Sandboxes, including managing their lifecycle, snapshots, and more.
+
+To interact with Daytona Sandboxes from the command line, install the Daytona CLI:
 
 <Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
+  <TabItem label="Mac/Linux">
     ```bash
-    pip install daytona
+    brew install daytonaio/cli/daytona
     ```
   </TabItem>
 
-  <TabItem label="TypeScript" icon="seti:typescript">
+  <TabItem label="Windows">
     ```bash
-    # Using npm
-    npm install @daytonaio/sdk
-
-    # Using yarn
-
-    yarn add @daytonaio/sdk
-
-    # Using pnpm
-
-    pnpm add @daytonaio/sdk
-
+    powershell -Command "irm https://get.daytona.io/windows | iex"
     ```
   </TabItem>
 </Tabs>
 
-## Run Code Inside a Sandbox
+After installing the Daytona CLI, use the `daytona` command to interact with Daytona Sandboxes from the command line.
 
-Run the following code to create a Daytona Sandbox and execute commands:
+To view all available commands and flags, see the [CLI Reference](/docs/en/tools/cli).
+
+## API
+
+Daytona provides a RESTful API for interacting with Daytona Sandboxes, including managing their lifecycle, snapshots, and more.
+It serves as a flexible and powerful way to interact with Daytona from your own applications.
+
+To interact with Daytona Sandboxes from the API, see the [API Reference](/docs/en/tools/api).
+
+## Multiple runtime support
+
+Daytona supports multiple programming language runtimes for direct code execution inside the sandbox.
+
+[TypeScript SDK](/docs/en/typescript-sdk) works across multiple **JavaScript runtimes** including **Node.js**, **Deno**, **Bun**, **browsers**, and **serverless platforms**: Cloudflare Workers, AWS Lambda, Azure Functions, etc.
+
+Using the Daytona SDK in browser-based environments or frameworks like [**Vite**](/docs/en/getting-started#daytona-in-vite-projects) and [**Next.js**](/docs/en/getting-started#daytona-in-nextjs-projects) requires configuring node polyfills.
+
+### Daytona in Vite projects
+
+When using Daytona SDK in a Vite-based project, configure node polyfills to ensure compatibility.
+
+Add the following configuration to your `vite.config.ts` file in the `plugins` array:
+
+```typescript
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+export default defineConfig({
+  plugins: [
+    // ... other plugins
+    nodePolyfills({
+      globals: { global: true, process: true, Buffer: true },
+      overrides: {
+        path: 'path-browserify-win32',
+      },
+    }),
+  ],
+  // ... rest of your config
+})
+```
+
+### Daytona in Next.js projects
+
+When using Daytona SDK in a Next.js project, configure node polyfills to ensure compatibility with Webpack and Turbopack bundlers.
+
+Add the following configuration to your `next.config.ts` file:
+
+```typescript
+import type { NextConfig } from 'next'
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
+import { env, nodeless } from 'unenv'
+
+const { alias: turbopackAlias } = env(nodeless, {})
+
+const nextConfig: NextConfig = {
+  // Turbopack
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        ...turbopackAlias,
+      },
+    },
+  },
+  // Webpack
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.plugins.push(new NodePolyfillPlugin())
+    }
+    return config
+  },
+}
+
+export default nextConfig
+```
+
+## Run code inside a Sandbox
+
+Create a Daytona Sandbox instance and run code securely inside it. The following snippet is an example of running a calculation securely inside a Daytona Sandbox.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -63,6 +142,7 @@ Run the following code to create a Daytona Sandbox and execute commands:
     # Clean up the Sandbox
     sandbox.delete()
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -101,8 +181,8 @@ Run the following code to create a Daytona Sandbox and execute commands:
     }
 
     main().catch(console.error)
-
     ```
+
   </TabItem>
 </Tabs>
 
@@ -113,16 +193,19 @@ Run the following code to create a Daytona Sandbox and execute commands:
     ```
   </TabItem>
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```bash
-    npx tsx ./index.ts
-    ```
-  </TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+  ```bash npx tsx ./index.ts ```
+</TabItem>
+
+```text
+Sum of 3 and 4 is 7
+```
+
 </Tabs>
 
-## Preview Your App
+## Preview your app
 
-The following snippet uploads a file containing a simple Flask app to a Daytona Sandbox. The web server runs on port `3000` and is accessible through the provided preview URL:
+Preview your app by uploading a file containing a simple Flask app to a Daytona Sandbox. The web server runs on port `3000` and is accessible through the provided preview URL.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -180,6 +263,7 @@ The following snippet uploads a file containing a simple Flask app to a Daytona 
     print(f"Flask app is available at: {preview_info.url}")
 
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -238,12 +322,12 @@ The following snippet uploads a file containing a simple Flask app to a Daytona 
     }
 
     main().catch(error => console.error("Error:", error));
-
     ```
+
   </TabItem>
 </Tabs>
 
-Need to access this endpoint programmatically? Learn more about [Preview & Authentication](/docs/en/preview-and-authentication).
+To access the preview URL endpoint programmatically, learn more about [Preview & Authentication](/docs/en/preview-and-authentication).
 
 :::tip
 You can access the Sandbox [Web Terminal](/docs/en/web-terminal) by printing out the preview URL for port `22222` or by simply going to Dashboard -> Sandboxes and clicking on the Terminal input sign.
@@ -251,11 +335,12 @@ You can access the Sandbox [Web Terminal](/docs/en/web-terminal) by printing out
 
 ## Connect to an LLM
 
-The following snippet connects to an LLM using the Anthropic API and asks Claude to generate code for getting the factorial of 25 and then executes it inside of a Daytona Sandbox:
+Connect to an LLM using the Anthropic API and ask Claude to generate code for getting the factorial of 25 and then execute it inside in a Daytona Sandbox.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-    ````python
+
+    ```python
     import os
     import re
     import requests
@@ -300,14 +385,13 @@ The following snippet connects to an LLM using the Anthropic API and asks Claude
 
     response = sandbox.process.code_run(code)
     print("The factorial of 25 is", response.result)
+    ```
 
-    ````
-
-    Running the snippet:
+    Ensure the following environment variables are set and run the snippet:
 
     ```bash
-    ANTHROPIC_API_KEY="your-anthropic-api-key"
-    DAYTONA_API_KEY="your-daytona-api-key"
+    ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
+    DAYTONA_API_KEY="YOUR_DAYTONA_API_KEY"
     DAYTONA_TARGET=us
     python claude-example.py
     ```
@@ -315,10 +399,12 @@ The following snippet connects to an LLM using the Anthropic API and asks Claude
     ```bash
     > The factorial of 25 is 15511210043330985984000000
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
-    ````typescript
+
+    ```typescript
     import { Daytona } from '@daytonaio/sdk'
     import * as dotenv from 'dotenv'
     import axios from 'axios'
@@ -360,15 +446,15 @@ The following snippet connects to an LLM using the Anthropic API and asks Claude
       const sandbox = await daytona.create()
 
       const prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
-      
+
       const result = await getClaudeResponse(process.env.ANTHROPIC_API_KEY || "", prompt)
-      
+
       // Extract code from the response using regex
       const codeMatch = result.match(/```python\n(.*?)```/s)
-      
+
       let code = codeMatch ? codeMatch[1] : result
       code = code.replace(/\\/g, '\\\\')
-      
+
       // Run the extracted code in the sandbox
       const response = await sandbox.process.codeRun(code)
       console.log("The factorial of 25 is", response.result)
@@ -376,7 +462,7 @@ The following snippet connects to an LLM using the Anthropic API and asks Claude
 
     main().catch(console.error)
 
-    ````
+    ```
 
     Running the snippet:
 
@@ -390,92 +476,16 @@ The following snippet connects to an LLM using the Anthropic API and asks Claude
     ```bash
     > The factorial of 25 is 15511210043330985984000000
     ```
+
   </TabItem>
 </Tabs>
 
-## Additional Examples
+## Examples
 
-Use the Daytona SDK [Python examples](https://github.com/daytonaio/daytona/tree/main/examples/python) or [TypeScript/JavaScript examples](https://github.com/daytonaio/daytona/tree/main/examples/typescript) to create a Sandbox and run your code.
+Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python) and [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) examples to create Daytona Sandboxes and run your code.
 
-Speed up your development on Daytona using LLMs. Copy the /llms.txt files and include them into your projects or chat context: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt)
-
-Learn more by checking out the Daytona SDK repository on [GitHub](https://github.com/daytonaio/daytona).
-
-## Multiple Runtime Support
-
-The Daytona TypeScript SDK works across multiple JavaScript runtimes including Node.js, Deno, Bun, browsers, and serverless platforms (Cloudflare Workers, AWS Lambda, Azure Functions, etc.).
-
-:::note[Browser and Framework Configuration]
-When using the SDK in browser-based environments or frameworks like Vite and Next.js, you'll need to configure node polyfills. See the sections below for setup instructions.
+:::tip
+Use our LLMs context files for faster development with AI agents and assistants. Copy the [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt) files and include them in your projects or chat contexts.
 :::
 
-### Daytona in Vite Projects
-
-When using Daytona SDK in a Vite-based project, you need to configure node polyfills to ensure compatibility. Add the following configuration to your `vite.config.ts` file in the plugins array:
-
-```typescript
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
-
-export default defineConfig({
-  plugins: [
-    // ... other plugins
-    nodePolyfills({
-      globals: { global: true, process: true, Buffer: true },
-      overrides: {
-        path: 'path-browserify-win32',
-      },
-    }),
-  ],
-  // ... rest of your config
-})
-```
-
-### Daytona in Next.js Projects
-
-When using Daytona SDK in a Next.js project, you need to configure node polyfills to ensure compatibility with Webpack and Turbopack bundlers (depending on what you're using). Add the following configuration to your `next.config.ts` file:
-
-```typescript
-import type { NextConfig } from 'next'
-import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
-import { env, nodeless } from 'unenv'
-
-const { alias: turbopackAlias } = env(nodeless, {})
-
-const nextConfig: NextConfig = {
-  // Turbopack
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        ...turbopackAlias,
-      },
-    },
-  },
-  // Webpack
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.plugins.push(new NodePolyfillPlugin())
-    }
-    return config
-  },
-}
-
-export default nextConfig
-```
-
-## Setting up the Daytona CLI
-
-If you want to use [images from your local device](/docs/en/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
-
-<Tabs syncKey="language">
-  <TabItem label="Mac/Linux">
-    ```bash
-    brew install daytonaio/cli/daytona
-    ```
-  </TabItem>
-
-  <TabItem label="Windows">
-    ```bash
-    powershell -Command "irm https://get.daytona.io/windows | iex"
-    ```
-  </TabItem>
-</Tabs>
+Learn more by checking the Daytona repository on [GitHub](https://github.com/daytonaio/daytona).

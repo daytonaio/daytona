@@ -5,85 +5,111 @@ title: Snapshots
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
 
-Snapshots are Sandbox templates that can be created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. New Sandboxes can be created from a custom Snapshot pre-configured with your required dependencies, settings, and resources, or from the [default Snapshot](#default-snapshot).
+Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshot) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
-## Creating Snapshots
+## Create Snapshots
 
-Snapshots can be created in one of four ways: [from a public image](#using-a-public-image), [from a private image](#using-private-registries), [from a local image](#using-a-local-image), or [using the Declarative Builder](#using-the-declarative-builder).
+Daytona provides options to create snapshots using [public images](#using-a-public-image), [private images](<(#using-private-registries)>), [local images](#using-a-local-image), and the [declarative builder](#using-the-declarative-builder).
 
-### Using a Public Image
+1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+2. Click the **Create Snapshot** button
+3. Enter the snapshot name, image (tag or digest), entrypoint, and resources
 
-To create a Snapshot from a public image, follow these steps:
-
-1. Visit the Dashboard and click on [Snapshots](https://app.daytona.io/dashboard/snapshots)
-2. Click on **Create Snapshot**
-3. Enter the name and tag of any publicly accessible image from Docker Hub (e.g. `alpine:3.21.3`) or from another public container registry (e.g. `my-public-registry.com/custom-alpine:3.21`)
-
-Optionally, set the entrypoint field. If the image does not have a long-running entrypoint, Daytona will automatically run `sleep infinity` to prevent the container from exiting immediately.
+- **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI
+- **Image**: Base image for the snapshot. Must include either a tag (e.g., **`ubuntu:22.04`**) or a digest. The tag **`latest`** is not allowed.
+- **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
+- **Resources** (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
 
 :::note
-Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same idea applies to tags such as `lts` or `stable` and we recommend avoiding those when defining an image.
+Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
 :::
 
-Once the Snapshot is pulled, validated and has an `Active` state, it is ready to be used.
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#create) and [TypeScript SDK](/docs/typescript-sdk/snapshot#create) references:
 
-### Images from Private Registries
+> [**create (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotservicecreate)
+>
+> [**create (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
 
-To create a Snapshot from an image that is available in a private container registry:
+### Using public images
 
-1. Go to the [Registries](https://app.daytona.io/dashboard/registries) page in the Dashboard
-2. Click the **Add Registry** button.
-3. Fill out the form with an appropriate custom name, URL, username, password, and project (if applicable)
-4. Once the Container Registry is created, you may go back to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
-5. When creating the Snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. `my-private-registry.com/<my-project>/custom-alpine:3.21`)
+Daytona supports creating snapshots from public images from Docker Hub or other public container registries.
 
-The next step is the same; simply set the `CreateSandboxFromSnapshotParams` field to use the custom Snapshot and no further authentication is needed.
+1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+2. Click the **Create Snapshot** button
+3. Enter the snapshot name and image (tag or digest) of any publicly accessible image from Docker Hub or from another public container registry.
 
-#### Using a Private Docker Hub Image
+Once the snapshot is pulled, validated, and has an `Active` state, it is ready to be used.
 
-To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/en/snapshots#images-from-private-registries) with your Docker Hub credentials:
+### Using images from private registries
 
-- **Registry URL**: Set this to `docker.io`
-- **Username**: Enter your Docker Hub username (the account with access to the private image)
-- **Password**: Use a [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/) (not your account password)
-- **Create the Snapshot**: Once the registry is added, you can create a Snapshot using the full image path as the image name: `docker.io/<username>/<image>:<tag>`
+Daytona supports creating snapshots from private images from Docker Hub or other private container registries.
 
-#### Using Google Artifact Registry
+1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
+2. Click the **Add Registry** button
+3. Enter the registry name, registry URL, username, password, and project (if applicable)
+4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+5. Click the **Create Snapshot** button
+6. Enter the snapshot name and image (tag or digest) of the private image. When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
 
-To use an image from Google Artifact Registry, you need to configure the registry using a [Service Account key](https://cloud.google.com/iam/docs/keys-create-delete) in JSON format:
+Optionally, set the **`CreateSandboxFromSnapshotParams`** field to use the custom snapshot.
 
-- **Registry URL**: The base URL for your region (e.g., `https://us-central1-docker.pkg.dev` or `https://us-central1-docker.pkg.dev/your-org`).
-- **Username**: Set this specifically to `_json_key`.
-- **Password**: Paste the full contents of your Service Account JSON key file.
-- **Project**: Your Google Cloud Project ID.
-- **Create the Snapshot**: Once added, create a Snapshot using the full image path: `us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`.
+### Using private Docker Hub image
 
-### Using a Local Image
+Daytona supports creating snapshots from private Docker Hub images.
 
-In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
+1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
+2. Click the **Add Registry** button
+3. Enter the registry name, registry URL, username, password, and project (if applicable)
 
-To create a Snapshot from a local image:
+- **Registry URL**: `docker.io`
+- **Username**: Docker Hub username (the account with access to the private image)
+- **Password**: [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/) (not your account password)
+- **Create the Snapshot**: `docker.io/<username>/<image>:<tag>`
 
-1. Run `docker images` to ensure the image and tag you want to use is available
-2. Run `daytona snapshot push <your_local_docker_image>` to create a Snapshot and push it to Daytona, e.g.:
+4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+5. Click the **Create Snapshot** button
+6. Enter the snapshot name and image (tag or digest) of the private image. When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`docker.io/<username>/<image>:<tag>`**)
+
+### Using Google Artifact Registry
+
+Daytona supports creating snapshots from images from Google Artifact Registry.
+
+To use an image from Google Artifact Registry, configure the registry using a [service account key](https://cloud.google.com/iam/docs/keys-create-delete) in JSON format.
+
+1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
+2. Click the **Add Registry** button
+3. Enter the registry name, registry URL, username, password, and project (if applicable)
+
+- **Registry URL**: base URL for your region (e.g., `https://us-central1-docker.pkg.dev` or `https://us-central1-docker.pkg.dev/your-org`).
+- **Username**: `_json_key`
+- **Password**: Paste the full contents of your Service Account JSON key file
+- **Project**: Google Cloud Project ID
+- **Create the Snapshot**: `us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`
+
+4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+5. Click the **Create Snapshot** button
+6. Enter the snapshot name and image (tag or digest) of the private image. When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
+
+### Using local images
+
+Daytona supports creating snapshots from local images or from local Dockerfiles. To create a snapshot from a local image or from a local Dockerfile, use the [Daytona CLI](/docs/en/getting-started#cli).
+
+Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture. For more information, see the [CLI documentation](/docs/en/tools/cli#daytona-snapshot-push).
+
+1. Run **`docker images`** to ensure the image and tag you want to use is available
+2. Run **`daytona snapshot push <your_local_docker_image>`** to create a snapshot and push it to Daytona, e.g.:
 
 ```bash
 daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 ```
 
 :::tip
-Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have
+Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have.
 
-For example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
+Example: `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
 :::
 
-:::note
-Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
-
-For more information, see the [CLI documentation](/docs/en/tools/cli#daytona-snapshot-push).
-:::
-
-Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you. The COPY/ADD commands will be automatically parsed and added to the context - to manually add files to the context you can use the `--context` flag.
+Alternatively, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the snapshot for you. The COPY/ADD commands will be automatically parsed and added to the context. To manually add files to the context, use the `--context` flag.
 
 ```bash
 daytona snapshot create data-analysis01 --dockerfile ./Dockerfile
@@ -94,27 +120,25 @@ Building image from /Users/idagelic/docs/Dockerfile
 Step 1/5 : FROM alpine:latest
 
 ...
-
  ⡿  Waiting for the Snapshot to be validated ...
-
- ...
+...
 
  ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
-
 ```
 
-### Using the Declarative Builder
+### Using the declarative builder
 
-The declarative builder allows you to define your Snapshots using a code-first approach. See [Declarative Builder](/docs/declarative-builder) for more information.
+[Declarative Builder](/docs/declarative-builder) provides a code-first approach to define your snapshots.
 
-### Specifying Resources
+### Snapshot resources
 
-Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
+Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk**.
 
 To customize these resources, use the `Resources` class to define exactly what you need:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 from daytona import (
     Daytona,
@@ -125,12 +149,11 @@ from daytona import (
 
 daytona = Daytona()
 
-# Create a Snapshot with custom resources
+# Create a snapshot with custom resources
 daytona.snapshot.create(
   CreateSnapshotParams(
     name="my-snapshot",
     image=Image.debian_slim("3.12"),
-    # All resource parameters are optional:
     resources=Resources(
       cpu=2,
       memory=4,
@@ -140,19 +163,20 @@ daytona.snapshot.create(
   on_logs=print,
 )
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
-import { Daytona, Image } from "@daytonaio/sdk";
+import { Daytona, Image } from '@daytonaio/sdk'
 
-const daytona = new Daytona();
+const daytona = new Daytona()
 
-// Create a Snapshot with custom resources
+// Create a snapshot with custom resources
 await daytona.snapshot.create(
   {
-    name: "my-snapshot",
-    image: Image.debianSlim("3.13"),
-    // All resource parameters are optional:
+    name: 'my-snapshot',
+    image: Image.debianSlim('3.13'),
     resources: {
       cpu: 2,
       memory: 4,
@@ -160,80 +184,117 @@ await daytona.snapshot.create(
     },
   },
   { onLogs: console.log }
-);
+)
 ```
 
 </TabItem>
 </Tabs>
 
-Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
+To check your available resources and limits, navigate to the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/limits).
 
-## Using Snapshots
+## Get a Snapshot by name
 
-To use a Snapshot in your Sandbox, specify the `snapshot` field in the `CreateSandboxFromSnapshotParams` object:
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+daytona = Daytona()
+snapshot = daytona.snapshot.get("my-awesome-snapshot")
+print(f"{snapshot.name} ({snapshot.image_name})")
+```
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotget) and [TypeScript SDK](/docs/typescript-sdk/snapshot#get) references:
+
+> [**get (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceget)
+>
+> [**get (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#get)
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const daytona = new Daytona()
+const snapshot = await daytona.snapshot.get('my-awesome-snapshot')
+console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`)
+```
+
+</TabItem>
+</Tabs>
+
+## List Snapshots
+
+Daytona provides options to list snapshots and view their details.
+
+The following snippet lists all snapshots on the first page with a limit of 10 snapshots per page.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+daytona = Daytona()
+result = daytona.snapshot.list(page=2, limit=10)
+for snapshot in result.items:
+    print(f"{snapshot.name} ({snapshot.image_name})")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const daytona = new Daytona()
+const result = await daytona.snapshot.list(1, 10)
+console.log(`Found ${result.total} snapshots`)
+result.items.forEach(snapshot =>
+  console.log(`${snapshot.name} (${snapshot.imageName})`)
+)
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotlist) and [TypeScript SDK](/docs/typescript-sdk/snapshot#list) references:
+
+> [**list (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicelist)
+>
+> [**list (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#list)
+
+## Delete Snapshots
+
+Daytona provides options to delete snapshots. Deleted snapshots cannot be recovered.
+
+1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+2. Click the three dots at the end of the row for the snapshot you want to delete
+3. Click the **Delete** button
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-))
+daytona = Daytona()
+daytona.snapshot.delete("my-awesome-snapshot")
+print("Snapshot deleted")
 ```
 </TabItem>
+
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-const sandbox = await daytona.create({
-  snapshot: "my-snapshot-name",
-})
+const daytona = new Daytona()
+await daytona.snapshot.delete("my-awesome-snapshot")
+console.log("Snapshot deleted")
 ```
 </TabItem>
 </Tabs>
 
-For examples of running code inside a sandbox, see the [Getting Started Guide](/docs/en/getting-started/#run-code-inside-a-sandbox).
+For more information, see the [Python SDK](/docs/python-sdk/) and [TypeScript SDK](/docs/typescript-sdk/) references:
 
-## Deleting Snapshots
+> [**delete (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxdelete)
+>
+> [**delete (TypeScript SDK)**](/docs/typescript-sdk/sandbox#delete)
 
-To delete custom Snapshots:
-
-1. Go to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
-2. Click the three dots at the end of the row for the Snapshot you want to delete
-3. Click the `Delete` button that appears
-
-:::tip
-
-To temporarily disable a Snapshot, instead of deleting, you can click `Disable`. This will prevent the Snapshot from being used in any new Sandboxes but will not delete it.
-
-:::
-
-## Running Docker in a Sandbox
+## Run Docker in a Sandbox
 
 Daytona Sandboxes can run Docker containers inside them (**Docker-in-Docker**), enabling you to build, test, and deploy containerized applications. This is particularly useful when your projects have dependencies on external services like databases, message queues, or other microservices.
 
-Agents can seamlessly interact with these services since they run within the same sandbox environment, providing better isolation and security compared to external service dependencies.
-
-### Creating a DinD Snapshot
-
-You can create a Snapshot with Docker support using pre-built Docker-in-Docker images as a base or by manually installing Docker in a custom image.
-
-#### Using Pre-built Images
-
-The following base images are widely used for creating Docker-in-Docker snapshots or can be used as a base for a custom Dockerfile:
-
-- `docker:28.3.3-dind` - Official Docker-in-Docker image (Alpine-based, lightweight)
-- `docker:28.3.3-dind-rootless` - Rootless Docker-in-Docker for enhanced security
-- `docker:28.3.2-dind-alpine3.22` - Docker-in-Docker image with Alpine 3.22
-
-#### Manual Docker Installation
-
-Alternatively, you can install Docker manually in a custom Dockerfile:
-
-```dockerfile
-FROM ubuntu:22.04
-# Install Docker using the official install script
-RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
-```
-
-### Use Cases
+Agents can seamlessly interact with these services since they run within the same sandbox environment, providing better isolation and security compared to external service dependencies. The following use cases are supported:
 
 - Run databases (PostgreSQL, Redis, MySQL) and other services
 - Build and test containerized applications
@@ -244,9 +305,72 @@ RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
 Docker-in-Docker Sandboxes require additional resources due to the Docker daemon overhead. Consider allocating at least 2 vCPU and 4GiB of memory for optimal performance.
 :::
 
+### Create a Docker-in-Docker Snapshot
+
+Daytona provides an option to create a snapshot with Docker support using pre-built Docker-in-Docker images as a base or by manually installing Docker in a custom image.
+
+#### Using pre-built images
+
+The following base images are widely used for creating Docker-in-Docker snapshots or can be used as a base for a custom Dockerfile:
+
+- `docker:28.3.3-dind`: official Docker-in-Docker image (Alpine-based, lightweight)
+- `docker:28.3.3-dind-rootless`: rootless Docker-in-Docker for enhanced security
+- `docker:28.3.2-dind-alpine3.22`: Docker-in-Docker image with Alpine 3.22
+
+#### Using manual installation
+
+Alternatively, install Docker manually in a custom Dockerfile:
+
+```dockerfile
+FROM ubuntu:22.04
+# Install Docker using the official install script
+RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
+```
+
+## Run Kubernetes in a Sandbox
+
+Daytona Sandboxes can run a Kubernetes cluster inside the sandbox. Kubernetes runs entirely inside the sandbox and is removed when the sandbox is deleted, keeping environments secure and reproducible.
+
+### Run k3s in a Sandbox
+
+The following snippet installs and starts a k3s cluster inside a sandbox and lists all running pods.
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+import { setTimeout } from 'timers/promises'
+
+// Initialize the Daytona client
+const daytona = new Daytona()
+
+// Create the sandbox instance
+const sandbox = await daytona.create()
+
+// Run the k3s installation script
+const response = await sandbox.process.executeCommand(
+  'curl -sfL https://get.k3s.io | sh -'
+)
+
+// Run k3s
+const sessionName = 'k3s-server'
+await sandbox.process.createSession(sessionName)
+const k3s = await sandbox.process.executeSessionCommand(sessionName, {
+  command: 'sudo /usr/local/bin/k3s server',
+  async: true,
+})
+
+// Give time to k3s to fully start
+await setTimeout(30000)
+
+// Get all pods
+const pods = await sandbox.process.executeCommand(
+  'sudo /usr/local/bin/kubectl get pod -A'
+)
+console.log(pods.result)
+```
+
 ## Default Snapshot
 
-When a Sandbox is created with no Snapshot specified, Daytona uses a default Snapshot that includes `python`, `node`, their language servers, and several common pip packages:
+When a sandbox is created with no snapshot specified, Daytona uses a default snapshot that includes `python`, `node`, their language servers, and several common pip packages:
 
 - `anthropic` (v0.49.0)
 - `beautifulsoup4` (v4.13.3)

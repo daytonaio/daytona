@@ -17,7 +17,7 @@ sidebar:
 import Aside from "@components/Aside.astro";
 import Label from "@components/Label.astro";
 
-The \`daytona\` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/en/getting-started#setting-up-the-daytona-cli).
+The \`daytona\` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/getting-started#cli).
 
 This reference lists all commands supported by the \`daytona\` command-line tool complete with a description of their behaviour, and any supported flags.
 You can access this documentation on a per-command basis by appending the \`--help\`/\`-h\` flag when invoking \`daytona\`.

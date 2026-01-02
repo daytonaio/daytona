@@ -4,25 +4,24 @@ title: Configuration
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-## Configuration Methods
+Daytona supports multiple options to configure your environment, in order of precedence:
 
-Daytona SDK supports multiple ways to configure your environment, in order of precedence:
+1. [Configuration in code](#configuration-in-code)
+2. [Environment variables](#environment-variables)
+3. [.env file](#env-file)
+4. [Default values](#default-values)
 
-1. [**Configuration in code**](#configuration-in-code)
-2. [**Environment variables**](#environment-variables)
-3. [**.env file**](#env-file)
-4. [**Default values**](#default-values)
+## Configuration in code
 
-## Configuration in Code
-
-Daytona SDK provides an option to configure settings using the `DaytonaConfig` class in Python and TypeScript. The `DaytonaConfig` class accepts the following parameters:
+To configure your environment in code, use the `DaytonaConfig` class. The `DaytonaConfig` class accepts the following parameters:
 
 - `api_key`: Your Daytona [API Key](/docs/api-keys)
 - `api_url`: URL of your Daytona API
-- `target`: Daytona Target to create the Sandboxes on.
+- `target`: Daytona Target to create the Sandboxes on
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 from daytona import DaytonaConfig
 
@@ -31,71 +30,80 @@ config = DaytonaConfig(
     api_url="your-api-url",
     target="us"
 )
-
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
-import { DaytonaConfig } from '@daytonaio/sdk';
+import { DaytonaConfig } from '@daytonaio/sdk'
 
 const config: DaytonaConfig = {
-    apiKey: "your-api-key",          
-    apiUrl: "your-api-url",     
-    target: "us"                  
-};
+  apiKey: 'your-api-key',
+  apiUrl: 'your-api-url',
+  target: 'us',
+}
 ```
 
 </TabItem>
 </Tabs>
 
-## Environment Variables
+For more information, see the [Python SDK](/docs/en/python-sdk/daytona) and [TypeScript SDK](/docs/en/typescript-sdk/daytona) references:
 
-Daytona SDK supports environment variables for configuration. The SDK automatically looks for these environment variables:
+> [**DaytonaConfig (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonaconfig)
+>
+> [**DaytonaConfig (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#daytonaconfig)
 
-| Variable              | Description                                | Optional |
+## Environment variables
+
+Daytona supports environment variables for configuration. The SDK automatically looks for these environment variables:
+
+| Variable              | Description                                | Required |
 | --------------------- | ------------------------------------------ | -------- |
-| **`DAYTONA_API_KEY`** | Your Daytona API key.                      | No       |
-| **`DAYTONA_API_URL`** | URL of your Daytona API.                   | Yes      |
-| **`DAYTONA_TARGET`**  | Daytona Target to create the Sandboxes on. | Yes      |
+| **`DAYTONA_API_KEY`** | Your Daytona API key.                      | Yes      |
+| **`DAYTONA_API_URL`** | URL of your Daytona API.                   | No       |
+| **`DAYTONA_TARGET`**  | Daytona Target to create the sandboxes on. | No       |
 
-Set environment variables in your shell:
+### Shell
+
+To set environment variables in your shell, use the following commands:
 
 <Tabs syncKey="shell">
   <TabItem label="Bash/Zsh" icon="seti:shell">
+
     ```bash
     export DAYTONA_API_KEY=your-api-key
     export DAYTONA_API_URL=https://your-api-url
     export DAYTONA_TARGET=us
     ```
+
   </TabItem>
   <TabItem label="Windows PowerShell" icon="seti:powershell">
-    ```bash 
+
+    ```bash
     $env:DAYTONA_API_KEY="your-api-key"
     $env:DAYTONA_API_URL="https://your-api-url"
     $env:DAYTONA_TARGET="us"
     ```
+
   </TabItem>
 </Tabs>
 
-You can also set these environment variables in a `.env` file.
+### .env file
 
-## .env File
-
-Create a `.env` file in your project root directory:
+To set environment variables in a `.env` file, use the following syntax:
 
 ```bash
-DAYTONA_API_KEY=your-api-key
-DAYTONA_API_URL=https://your-api-url
+DAYTONA_API_KEY=YOUR_API_KEY
+DAYTONA_API_URL=https://your_api_url
 DAYTONA_TARGET=us
 ```
 
-The SDK will automatically read these values when initializing.
+## Default values
 
-## Default Values
+If no configuration is provided, Daytona will use its built-in default values:
 
-If no configuration is provided, Daytona SDK will use its built-in defaults:
-
-| Option    | Default Value                       |
-|-----------|-------------------------------------|
-| API URL   | https://app.daytona.io/api          |
-| Target    | Default region for the organization |
+| Option  | Value                               |
+| ------- | ----------------------------------- |
+| API URL | https://app.daytona.io/api          |
+| Target  | Default region for the organization |
