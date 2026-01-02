@@ -2,6 +2,8 @@
 title: Limits
 ---
 
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
 Daytona enforces resource and requests limits to ensure fair usage and stability across all organizations.
 
 [Daytona Limits ↗](https://app.daytona.io/dashboard/limits) provides an overview of your organization's resource limits and usage.
@@ -26,21 +28,30 @@ To unlock higher limits, complete the following steps:
 | **Tier 4** | **`500`** / **`1000GiB`** / **`5000GiB`** | $2000 top-up every 30 days.                                                                          |
 | **Custom** | Custom limits                             | Contact [support@daytona.io](mailto:support@daytona.io)                                              |
 
-Once you meet the criteria for a higher tier, make sure to Upgrade by clicking the "Upgrade" button in the [Dashboard](https://app.daytona.io/dashboard/limits).
+Once you meet the criteria for a higher tier, upgrade your tier in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/limits).
+
+### Resource usage
+
+Daytona supports managing your resources by [changing the state](/docs/sandboxes#sandbox-lifecycle) of your Sandboxes. The table below summarizes how each state affects resource usage:
+
+| **State**    | **vCPU** | **Memory** | **Storage** | **Description**                               |
+| ------------ | -------- | ---------- | ----------- | --------------------------------------------- |
+| **Running**  | ✅       | ✅         | ✅          | Counts against all limits                     |
+| **Stopped**  | ❌       | ❌         | ✅          | Frees CPU & memory, but storage is still used |
+| **Archived** | ❌       | ❌         | ❌          | Data moved to cold storage, no quota impact   |
+| **Deleted**  | ❌       | ❌         | ❌          | All resources freed                           |
 
 ## Rate limits
 
-Rate limits are applied based on your tier, access requirements, and the type of operation you're performing. The following rate limits are applied for each tier:
+Rate limits control how many API requests you can make within a specific time window.
+These limits are applied based on your tier, authentication status, and the type of operation you're performing.
+Rate limits for general authenticated requests are tracked per organization.
+
+The following rate limits are applied for each tier:
 
 - **General requests**
-- **Sandbox creation**
-- **Sandbox Lifecycle**
-
-### API rate limits
-
-Request rate limits are applied based on your tier, authentication status, and the type of operation you're performing. Rate limits for general authenticated requests are tracked per organization.
-
-Rate limits control how many API requests you can make within a specific time window. Understanding these limits helps you build robust applications that handle rate limiting gracefully and avoid service interruptions.
+- **[Sandbox creation](#sandbox-creation)**
+- **[Sandbox lifecycle](#sandbox-lifecycle-operations)**
 
 | **Tier**   | **General Requests (per min)** | **Sandbox Creation (per min)** | **Sandbox Lifecycle (per min)** |
 | ---------- | ------------------------------ | ------------------------------ | ------------------------------- |
@@ -58,7 +69,15 @@ The general rate limit for authenticated API requests that don't fall under sand
 - **Listing snapshots**
 - **Managing volumes**
 - **Viewing audit logs**
-- And other read/management operations
+- and other read/management operations
+
+When you exceed a rate limit, subsequent requests will fail with:
+
+- **HTTP Status**: `429 Too Many Requests`
+- **Error Response**: JSON body with rate limit details
+- **Retry-After Header**: Time to wait before retrying (in seconds)
+
+Understanding these limits helps you build robust applications that handle rate limiting gracefully and avoid service interruptions. For more information, see [best practices](#best-practices).
 
 ### Rate limit headers
 
@@ -71,93 +90,72 @@ Daytona includes rate limit information in API response headers. Header names in
 | **`X-RateLimit-Reset-{throttler}`**     | Time in seconds until the rate limit window resets                        |
 | **`Retry-After-{throttler}`**           | Time in seconds to wait before retrying (included when limit is exceeded) |
 
-## Tier upgrade
-
-Unlock more resources and higher rate limits by completing verification steps.
-
-:::note
-For access to resources in other regions, please contact [sales@daytona.io](mailto:sales@daytona.io).
-:::
-
-## Enterprise
-
-:::note
-For access tocustom tier requirements, contact [sales@daytona.io](mailto:sales@daytona.io).
-:::
-
-## Resource usage
-
-You can manage your resource usage by [changing the state](/docs/sandboxes#sandbox-lifecycle) of your Sandboxes. The table below summarizes how each state affects resource usage:
-
-| **State**    | **vCPU** | **Memory** | **Storage** | **Notes**                                     |
-| ------------ | -------- | ---------- | ----------- | --------------------------------------------- |
-| **Running**  | ✅       | ✅         | ✅          | Counts against all limits                     |
-| **Stopped**  | ❌       | ❌         | ✅          | Frees CPU & memory, but storage is still used |
-| **Archived** | ❌       | ❌         | ❌          | Data moved to cold storage, no quota impact   |
-| **Deleted**  | ❌       | ❌         | ❌          | All resources freed                           |
 
 ### Sandbox creation
 
-This rate limit applies to all sandbox creation methods, including creation from snapshots, declarative builds and any other parameters passed to `daytona.create()` (SDK) or POST requests to `/api/sandbox` (API).
+This rate limit applies to all sandbox creation methods, including [creation from snapshots](/docs/snapshots#create-snapshots), [declarative builds](/docs/declarative-builder) and any other parameters passed to `daytona.create()` ([SDK](/docs/getting-started#sdks)) or POST requests to `/api/sandbox` ([API](/docs/getting-started#api)).
 
 This independent limit prevents resource exhaustion while allowing you to perform lifecycle operations on existing sandboxes without restriction.
 
 :::note
-If you need to create sandboxes at a higher rate for your use case, please contact [support@daytona.io](mailto:support@daytona.io) to discuss custom rate limits.
+To create sandboxes at a higher rate for your use case, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
 ### Sandbox lifecycle operations
 
 This rate limit applies to lifecycle and state management operations on existing sandboxes:
 
-- **Starting** sandboxes (`POST /api/sandbox/:id/start`)
-- **Stopping** sandboxes (`POST /api/sandbox/:id/stop`)
-- **Deleting** sandboxes (`DELETE /api/sandbox/:id`)
-- **Archiving** sandboxes (`POST /api/sandbox/:id/archive`)
-
-And all corresponding SDK methods.
+- [**Starting** sandboxes](/docs/tools/api#post-sandboxsandboxidornamestart) (`POST /api/sandbox/:id/start`)
+- [**Stopping** sandboxes](/docs/tools/api#post-sandboxsandboxidornamestop) (`POST /api/sandbox/:id/stop`)
+- [**Deleting** sandboxes](/docs/tools/api#delete-sandboxsandboxidorname) (`DELETE /api/sandbox/:id`)
+- [**Archiving** sandboxes](/docs/tools/api#post-sandboxsandboxidornamearchive) (`POST /api/sandbox/:id/archive`)
+- and all corresponding SDK methods
 
 These operations have a higher limit since they're often performed more frequently during development workflows.
 
-### What happens when you hit the limit
+### Rate limit errors
 
-When you exceed a rate limit, subsequent requests will fail with:
+Daytona [Python](/docs/python-sdk) or [TypeScript](/docs/en/typescript-sdk) SDKs raise or throw a `DaytonaRateLimitError` exception (Python) or error (TypeScript) when you exceed a rate limit.
 
-- **HTTP Status**: `429 Too Many Requests`
-- **Error Response**: JSON body with rate limit details
-- **Retry-After Header**: Time to wait before retrying (in seconds)
+All errors include [**`headers`**](#rate-limit-headers) and [**`statusCode`**](#example-rate-limit-error-response) properties, allowing access to rate limit headers directly from the error object. Headers support case-insensitive access:
 
-#### SDK behavior
+<Tabs>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    try {
+      await daytona.create()
+    } catch (error) {
+      if (error instanceof DaytonaRateLimitError) {
+        console.log(error.headers?.get('x-ratelimit-remaining-sandbox-create'))
+        console.log(error.headers?.get('X-RateLimit-Remaining-Sandbox-Create')) // also works
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    try:
+      daytona.create(snapshot="my-snapshot")
+    except DaytonaRateLimitError as e:
+      print(e.headers['x-ratelimit-remaining-sandbox-create'])
+      print(e.headers['X-RateLimit-Remaining-Sandbox-Create'])  # also works
+    ```
+  </TabItem>
+</Tabs>
 
-If you're using the official Daytona SDKs:
+For more information, see the [Python SDK](/docs/python-sdk/common/errors) and [TypeScript SDK](/docs/typescript-sdk/errors) references.
 
-- **TypeScript SDK**: Throws `DaytonaRateLimitError`
-- **Python SDK**: Raises `DaytonaRateLimitError`
+> [**DaytonaRateLimitError (Python SDK)**](/docs/en/python-sdk/common/errors#daytonaratelimiteerror)
+>
+> [**DaytonaRateLimitError (TypeScript SDK)**](/docs/python-sdk/common/errors#daytonaratelimiterror)
 
-All errors include `headers` and `statusCode` properties, allowing you to access rate limit headers directly from the error object. Headers support case-insensitive access:
+### Rate limit error response
 
-```typescript
-// TypeScript - use .get() for case-insensitive access
-try {
-  await daytona.create()
-} catch (error) {
-  if (error instanceof DaytonaRateLimitError) {
-    console.log(error.headers?.get('x-ratelimit-remaining-sandbox-create'))
-    console.log(error.headers?.get('X-RateLimit-Remaining-Sandbox-Create')) // also works
-  }
-}
-```
+The rate limit error response is a JSON object with the following properties:
 
-```python
-# Python - headers support case-insensitive access
-try:
-    daytona.create(snapshot="my-snapshot")
-except DaytonaRateLimitError as e:
-    print(e.headers['x-ratelimit-remaining-sandbox-create'])
-    print(e.headers['X-RateLimit-Remaining-Sandbox-Create'])  # also works
-```
-
-#### Example error response
+- **`statusCode`**: The HTTP status code of the error
+- **`message`**: The error message
+- **`error`**: The error type
 
 ```json
 {
@@ -167,11 +165,19 @@ except DaytonaRateLimitError as e:
 }
 ```
 
+## Tier upgrade
 
+Unlock more resources and higher rate limits by completing verification steps. For more information, see the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/limits).
 
-### Best practices
+:::note
+For access to custom tier requirements or resources in other regions, please contact [sales@daytona.io](mailto:sales@daytona.io).
+:::
 
-To work effectively within rate limits, always handle `429` errors gracefully with proper retry logic. When you receive a rate limit error, implement exponential backoff—wait progressively longer between retries (1s, 2s, 4s, 8s, etc.) to avoid overwhelming the API. Here's an example:
+## Best practices
+
+To work effectively within rate limits, always handle `429` errors gracefully with proper retry logic. When you receive a rate limit error, implement exponential backoff—wait progressively longer between retries (1s, 2s, 4s, 8s, etc.) to avoid overwhelming the API.
+
+The following snippet demonstrates how to create a sandbox with retry logic using the TypeScript SDK:
 
 ```typescript
 async function createSandboxWithRetry() {
@@ -198,12 +204,12 @@ async function createSandboxWithRetry() {
 }
 ```
 
-**Monitor rate limit headers** (e.g., `X-RateLimit-Remaining-{throttler}`, `X-RateLimit-Reset-{throttler}`) to track your consumption and implement proactive throttling before hitting limits. These headers are available on all error objects via the `headers` property.
+**Monitor [rate limit headers](#rate-limit-headers)** (e.g., `X-RateLimit-Remaining-{throttler}`, `X-RateLimit-Reset-{throttler}`) to track your consumption and implement proactive throttling before hitting limits. These headers are available on all error objects via the `headers` property.
 
-**Cache API responses** that don't change frequently, such as sandbox lists (when relatively static), available regions, and snapshot information. This reduces unnecessary API calls and helps you stay well within your limits.
+**Cache API responses** that don't frequently change, such as [sandbox lists](/docs/sandboxes#list-sandboxes) (when relatively static), [available regions](/docs/regions), and [snapshot information](/docs/snapshots). This reduces unnecessary API calls and helps you stay well within your limits.
 
 **Batch and optimize operations** by creating multiple sandboxes in parallel (within rate limits) rather than sequentially. Consider reusing existing sandboxes when possible instead of creating new ones for every task.
 
-**Efficiently manage sandbox lifecycle** to reduce API calls. Archive sandboxes instead of deleting and recreating them, stop sandboxes when not in use rather than deleting them, and leverage [auto-stop intervals](/docs/en/sandboxes#auto-stop) to automatically manage running sandboxes without manual intervention.
+**Efficiently manage sandbox lifecycle** to reduce API calls. [Archive sandboxes](/docs/sandboxes#archive-sandboxes) instead of deleting and recreating them, stop sandboxes when not in use rather than deleting them, and leverage [auto-stop intervals](/docs/sandboxes#auto-stop-interval) to automatically manage running sandboxes without manual intervention.
 
-**Implement request queuing** to prevent bursts that exceed limits, and use [webhooks](/docs/en/webhooks) instead of polling for state changes to avoid unnecessary API calls. Set up monitoring and alerts for `429` errors in your application logs so you can proactively address rate limiting issues before they impact your users.
+**Implement request queuing** to prevent bursts that exceed limits, and use [webhooks](/docs/webhooks) instead of polling for state changes to avoid unnecessary API calls. Set up monitoring and alerts for `429` errors in your application logs so you can proactively address rate limiting issues before they impact your users.
