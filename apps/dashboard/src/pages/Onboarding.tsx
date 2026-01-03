@@ -122,18 +122,16 @@ const Onboarding: React.FC = () => {
               <h1 className="text-2xl font-bold mb-2">Get Started</h1>
               <p className="text-muted-foreground">Install and get your Sandboxes running.</p>
             </div>
-            <div className="flex items-center space-x-2">
-              <Tabs value={language} onValueChange={(value) => setLanguage(value as 'typescript' | 'python')}>
-                <TabsList className="bg-foreground/10">
-                  <TabsTrigger value="python">
-                    <img src={pythonIcon} alt="Python" className="w-4 h-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="typescript">
-                    <img src={typescriptIcon} alt="TypeScript" className="w-4 h-4" />
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+            <Tabs value={language} onValueChange={(value) => setLanguage(value as 'typescript' | 'python')}>
+              <TabsList className="bg-foreground/10">
+                <TabsTrigger value="python">
+                  <img src={pythonIcon} alt="Python" className="w-4 h-4" />
+                </TabsTrigger>
+                <TabsTrigger value="typescript">
+                  <img src={typescriptIcon} alt="TypeScript" className="w-4 h-4" />
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           <div className="relative">
@@ -150,9 +148,7 @@ const Onboarding: React.FC = () => {
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Install the SDK</h2>
                   <p className="mb-4">Run the following command in your terminal to install the Daytona SDK:</p>
-                  <div className="transition-all duration-500">
-                    <CodeBlock code={codeExamples[language].install} language="bash" showCopy />
-                  </div>
+                  <CodeBlock code={codeExamples[language].install} language="bash" showCopy />
                 </div>
               </div>
 
@@ -171,10 +167,11 @@ const Onboarding: React.FC = () => {
                       onClick={() => navigate(RoutePath.KEYS)}
                       className="underline cursor-pointer hover:text-muted-foreground"
                     >
-                      Keys
+                      API Keys
                     </button>{' '}
                     page.
                   </p>
+
                   {createdApiKey ? (
                     <div className="p-4 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
                       <span className="overflow-x-auto pr-2 cursor-text select-all">
@@ -182,21 +179,15 @@ const Onboarding: React.FC = () => {
                       </span>
                       <div className="flex items-center space-x-3 pl-3">
                         {isApiKeyRevealed ? (
-                          <EyeOff
-                            className="w-4 h-4 cursor-pointer hover:text-green-400 dark:hover:text-green-200 transition-colors"
-                            onClick={() => setIsApiKeyRevealed(false)}
-                          />
+                          <EyeOff className="w-4 h-4 cursor-pointer" onClick={() => setIsApiKeyRevealed(false)} />
                         ) : (
-                          <Eye
-                            className="w-4 h-4 cursor-pointer hover:text-green-400 dark:hover:text-green-200 transition-colors"
-                            onClick={() => setIsApiKeyRevealed(true)}
-                          />
+                          <Eye className="w-4 h-4 cursor-pointer" onClick={() => setIsApiKeyRevealed(true)} />
                         )}
                         {isApiKeyCopied ? (
                           <Check className="w-4 h-4" />
                         ) : (
                           <ClipboardIcon
-                            className="w-4 h-4 cursor-pointer hover:text-green-400 dark:hover:text-green-200 transition-colors"
+                            className="w-4 h-4 cursor-pointer"
                             onClick={() => copyToClipboard(createdApiKey.value)}
                           />
                         )}
@@ -209,6 +200,9 @@ const Onboarding: React.FC = () => {
                         await handleCreateApiKey()
                       }}
                     >
+                      <label htmlFor="key-name" className="block text-sm font-medium mb-2">
+                        API Key Name
+                      </label>
                       <Input
                         id="key-name"
                         type="text"
@@ -224,11 +218,7 @@ const Onboarding: React.FC = () => {
                         disabled={isLoadingCreateKey || !hasSufficientPermissions}
                         className="text-base"
                       >
-                        {isLoadingCreateKey ? (
-                          <Loader2 className="h-6 w-6 animate-spin" />
-                        ) : (
-                          <Plus className="w-6 h-6" />
-                        )}
+                        {isLoadingCreateKey ? <Loader2 className="h-6 w-6 animate-spin" /> : <Plus className="w-6 h-6" />}
                         Create API Key
                       </Button>
                     </form>
@@ -247,58 +237,38 @@ const Onboarding: React.FC = () => {
                 </div>
                 <div className={!createdApiKey ? 'opacity-40 pointer-events-none' : ''}>
                   <h2 className="text-xl font-semibold mb-4">Create a Sandbox</h2>
-                  <p className="mb-4">The example below will create a Sandbox and run a simple code snippet:</p>
-                  <div className="transition-all duration-500">
-                    <CodeBlock
-                      code={
-                        createdApiKey && isApiKeyRevealed
-                          ? codeExamples[language].example.replace('your-api-key', createdApiKey.value)
-                          : codeExamples[language].example
-                      }
-                      language={language}
-                      showCopy
-                    />
-                  </div>
+                  <CodeBlock
+                    code={
+                      createdApiKey && isApiKeyRevealed
+                        ? codeExamples[language].example.replace('your-api-key', createdApiKey.value)
+                        : codeExamples[language].example
+                    }
+                    language={language}
+                    showCopy
+                  />
                 </div>
               </div>
 
               {/* Step 4 */}
               <div className="relative pl-12">
-                <div
-                  className={`absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm ${
-                    !createdApiKey ? 'bg-secondary' : 'bg-muted-foreground'
-                  }`}
-                >
+                <div className="absolute left-0 w-8 h-8 text-background rounded-full bg-muted-foreground flex items-center justify-center text-sm">
                   4
                 </div>
-                <div className={!createdApiKey ? 'opacity-40 pointer-events-none' : ''}>
-                  <h2 className="text-xl font-semibold mb-4">Run the Example</h2>
-                  <p className="mb-4">Run the following command in your terminal to run the example:</p>
-                  <div className="transition-all duration-500">
-                    <CodeBlock code={codeExamples[language].run} language="bash" showCopy />
-                  </div>
-                </div>
+                <CodeBlock code={codeExamples[language].run} language="bash" showCopy />
               </div>
 
               {/* Step 5 */}
               <div className="relative pl-12">
-                <div
-                  className={`absolute left-0 w-8 h-8 text-background rounded-full flex items-center justify-center text-sm ${
-                    !createdApiKey ? 'bg-secondary' : 'bg-muted-foreground'
-                  }`}
-                >
+                <div className="absolute left-0 w-8 h-8 text-background rounded-full bg-muted-foreground flex items-center justify-center text-sm">
                   5
                 </div>
-                <div className={!createdApiKey ? 'opacity-40 pointer-events-none' : ''}>
-                  <h2 className="text-xl font-semibold mb-4">That's It</h2>
-                  <p className="text-muted-foreground">
-                    It's as easy as that. For more examples check out the{' '}
-                    <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-                      Docs
-                    </a>
-                    .
-                  </p>
-                </div>
+                <p className="text-muted-foreground">
+                  It's as easy as that. For more examples check out the{' '}
+                  <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
+                    Docs
+                  </a>
+                  .
+                </p>
               </div>
             </div>
           </div>
@@ -314,15 +284,8 @@ const codeExamples = {
     run: `npx tsx index.mts`,
     example: `import { Daytona } from '@daytonaio/sdk'
   
-// Initialize the Daytona client
 const daytona = new Daytona({ apiKey: 'your-api-key' });
-
-// Create the Sandbox instance
-const sandbox = await daytona.create({
-  language: 'typescript',
-});
-
-// Run the code securely inside the Sandbox
+const sandbox = await daytona.create({ language: 'typescript' });
 const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
 console.log(response.result);
   `,
@@ -332,21 +295,14 @@ console.log(response.result);
     run: `python main.py`,
     example: `from daytona import Daytona, DaytonaConfig
   
-# Define the configuration
 config = DaytonaConfig(api_key="your-api-key")
-
-# Initialize the Daytona client
 daytona = Daytona(config)
-
-# Create the Sandbox instance
 sandbox = daytona.create()
-
-# Run the code securely inside the Sandbox
 response = sandbox.process.code_run('print("Hello World from code!")')
 if response.exit_code != 0:
   print(f"Error: {response.exit_code} {response.result}")
 else:
-    print(response.result)
+  print(response.result)
   `,
   },
 }
