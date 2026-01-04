@@ -29,6 +29,9 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { isValidUuid } from '../../common/utils/uuid'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
+import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
+import { RunnerClass } from '../enums/runner-class'
 
 export type FetchWarmPoolSandboxParams = {
   snapshot: string
@@ -113,6 +116,10 @@ export class SandboxWarmPoolService {
         },
       })
 
+      // Windows warm pool sandboxes wait in STOPPED state, Linux in STARTED state
+      const expectedState =
+        snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ? SandboxState.STOPPED : SandboxState.STARTED
+
       const warmPoolSandboxes = await this.sandboxRepository.find({
         where: {
           runnerId: Not(In(unschedulableRunners.map((runner) => runner.id))),
@@ -125,7 +132,7 @@ export class SandboxWarmPoolService {
           env: warmPoolItem.env,
           organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
           region: warmPoolItem.target,
-          state: SandboxState.STARTED,
+          state: expectedState,
         },
         take: 10,
       })
@@ -162,6 +169,17 @@ export class SandboxWarmPoolService {
           return
         }
 
+        // Query the snapshot to determine if it's Windows-based
+        const snapshot = await this.snapshotRepository.findOne({
+          where: [{ name: warmPoolItem.snapshot, general: true }, { name: warmPoolItem.snapshot }],
+        })
+
+        // Windows warm pool sandboxes have desiredState STOPPED, Linux have STARTED
+        const expectedDesiredState =
+          snapshot?.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL
+            ? SandboxDesiredState.STOPPED
+            : SandboxDesiredState.STARTED
+
         const sandboxCount = await this.sandboxRepository.count({
           where: {
             snapshot: warmPoolItem.snapshot,
@@ -174,7 +192,7 @@ export class SandboxWarmPoolService {
             gpu: warmPoolItem.gpu,
             mem: warmPoolItem.mem,
             disk: warmPoolItem.disk,
-            desiredState: SandboxDesiredState.STARTED,
+            desiredState: expectedDesiredState,
             state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
           },
         })
@@ -222,6 +240,17 @@ export class SandboxWarmPoolService {
       return
     }
 
+    // Query the snapshot to determine if it's Windows-based
+    const snapshot = await this.snapshotRepository.findOne({
+      where: [{ name: warmPoolItem.snapshot, general: true }, { name: warmPoolItem.snapshot }],
+    })
+
+    // Windows warm pool sandboxes have desiredState STOPPED, Linux have STARTED
+    const expectedDesiredState =
+      snapshot?.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL
+        ? SandboxDesiredState.STOPPED
+        : SandboxDesiredState.STARTED
+
     const sandboxCount = await this.sandboxRepository.count({
       where: {
         snapshot: warmPoolItem.snapshot,
@@ -234,7 +263,7 @@ export class SandboxWarmPoolService {
         gpu: warmPoolItem.gpu,
         mem: warmPoolItem.mem,
         disk: warmPoolItem.disk,
-        desiredState: SandboxDesiredState.STARTED,
+        desiredState: expectedDesiredState,
         state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
       },
     })
@@ -245,6 +274,44 @@ export class SandboxWarmPoolService {
 
     if (warmPoolItem) {
       this.eventEmitter.emit(WarmPoolEvents.TOPUP_REQUESTED, new WarmPoolTopUpRequested(warmPoolItem))
+    }
+  }
+
+  @OnEvent(SandboxEvents.STATE_UPDATED)
+  async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
+    // Only handle transitions to STARTED state for warm pool sandboxes
+    if (
+      event.newState !== SandboxState.STARTED ||
+      event.sandbox.organizationId !== SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
+    ) {
+      return
+    }
+
+    // Check if the snapshot is Windows-based
+    const snapshot = await this.snapshotRepository.findOne({
+      where: [
+        { name: event.sandbox.snapshot, general: true },
+        { name: event.sandbox.snapshot, organizationId: event.sandbox.organizationId },
+      ],
+    })
+
+    if (!snapshot || snapshot.runnerClass !== RunnerClass.WINDOWS_EXPERIMENTAL) {
+      return
+    }
+
+    // Stop Windows warm pool sandboxes after they start
+    this.logger.debug(`Stopping Windows warm pool sandbox ${event.sandbox.id} after start`)
+
+    // Update the sandbox to stop it
+    await this.sandboxRepository.update(
+      { id: event.sandbox.id },
+      { desiredState: SandboxDesiredState.STOPPED, pending: true },
+    )
+
+    // Emit the stopped event to trigger the stop action
+    const updatedSandbox = await this.sandboxRepository.findOne({ where: { id: event.sandbox.id } })
+    if (updatedSandbox) {
+      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(updatedSandbox))
     }
   }
 }

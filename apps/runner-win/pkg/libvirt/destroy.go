@@ -73,7 +73,8 @@ func (l *LibVirt) Destroy(ctx context.Context, domainId string) error {
 
 	// Clean up DHCP reservation to free the IP
 	mac := GetReservedMAC(domainId)
-	if err := l.RemoveDHCPReservation(mac); err != nil {
+	ip := GetReservedIP(domainId)
+	if err := l.RemoveDHCPReservation(mac, ip); err != nil {
 		log.Warnf("Failed to remove DHCP reservation for %s: %v", domainId, err)
 		// Don't fail the destroy operation for DHCP cleanup failure
 	}

@@ -89,20 +89,24 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 		return nil, nil, errors.New("sandbox ID is required")
 	}
 
-	// Get container details
-	container, err := runner.LibVirt.ContainerInspect(ctx.Request.Context(), sandboxId)
+	// Use ContainerInspectBasic to verify sandbox exists without waiting for IP
+	// This is much faster than ContainerInspect which polls DHCP leases
+	container, err := runner.LibVirt.ContainerInspectBasic(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err)))
 		return nil, nil, fmt.Errorf("sandbox container not found: %w", err)
 	}
 
-	containerIP := libvirt.GetDomainIpAddress(ctx.Request.Context(), container)
-
-	if containerIP == "" {
-		message := "no IP address found. Is the Sandbox started?"
+	// Check if sandbox is running
+	if container.State != libvirt.DomainStateRunning {
+		message := "sandbox is not running"
 		ctx.Error(common_errors.NewBadRequestError(errors.New(message)))
 		return nil, nil, errors.New(message)
 	}
+
+	// Use deterministic IP calculated from sandbox ID - instant, no network calls
+	// The IP is pre-configured via DHCP reservation during sandbox creation
+	containerIP := libvirt.GetReservedIP(sandboxId)
 
 	// Build the target URL
 	targetURL := fmt.Sprintf("http://%s:2280", containerIP)

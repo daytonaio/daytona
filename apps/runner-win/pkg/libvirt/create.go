@@ -29,15 +29,23 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 	}
 
 	// Check if domain already exists (idempotency)
+	// If domain exists, return success immediately - don't try to modify its state
+	// The Start API should be used to start stopped domains, not Create
 	existingDomain, err := conn.LookupDomainByName(sandboxDto.Id)
 	if err == nil && existingDomain != nil {
-		// Domain already exists - return success
 		uuid, _ := existingDomain.GetUUIDString()
 		name, _ := existingDomain.GetName()
-		log.Infof("Domain %s already exists (UUID: %s), returning existing", sandboxDto.Id, uuid)
+		state, _, _ := existingDomain.GetState()
+		log.Infof("Domain %s already exists (UUID: %s, state: %d), ignoring subsequent create call", sandboxDto.Id, uuid, state)
 		existingDomain.Free()
 		if l.statesCache != nil {
-			l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateStarted)
+			// Map actual libvirt state to sandbox state
+			// VIR_DOMAIN_RUNNING = 1, VIR_DOMAIN_BLOCKED = 2, VIR_DOMAIN_PAUSED = 3
+			if state == 1 || state == 2 || state == 3 {
+				l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateStarted)
+			} else {
+				l.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateStopped)
+			}
 		}
 		return uuid, name, nil
 	}

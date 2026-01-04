@@ -93,7 +93,7 @@ func (l *LibVirt) AddDHCPReservation(mac, ip, hostname string) error {
 		// Check if it's a duplicate error (reservation already exists)
 		log.Warnf("Failed to add DHCP reservation (may already exist): %v", err)
 		// Try to delete and re-add
-		_ = l.RemoveDHCPReservation(mac)
+		_ = l.RemoveDHCPReservation(mac, ip)
 		err = network.Update(2, 4, -1, hostXML, 3)
 		if err != nil {
 			return fmt.Errorf("failed to add DHCP reservation: %w", err)
@@ -105,7 +105,7 @@ func (l *LibVirt) AddDHCPReservation(mac, ip, hostname string) error {
 }
 
 // RemoveDHCPReservation removes a MAC->IP mapping from the network's DHCP configuration
-func (l *LibVirt) RemoveDHCPReservation(mac string) error {
+func (l *LibVirt) RemoveDHCPReservation(mac, ip string) error {
 	conn, err := l.getConnection()
 	if err != nil {
 		return fmt.Errorf("failed to get connection: %w", err)
@@ -117,10 +117,10 @@ func (l *LibVirt) RemoveDHCPReservation(mac string) error {
 	}
 	defer network.Free()
 
-	// Build the DHCP host XML (only MAC is needed for deletion)
-	hostXML := fmt.Sprintf(`<host mac="%s"/>`, mac)
+	// Build the DHCP host XML (MAC and IP are both needed for deletion)
+	hostXML := fmt.Sprintf(`<host mac="%s" ip="%s"/>`, mac, ip)
 
-	log.Infof("Removing DHCP reservation for MAC=%s", mac)
+	log.Infof("Removing DHCP reservation for MAC=%s IP=%s", mac, ip)
 
 	// Delete the DHCP host entry
 	// Flags: VIR_NETWORK_UPDATE_AFFECT_LIVE | VIR_NETWORK_UPDATE_AFFECT_CONFIG = 3

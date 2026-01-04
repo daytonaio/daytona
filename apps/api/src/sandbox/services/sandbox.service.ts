@@ -558,13 +558,25 @@ export class SandboxService {
       )
     }
 
+    // If sandbox is stopped (Windows warm pool), start it after assignment
+    if (warmPoolSandbox.state === SandboxState.STOPPED) {
+      warmPoolSandbox.pending = true
+      warmPoolSandbox.desiredState = SandboxDesiredState.STARTED
+    }
+
     const result = await this.sandboxRepository.save(warmPoolSandbox)
 
-    // Treat this as a newly started sandbox
-    this.eventEmitter.emit(
-      SandboxEvents.STATE_UPDATED,
-      new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
-    )
+    // Emit appropriate event based on sandbox state
+    if (result.state === SandboxState.STOPPED) {
+      // Trigger start for stopped warm pool sandboxes (Windows)
+      await this.eventEmitter.emitAsync(SandboxEvents.STARTED, new SandboxStartedEvent(result))
+    } else {
+      // Treat this as a newly started sandbox (Linux warm pool)
+      this.eventEmitter.emit(
+        SandboxEvents.STATE_UPDATED,
+        new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
+      )
+    }
     return SandboxDto.fromSandbox(result)
   }
 
