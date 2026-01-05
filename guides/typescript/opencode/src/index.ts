@@ -39,7 +39,9 @@ async function main() {
     console.log('Installing OpenCode...')
     await sandbox.process.executeCommand('npm i -g opencode-ai@1.1.1')
 
-    // Get the preview URL for the sandbox
+    // Create the URL pattern for Daytona preview links
+    // This is a URL where {PORT} is a placeholder for the port number
+    // We first generate a preview link with the dummy port 1234, then replace it with {PORT}
     const previewLink = await sandbox.getPreviewLink(1234)
     const previewUrlPattern = previewLink.url.replace(/1234/, '{PORT}')
 
