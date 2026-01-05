@@ -52,25 +52,25 @@ async function main() {
 
     // OpenCode config with Daytona-aware agent
     const opencodeConfig = {
-      "$schema": "https://opencode.ai/config.json",
-      "default_agent": "daytona",
-      "agent": {
-        "daytona": {
-          "description": "Daytona sandbox-aware coding agent",
-          "mode": "primary",
-          "prompt": systemPrompt
-        }
-      }
+      $schema: 'https://opencode.ai/config.json',
+      default_agent: 'daytona',
+      agent: {
+        daytona: {
+          description: 'Daytona sandbox-aware coding agent',
+          mode: 'primary',
+          prompt: systemPrompt,
+        },
+      },
     }
 
     // Start OpenCode web server with config
     console.log('Starting OpenCode web server...')
     const configJson = JSON.stringify(opencodeConfig)
-    
+
     // Create a session for running OpenCode
     const sessionId = `opencode-session-${Date.now()}`
     await sandbox.process.createSession(sessionId)
-    
+
     // Run OpenCode web server asynchronously with config injected via environment variable
     const envVar = injectEnvVar('OPENCODE_CONFIG_CONTENT', configJson)
     const command = await sandbox.process.executeSessionCommand(sessionId, {
@@ -80,7 +80,8 @@ async function main() {
 
     // Function to replace localhost URLs with the actual preview link
     const opencodePreviewLink = await sandbox.getPreviewLink(OPENCODE_PORT)
-    const replaceUrl = (text: string) => text.replace(new RegExp(`http:\\/\\/127\\.0\\.0\\.1:${OPENCODE_PORT}`, 'g'), opencodePreviewLink.url)
+    const replaceUrl = (text: string) =>
+      text.replace(new RegExp(`http:\\/\\/127\\.0\\.0\\.1:${OPENCODE_PORT}`, 'g'), opencodePreviewLink.url)
 
     // Stream output from the OpenCode server
     if (!command.cmdId) throw new Error('Failed to start OpenCode command in sandbox')
