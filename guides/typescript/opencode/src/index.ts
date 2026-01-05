@@ -95,21 +95,20 @@ async function main() {
     // Keep the process running until Ctrl+C is pressed
     console.log('Press Ctrl+C to stop.\n')
     process.stdin.resume()
-    
-    await new Promise<void>((resolve) => {
-      process.once('SIGINT', async () => {
-        console.log('\nCleaning up...')
-        await sandbox.delete()
-        process.stdin.pause()
-        resolve()
-      })
-    })
-
   } catch (error) {
     console.error('Error:', error)
     await sandbox.delete()
     process.exit(1)
   }
+
+  await new Promise<void>((resolve) => {
+    process.once('SIGINT', async () => {
+      console.log('\nCleaning up...')
+      await sandbox.delete()
+      process.stdin.pause()
+      resolve()
+    })
+  })
 }
 
 main().catch((err) => {
