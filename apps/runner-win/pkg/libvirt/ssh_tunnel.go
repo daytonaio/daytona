@@ -12,9 +12,11 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/net/proxy"
 )
 
 // IsRemoteURI returns true if the libvirt URI is a remote SSH connection

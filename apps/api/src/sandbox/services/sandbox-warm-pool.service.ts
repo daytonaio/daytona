@@ -174,10 +174,11 @@ export class SandboxWarmPoolService {
           where: [{ name: warmPoolItem.snapshot, general: true }, { name: warmPoolItem.snapshot }],
         })
 
-        // Windows warm pool sandboxes have desiredState STOPPED, Linux have STARTED
-        const expectedDesiredState =
+        // For Windows: count both STARTED (being created) and STOPPED (ready) to prevent over-provisioning
+        // For Linux: count only STARTED
+        const desiredStateFilter =
           snapshot?.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL
-            ? SandboxDesiredState.STOPPED
+            ? In([SandboxDesiredState.STARTED, SandboxDesiredState.STOPPED])
             : SandboxDesiredState.STARTED
 
         const sandboxCount = await this.sandboxRepository.count({
@@ -192,7 +193,7 @@ export class SandboxWarmPoolService {
             gpu: warmPoolItem.gpu,
             mem: warmPoolItem.mem,
             disk: warmPoolItem.disk,
-            desiredState: expectedDesiredState,
+            desiredState: desiredStateFilter,
             state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
           },
         })
@@ -245,10 +246,11 @@ export class SandboxWarmPoolService {
       where: [{ name: warmPoolItem.snapshot, general: true }, { name: warmPoolItem.snapshot }],
     })
 
-    // Windows warm pool sandboxes have desiredState STOPPED, Linux have STARTED
-    const expectedDesiredState =
+    // For Windows: count both STARTED (being created) and STOPPED (ready) to prevent over-provisioning
+    // For Linux: count only STARTED
+    const desiredStateFilter =
       snapshot?.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL
-        ? SandboxDesiredState.STOPPED
+        ? In([SandboxDesiredState.STARTED, SandboxDesiredState.STOPPED])
         : SandboxDesiredState.STARTED
 
     const sandboxCount = await this.sandboxRepository.count({
@@ -263,7 +265,7 @@ export class SandboxWarmPoolService {
         gpu: warmPoolItem.gpu,
         mem: warmPoolItem.mem,
         disk: warmPoolItem.disk,
-        desiredState: expectedDesiredState,
+        desiredState: desiredStateFilter,
         state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
       },
     })
