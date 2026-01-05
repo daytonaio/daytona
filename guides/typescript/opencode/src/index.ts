@@ -109,7 +109,7 @@ async function main() {
     process.once('SIGINT', async () => {
       try {
         console.log('\nCleaning up...')
-        await sandbox.delete()
+        if (sandbox) await sandbox.delete()
       } catch (e) {
         console.error('Error deleting sandbox:', e)
       } finally {
