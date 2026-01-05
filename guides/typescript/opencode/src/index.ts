@@ -80,7 +80,8 @@ async function main() {
       runAsync: true,
     })
 
-    // Function to replace localhost URLs with the actual preview link
+    // OpenCode prints a localhost URL pointing to the web UI
+    // This function detects the URL and replaces it with a Daytona preview URL
     const opencodePreviewLink = await sandbox.getPreviewLink(OPENCODE_PORT)
     const replaceUrl = (text: string) =>
       text.replace(new RegExp(`http:\\/\\/127\\.0\\.0\\.1:${OPENCODE_PORT}`, 'g'), opencodePreviewLink.url)
