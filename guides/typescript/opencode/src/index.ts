@@ -35,6 +35,18 @@ async function main() {
     console.log('Creating sandbox...')
     sandbox = await daytona.create()
 
+    // Register cleanup handler immediately after sandbox creation
+    process.once('SIGINT', async () => {
+      try {
+        console.log('\nCleaning up...')
+        if (sandbox) await sandbox.delete()
+      } catch (e) {
+        console.error('Error deleting sandbox:', e)
+      } finally {
+        process.exit(0)
+      }
+    })
+
     // Install OpenCode in the sandbox
     console.log('Installing OpenCode...')
     await sandbox.process.executeCommand('npm i -g opencode-ai@1.1.1')
@@ -99,27 +111,17 @@ async function main() {
 
     // Keep the process running until Ctrl+C is pressed
     console.log('Press Ctrl+C to stop.\n')
-    process.stdin.resume()
+
+    // Block here to keep the process alive indefinitely
+    // Never resolves - keeps process running until SIGINT
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    await new Promise(() => {})
   } catch (error) {
     // If an error occurs, log it and clean up the sandbox
     console.error('Error:', error)
     if (sandbox) await sandbox.delete()
     process.exit(1)
   }
-
-  await new Promise<void>((resolve) => {
-    process.once('SIGINT', async () => {
-      try {
-        console.log('\nCleaning up...')
-        if (sandbox) await sandbox.delete()
-      } catch (e) {
-        console.error('Error deleting sandbox:', e)
-      } finally {
-        process.stdin.pause()
-        resolve()
-      }
-    })
-  })
 }
 
 main().catch((err) => {
