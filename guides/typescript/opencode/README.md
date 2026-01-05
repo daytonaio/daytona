@@ -2,7 +2,7 @@
 
 ## Overview
 
-This example runs [OpenCode](https://opencode.dev/), a an open source coding agent, inside a Daytona sandbox. You can interact with OpenCode via a web interface to run automations, build apps, and launch web apps or services using [Daytona preview links](https://www.daytona.io/docs/en/preview-and-authentication/#fetching-a-preview-link).
+This example runs [OpenCode](https://opencode.ai/), an open source coding agent, inside a Daytona sandbox. You can interact with OpenCode via a web interface to run automations, build apps, and launch web apps or services using [Daytona preview links](https://www.daytona.io/docs/en/preview-and-authentication/#fetching-a-preview-link).
 
 ## Features
 
