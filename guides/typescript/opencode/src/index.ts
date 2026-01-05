@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona, Sandbox } from '@daytonaio/sdk'
 import * as dotenv from 'dotenv'
 
 // Load environment variables from .env file
@@ -29,10 +29,12 @@ async function main() {
   // Initialize the Daytona client
   const daytona = new Daytona({ apiKey: process.env.DAYTONA_API_KEY })
 
-  console.log('Creating sandbox...')
-  const sandbox = await daytona.create()
+  let sandbox: Sandbox | undefined
 
   try {
+    console.log('Creating sandbox...')
+    sandbox = await daytona.create()
+
     // Install OpenCode in the sandbox
     console.log('Installing OpenCode...')
     await sandbox.process.executeCommand('npm i -g opencode-ai@1.1.1')
@@ -96,17 +98,23 @@ async function main() {
     console.log('Press Ctrl+C to stop.\n')
     process.stdin.resume()
   } catch (error) {
+    // If an error occurs, log it and clean up the sandbox
     console.error('Error:', error)
-    await sandbox.delete()
+    if (sandbox) await sandbox.delete()
     process.exit(1)
   }
 
   await new Promise<void>((resolve) => {
     process.once('SIGINT', async () => {
-      console.log('\nCleaning up...')
-      await sandbox.delete()
-      process.stdin.pause()
-      resolve()
+      try {
+        console.log('\nCleaning up...')
+        await sandbox.delete()
+      } catch (e) {
+        console.error('Error deleting sandbox:', e)
+      } finally {
+        process.stdin.pause()
+        resolve()
+      }
     })
   })
 }
