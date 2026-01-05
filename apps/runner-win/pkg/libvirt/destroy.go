@@ -96,10 +96,14 @@ func (l *LibVirt) RemoveDestroyed(ctx context.Context, domainId string) error {
 
 // cleanupDomainFiles removes disk and NVRAM files for a destroyed domain
 func (l *LibVirt) cleanupDomainFiles(ctx context.Context, domainId string) {
-	host := l.extractHostFromURI()
-	if host == "" {
-		log.Warnf("Could not extract host from URI for cleanup")
-		return
+	isLocal := l.isLocalURI()
+	host := ""
+	if !isLocal {
+		host = l.extractHostFromURI()
+		if host == "" {
+			log.Warnf("Could not extract host from URI for cleanup")
+			return
+		}
 	}
 
 	// Build paths for disk and NVRAM
@@ -108,14 +112,23 @@ func (l *LibVirt) cleanupDomainFiles(ctx context.Context, domainId string) {
 
 	// Remove disk file
 	log.Infof("Removing disk file: %s", diskPath)
-	cmd := exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", diskPath))
+	var cmd *exec.Cmd
+	if isLocal {
+		cmd = exec.CommandContext(ctx, "rm", "-f", diskPath)
+	} else {
+		cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", diskPath))
+	}
 	if output, err := cmd.CombinedOutput(); err != nil {
 		log.Warnf("Failed to remove disk %s: %v (output: %s)", diskPath, err, string(output))
 	}
 
 	// Remove NVRAM file
 	log.Infof("Removing NVRAM file: %s", nvramPath)
-	cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", nvramPath))
+	if isLocal {
+		cmd = exec.CommandContext(ctx, "rm", "-f", nvramPath)
+	} else {
+		cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", nvramPath))
+	}
 	if output, err := cmd.CombinedOutput(); err != nil {
 		log.Warnf("Failed to remove NVRAM %s: %v (output: %s)", nvramPath, err, string(output))
 	}

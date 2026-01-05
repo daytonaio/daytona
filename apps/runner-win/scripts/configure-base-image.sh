@@ -5,8 +5,8 @@
 set -e
 
 LIBVIRT_HOST="root@h1001.blinkbox.dev"
-BASE_IMAGE="/var/lib/libvirt/images/winserver-desktop-base.qcow2"
-TEMPLATE_NVRAM="/var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd"
+BASE_IMAGE="/var/lib/libvirt/images/winserver-autologin-base.qcow2"
+TEMPLATE_NVRAM="/var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd"
 WORK_IMAGE="/var/lib/libvirt/images/winserver-desktop-config.qcow2"
 WORK_NVRAM="/var/lib/libvirt/qemu/nvram/winserver-desktop-config_VARS.fd"
 VM_NAME="winserver-desktop-config"

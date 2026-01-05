@@ -49,7 +49,7 @@ This creates `dist/apps/daemon-win.exe` - a Windows AMD64 executable.
 
 ### 2. Base Image Setup
 
-The Windows sandbox base image (`winserver-desktop-base.qcow2`) includes:
+The Windows sandbox base image (`winserver-autologin-base.qcow2`) includes:
 
 - Windows Server 2022 with **Desktop Experience** (full GUI)
 - TightVNC Server (port 5900, no authentication)
@@ -386,6 +386,8 @@ To update the daemon in the `winserver-desktop` VM and create a new base image:
 
 ### Creating the Base Image
 
+The runner-win uses `winserver-autologin-base.qcow2` as the base image for creating new sandboxes. The source VM is `winserver-desktop`.
+
 1. Shut down the VM (force if necessary):
 
    ```bash
@@ -394,41 +396,45 @@ To update the daemon in the `winserver-desktop` VM and create a new base image:
    virsh destroy winserver-desktop
    ```
 
-2. Create standalone base image (flatten backing chain):
+2. Backup the old base image:
 
    ```bash
-   sudo qemu-img convert -p -O qcow2 /var/lib/libvirt/images/winserver-desktop.qcow2 /var/lib/libvirt/images/winserver-desktop-base-new.qcow2
+   sudo cp /var/lib/libvirt/images/winserver-autologin-base.qcow2 /var/lib/libvirt/images/winserver-autologin-base.qcow2.old.$(date +%Y%m%d)
    ```
 
-3. Replace the old base image:
+3. Copy the updated VM disk as the new base image:
 
    ```bash
-   sudo mv /var/lib/libvirt/images/winserver-desktop-base.qcow2 /var/lib/libvirt/images/winserver-desktop-base.qcow2.old
-   sudo mv /var/lib/libvirt/images/winserver-desktop-base-new.qcow2 /var/lib/libvirt/images/winserver-desktop-base.qcow2
+   sudo cp /var/lib/libvirt/images/winserver-desktop.qcow2 /var/lib/libvirt/images/winserver-autologin-base.qcow2
    ```
 
-4. Copy NVRAM template (if needed):
+   **Note**: If the VM disk has a backing chain, flatten it first:
 
    ```bash
-   cp /var/lib/libvirt/qemu/nvram/winserver-desktop_VARS.fd /var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd
+   sudo qemu-img convert -p -O qcow2 /var/lib/libvirt/images/winserver-desktop.qcow2 /var/lib/libvirt/images/winserver-autologin-base.qcow2
    ```
 
-5. Set permissions:
+4. Set permissions:
 
    ```bash
-   sudo chown libvirt-qemu:kvm /var/lib/libvirt/images/winserver-desktop-base.qcow2
-   sudo chown libvirt-qemu:kvm /var/lib/libvirt/qemu/nvram/winserver-desktop-base_VARS.fd
+   sudo chown libvirt-qemu:kvm /var/lib/libvirt/images/winserver-autologin-base.qcow2
    ```
 
-6. Restart the source VM:
+5. Restart the source VM:
 
    ```bash
    virsh start winserver-desktop
    ```
 
+6. Backup to remote server (optional):
+
+   ```bash
+   rsync -avP /var/lib/libvirt/images/winserver-autologin-base.qcow2 root@backup-server:/var/lib/libvirt/images/
+   ```
+
 ### Verifying the Base Image
 
-New sandboxes created from the base image should:
+New sandboxes created from `winserver-autologin-base.qcow2` should:
 
 - Have the daemon running on port 2280
 - Have SSH server running on port 22220

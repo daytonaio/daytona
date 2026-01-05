@@ -55,7 +55,7 @@
       },
       "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
     },
-    "serve": {
+    "serve2": {
       "executor": "@nx-go/nx-go:serve",
       "options": {
         "cmd": "sudo -E HOME=/home/daytona PATH=/usr/local/go/bin:$PATH $(which gow)",

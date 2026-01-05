@@ -285,14 +285,19 @@ const (
 func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, error) {
 	newDiskPath := filepath.Join(imagesBasePath, fmt.Sprintf("%s.qcow2", sandboxDto.Id))
 
-	// Get the remote host from libvirt URI
-	host := l.extractHostFromURI()
-	if host == "" {
-		return "", fmt.Errorf("could not extract host from libvirt URI: %s", l.libvirtURI)
-	}
+	isLocal := l.isLocalURI()
 
 	// Check if disk already exists (idempotency - avoid duplicate create attempts)
-	checkCmd := exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("test -f %s && echo exists", newDiskPath))
+	var checkCmd *exec.Cmd
+	if isLocal {
+		checkCmd = exec.CommandContext(ctx, "bash", "-c", fmt.Sprintf("test -f %s && echo exists", newDiskPath))
+	} else {
+		host := l.extractHostFromURI()
+		if host == "" {
+			return "", fmt.Errorf("could not extract host from libvirt URI: %s", l.libvirtURI)
+		}
+		checkCmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("test -f %s && echo exists", newDiskPath))
+	}
 	if output, _ := checkCmd.Output(); strings.TrimSpace(string(output)) == "exists" {
 		log.Infof("Disk %s already exists, skipping creation", newDiskPath)
 		return newDiskPath, nil
@@ -305,13 +310,19 @@ func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDT
 	createDiskCmd := fmt.Sprintf("qemu-img create -f qcow2 -F qcow2 -b %s %s && chown libvirt-qemu:kvm %s",
 		baseImagePath, newDiskPath, newDiskPath)
 
-	log.Infof("Executing on remote server: %s", createDiskCmd)
-
-	cmd := exec.CommandContext(ctx, "ssh", host, createDiskCmd)
+	var cmd *exec.Cmd
+	if isLocal {
+		log.Infof("Executing locally: %s", createDiskCmd)
+		cmd = exec.CommandContext(ctx, "bash", "-c", createDiskCmd)
+	} else {
+		host := l.extractHostFromURI()
+		log.Infof("Executing on remote server %s: %s", host, createDiskCmd)
+		cmd = exec.CommandContext(ctx, "ssh", host, createDiskCmd)
+	}
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Errorf("Failed to create disk: %v, output: %s", err, string(output))
-		return "", fmt.Errorf("failed to create disk on remote server: %w (output: %s)", err, string(output))
+		return "", fmt.Errorf("failed to create disk: %w (output: %s)", err, string(output))
 	}
 
 	log.Infof("Successfully created disk %s", newDiskPath)
@@ -323,14 +334,20 @@ func (l *LibVirt) copyNVRAM(ctx context.Context, sandboxId string) (string, erro
 
 	log.Infof("Copying NVRAM from %s to %s", templateNVRAM, nvramPath)
 
-	host := l.extractHostFromURI()
-	if host == "" {
-		return "", fmt.Errorf("could not extract host from libvirt URI: %s", l.libvirtURI)
-	}
-
 	copyCmd := fmt.Sprintf("cp %s %s && chown libvirt-qemu:kvm %s", templateNVRAM, nvramPath, nvramPath)
 
-	cmd := exec.CommandContext(ctx, "ssh", host, copyCmd)
+	var cmd *exec.Cmd
+	if l.isLocalURI() {
+		log.Infof("Executing locally: %s", copyCmd)
+		cmd = exec.CommandContext(ctx, "bash", "-c", copyCmd)
+	} else {
+		host := l.extractHostFromURI()
+		if host == "" {
+			return "", fmt.Errorf("could not extract host from libvirt URI: %s", l.libvirtURI)
+		}
+		log.Infof("Executing on remote server %s: %s", host, copyCmd)
+		cmd = exec.CommandContext(ctx, "ssh", host, copyCmd)
+	}
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Errorf("Failed to copy NVRAM: %v, output: %s", err, string(output))
@@ -372,6 +389,15 @@ func (l *LibVirt) extractHostFromURI() string {
 	}
 
 	return uri[atIndex+1 : slashIndex]
+}
+
+// isLocalURI checks if the libvirt URI is a local connection (e.g., qemu:///system)
+// Local URIs don't have a host component, so commands should run directly without SSH
+func (l *LibVirt) isLocalURI() bool {
+	uri := l.libvirtURI
+	// Local URIs: qemu:///system, qemu:///session, qemu+unix:///system
+	// Remote URIs: qemu+ssh://user@host/system, qemu+tcp://host/system
+	return !strings.Contains(uri, "@") && !strings.Contains(uri, "+tcp://") && !strings.Contains(uri, "+tls://")
 }
 
 // getActualDomainIP gets the actual IP address from DHCP lease (not pre-calculated)

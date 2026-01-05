@@ -9,22 +9,29 @@ import (
 )
 
 // GetShell returns the path to the preferred shell on Windows.
-// It checks for PowerShell Core (pwsh.exe) first, then Windows PowerShell,
-// and finally falls back to cmd.exe.
+// By default uses cmd.exe for faster execution. Set DAYTONA_SHELL env var
+// to override (e.g., "powershell.exe" or "pwsh.exe").
 func GetShell() string {
-	// Check for PowerShell Core (cross-platform PowerShell)
-	if pwsh, err := exec.LookPath("pwsh.exe"); err == nil {
-		return pwsh
+	// Allow override via environment variable
+	if shell := os.Getenv("DAYTONA_SHELL"); shell != "" {
+		if path, err := exec.LookPath(shell); err == nil {
+			return path
+		}
 	}
 
-	// Check for Windows PowerShell
+	// Default to cmd.exe for faster execution (~100ms vs ~2s for PowerShell)
+	if cmd, err := exec.LookPath("cmd.exe"); err == nil {
+		return cmd
+	}
+
+	// Fallback to PowerShell if cmd.exe not available
 	if powershell, err := exec.LookPath("powershell.exe"); err == nil {
 		return powershell
 	}
 
-	// Fallback to cmd.exe
-	if cmd, err := exec.LookPath("cmd.exe"); err == nil {
-		return cmd
+	// Check for PowerShell Core
+	if pwsh, err := exec.LookPath("pwsh.exe"); err == nil {
+		return pwsh
 	}
 
 	// Last resort: check common paths
