@@ -52,25 +52,10 @@
     <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-topic-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-topic-badge.svg?post_id=957617&theme=neutral&period=monthly&topic_id=237&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 </p>
 
- --- 
-
-## Installation
-
-### Python SDK
-
-```bash
-pip install daytona
-```
-
-### TypeScript SDK
-
-```bash
-npm install @daytonaio/sdk
-```
 
 ---
 
-## Features
+<h1 align="center"> Features </h1>
 
 - **Lightning-Fast Infrastructure**: Sub-90ms Sandbox creation from code to execution.
 - **Separated & Isolated Runtime**: Execute AI-generated code with zero risk to your infrastructure.
@@ -78,16 +63,30 @@ npm install @daytonaio/sdk
 - **Programmatic Control**: File, Git, LSP, and Execute API
 - **Unlimited Persistence**: Your Sandboxes can live forever
 - **OCI/Docker Compatibility**: Use any OCI/Docker image to create a Sandbox
-
----
-
-## Quick Start
-
+ --- 
+ 
+ <h1 align="center"> Quick Start </h1>
+ 
 1. Create an account at https://app.daytona.io
 1. Generate a [new API key](https://app.daytona.io/dashboard/keys)
 1. Follow the [Getting Started docs](https://www.daytona.io/docs/getting-started/) to start using the Daytona SDK
+---
 
-## Creating your first Sandbox
+<h1 align="center"> Installation  </h1>
+
+### Python SDK or TypeScript SDK
+---
+<b> Python install </b>
+```bash
+pip install daytona
+```
+<b> TypeScript install </b>
+```bash
+npm install @daytonaio/sdk
+```
+---
+
+<h1 align="center">  Creating your first Sandbox  </h1> 
 
 ### Python SDK
 
