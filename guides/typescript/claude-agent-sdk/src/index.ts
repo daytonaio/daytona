@@ -46,14 +46,6 @@ async function main() {
   const daytona = new Daytona({ apiKey })
 
   let sandbox: Sandbox | undefined
-  const cleanup = async () => {
-    console.log('\nCleaning up...')
-    try {
-      if (sandbox) await sandbox.delete()
-    } catch (e) {
-      console.error('Error deleting sandbox:', e)
-    }
-  }
 
   try {
     // Create a new Daytona sandbox
@@ -65,6 +57,18 @@ async function main() {
       envVars: {
         ANTHROPIC_API_KEY: process.env.SANDBOX_ANTHROPIC_API_KEY,
       },
+    })
+
+    // Register a handler to delete the sandbox on process exit
+    process.once('SIGINT', async () => {
+      try {
+        console.log('\nCleaning up...')
+        if (sandbox) await sandbox.delete()
+      } catch (e) {
+        console.error('Error deleting sandbox:', e)
+      } finally {
+        process.exit(0)
+      }
     })
 
     // Install the Claude Agent SDK
@@ -87,10 +91,6 @@ async function main() {
 
     // Set up readline interface for user input
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-    rl.on('SIGINT', async () => {
-      await cleanup()
-      process.exit(0)
-    })
 
     // Start the interactive prompt loop
     console.log('Press Ctrl+C at any time to exit.')
@@ -101,7 +101,7 @@ async function main() {
     }
   } catch (error) {
     console.error(error)
-    await cleanup()
+    if (sandbox) await sandbox.delete()
     process.exit(1)
   }
 }
