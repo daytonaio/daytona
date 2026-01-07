@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Daytona, Image, Sandbox } from '@daytonaio/sdk'
-import { InterpreterContext } from '@daytonaio/toolbox-api-client'
+import { Daytona, Sandbox, OutputMessage, ExecutionResult } from '@daytonaio/sdk'
+import { InterpreterContext, ExecuteResponse } from '@daytonaio/toolbox-api-client'
 import * as dotenv from 'dotenv'
 import * as readline from 'readline'
 
@@ -18,8 +18,8 @@ async function processPrompt(prompt: string, sandbox: Sandbox, ctx: InterpreterC
   const result = await sandbox.codeInterpreter.runCode(`coding_agent.run_query_sync(os.environ.get('PROMPT', ''))`, {
     context: ctx,
     envs: { PROMPT: prompt },
-    onStdout: (msg: any) => process.stdout.write(renderMarkdown(msg.output)),
-    onStderr: (msg: any) => process.stdout.write(renderMarkdown(msg.output)),
+    onStdout: (msg: OutputMessage) => process.stdout.write(renderMarkdown(msg.output)),
+    onStderr: (msg: OutputMessage) => process.stdout.write(renderMarkdown(msg.output)),
   })
 
   if (result.error) console.error('Execution error:', result.error.value)
@@ -69,7 +69,7 @@ async function main() {
 
     // Install the Claude Agent SDK
     console.log('Installing Agent SDK...')
-    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk').then((r: any) => {
+    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk').then((r: ExecuteResponse) => {
       if (r.exitCode) throw new Error('Error installing Agent SDK: ' + r.result)
     })
 
@@ -81,7 +81,7 @@ async function main() {
     await sandbox.codeInterpreter.runCode(`import os, coding_agent;`, {
       context: ctx,
       envs: { PREVIEW_URL: previewLink.url },
-    }).then((r: any) => {
+    }).then((r: ExecutionResult) => {
       if (r.error) throw new Error('Error initializing Agent SDK: ' + r.error.value)
     })
 
