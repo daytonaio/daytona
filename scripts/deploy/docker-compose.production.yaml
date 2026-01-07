@@ -1,0 +1,267 @@
+name: daytona
+services:
+  api:
+    build:
+      context: ../../
+      dockerfile: apps/api/Dockerfile
+      target: daytona
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-user}
+      - DB_PASSWORD=${DB_PASSWORD:-pass}
+      - DB_DATABASE=${DB_DATABASE:-daytona}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - OIDC_CLIENT_ID=daytona
+      - OIDC_ISSUER_BASE_URL=http://dex:5556/dex
+      - PUBLIC_OIDC_DOMAIN=${PUBLIC_OIDC_DOMAIN:-https://win.trydaytona.com/dex}
+      - OIDC_AUDIENCE=daytona
+      - DEFAULT_SNAPSHOT=daytonaio/sandbox:0.5.0-slim
+      - DASHBOARD_URL=${DASHBOARD_URL:-https://win.trydaytona.com/dashboard}
+      - DASHBOARD_BASE_API_URL=${DASHBOARD_BASE_API_URL:-https://win.trydaytona.com}
+      - TRANSIENT_REGISTRY_URL=http://registry:6000
+      - TRANSIENT_REGISTRY_ADMIN=admin
+      - TRANSIENT_REGISTRY_PASSWORD=${REGISTRY_PASSWORD:-password}
+      - TRANSIENT_REGISTRY_PROJECT_ID=daytona
+      - INTERNAL_REGISTRY_URL=http://registry:6000
+      - INTERNAL_REGISTRY_ADMIN=admin
+      - INTERNAL_REGISTRY_PASSWORD=${REGISTRY_PASSWORD:-password}
+      - INTERNAL_REGISTRY_PROJECT_ID=daytona
+      - SMTP_HOST=maildev
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_SECURE=
+      - SMTP_EMAIL_FROM="Daytona Team <no-reply@daytona.io>"
+      - S3_ENDPOINT=http://minio:9000
+      - S3_STS_ENDPOINT=http://minio:9000/minio/v1/assume-role
+      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
+      - S3_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - S3_DEFAULT_BUCKET=daytona
+      - S3_ACCOUNT_ID=/
+      - S3_ROLE_NAME=/
+      - ENVIRONMENT=production
+      - PROXY_DOMAIN=${PROXY_DOMAIN:-preview.win.trydaytona.com}
+      - PROXY_PROTOCOL=https
+      - PROXY_API_KEY=${PROXY_API_KEY:-super_secret_key}
+      - PROXY_TEMPLATE_URL=https://{{PORT}}-{{sandboxId}}.${PROXY_DOMAIN:-preview.win.trydaytona.com}
+      - DEFAULT_RUNNER_DOMAIN=runner:3003
+      - DEFAULT_RUNNER_API_URL=http://runner:3003
+      - DEFAULT_RUNNER_PROXY_URL=http://runner:3003
+      - DEFAULT_RUNNER_API_KEY=${RUNNER_API_KEY:-secret_api_token}
+      - DEFAULT_RUNNER_CPU=4
+      - DEFAULT_RUNNER_MEMORY=8
+      - DEFAULT_RUNNER_DISK=50
+      - DEFAULT_RUNNER_NAME=default
+      - DEFAULT_REGION_ID=us
+      - DEFAULT_REGION_NAME=us
+      - DEFAULT_REGION_ENFORCE_QUOTAS=false
+      - SSH_GATEWAY_API_KEY=${SSH_GATEWAY_API_KEY:-ssh_secret_api_token}
+      - SSH_GATEWAY_COMMAND="ssh -p 2222 {{TOKEN}}@${HOST_DOMAIN:-win.trydaytona.com}"
+      - SSH_GATEWAY_PUBLIC_KEY=${SSH_GATEWAY_PUBLIC_KEY}
+      - SSH_GATEWAY_URL="${HOST_DOMAIN:-win.trydaytona.com}:2222"
+      - SKIP_USER_EMAIL_VERIFICATION=true
+      - RUN_MIGRATIONS=true
+      - OTEL_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    networks:
+      - daytona-network
+    restart: always
+    privileged: true
+    depends_on:
+      - db
+      - redis
+      - dex
+      - registry
+      - minio
+
+  proxy:
+    build:
+      context: ../../
+      dockerfile: apps/proxy/Dockerfile
+      target: proxy
+    environment:
+      - DAYTONA_API_URL=http://api:3000/api
+      - PROXY_PORT=4000
+      - PROXY_DOMAIN=${PROXY_DOMAIN:-preview.win.trydaytona.com}
+      - PROXY_API_KEY=${PROXY_API_KEY:-super_secret_key}
+      - PROXY_PROTOCOL=https
+      - OIDC_CLIENT_ID=daytona
+      - OIDC_CLIENT_SECRET=
+      - OIDC_DOMAIN=http://dex:5556/dex
+      - OIDC_PUBLIC_DOMAIN=${PUBLIC_OIDC_DOMAIN:-https://win.trydaytona.com/dex}
+      - OIDC_AUDIENCE=daytona
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - TOOLBOX_ONLY_MODE=false
+      - PREVIEW_WARNING_ENABLED=false
+    networks:
+      - daytona-network
+    restart: always
+    depends_on:
+      - api
+      - redis
+
+  ssh-gateway:
+    build:
+      context: ../../
+      dockerfile: apps/ssh-gateway/Dockerfile
+      target: ssh-gateway
+    environment:
+      - API_URL=http://api:3000/api
+      - API_KEY=${SSH_GATEWAY_API_KEY:-ssh_secret_api_token}
+      - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
+      - SSH_HOST_KEY=${SSH_HOST_KEY}
+      - SSH_GATEWAY_PORT=2222
+    ports:
+      - "2222:2222"
+    networks:
+      - daytona-network
+    restart: always
+    depends_on:
+      - api
+
+  runner:
+    build:
+      context: ../../
+      dockerfile: apps/runner/Dockerfile
+      target: runner
+    environment:
+      - API_URL=http://api:3000
+      - API_KEY=${RUNNER_API_KEY:-secret_api_token}
+    networks:
+      - daytona-network
+    privileged: true
+    restart: always
+    depends_on:
+      - api
+
+  dex:
+    image: dexidp/dex:v2.42.0
+    volumes:
+      - ./dex/config.yaml:/etc/dex/config.yaml
+      - dex_db:/var/dex
+    entrypoint: ['sh', '-c', 'touch /var/dex/dex.db && exec dex serve /etc/dex/config.yaml']
+    networks:
+      - daytona-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:5556/dex/.well-known/openid-configuration"]
+
+  db:
+    image: postgres:18
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-pass}
+      - POSTGRES_USER=${DB_USERNAME:-user}
+      - POSTGRES_DB=${DB_DATABASE:-daytona}
+    networks:
+      - daytona-network
+    volumes:
+      - db_data:/var/lib/postgresql/18/docker
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4:9.2.0
+    entrypoint: ['sh', '-c', 'chmod 600 /pgpass && exec /entrypoint.sh']
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-dev@daytona.io}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    user: root
+    volumes:
+      - ./pgadmin4/servers.json:/pgadmin4/servers.json
+      - ./pgadmin4/pgpass:/pgpass
+    depends_on:
+      - db
+    networks:
+      - daytona-network
+    restart: always
+
+  redis:
+    image: redis:latest
+    networks:
+      - daytona-network
+    restart: always
+
+  registry-ui:
+    image: joxit/docker-registry-ui:main
+    restart: always
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=Docker Registry UI
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://registry:6000
+      - SHOW_CATALOG_NB_TAGS=true
+      - CATALOG_MIN_BRANCHES=1
+      - CATALOG_MAX_BRANCHES=1
+      - TAGLIST_PAGE_SIZE=100
+      - REGISTRY_SECURED=false
+      - CATALOG_ELEMENTS_LIMIT=1000
+    networks:
+      - daytona-network
+
+  registry:
+    image: registry:2.8.2
+    restart: always
+    environment:
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '[http://registry-ui.example.com]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[HEAD,GET,OPTIONS,DELETE]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Credentials: '[true]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Expose-Headers: '[Docker-Content-Digest]'
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_HTTP_ADDR: registry:6000
+    volumes:
+      - registry:/var/lib/registry
+    networks:
+      - daytona-network
+
+  maildev:
+    image: maildev/maildev
+    networks:
+      - daytona-network
+    restart: always
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - MINIO_IDENTITY_STS_EXPIRY="24h"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - daytona-network
+    restart: always
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.67.0
+    networks:
+      - daytona-network
+    restart: always
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.138.0
+    volumes:
+      - ./otel/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    networks:
+      - daytona-network
+    restart: always
+
+volumes:
+  registry: {}
+  minio_data: {}
+  db_data: {}
+  dex_db: {}
+
+networks:
+  daytona-network:
+    driver: bridge
+
+

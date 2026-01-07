@@ -15,7 +15,10 @@ ENV VERSION=${VERSION}
 
 RUN yarn
 
-RUN SKIP_COMPUTER_USE_BUILD=true yarn nx build runner --configuration=production --nxBail=true
+# Create placeholder for computer-use plugin (optional feature)
+RUN mkdir -p dist/libs && touch dist/libs/computer-use-amd64
+
+RUN yarn nx build runner --configuration=production --nxBail=true
 
 FROM docker:28.2.2-dind-alpine3.22 AS runner
 

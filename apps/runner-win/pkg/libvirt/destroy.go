@@ -58,13 +58,30 @@ func (l *LibVirt) Destroy(ctx context.Context, domainId string) error {
 		}
 	}
 
-	// Undefine the domain with NVRAM removal flag
-	log.Infof("Undefining domain %s with NVRAM", domainId)
-	if err := domain.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM); err != nil {
-		// Try without NVRAM flag if it fails
-		log.Warnf("Failed to undefine with NVRAM flag, trying without: %v", err)
-		if err := domain.Undefine(); err != nil {
-			return fmt.Errorf("failed to undefine domain: %w", err)
+	// Check and remove managed save image if it exists
+	hasManagedSave, err := domain.HasManagedSaveImage(0)
+	if err != nil {
+		log.Warnf("Failed to check managed save for %s: %v", domainId, err)
+	} else if hasManagedSave {
+		log.Infof("Removing managed save image for domain %s", domainId)
+		if err := domain.ManagedSaveRemove(0); err != nil {
+			log.Warnf("Failed to remove managed save: %v", err)
+			// Continue anyway - undefine with flag might still work
+		}
+	}
+
+	// Undefine the domain with NVRAM and managed save removal flags
+	log.Infof("Undefining domain %s with NVRAM and managed save flags", domainId)
+	undefineFlags := libvirt.DOMAIN_UNDEFINE_NVRAM | libvirt.DOMAIN_UNDEFINE_MANAGED_SAVE
+	if err := domain.UndefineFlags(undefineFlags); err != nil {
+		// Try with just NVRAM flag
+		log.Warnf("Failed to undefine with all flags, trying NVRAM only: %v", err)
+		if err := domain.UndefineFlags(libvirt.DOMAIN_UNDEFINE_NVRAM); err != nil {
+			// Try without any flags
+			log.Warnf("Failed to undefine with NVRAM flag, trying without: %v", err)
+			if err := domain.Undefine(); err != nil {
+				return fmt.Errorf("failed to undefine domain: %w", err)
+			}
 		}
 	}
 

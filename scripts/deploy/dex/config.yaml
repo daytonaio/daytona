@@ -1,0 +1,42 @@
+# Dex OIDC Provider Configuration for Production
+# This config is used by the Dex container in docker-compose
+
+# The issuer URL - this is what clients will use to discover OIDC endpoints
+# Note: Dex runs internally on port 5556, but is exposed via nginx at /dex/
+issuer: https://win.trydaytona.com/dex
+
+storage:
+  type: sqlite3
+  config:
+    file: /var/dex/dex.db
+
+web:
+  http: 0.0.0.0:5556
+  allowedOrigins: ['*']
+  allowedHeaders: ['x-requested-with']
+
+staticClients:
+  - id: daytona
+    redirectURIs:
+      # Main dashboard
+      - 'https://win.trydaytona.com'
+      - 'https://win.trydaytona.com/'
+      - 'https://win.trydaytona.com/dashboard'
+      - 'https://win.trydaytona.com/dashboard/'
+      # API OAuth2 redirect for Swagger
+      - 'https://win.trydaytona.com/api/oauth2-redirect.html'
+      # Proxy callback
+      - 'https://preview.win.trydaytona.com/callback'
+      - 'https://*.preview.win.trydaytona.com/callback'
+    name: 'Daytona'
+    public: true
+
+enablePasswordDB: true
+
+staticPasswords:
+  - email: 'dev@daytona.io'
+    # Default password: "password"
+    # Generated with: echo password | htpasswd -BinC 10 admin | cut -d: -f2
+    hash: '$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W'
+    username: 'admin'
+    userID: '1234'
