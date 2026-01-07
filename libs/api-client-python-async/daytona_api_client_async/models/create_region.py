@@ -30,8 +30,9 @@ class CreateRegion(BaseModel):
     name: StrictStr = Field(description="Region name")
     proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", alias="proxyUrl")
     ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", alias="sshGatewayUrl")
+    snapshot_manager_url: Optional[StrictStr] = Field(default=None, description="Snapshot Manager URL for the region", alias="snapshotManagerUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "proxyUrl", "sshGatewayUrl"]
+    __properties: ClassVar[List[str]] = ["name", "proxyUrl", "sshGatewayUrl", "snapshotManagerUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,6 +90,11 @@ class CreateRegion(BaseModel):
         if self.ssh_gateway_url is None and "ssh_gateway_url" in self.model_fields_set:
             _dict['sshGatewayUrl'] = None
 
+        # set to None if snapshot_manager_url (nullable) is None
+        # and model_fields_set contains the field
+        if self.snapshot_manager_url is None and "snapshot_manager_url" in self.model_fields_set:
+            _dict['snapshotManagerUrl'] = None
+
         return _dict
 
     @classmethod
@@ -103,7 +109,8 @@ class CreateRegion(BaseModel):
         _obj = cls.model_validate({
             "name": obj.get("name"),
             "proxyUrl": obj.get("proxyUrl"),
-            "sshGatewayUrl": obj.get("sshGatewayUrl")
+            "sshGatewayUrl": obj.get("sshGatewayUrl"),
+            "snapshotManagerUrl": obj.get("snapshotManagerUrl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
