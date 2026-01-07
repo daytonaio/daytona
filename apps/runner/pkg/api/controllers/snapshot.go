@@ -26,6 +26,7 @@ import (
 //
 //	@Tags			snapshots
 //	@Summary		Tag an image
+//	@Deprecated		New snapshot tags are sent in PullSnapshot
 //	@Description	Tag an existing local image with a new target reference
 //	@Param			request	body		dto.TagImageRequestDTO	true	"Tag image request"
 //	@Success		200		{string}	string					"Image successfully tagged"

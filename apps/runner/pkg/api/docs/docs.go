@@ -1224,6 +1224,7 @@ const docTemplate = `{
                 ],
                 "summary": "Tag an image",
                 "operationId": "TagImage",
+                "deprecated": true,
                 "parameters": [
                     {
                         "description": "Tag image request",
@@ -1453,6 +1454,9 @@ const docTemplate = `{
                 },
                 "destinationRegistry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "newTag": {
+                    "type": "string"
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"

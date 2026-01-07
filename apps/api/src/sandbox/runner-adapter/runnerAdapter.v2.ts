@@ -285,9 +285,11 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     registry?: DockerRegistry,
     destinationRegistry?: DockerRegistry,
     destinationRef?: string,
+    newTag?: string,
   ): Promise<void> {
     const payload: PullSnapshotRequestDTO = {
       snapshot: snapshotName,
+      newTag,
     }
 
     if (registry) {
@@ -328,10 +330,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     await this.jobService.createJob(null, JobType.REMOVE_SNAPSHOT, this.runner.id, ResourceType.SNAPSHOT, snapshotName)
 
     this.logger.debug(`Created REMOVE_SNAPSHOT job for ${snapshotName} on runner ${this.runner.id}`)
-  }
-
-  async tagImage(_sourceImage: string, _targetImage: string): Promise<void> {
-    throw new Error('tagImage is not supported for V2 runners')
   }
 
   async snapshotExists(snapshotRef: string): Promise<boolean> {
@@ -406,10 +404,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
           `Snapshot ${snapshotRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,
         )
     }
-  }
-
-  async getSandboxDaemonVersion(_sandboxId: string): Promise<string> {
-    throw new Error('getSandboxDaemonVersion is not supported for V2 runners')
   }
 
   async updateNetworkSettings(

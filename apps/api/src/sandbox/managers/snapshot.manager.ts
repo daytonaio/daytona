@@ -687,8 +687,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         return DONT_SYNC_AGAIN
       }
 
-      await runnerAdapter.tagImage(snapshot.imageName, this.getInitialRunnerSnapshotTag(snapshot))
-
       // Best-effort cleanup of the original tag
       // Only if there is no other snapshot in a processing state that uses the same image
       try {

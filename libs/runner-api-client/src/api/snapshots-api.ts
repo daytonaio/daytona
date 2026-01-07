@@ -295,6 +295,7 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
      * @summary Tag an image
      * @param {TagImageRequestDTO} request Tag image request
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     tagImage: async (request: TagImageRequestDTO, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
@@ -482,6 +483,7 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
      * @summary Tag an image
      * @param {TagImageRequestDTO} request Tag image request
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     async tagImage(
@@ -576,6 +578,7 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
      * @summary Tag an image
      * @param {TagImageRequestDTO} request Tag image request
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     tagImage(request: TagImageRequestDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
@@ -681,6 +684,7 @@ export class SnapshotsApi extends BaseAPI {
    * @summary Tag an image
    * @param {TagImageRequestDTO} request Tag image request
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof SnapshotsApi
    */
