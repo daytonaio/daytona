@@ -627,12 +627,34 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     const snapshotInfoResponse = await runnerAdapter.getSnapshotInfo(initialImageRefOnRunner)
+    const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
     // Process snapshot info in case it had failed or it's a build snapshot
     if (!snapshot.ref) {
-      const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
       const sanitizedUrl = defaultInternalRegistry.url.replace(/^https?:\/\//, '')
-      snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${snapshotInfoResponse.hash}:daytona`
+
+      // For builds, use the buildInfo.snapshotRef since that's what was pushed to the registry
+      // For pulls, we need to get the hash from the ORIGINAL image name (snapshot.imageName),
+      // not from the local tag, because that's what the runner used when pushing to the registry.
+      // The local tag doesn't have RepoDigests so it returns the Image ID instead of the manifest digest.
+      if (snapshot.buildInfo) {
+        snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/${snapshot.buildInfo.snapshotRef}`
+      } else {
+        const originalImageExists = await runnerAdapter.snapshotExists(snapshot.imageName)
+        if (!originalImageExists) {
+          this.logger.error(
+            `Initial image ${snapshot.imageName} not found on runner while computing ref for snapshot ${snapshot.id}`,
+          )
+          await this.updateSnapshotState(
+            snapshot.id,
+            SnapshotState.ERROR,
+            `Initial image ${snapshot.imageName} not found on runner`,
+          )
+          return DONT_SYNC_AGAIN
+        }
+        const originalImageInfo = await runnerAdapter.getSnapshotInfo(snapshot.imageName)
+        snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${originalImageInfo.hash}:daytona`
+      }
 
       const organization = await this.organizationService.findOne(snapshot.organizationId)
       if (!organization) {
@@ -668,10 +690,46 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
     }
 
+    // Verify the image actually exists in the registry before marking as ready
+    // This prevents race conditions where the snapshot is marked active but the image isn't available yet
+    const imageExistsInRegistry = await this.dockerRegistryService.checkImageExistsInRegistry(
+      snapshot.ref,
+      defaultInternalRegistry,
+    )
+
+    if (!imageExistsInRegistry) {
+      this.logger.warn(`Snapshot ${snapshot.id} image ${snapshot.ref} not found in registry, waiting for propagation`)
+      // Don't mark as ready yet, wait for the image to be available in the registry
+      // Save the snapshot ref for retries, this method will time out if the image is not found time
+      await this.snapshotRepository.save(snapshot)
+      return DONT_SYNC_AGAIN
+    }
+
     try {
       await runnerAdapter.removeSnapshot(initialImageRefOnRunner)
     } catch (error) {
       this.logger.error(`Failed to remove snapshot ${snapshot.imageName}: ${fromAxiosError(error)}`)
+    }
+
+    // For pull snapshots, best effort cleanup the original image now that we've computed the ref from it
+    // Only cleanup if there's no other snapshot in processing state using the same image
+    if (!snapshot.buildInfo) {
+      try {
+        const anotherSnapshot = await this.snapshotRepository.findOne({
+          where: {
+            imageName: snapshot.imageName,
+            id: Not(snapshot.id),
+            state: Not(
+              In([SnapshotState.ACTIVE, SnapshotState.INACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]),
+            ),
+          },
+        })
+        if (!anotherSnapshot) {
+          await runnerAdapter.removeSnapshot(snapshot.imageName)
+        }
+      } catch (err) {
+        this.logger.error(`Failed to cleanup original image ${snapshot.imageName}: ${fromAxiosError(err)}`)
+      }
     }
 
     await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
@@ -739,22 +797,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       await runnerAdapter.tagImage(snapshot.imageName, this.getInitialRunnerSnapshotTag(snapshot))
-
-      // Best-effort cleanup of the original tag
-      // Only if there is no other snapshot in a processing state that uses the same image
-      try {
-        const anotherSnapshot = await this.snapshotRepository.findOne({
-          where: {
-            name: snapshot.imageName,
-            state: Not(In([SnapshotState.ACTIVE, SnapshotState.INACTIVE])),
-          },
-        })
-        if (!anotherSnapshot) {
-          await runnerAdapter.removeSnapshot(snapshot.imageName)
-        }
-      } catch (err) {
-        this.logger.error(`Failed to cleanup original tag ${snapshot.imageName}: ${fromAxiosError(err)}`)
-      }
     } catch (err) {
       if (err.code !== 'ECONNRESET') {
         await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, err.message)
