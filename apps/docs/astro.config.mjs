@@ -63,8 +63,8 @@ export default defineConfig({
       ...generateI18nConfig(config),
     }),
   ],
-  experimental: { contentLayer: true },
-  output: 'hybrid',
+  // experimental: { contentLayer: true },
+  output: 'server',
   adapter: node({
     mode: 'middleware',
   }),
