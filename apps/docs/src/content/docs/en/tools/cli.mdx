@@ -7,7 +7,7 @@ sidebar:
 import Aside from "@components/Aside.astro";
 import Label from "@components/Label.astro";
 
-The `daytona` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/en/getting-started#cli).
+The `daytona` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/getting-started#cli).
 
 This reference lists all commands supported by the `daytona` command-line tool complete with a description of their behaviour, and any supported flags.
 You can access this documentation on a per-command basis by appending the `--help`/`-h` flag when invoking `daytona`.
@@ -226,7 +226,6 @@ daytona sandbox create [flags]
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--name` |  | Name of the sandbox |
 | `--auto-archive` |  | Auto-archive interval in minutes (0 means the maximum interval will be used) |
 | `--auto-delete` |  | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
 | `--auto-stop` |  | Auto-stop interval in minutes (0 means disabled) |
@@ -239,7 +238,6 @@ __Flags__
 | `--gpu` |  | GPU units allocated to the sandbox |
 | `--label` | `-l` | Labels (format: KEY=VALUE) |
 | `--memory` |  | Memory allocated to the sandbox in MB |
-| `--name` |  | Name of the sandbox |
 | `--network-allow-list` |  | Comma-separated list of allowed CIDR network addresses for the sandbox |
 | `--network-block-all` |  | Whether to block all network access for the sandbox |
 | `--public` |  | Make sandbox publicly accessible |
@@ -254,7 +252,7 @@ __Flags__
 Delete a sandbox
 
 ```shell
-daytona sandbox delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona sandbox delete [SANDBOX_ID] [flags]
 ```
 
 __Flags__
@@ -268,7 +266,7 @@ __Flags__
 Get sandbox info
 
 ```shell
-daytona sandbox info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona sandbox info [SANDBOX_ID] [flags]
 ```
 
 __Flags__
@@ -298,7 +296,7 @@ __Flags__
 Start a sandbox
 
 ```shell
-daytona sandbox start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona sandbox start [SANDBOX_ID] [flags]
 ```
 
 __Flags__
@@ -311,7 +309,7 @@ __Flags__
 Stop a sandbox
 
 ```shell
-daytona sandbox stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona sandbox stop [SANDBOX_ID] [flags]
 ```
 
 __Flags__
