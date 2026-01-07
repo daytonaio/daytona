@@ -7,9 +7,13 @@ import { getSidebarConfig } from '../content/config.js'
 const { dir } = Astro.props
 const isRtl = dir === 'rtl'
 const { prev, next } = getPagination(
-  getSidebarConfig(Astro.props.lang, (key: string) =>
-    Astro.locals.t(key as any)
-  ),
+  getSidebarConfig(Astro.props.lang, (key: string) => {
+    try {
+      return Astro.locals?.t?.(key as any) || key
+    } catch {
+      return key
+    }
+  }),
   Astro.url.pathname
 )
 const { locale } = Astro.props

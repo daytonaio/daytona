@@ -11,9 +11,13 @@ const PUBLIC_WEB_URL = (
 
 <SidebarSublist
   sublist={getSidebar(
-    getSidebarConfig(Astro.props.lang, (key: string) =>
-      Astro.locals.t(key as any)
-    ),
+    getSidebarConfig(Astro.props.lang, (key: string) => {
+      try {
+        return Astro.locals?.t?.(key as any) || key
+      } catch {
+        return key
+      }
+    }),
     Astro.url.pathname
   )}
 />

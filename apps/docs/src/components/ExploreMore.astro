@@ -4,9 +4,13 @@ import { getSidebarConfig } from '../content/config'
 
 const { expanded } = Astro.props
 const exploreMoreData = getExploreMoreData(
-  getSidebarConfig(Astro.props.lang, (key: string) =>
-    Astro.locals.t(key as any)
-  ),
+  getSidebarConfig(Astro.props.lang, (key: string) => {
+    try {
+      return Astro.locals?.t?.(key as any) || key
+    } catch {
+      return key
+    }
+  }),
   Astro.url.pathname
 )
 const gridColumn = expanded ? 'span 2' : 'inherit'
