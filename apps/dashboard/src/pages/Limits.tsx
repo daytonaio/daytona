@@ -195,16 +195,16 @@ export default function Limits() {
                   className="border-t border-border"
                   rateLimits={[
                     {
-                      value: config?.rateLimit?.authenticated?.limit || selectedOrganization?.authenticatedRateLimit,
+                      value: selectedOrganization?.authenticatedRateLimit || config?.rateLimit?.authenticated?.limit,
                       label: 'General Requests',
                     },
                     {
-                      value: config?.rateLimit?.sandboxCreate?.limit || selectedOrganization?.sandboxCreateRateLimit,
+                      value: selectedOrganization?.sandboxCreateRateLimit || config?.rateLimit?.sandboxCreate?.limit,
                       label: 'Sandbox Creation',
                     },
                     {
                       value:
-                        config?.rateLimit?.sandboxLifecycle?.limit || selectedOrganization?.sandboxLifecycleRateLimit,
+                        selectedOrganization?.sandboxLifecycleRateLimit || config?.rateLimit?.sandboxLifecycle?.limit,
                       label: 'Sandbox Lifecycle',
                     },
                   ]}
