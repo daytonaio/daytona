@@ -89,7 +89,7 @@ async function main() {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
     rl.on('SIGINT', async () => {
       await cleanup()
-      process.exit()
+      process.exit(0)
     })
 
     // Start the interactive prompt loop
