@@ -60,8 +60,8 @@ async function main() {
     // The sandbox language is irrelevant since we will use the code interpreter SDK
     console.log('Creating sandbox...')
     sandbox = await daytona.create({
-      image: Image.base("nikolaik/python-nodejs:latest"),
-      resources: { memory: 2 }, // Claude Code is memory-intensive
+      // Claude Code is memory intensive, so we use a medium snapshot
+      snapshot: "daytona-medium", // This snapshot has 4GiB RAM and 2 vCPUs
       envVars: {
         ANTHROPIC_API_KEY: process.env.SANDBOX_ANTHROPIC_API_KEY,
       },
