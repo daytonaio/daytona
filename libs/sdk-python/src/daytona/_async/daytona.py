@@ -7,7 +7,7 @@ import time
 import warnings
 from copy import deepcopy
 from importlib.metadata import version
-from typing import Callable, Dict, List, Optional, Union, overload
+from typing import Callable, Dict, Optional, Union, overload
 
 from daytona_api_client_async import (
     ApiClient,
@@ -80,7 +80,6 @@ class AsyncDaytona:
     _organization_id: Optional[str] = None
     _api_url: str
     _target: Optional[str] = None
-    _api_clients: List[ApiClient | ToolboxApiClient] = []
 
     def __init__(self, config: Optional[DaytonaConfig] = None):
         """Initializes Daytona instance with optional configuration.
@@ -163,7 +162,6 @@ class AsyncDaytona:
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
         self._api_client = ApiClient(configuration)
-        self._api_clients.append(self._api_client)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
         self._api_client.default_headers["X-Daytona-Source"] = "python-sdk"
 
@@ -196,6 +194,7 @@ class AsyncDaytona:
         self._config_api = ConfigApi(self._api_client)
         self._proxy_toolbox_url_task: Optional[asyncio.Task] = None
         self._proxy_toolbox_url_task_lock = asyncio.Lock()
+        self._toolbox_api_client = self._clone_api_client_to_toolbox_api_client()
 
         # Initialize services
         self.volume = AsyncVolumeService(VolumesApi(self._api_client))
@@ -234,9 +233,13 @@ class AsyncDaytona:
             # Automatically closed
             ```
         """
-        if hasattr(self, "_api_clients") and self._api_clients:
-            for api_client in self._api_clients:
-                await api_client.close()
+        # Close the main API client
+        if hasattr(self, "_api_client") and self._api_client:
+            await self._api_client.close()
+
+        # Close the toolbox API client
+        if hasattr(self, "_toolbox_api_client") and self._toolbox_api_client:
+            await self._toolbox_api_client.close()
 
     # unasync: delete end
 
@@ -458,7 +461,7 @@ class AsyncDaytona:
 
         sandbox = AsyncSandbox(
             response,
-            self._clone_api_client_to_toolbox_api_client(),
+            self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
             self._get_proxy_toolbox_url,
@@ -553,7 +556,7 @@ class AsyncDaytona:
         code_toolbox = SandboxPythonCodeToolbox()
         return AsyncSandbox(
             sandbox_instance,
-            self._clone_api_client_to_toolbox_api_client(),
+            self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
             self._get_proxy_toolbox_url,
@@ -621,7 +624,7 @@ class AsyncDaytona:
             items=[
                 AsyncSandbox(
                     sandbox,
-                    self._clone_api_client_to_toolbox_api_client(),
+                    self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
                     self._get_proxy_toolbox_url,
@@ -679,12 +682,18 @@ class AsyncDaytona:
         """
         await sandbox.stop(timeout)
 
-    def _clone_api_client_to_toolbox_api_client(self):
+    def _clone_api_client_to_toolbox_api_client(self) -> ToolboxApiClient:
+        """Creates the toolbox API client from the main API client with empty host.
+
+        Returns:
+            ToolboxApiClient: The toolbox API client.
+        """
         config = deepcopy(self._api_client.configuration)
-        new_client = ToolboxApiClient(config)
-        new_client.default_headers = deepcopy(self._api_client.default_headers)
-        self._api_clients.append(new_client)
-        return new_client
+        config.host = ""
+        toolbox_api_client = ToolboxApiClient(config)
+        toolbox_api_client.default_headers = deepcopy(self._api_client.default_headers)
+
+        return toolbox_api_client
 
     async def _get_proxy_toolbox_url(self):
         if self._proxy_toolbox_url_task is not None:

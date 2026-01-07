@@ -3,7 +3,6 @@
 
 import asyncio
 import time
-from types import MethodType
 from typing import Awaitable, Callable, Dict, List, Optional
 
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
@@ -27,6 +26,7 @@ from .._utils.errors import intercept_errors
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError, DaytonaNotFoundError
 from ..common.protocols import SandboxCodeToolbox
+from ..internal.toolbox_api_client_proxy import AsyncToolboxApiClientProxyLazyBaseUrl
 from .code_interpreter import AsyncCodeInterpreter
 from .computer_use import AsyncComputerUse
 from .filesystem import AsyncFileSystem
@@ -104,32 +104,19 @@ class AsyncSandbox(SandboxDto):
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api = sandbox_api
         self._code_toolbox = code_toolbox
-        self._toolbox_api = toolbox_api
-        self._toolbox_api.configuration.host = ""
-        self._get_toolbox_base_url = get_toolbox_base_url
+        # Wrap the toolbox API client to inject the sandbox ID into the resource path and lazy load the base URL
+        self._toolbox_api = AsyncToolboxApiClientProxyLazyBaseUrl(toolbox_api, self.id, get_toolbox_base_url)
 
-        self._fs = AsyncFileSystem(FileSystemApi(toolbox_api), self.__ensure_toolbox_url)
-        self._git = AsyncGit(GitApi(toolbox_api))
-        self._process = AsyncProcess(code_toolbox, ProcessApi(toolbox_api), self.__ensure_toolbox_url)
-        self._computer_use = AsyncComputerUse(ComputerUseApi(toolbox_api))
-        self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(toolbox_api), self.__ensure_toolbox_url)
-        self._info_api = InfoApi(toolbox_api)
-
-        og_call_toolbox_api = self._toolbox_api.call_api
-
-        async def call_toolbox_api_with_lazy_host_load(_, *args, **kwargs):
-            url = str(args[1])
-            if url.startswith("/"):
-                await self.__ensure_toolbox_url()
-                url = self._toolbox_api.configuration.host + url
-                args = (args[0], url, *args[2:])
-
-            return await og_call_toolbox_api(*args, **kwargs)
-
-        self._toolbox_api.call_api = MethodType(
-            call_toolbox_api_with_lazy_host_load,
-            self._toolbox_api,
+        self._fs = AsyncFileSystem(FileSystemApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
+        self._git = AsyncGit(GitApi(self._toolbox_api))
+        self._process = AsyncProcess(
+            code_toolbox, ProcessApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
         )
+        self._computer_use = AsyncComputerUse(ComputerUseApi(self._toolbox_api))
+        self._code_interpreter = AsyncCodeInterpreter(
+            InterpreterApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
+        )
+        self._info_api = InfoApi(self._toolbox_api)
 
     @property
     def fs(self) -> AsyncFileSystem:
@@ -615,15 +602,6 @@ class AsyncSandbox(SandboxDto):
             await self.refresh_data()
         except DaytonaNotFoundError:
             self.state = SandboxState.DESTROYED
-
-    async def __ensure_toolbox_url(self) -> None:
-        """Ensures the toolbox API URL for the sandbox is initialized."""
-        if self._toolbox_api.configuration.host != "":
-            return
-        self._toolbox_api.configuration.host = await self._get_toolbox_base_url()
-        if not self._toolbox_api.configuration.host.endswith("/"):
-            self._toolbox_api.configuration.host += "/"
-        self._toolbox_api.configuration.host += self.id
 
 
 class AsyncPaginatedSandboxes(PaginatedSandboxesDto):
