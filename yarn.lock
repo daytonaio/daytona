@@ -500,9 +500,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@astrojs/starlight@npm:^0.30.0":
-  version: 0.30.6
-  resolution: "@astrojs/starlight@npm:0.30.6"
+"@astrojs/starlight@npm:0.30.0":
+  version: 0.30.0
+  resolution: "@astrojs/starlight@npm:0.30.0"
   dependencies:
     "@astrojs/mdx": "npm:^4.0.1"
     "@astrojs/sitemap": "npm:^3.1.6"
@@ -530,7 +530,7 @@ __metadata:
     vfile: "npm:^6.0.2"
   peerDependencies:
     astro: ^5.0.0
-  checksum: 10c0/d30846b345221ebacc298a25fbb443970fab6d62e5fbcfdd2269cbbd043b637e137b0c2dc2d72d79792bac037de5de1e9988ef8f11254c6d4b5917ad343627db
+  checksum: 10c0/222d52fe5171e6de85cc70bdd05d618630917e752c92154308d16462e021818f91de061643b63f2fffe44a7529a078c7c6abf6f7ba432850bb80cc39b752ac23
   languageName: node
   linkType: hard
 
@@ -18741,7 +18741,7 @@ __metadata:
     "@astrojs/mdx": "npm:2.2.4"
     "@astrojs/node": "npm:8.2.5"
     "@astrojs/react": "npm:^3.1.1"
-    "@astrojs/starlight": "npm:^0.30.0"
+    "@astrojs/starlight": "npm:0.30.0"
     "@astrojs/starlight-tailwind": "npm:^2.0.1"
     "@astrojs/tailwind": "npm:5.1.0"
     "@aws-sdk/client-s3": "npm:^3.787.0"
