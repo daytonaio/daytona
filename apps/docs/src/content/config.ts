@@ -41,7 +41,7 @@ export const getSidebarConfig = (
   locale: string,
   t: (key: string) => string
 ): NavigationGroup[] => {
-  if (!t) return []
+  if (!t || typeof t !== 'function') return []
   return [
     {
       type: 'group',
