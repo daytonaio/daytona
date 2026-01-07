@@ -39,8 +39,13 @@ export enum NavigationCategory {
  */
 export const getSidebarConfig = (
   locale: string,
-  t: (key: string) => string
+  labels?: ((key: string) => string) | Record<string, string>
 ): NavigationGroup[] => {
+  const t =
+    typeof labels === 'function'
+      ? labels
+      : (key: string) => labels?.[key] ?? key
+
   if (!t || typeof t !== 'function') return []
   return [
     {
