@@ -11,6 +11,7 @@ type RunnerMetrics struct {
 	CurrentAllocatedMemoryGiB    int64   `json:"currentAllocatedMemoryGiB"`
 	CurrentAllocatedDiskGiB      int64   `json:"currentAllocatedDiskGiB"`
 	CurrentSnapshotCount         int     `json:"currentSnapshotCount"`
+	CurrentStartedSandboxes      int64   `json:"currentStartedSandboxes"`
 } //	@name	RunnerMetrics
 
 type RunnerInfoResponseDTO struct {

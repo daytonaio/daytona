@@ -60,4 +60,10 @@ export interface RunnerMetrics {
    * @memberof RunnerMetrics
    */
   currentSnapshotCount?: number
+  /**
+   *
+   * @type {number}
+   * @memberof RunnerMetrics
+   */
+  currentStartedSandboxes?: number
 }

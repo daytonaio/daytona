@@ -57,6 +57,8 @@ type Runner struct {
 	CurrentAllocatedDiskGiB *float32 `json:"currentAllocatedDiskGiB,omitempty"`
 	// Current snapshot count
 	CurrentSnapshotCount *float32 `json:"currentSnapshotCount,omitempty"`
+	// Current number of started sandboxes
+	CurrentStartedSandboxes *float32 `json:"currentStartedSandboxes,omitempty"`
 	// Runner availability score
 	AvailabilityScore *float32 `json:"availabilityScore,omitempty"`
 	// The region of the runner
@@ -600,6 +602,38 @@ func (o *Runner) SetCurrentSnapshotCount(v float32) {
 	o.CurrentSnapshotCount = &v
 }
 
+// GetCurrentStartedSandboxes returns the CurrentStartedSandboxes field value if set, zero value otherwise.
+func (o *Runner) GetCurrentStartedSandboxes() float32 {
+	if o == nil || IsNil(o.CurrentStartedSandboxes) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentStartedSandboxes
+}
+
+// GetCurrentStartedSandboxesOk returns a tuple with the CurrentStartedSandboxes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentStartedSandboxesOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentStartedSandboxes) {
+		return nil, false
+	}
+	return o.CurrentStartedSandboxes, true
+}
+
+// HasCurrentStartedSandboxes returns a boolean if a field has been set.
+func (o *Runner) HasCurrentStartedSandboxes() bool {
+	if o != nil && !IsNil(o.CurrentStartedSandboxes) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentStartedSandboxes gets a reference to the given float32 and assigns it to the CurrentStartedSandboxes field.
+func (o *Runner) SetCurrentStartedSandboxes(v float32) {
+	o.CurrentStartedSandboxes = &v
+}
+
 // GetAvailabilityScore returns the AvailabilityScore field value if set, zero value otherwise.
 func (o *Runner) GetAvailabilityScore() float32 {
 	if o == nil || IsNil(o.AvailabilityScore) {
@@ -850,6 +884,9 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.CurrentSnapshotCount) {
 		toSerialize["currentSnapshotCount"] = o.CurrentSnapshotCount
 	}
+	if !IsNil(o.CurrentStartedSandboxes) {
+		toSerialize["currentStartedSandboxes"] = o.CurrentStartedSandboxes
+	}
 	if !IsNil(o.AvailabilityScore) {
 		toSerialize["availabilityScore"] = o.AvailabilityScore
 	}
@@ -939,6 +976,7 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "currentAllocatedMemoryGiB")
 		delete(additionalProperties, "currentAllocatedDiskGiB")
 		delete(additionalProperties, "currentSnapshotCount")
+		delete(additionalProperties, "currentStartedSandboxes")
 		delete(additionalProperties, "availabilityScore")
 		delete(additionalProperties, "region")
 		delete(additionalProperties, "state")
