@@ -31,19 +31,19 @@ const algoliaEnabled =
     </div>
     <div class="navbar-links">
       <a href={import.meta.env.BASE_URL}
-        >{Astro.props.labels['header.documentation']}
+        >{Astro.locals.t('header.documentation' as any)}
       </a>
       <a href={`${PUBLIC_WEB_URL}/customers`}
-        >{Astro.props.labels['header.customers']}
+        >{Astro.locals.t('header.customers' as any)}
       </a>
       <a href={`${PUBLIC_WEB_URL}/pricing`}
-        >{Astro.props.labels['header.pricing']}
+        >{Astro.locals.t('header.pricing' as any)}
       </a>
       <a href={`${PUBLIC_WEB_URL}/startups`}
-        >{Astro.props.labels['header.startups']}
+        >{Astro.locals.t('header.startups' as any)}
       </a>
       <a href={`${PUBLIC_WEB_URL}/blog`}
-        >{Astro.props.labels['header.blog']}
+        >{Astro.locals.t('header.blog' as any)}
       </a>
     </div>
     <div class="nav__items_side_menu">

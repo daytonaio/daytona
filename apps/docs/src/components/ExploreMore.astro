@@ -4,7 +4,9 @@ import { getSidebarConfig } from '../content/config'
 
 const { expanded } = Astro.props
 const exploreMoreData = getExploreMoreData(
-  getSidebarConfig(Astro.props.lang, Astro.props.labels),
+  getSidebarConfig(Astro.props.lang, (key: string) =>
+    Astro.locals.t(key as any)
+  ),
   Astro.url.pathname
 )
 const gridColumn = expanded ? 'span 2' : 'inherit'
@@ -14,7 +16,7 @@ const style = `grid-column: ${gridColumn};`
 {
   exploreMoreData.map(group => (
     <section>
-      <h1>{group.title || Astro.props.labels['exploreMore.exploreMore']}</h1>
+      <h1>{group.title || Astro.locals.t('exploreMore.exploreMore' as any)}</h1>
       <ul>
         {group.items.map(item => (
           <a href={item.href} style={style}>
