@@ -50,14 +50,26 @@ module.exports = {
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
+          background: 'hsl(var(--destructive-background))',
+          separator: 'hsl(var(--destructive-separator))',
         },
         warning: {
           DEFAULT: 'hsl(var(--warning))',
           foreground: 'hsl(var(--warning-foreground))',
+          background: 'hsl(var(--warning-background))',
+          separator: 'hsl(var(--warning-separator))',
         },
         success: {
           DEFAULT: 'hsl(var(--success))',
           foreground: 'hsl(var(--success-foreground))',
+          background: 'hsl(var(--success-background))',
+          separator: 'hsl(var(--success-separator))',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+          background: 'hsl(var(--info-background))',
+          separator: 'hsl(var(--info-separator))',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
