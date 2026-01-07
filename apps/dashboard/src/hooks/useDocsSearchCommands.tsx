@@ -145,6 +145,11 @@ const parseSDKLanguage = (hit: AlgoliaHit) => {
   return lang
 }
 
+const handleSelect = (hit: AlgoliaHit) => {
+  const url = hit.url || `https://www.daytona.io/${hit.slug}`
+  window.open(url, '_blank')
+}
+
 export function useDocsSearchCommands() {
   const activePageId = useCommandPalette((state) => state.activePageId)
   const search = useCommandPalette((state) => state.searchByPage.get('search-docs') ?? '')
@@ -175,12 +180,7 @@ export function useDocsSearchCommands() {
     setIsLoading(isFetching)
   }, [enabled, isFetching, setIsLoading])
 
-  const commands: CommandConfig[] = useMemo(() => {
-    const handleSelect = (hit: AlgoliaHit) => {
-      const url = hit.url || `https://www.daytona.io/${hit.slug}`
-      window.open(url, '_blank')
-    }
-
+  const docsCommands: CommandConfig[] = useMemo(() => {
     if (!search || !data) {
       return [
         {
@@ -223,36 +223,41 @@ export function useDocsSearchCommands() {
       ]
     }
 
-    const results: CommandConfig[] = []
+    return data.docs.map((hit) => ({
+      id: `docs-${hit.objectID}`,
+      label: <ResultRow hit={hit} />,
+      value: `docs ${hit.title} ${hit.description || ''}`,
+      icon: <BookOpen className="w-4 h-4" />,
+      onSelect: () => handleSelect(hit),
+      chainable: true,
+      className: 'py-2',
+    }))
+  }, [search, data, isError])
 
-    for (const hit of data.docs) {
-      results.push({
-        id: `docs-${hit.objectID}`,
-        label: <ResultRow hit={hit} />,
-        value: `docs ${hit.title} ${hit.description || ''}`,
-        icon: <BookOpen className="w-4 h-4" />,
-        onSelect: () => handleSelect(hit),
-        chainable: true,
-        className: 'py-2',
-      })
+  const cliCommands: CommandConfig[] = useMemo(() => {
+    if (!search || !data) {
+      return []
     }
 
-    for (const hit of data.cli) {
-      results.push({
-        id: `cli-${hit.objectID}`,
-        label: <ResultRow hit={hit} />,
-        value: `cli ${hit.title} ${hit.description || ''}`,
-        icon: <Terminal className="w-4 h-4" />,
-        onSelect: () => handleSelect(hit),
-        chainable: true,
-        className: 'py-2',
-      })
+    return data.cli.map((hit) => ({
+      id: `cli-${hit.objectID}`,
+      label: <ResultRow hit={hit} />,
+      value: `cli ${hit.title} ${hit.description || ''}`,
+      icon: <Terminal className="w-4 h-4" />,
+      onSelect: () => handleSelect(hit),
+      chainable: true,
+      className: 'py-2',
+    }))
+  }, [search, data])
+
+  const sdkCommands: CommandConfig[] = useMemo(() => {
+    if (!search || !data) {
+      return []
     }
 
-    for (const hit of data.sdk) {
+    return data.sdk.map((hit) => {
       const sdkLanguage = parseSDKLanguage(hit)
-
-      results.push({
+      return {
         id: `sdk-${hit.objectID}`,
         label: (
           <ResultRow hit={hit} tag={<CommandHighlight className="text-xs h-auto">{sdkLanguage}</CommandHighlight>} />
@@ -262,16 +267,28 @@ export function useDocsSearchCommands() {
         onSelect: () => handleSelect(hit),
         chainable: true,
         className: 'py-2',
-      })
-    }
+      }
+    })
+  }, [search, data])
 
-    return results
-  }, [search, data, isError])
-
-  useRegisterCommands(commands, {
+  useRegisterCommands(docsCommands, {
     pageId: 'search-docs',
     groupId: 'docs-results',
     groupLabel: !search ? 'Suggestions' : data?.docs.length ? 'Results' : undefined,
     groupOrder: 0,
+  })
+
+  useRegisterCommands(cliCommands, {
+    pageId: 'search-docs',
+    groupId: 'cli-results',
+    groupLabel: data?.cli.length ? 'CLI' : undefined,
+    groupOrder: 1,
+  })
+
+  useRegisterCommands(sdkCommands, {
+    pageId: 'search-docs',
+    groupId: 'sdk-results',
+    groupLabel: data?.sdk.length ? 'SDK' : undefined,
+    groupOrder: 2,
   })
 }
