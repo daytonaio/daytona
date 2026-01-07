@@ -303,9 +303,11 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     registry?: DockerRegistry,
     destinationRegistry?: DockerRegistry,
     destinationRef?: string,
+    newTag?: string,
   ): Promise<void> {
     const request: PullSnapshotRequestDTO = {
       snapshot: snapshotName,
+      newTag,
     }
 
     if (registry) {
@@ -333,10 +335,6 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     await this.snapshotApiClient.pullSnapshot(request)
   }
 
-  async tagImage(sourceImage: string, targetImage: string): Promise<void> {
-    await this.snapshotApiClient.tagImage({ sourceImage, targetImage })
-  }
-
   async snapshotExists(snapshotName: string): Promise<boolean> {
     const response = await this.snapshotApiClient.snapshotExists(snapshotName)
     return response.data.exists
@@ -351,15 +349,6 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       cmd: response.data.cmd,
       hash: response.data.hash,
     }
-  }
-
-  async getSandboxDaemonVersion(sandboxId: string): Promise<string> {
-    const getVersionResponse = await this.toolboxApiClient.sandboxesSandboxIdToolboxPathGet(sandboxId, 'version')
-    if (!getVersionResponse.data || !(getVersionResponse.data as any).version) {
-      throw new Error('Failed to get sandbox daemon version')
-    }
-
-    return (getVersionResponse.data as any).version
   }
 
   async updateNetworkSettings(

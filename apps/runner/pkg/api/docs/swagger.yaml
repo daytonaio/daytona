@@ -121,6 +121,8 @@ definitions:
         type: string
       destinationRegistry:
         $ref: '#/definitions/RegistryDTO'
+      newTag:
+        type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
       snapshot:
@@ -1110,6 +1112,7 @@ paths:
         - snapshots
   /snapshots/tag:
     post:
+      deprecated: true
       description: Tag an existing local image with a new target reference
       operationId: TagImage
       parameters:

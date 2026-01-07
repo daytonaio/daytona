@@ -20,6 +20,13 @@ func (d *DockerClient) PullSnapshot(ctx context.Context, req dto.PullSnapshotReq
 		return err
 	}
 
+	if req.NewTag != nil {
+		err = d.TagImage(ctx, req.Snapshot, *req.NewTag)
+		if err != nil {
+			return err
+		}
+	}
+
 	if req.DestinationRegistry != nil {
 		if req.DestinationRegistry.Project == nil {
 			return common_errors.NewBadRequestError(errors.New("project is required when pushing to registry"))
