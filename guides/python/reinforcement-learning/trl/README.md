@@ -101,7 +101,7 @@ The script runs reinforcement learning training using TRL's GRPOTrainer.
 2. **Generation:** The model generates N completions per prompt via vLLM
 3. **Sanitization:** Completions using banned patterns (e.g., using built-in functions) are rejected
 4. **Evaluation:** Each completion runs in a Daytona sandbox against the test suite
-5. **Reward:** -1 for errors or banned patterns; otherwise, the rewards is the fraction of tests passed
+5. **Reward:** -1 for errors or banned patterns; otherwise, the reward is the fraction of tests passed
 6. **Policy update:** GRPO reinforces completions that scored higher than their group average
 7. **Cleanup:** When training finishes, sandboxes are deleted
 
