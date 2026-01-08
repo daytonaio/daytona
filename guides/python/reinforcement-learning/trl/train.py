@@ -275,8 +275,10 @@ def main():
     training_args = GRPOConfig(
         output_dir="training_results",
         per_device_train_batch_size=20,
+        # batch size chosen so the training runs comfortably on a single 80GB GPU,
+        # if running this on a GPU with less memory, reduce the batch size accordingly
         gradient_accumulation_steps=25,
-        num_generations=250,
+        num_generations=EFFECTIVE_BATCH_SIZE // len(TASKS),
         max_prompt_length=256,
         max_completion_length=512,
         learning_rate=8e-6,
@@ -292,6 +294,9 @@ def main():
         loss_type="dapo",
         beta=0.01,
     )
+    assert (
+        EFFECTIVE_BATCH_SIZE % len(TASKS) == 0
+    ), "EFFECTIVE_BATCH_SIZE must be divisible by number of tasks."
     assert (
         training_args.per_device_train_batch_size
         * training_args.gradient_accumulation_steps
