@@ -164,6 +164,12 @@ export interface Runner {
    */
   unschedulable: boolean
   /**
+   * Whether the runner is draining (not accepting new sandboxes)
+   * @type {boolean}
+   * @memberof Runner
+   */
+  isDraining?: boolean
+  /**
    * The creation timestamp of the runner
    * @type {string}
    * @memberof Runner

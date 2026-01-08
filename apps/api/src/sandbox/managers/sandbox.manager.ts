@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, MoreThanOrEqual, Not, Raw } from 'typeorm'
+import { In, IsNull, MoreThanOrEqual, Not, Raw, Repository } from 'typeorm'
 import { randomUUID } from 'crypto'
 
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -42,6 +42,13 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
+import { InjectRepository } from '@nestjs/typeorm'
+import { SnapshotRunner } from '../entities/snapshot-runner.entity'
+import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
+import { Sandbox } from '../entities/sandbox.entity'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { OrganizationService } from '../../organization/services/organization.service'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -58,6 +65,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
+    @InjectRepository(SnapshotRunner)
+    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
+    private readonly dockerRegistryService: DockerRegistryService,
+    private readonly organizationService: OrganizationService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   async onApplicationShutdown() {
@@ -244,6 +256,207 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       )
     } finally {
       await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'draining-runner-sandboxes-check' })
+  @TrackJobExecution()
+  @LogExecution('draining-runner-sandboxes-check')
+  @WithInstrumentation()
+  async drainingRunnerSandboxesCheck(): Promise<void> {
+    const lockKey = 'draining-runner-sandboxes-check'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const drainingRunners = await this.runnerService.findAll()
+      const drainingRunnersList = drainingRunners.filter((runner) => runner.isDraining)
+
+      this.logger.debug(`Checking ${drainingRunnersList.length} draining runners for sandbox migration`)
+
+      await Promise.allSettled(
+        drainingRunnersList.map(async (runner) => {
+          try {
+            const sandboxes = await this.sandboxRepository.find({
+              where: {
+                runnerId: runner.id,
+                state: SandboxState.STOPPED,
+                desiredState: SandboxDesiredState.STOPPED,
+                backupState: BackupState.COMPLETED,
+                backupSnapshot: Not(IsNull()),
+              },
+              take: 100,
+            })
+
+            this.logger.debug(
+              `Found ${sandboxes.length} eligible sandboxes on draining runner ${runner.id} for migration`,
+            )
+
+            await Promise.allSettled(
+              sandboxes.map(async (sandbox) => {
+                const sandboxLockKey = getStateChangeLockKey(sandbox.id)
+                const hasSandboxLock = await this.redisLockProvider.lock(sandboxLockKey, 60)
+                if (!hasSandboxLock) {
+                  return
+                }
+
+                try {
+                  // Check if the backupSnapshot exists in snapshot_runner table with state = READY
+                  const snapshotRunners = await this.snapshotRunnerRepository.find({
+                    where: {
+                      snapshotRef: sandbox.backupSnapshot,
+                      state: SnapshotRunnerState.READY,
+                    },
+                  })
+
+                  if (snapshotRunners.length === 0) {
+                    this.logger.debug(
+                      `No ready snapshot runners found for sandbox ${sandbox.id} with backup snapshot ${sandbox.backupSnapshot}`,
+                    )
+                    return
+                  }
+
+                  // Get the start score threshold from config
+                  const startScoreThreshold = this.configService.get('runnerUsage.startScoreThreshold') || 0
+
+                  // Find a runner that's not the current draining runner and meets all criteria
+                  let targetSnapshotRunner: SnapshotRunner | undefined = undefined
+                  for (const sr of snapshotRunners) {
+                    // Skip the current draining runner
+                    if (sr.runnerId === runner.id) {
+                      continue
+                    }
+
+                    // Fetch the actual runner entity to check its state, unschedulable status, and score
+                    const targetRunner = await this.runnerService.findOne(sr.runnerId)
+                    if (!targetRunner) {
+                      this.logger.debug(`Runner ${sr.runnerId} not found, skipping`)
+                      continue
+                    }
+
+                    // Check if runner meets all criteria: READY state, not unschedulable, and has enough score
+                    if (
+                      targetRunner.state === RunnerState.READY &&
+                      !targetRunner.unschedulable &&
+                      targetRunner.availabilityScore >= startScoreThreshold
+                    ) {
+                      targetSnapshotRunner = sr
+                      break
+                    }
+                  }
+
+                  if (!targetSnapshotRunner) {
+                    this.logger.debug(
+                      `No suitable alternative runner found for sandbox ${sandbox.id} with backup snapshot ${sandbox.backupSnapshot}`,
+                    )
+                    return
+                  }
+
+                  await this.reassignSandbox(sandbox, runner.id, targetSnapshotRunner.runnerId)
+                } catch (e) {
+                  this.logger.error(`Error migrating sandbox ${sandbox.id} from draining runner ${runner.id}`, e)
+                } finally {
+                  await this.redisLockProvider.unlock(sandboxLockKey)
+                }
+              }),
+            )
+          } catch (e) {
+            this.logger.error(`Error processing draining runner ${runner.id} for sandbox migration`, e)
+          }
+        }),
+      )
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  private async reassignSandbox(sandbox: Sandbox, oldRunnerId: string, newRunnerId: string): Promise<void> {
+    this.logger.debug(
+      `Starting sandbox reassignment for ${sandbox.id} from runner ${oldRunnerId} to runner ${newRunnerId}`,
+    )
+
+    // Safety check: ensure sandbox is not pending
+    if (sandbox.pending) {
+      this.logger.warn(
+        `Sandbox ${sandbox.id} is pending, skipping reassignment from runner ${oldRunnerId} to runner ${newRunnerId}`,
+      )
+      return
+    }
+
+    if (!sandbox.backupRegistryId) {
+      throw new Error(`Sandbox ${sandbox.id} has no backup registry`)
+    }
+
+    const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+    if (!registry) {
+      throw new Error(`Registry ${sandbox.backupRegistryId} not found for sandbox ${sandbox.id}`)
+    }
+
+    const organization = await this.organizationService.findOne(sandbox.organizationId)
+
+    let metadata: { [key: string]: string } | undefined = undefined
+
+    if (organization) {
+      metadata = {
+        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
+        organizationId: organization.id,
+        organizationName: organization.name,
+        sandboxName: sandbox.name,
+      }
+    }
+
+    const newRunner = await this.runnerService.findOne(newRunnerId)
+    if (!newRunner) {
+      throw new Error(`Target runner ${newRunnerId} not found`)
+    }
+
+    const newRunnerAdapter = await this.runnerAdapterFactory.create(newRunner)
+
+    const originalSnapshot = sandbox.snapshot
+    sandbox.snapshot = sandbox.backupSnapshot
+
+    try {
+      // Pass undefined for entrypoint as the backup snapshot already has it baked in and use skipStart
+      await newRunnerAdapter.createSandbox(sandbox, registry, undefined, metadata, true)
+      this.logger.debug(`Created sandbox ${sandbox.id} on new runner ${newRunnerId} with skipStart`)
+    } catch (e) {
+      // Restore original snapshot on failure
+      sandbox.snapshot = originalSnapshot
+      this.logger.error(`Failed to create sandbox ${sandbox.id} on new runner ${newRunnerId}`, e)
+      throw e
+    }
+
+    if (sandbox.pending) {
+      this.logger.warn(
+        `Sandbox ${sandbox.id} is pending, skipping reassignment from runner ${oldRunnerId} to runner ${newRunnerId}`,
+      )
+
+      // Remove the sandbox from the new runner
+      await newRunnerAdapter.destroySandbox(sandbox.id)
+      this.logger.debug(`Removed sandbox ${sandbox.id} from new runner ${newRunnerId}`)
+      return
+    }
+
+    // Update the sandbox to use the new runner
+    await this.sandboxRepository.update(sandbox.id, {
+      prevRunnerId: sandbox.runnerId,
+      runnerId: newRunnerId,
+    })
+
+    this.logger.log(`Migrated sandbox ${sandbox.id} from draining runner ${oldRunnerId} to runner ${newRunnerId}`)
+
+    // Best effort deletion of the sandbox on the old runner
+    try {
+      const oldRunner = await this.runnerService.findOne(oldRunnerId)
+      if (oldRunner) {
+        const oldRunnerAdapter = await this.runnerAdapterFactory.create(oldRunner)
+        await oldRunnerAdapter.destroySandbox(sandbox.id)
+        this.logger.debug(`Deleted sandbox ${sandbox.id} from old runner ${oldRunnerId}`)
+      }
+    } catch (e) {
+      this.logger.warn(`Best effort deletion failed for sandbox ${sandbox.id} on old runner ${oldRunnerId}`, e)
     }
   }
 

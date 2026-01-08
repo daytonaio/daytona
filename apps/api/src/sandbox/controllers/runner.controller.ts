@@ -108,6 +108,25 @@ export class RunnerController {
     return this.runnerService.updateSchedulingStatus(id, unschedulable)
   }
 
+  @Patch(':id/draining')
+  @ApiOperation({
+    summary: 'Update runner draining status',
+    operationId: 'updateRunnerDraining',
+  })
+  @Audit({
+    action: AuditAction.UPDATE_DRAINING,
+    targetType: AuditTarget.RUNNER,
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      body: (req: TypedRequest<{ isDraining: boolean }>) => ({
+        isDraining: req.body?.isDraining,
+      }),
+    },
+  })
+  async updateDrainingStatus(@Param('id') id: string, @Body('isDraining') isDraining: boolean): Promise<Runner> {
+    return this.runnerService.updateDrainingStatus(id, isDraining)
+  }
+
   @Get('/by-sandbox/:sandboxId')
   @ApiOperation({
     summary: 'Get runner by sandbox ID',
