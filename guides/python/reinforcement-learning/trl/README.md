@@ -59,7 +59,7 @@ The script has several configurable parameters:
 
 ### Sandbox Settings
 
-- `SANDBOX_POOL_SIZE`: Number of Daytona sandboxes to create (default: 10).
+- `SANDBOX_POOL_SIZE`: Number of Daytona sandboxes to create (default: 500).
 - `MAX_TIMEOUT_SECONDS`: Timeout for code execution in each sandbox (default: 1 second). Prevents infinite loops from blocking training.
 
 ### Model Settings
