@@ -8,7 +8,14 @@ import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
 import { Injectable, Logger } from '@nestjs/common'
-import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo, StartSandboxResponse } from './runnerAdapter'
+import {
+  RunnerAdapter,
+  RunnerInfo,
+  RunnerSandboxInfo,
+  RunnerSnapshotInfo,
+  StartSandboxResponse,
+  SnapshotDigestResponse,
+} from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import {
   Configuration,
@@ -348,6 +355,25 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       entrypoint: response.data.entrypoint,
       cmd: response.data.cmd,
       hash: response.data.hash,
+    }
+  }
+
+  async inspectSnapshotInRegistry(snapshotName: string, registry?: DockerRegistry): Promise<SnapshotDigestResponse> {
+    const response = await this.snapshotApiClient.inspectSnapshotInRegistry({
+      snapshot: snapshotName,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    })
+
+    return {
+      hash: response.data.hash,
+      sizeGB: response.data.sizeGB,
     }
   }
 

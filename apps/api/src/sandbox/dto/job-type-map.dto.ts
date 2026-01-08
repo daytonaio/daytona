@@ -39,6 +39,9 @@ export interface JobTypeMap {
   [JobType.UPDATE_SANDBOX_NETWORK_SETTINGS]: {
     resourceType: [ResourceType.SANDBOX]
   }
+  [JobType.INSPECT_SNAPSHOT_IN_REGISTRY]: {
+    resourceType: [ResourceType.SNAPSHOT]
+  }
 }
 
 /**

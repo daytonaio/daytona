@@ -12840,6 +12840,7 @@ components:
         - CREATE_BACKUP
         - BUILD_SNAPSHOT
         - PULL_SNAPSHOT
+        - INSPECT_SNAPSHOT_IN_REGISTRY
         - REMOVE_SNAPSHOT
         - UPDATE_SANDBOX_NETWORK_SETTINGS
       type: string

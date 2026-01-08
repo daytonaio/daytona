@@ -376,3 +376,36 @@ func GetSnapshotInfo(ctx *gin.Context) {
 		Hash:       dto.HashWithoutPrefix(info.Hash),
 	})
 }
+
+// InspectSnapshotInRegistry godoc
+//
+//	@Tags			snapshots
+//	@Summary		Inspect a snapshot in a registry
+//	@Description	Inspect a specified snapshot in a registry
+//	@Produce		json
+//	@Param			request	body		dto.InspectSnapshotInRegistryRequestDTO	true	"Inspect snapshot in registry request"
+//	@Success		200		{object}	dto.SnapshotDigestResponse
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
+//
+//	@Router			/snapshots/inspect [post]
+//	@id				InspectSnapshotInRegistry
+func InspectSnapshotInRegistry(ctx *gin.Context) {
+	var request dto.InspectSnapshotInRegistryRequestDTO
+	err := ctx.ShouldBindJSON(&request)
+
+	runner := runner.GetInstance(nil)
+
+	digest, err := runner.Docker.InspectImageInRegistry(ctx.Request.Context(), request.Snapshot, request.Registry)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.SnapshotDigestResponse{
+		Hash:   dto.HashWithoutPrefix(digest.Digest),
+		SizeGB: float64(digest.Size) / (1024 * 1024 * 1024),
+	})
+}

@@ -115,6 +115,16 @@ definitions:
       - statusCode
       - timestamp
     type: object
+  InspectSnapshotInRegistryRequest:
+    properties:
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        example: nginx:latest
+        type: string
+    required:
+      - snapshot
+    type: object
   PullSnapshotRequestDTO:
     properties:
       destinationRef:
@@ -191,6 +201,15 @@ definitions:
         type: string
       state:
         $ref: '#/definitions/enums.SandboxState'
+    type: object
+  SnapshotDigestResponse:
+    properties:
+      hash:
+        example: a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff
+        type: string
+      sizeGB:
+        example: 0.13
+        type: number
     type: object
   SnapshotExistsResponse:
     properties:
@@ -990,6 +1009,43 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Get snapshot information
+      tags:
+        - snapshots
+  /snapshots/inspect:
+    post:
+      description: Inspect a specified snapshot in a registry
+      operationId: InspectSnapshotInRegistry
+      parameters:
+        - description: Inspect snapshot in registry request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/InspectSnapshotInRegistryRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SnapshotDigestResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Inspect a snapshot in a registry
       tags:
         - snapshots
   /snapshots/logs:

@@ -76,3 +76,21 @@ func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any,
 
 	return nil, e.docker.RemoveImage(ctx, *job.Payload, true)
 }
+
+func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient.Job) (any, error) {
+	var request dto.InspectSnapshotInRegistryRequestDTO
+	err := e.parsePayload(job.Payload, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	digest, err := e.docker.InspectImageInRegistry(ctx, request.Snapshot, request.Registry)
+	if err != nil {
+		return nil, err
+	}
+
+	return dto.SnapshotDigestResponse{
+		Hash:   dto.HashWithoutPrefix(digest.Digest),
+		SizeGB: float64(digest.Size) / (1024 * 1024 * 1024),
+	}, nil
+}
