@@ -11,24 +11,30 @@ const PUBLIC_WEB_URL = (
 
 <SidebarSublist
   sublist={getSidebar(
-    getSidebarConfig(Astro.props.lang, Astro.props.labels),
+    getSidebarConfig(Astro.props.lang, (key: string) => {
+      try {
+        return Astro.locals?.t?.(key as any) || key
+      } catch {
+        return key
+      }
+    }),
     Astro.url.pathname
   )}
 />
 <div class="navbar-links">
   <a href={import.meta.env.BASE_URL}
-    >{Astro.props.labels['header.documentation']}
+    >{Astro.locals.t('header.documentation' as any)}
   </a>
   <a href={`${PUBLIC_WEB_URL}/customers`}
-    >{Astro.props.labels['header.customers']}
+    >{Astro.locals.t('header.customers' as any)}
   </a>
   <a href={`${PUBLIC_WEB_URL}/pricing`}
-    >{Astro.props.labels['header.pricing']}
+    >{Astro.locals.t('header.pricing' as any)}
   </a>
   <a href={`${PUBLIC_WEB_URL}/startups`}
-    >{Astro.props.labels['header.startups']}
+    >{Astro.locals.t('header.startups' as any)}
   </a>
-  <a href={`${PUBLIC_WEB_URL}/blog`}>{Astro.props.labels['header.blog']} </a>
+  <a href={`${PUBLIC_WEB_URL}/blog`}>{Astro.locals.t('header.blog' as any)} </a>
 </div>
 <div class="mobile-nav-btn nav__items_side_menu">
   <SideNavLinks client:load locale={Astro.props.lang} />

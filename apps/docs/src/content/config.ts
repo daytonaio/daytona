@@ -39,9 +39,14 @@ export enum NavigationCategory {
  */
 export const getSidebarConfig = (
   locale: string,
-  labels: Record<string, string>
+  labels?: ((key: string) => string) | Record<string, string>
 ): NavigationGroup[] => {
-  if (!labels) return []
+  const t =
+    typeof labels === 'function'
+      ? labels
+      : (key: string) => labels?.[key] ?? key
+
+  if (!t || typeof t !== 'function') return []
   return [
     {
       type: 'group',
@@ -50,7 +55,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs', locale),
-          label: labels['sidebarconfig.documentation'],
+          label: t('sidebarconfig.documentation'),
           attrs: {
             icon: 'home.svg',
           },
@@ -59,7 +64,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/typescript-sdk', locale),
-          label: labels['sidebarconfig.tsSdkReference'],
+          label: t('sidebarconfig.tsSdkReference'),
           attrs: {
             icon: 'package.svg',
           },
@@ -68,7 +73,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/python-sdk', locale),
-          label: labels['sidebarconfig.pythonSdkReference'],
+          label: t('sidebarconfig.pythonSdkReference'),
           attrs: {
             icon: 'package.svg',
           },
@@ -77,7 +82,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/tools/api', locale),
-          label: labels['sidebarconfig.apiReference'],
+          label: t('sidebarconfig.apiReference'),
           disablePagination: true,
           attrs: {
             icon: 'server.svg',
@@ -86,7 +91,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/tools/cli', locale),
-          label: labels['sidebarconfig.cliReference'],
+          label: t('sidebarconfig.cliReference'),
           disablePagination: true,
           attrs: {
             icon: 'terminal.svg',
@@ -95,7 +100,7 @@ export const getSidebarConfig = (
         // {
         //   type: 'link',
         //   href: 'https://www.daytona.io/dotfiles/guides',
-        //   label: labels['sidebarconfig.guides'],
+        //   label: t('sidebarconfig.guides'),
         //   disablePagination: true,
         //   external: true,
         //   attrs: {
@@ -106,14 +111,14 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.introduction'],
+      label: t('sidebarconfig.introduction'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
           href: localizePath('/docs', locale),
-          label: labels['sidebarconfig.quickStart'],
+          label: t('sidebarconfig.quickStart'),
           attrs: {
             icon: 'rocket.svg',
           },
@@ -121,8 +126,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/getting-started', locale),
-          label: labels['sidebarconfig.gettingStarted'],
-          description: labels['sidebarconfig.gettingStartedDescription'],
+          label: t('sidebarconfig.gettingStarted'),
+          description: t('sidebarconfig.gettingStartedDescription'),
           attrs: {
             icon: 'bookmark.svg',
           },
@@ -130,8 +135,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/configuration', locale),
-          label: labels['sidebarconfig.configuration'],
-          description: labels['sidebarconfig.configurationDescription'],
+          label: t('sidebarconfig.configuration'),
+          description: t('sidebarconfig.configurationDescription'),
           attrs: {
             icon: 'git-commit.svg',
           },
@@ -139,8 +144,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/sandboxes', locale),
-          label: labels['sidebarconfig.sandboxes'],
-          description: labels['sidebarconfig.sandboxesDescription'],
+          label: t('sidebarconfig.sandboxes'),
+          description: t('sidebarconfig.sandboxesDescription'),
           attrs: {
             icon: 'rectangle.svg',
           },
@@ -148,8 +153,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/snapshots', locale),
-          label: labels['sidebarconfig.snapshots'],
-          description: labels['sidebarconfig.snapshotsDescription'],
+          label: t('sidebarconfig.snapshots'),
+          description: t('sidebarconfig.snapshotsDescription'),
           attrs: {
             icon: 'layers.svg',
           },
@@ -157,8 +162,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/declarative-builder', locale),
-          label: labels['sidebarconfig.declarativeBuilder'],
-          description: labels['sidebarconfig.declarativeBuilderDescription'],
+          label: t('sidebarconfig.declarativeBuilder'),
+          description: t('sidebarconfig.declarativeBuilderDescription'),
           attrs: {
             icon: 'prebuilds.svg',
           },
@@ -166,8 +171,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/volumes', locale),
-          label: labels['sidebarconfig.volumes'],
-          description: labels['sidebarconfig.volumesDescription'],
+          label: t('sidebarconfig.volumes'),
+          description: t('sidebarconfig.volumesDescription'),
           attrs: {
             icon: 'container-registries.svg',
           },
@@ -176,15 +181,15 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.accountManagement'],
+      label: t('sidebarconfig.accountManagement'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
           href: localizePath('/docs/api-keys', locale),
-          label: labels['sidebarconfig.apiKeys'],
-          description: labels['sidebarconfig.apiKeysDescription'],
+          label: t('sidebarconfig.apiKeys'),
+          description: t('sidebarconfig.apiKeysDescription'),
           attrs: {
             icon: 'tag.svg',
           },
@@ -192,8 +197,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/organizations', locale),
-          label: labels['sidebarconfig.organizations'],
-          description: labels['sidebarconfig.organizationsDescription'],
+          label: t('sidebarconfig.organizations'),
+          description: t('sidebarconfig.organizationsDescription'),
           attrs: {
             icon: 'building.svg',
           },
@@ -201,8 +206,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/limits', locale),
-          label: labels['sidebarconfig.limits'],
-          description: labels['sidebarconfig.limitsDescription'],
+          label: t('sidebarconfig.limits'),
+          description: t('sidebarconfig.limitsDescription'),
           attrs: {
             icon: 'log.svg',
           },
@@ -210,8 +215,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/billing', locale),
-          label: labels['sidebarconfig.billing'],
-          description: labels['sidebarconfig.billingDescription'],
+          label: t('sidebarconfig.billing'),
+          description: t('sidebarconfig.billingDescription'),
           attrs: {
             icon: 'credit-card.svg',
           },
@@ -219,8 +224,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/linked-accounts', locale),
-          label: labels['sidebarconfig.linkedAccounts'],
-          description: labels['sidebarconfig.linkedAccountsDescription'],
+          label: t('sidebarconfig.linkedAccounts'),
+          description: t('sidebarconfig.linkedAccountsDescription'),
           attrs: {
             icon: 'link.svg',
           },
@@ -229,15 +234,15 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.agentToolbox'],
+      label: t('sidebarconfig.agentToolbox'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
           href: localizePath('/docs/file-system-operations', locale),
-          label: labels['sidebarconfig.fileSystem'],
-          description: labels['sidebarconfig.fileSystemDescription'],
+          label: t('sidebarconfig.fileSystem'),
+          description: t('sidebarconfig.fileSystemDescription'),
           attrs: {
             icon: 'folder.svg',
           },
@@ -245,8 +250,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/git-operations', locale),
-          label: labels['sidebarconfig.gitOperations'],
-          description: labels['sidebarconfig.gitOperationsDescription'],
+          label: t('sidebarconfig.gitOperations'),
+          description: t('sidebarconfig.gitOperationsDescription'),
           attrs: {
             icon: 'git-branch.svg',
           },
@@ -254,9 +259,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/language-server-protocol', locale),
-          label: labels['sidebarconfig.languageServerProtocol'],
-          description:
-            labels['sidebarconfig.languageServerProtocolDescription'],
+          label: t('sidebarconfig.languageServerProtocol'),
+          description: t('sidebarconfig.languageServerProtocolDescription'),
           attrs: {
             icon: 'pulse.svg',
           },
@@ -264,8 +268,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/process-code-execution', locale),
-          label: labels['sidebarconfig.processCodeExecution'],
-          description: labels['sidebarconfig.processCodeExecutionDescription'],
+          label: t('sidebarconfig.processCodeExecution'),
+          description: t('sidebarconfig.processCodeExecutionDescription'),
           attrs: {
             icon: 'computer.svg',
           },
@@ -273,8 +277,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/pty', locale),
-          label: labels['sidebarconfig.pty'],
-          description: labels['sidebarconfig.ptyDescription'],
+          label: t('sidebarconfig.pty'),
+          description: t('sidebarconfig.ptyDescription'),
           attrs: {
             icon: 'terminal.svg',
           },
@@ -282,8 +286,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/log-streaming', locale),
-          label: labels['sidebarconfig.logStreaming'],
-          description: labels['sidebarconfig.logStreamingDescription'],
+          label: t('sidebarconfig.logStreaming'),
+          description: t('sidebarconfig.logStreamingDescription'),
           attrs: {
             icon: 'log2.svg',
           },
@@ -292,15 +296,15 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.computerUse'],
+      label: t('sidebarconfig.computerUse'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
           href: localizePath('/docs/computer-use-linux', locale),
-          label: labels['sidebarconfig.computerUseLinux'],
-          description: labels['sidebarconfig.computerUseLinuxDescription'],
+          label: t('sidebarconfig.computerUseLinux'),
+          description: t('sidebarconfig.computerUseLinuxDescription'),
           attrs: {
             icon: 'linux.svg',
           },
@@ -308,8 +312,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/computer-use-windows', locale),
-          label: labels['sidebarconfig.computerUseWindows'],
-          description: labels['sidebarconfig.computerUseWindowsDescription'],
+          label: t('sidebarconfig.computerUseWindows'),
+          description: t('sidebarconfig.computerUseWindowsDescription'),
           attrs: {
             icon: 'windows.svg',
           },
@@ -317,8 +321,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/computer-use-macos', locale),
-          label: labels['sidebarconfig.computerUseMacOS'],
-          description: labels['sidebarconfig.computerUseMacOSDescription'],
+          label: t('sidebarconfig.computerUseMacOS'),
+          description: t('sidebarconfig.computerUseMacOSDescription'),
           attrs: {
             icon: 'apple.svg',
           },
@@ -327,15 +331,15 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.other'],
+      label: t('sidebarconfig.other'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
           href: localizePath('/docs/web-terminal', locale),
-          label: labels['sidebarconfig.webTerminal'],
-          description: labels['sidebarconfig.webTerminalDescription'],
+          label: t('sidebarconfig.webTerminal'),
+          description: t('sidebarconfig.webTerminalDescription'),
           attrs: {
             icon: 'terminal.svg',
           },
@@ -343,8 +347,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/network-limits', locale),
-          label: labels['sidebarconfig.networkLimits'],
-          description: labels['sidebarconfig.networkLimitsDescription'],
+          label: t('sidebarconfig.networkLimits'),
+          description: t('sidebarconfig.networkLimitsDescription'),
           attrs: {
             icon: 'network-limits.svg',
           },
@@ -352,8 +356,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/ssh-access', locale),
-          label: labels['sidebarconfig.sshAccess'],
-          description: labels['sidebarconfig.sshAccessDescription'],
+          label: t('sidebarconfig.sshAccess'),
+          description: t('sidebarconfig.sshAccessDescription'),
           attrs: {
             icon: 'terminal.svg',
           },
@@ -361,8 +365,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/preview-and-authentication', locale),
-          label: labels['sidebarconfig.previewAuthentication'],
-          description: labels['sidebarconfig.previewAuthenticationDescription'],
+          label: t('sidebarconfig.previewAuthentication'),
+          description: t('sidebarconfig.previewAuthenticationDescription'),
           attrs: {
             icon: 'shield.svg',
           },
@@ -370,9 +374,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/custom-domain-authentication', locale),
-          label: labels['sidebarconfig.customDomainAuthentication'],
-          description:
-            labels['sidebarconfig.customDomainAuthenticationDescription'],
+          label: t('sidebarconfig.customDomainAuthentication'),
+          description: t('sidebarconfig.customDomainAuthenticationDescription'),
           attrs: {
             icon: 'proxy-link.svg',
           },
@@ -380,8 +383,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/audit-logs', locale),
-          label: labels['sidebarconfig.auditLogs'],
-          description: labels['sidebarconfig.auditLogsDescription'],
+          label: t('sidebarconfig.auditLogs'),
+          description: t('sidebarconfig.auditLogsDescription'),
           attrs: {
             icon: 'log.svg',
           },
@@ -389,8 +392,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/webhooks', locale),
-          label: labels['sidebarconfig.webhooks'],
-          description: labels['sidebarconfig.webhooksDescription'],
+          label: t('sidebarconfig.webhooks'),
+          description: t('sidebarconfig.webhooksDescription'),
           attrs: {
             icon: 'webhook.svg',
           },
@@ -398,8 +401,8 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/regions', locale),
-          label: labels['sidebarconfig.regions'],
-          description: labels['sidebarconfig.regionsDescription'],
+          label: t('sidebarconfig.regions'),
+          description: t('sidebarconfig.regionsDescription'),
           attrs: {
             icon: 'globe.svg',
           },
@@ -407,7 +410,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/mcp', locale),
-          label: labels['sidebarconfig.mcpServer'],
+          label: t('sidebarconfig.mcpServer'),
           disablePagination: true,
           attrs: {
             icon: 'server.svg',
@@ -416,7 +419,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/data-analysis-with-ai', locale),
-          label: labels['sidebarconfig.dataAnalysis'],
+          label: t('sidebarconfig.dataAnalysis'),
           disablePagination: true,
           attrs: {
             icon: 'chart.svg',
@@ -426,14 +429,14 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.integrations'],
+      label: t('sidebarconfig.integrations'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
           href: localizePath('/docs/inngest-agentkit-coding-agent', locale),
-          label: labels['sidebarconfig.inngestAgentKit'],
+          label: t('sidebarconfig.inngestAgentKit'),
           disablePagination: true,
           attrs: {
             icon: 'inngest-agentkit.svg',
@@ -442,7 +445,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/langchain-data-analysis', locale),
-          label: labels['sidebarconfig.langchainIntegrations'],
+          label: t('sidebarconfig.langchainIntegrations'),
           disablePagination: true,
           attrs: {
             icon: 'langchain.svg',
@@ -451,7 +454,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/claude', locale),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           attrs: {
             icon: 'claude.svg',
@@ -463,7 +466,7 @@ export const getSidebarConfig = (
             '/docs/claude-agent-sdk-interactive-terminal-sandbox',
             locale
           ),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           hideInSidebar: true,
         },
@@ -473,7 +476,7 @@ export const getSidebarConfig = (
             '/docs/claude-agent-sdk-connect-service-sandbox',
             locale
           ),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           hideInSidebar: true,
         },
@@ -483,7 +486,7 @@ export const getSidebarConfig = (
             '/docs/claude-code-run-tasks-stream-logs-sandbox',
             locale
           ),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           hideInSidebar: true,
         },
@@ -491,14 +494,14 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.deployments'],
+      label: t('sidebarconfig.deployments'),
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,
       entries: [
         {
           type: 'link',
           href: localizePath('/docs/oss-deployment', locale),
-          label: labels['sidebarconfig.ossDeployment'],
+          label: t('sidebarconfig.ossDeployment'),
           disablePagination: true,
           attrs: {
             icon: 'computer.svg',
@@ -508,7 +511,7 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.tsSdkReference'],
+      label: t('sidebarconfig.tsSdkReference'),
       homePageHref: localizePath('/docs/typescript-sdk', locale),
       category: NavigationCategory.TYPESCRIPT_SDK,
       autopopulateFromDir: localizePath('/docs/typescript-sdk', locale),
@@ -516,25 +519,25 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/typescript-sdk/daytona', locale),
-          label: labels['sidebarconfig.daytona'],
+          label: t('sidebarconfig.daytona'),
         },
         {
           type: 'link',
           href: localizePath('/docs/typescript-sdk/sandbox', locale),
-          label: labels['sidebarconfig.sandbox'],
+          label: t('sidebarconfig.sandbox'),
         },
       ],
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.common'],
+      label: t('sidebarconfig.common'),
       homePageHref: localizePath('/docs/python-sdk', locale),
       category: NavigationCategory.PYTHON_SDK,
       autopopulateFromDir: localizePath('/docs/python-sdk/common', locale),
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.syncPython'],
+      label: t('sidebarconfig.syncPython'),
       homePageHref: localizePath('/docs/python-sdk', locale),
       category: NavigationCategory.PYTHON_SDK,
       autopopulateFromDir: localizePath('/docs/python-sdk/sync', locale),
@@ -542,18 +545,18 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/python-sdk/sync/daytona', locale),
-          label: labels['sidebarconfig.daytona'],
+          label: t('sidebarconfig.daytona'),
         },
         {
           type: 'link',
           href: localizePath('/docs/python-sdk/sync/sandbox', locale),
-          label: labels['sidebarconfig.sandbox'],
+          label: t('sidebarconfig.sandbox'),
         },
       ],
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.asyncPython'],
+      label: t('sidebarconfig.asyncPython'),
       homePageHref: localizePath('/docs/python-sdk', locale),
       category: NavigationCategory.PYTHON_SDK,
       autopopulateFromDir: localizePath('/docs/python-sdk/async', locale),
@@ -561,12 +564,12 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/python-sdk/async/async-daytona', locale),
-          label: labels['sidebarconfig.asyncDaytona'],
+          label: t('sidebarconfig.asyncDaytona'),
         },
         {
           type: 'link',
           href: localizePath('/docs/python-sdk/async/async-sandbox', locale),
-          label: labels['sidebarconfig.asyncSandbox'],
+          label: t('sidebarconfig.asyncSandbox'),
         },
       ],
     },

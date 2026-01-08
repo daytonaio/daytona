@@ -241,9 +241,14 @@ function main() {
     {fileName: 'sdk', records: sdkRecords}
   ]
   
+  const outputDir = path.join(__dirname, '../../../dist/apps/docs/client')
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true })
+  }
+  
   fileRecords.forEach(({fileName, records}) => 
     fs.writeFileSync(
-    path.join(__dirname, `../../../dist/apps/docs/dist/client/${fileName}.json`),
+    path.join(outputDir, `${fileName}.json`),
     JSON.stringify(records, null, 2),
     'utf8'
   ))

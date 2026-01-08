@@ -1,14 +1,14 @@
 ---
 import editIcon from '@assets/icons/edit.svg?raw'
 
-const { editUrl, labels } = Astro.props
+const { editUrl } = Astro.props
 ---
 
 {
   editUrl && (
     <a href={editUrl} class="edit-link">
       <Fragment set:html={editIcon} />
-      {labels['page.editLink']}
+      {Astro.locals.t('page.editLink' as any)}
     </a>
   )
 }

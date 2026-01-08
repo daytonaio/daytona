@@ -15,7 +15,7 @@ const DOCS_BASE_URL = `${PUBLIC_WEB_URL}/docs`
 
 const BUILD_OUTPUT_DIR = path.join(
   __dirname,
-  '../../../dist/apps/docs/dist/client'
+  '../../../dist/apps/docs/client'
 )
 const STATIC_LOCALE = 'en'
 const STATIC_DOCS_OUTPUT_DIR = path.join(BUILD_OUTPUT_DIR, STATIC_LOCALE)
@@ -165,8 +165,11 @@ const generateLlmsTxtFile = docsData => {
     ...docsData.map(doc => `- [${doc.title}](${PUBLIC_WEB_URL}${doc.url})`),
   ]
   const output = rewriteLinksToMd(llmsContent.join('\n'), DOCS_BASE_URL)
+  if (!fs.existsSync(BUILD_OUTPUT_DIR)) {
+    fs.mkdirSync(BUILD_OUTPUT_DIR, { recursive: true })
+  }
   fs.writeFileSync(
-    path.join(__dirname, '../../../dist/apps/docs/dist/client/llms.txt'),
+    path.join(BUILD_OUTPUT_DIR, 'llms.txt'),
     output,
     'utf8'
   )
@@ -176,8 +179,11 @@ const generateLlmsTxtFile = docsData => {
 const generateLlmsFullTxtFile = fullContent => {
   const content = [getVersionHeader(), fullContent].join('\n\n')
   const output = rewriteLinksToMd(content, DOCS_BASE_URL)
+  if (!fs.existsSync(BUILD_OUTPUT_DIR)) {
+    fs.mkdirSync(BUILD_OUTPUT_DIR, { recursive: true })
+  }
   fs.writeFileSync(
-    path.join(__dirname, '../../../dist/apps/docs/dist/client/llms-full.txt'),
+    path.join(BUILD_OUTPUT_DIR, 'llms-full.txt'),
     output,
     'utf8'
   )

@@ -1,14 +1,13 @@
 ---
 import menuIcon from '@assets/icons/menu.svg?raw'
 import closeXIcon from '@assets/icons/closeX.svg?raw'
-const { labels } = Astro.props
 ---
 
 <starlight-menu-button>
   <div id="blur-overlay"></div>
   <button
     aria-expanded="false"
-    aria-label={labels['menuButton.accessibleLabel']}
+    aria-label={Astro.locals.t('menuButton.accessibleLabel' as any)}
     aria-controls="starlight__sidebar"
   >
     <Fragment set:html={menuIcon} />
