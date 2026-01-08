@@ -719,9 +719,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           where: {
             imageName: snapshot.imageName,
             id: Not(snapshot.id),
-            state: Not(
-              In([SnapshotState.ACTIVE, SnapshotState.INACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]),
-            ),
+            state: Not(In([SnapshotState.ACTIVE, SnapshotState.INACTIVE])),
           },
         })
         if (!anotherSnapshot) {
