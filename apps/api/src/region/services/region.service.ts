@@ -12,15 +12,19 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { In, IsNull, Repository } from 'typeorm'
+import { DataSource, In, IsNull, Repository } from 'typeorm'
 import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
 import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
 import { Runner } from '../../sandbox/entities/runner.entity'
 import { RegionType } from '../enums/region-type.enum'
 import { CreateRegionResponseDto } from '../dto/create-region.dto'
-import { generateApiKeyHash, generateApiKeyValue } from '../../common/utils/api-key'
+import { generateApiKeyHash, generateApiKeyValue, generateRandomString } from '../../common/utils/api-key'
 import { RegionDto } from '../dto/region.dto'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { RegionEvents } from '../constants/region-events.constant'
+import { RegionCreatedEvent } from '../events/region-created.event'
+import { RegionDeletedEvent } from '../events/region-deleted.event'
 
 @Injectable()
 export class RegionService {
@@ -31,6 +35,8 @@ export class RegionService {
     private readonly regionRepository: Repository<Region>,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
+    private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -61,6 +67,9 @@ export class RegionService {
       const proxyApiKey = createRegionDto.proxyUrl ? generateApiKeyValue() : undefined
       const sshGatewayApiKey = createRegionDto.sshGatewayUrl ? generateApiKeyValue() : undefined
 
+      const snapshotManagerUsername = createRegionDto.snapshotManagerUrl ? 'daytona' : undefined
+      const snapshotManagerPassword = createRegionDto.snapshotManagerUrl ? generateRandomString(16) : undefined
+
       const region = new Region({
         name: createRegionDto.name,
         enforceQuotas: createRegionDto.enforceQuotas,
@@ -71,11 +80,24 @@ export class RegionService {
         sshGatewayUrl: createRegionDto.sshGatewayUrl,
         proxyApiKeyHash: proxyApiKey ? generateApiKeyHash(proxyApiKey) : null,
         sshGatewayApiKeyHash: sshGatewayApiKey ? generateApiKeyHash(sshGatewayApiKey) : null,
+        snapshotManagerUrl: createRegionDto.snapshotManagerUrl,
       })
 
-      await this.regionRepository.save(region)
+      await this.dataSource.transaction(async (em) => {
+        await em.save(region)
+        await this.eventEmitter.emitAsync(
+          RegionEvents.CREATED,
+          new RegionCreatedEvent(em, region, organizationId, snapshotManagerUsername, snapshotManagerPassword),
+        )
+      })
 
-      return new CreateRegionResponseDto({ id: region.id, proxyApiKey, sshGatewayApiKey })
+      return new CreateRegionResponseDto({
+        id: region.id,
+        proxyApiKey,
+        sshGatewayApiKey,
+        snapshotManagerUsername,
+        snapshotManagerPassword,
+      })
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Region with name ${createRegionDto.name} already exists`)
@@ -227,7 +249,10 @@ export class RegionService {
       )
     }
 
-    await this.regionRepository.remove(region)
+    await this.dataSource.transaction(async (em) => {
+      await this.eventEmitter.emitAsync(RegionEvents.DELETED, new RegionDeletedEvent(em, region))
+      await em.remove(region)
+    })
   }
 
   /**

@@ -14,8 +14,18 @@ import {
   UseGuards,
   HttpCode,
   ForbiddenException,
+  Query,
 } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiOAuth2, ApiHeader, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiOAuth2,
+  ApiHeader,
+  ApiParam,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { DockerRegistryService } from '../services/docker-registry.service'
 import { CreateDockerRegistryDto } from '../dto/create-docker-registry.dto'
@@ -105,7 +115,11 @@ export class DockerRegistryController {
     type: [DockerRegistryDto],
   })
   async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<DockerRegistryDto[]> {
-    const dockerRegistries = await this.dockerRegistryService.findAll(authContext.organizationId)
+    const dockerRegistries = await this.dockerRegistryService.findAll(
+      authContext.organizationId,
+      // only include registries manually created by the organization
+      RegistryType.ORGANIZATION,
+    )
     return dockerRegistries.map(DockerRegistryDto.fromDockerRegistry)
   }
 
@@ -115,13 +129,22 @@ export class DockerRegistryController {
     summary: 'Get temporary registry access for pushing snapshots',
     operationId: 'getTransientPushAccess',
   })
+  @ApiQuery({
+    name: 'regionId',
+    required: false,
+    description: 'ID of the region where the snapshot will be available (defaults to organization default region)',
+    type: 'string',
+  })
   @ApiResponse({
     status: 200,
     description: 'Temporary registry access has been generated',
     type: RegistryPushAccessDto,
   })
-  async getTransientPushAccess(@AuthContext() authContext: OrganizationAuthContext): Promise<RegistryPushAccessDto> {
-    return this.dockerRegistryService.getRegistryPushAccess(authContext.organizationId, authContext.userId)
+  async getTransientPushAccess(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Query('regionId') regionId?: string,
+  ): Promise<RegistryPushAccessDto> {
+    return this.dockerRegistryService.getRegistryPushAccess(authContext.organizationId, authContext.userId, regionId)
   }
 
   @Get(':id')

@@ -173,7 +173,7 @@ export class SnapshotService {
       let imageDetails: ImageDetails | undefined = undefined
 
       try {
-        imageDetails = await this.dockerRegistryService.getImageDetails(createSnapshotDto.imageName, organization.id)
+        imageDetails = await this.dockerRegistryService.getImageDetails(createSnapshotDto.imageName, regionId)
       } catch (error) {
         this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
       }
@@ -193,12 +193,15 @@ export class SnapshotService {
           }
         }
 
-        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(regionId)
+        if (!internalRegistry) {
+          throw new Error('No internal registry found for snapshot')
+        }
         const hash =
           imageDetails.digest && imageDetails.digest.startsWith('sha256:')
             ? imageDetails.digest.substring('sha256:'.length)
             : imageDetails.digest
-        ref = `${defaultInternalRegistry.url.replace(/^https?:\/\//, '')}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
+        ref = `${internalRegistry.url.replace(/^https?:\/\//, '')}/${internalRegistry.project || 'daytona'}/daytona-${hash}:daytona`
 
         const exists = await this.readySnapshotRunnerExists(ref, regionId)
 
@@ -311,8 +314,11 @@ export class SnapshotService {
         snapshot.buildInfo = buildInfoEntity
       }
 
-      const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      snapshot.ref = `${defaultInternalRegistry.url.replace(/^(https?:\/\/)/, '')}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
+      const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(regionId)
+      if (!internalRegistry) {
+        throw new Error('No internal registry found for snapshot')
+      }
+      snapshot.ref = `${internalRegistry.url.replace(/^(https?:\/\/)/, '')}/${internalRegistry.project || 'daytona'}/${buildSnapshotRef}`
 
       const exists = await this.readySnapshotRunnerExists(snapshot.ref, regionId)
 

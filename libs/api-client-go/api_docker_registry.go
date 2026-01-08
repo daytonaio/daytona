@@ -448,11 +448,18 @@ type DockerRegistryAPIGetTransientPushAccessRequest struct {
 	ctx                    context.Context
 	ApiService             DockerRegistryAPI
 	xDaytonaOrganizationID *string
+	regionId               *string
 }
 
 // Use with JWT to specify the organization ID
 func (r DockerRegistryAPIGetTransientPushAccessRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) DockerRegistryAPIGetTransientPushAccessRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// ID of the region where the snapshot will be available (defaults to organization default region)
+func (r DockerRegistryAPIGetTransientPushAccessRequest) RegionId(regionId string) DockerRegistryAPIGetTransientPushAccessRequest {
+	r.regionId = &regionId
 	return r
 }
 
@@ -495,6 +502,9 @@ func (a *DockerRegistryAPIService) GetTransientPushAccessExecute(r DockerRegistr
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.regionId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "regionId", r.regionId, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

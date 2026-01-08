@@ -26,6 +26,7 @@ const DEFAULT_FORM_DATA = {
   name: '',
   proxyUrl: '',
   sshGatewayUrl: '',
+  snapshotManagerUrl: '',
 }
 
 interface CreateRegionDialogProps {
@@ -45,6 +46,7 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
   const [createdRegion, setCreatedRegion] = useState<CreateRegionResponse | null>(null)
   const [isProxyApiKeyRevealed, setIsProxyApiKeyRevealed] = useState(false)
   const [isSshGatewayApiKeyRevealed, setIsSshGatewayApiKeyRevealed] = useState(false)
+  const [isSnapshotManagerPasswordRevealed, setIsSnapshotManagerPasswordRevealed] = useState(false)
 
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA)
 
@@ -55,11 +57,17 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
         name: formData.name,
         proxyUrl: formData.proxyUrl.trim() || null,
         sshGatewayUrl: formData.sshGatewayUrl.trim() || null,
+        snapshotManagerUrl: formData.snapshotManagerUrl.trim() || null,
       }
 
       const region = await onCreateRegion(createRegionData)
       if (region) {
-        if (!region.proxyApiKey && !region.sshGatewayApiKey) {
+        if (
+          !region.proxyApiKey &&
+          !region.sshGatewayApiKey &&
+          !region.snapshotManagerUsername &&
+          !region.snapshotManagerPassword
+        ) {
           setOpen(false)
           setCreatedRegion(null)
         } else {
@@ -96,6 +104,7 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
           setFormData(DEFAULT_FORM_DATA)
           setIsProxyApiKeyRevealed(false)
           setIsSshGatewayApiKeyRevealed(false)
+          setIsSnapshotManagerPasswordRevealed(false)
         }
       }}
     >
@@ -108,20 +117,25 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
 
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Create New Region</DialogTitle>
-          <DialogDescription>Add a new region for grouping runners and sandboxes.</DialogDescription>
+          <DialogTitle>{createdRegion ? 'New Region Created' : 'Create New Region'}</DialogTitle>
+          <DialogDescription>
+            {!createdRegion
+              ? 'Add a new region for grouping runners and sandboxes.'
+              : createdRegion.proxyApiKey ||
+                  createdRegion.sshGatewayApiKey ||
+                  createdRegion.snapshotManagerUsername ||
+                  createdRegion.snapshotManagerPassword
+                ? "Save these credentials securely. You won't be able to see them again."
+                : ''}
+          </DialogDescription>
         </DialogHeader>
 
-        {createdRegion && (createdRegion.proxyApiKey || createdRegion.sshGatewayApiKey) ? (
+        {createdRegion &&
+        (createdRegion.proxyApiKey ||
+          createdRegion.sshGatewayApiKey ||
+          createdRegion.snapshotManagerUsername ||
+          createdRegion.snapshotManagerPassword) ? (
           <div className="space-y-6">
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Region created successfully.{' '}
-                {(createdRegion.proxyApiKey || createdRegion.sshGatewayApiKey) &&
-                  "Save these API keys securely. You won't be able to see them again."}
-              </p>
-            </div>
-
             {createdRegion.proxyApiKey && (
               <div className="space-y-3">
                 <Label htmlFor="proxy-api-key">Proxy API Key</Label>
@@ -157,6 +171,42 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
                   <Copy
                     className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
                     onClick={() => copyToClipboard(createdRegion.sshGatewayApiKey!)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {createdRegion.snapshotManagerUsername && (
+              <div className="space-y-3">
+                <Label htmlFor="snapshot-manager-username">Snapshot manager username</Label>
+                <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                  <span className="overflow-x-auto pr-2 cursor-text select-all">
+                    {createdRegion.snapshotManagerUsername}
+                  </span>
+                  <Copy
+                    className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => copyToClipboard(createdRegion.snapshotManagerUsername!)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {createdRegion.snapshotManagerPassword && (
+              <div className="space-y-3">
+                <Label htmlFor="snapshot-manager-password">Snapshot manager password</Label>
+                <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                  <span
+                    className="overflow-x-auto pr-2 cursor-text select-all"
+                    onMouseEnter={() => setIsSnapshotManagerPasswordRevealed(true)}
+                    onMouseLeave={() => setIsSnapshotManagerPasswordRevealed(false)}
+                  >
+                    {isSnapshotManagerPasswordRevealed
+                      ? createdRegion.snapshotManagerPassword
+                      : getMaskedToken(createdRegion.snapshotManagerPassword)}
+                  </span>
+                  <Copy
+                    className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => copyToClipboard(createdRegion.snapshotManagerPassword!)}
                   />
                 </div>
               </div>
@@ -202,7 +252,7 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="ssh-gateway-url">SSH Gateway URL</Label>
+              <Label htmlFor="ssh-gateway-url">SSH gateway URL</Label>
               <Input
                 id="ssh-gateway-url"
                 value={formData.sshGatewayUrl}
@@ -213,6 +263,21 @@ export const CreateRegionDialog: React.FC<CreateRegionDialogProps> = ({
               />
               <p className="text-sm text-muted-foreground mt-1 pl-1">
                 (Optional) URL of the custom SSH gateway for this region
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="snapshot-manager-url">Snapshot manager URL</Label>
+              <Input
+                id="snapshot-manager-url"
+                value={formData.snapshotManagerUrl}
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, snapshotManagerUrl: e.target.value }))
+                }}
+                placeholder="https://snapshot-manager.example.com"
+              />
+              <p className="text-sm text-muted-foreground mt-1 pl-1">
+                (Optional) URL of the custom snapshot manager for this region
               </p>
             </div>
           </form>

@@ -187,11 +187,13 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
      *
      * @summary Get temporary registry access for pushing snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [regionId] ID of the region where the snapshot will be available (defaults to organization default region)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getTransientPushAccess: async (
       xDaytonaOrganizationID?: string,
+      regionId?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/docker-registry/registry-push-access`
@@ -211,6 +213,10 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
+
+      if (regionId !== undefined) {
+        localVarQueryParameter['regionId'] = regionId
+      }
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -455,14 +461,20 @@ export const DockerRegistryApiFp = function (configuration?: Configuration) {
      *
      * @summary Get temporary registry access for pushing snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [regionId] ID of the region where the snapshot will be available (defaults to organization default region)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getTransientPushAccess(
       xDaytonaOrganizationID?: string,
+      regionId?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegistryPushAccessDto>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getTransientPushAccess(xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getTransientPushAccess(
+        xDaytonaOrganizationID,
+        regionId,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['DockerRegistryApi.getTransientPushAccess']?.[localVarOperationServerIndex]?.url
@@ -615,15 +627,17 @@ export const DockerRegistryApiFactory = function (
      *
      * @summary Get temporary registry access for pushing snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [regionId] ID of the region where the snapshot will be available (defaults to organization default region)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getTransientPushAccess(
       xDaytonaOrganizationID?: string,
+      regionId?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<RegistryPushAccessDto> {
       return localVarFp
-        .getTransientPushAccess(xDaytonaOrganizationID, options)
+        .getTransientPushAccess(xDaytonaOrganizationID, regionId, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -738,13 +752,14 @@ export class DockerRegistryApi extends BaseAPI {
    *
    * @summary Get temporary registry access for pushing snapshots
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {string} [regionId] ID of the region where the snapshot will be available (defaults to organization default region)
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DockerRegistryApi
    */
-  public getTransientPushAccess(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getTransientPushAccess(xDaytonaOrganizationID?: string, regionId?: string, options?: RawAxiosRequestConfig) {
     return DockerRegistryApiFp(this.configuration)
-      .getTransientPushAccess(xDaytonaOrganizationID, options)
+      .getTransientPushAccess(xDaytonaOrganizationID, regionId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

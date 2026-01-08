@@ -36,4 +36,16 @@ export interface CreateRegionResponse {
    * @memberof CreateRegionResponse
    */
   sshGatewayApiKey?: string | null
+  /**
+   * Snapshot Manager username for the region
+   * @type {string}
+   * @memberof CreateRegionResponse
+   */
+  snapshotManagerUsername?: string | null
+  /**
+   * Snapshot Manager password for the region
+   * @type {string}
+   * @memberof CreateRegionResponse
+   */
+  snapshotManagerPassword?: string | null
 }

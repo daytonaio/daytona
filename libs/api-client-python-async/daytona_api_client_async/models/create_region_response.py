@@ -30,8 +30,10 @@ class CreateRegionResponse(BaseModel):
     id: StrictStr = Field(description="ID of the created region")
     proxy_api_key: Optional[StrictStr] = Field(default=None, description="Proxy API key for the region", alias="proxyApiKey")
     ssh_gateway_api_key: Optional[StrictStr] = Field(default=None, description="SSH Gateway API key for the region", alias="sshGatewayApiKey")
+    snapshot_manager_username: Optional[StrictStr] = Field(default=None, description="Snapshot Manager username for the region", alias="snapshotManagerUsername")
+    snapshot_manager_password: Optional[StrictStr] = Field(default=None, description="Snapshot Manager password for the region", alias="snapshotManagerPassword")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "proxyApiKey", "sshGatewayApiKey"]
+    __properties: ClassVar[List[str]] = ["id", "proxyApiKey", "sshGatewayApiKey", "snapshotManagerUsername", "snapshotManagerPassword"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,6 +91,16 @@ class CreateRegionResponse(BaseModel):
         if self.ssh_gateway_api_key is None and "ssh_gateway_api_key" in self.model_fields_set:
             _dict['sshGatewayApiKey'] = None
 
+        # set to None if snapshot_manager_username (nullable) is None
+        # and model_fields_set contains the field
+        if self.snapshot_manager_username is None and "snapshot_manager_username" in self.model_fields_set:
+            _dict['snapshotManagerUsername'] = None
+
+        # set to None if snapshot_manager_password (nullable) is None
+        # and model_fields_set contains the field
+        if self.snapshot_manager_password is None and "snapshot_manager_password" in self.model_fields_set:
+            _dict['snapshotManagerPassword'] = None
+
         return _dict
 
     @classmethod
@@ -103,7 +115,9 @@ class CreateRegionResponse(BaseModel):
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "proxyApiKey": obj.get("proxyApiKey"),
-            "sshGatewayApiKey": obj.get("sshGatewayApiKey")
+            "sshGatewayApiKey": obj.get("sshGatewayApiKey"),
+            "snapshotManagerUsername": obj.get("snapshotManagerUsername"),
+            "snapshotManagerPassword": obj.get("snapshotManagerPassword")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

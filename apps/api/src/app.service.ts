@@ -178,7 +178,9 @@ Admin user created with API key: ${value}
   }
 
   private async initializeTransientRegistry(): Promise<void> {
-    const existingRegistry = await this.dockerRegistryService.getDefaultTransientRegistry()
+    const existingRegistry = await this.dockerRegistryService.getAvailableTransientRegistry(
+      this.configService.getOrThrow('defaultRegion.id'),
+    )
     if (existingRegistry) {
       return
     }
@@ -209,7 +211,9 @@ Admin user created with API key: ${value}
   }
 
   private async initializeInternalRegistry(): Promise<void> {
-    const existingRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    const existingRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(
+      this.configService.getOrThrow('defaultRegion.id'),
+    )
     if (existingRegistry) {
       return
     }
