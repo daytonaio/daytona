@@ -147,9 +147,9 @@ export class SnapshotService {
     }
 
     try {
-      let entrypoint = createSnapshotDto.entrypoint
-      let ref: string | undefined = undefined
-      let state: SnapshotState = SnapshotState.PENDING
+      const entrypoint = createSnapshotDto.entrypoint
+      const ref: string | undefined = undefined
+      const state: SnapshotState = SnapshotState.PENDING
 
       const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
       if (nameValidationError) {
@@ -175,43 +175,6 @@ export class SnapshotService {
 
       if (pendingSnapshotCountIncremented) {
         pendingSnapshotCountIncrement = newSnapshotCount
-      }
-
-      let imageDetails: ImageDetails | undefined = undefined
-
-      try {
-        imageDetails = await this.dockerRegistryService.getImageDetails(createSnapshotDto.imageName, organization.id)
-      } catch (error) {
-        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
-      }
-
-      if (imageDetails) {
-        if (imageDetails?.sizeGB > organization.maxSnapshotSize) {
-          throw new ForbiddenException(
-            `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
-          )
-        }
-
-        if ((!entrypoint || entrypoint.length === 0) && imageDetails) {
-          if (imageDetails.entrypoint && imageDetails.entrypoint.length > 0) {
-            entrypoint = imageDetails.entrypoint
-          } else {
-            entrypoint = ['sleep', 'infinity']
-          }
-        }
-
-        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-        const hash =
-          imageDetails.digest && imageDetails.digest.startsWith('sha256:')
-            ? imageDetails.digest.substring('sha256:'.length)
-            : imageDetails.digest
-        ref = `${defaultInternalRegistry.url.replace(/^https?:\/\//, '')}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
-
-        const exists = await this.readySnapshotRunnerExists(ref, regionId)
-
-        if (exists) {
-          state = SnapshotState.ACTIVE
-        }
       }
 
       try {

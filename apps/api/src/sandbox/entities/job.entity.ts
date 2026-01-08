@@ -26,12 +26,13 @@ import { v4 } from 'uuid'
   unique: true,
   where: '"completedAt" IS NULL',
 })
-@Check(
-  'VALIDATE_JOB_TYPE',
-  `"type" IN (${Object.values(JobType)
-    .map((v) => `'${v}'`)
-    .join(', ')})`,
-)
+// FIXME: Add this once https://github.com/typeorm/typeorm/issues/11714 is resolved
+// @Check(
+//   'VALIDATE_JOB_TYPE',
+//   `"type" IN (${Object.values(JobType)
+//     .map((v) => `'${v}'`)
+//     .join(', ')})`,
+// )
 export class Job {
   @PrimaryGeneratedColumn('uuid')
   id: string

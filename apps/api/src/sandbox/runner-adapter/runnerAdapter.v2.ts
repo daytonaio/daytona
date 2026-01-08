@@ -6,7 +6,14 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, IsNull } from 'typeorm'
-import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo, StartSandboxResponse } from './runnerAdapter'
+import {
+  RunnerAdapter,
+  RunnerInfo,
+  RunnerSandboxInfo,
+  RunnerSnapshotInfo,
+  StartSandboxResponse,
+  SnapshotDigestResponse,
+} from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Job } from '../entities/job.entity'
@@ -23,6 +30,7 @@ import {
   BuildSnapshotRequestDTO,
   PullSnapshotRequestDTO,
   UpdateNetworkSettingsDTO,
+  InspectSnapshotInRegistryRequest,
 } from '@daytonaio/runner-api-client'
 
 /**
@@ -403,6 +411,51 @@ export class RunnerAdapterV2 implements RunnerAdapter {
         throw new Error(
           `Snapshot ${snapshotRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,
         )
+    }
+  }
+
+  async inspectSnapshotInRegistry(snapshotName: string, registry?: DockerRegistry): Promise<SnapshotDigestResponse> {
+    const payload: InspectSnapshotInRegistryRequest = {
+      snapshot: snapshotName,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    }
+
+    const job = await this.jobService.createJob(
+      null,
+      JobType.INSPECT_SNAPSHOT_IN_REGISTRY,
+      this.runner.id,
+      ResourceType.SNAPSHOT,
+      snapshotName,
+      payload,
+    )
+
+    this.logger.debug(`Created INSPECT_SNAPSHOT_IN_REGISTRY job for ${snapshotName} on runner ${this.runner.id}`)
+
+    const waitTimeout = 30 * 1000 // 30 seconds
+    const completedJob = await this.jobService.waitJobCompletion(job.id, waitTimeout)
+
+    if (!completedJob) {
+      throw new Error(`Snapshot ${snapshotName} not found in registry on runner ${this.runner.id}`)
+    }
+
+    if (completedJob.status !== JobStatus.COMPLETED) {
+      throw new Error(
+        `Snapshot ${snapshotName} failed to inspect in registry on runner ${this.runner.id}. Error: ${completedJob.errorMessage}`,
+      )
+    }
+
+    const resultMetadata = completedJob.getResultMetadata()
+
+    return {
+      hash: resultMetadata?.hash,
+      sizeGB: resultMetadata?.sizeGB,
     }
   }
 

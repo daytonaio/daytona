@@ -30,11 +30,12 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { setTimeout as sleep } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
-import { RunnerAdapterFactory, RunnerSnapshotInfo } from '../runner-adapter/runnerAdapter'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotService } from '../services/snapshot.service'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { parseDockerImage } from '../../common/utils/docker-image.util'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -608,10 +609,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     const snapshotInfoResponse = await runnerAdapter.getSnapshotInfo(initialImageRefOnRunner)
 
-    // Process snapshot info in case it had failed or it's a build snapshot
-    if (!snapshot.ref) {
-      await this.processSnapshotInfo(snapshot, snapshotInfoResponse)
-    }
+    await this.processSnapshotDigest(
+      snapshot,
+      snapshotInfoResponse.hash,
+      snapshotInfoResponse.sizeGB,
+      snapshotInfoResponse.entrypoint,
+    )
 
     try {
       await runnerAdapter.removeSnapshot(initialImageRefOnRunner)
@@ -741,33 +744,42 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleSnapshotStatePending(snapshot: Snapshot): Promise<SyncState> {
-    // TODO: get only runners where the base snapshot is available (extract from buildInfo)
-    const excludedRunnerIds = snapshot.buildInfo
-      ? await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
-      : await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
+    let initialRunner: Runner | undefined = undefined
 
-    let initialRunner: Runner | null = null
-    try {
-      const regions = await this.snapshotService.getSnapshotRegions(snapshot.id)
-      if (!regions.length) {
-        throw new Error('No regions found for snapshot')
+    if (!snapshot.initialRunnerId) {
+      // TODO: get only runners where the base snapshot is available (extract from buildInfo)
+      const excludedRunnerIds = snapshot.buildInfo
+        ? await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
+        : await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
+
+      try {
+        const regions = await this.snapshotService.getSnapshotRegions(snapshot.id)
+        if (!regions.length) {
+          throw new Error('No regions found for snapshot')
+        }
+
+        initialRunner = await this.runnerService.getRandomAvailableRunner({
+          regions: regions.map((region) => region.id),
+          excludedRunnerIds: excludedRunnerIds,
+        })
+      } catch (error) {
+        this.logger.warn(`Failed to get initial runner: ${fromAxiosError(error)}`)
       }
 
-      initialRunner = await this.runnerService.getRandomAvailableRunner({
-        regions: regions.map((region) => region.id),
-        excludedRunnerIds: excludedRunnerIds,
+      if (!initialRunner) {
+        // No runners available, retry later
+        return DONT_SYNC_AGAIN
+      }
+
+      snapshot.initialRunnerId = initialRunner.id
+      await this.snapshotRepository.save(snapshot)
+    } else {
+      initialRunner = await this.runnerRepository.findOneOrFail({
+        where: {
+          id: snapshot.initialRunnerId,
+        },
       })
-    } catch (error) {
-      this.logger.warn(`Failed to get initial runner: ${fromAxiosError(error)}`)
     }
-
-    if (!initialRunner) {
-      // No runners available, retry later
-      return DONT_SYNC_AGAIN
-    }
-
-    snapshot.initialRunnerId = initialRunner.id
-    await this.snapshotRepository.save(snapshot)
 
     if (snapshot.buildInfo) {
       await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
@@ -778,6 +790,22 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       )
       await this.processBuildOnRunner(snapshot, initialRunner)
     } else {
+      if (!snapshot.ref) {
+        const runnerAdapter = await this.runnerAdapterFactory.create(initialRunner)
+        const registry = await this.dockerRegistryService.findRegistryByImageName(
+          snapshot.imageName,
+          snapshot.organizationId,
+        )
+        const image = parseDockerImage(snapshot.imageName)
+        const imageName = registry
+          ? `${registry.url.replace(/^(https?:\/\/)/, '')}${registry.project ? `/${registry.project}` : ''}/${image.repository}:${image.tag}`
+          : `${image.repository}:${image.tag}`
+
+        const snapshotDigestResponse = await runnerAdapter.inspectSnapshotInRegistry(imageName, registry)
+        await this.processSnapshotDigest(snapshot, snapshotDigestResponse.hash, snapshotDigestResponse.sizeGB)
+        await this.snapshotRepository.save(snapshot)
+      }
+
       await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
       await this.runnerService.createSnapshotRunnerEntry(
         initialRunner.id,
@@ -980,40 +1008,56 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  private async processSnapshotInfo(snapshot: Snapshot, snapshotInfoResponse: RunnerSnapshotInfo) {
-    const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-    const sanitizedUrl = defaultInternalRegistry.url.replace(/^https?:\/\//, '')
-    snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${snapshotInfoResponse.hash}:daytona`
-
-    const organization = await this.organizationService.findOne(snapshot.organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
+  private async processSnapshotDigest(
+    snapshot: Snapshot,
+    hash: string,
+    sizeGB: number,
+    entrypoint?: string[] | string,
+  ) {
+    let shouldSave = false
+    if (!snapshot.ref) {
+      shouldSave = true
+      const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      const sanitizedUrl = defaultInternalRegistry.url.replace(/^https?:\/\//, '')
+      snapshot.ref = `${sanitizedUrl}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
     }
 
-    const MAX_SIZE_GB = organization.maxSnapshotSize
+    if (!snapshot.size) {
+      shouldSave = true
 
-    if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
-      await this.updateSnapshotState(
-        snapshot.id,
-        SnapshotState.ERROR,
-        `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
-      )
-      return DONT_SYNC_AGAIN
+      const organization = await this.organizationService.findOne(snapshot.organizationId)
+      if (!organization) {
+        throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
+      }
+
+      const MAX_SIZE_GB = organization.maxSnapshotSize
+
+      if (sizeGB > MAX_SIZE_GB) {
+        await this.updateSnapshotState(
+          snapshot.id,
+          SnapshotState.ERROR,
+          `Snapshot size (${sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
+        )
+        return DONT_SYNC_AGAIN
+      }
+
+      snapshot.size = sizeGB
     }
-
-    snapshot.size = snapshotInfoResponse.sizeGB
 
     // If entrypoint is not explicitly set, set it from snapshotInfoResponse
     if (!snapshot.entrypoint) {
-      if (snapshotInfoResponse.entrypoint && snapshotInfoResponse.entrypoint.length > 0) {
-        if (Array.isArray(snapshotInfoResponse.entrypoint)) {
-          snapshot.entrypoint = snapshotInfoResponse.entrypoint
+      if (entrypoint && entrypoint.length > 0) {
+        shouldSave = true
+        if (Array.isArray(entrypoint)) {
+          snapshot.entrypoint = entrypoint
         } else {
-          snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
+          snapshot.entrypoint = [entrypoint]
         }
-      } else {
-        snapshot.entrypoint = ['sleep', 'infinity']
       }
+    }
+
+    if (shouldSave) {
+      await this.snapshotRepository.save(snapshot)
     }
   }
 

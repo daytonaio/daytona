@@ -29,6 +29,11 @@ export interface RunnerSnapshotInfo {
   hash: string
 }
 
+export interface SnapshotDigestResponse {
+  hash: string
+  sizeGB: number
+}
+
 export interface RunnerMetrics {
   currentAllocatedCpu?: number
   currentAllocatedDiskGiB?: number
@@ -85,6 +90,7 @@ export interface RunnerAdapter {
   ): Promise<void>
   snapshotExists(snapshotRef: string): Promise<boolean>
   getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>
+  inspectSnapshotInRegistry(snapshotName: string, registry?: DockerRegistry): Promise<SnapshotDigestResponse>
 
   updateNetworkSettings(
     sandboxId: string,

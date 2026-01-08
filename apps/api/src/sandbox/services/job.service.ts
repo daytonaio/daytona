@@ -293,6 +293,26 @@ export class JobService {
     })
   }
 
+  async waitJobCompletion(jobId: string, waitTimeout: number): Promise<Job | null> {
+    const startTime = Date.now()
+    const endTime = startTime + waitTimeout
+
+    while (Date.now() < endTime) {
+      const job = await this.findOne(jobId)
+      if (!job) {
+        return null
+      }
+
+      if (job.status === JobStatus.COMPLETED || job.status === JobStatus.FAILED) {
+        return job
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+
+    throw new Error(`Job ${jobId} timed out after ${waitTimeout}ms`)
+  }
+
   /**
    * Captures the current OpenTelemetry trace context in W3C Trace Context format
    * This allows distributed tracing across the API and runner services
