@@ -592,4 +592,29 @@ export class OrganizationController {
       body.sandboxDefaultLimitedNetworkEgress,
     )
   }
+
+  @Post('/:organizationId/sso')
+  @ApiOperation({
+    summary: 'Create organization SSO',
+    operationId: 'createOrganizationSso',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Organization SSO created successfully',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
+  async createOrganizationSso(@Param('organizationId') organizationId: string): Promise<void> {
+    return this.organizationService.createOrganizationSso(organizationId)
+  }
 }

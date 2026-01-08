@@ -49,6 +49,7 @@ import { CreateOrganizationInternalDto } from '../dto/create-organization.intern
 import { RegionService } from '../../region/services/region.service'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
+import { Auth0Service } from './auth0.service'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -70,6 +71,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     @InjectRepository(RegionQuota)
     private readonly regionQuotaRepository: Repository<RegionQuota>,
     private readonly regionService: RegionService,
+    private readonly auth0Service: Auth0Service,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -579,5 +581,21 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
         throw new ForbiddenException('Organization is suspended')
       }
     }
+  }
+
+  async createOrganizationSso(organizationId: string): Promise<void> {
+    const organization = await this.organizationRepository.findOne({
+      where: { id: organizationId },
+      relations: ['users'],
+    })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    await this.auth0Service.createOrganization(organization)
+    await this.auth0Service.addOrganizationMembers(
+      organization.id,
+      organization.users.map((user) => user.userId),
+    )
   }
 }

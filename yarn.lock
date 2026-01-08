@@ -15689,6 +15689,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"auth0-legacy@npm:auth0@^4.27.0":
+  version: 4.37.0
+  resolution: "auth0@npm:4.37.0"
+  dependencies:
+    jose: "npm:^4.13.2"
+    undici-types: "npm:^6.15.0"
+    uuid: "npm:^9.0.0"
+  checksum: 10c0/42aac4366003e3d64164460c4911857bd4d5cf410fb05607383778abdaf3efc09ee4050f9f6c1d6ee4624d62d230ee305a9b0580b139f1a4544348025fe0c70f
+  languageName: node
+  linkType: hard
+
+"auth0@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "auth0@npm:5.2.0"
+  dependencies:
+    auth0-legacy: "npm:auth0@^4.27.0"
+    jose: "npm:^4.13.2"
+    uuid: "npm:^11.1.0"
+  checksum: 10c0/89d66a0f163988f3824aaaeb8e211520182d4374e3b538f24620e11c0dd31a8ece0db7503be6c931e306907ae12605785c49c2d70bd94e39e6c18bc288073fcc
+  languageName: node
+  linkType: hard
+
 "autoprefixer@npm:10.4.13":
   version: 10.4.13
   resolution: "autoprefixer@npm:10.4.13"
@@ -18502,6 +18524,7 @@ __metadata:
     algoliasearch: "npm:^5.30.0"
     astro: "npm:4.16.18"
     astro-expressive-code: "npm:^0.41.2"
+    auth0: "npm:^5.2.0"
     autoprefixer: "npm:10.4.13"
     axios: "npm:^1.11.0"
     axios-debug-log: "npm:^1.0.0"
@@ -25131,7 +25154,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.15.4":
+"jose@npm:^4.13.2, jose@npm:^4.15.4":
   version: 4.15.9
   resolution: "jose@npm:4.15.9"
   checksum: 10c0/4ed4ddf4a029db04bd167f2215f65d7245e4dc5f36d7ac3c0126aab38d66309a9e692f52df88975d99429e357e5fd8bab340ff20baab544d17684dd1d940a0f4
@@ -36051,6 +36074,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici-types@npm:^6.15.0":
+  version: 6.23.0
+  resolution: "undici-types@npm:6.23.0"
+  checksum: 10c0/109eaff53165b76f527979a12252fb10ff5079942e461c18ec68ac9e91b603ede39edb29a04151d64645d449663bc360e50d60ad889445cac74a3cbe0b50e309
+  languageName: node
+  linkType: hard
+
 "undici-types@npm:~5.26.4":
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
@@ -36643,7 +36673,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^9.0.1":
+"uuid@npm:^9.0.0, uuid@npm:^9.0.1":
   version: 9.0.1
   resolution: "uuid@npm:9.0.1"
   bin:

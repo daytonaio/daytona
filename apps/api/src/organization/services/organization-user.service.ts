@@ -20,6 +20,7 @@ import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserService } from '../../user/user.service'
 import { UserEvents } from '../../user/constants/user-events.constant'
 import { UserDeletedEvent } from '../../user/events/user-deleted.event'
+import { Auth0Service } from './auth0.service'
 
 @Injectable()
 export class OrganizationUserService {
@@ -30,6 +31,7 @@ export class OrganizationUserService {
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
+    private readonly auth0Service: Auth0Service,
   ) {}
 
   async findAll(organizationId: string): Promise<OrganizationUserDto[]> {
@@ -143,6 +145,7 @@ export class OrganizationUserService {
     }
 
     await this.removeWithEntityManager(this.organizationUserRepository.manager, organizationUser)
+    await this.auth0Service.removeOrganizationMembers(organizationId, [userId])
   }
 
   private async removeWithEntityManager(
@@ -191,6 +194,7 @@ export class OrganizationUserService {
   async handleOrganizationInvitationAcceptedEvent(
     payload: OrganizationInvitationAcceptedEvent,
   ): Promise<OrganizationUser> {
+    await this.auth0Service.addOrganizationMembers(payload.organizationId, [payload.userId])
     return this.createWithEntityManager(
       payload.entityManager,
       payload.organizationId,
