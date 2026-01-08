@@ -700,7 +700,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     if (!imageExistsInRegistry) {
       this.logger.warn(`Snapshot ${snapshot.id} image ${snapshot.ref} not found in registry, waiting for propagation`)
       // Don't mark as ready yet, wait for the image to be available in the registry
-      // Save the snapshot ref for retries, this method will time out if the image is not found time
+      // Save the snapshot ref for retries, this method will time out if the image is not found in time
       await this.snapshotRepository.save(snapshot)
       return DONT_SYNC_AGAIN
     }
