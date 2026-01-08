@@ -285,7 +285,7 @@ The `build_test_harness` function combines the original prompt, the model's comp
         tests_tuple = ",\n        ".join(tests)
 
         return f"""{prompt}
-    {function_body}
+{function_body}
 
     import json
     import random
