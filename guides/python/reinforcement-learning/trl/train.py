@@ -101,7 +101,6 @@ async def _cleanup_sandbox_pool_async(sandbox_pool: List[AsyncSandbox]) -> None:
         if isinstance(r, Exception):
             print(f"  Sandbox delete error: {type(r).__name__}: {r}")
     print("All sandboxes cleaned up")
-
 class EvalResult(TypedDict):
     no_error: bool
     num_passed: int
