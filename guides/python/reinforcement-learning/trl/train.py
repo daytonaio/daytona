@@ -270,6 +270,31 @@ def main():
 
     sandbox_pool: List[AsyncSandbox] = []
 
+    training_args = GRPOConfig(
+        output_dir="training_results",
+        per_device_train_batch_size=20,
+        gradient_accumulation_steps=25,
+        num_generations=250,
+        max_prompt_length=256,
+        max_completion_length=512,
+        learning_rate=8e-6,
+        num_train_epochs=1,
+        logging_steps=1,
+        report_to="none",
+        max_steps=8,
+        bf16=True,
+        use_vllm=True,
+        vllm_mode="colocate",
+        vllm_gpu_memory_utilization=0.15,
+        gradient_checkpointing=True,
+        loss_type="dapo",
+        beta=0.01,
+    )
+    assert (
+        training_args.per_device_train_batch_size
+        * training_args.gradient_accumulation_steps
+    ) == SANDBOX_POOL_SIZE, "The total batch size must equal the sandbox pool size."
+    
     try:
         sandbox_pool = run_async(
             _create_sandbox_pool_async(daytona, n=SANDBOX_POOL_SIZE)
@@ -278,31 +303,6 @@ def main():
         train_dataset = Dataset.from_dict(
             {"prompt": [task["prompt"] for task in TASKS.values()]}
         )
-
-        training_args = GRPOConfig(
-            output_dir="training_results",
-            per_device_train_batch_size=20,
-            gradient_accumulation_steps=25,
-            num_generations=250,
-            max_prompt_length=256,
-            max_completion_length=512,
-            learning_rate=8e-6,
-            num_train_epochs=1,
-            logging_steps=1,
-            report_to="none",
-            max_steps=8,
-            bf16=True,
-            use_vllm=True,
-            vllm_mode="colocate",
-            vllm_gpu_memory_utilization=0.15,
-            gradient_checkpointing=True,
-            loss_type="dapo",
-            beta=0.01,
-        )
-        assert (
-            training_args.per_device_train_batch_size
-            * training_args.gradient_accumulation_steps
-        ) == SANDBOX_POOL_SIZE, "The total batch size must equal the sandbox pool size."
 
         def reward_func(prompts, completions, **kwargs):
             stats_list = run_async(
