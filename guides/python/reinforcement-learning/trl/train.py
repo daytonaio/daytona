@@ -11,7 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SANDBOX_POOL_SIZE = 500
+EFFECTIVE_BATCH_SIZE = 500
+# We evaluate each completion concurrently, in its own sandbox,
+# so we spawn EFFECTIVE_BATCH_SIZE number of sandboxes.
 MAX_TIMEOUT_SECONDS = 1
 MODEL_NAME = "Qwen/Qwen3-1.7B-Base"
 
@@ -293,11 +295,11 @@ def main():
     assert (
         training_args.per_device_train_batch_size
         * training_args.gradient_accumulation_steps
-    ) == SANDBOX_POOL_SIZE, "The total batch size must equal the sandbox pool size."
+    ) == EFFECTIVE_BATCH_SIZE, "The total batch size must equal the sandbox pool size."
     
     try:
         sandbox_pool = run_async(
-            _create_sandbox_pool_async(daytona, n=SANDBOX_POOL_SIZE)
+            _create_sandbox_pool_async(daytona, n=EFFECTIVE_BATCH_SIZE)
         )
 
         train_dataset = Dataset.from_dict(
