@@ -4,10 +4,16 @@ import arrowLeft from '@assets/icons/arrow-left.svg?raw'
 import { getPagination } from '../utils/navigation.js'
 import { getSidebarConfig } from '../content/config.js'
 
-const { dir, labels } = Astro.props
+const { dir } = Astro.props
 const isRtl = dir === 'rtl'
 const { prev, next } = getPagination(
-  getSidebarConfig(Astro.props.lang, Astro.props.labels),
+  getSidebarConfig(Astro.props.lang, (key: string) => {
+    try {
+      return Astro.locals?.t?.(key as any) || key
+    } catch {
+      return key
+    }
+  }),
   Astro.url.pathname
 )
 const { locale } = Astro.props
@@ -19,7 +25,9 @@ const { locale } = Astro.props
       <a href={prev.href} rel="prev">
         <Fragment set:html={isRtl ? arrowRight : arrowLeft} />
         <div class="pagination-links__container">
-          <span class="link-description">{labels['page.previousLink']}</span>
+          <span class="link-description">
+            {Astro.locals.t('page.previousLink' as any)}
+          </span>
           <span class="link-title">{prev.label}</span>
         </div>
       </a>
@@ -30,7 +38,9 @@ const { locale } = Astro.props
       <a href={next.href} rel="next">
         <Fragment set:html={isRtl ? arrowLeft : arrowRight} />
         <div class="pagination-links__container">
-          <span class="link-description">{labels['page.nextLink']}</span>
+          <span class="link-description">
+            {Astro.locals.t('page.nextLink' as any)}
+          </span>
           <span class="link-title">{next.label}</span>
         </div>
       </a>

@@ -13,35 +13,37 @@ const release = `${maj}.${min}`
 const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${release}.0`
 ---
 
-<Default {...Astro.props}>
+<Default {...Astro.props as any}>
   <slot />
 </Default>
 <footer class="docs-footer__container">
   <div class="docs-footer__container__support-links">
     <p>
       <Fragment set:html={textArrowIcon} />{
-        Astro.props.labels['footer.needHelp']
+        Astro.locals.t('footer.needHelp' as any)
       } -
       <a href="https://go.daytona.io/slack"
-        >{Astro.props.labels['footer.reachSupport']}</a
+        >{Astro.locals.t('footer.reachSupport' as any)}</a
       >
     </p>
     <p>
       <Fragment set:html={textArrowIcon} />{
-        Astro.props.labels['footer.latestUpdates']
+        Astro.locals.t('footer.latestUpdates' as any)
       } - <a href="https://github.com/daytonaio/daytona/commits/main/"
-        >{Astro.props.labels['footer.viewChangelog']}</a
+        >{Astro.locals.t('footer.viewChangelog' as any)}</a
       >
     </p>
     <p>
       <Fragment set:html={textArrowIcon} />{
-        Astro.props.labels['footer.dotfilesInsider']
+        Astro.locals.t('footer.dotfilesInsider' as any)
       } - <a href="https://www.daytona.io/dotfiles/"
-        >{Astro.props.labels['footer.readBlog']}</a
+        >{Astro.locals.t('footer.readBlog' as any)}</a
       >
     </p>
     <p>
-      <Fragment set:html={textArrowIcon} />{Astro.props.labels['footer.LLMs']} -
+      <Fragment set:html={textArrowIcon} />{
+        Astro.locals.t('footer.LLMs' as any)
+      } -
       <a href="https://www.daytona.io/docs/llms.txt">llms.txt</a> &
       <a href="https://www.daytona.io/docs/llms-full.txt">llms-full.txt</a>
     </p>
@@ -59,10 +61,10 @@ const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${releas
     </div>
     <div class="menu-list">
       <a href="https://www.daytona.io/company/privacy-policy"
-        >{Astro.props.labels['footer.privacyPolicy']}</a
+        >{Astro.locals.t('footer.privacyPolicy' as any)}</a
       >
       <a href="https://www.daytona.io/company/terms-of-service"
-        >{Astro.props.labels['footer.termsOfService']}</a
+        >{Astro.locals.t('footer.termsOfService' as any)}</a
       >
     </div>
   </div>

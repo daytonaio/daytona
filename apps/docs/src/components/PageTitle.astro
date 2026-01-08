@@ -18,7 +18,7 @@ const markdownRaw = Astro.props.entry.body
 }
 <div class="title-actions">
   <CopyButton client:load value={markdownRaw} variant="ghost"
-    >{Astro.props.labels['header.copyForLlms']}</CopyButton
+    >{Astro.locals.t('header.copyForLlms' as any)}</CopyButton
   >
   <LinkButton
     client:load
@@ -36,7 +36,7 @@ const markdownRaw = Astro.props.entry.body
       >
       </path>
     </svg>
-    {Astro.props.labels['header.viewAsMarkdown']}
+    {Astro.locals.t('header.viewAsMarkdown' as any)}
   </LinkButton>
   <OpenPageDropdown
     client:load
