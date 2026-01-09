@@ -1,12 +1,12 @@
 ---
 title: TypeScript SDK リファレンス
-description: TypeScript SDK を使用して Daytona のサンドボックスを操作する
+description: TypeScript SDK を使って Daytona のサンドボックスを操作する
 next: /docs/typescript-sdk/daytona
 ---
 
-Daytona の TypeScript SDK は、Daytona のサンドボックスをプログラムから操作するための強力なインターフェースを提供します。
+Daytona TypeScript SDK は、Daytona のサンドボックスをプログラムから操作するための強力なインターフェースを提供します。
 
-## インストール
+## インストール \{#installation\}
 
 npm を使用して Daytona の TypeScript SDK をインストールします：
 
@@ -14,21 +14,23 @@ npm を使用して Daytona の TypeScript SDK をインストールします：
 npm install @daytonaio/sdk
 ```
 
-または yarn を使用します：
+または yarn を使用する場合は：
 
 ```bash
 yarn add @daytonaio/sdk
 ```
 
-## はじめに
+## はじめに \{#getting-started\}
 
-Daytona の TypeScript SDK を使い始めるための簡単な例を紹介します:
+### サンドボックスを作成する \{#create-a-sandbox\}
+
+コードを安全に実行するための分離された環境内で動作する Daytona サンドボックスを作成します。次のスニペットは、Daytona サンドボックス内で安全に実行される「Hello World」プログラムの例です。
 
 ```typescript
 import { Daytona } from '@daytonaio/sdk'
 
 async function main() {
-  // SDK を初期化（デフォルトで環境変数を使用）
+  // SDKを初期化（デフォルトで環境変数を使用）
   const daytona = new Daytona()
 
   // 新しいサンドボックスを作成
@@ -45,9 +47,9 @@ async function main() {
 main().catch(console.error)
 ```
 
-## 設定
+## 設定 \{#configuration\}
 
-SDK は環境変数を使うか、コンストラクターにオプションを渡して設定できます:
+Daytona SDK は、環境変数を使用するか、コンストラクターにオプションを渡すことで設定できます。
 
 ```typescript
 import { Daytona } from '@daytonaio/sdk';
@@ -55,10 +57,77 @@ import { Daytona } from '@daytonaio/sdk';
 // 環境変数を使用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
 const daytona = new Daytona();
 
-// 明示的な設定を指定
+// 明示的な設定を使用
 const daytona = new Daytona({
-  apiKey: 'your-api-key',
+  apiKey: 'YOUR_API_KEY',
   apiUrl: 'https://app.daytona.io/api',
   target: 'us'
 });
+```
+
+Daytona SDK の設定の詳細については、[設定](/docs/ja/configuration)を参照してください。
+
+## 複数ランタイムのサポート \{#multiple-runtime-support\}
+
+Daytona は、サンドボックス内でコードを直接実行できるように、複数のプログラミング言語ランタイムをサポートしています。
+
+[TypeScript SDK](/docs/ja/typescript-sdk) は、**Node.js**、**ブラウザ**、および **サーバーレスプラットフォーム**（Cloudflare Workers、AWS Lambda、Azure Functions など）を含む複数の **JavaScript ランタイム** で動作します。
+
+ブラウザベースの環境や、[**Vite**](/docs/ja/getting-started#daytona-in-vite-projects) や [**Next.js**](/docs/ja/getting-started#daytona-in-nextjs-projects) のようなフレームワークで Daytona SDK を使用する場合は、Node.js ポリフィルの設定が必要です。
+
+### Vite プロジェクトにおける Daytona \{#daytona-in-vite-projects\}
+
+Vite ベースのプロジェクトで Daytona SDK を使用する場合は、互換性を確保するために Node のポリフィルを設定してください。
+
+`vite.config.ts` の `plugins` 配列に次の設定を追加してください:
+
+```typescript
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+export default defineConfig({
+  plugins: [
+    // ... その他のプラグイン
+    nodePolyfills({
+      globals: { global: true, process: true, Buffer: true },
+      overrides: {
+        path: 'path-browserify-win32',
+      },
+    }),
+  ],
+  // ... 設定の残りの部分
+})
+```
+
+### Next.js プジェクトでの Daytona \{#daytona-in-nextjs-projects\}
+
+Next.js プロジェクトで Daytona SDK を使用する場合は、Webpack および Turbopack との互換性を確保するため、Node のポリフィルを設定する必要があります。
+
+次の設定を `next.config.ts` ファイルに追加してください。
+
+```typescript
+import type { NextConfig } from 'next'
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
+import { env, nodeless } from 'unenv'
+
+const { alias: turbopackAlias } = env(nodeless, {})
+
+const nextConfig: NextConfig = {
+  // Turbopack
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        ...turbopackAlias,
+      },
+    },
+  },
+  // Webpack
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.plugins.push(new NodePolyfillPlugin())
+    }
+    return config
+  },
+}
+
+export default nextConfig
 ```
