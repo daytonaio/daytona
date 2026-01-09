@@ -112,7 +112,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
     this.logger.log(`Creating default runner: ${this.configService.getOrThrow('defaultRunner.name')}`)
 
-    const runnerVersion = this.configService.get('defaultRunner.apiVersion') || '0'
+    const runnerVersion = this.configService.getOrThrow('defaultRunner.apiVersion')
 
     if (runnerVersion === '0') {
       const { runner } = await this.runnerService.create({

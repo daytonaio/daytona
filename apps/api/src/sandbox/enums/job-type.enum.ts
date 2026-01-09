@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-/**
- * Adding/modifying job types here requires a database migration to update the VALIDATE_JOB_TYPE check constraint in the job table
- */
 export enum JobType {
   CREATE_SANDBOX = 'CREATE_SANDBOX',
   START_SANDBOX = 'START_SANDBOX',

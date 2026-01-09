@@ -182,5 +182,14 @@ export class Runner {
     this.appVersion = params.appVersion ?? null
     this.gpu = null
     this.gpuType = null
+
+    if (this.apiVersion === '0') {
+      if (!this.apiUrl) {
+        throw new Error('API URL is required for runner version 0')
+      }
+      if (!this.proxyUrl) {
+        this.proxyUrl = this.apiUrl
+      }
+    }
   }
 }
