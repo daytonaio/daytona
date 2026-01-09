@@ -247,7 +247,8 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 			return func() {}
 		}
 
-		err = p.sandboxLastActivityUpdateCache.Set(ctx, sandboxId, true, pollInterval)
+		// Expire a bit before the poll interval to avoid skipping one interval
+		err = p.sandboxLastActivityUpdateCache.Set(ctx, sandboxId, true, pollInterval-5*time.Second)
 		if err != nil {
 			log.Errorf("failed to set last activity update cache for sandbox %s: %v", sandboxId, err)
 		}
@@ -265,7 +266,7 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 			for {
 				select {
 				case <-ticker.C:
-					p.updateLastActivity(context.Background(), sandboxId, false)
+					p.updateLastActivity(context.WithoutCancel(ctx), sandboxId, false)
 				case <-done:
 					return
 				}
