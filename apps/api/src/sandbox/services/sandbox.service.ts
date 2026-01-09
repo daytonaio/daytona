@@ -66,12 +66,14 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { SnapshotService } from './snapshot.service'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -101,6 +103,7 @@ export class SandboxService {
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRedis() private readonly redis: Redis,
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
   ) {}
@@ -1067,6 +1070,92 @@ export class SandboxService {
       url,
       token: sandbox.authToken,
     }
+  }
+
+  async getSignedPortPreviewUrl(
+    sandboxIdOrName: string,
+    organizationId: string,
+    port: number,
+    expiresInSeconds = 60,
+  ): Promise<SignedPortPreviewUrlDto> {
+    if (port < 1 || port > 65535) {
+      throw new BadRequestError('Invalid port')
+    }
+
+    if (expiresInSeconds < 1 || expiresInSeconds > 60 * 60 * 24) {
+      throw new BadRequestError('expiresInSeconds must be between 1 second and 24 hours')
+    }
+
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
+
+    const where: FindOptionsWhere<Sandbox> = {
+      organizationId: organizationId,
+      state: Not(SandboxState.DESTROYED),
+    }
+
+    const sandbox = await this.sandboxRepository.findOne({
+      where: [
+        {
+          id: sandboxIdOrName,
+          ...where,
+        },
+        {
+          name: sandboxIdOrName,
+          ...where,
+        },
+      ],
+      cache: {
+        id: `sandbox:${sandboxIdOrName}:organization:${organizationId}`,
+        milliseconds: 1000,
+      },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    const token = customNanoid(urlAlphabet.replace('_', '').replace('-', ''))(16).toLocaleLowerCase()
+
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    await this.redis.setex(lockKey, expiresInSeconds, sandbox.id)
+
+    let url = `${proxyProtocol}://${port}-${token}.${proxyDomain}`
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+    if (region && region.proxyUrl) {
+      // Insert port and sandbox.id into the custom proxy URL
+      url = region.proxyUrl.replace(/(https?:\/)(\/)/, `$1/${port}-${token}.`)
+    }
+
+    return {
+      sandboxId: sandbox.id,
+      url,
+    }
+  }
+
+  async getSandboxIdFromSignedPreviewUrlToken(token: string, port: number): Promise<string> {
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    const sandboxId = await this.redis.get(lockKey)
+    if (!sandboxId) {
+      throw new ForbiddenException('Invalid or expired token')
+    }
+    return sandboxId
+  }
+
+  async expireSignedPreviewUrlToken(
+    sandboxIdOrName: string,
+    organizationId: string,
+    token: string,
+    port: number,
+  ): Promise<void> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    await this.redis.del(lockKey)
   }
 
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {

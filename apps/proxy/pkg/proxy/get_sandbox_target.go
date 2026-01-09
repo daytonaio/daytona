@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,21 +20,21 @@ import (
 )
 
 func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*url.URL, map[string]string, error) {
-	var targetPort, targetPath, sandboxID string
+	var targetPort, targetPath, sandboxIdOrSignedToken string
 
 	if toolboxSubpathRequest {
 		// Expected format: /toolbox/<sandboxID>/<targetPath>
 		var err error
-		targetPort, sandboxID, targetPath, err = p.parseToolboxSubpath(ctx.Param("path"))
+		targetPort, sandboxIdOrSignedToken, targetPath, err = p.parseToolboxSubpath(ctx.Param("path"))
 		if err != nil {
 			ctx.Error(common_errors.NewBadRequestError(err))
 			return nil, nil, err
 		}
 	} else {
 		// Extract port and sandbox ID from the host header
-		// Expected format: 1234-some-id-uuid.proxy.domain
+		// Expected format: 1234-<sandboxId | token>.proxy.domain
 		var err error
-		targetPort, sandboxID, err = p.parseHost(ctx.Request.Host)
+		targetPort, sandboxIdOrSignedToken, err = p.parseHost(ctx.Request.Host)
 		if err != nil {
 			ctx.Error(common_errors.NewBadRequestError(err))
 			return nil, nil, err
@@ -47,28 +48,36 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 		return nil, nil, errors.New("target port is required")
 	}
 
-	if sandboxID == "" {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("sandbox ID is required")))
-		return nil, nil, errors.New("sandbox ID is required")
+	if sandboxIdOrSignedToken == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("sandbox ID or signed token is required")))
+		return nil, nil, errors.New("sandbox ID or signed token is required")
 	}
 
-	// isPublic, err := p.getSandboxPublic(ctx, sandboxID)
-	// if err != nil {
-	// 	ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get sandbox public status: %w", err)))
-	// 	return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
-	// }
+	sandboxId := sandboxIdOrSignedToken
 
-	// if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT {
-	// 	err, didRedirect := p.Authenticate(ctx, sandboxID)
-	// 	if err != nil {
-	// 		if !didRedirect {
-	// 			ctx.Error(common_errors.NewUnauthorizedError(err))
-	// 		}
-	// 		return nil, nil, err
-	// 	}
-	// }
+	isPublic, err := p.getSandboxPublic(ctx, sandboxIdOrSignedToken)
+	if err != nil {
+		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get sandbox public status: %w", err)))
+		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
+	}
 
-	runnerInfo, err := p.getSandboxRunnerInfo(ctx, sandboxID)
+	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT {
+		portFloat, err := strconv.ParseFloat(targetPort, 64)
+		if err != nil {
+			ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target port: %w", err)))
+			return nil, nil, fmt.Errorf("failed to parse target port: %w", err)
+		}
+		var didRedirect bool
+		sandboxId, didRedirect, err = p.Authenticate(ctx, sandboxIdOrSignedToken, float32(portFloat))
+		if err != nil {
+			if !didRedirect {
+				ctx.Error(common_errors.NewUnauthorizedError(err))
+			}
+			return nil, nil, err
+		}
+	}
+
+	runnerInfo, err := p.getSandboxRunnerInfo(ctx, sandboxId)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
 		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
@@ -76,12 +85,12 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 
 	// Skip last activity update if header is set
 	if ctx.Request.Header.Get(SKIP_LAST_ACTIVITY_UPDATE_HEADER) != "true" {
-		p.updateLastActivity(ctx.Request.Context(), sandboxID, true)
+		p.updateLastActivity(ctx.Request.Context(), sandboxId, true)
 		ctx.Request.Header.Del(SKIP_LAST_ACTIVITY_UPDATE_HEADER)
 	}
 
 	// Build the target URL
-	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
+	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxId, targetPort)
 
 	// Ensure path always has a leading slash but not duplicate slashes
 	if targetPath == "" {
@@ -201,7 +210,7 @@ func (p *Proxy) validateAndCache(
 	return &isValid, nil
 }
 
-func (p *Proxy) parseHost(host string) (targetPort string, sandboxID string, err error) {
+func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToken string, err error) {
 	// Extract port and sandbox ID from the host header
 	// Expected format: 1234-some-id-uuid.proxy.domain
 	if host == "" {
@@ -216,15 +225,15 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxID string, err
 
 	// Extract port from the first part (e.g., "1234-some-id-uuid")
 	hostPrefix := parts[0]
-	dashIndex := strings.Index(hostPrefix, "-")
-	if dashIndex == -1 {
+	before, after, ok := strings.Cut(hostPrefix, "-")
+	if !ok {
 		return "", "", errors.New("invalid host format: port and sandbox ID not found")
 	}
 
-	targetPort = hostPrefix[:dashIndex]
-	sandboxID = hostPrefix[dashIndex+1:]
+	targetPort = before
+	sandboxIdOrSignedToken = after
 
-	return targetPort, sandboxID, nil
+	return targetPort, sandboxIdOrSignedToken, nil
 }
 
 func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, shouldPollUpdate bool) {

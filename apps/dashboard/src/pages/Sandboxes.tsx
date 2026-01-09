@@ -571,7 +571,7 @@ const Sandboxes: React.FC = () => {
     async (sandboxId: string, port: number): Promise<string> => {
       setSandboxIsLoading((prev) => ({ ...prev, [sandboxId]: true }))
       try {
-        return (await sandboxApi.getPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url
+        return (await sandboxApi.getSignedPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url
       } finally {
         setSandboxIsLoading((prev) => ({ ...prev, [sandboxId]: false }))
       }

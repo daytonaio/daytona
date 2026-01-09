@@ -53,12 +53,11 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { TypedConfigService } from '../../config/typed-config.service'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
@@ -89,7 +88,6 @@ export class SandboxController {
   constructor(
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
-    private readonly configService: TypedConfigService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -861,6 +859,81 @@ export class SandboxController {
     @Param('port') port: number,
   ): Promise<PortPreviewUrlDto> {
     return this.sandboxService.getPortPreviewUrl(sandboxIdOrName, authContext.organizationId, port)
+  }
+
+  @Get(':sandboxIdOrName/ports/:port/signed-preview-url')
+  @ApiOperation({
+    summary: 'Get signed preview URL for a sandbox port',
+    operationId: 'getSignedPortPreviewUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'port',
+    description: 'Port number to get signed preview URL for',
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'expiresInSeconds',
+    required: false,
+    type: Number,
+    description: 'Expiration time in seconds (default: 60 seconds)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed preview URL for the specified port',
+    type: SignedPortPreviewUrlDto,
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getSignedPortPreviewUrl(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Param('port') port: number,
+    @Query('expiresInSeconds') expiresInSeconds?: number,
+  ): Promise<SignedPortPreviewUrlDto> {
+    return this.sandboxService.getSignedPortPreviewUrl(
+      sandboxIdOrName,
+      authContext.organizationId,
+      port,
+      expiresInSeconds,
+    )
+  }
+
+  @Post(':sandboxIdOrName/ports/:port/signed-preview-url/:token/expire')
+  @ApiOperation({
+    summary: 'Expire signed preview URL for a sandbox port',
+    operationId: 'expireSignedPortPreviewUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'port',
+    description: 'Port number to expire signed preview URL for',
+    type: 'number',
+  })
+  @ApiParam({
+    name: 'token',
+    description: 'Token to expire signed preview URL for',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed preview URL has been expired',
+  })
+  @UseGuards(SandboxAccessGuard)
+  async expireSignedPortPreviewUrl(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Param('port') port: number,
+    @Param('token') token: string,
+  ): Promise<void> {
+    await this.sandboxService.expireSignedPreviewUrlToken(sandboxIdOrName, authContext.organizationId, token, port)
   }
 
   @Get(':sandboxIdOrName/build-logs')
