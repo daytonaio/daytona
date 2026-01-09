@@ -187,25 +187,44 @@ export class UserController {
     @AuthContext() authContext: IAuthContext,
     @Body() createLinkedAccountDto: CreateLinkedAccountDto,
   ): Promise<void> {
-    const authenticatedUser = await this.userService.findOne(authContext.userId)
-    if (!authenticatedUser.emailVerified) {
-      throw new ForbiddenException('Please verify your email address')
-    }
-
-    const userToLink = await this.userService.findOne(
-      `${createLinkedAccountDto.provider}|${createLinkedAccountDto.userId}`,
-    )
-    if (userToLink) {
-      throw new BadRequestException('This account is already associated with another user')
-    }
-
     if (!this.configService.get('oidc.managementApi.enabled')) {
       this.logger.warn('OIDC Management API is not enabled')
       throw new NotFoundException()
     }
 
+    const authenticatedUser = await this.userService.findOne(authContext.userId)
+    if (!authenticatedUser.emailVerified) {
+      throw new ForbiddenException('Please verify your email address')
+    }
+
+    const userToLinkId = `${createLinkedAccountDto.provider}|${createLinkedAccountDto.userId}`
+
+    // Verify user doesn't already exist in our user table
+    const userToLink = await this.userService.findOne(userToLinkId)
+    if (userToLink) {
+      throw new BadRequestException('This account is already associated with another user')
+    }
+
     const token = await this.getManagementApiToken()
 
+    // Verify account is eligible to be linked (must be reachable via OIDC Management API)
+    try {
+      await axios.get(
+        `${this.configService.getOrThrow('oidc.issuer')}/api/v2/users/${encodeURIComponent(userToLinkId)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        throw new BadRequestException('Account not found or already linked to another user')
+      }
+      throw error
+    }
+
+    // Link account
     try {
       await axios.post(
         `${this.configService.getOrThrow('oidc.issuer')}/api/v2/users/${authContext.userId}/identities`,
