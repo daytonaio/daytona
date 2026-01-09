@@ -318,24 +318,19 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
     /**
      *
      * @summary Create a new region
-     * @param {string} organizationId Organization ID
      * @param {CreateRegion} createRegion
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createRegion: async (
-      organizationId: string,
       createRegion: CreateRegion,
+      xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('createRegion', 'organizationId', organizationId)
       // verify required parameter 'createRegion' is not null or undefined
       assertParamExists('createRegion', 'createRegion', createRegion)
-      const localVarPath = `/organizations/{organizationId}/regions`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
+      const localVarPath = `/regions`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -355,6 +350,9 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
       localVarHeaderParameter['Content-Type'] = 'application/json'
 
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -544,22 +542,18 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
      *
      * @summary Delete a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteRegion: async (
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists('deleteRegion', 'id', id)
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('deleteRegion', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/regions/{id}`
-        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
+      const localVarPath = `/regions/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -577,6 +571,9 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication oauth2 required
 
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -752,22 +749,18 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
      *
      * @summary Get region by ID
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getRegionById: async (
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists('getRegionById', 'id', id)
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('getRegionById', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/regions/{id}`
-        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
+      const localVarPath = `/regions/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -785,6 +778,9 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication oauth2 required
 
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -877,17 +873,15 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
     /**
      *
      * @summary List all available regions for the organization
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listAvailableRegions: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('listAvailableRegions', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/regions`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
+    listAvailableRegions: async (
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/regions`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -905,6 +899,9 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication oauth2 required
 
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -1117,22 +1114,18 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
      *
      * @summary Regenerate proxy API key for a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     regenerateProxyApiKey: async (
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists('regenerateProxyApiKey', 'id', id)
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('regenerateProxyApiKey', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/regions/{id}/regenerate-proxy-api-key`
-        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
+      const localVarPath = `/regions/{id}/regenerate-proxy-api-key`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -1150,6 +1143,9 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication oauth2 required
 
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -1163,22 +1159,21 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
      *
      * @summary Regenerate SSH gateway API key for a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     regenerateSshGatewayApiKey: async (
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
       assertParamExists('regenerateSshGatewayApiKey', 'id', id)
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('regenerateSshGatewayApiKey', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/regions/{id}/regenerate-ssh-gateway-api-key`
-        .replace(`{${'id'}}`, encodeURIComponent(String(id)))
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
+      const localVarPath = `/regions/{id}/regenerate-ssh-gateway-api-key`.replace(
+        `{${'id'}}`,
+        encodeURIComponent(String(id)),
+      )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -1196,6 +1191,9 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication oauth2 required
 
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -1840,17 +1838,21 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Create a new region
-     * @param {string} organizationId Organization ID
      * @param {CreateRegion} createRegion
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async createRegion(
-      organizationId: string,
       createRegion: CreateRegion,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createRegion(organizationId, createRegion, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createRegion(
+        createRegion,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.createRegion']?.[localVarOperationServerIndex]?.url
@@ -1966,16 +1968,16 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
      *
      * @summary Delete a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async deleteRegion(
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRegion(id, organizationId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRegion(id, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.deleteRegion']?.[localVarOperationServerIndex]?.url
@@ -2084,16 +2086,16 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
      *
      * @summary Get region by ID
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getRegionById(
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Region>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionById(id, organizationId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionById(id, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.getRegionById']?.[localVarOperationServerIndex]?.url
@@ -2154,15 +2156,15 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary List all available regions for the organization
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async listAvailableRegions(
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Region>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listAvailableRegions(organizationId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listAvailableRegions(xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.listAvailableRegions']?.[localVarOperationServerIndex]?.url
@@ -2291,16 +2293,20 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
      *
      * @summary Regenerate proxy API key for a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async regenerateProxyApiKey(
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateProxyApiKey(id, organizationId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateProxyApiKey(
+        id,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.regenerateProxyApiKey']?.[localVarOperationServerIndex]?.url
@@ -2316,16 +2322,20 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
      *
      * @summary Regenerate SSH gateway API key for a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async regenerateSshGatewayApiKey(
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateSshGatewayApiKey(id, organizationId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateSshGatewayApiKey(
+        id,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.regenerateSshGatewayApiKey']?.[localVarOperationServerIndex]?.url
@@ -2699,17 +2709,19 @@ export const OrganizationsApiFactory = function (
     /**
      *
      * @summary Create a new region
-     * @param {string} organizationId Organization ID
      * @param {CreateRegion} createRegion
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createRegion(
-      organizationId: string,
       createRegion: CreateRegion,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<CreateRegionResponse> {
-      return localVarFp.createRegion(organizationId, createRegion, options).then((request) => request(axios, basePath))
+      return localVarFp
+        .createRegion(createRegion, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
     },
     /**
      *
@@ -2769,12 +2781,12 @@ export const OrganizationsApiFactory = function (
      *
      * @summary Delete a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    deleteRegion(id: string, organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.deleteRegion(id, organizationId, options).then((request) => request(axios, basePath))
+    deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.deleteRegion(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
     },
     /**
      *
@@ -2826,12 +2838,12 @@ export const OrganizationsApiFactory = function (
      *
      * @summary Get region by ID
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getRegionById(id: string, organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Region> {
-      return localVarFp.getRegionById(id, organizationId, options).then((request) => request(axios, basePath))
+    getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Region> {
+      return localVarFp.getRegionById(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
     },
     /**
      *
@@ -2856,12 +2868,17 @@ export const OrganizationsApiFactory = function (
     /**
      *
      * @summary List all available regions for the organization
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listAvailableRegions(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Region>> {
-      return localVarFp.listAvailableRegions(organizationId, options).then((request) => request(axios, basePath))
+    listAvailableRegions(
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Array<Region>> {
+      return localVarFp
+        .listAvailableRegions(xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
     },
     /**
      *
@@ -2928,32 +2945,34 @@ export const OrganizationsApiFactory = function (
      *
      * @summary Regenerate proxy API key for a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     regenerateProxyApiKey(
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<RegenerateApiKeyResponse> {
-      return localVarFp.regenerateProxyApiKey(id, organizationId, options).then((request) => request(axios, basePath))
+      return localVarFp
+        .regenerateProxyApiKey(id, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Regenerate SSH gateway API key for a region
      * @param {string} id Region ID
-     * @param {string} organizationId Organization ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     regenerateSshGatewayApiKey(
       id: string,
-      organizationId: string,
+      xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<RegenerateApiKeyResponse> {
       return localVarFp
-        .regenerateSshGatewayApiKey(id, organizationId, options)
+        .regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -3208,15 +3227,15 @@ export class OrganizationsApi extends BaseAPI {
   /**
    *
    * @summary Create a new region
-   * @param {string} organizationId Organization ID
    * @param {CreateRegion} createRegion
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof OrganizationsApi
    */
-  public createRegion(organizationId: string, createRegion: CreateRegion, options?: RawAxiosRequestConfig) {
+  public createRegion(createRegion: CreateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
-      .createRegion(organizationId, createRegion, options)
+      .createRegion(createRegion, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -3282,14 +3301,14 @@ export class OrganizationsApi extends BaseAPI {
    *
    * @summary Delete a region
    * @param {string} id Region ID
-   * @param {string} organizationId Organization ID
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof OrganizationsApi
    */
-  public deleteRegion(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+  public deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
-      .deleteRegion(id, organizationId, options)
+      .deleteRegion(id, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -3352,14 +3371,14 @@ export class OrganizationsApi extends BaseAPI {
    *
    * @summary Get region by ID
    * @param {string} id Region ID
-   * @param {string} organizationId Organization ID
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof OrganizationsApi
    */
-  public getRegionById(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+  public getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
-      .getRegionById(id, organizationId, options)
+      .getRegionById(id, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -3394,14 +3413,14 @@ export class OrganizationsApi extends BaseAPI {
   /**
    *
    * @summary List all available regions for the organization
-   * @param {string} organizationId Organization ID
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof OrganizationsApi
    */
-  public listAvailableRegions(organizationId: string, options?: RawAxiosRequestConfig) {
+  public listAvailableRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
-      .listAvailableRegions(organizationId, options)
+      .listAvailableRegions(xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -3477,14 +3496,14 @@ export class OrganizationsApi extends BaseAPI {
    *
    * @summary Regenerate proxy API key for a region
    * @param {string} id Region ID
-   * @param {string} organizationId Organization ID
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof OrganizationsApi
    */
-  public regenerateProxyApiKey(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+  public regenerateProxyApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
-      .regenerateProxyApiKey(id, organizationId, options)
+      .regenerateProxyApiKey(id, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -3492,14 +3511,14 @@ export class OrganizationsApi extends BaseAPI {
    *
    * @summary Regenerate SSH gateway API key for a region
    * @param {string} id Region ID
-   * @param {string} organizationId Organization ID
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof OrganizationsApi
    */
-  public regenerateSshGatewayApiKey(id: string, organizationId: string, options?: RawAxiosRequestConfig) {
+  public regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return OrganizationsApiFp(this.configuration)
-      .regenerateSshGatewayApiKey(id, organizationId, options)
+      .regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

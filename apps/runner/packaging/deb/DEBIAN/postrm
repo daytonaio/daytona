@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+# Reload systemd daemon to remove the service
+systemctl daemon-reload
+
+# On purge, remove configuration and data
+if [ "$1" = "purge" ]; then
+    rm -rf /etc/daytona/runner.env
+    rm -rf /var/lib/daytona/runner
+    rm -rf /var/log/daytona
+fi
+
+exit 0

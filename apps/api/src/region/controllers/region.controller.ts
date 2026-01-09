@@ -10,7 +10,7 @@ import { RegionType } from '../enums/region-type.enum'
 import { RegionService } from '../services/region.service'
 
 @ApiTags('regions')
-@Controller('regions')
+@Controller('shared-regions')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class RegionController {

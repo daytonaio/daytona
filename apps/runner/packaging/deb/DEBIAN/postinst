@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+
+# Create necessary directories
+mkdir -p /var/lib/daytona/runner
+mkdir -p /var/log/daytona
+mkdir -p /etc/daytona
+
+# Create default environment file if it doesn't exist
+if [ ! -f /etc/daytona/runner.env ]; then
+    cat > /etc/daytona/runner.env <<EOF
+# Daytona Runner Environment Variables
+# Add your configuration here, for example:
+# DAYTONA_API_URL=https://api.daytona.io
+# DAYTONA_RUNNER_TOKEN=your-token-here
+EOF
+    chmod 600 /etc/daytona/runner.env
+fi
+
+# Reload systemd daemon
+systemctl daemon-reload
+
+echo "Daytona Runner installed successfully"
+echo ""
+echo "Next steps:"
+echo "1. Configure environment variables in /etc/daytona/runner.env"
+echo "2. Enable and start the service: systemctl enable --now daytona-runner"
+echo ""
+echo "To check service status: systemctl status daytona-runner"
+
+exit 0

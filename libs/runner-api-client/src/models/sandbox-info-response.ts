@@ -39,6 +39,12 @@ export interface SandboxInfoResponse {
   backupState?: EnumsBackupState
   /**
    *
+   * @type {string}
+   * @memberof SandboxInfoResponse
+   */
+  daemonVersion?: string
+  /**
+   *
    * @type {EnumsSandboxState}
    * @memberof SandboxInfoResponse
    */

@@ -14,6 +14,6 @@ type RunnerMetrics struct {
 } //	@name	RunnerMetrics
 
 type RunnerInfoResponseDTO struct {
-	Metrics *RunnerMetrics `json:"metrics,omitempty"`
-	Version string         `json:"version"`
+	Metrics    *RunnerMetrics `json:"metrics,omitempty"`
+	AppVersion string         `json:"appVersion"`
 } //	@name	RunnerInfoResponseDTO

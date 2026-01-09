@@ -24,10 +24,7 @@ import { Plus, Copy } from 'lucide-react'
 import { getMaskedToken } from '@/lib/utils'
 
 const DEFAULT_FORM_DATA = {
-  domain: '',
   name: '',
-  apiUrl: '',
-  proxyUrl: '',
   regionId: '',
 }
 
@@ -55,24 +52,8 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
   const validateForm = () => {
     const errors: Record<string, string> = {}
 
-    if (!formData.domain.trim()) {
-      errors.domain = 'Domain is required'
-    }
-
     if (!formData.name.trim()) {
       errors.name = 'Name is required'
-    }
-
-    if (!formData.apiUrl.trim()) {
-      errors.apiUrl = 'API URL is required'
-    } else if (!formData.apiUrl.startsWith('http')) {
-      errors.apiUrl = 'API URL must start with http:// or https://'
-    }
-
-    if (!formData.proxyUrl.trim()) {
-      errors.proxyUrl = 'Proxy URL is required'
-    } else if (!formData.proxyUrl.startsWith('http')) {
-      errors.proxyUrl = 'Proxy URL must start with http:// or https://'
     }
 
     if (!formData.regionId) {
@@ -91,10 +72,7 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
     setLoading(true)
     try {
       const runner = await onCreateRunner({
-        domain: formData.domain,
         name: formData.name,
-        apiUrl: formData.apiUrl,
-        proxyUrl: formData.proxyUrl,
         regionId: formData.regionId,
       })
       if (runner) {
@@ -209,23 +187,6 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="domain">Domain</Label>
-              <Input
-                id="domain"
-                value={formData.domain}
-                onChange={(e) => {
-                  setFormData((prev) => ({ ...prev, domain: e.target.value }))
-                  if (formErrors.domain) {
-                    setFormErrors((prev) => ({ ...prev, domain: '' }))
-                  }
-                }}
-                placeholder="runner.example.com"
-                className={formErrors.domain ? 'border-destructive' : ''}
-              />
-              {formErrors.domain && <p className="text-sm text-destructive">{formErrors.domain}</p>}
-            </div>
-
-            <div className="space-y-3">
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
@@ -236,40 +197,6 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
                 placeholder="runner-1"
               />
               {formErrors.name && <p className="text-sm text-destructive">{formErrors.name}</p>}
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="apiUrl">API URL</Label>
-              <Input
-                id="apiUrl"
-                value={formData.apiUrl}
-                onChange={(e) => {
-                  setFormData((prev) => ({ ...prev, apiUrl: e.target.value }))
-                  if (formErrors.apiUrl) {
-                    setFormErrors((prev) => ({ ...prev, apiUrl: '' }))
-                  }
-                }}
-                placeholder="https://api.runner.example.com"
-                className={formErrors.apiUrl ? 'border-destructive' : ''}
-              />
-              {formErrors.apiUrl && <p className="text-sm text-destructive">{formErrors.apiUrl}</p>}
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="proxyUrl">Proxy URL</Label>
-              <Input
-                id="proxyUrl"
-                value={formData.proxyUrl}
-                onChange={(e) => {
-                  setFormData((prev) => ({ ...prev, proxyUrl: e.target.value }))
-                  if (formErrors.proxyUrl) {
-                    setFormErrors((prev) => ({ ...prev, proxyUrl: '' }))
-                  }
-                }}
-                placeholder="https://proxy.runner.example.com"
-                className={formErrors.proxyUrl ? 'border-destructive' : ''}
-              />
-              {formErrors.proxyUrl && <p className="text-sm text-destructive">{formErrors.proxyUrl}</p>}
             </div>
           </form>
         )}

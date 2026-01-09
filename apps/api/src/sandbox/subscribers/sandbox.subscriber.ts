@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DataSource, EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent } from 'typeorm'
+import { DataSource, EntitySubscriberInterface, EventSubscriber, UpdateEvent } from 'typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Inject } from '@nestjs/common'
@@ -11,7 +11,6 @@ import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxDesiredStateUpdatedEvent } from '../events/sandbox-desired-state-updated.event'
 import { SandboxPublicStatusUpdatedEvent } from '../events/sandbox-public-status-updated.event'
-import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { SandboxOrganizationUpdatedEvent } from '../events/sandbox-organization-updated.event'
 
 @EventSubscriber()
@@ -25,10 +24,6 @@ export class SandboxSubscriber implements EntitySubscriberInterface<Sandbox> {
 
   listenTo() {
     return Sandbox
-  }
-
-  afterInsert(event: InsertEvent<Sandbox>) {
-    this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(event.entity as Sandbox))
   }
 
   afterUpdate(event: UpdateEvent<Sandbox>) {

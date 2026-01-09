@@ -485,10 +485,14 @@ export class Daytona {
           sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data
         }
 
-        const url = `${this.clientConfig.basePath}/sandbox/${sandboxInstance.id}/build-logs?follow=true`
+        const response = await this.sandboxApi.getBuildLogsUrl(sandboxInstance.id)
 
         await processStreamingResponse(
-          () => fetch(url, { method: 'GET', headers: this.clientConfig.baseOptions.headers }),
+          () =>
+            fetch(response.data.url + '?follow=true', {
+              method: 'GET',
+              headers: this.clientConfig.baseOptions.headers,
+            }),
           (chunk) => options.onSnapshotCreateLogs?.(chunk.trimEnd()),
           async () => {
             sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data

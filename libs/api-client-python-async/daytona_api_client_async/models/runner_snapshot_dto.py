@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,7 +29,7 @@ class RunnerSnapshotDto(BaseModel):
     """ # noqa: E501
     runner_snapshot_id: StrictStr = Field(description="Runner snapshot ID", alias="runnerSnapshotId")
     runner_id: StrictStr = Field(description="Runner ID", alias="runnerId")
-    runner_domain: StrictStr = Field(description="Runner domain", alias="runnerDomain")
+    runner_domain: Optional[StrictStr] = Field(default=None, description="Runner domain", alias="runnerDomain")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["runnerSnapshotId", "runnerId", "runnerDomain"]
 

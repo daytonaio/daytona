@@ -593,6 +593,10 @@ export class WorkspaceController {
       throw new NotFoundException(`Runner for workspace ${workspaceId} not found`)
     }
 
+    if (!runner.apiUrl) {
+      throw new NotFoundException(`Runner for workspace ${workspaceId} has no API URL`)
+    }
+
     const logProxy = new LogProxy(
       runner.apiUrl,
       workspace.buildInfo.snapshotRef.split(':')[0],

@@ -18,7 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
+func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) (string, error) {
 	defer timer.Timer()()
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -30,43 +30,43 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 
 	c, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if c.State.Running {
 		containerIP := common.GetContainerIpAddress(ctx, c)
 		if containerIP == "" {
-			return errors.New("sandbox IP not found? Is the sandbox started?")
+			return "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
 
-		err = d.waitForDaemonRunning(ctx, containerIP)
+		daemonVersion, err := d.waitForDaemonRunning(ctx, containerIP)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
-		return nil
+		return daemonVersion, nil
 	}
 
 	err = d.apiClient.ContainerStart(ctx, containerId, container.StartOptions{})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// make sure container is running
 	err = d.waitForContainerRunning(ctx, containerId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	c, err = d.ContainerInspect(ctx, containerId)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	containerIP := common.GetContainerIpAddress(ctx, c)
 	if containerIP == "" {
-		return errors.New("sandbox IP not found? Is the sandbox started?")
+		return "", errors.New("sandbox IP not found? Is the sandbox started?")
 	}
 
 	if !slices.Equal(c.Config.Entrypoint, strslice.StrSlice{common.DAEMON_PATH}) {
@@ -81,9 +81,9 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	// If daemon is the sandbox entrypoint (common.DAEMON_PATH), it is started as part of the sandbox;
 	// Otherwise, the daemon is started separately above.
 	// In either case, we wait for it here.
-	err = d.waitForDaemonRunning(ctx, containerIP)
+	daemonVersion, err := d.waitForDaemonRunning(ctx, containerIP)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
@@ -98,7 +98,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		}()
 	}
 
-	return nil
+	return daemonVersion, nil
 }
 
 func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId string) error {

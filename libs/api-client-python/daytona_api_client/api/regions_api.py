@@ -266,7 +266,7 @@ class RegionsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/regions',
+            resource_path='/shared-regions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

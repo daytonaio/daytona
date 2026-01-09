@@ -200,7 +200,9 @@ export class SnapshotService {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const startLogStreaming = async (onChunk: (chunk: string) => void = () => {}) => {
       if (!streamPromise) {
-        const url = `${this.clientConfig.basePath}/snapshots/${createdSnapshot.id}/build-logs?follow=true`
+        const response = await this.snapshotsApi.getSnapshotBuildLogsUrl(createdSnapshot.id)
+
+        const url = `${response.data.url}?follow=true`
 
         streamPromise = processStreamingResponse(
           () => fetch(url, { method: 'GET', headers: this.clientConfig.baseOptions.headers }),

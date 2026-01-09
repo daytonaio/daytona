@@ -61,7 +61,7 @@ const Regions: React.FC = () => {
     }
 
     try {
-      const response = (await organizationsApi.createRegion(selectedOrganization.id, createRegionData)).data
+      const response = (await organizationsApi.createRegion(createRegionData, selectedOrganization.id)).data
       toast.success(`Creating region ${createRegionData.name}`)
       await refreshRegions()
       return response
