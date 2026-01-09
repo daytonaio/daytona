@@ -16,6 +16,7 @@ import { RoutePath } from '@/enums/RoutePath'
 import { useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
 
@@ -26,6 +27,8 @@ const Dashboard: React.FC = () => {
   useOwnerWalletQuery() // prefetch wallet
 
   const navigate = useNavigate()
+
+  useSuspensionBanner(selectedOrganization)
 
   useEffect(() => {
     if (

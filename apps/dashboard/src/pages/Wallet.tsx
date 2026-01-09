@@ -249,7 +249,7 @@ const Wallet = () => {
             {user && (
               <>
                 {!user.profile.email_verified && (
-                  <Alert variant="destructive">
+                  <Alert variant="info">
                     <TriangleAlertIcon />
                     <AlertTitle>Verify your email</AlertTitle>
                     <AlertDescription>
