@@ -1,13 +1,17 @@
-import os
-import json
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 import asyncio
+import json
+import os
 from typing import Any, Awaitable, Dict, List, TypedDict
 
 from datasets import Dataset
+from dotenv import load_dotenv
+from trl import GRPOConfig, GRPOTrainer
+
 from daytona import AsyncDaytona, AsyncSandbox
 from daytona.common.errors import DaytonaTimeoutError
-from trl import GRPOTrainer, GRPOConfig
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -83,9 +87,7 @@ TASKS = {
 PROMPT_TO_TASK = {task["prompt"]: task for task in TASKS.values()}
 
 
-async def _create_sandbox_pool_async(
-    daytona: AsyncDaytona, n: int = 10
-) -> List[AsyncSandbox]:
+async def _create_sandbox_pool_async(daytona: AsyncDaytona, n: int = 10) -> List[AsyncSandbox]:
     print(f"Creating {n} sandboxes...")
     tasks = [daytona.create() for _ in range(n)]
     sandboxes = await asyncio.gather(*tasks)
@@ -103,10 +105,13 @@ async def _cleanup_sandbox_pool_async(sandbox_pool: List[AsyncSandbox]) -> None:
         if isinstance(r, Exception):
             print(f"  Sandbox delete error: {type(r).__name__}: {r}")
     print("All sandboxes cleaned up")
+
+
 class EvalResult(TypedDict):
     no_error: bool
     num_passed: int
     num_tests: int
+
 
 def _fail_result(num_tests: int) -> EvalResult:
     return {"no_error": False, "num_passed": 0, "num_tests": num_tests}
@@ -190,19 +195,13 @@ async def evaluate_single_completion_async(
     code = build_test_harness(task, body)
 
     try:
-        response = await sandbox.code_interpreter.run_code(
-            code, timeout=MAX_TIMEOUT_SECONDS
-        )
+        response = await sandbox.code_interpreter.run_code(code, timeout=MAX_TIMEOUT_SECONDS)
     except DaytonaTimeoutError:
-        print(
-            f"Completion timed out after {MAX_TIMEOUT_SECONDS}s "
-            f"in sandbox {getattr(sandbox, 'id', '?')}"
-        )
+        print(f"Completion timed out after {MAX_TIMEOUT_SECONDS}s " f"in sandbox {getattr(sandbox, 'id', '?')}")
         return _fail_result(num_task_tests)
     except Exception as e:
         print(
-            f"Error evaluating completion in sandbox {getattr(sandbox, 'id', '?')}: "
-            f"{type(e).__name__}: {e}",
+            f"Error evaluating completion in sandbox {getattr(sandbox, 'id', '?')}: " f"{type(e).__name__}: {e}",
         )
         return _fail_result(num_task_tests)
 
@@ -224,17 +223,13 @@ async def evaluate_single_completion_async(
         "num_tests": len(correct),
     }
 
+
 async def _evaluate_batch_async(
     sandbox_pool: List[AsyncSandbox], completions: List[str], prompts: List[str]
 ) -> List[EvalResult]:
-    print(
-        f"Evaluating {len(completions)} completions in parallel across "
-        f"{len(sandbox_pool)} sandboxes..."
-    )
+    print(f"Evaluating {len(completions)} completions in parallel across " f"{len(sandbox_pool)} sandboxes...")
 
-    async def run_one(
-        i: int, sandbox: AsyncSandbox, completion: str, prompt: str
-    ) -> EvalResult:
+    async def run_one(i: int, sandbox: AsyncSandbox, completion: str, prompt: str) -> EvalResult:
         task = PROMPT_TO_TASK[prompt]
         num_task_tests = len(task["tests"])
         try:
@@ -242,10 +237,7 @@ async def _evaluate_batch_async(
             print(f"  Completion {i + 1}/{len(completions)} done")
             return stats
         except Exception as e:
-            print(
-                f"  Completion {i + 1}/{len(completions)} failed: "
-                f"{type(e).__name__}: {e}"
-            )
+            print(f"  Completion {i + 1}/{len(completions)} failed: " f"{type(e).__name__}: {e}")
             return _fail_result(num_task_tests)
 
     tasks = [
@@ -294,27 +286,18 @@ def main():
         loss_type="dapo",
         beta=0.01,
     )
+    assert EFFECTIVE_BATCH_SIZE % len(TASKS) == 0, "EFFECTIVE_BATCH_SIZE must be divisible by number of tasks."
     assert (
-        EFFECTIVE_BATCH_SIZE % len(TASKS) == 0
-    ), "EFFECTIVE_BATCH_SIZE must be divisible by number of tasks."
-    assert (
-        training_args.per_device_train_batch_size
-        * training_args.gradient_accumulation_steps
+        training_args.per_device_train_batch_size * training_args.gradient_accumulation_steps
     ) == EFFECTIVE_BATCH_SIZE, "The total batch size must equal the sandbox pool size."
-    
+
     try:
-        sandbox_pool = run_async(
-            _create_sandbox_pool_async(daytona, n=EFFECTIVE_BATCH_SIZE)
-        )
+        sandbox_pool = run_async(_create_sandbox_pool_async(daytona, n=EFFECTIVE_BATCH_SIZE))
 
-        train_dataset = Dataset.from_dict(
-            {"prompt": [task["prompt"] for task in TASKS.values()]}
-        )
+        train_dataset = Dataset.from_dict({"prompt": [task["prompt"] for task in TASKS.values()]})
 
-        def reward_func(prompts, completions, **kwargs):
-            stats_list = run_async(
-                _evaluate_batch_async(sandbox_pool, completions, prompts)
-            )
+        def reward_func(prompts, completions, **_kwargs):
+            stats_list = run_async(_evaluate_batch_async(sandbox_pool, completions, prompts))
             rewards = []
             for s in stats_list:
                 if not s["no_error"]:
