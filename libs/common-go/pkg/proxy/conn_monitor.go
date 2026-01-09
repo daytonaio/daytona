@@ -16,9 +16,6 @@ import (
 type ConnectionMonitor struct {
 	gin.ResponseWriter
 	OnConnClosed func()
-
-	conn   net.Conn
-	connMu sync.Mutex
 }
 
 func (cm *ConnectionMonitor) Hijack() (net.Conn, *bufio.ReadWriter, error) {
@@ -31,10 +28,6 @@ func (cm *ConnectionMonitor) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	if err != nil {
 		return conn, rw, err
 	}
-
-	cm.connMu.Lock()
-	cm.conn = conn
-	cm.connMu.Unlock()
 
 	// Wrap the connection to detect when it's closed
 	wrappedConn := &monitoredConn{
