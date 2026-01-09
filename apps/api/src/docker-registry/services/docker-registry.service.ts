@@ -23,7 +23,18 @@ import { AxiosHeaders } from 'axios'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
-const DOCKER_HUB_REGISTRY_ENDPOINT = 'index.docker.io/v1/'
+const DOCKER_HUB_URL = 'docker.io'
+
+/**
+ * Normalizes Docker Hub URLs to 'docker.io' for storage.
+ * Empty URLs are assumed to be Docker Hub.
+ */
+function normalizeRegistryUrl(url: string): string {
+  if (!url || url.trim() === '' || url.toLowerCase().includes('docker.io')) {
+    return DOCKER_HUB_URL
+  }
+  return url
+}
 
 export interface ImageDetails {
   digest: string
@@ -64,6 +75,7 @@ export class DockerRegistryService {
 
     const registry = this.dockerRegistryRepository.create({
       ...createDto,
+      url: normalizeRegistryUrl(createDto.url),
       organizationId,
       isFallback,
     })
@@ -101,7 +113,7 @@ export class DockerRegistryService {
     }
 
     registry.name = updateDto.name
-    registry.url = updateDto.url
+    registry.url = normalizeRegistryUrl(updateDto.url)
     registry.username = updateDto.username
     if (updateDto.password) {
       registry.password = updateDto.password
@@ -159,7 +171,7 @@ export class DockerRegistryService {
       where: {
         organizationId: IsNull(),
         registryType: RegistryType.INTERNAL,
-        url: DOCKER_HUB_REGISTRY_ENDPOINT,
+        url: DOCKER_HUB_URL,
         project: '',
       },
     })

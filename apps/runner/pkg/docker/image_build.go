@@ -156,8 +156,13 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 			url = strings.TrimPrefix(url, "https://")
 			url = strings.TrimPrefix(url, "http://")
 
-			authConfigs["https://"+url] = authConfig
-			authConfigs["http://"+url] = authConfig
+			// Docker's build API expects 'index.docker.io/v1/' for Docker Hub auth
+			if url == "docker.io" {
+				authConfigs["https://index.docker.io/v1/"] = authConfig
+			} else {
+				authConfigs["https://"+url] = authConfig
+				authConfigs["http://"+url] = authConfig
+			}
 		}
 	}
 
