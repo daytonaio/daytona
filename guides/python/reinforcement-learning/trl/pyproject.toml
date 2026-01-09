@@ -1,0 +1,15 @@
+[project]
+name = "daytona-trl-grpo-training"
+version = "0.1.0"
+description = "GRPO training with sandboxed code evaluation using Daytona"
+authors = [
+    {name = "Lovre Pesut", email = "lpesut@daytona.io"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "daytona>=0.128.1,<1.0.0",
+    "datasets>=3.0.0",
+    "trl[vllm]>=0.26.0",
+    "python-dotenv>=1.2.1",
+]
