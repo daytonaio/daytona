@@ -493,10 +493,10 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/trl-grpo-training', locale),
-          label: labels['sidebarconfig.trlGrpo'],
+          label: t('sidebarconfig.trlGrpo'),
           disablePagination: true,
           attrs: {
-            icon: 'qwen.svg',
+            icon: 'trl-logo.svg',
           },
         },
       ],
