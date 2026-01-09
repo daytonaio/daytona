@@ -25,7 +25,6 @@ interface Props {
     emailVerified: boolean
     creditCardLinked: boolean
     businessEmailVerified: boolean
-    phoneVerified: boolean
     githubConnected: boolean
   }
 }
@@ -210,7 +209,6 @@ function getTierRequirementItems(
     creditCardLinked: boolean
     githubConnected: boolean
     businessEmailVerified: boolean
-    phoneVerified: boolean
   },
   currentTier?: OrganizationTier | null,
   tier?: Tier | null,
@@ -246,18 +244,11 @@ function getTierRequirementItems(
     )
   }
   if (tier.tier === 3) {
-    items.push(
-      {
-        label: 'Business email verified',
-        isChecked: requirementsState.businessEmailVerified,
-        link: RoutePath.BILLING_WALLET,
-      },
-      {
-        label: 'Phone verified',
-        isChecked: requirementsState.phoneVerified,
-        link: RoutePath.ACCOUNT_SETTINGS,
-      },
-    )
+    items.push({
+      label: 'Business email verified',
+      isChecked: requirementsState.businessEmailVerified,
+      link: RoutePath.BILLING_WALLET,
+    })
   }
 
   if (tier.minTopUpAmountCents) {
