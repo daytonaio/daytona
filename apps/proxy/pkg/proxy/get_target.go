@@ -226,7 +226,7 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxID string, err
 }
 
 // updateLastActivity updates the last activity timestamp for a sandbox.
-// If shouldPollUpdate is true, it starts a goroutine that updates every 45 seconds.
+// If shouldPollUpdate is true, it starts a goroutine that updates every 50 seconds.
 // Returns a stop function that should be called when the connection closes.
 func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, shouldPollUpdate bool) func() {
 	// Prevent frequent updates by caching the last update
