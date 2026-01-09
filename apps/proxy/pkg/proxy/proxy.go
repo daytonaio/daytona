@@ -39,8 +39,19 @@ const SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
 const SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
 const SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
 const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Daytona-Skip-Last-Activity-Update"
+const ACTIVITY_POLL_STOP_KEY = "daytona-activity-poll-stop"
 const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
+
+// stopActivityPoll retrieves and calls the activity poll stop function from the gin context.
+// This ensures the polling goroutine is stopped when the request (including WebSocket) finishes.
+func stopActivityPoll(ctx *gin.Context) {
+	if stopFn, exists := ctx.Get(ACTIVITY_POLL_STOP_KEY); exists {
+		if fn, ok := stopFn.(func()); ok {
+			fn()
+		}
+	}
+}
 
 type Proxy struct {
 	config       *config.Config
@@ -100,9 +111,24 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 	router := gin.New()
 	router.Use(func(ctx *gin.Context) {
 		shutdownWg.Add(1)
-		defer func() {
-			shutdownWg.Done()
-		}()
+
+		cleanupOnce := sync.Once{}
+		cleanup := func() {
+			cleanupOnce.Do(func() {
+				stopActivityPoll(ctx)
+				shutdownWg.Done()
+			})
+		}
+
+		// Wrap the response writer to monitor connection
+		monitor := &common_proxy.ConnectionMonitor{
+			ResponseWriter: ctx.Writer,
+			OnConnClosed:   cleanup,
+		}
+		ctx.Writer = monitor
+
+		// For non-WebSocket connections, cleanup on defer
+		defer cleanup()
 
 		common_errors.Recovery()(ctx)
 	})
