@@ -209,16 +209,22 @@ const Onboarding: React.FC = () => {
                         await handleCreateApiKey()
                       }}
                     >
-                      <Input
-                        id="key-name"
-                        type="text"
-                        value={apiKeyName}
-                        onChange={(e) => setApiKeyName(e.target.value)}
-                        required
-                        placeholder="e.g. 'Onboarding'"
-                        className="mb-6 md:text-base px-4 h-10.5"
-                        disabled={!hasSufficientPermissions}
-                      />
+                      <div className="mb-6">
+                        <label htmlFor="key-name" className="block mb-1 text-sm font-medium text-muted-foreground">
+                          API Key Name
+                        </label>
+
+                        <Input
+                          id="key-name"
+                          type="text"
+                          value={apiKeyName}
+                          onChange={(e) => setApiKeyName(e.target.value)}
+                          required
+                          placeholder="e.g. Onboarding"
+                          className="md:text-base px-4 h-10.5"
+                          disabled={!hasSufficientPermissions}
+                        />
+                      </div>
                       <Button
                         type="submit"
                         disabled={isLoadingCreateKey || !hasSufficientPermissions}
