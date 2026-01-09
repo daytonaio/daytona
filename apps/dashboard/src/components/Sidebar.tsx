@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { addHours, formatRelative } from 'date-fns'
 import {
+  ArrowRightIcon,
   BookOpen,
   Box,
   ChartColumn,
@@ -43,6 +44,7 @@ import {
   Mail,
   Moon,
   PackageOpen,
+  SearchIcon,
   Settings,
   Slack,
   SquareUserRound,
@@ -53,10 +55,17 @@ import {
 } from 'lucide-react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  CommandConfig,
+  useCommandPaletteActions,
+  useIsCommandPaletteEnabled,
+  useRegisterCommands,
+} from './CommandPalette'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 interface SidebarProps {
@@ -72,6 +81,26 @@ interface SidebarItem {
   onClick?: () => void
 }
 
+const useNavCommands = (items: { label: string; path: RoutePath | string; onClick?: () => void }[]) => {
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
+  const navCommands: CommandConfig[] = useMemo(
+    () =>
+      items
+        .filter((item) => item.path !== pathname)
+        .map((item) => ({
+          id: `nav-${item.path}`,
+          label: `Go to ${item.label}`,
+          icon: <ArrowRightIcon className="w-4 h-4" />,
+          onSelect: () => navigate(item.path),
+        })),
+    [pathname, navigate, items],
+  )
+
+  useRegisterCommands(navCommands, { groupId: 'navigation', groupLabel: 'Navigation', groupOrder: 1 })
+}
+
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
@@ -81,6 +110,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
+
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [
       {
@@ -191,6 +221,34 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     ].filter((group) => group.items.length > 0)
   }, [sidebarItems, settingsItems, billingItems])
 
+  const commandItems = useMemo(() => {
+    return sidebarGroups
+      .flatMap((group) => group.items)
+      .concat(
+        {
+          path: RoutePath.ACCOUNT_SETTINGS,
+          label: 'Account Settings',
+          icon: <Settings size={16} strokeWidth={1.5} />,
+        },
+        {
+          path: RoutePath.USER_INVITATIONS,
+          label: 'Invitations',
+          icon: <Mail size={16} strokeWidth={1.5} />,
+        },
+        {
+          path: RoutePath.ONBOARDING,
+          label: 'Onboarding',
+          icon: <ListChecks size={16} strokeWidth={1.5} />,
+        },
+      )
+  }, [sidebarGroups])
+
+  const commandPaletteActions = useCommandPaletteActions()
+
+  useNavCommands(commandItems)
+
+  const cmdkEnabled = useIsCommandPaletteEnabled()
+
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarHeader>
@@ -206,6 +264,21 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           <SidebarTrigger className="p-2 [&_svg]:size-5" />
         </div>
         <SidebarMenu>
+          {cmdkEnabled && (
+            <SidebarMenuItem className="mb-1">
+              <SidebarMenuButton
+                tooltip="Search"
+                variant="outline"
+                className="flex items-center gap-2 justify-between"
+                onClick={() => commandPaletteActions.setIsOpen(true)}
+              >
+                <span className="flex items-center gap-2">
+                  <SearchIcon className="w-4 h-4" /> Search
+                </span>
+                <Kbd className="whitespace-nowrap">⌘ K</Kbd>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <OrganizationPicker />
         </SidebarMenu>
       </SidebarHeader>
