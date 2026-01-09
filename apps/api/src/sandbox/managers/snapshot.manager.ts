@@ -796,10 +796,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
           snapshot.imageName,
           snapshot.organizationId,
         )
+
         const image = parseDockerImage(snapshot.imageName)
-        const imageName = registry
-          ? `${registry.url.replace(/^(https?:\/\/)/, '')}${registry.project ? `/${registry.project}` : ''}/${image.repository}:${image.tag}`
-          : `${image.repository}:${image.tag}`
+        if (registry) {
+          image.registry = registry.url.replace(/^(https?:\/\/)/, '')
+        }
+        const imageName = image.getFullName()
 
         const snapshotDigestResponse = await runnerAdapter.inspectSnapshotInRegistry(imageName, registry)
         await this.processSnapshotDigest(snapshot, snapshotDigestResponse.hash, snapshotDigestResponse.sizeGB)

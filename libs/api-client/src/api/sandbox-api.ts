@@ -42,6 +42,8 @@ import type { Sandbox } from '../models'
 // @ts-ignore
 import type { SandboxLabels } from '../models'
 // @ts-ignore
+import type { SingedPortPreviewUrl } from '../models'
+// @ts-ignore
 import type { SshAccessDto } from '../models'
 // @ts-ignore
 import type { SshAccessValidationDto } from '../models'
@@ -550,6 +552,63 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (skipReconcilingSandboxes !== undefined) {
         localVarQueryParameter['skipReconcilingSandboxes'] = skipReconcilingSandboxes
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Get signed preview URL for a sandbox port
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {number} port Port number to get signed preview URL for
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSignedPortPreviewUrl: async (
+      sandboxIdOrName: string,
+      port: number,
+      xDaytonaOrganizationID?: string,
+      expiresInSeconds?: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('getSignedPortPreviewUrl', 'sandboxIdOrName', sandboxIdOrName)
+      // verify required parameter 'port' is not null or undefined
+      assertParamExists('getSignedPortPreviewUrl', 'port', port)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url`
+        .replace(`{${'sandboxIdOrName'}}`, encodeURIComponent(String(sandboxIdOrName)))
+        .replace(`{${'port'}}`, encodeURIComponent(String(port)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (expiresInSeconds !== undefined) {
+        localVarQueryParameter['expiresInSeconds'] = expiresInSeconds
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1707,6 +1766,41 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get signed preview URL for a sandbox port
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {number} port Port number to get signed preview URL for
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSignedPortPreviewUrl(
+      sandboxIdOrName: string,
+      port: number,
+      xDaytonaOrganizationID?: string,
+      expiresInSeconds?: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SingedPortPreviewUrl>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSignedPortPreviewUrl(
+        sandboxIdOrName,
+        port,
+        xDaytonaOrganizationID,
+        expiresInSeconds,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getSignedPortPreviewUrl']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Get toolbox proxy URL for a sandbox
      * @param {string} sandboxId ID of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2385,6 +2479,27 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
+     * @summary Get signed preview URL for a sandbox port
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {number} port Port number to get signed preview URL for
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSignedPortPreviewUrl(
+      sandboxIdOrName: string,
+      port: number,
+      xDaytonaOrganizationID?: string,
+      expiresInSeconds?: number,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<SingedPortPreviewUrl> {
+      return localVarFp
+        .getSignedPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID, expiresInSeconds, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Get toolbox proxy URL for a sandbox
      * @param {string} sandboxId ID of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2885,6 +3000,29 @@ export class SandboxApi extends BaseAPI {
   ) {
     return SandboxApiFp(this.configuration)
       .getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get signed preview URL for a sandbox port
+   * @param {string} sandboxIdOrName ID or name of the sandbox
+   * @param {number} port Port number to get signed preview URL for
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {number} [expiresInSeconds] Expiration time in seconds (default: 60 seconds)
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getSignedPortPreviewUrl(
+    sandboxIdOrName: string,
+    port: number,
+    xDaytonaOrganizationID?: string,
+    expiresInSeconds?: number,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .getSignedPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID, expiresInSeconds, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

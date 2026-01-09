@@ -184,6 +184,7 @@ from daytona_api_client.models.session import Session
 from daytona_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client.models.session_execute_response import SessionExecuteResponse
 from daytona_api_client.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
+from daytona_api_client.models.singed_port_preview_url import SingedPortPreviewUrl
 from daytona_api_client.models.snapshot_dto import SnapshotDto
 from daytona_api_client.models.snapshot_state import SnapshotState
 from daytona_api_client.models.ssh_access_dto import SshAccessDto

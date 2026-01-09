@@ -2429,6 +2429,58 @@ paths:
       summary: Get preview URL for a sandbox port
       tags:
         - sandbox
+  /sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url:
+    get:
+      operationId: getSignedPortPreviewUrl
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Port number to get signed preview URL for
+          explode: false
+          in: path
+          name: port
+          required: true
+          schema:
+            type: number
+          style: simple
+        - description: 'Expiration time in seconds (default: 60 seconds)'
+          explode: true
+          in: query
+          name: expiresInSeconds
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingedPortPreviewUrl'
+          description: Signed preview URL for the specified port
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get signed preview URL for a sandbox port
+      tags:
+        - sandbox
   /sandbox/{sandboxIdOrName}/build-logs:
     get:
       deprecated: true
@@ -7076,6 +7128,36 @@ paths:
       summary: Check if user has access to the sandbox
       tags:
         - preview
+  /preview/{signedPreviewToken}/{port}/sandbox-id:
+    get:
+      operationId: getSandboxIdFromSignedPreviewUrlToken
+      parameters:
+        - description: Signed preview URL token
+          explode: false
+          in: path
+          name: signedPreviewToken
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Port number to get sandbox ID from signed preview URL token
+          explode: false
+          in: path
+          name: port
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: Sandbox ID from signed preview URL token
+      summary: Get sandbox ID from signed preview URL token
+      tags:
+        - preview
   /volumes:
     get:
       operationId: listVolumes
@@ -10100,7 +10182,7 @@ components:
     PortPreviewUrl:
       example:
         sandboxId: '123456'
-        url: https://123456-mysandbox.runner.com
+        url: 'https://{port}-{sandboxId}.{proxyDomain'
         token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
       properties:
         sandboxId:
@@ -10109,7 +10191,7 @@ components:
           type: string
         url:
           description: Preview url
-          example: https://123456-mysandbox.runner.com
+          example: 'https://{port}-{sandboxId}.{proxyDomain'
           type: string
         token:
           description: Access token
@@ -10118,6 +10200,23 @@ components:
       required:
         - sandboxId
         - token
+        - url
+      type: object
+    SingedPortPreviewUrl:
+      example:
+        sandboxId: '123456'
+        url: 'https://{port}-{token}.{proxyDomain'
+      properties:
+        sandboxId:
+          description: ID of the sandbox
+          example: '123456'
+          type: string
+        url:
+          description: Singed preview url
+          example: 'https://{port}-{token}.{proxyDomain'
+          type: string
+      required:
+        - sandboxId
         - url
       type: object
     Url:
