@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
@@ -25,7 +26,7 @@ import {
   OrganizationRolePermissionsEnum,
   type DockerRegistry,
 } from '@daytonaio/api-client'
-import { Plus } from 'lucide-react'
+import { Info, Plus } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -77,7 +78,7 @@ const Registries: React.FC = () => {
       await dockerRegistryApi.createRegistry(
         {
           name: formData.name.trim(),
-          url: formData.url.trim(),
+          url: formData.url.trim() || 'docker.io',
           username: formData.username.trim(),
           password: formData.password.trim(),
           project: formData.project.trim(),
@@ -111,7 +112,7 @@ const Registries: React.FC = () => {
         registryToEdit.id,
         {
           name: formData.name.trim(),
-          url: formData.url.trim(),
+          url: formData.url.trim() || 'docker.io',
           username: formData.username.trim(),
           password: formData.password.trim(),
           project: formData.project.trim(),
@@ -186,13 +187,24 @@ const Registries: React.FC = () => {
           />
         </div>
         <div className="space-y-3">
-          <Label htmlFor="url">Registry URL</Label>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="url">Registry URL</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Defaults to docker.io when left blank</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <Input
             id="url"
             value={formData.url}
             onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
             placeholder="https://registry.example.com"
-            required
           />
         </div>
         <div className="space-y-3">
@@ -216,7 +228,19 @@ const Registries: React.FC = () => {
           {registryToEdit && <p className="text-sm text-gray-500">Leave empty to keep the current password.</p>}
         </div>
         <div className="space-y-3">
-          <Label htmlFor="project">Project</Label>
+          <div className="flex items-center gap-1.5">
+            <Label htmlFor="project">Project</Label>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Leave this empty for private Docker Hub entries</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <Input
             id="project"
             value={formData.project}
@@ -241,10 +265,7 @@ const Registries: React.FC = () => {
             form="registry-form"
             variant="default"
             disabled={
-              !formData.name.trim() ||
-              !formData.url.trim() ||
-              !formData.username.trim() ||
-              (!registryToEdit && !formData.password.trim())
+              !formData.name.trim() || !formData.username.trim() || (!registryToEdit && !formData.password.trim())
             }
           >
             {registryToEdit ? 'Edit' : 'Add'}

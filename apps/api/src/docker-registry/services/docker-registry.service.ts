@@ -16,14 +16,25 @@ import {
   IDockerRegistryProvider,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
-import { parseDockerImage } from '../../common/utils/docker-image.util'
+import { parseDockerImage, checkDockerfileHasRegistryPrefix } from '../../common/utils/docker-image.util'
 import axios from 'axios'
 import type { AxiosRequestHeaders } from 'axios'
 import { AxiosHeaders } from 'axios'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
-const DOCKER_HUB_REGISTRY_ENDPOINT = 'index.docker.io/v1/'
+const DOCKER_HUB_URL = 'docker.io'
+
+/**
+ * Normalizes Docker Hub URLs to 'docker.io' for storage.
+ * Empty URLs are assumed to be Docker Hub.
+ */
+function normalizeRegistryUrl(url: string): string {
+  if (!url || url.trim() === '' || url.toLowerCase().includes('docker.io')) {
+    return DOCKER_HUB_URL
+  }
+  return url
+}
 
 export interface ImageDetails {
   digest: string
@@ -64,6 +75,7 @@ export class DockerRegistryService {
 
     const registry = this.dockerRegistryRepository.create({
       ...createDto,
+      url: normalizeRegistryUrl(createDto.url),
       organizationId,
       isFallback,
     })
@@ -101,7 +113,7 @@ export class DockerRegistryService {
     }
 
     registry.name = updateDto.name
-    registry.url = updateDto.url
+    registry.url = normalizeRegistryUrl(updateDto.url)
     registry.username = updateDto.username
     if (updateDto.password) {
       registry.password = updateDto.password
@@ -159,7 +171,7 @@ export class DockerRegistryService {
       where: {
         organizationId: IsNull(),
         registryType: RegistryType.INTERNAL,
-        url: DOCKER_HUB_REGISTRY_ENDPOINT,
+        url: DOCKER_HUB_URL,
         project: '',
       },
     })
@@ -802,6 +814,38 @@ export class DockerRegistryService {
       this.logger.error(`Exception when deleting image ${imageName}: ${error.message}`)
       throw error
     }
+  }
+
+  /**
+   * Gets source registries for building a Docker image from a Dockerfile
+   * If the Dockerfile has images with registry prefixes, returns all user registries
+   *
+   * @param dockerfileContent - The Dockerfile content
+   * @param organizationId - The organization ID
+   * @returns Array of source registries (private registries + default Docker Hub)
+   */
+  async getSourceRegistriesForDockerfile(dockerfileContent: string, organizationId: string): Promise<DockerRegistry[]> {
+    const sourceRegistries: DockerRegistry[] = []
+
+    // Check if Dockerfile has any images with a registry prefix
+    // If so, include all user's registries (we can't reliably match specific registries)
+    if (checkDockerfileHasRegistryPrefix(dockerfileContent)) {
+      const userRegistries = await this.findAll(organizationId)
+      sourceRegistries.push(...userRegistries)
+    }
+
+    // Add default Docker Hub registry only if user doesn't have their own Docker Hub credentials
+    // The auth configs map is keyed by URL, so adding the default last would override user credentials
+    const userHasDockerHubCreds = sourceRegistries.some((registry) => registry.url.includes('docker.io'))
+
+    if (!userHasDockerHubCreds) {
+      const defaultDockerHubRegistry = await this.getDefaultDockerHubRegistry()
+      if (defaultDockerHubRegistry) {
+        sourceRegistries.push(defaultDockerHubRegistry)
+      }
+    }
+
+    return sourceRegistries
   }
 }
 
