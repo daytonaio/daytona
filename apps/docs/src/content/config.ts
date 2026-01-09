@@ -454,7 +454,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/claude', locale),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           attrs: {
             icon: 'claude.svg',
@@ -466,7 +466,7 @@ export const getSidebarConfig = (
             '/docs/claude-agent-sdk-interactive-terminal-sandbox',
             locale
           ),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           hideInSidebar: true,
         },
@@ -476,7 +476,7 @@ export const getSidebarConfig = (
             '/docs/claude-agent-sdk-connect-service-sandbox',
             locale
           ),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           hideInSidebar: true,
         },
@@ -486,7 +486,7 @@ export const getSidebarConfig = (
             '/docs/claude-code-run-tasks-stream-logs-sandbox',
             locale
           ),
-          label: labels['sidebarconfig.claude'],
+          label: t('sidebarconfig.claude'),
           disablePagination: true,
           hideInSidebar: true,
         },
