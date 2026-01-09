@@ -42,8 +42,10 @@ import (
 )
 
 type Server struct {
-	WorkDir     string
-	ComputerUse computeruse.IComputerUse
+	WorkDir                              string
+	ComputerUse                          computeruse.IComputerUse
+	TerminationGracePeriodSeconds        int
+	TerminationCheckIntervalMilliseconds int
 }
 
 type WorkDirResponse struct {
@@ -124,7 +126,12 @@ func (s *Server) Start() error {
 	r := gin.New()
 	r.Use(common_errors.Recovery())
 	r.Use(middlewares.LoggingMiddleware())
-	r.Use(middlewares.ErrorMiddleware())
+	r.Use(common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
+		return common_errors.ErrorResponse{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
+	}))
 	binding.Validator = new(DefaultValidator)
 
 	// Add swagger UI in development mode
@@ -178,7 +185,7 @@ func (s *Server) Start() error {
 	{
 		processController.POST("/execute", process.ExecuteCommand)
 
-		sessionController := session.NewSessionController(configDir, s.WorkDir)
+		sessionController := session.NewSessionController(configDir, s.WorkDir, s.TerminationGracePeriodSeconds, s.TerminationCheckIntervalMilliseconds)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)

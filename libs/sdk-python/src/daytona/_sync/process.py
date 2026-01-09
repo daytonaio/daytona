@@ -12,14 +12,14 @@ from typing import Callable, Dict, List, Optional
 
 import websockets
 from daytona_toolbox_api_client import (
-    Command,
+    CommandDTO,
     CreateSessionRequest,
     ExecuteRequest,
     ProcessApi,
     PtyCreateRequest,
     PtyResizeRequest,
     PtySessionInfo,
-    Session,
+    SessionDTO,
 )
 from websockets.sync.client import connect
 
@@ -263,14 +263,14 @@ class Process:
         self._api_client.create_session(request=request)
 
     @intercept_errors(message_prefix="Failed to get session: ")
-    def get_session(self, session_id: str) -> Session:
+    def get_session(self, session_id: str) -> SessionDTO:
         """Gets a session in the Sandbox.
 
         Args:
             session_id (str): Unique identifier of the session to retrieve.
 
         Returns:
-            Session: Session information including:
+            SessionDTO: SessionDTO information including:
                 - session_id: The session's unique identifier
                 - commands: List of commands executed in the session
 
@@ -284,7 +284,7 @@ class Process:
         return self._api_client.get_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to get session command: ")
-    def get_session_command(self, session_id: str, command_id: str) -> Command:
+    def get_session_command(self, session_id: str, command_id: str) -> CommandDTO:
         """Gets information about a specific command executed in a session.
 
         Args:
@@ -292,7 +292,7 @@ class Process:
             command_id (str): Unique identifier of the command.
 
         Returns:
-            Command: Command information including:
+            CommandDTO: CommandDTO information including:
                 - id: The command's unique identifier
                 - command: The executed command string
                 - exit_code: Command's exit status (if completed)
@@ -436,11 +436,11 @@ class Process:
             await std_demux_stream(ws, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to list sessions: ")
-    def list_sessions(self) -> List[Session]:
+    def list_sessions(self) -> List[SessionDTO]:
         """Lists all sessions in the Sandbox.
 
         Returns:
-            List[Session]: List of all sessions in the Sandbox.
+            List[SessionDTO]: List of all sessions in the Sandbox.
 
         Example:
             ```python

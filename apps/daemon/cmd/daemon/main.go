@@ -114,7 +114,9 @@ func main() {
 	}
 
 	toolBoxServer := &toolbox.Server{
-		WorkDir: workDir,
+		WorkDir:                              workDir,
+		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
+		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,
 	}
 
 	// Start the toolbox server in a go routine

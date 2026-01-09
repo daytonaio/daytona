@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
-	ReadLogWithExitCode(ctx, logReader, follow, "", c, errChan)
-}
-
 func ReadLogWithExitCode(ctx context.Context, logReader io.Reader, follow bool, exitCodeFilePath string, c chan []byte, errChan chan error) {
 	reader := bufio.NewReader(logReader)
 	consecutiveEOFCount := 0
