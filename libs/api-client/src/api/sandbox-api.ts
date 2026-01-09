@@ -306,6 +306,62 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     *
+     * @summary Expire signed preview URL for a sandbox port
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {number} port Port number to expire signed preview URL for
+     * @param {string} token Token to expire signed preview URL for
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    expireSignedPortPreviewUrl: async (
+      sandboxIdOrName: string,
+      port: number,
+      token: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('expireSignedPortPreviewUrl', 'sandboxIdOrName', sandboxIdOrName)
+      // verify required parameter 'port' is not null or undefined
+      assertParamExists('expireSignedPortPreviewUrl', 'port', port)
+      // verify required parameter 'token' is not null or undefined
+      assertParamExists('expireSignedPortPreviewUrl', 'token', token)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url/{token}/expire`
+        .replace(`{${'sandboxIdOrName'}}`, encodeURIComponent(String(sandboxIdOrName)))
+        .replace(`{${'port'}}`, encodeURIComponent(String(port)))
+        .replace(`{${'token'}}`, encodeURIComponent(String(token)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * This endpoint is deprecated. Use `getBuildLogsUrl` instead.
      * @summary Get build logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -1607,6 +1663,41 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     *
+     * @summary Expire signed preview URL for a sandbox port
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {number} port Port number to expire signed preview URL for
+     * @param {string} token Token to expire signed preview URL for
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async expireSignedPortPreviewUrl(
+      sandboxIdOrName: string,
+      port: number,
+      token: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.expireSignedPortPreviewUrl(
+        sandboxIdOrName,
+        port,
+        token,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.expireSignedPortPreviewUrl']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * This endpoint is deprecated. Use `getBuildLogsUrl` instead.
      * @summary Get build logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -2384,6 +2475,27 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     *
+     * @summary Expire signed preview URL for a sandbox port
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {number} port Port number to expire signed preview URL for
+     * @param {string} token Token to expire signed preview URL for
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    expireSignedPortPreviewUrl(
+      sandboxIdOrName: string,
+      port: number,
+      token: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .expireSignedPortPreviewUrl(sandboxIdOrName, port, token, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * This endpoint is deprecated. Use `getBuildLogsUrl` instead.
      * @summary Get build logs
      * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -2900,6 +3012,29 @@ export class SandboxApi extends BaseAPI {
   public deleteSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
       .deleteSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Expire signed preview URL for a sandbox port
+   * @param {string} sandboxIdOrName ID or name of the sandbox
+   * @param {number} port Port number to expire signed preview URL for
+   * @param {string} token Token to expire signed preview URL for
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public expireSignedPortPreviewUrl(
+    sandboxIdOrName: string,
+    port: number,
+    token: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .expireSignedPortPreviewUrl(sandboxIdOrName, port, token, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

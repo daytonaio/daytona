@@ -2481,6 +2481,54 @@ paths:
       summary: Get signed preview URL for a sandbox port
       tags:
         - sandbox
+  /sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url/{token}/expire:
+    post:
+      operationId: expireSignedPortPreviewUrl
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Port number to expire signed preview URL for
+          explode: false
+          in: path
+          name: port
+          required: true
+          schema:
+            type: number
+          style: simple
+        - description: Token to expire signed preview URL for
+          explode: false
+          in: path
+          name: token
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Signed preview URL has been expired
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Expire signed preview URL for a sandbox port
+      tags:
+        - sandbox
   /sandbox/{sandboxIdOrName}/build-logs:
     get:
       deprecated: true
@@ -10182,7 +10230,7 @@ components:
     PortPreviewUrl:
       example:
         sandboxId: '123456'
-        url: 'https://{port}-{sandboxId}.{proxyDomain'
+        url: 'https://{port}-{sandboxId}.{proxyDomain}'
         token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
       properties:
         sandboxId:
@@ -10191,7 +10239,7 @@ components:
           type: string
         url:
           description: Preview url
-          example: 'https://{port}-{sandboxId}.{proxyDomain'
+          example: 'https://{port}-{sandboxId}.{proxyDomain}'
           type: string
         token:
           description: Access token
@@ -10205,7 +10253,7 @@ components:
     SingedPortPreviewUrl:
       example:
         sandboxId: '123456'
-        url: 'https://{port}-{token}.{proxyDomain'
+        url: 'https://{port}-{token}.{proxyDomain}'
       properties:
         sandboxId:
           description: ID of the sandbox
@@ -10213,7 +10261,7 @@ components:
           type: string
         url:
           description: Singed preview url
-          example: 'https://{port}-{token}.{proxyDomain'
+          example: 'https://{port}-{token}.{proxyDomain}'
           type: string
       required:
         - sandboxId
@@ -10708,7 +10756,6 @@ components:
           example: runner.example.com
           type: string
       required:
-        - runnerDomain
         - runnerId
         - runnerSnapshotId
       type: object

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class RunnerSnapshotDto {
   @ApiProperty({
@@ -18,15 +18,15 @@ export class RunnerSnapshotDto {
   })
   runnerId: string
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Runner domain',
     example: 'runner.example.com',
   })
-  runnerDomain: string
+  runnerDomain?: string
 
-  constructor(runnerSnapshotId: string, runnerId: string, runnerDomain: string) {
+  constructor(runnerSnapshotId: string, runnerId: string, runnerDomain: string | null) {
     this.runnerSnapshotId = runnerSnapshotId
     this.runnerId = runnerId
-    this.runnerDomain = runnerDomain
+    this.runnerDomain = runnerDomain ?? undefined
   }
 }
