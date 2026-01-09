@@ -78,7 +78,7 @@ const Registries: React.FC = () => {
       await dockerRegistryApi.createRegistry(
         {
           name: formData.name.trim(),
-          url: formData.url.trim(),
+          url: formData.url.trim() || 'docker.io',
           username: formData.username.trim(),
           password: formData.password.trim(),
           project: formData.project.trim(),
@@ -112,7 +112,7 @@ const Registries: React.FC = () => {
         registryToEdit.id,
         {
           name: formData.name.trim(),
-          url: formData.url.trim(),
+          url: formData.url.trim() || 'docker.io',
           username: formData.username.trim(),
           password: formData.password.trim(),
           project: formData.project.trim(),
