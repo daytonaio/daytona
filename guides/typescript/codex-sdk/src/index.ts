@@ -126,6 +126,7 @@ async function main() {
     }
   } catch (error) {
     console.error('An error occurred:', error)
+    if (sandbox) await sandbox.delete()
     process.exit(1)
   }
 }
