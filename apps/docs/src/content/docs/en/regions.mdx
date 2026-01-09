@@ -37,6 +37,18 @@ const daytona: Daytona = new Daytona({
 });
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+# Configure Daytona to use the US region
+config = Daytona::Config.new(target: 'us')
+
+# Initialize the Daytona client with the specified configuration
+daytona = Daytona::Daytona.new(config)
+```
+</TabItem>
 </Tabs>
 
 For more information, see [Configuration](/docs/configuration).

@@ -27,6 +27,7 @@
   "sidebarconfig.documentation": "ドキュメント",
   "sidebarconfig.tsSdkReference": "TS SDK リファレンス",
   "sidebarconfig.pythonSdkReference": "Python SDK リファレンス",
+  "sidebarconfig.rubySdkReference": "Ruby SDK リファレンス",
   "sidebarconfig.apiReference": "APIリファレンス",
   "sidebarconfig.cliReference": "CLI リファレンス",
   "sidebarconfig.introduction": "概要",

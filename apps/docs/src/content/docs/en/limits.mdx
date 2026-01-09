@@ -124,6 +124,7 @@ If you're using the official Daytona SDKs:
 
 - **TypeScript SDK**: Throws `DaytonaRateLimitError`
 - **Python SDK**: Raises `DaytonaRateLimitError`
+- **Ruby SDK**: Raises `Daytona::Sdk::Error`
 
 All errors include `headers` and `statusCode` properties, allowing you to access rate limit headers directly from the error object. Headers support case-insensitive access:
 
@@ -146,6 +147,15 @@ try:
 except DaytonaRateLimitError as e:
     print(e.headers['x-ratelimit-remaining-sandbox-create'])
     print(e.headers['X-RateLimit-Remaining-Sandbox-Create'])  # also works
+```
+
+```ruby
+# Ruby - handle rate limit errors
+begin
+  daytona.create
+rescue Daytona::Sdk::Error => e
+  puts "Error: #{e.message}"
+end
 ```
 
 #### Example Error Response

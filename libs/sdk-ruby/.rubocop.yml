@@ -1,0 +1,16 @@
+plugins:
+  - rubocop-rake
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+
+Layout/LineLength:
+  AllowedPatterns: ['\A\s*#']
+  IgnoreCopDirectives: true
+
+Style/Documentation:
+  Enabled: false
+
+Style/AccessorGrouping:
+  EnforcedStyle: separated

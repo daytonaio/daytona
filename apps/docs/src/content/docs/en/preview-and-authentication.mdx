@@ -36,13 +36,24 @@ console.log(`Preview link token: ${previewInfo.token}`);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+
+preview_info = sandbox.preview_url(3000)
+
+puts "Preview link url: #{preview_info.url}"
+puts "Preview link token: #{preview_info.token}"
+
+```
+
+</TabItem>
 </Tabs>
 
 :::tip
 If you want to serve the previews under your own domain instead of using Daytona's URLs, check out the [Custom Domain/Authentication](/docs/en/custom-domain-authentication) section.
 :::
 
-See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink)
+See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink), [preview_url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
 
 ## Authentication
 

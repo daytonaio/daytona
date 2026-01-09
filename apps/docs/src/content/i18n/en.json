@@ -38,6 +38,7 @@
   "sidebarconfig.guides": "Guides",
   "sidebarconfig.tsSdkReference": "TS SDK Reference",
   "sidebarconfig.pythonSdkReference": "Python SDK Reference",
+  "sidebarconfig.rubySdkReference": "Ruby SDK Reference",
   "sidebarconfig.apiReference": "API Reference",
   "sidebarconfig.cliReference": "CLI Reference",
   "sidebarconfig.introduction": "Introduction",

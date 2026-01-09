@@ -56,9 +56,26 @@ const sandbox = await daytona.create(
 )
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Define a simple declarative image with Python packages
+declarative_image = Daytona::Image
+  .debian_slim('3.12')
+  .pip_install(['requests', 'pytest'])
+  .workdir('/home/daytona')
+
+# Create a new Sandbox with the declarative image and stream the build logs
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromImageParams.new(image: declarative_image),
+  timeout: 0,
+  on_snapshot_create_logs: proc { |chunk| puts chunk }
+)
+```
+</TabItem>
 </Tabs>
 
-See: [CreateSandboxFromImageParams (Python SDK)](/docs/python-sdk/sync/daytona#createsandboxfromimageparams), [CreateSandboxFromImageParams (TypeScript SDK)](/docs/typescript-sdk/daytona#createsandboxfromimageparams)
+See: [CreateSandboxFromImageParams (Python SDK)](/docs/python-sdk/sync/daytona#createsandboxfromimageparams), [CreateSandboxFromImageParams (TypeScript SDK)](/docs/typescript-sdk/daytona#createsandboxfromimageparams), [CreateSandboxFromImageParams (Ruby SDK)](/docs/ruby-sdk/daytona#createsandboxfromimageparams)
 
 ### Creating Pre-built Snapshots
 
@@ -117,9 +134,35 @@ const sandbox = await daytona.create({
 })
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create a simple Python data science image
+snapshot_name = 'data-science-snapshot'
+
+image = Daytona::Image
+  .debian_slim('3.12')
+  .pip_install(['pandas', 'numpy'])
+  .workdir('/home/daytona')
+
+# Create the Snapshot and stream the build logs
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(
+    name: snapshot_name,
+    image: image
+  ),
+  on_logs: proc { |chunk| puts chunk }
+)
+
+# Create a new Sandbox using the pre-built Snapshot
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: snapshot_name)
+)
+```
+</TabItem>
 </Tabs>
 
-See: [CreateSnapshotParams (Python SDK)](/docs/python-sdk/sync/snapshot#createsnapshotparams), [CreateSnapshotParams (TypeScript SDK)](/docs/typescript-sdk/snapshot#createsnapshotparams)
+See: [CreateSnapshotParams (Python SDK)](/docs/python-sdk/sync/snapshot#createsnapshotparams), [CreateSnapshotParams (TypeScript SDK)](/docs/typescript-sdk/snapshot#createsnapshotparams), [CreateSnapshotParams (Ruby SDK)](/docs/ruby-sdk/snapshot#createsnapshotparams)
 
 ## Image Configuration
 
@@ -150,9 +193,19 @@ const image = Image.base('python:3.12-slim-bookworm')
 const image = Image.debianSlim('3.12')
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create an image from a base
+image = Daytona::Image.base('python:3.12-slim-bookworm')
+
+# Use a Debian slim image with Python 3.12
+image = Daytona::Image.debian_slim('3.12')
+```
+</TabItem>
 </Tabs>
 
-See: [base (Python SDK)](/docs/python-sdk/common/image#imagebase), [debian_slim (Python SDK)](/docs/python-sdk/common/image#imagedebian_slim), [base (TypeScript SDK)](/docs/typescript-sdk/image#base), [debianSlim (TypeScript SDK)](/docs/typescript-sdk/image#debianslim)
+See: [base (Python SDK)](/docs/python-sdk/common/image#imagebase), [debian_slim (Python SDK)](/docs/python-sdk/common/image#imagedebian_slim), [base (TypeScript SDK)](/docs/typescript-sdk/image#base), [debianSlim (TypeScript SDK)](/docs/typescript-sdk/image#debianslim), [base (Ruby SDK)](/docs/ruby-sdk/image#base), [debian_slim (Ruby SDK)](/docs/ruby-sdk/image#debian_slim)
 
 ### Package Management
 
@@ -185,9 +238,24 @@ const image = Image.debianSlim('3.12').pipInstallFromPyproject('pyproject.toml',
 })
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Add pip packages
+image = Daytona::Image.debian_slim('3.12').pip_install(['requests', 'pandas'])
+
+# Install from requirements.txt
+image = Daytona::Image.debian_slim('3.12').pip_install_from_requirements('requirements.txt')
+
+# Install from pyproject.toml (with optional dependencies)
+image = Daytona::Image.debian_slim('3.12').pip_install_from_pyproject('pyproject.toml', 
+  optional_dependencies: ['dev']
+)
+```
+</TabItem>
 </Tabs>
 
-See: [pip_install (Python SDK)](/docs/python-sdk/common/image#imagepip_install), [pip_install_from_requirements (Python SDK)](/docs/python-sdk/common/image#imagepip_install_from_requirements), [pip_install_from_pyproject (Python SDK)](/docs/python-sdk/common/image#imagepip_install_from_pyproject), [pipInstall (TypeScript SDK)](/docs/typescript-sdk/image#pipinstall), [pipInstallFromRequirements (TypeScript SDK)](/docs/typescript-sdk/image#pipinstallfromrequirements), [pipInstallFromPyproject (TypeScript SDK)](/docs/typescript-sdk/image#pipinstallfrompyproject)
+See: [pip_install (Python SDK)](/docs/python-sdk/common/image#imagepip_install), [pip_install_from_requirements (Python SDK)](/docs/python-sdk/common/image#imagepip_install_from_requirements), [pip_install_from_pyproject (Python SDK)](/docs/python-sdk/common/image#imagepip_install_from_pyproject), [pipInstall (TypeScript SDK)](/docs/typescript-sdk/image#pipinstall), [pipInstallFromRequirements (TypeScript SDK)](/docs/typescript-sdk/image#pipinstallfromrequirements), [pipInstallFromPyproject (TypeScript SDK)](/docs/typescript-sdk/image#pipinstallfrompyproject), [pip_install (Ruby SDK)](/docs/ruby-sdk/image#pip_install), [pip_install_from_requirements (Ruby SDK)](/docs/ruby-sdk/image#pip_install_from_requirements), [pip_install_from_pyproject (Ruby SDK)](/docs/ruby-sdk/image#pip_install_from_pyproject)
 
 ### File System Operations
 
@@ -212,9 +280,19 @@ const image = Image.debianSlim('3.12').addLocalFile('package.json', '/home/dayto
 const image = Image.debianSlim('3.12').addLocalDir('src', '/home/daytona/src')
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Add a local file
+image = Daytona::Image.debian_slim('3.12').add_local_file('package.json', '/home/daytona/package.json')
+
+# Add a local directory
+image = Daytona::Image.debian_slim('3.12').add_local_dir('src', '/home/daytona/src')
+```
+</TabItem>
 </Tabs>
 
-See: [add_local_file (Python SDK)](/docs/python-sdk/common/image#imageadd_local_file), [add_local_dir (Python SDK)](/docs/python-sdk/common/image#imageadd_local_dir), [addLocalFile (TypeScript SDK)](/docs/typescript-sdk/image#addlocalfile), [addLocalDir (TypeScript SDK)](/docs/typescript-sdk/image#addlocaldir)
+See: [add_local_file (Python SDK)](/docs/python-sdk/common/image#imageadd_local_file), [add_local_dir (Python SDK)](/docs/python-sdk/common/image#imageadd_local_dir), [addLocalFile (TypeScript SDK)](/docs/typescript-sdk/image#addlocalfile), [addLocalDir (TypeScript SDK)](/docs/typescript-sdk/image#addlocaldir), [add_local_file (Ruby SDK)](/docs/ruby-sdk/image#add_local_file), [add_local_dir (Ruby SDK)](/docs/ruby-sdk/image#add_local_dir)
 
 ### Environment Configuration
 
@@ -239,9 +317,19 @@ const image = Image.debianSlim('3.12').env({ PROJECT_ROOT: '/home/daytona' })
 const image = Image.debianSlim('3.12').workdir('/home/daytona')
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Set environment variables
+image = Daytona::Image.debian_slim('3.12').env('PROJECT_ROOT': '/home/daytona')
+
+# Set working directory
+image = Daytona::Image.debian_slim('3.12').workdir('/home/daytona')
+```
+</TabItem>
 </Tabs>
 
-See: [env (Python SDK)](/docs/python-sdk/common/image#imageenv), [workdir (Python SDK)](/docs/python-sdk/common/image#imageworkdir), [env (TypeScript SDK)](/docs/typescript-sdk/image#env), [workdir (TypeScript SDK)](/docs/typescript-sdk/image#workdir)
+See: [env (Python SDK)](/docs/python-sdk/common/image#imageenv), [workdir (Python SDK)](/docs/python-sdk/common/image#imageworkdir), [env (TypeScript SDK)](/docs/typescript-sdk/image#env), [workdir (TypeScript SDK)](/docs/typescript-sdk/image#workdir), [env (Ruby SDK)](/docs/ruby-sdk/image#env), [workdir (Ruby SDK)](/docs/ruby-sdk/image#workdir)
 
 ### Commands and Entrypoints
 
@@ -280,9 +368,26 @@ const image = Image.debianSlim('3.12').entrypoint(['/bin/bash'])
 const image = Image.debianSlim('3.12').cmd(['/bin/bash'])
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Run shell commands during build
+image = Daytona::Image.debian_slim('3.12').run_commands(
+  'apt-get update && apt-get install -y git',
+  'groupadd -r daytona && useradd -r -g daytona -m daytona',
+  'mkdir -p /home/daytona/workspace'
+)
+
+# Set entrypoint
+image = Daytona::Image.debian_slim('3.12').entrypoint(['/bin/bash'])
+
+# Set default command
+image = Daytona::Image.debian_slim('3.12').cmd(['/bin/bash'])
+```
+</TabItem>
 </Tabs>
 
-See: [run_commands (Python SDK)](/docs/python-sdk/common/image#imagerun_commands), [entrypoint (Python SDK)](/docs/python-sdk/common/image#imageentrypoint), [cmd (Python SDK)](/docs/python-sdk/common/image#imagecmd), [runCommands (TypeScript SDK)](/docs/typescript-sdk/image#runcommands), [entrypoint (TypeScript SDK)](/docs/typescript-sdk/image#entrypoint), [cmd (TypeScript SDK)](/docs/typescript-sdk/image#cmd)
+See: [run_commands (Python SDK)](/docs/python-sdk/common/image#imagerun_commands), [entrypoint (Python SDK)](/docs/python-sdk/common/image#imageentrypoint), [cmd (Python SDK)](/docs/python-sdk/common/image#imagecmd), [runCommands (TypeScript SDK)](/docs/typescript-sdk/image#runcommands), [entrypoint (TypeScript SDK)](/docs/typescript-sdk/image#entrypoint), [cmd (TypeScript SDK)](/docs/typescript-sdk/image#cmd), [run_commands (Ruby SDK)](/docs/ruby-sdk/image#run_commands), [entrypoint (Ruby SDK)](/docs/ruby-sdk/image#entrypoint), [cmd (Ruby SDK)](/docs/ruby-sdk/image#cmd)
 
 ### Dockerfile Integration
 

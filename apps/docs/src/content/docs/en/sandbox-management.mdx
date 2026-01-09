@@ -6,7 +6,7 @@ import sandboxDiagram from '@assets/docs/sandbox-states.svg?raw'
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Image from 'astro/components/Image.astro'
 
-Sandboxes are isolated development environments managed by Daytona. This guide covers how to create, manage, and remove Sandboxes using the SDK.
+Sandboxes are isolated development environments managed by Daytona. This guide covers how to create, manage, and remove Sandboxes using the SDK (Python, TypeScript, and Ruby).
 By default, Sandboxes auto-stop after 15 minutes of inactivity and use **1 vCPU**, **1GB RAM**, and **3GiB disk**.
 
 ## Sandbox Lifecycle
@@ -38,7 +38,7 @@ If `language` is omitted, the SDK will default to `python`. You can always overr
 
 ### Basic Sandbox Creation
 
-The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, custom names, or custom labels using Python and TypeScript.
+The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, custom names, or custom labels using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -90,13 +90,33 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # Create a basic Sandbox
+    sandbox = daytona.create
+
+    # Create a Sandbox with specific language
+    params = Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON)
+    sandbox = daytona.create(params)
+
+    # Create a Sandbox with custom labels
+    params = Daytona::CreateSandboxFromSnapshotParams.new(labels: { 'SOME_LABEL' => 'my-label' })
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
 </Tabs>
 
 :::note
 **Sandbox Names**: You can specify a custom name for your sandbox using the `name` parameter. If not provided, the sandbox ID will be used as the name. Sandbox names are reusable - once a sandbox with a specific name is destroyed, that name becomes available for use again.
 :::
 
-See: [create (Python SDK)](/docs/en/python-sdk/sync/daytona#daytonacreate), [create (TypeScript SDK)](/docs/en/typescript-sdk/daytona#create)
+See: [create (Python SDK)](/docs/en/python-sdk/sync/daytona#daytonacreate), [create (TypeScript SDK)](/docs/en/typescript-sdk/daytona#create), [create (Ruby SDK)](/docs/en/ruby-sdk/daytona#create)
 
 When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/en/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/en/sandbox-management#auto-stop-and-auto-archive).
 
@@ -163,6 +183,29 @@ Check your available resources and limits in the [dashboard](https://app.daytona
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # Create a Sandbox with custom resources
+    resources = Daytona::Resources.new(
+      cpu: 2,    # 2 CPU cores
+      memory: 4, # 4GB RAM
+      disk: 8    # 8GB disk space
+    )
+
+    params = Daytona::CreateSandboxFromImageParams.new(
+      image: Daytona::Image.debian_slim('3.12'),
+      resources: resources
+    )
+
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
 </Tabs>
 
 :::note
@@ -207,6 +250,22 @@ To create an ephemeral Sandbox, set `ephemeral` to `True` when creating a Sandbo
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # Create an ephemeral Sandbox
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      ephemeral: true,
+      auto_stop_interval: 5 # the ephemeral sandbox will be deleted after 5 minutes of inactivity
+    )
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
 </Tabs>
 
 :::note
@@ -220,7 +279,7 @@ Learn more about network limits in the [Network Limits](/docs/en/network-limits)
 
 ## Sandbox Information
 
-The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
+The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -257,13 +316,26 @@ The Daytona SDK provides methods to get information about a Sandbox, such as ID,
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Get Sandbox ID
+    sandbox_id = sandbox.id
+
+    # Get the Sandbox id, auto-stop interval and state
+    puts sandbox.id
+    puts sandbox.auto_stop_interval
+    puts sandbox.state
+    ```
+
+  </TabItem>
 </Tabs>
 
 To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
 
 ## Stop and Start Sandbox
 
-The Daytona SDK provides methods to stop and start Sandboxes using Python and TypeScript.
+The Daytona SDK provides methods to stop and start Sandboxes using Python, TypeScript, and Ruby.
 
 Stopped Sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed.
 
@@ -308,15 +380,33 @@ Stopped Sandboxes maintain filesystem persistence while their memory state is cl
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create
+
+    # Stop Sandbox
+    sandbox.stop
+
+    puts sandbox.id # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+    # The sandbox ID can later be used to find the sandbox and start it
+    sandbox = daytona.find_one(id: '7cd11133-96c1-4cc8-9baa-c757b8f8c916')
+
+    # Start Sandbox
+    sandbox.start
+    ```
+
+  </TabItem>
 </Tabs>
 
-See: [stop (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstop), [start (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstart), [find_one (Python SDK)](/docs/python-sdk/sync/daytona#daytonafind_one), [stop (TypeScript SDK)](/docs/typescript-sdk/sandbox#stop), [start (TypeScript SDK)](/docs/typescript-sdk/sandbox#start), [findOne (TypeScript SDK)](/docs/typescript-sdk/daytona#findone)
+See: [stop (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstop), [start (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstart), [find_one (Python SDK)](/docs/python-sdk/sync/daytona#daytonafind_one), [stop (TypeScript SDK)](/docs/typescript-sdk/sandbox#stop), [start (TypeScript SDK)](/docs/typescript-sdk/sandbox#start), [findOne (TypeScript SDK)](/docs/typescript-sdk/daytona#findone), [stop (Ruby SDK)](/docs/ruby-sdk/sandbox#stop), [start (Ruby SDK)](/docs/ruby-sdk/sandbox#start), [find_one (Ruby SDK)](/docs/ruby-sdk/daytona#find_one)
 
 The stopped state should be used when the Sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the Sandbox to eliminate disk usage costs.
 
 ## Archive Sandbox
 
-The Daytona SDK provides methods to archive Sandboxes using Python and TypeScript.
+The Daytona SDK provides methods to archive Sandboxes using Python, TypeScript, and Ruby.
 
 When Sandboxes are archived, the entire filesystem state is moved to very cost-effective object storage, making it possible to keep Sandboxes available for an extended period.
 Starting an archived Sandbox takes more time than starting a stopped Sandbox, depending on its size.
@@ -337,13 +427,20 @@ A Sandbox must be stopped before it can be archived, and can be started again in
     await sandbox.archive();
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Archive Sandbox
+    sandbox.archive
+    ```
+  </TabItem>
 </Tabs>
 
-See: [archive (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxarchive), [archive (TypeScript SDK)](/docs/typescript-sdk/sandbox#archive)
+See: [archive (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxarchive), [archive (TypeScript SDK)](/docs/typescript-sdk/sandbox#archive), [archive (Ruby SDK)](/docs/ruby-sdk/sandbox#archive)
 
 ## Delete Sandbox
 
-The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript.
+The Daytona SDK provides methods to delete Sandboxes using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -359,9 +456,16 @@ The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript
     await sandbox.delete();
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Delete Sandbox
+    sandbox.delete
+    ```
+  </TabItem>
 </Tabs>
 
-See: [delete (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxdelete), [delete (TypeScript SDK)](/docs/typescript-sdk/sandbox#delete)
+See: [delete (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxdelete), [delete (TypeScript SDK)](/docs/typescript-sdk/sandbox#delete), [delete (Ruby SDK)](/docs/ruby-sdk/sandbox#delete)
 
 :::tip
 Check out the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) if you prefer managing Sandboxes through the terminal:
@@ -425,6 +529,16 @@ If the parameter is not set, the default interval of `15` minutes will be used.
     });
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      snapshot: 'my-snapshot-name',
+      auto_stop_interval: 0 # Disables the auto-stop feature - default is 15 minutes
+    )
+    sandbox = daytona.create(params)
+    ```
+  </TabItem>
 </Tabs>
 
 ### Auto-archive Interval
@@ -454,6 +568,16 @@ If the parameter is not set, the default interval of `7 days` days will be used.
         snapshot: "my-snapshot-name",
         autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
     });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      snapshot: 'my-snapshot-name',
+      auto_archive_interval: 60 # Auto-archive after a Sandbox has been stopped for 1 hour
+    )
+    sandbox = daytona.create(params)
     ```
   </TabItem>
 </Tabs>
@@ -505,6 +629,23 @@ If the parameter is not set, the Sandbox will not be deleted automatically.
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      snapshot: 'my-snapshot-name',
+      auto_delete_interval: 60 # Auto-delete after a Sandbox has been stopped for 1 hour
+    )
+    sandbox = daytona.create(params)
+
+    # Delete the Sandbox immediately after it has been stopped
+    sandbox.auto_delete_interval = 0
+
+    # Disable auto-deletion
+    sandbox.auto_delete_interval = -1
+    ```
+
+  </TabItem>
 </Tabs>
 
 ## Run Indefinitely
@@ -527,6 +668,16 @@ By default, Sandboxes auto-stop after 15 minutes of inactivity. To keep a Sandbo
         snapshot: "my-snapshot-name",
         autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
     });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      snapshot: 'my-snapshot-name',
+      auto_stop_interval: 0 # Disables the auto-stop feature - default is 15 minutes
+    )
+    sandbox = daytona.create(params)
     ```
   </TabItem>
 </Tabs>
@@ -556,6 +707,16 @@ Recovery actions are not performed automatically because they address errors tha
         await sandbox.recover();
         console.log('Sandbox recovered successfully');
     }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Check if the Sandbox is recoverable
+    if sandbox.recoverable
+      sandbox.recover
+      puts 'Sandbox recovered successfully'
+    end
     ```
   </TabItem>
 </Tabs>
