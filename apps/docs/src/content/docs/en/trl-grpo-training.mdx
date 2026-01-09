@@ -180,7 +180,9 @@ We create the sandbox pool upfront and reuse sandboxes throughout training:
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python
-    SANDBOX_POOL_SIZE = 500
+    EFFECTIVE_BATCH_SIZE = 500
+    # We evaluate each completion concurrently, in its own sandbox,
+    # so we spawn EFFECTIVE_BATCH_SIZE number of sandboxes.
 
     async def _create_sandbox_pool_async(
         daytona: AsyncDaytona, n: int = 10
@@ -287,18 +289,18 @@ The `build_test_harness` function combines the original prompt, the model's comp
         return f"""{prompt}
 {function_body}
 
-    import json
-    import random
-    random.seed(0)
+import json
+import random
+random.seed(0)
 
-    def _kadane(xs):
+def _kadane(xs):
         max_sum = current = xs[0]
         for x in xs[1:]:
             current = max(x, current + x)
             max_sum = max(max_sum, current)
         return max_sum
 
-    def _run_tests():
+def _run_tests():
         tests = (
             {tests_tuple}
         )
@@ -312,9 +314,9 @@ The `build_test_harness` function combines the original prompt, the model's comp
                 results.append(False)
         print(json.dumps({{"results": results}}))
 
-    if __name__ == "__main__":
+if __name__ == "__main__":
         _run_tests()
-    """
+"""
     ```
   </TabItem>
 </Tabs>
@@ -403,12 +405,18 @@ The batch evaluator distributes completions across the sandbox pool:
         async def run_one(
             i: int, sandbox: AsyncSandbox, completion: str, prompt: str
         ) -> EvalResult:
+            task = PROMPT_TO_TASK[prompt]
+            num_task_tests = len(task["tests"])
             try:
                 stats = await evaluate_single_completion_async(sandbox, completion, prompt)
                 print(f"  Completion {i + 1}/{len(completions)} done")
                 return stats
             except Exception as e:
-                return _fail_result(len(PROMPT_TO_TASK[prompt]["tests"]))
+                print(
+                    f"  Completion {i + 1}/{len(completions)} failed: "
+                    f"{type(e).__name__}: {e}"
+                )
+                return _fail_result(num_task_tests)
 
         tasks = [
             run_one(i, sandbox_pool[i % len(sandbox_pool)], completion, prompt)
@@ -416,6 +424,8 @@ The batch evaluator distributes completions across the sandbox pool:
         ]
 
         stats_list = await asyncio.gather(*tasks)
+        print(f"  Done: {len(completions)}/{len(completions)} completions evaluated")
+
         return stats_list
     ```
   </TabItem>
@@ -494,8 +504,10 @@ The GRPO trainer is configured with these parameters:
     training_args = GRPOConfig(
         output_dir="training_results",
         per_device_train_batch_size=20,
+        # batch size chosen so the training runs comfortably on a single 80GB GPU,
+        # if running this on a GPU with less memory, reduce the batch size accordingly
         gradient_accumulation_steps=25,
-        num_generations=250,
+        num_generations=EFFECTIVE_BATCH_SIZE // len(TASKS),
         max_prompt_length=256,
         max_completion_length=512,
         learning_rate=8e-6,
@@ -521,7 +533,7 @@ Key settings explained:
 ```
 per_device_train_batch_size (20) × gradient_accumulation_steps (25) = 500
 ```
-This equals `SANDBOX_POOL_SIZE`. Each training step generates exactly 500 completions, and we have exactly 500 sandboxes - so every completion evaluates in parallel with no waiting. If we had fewer sandboxes, some completions would queue up. If we had more, sandboxes would sit idle.
+This equals `EFFECTIVE_BATCH_SIZE`. Each training step generates exactly 500 completions, and we have exactly 500 sandboxes - so every completion evaluates in parallel with no waiting. If we had fewer sandboxes, some completions would queue up. If we had more, sandboxes would sit idle.
 
 **vLLM colocate mode:**
 ```python
@@ -532,7 +544,7 @@ vllm_gpu_memory_utilization=0.15,
 This runs vLLM for fast inference on the same GPU as training. We use 15% of the GPU's memory for model generation, and the rest for training (optimizer states).
 
 **Generation settings:**
-- `num_generations=250`: Generate 250 completions per prompt. With 2 prompts (sorting and max_subarray), that's 500 total per step
+- `num_generations=EFFECTIVE_BATCH_SIZE // len(TASKS)`: Generate 250 completions per prompt (500 / 2 tasks). With 2 prompts (sorting and max_subarray), that's 500 total per step
 - `max_completion_length=512`: Limit completion length to prevent runaway generation
 
 ### 4. Running the Training
@@ -666,12 +678,12 @@ The reference function should be defined in the test harness that `build_test_ha
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `SANDBOX_POOL_SIZE` | 500 | Number of parallel sandboxes |
+| `EFFECTIVE_BATCH_SIZE` | 500 | Effective batch size, also equal to the number of parallel sandboxes |
 | `MAX_TIMEOUT_SECONDS` | 1 | Timeout per code execution |
 | `MODEL_NAME` | `Qwen/Qwen3-1.7B-Base` | Base model to train |
 
 :::tip[Scaling Tips]
-- Match `SANDBOX_POOL_SIZE` to your total batch size for optimal parallelism
+- Keep `per_device_train_batch_size * gradient_accumulation_steps` equal to `EFFECTIVE_BATCH_SIZE` for optimal parallelism
 - Increase `MAX_TIMEOUT_SECONDS` for tasks with more (algorithmically) complex test cases
 :::
 

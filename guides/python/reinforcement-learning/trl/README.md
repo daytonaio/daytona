@@ -59,7 +59,7 @@ The script has several configurable parameters:
 
 ### Sandbox Settings
 
-- `SANDBOX_POOL_SIZE`: Number of Daytona sandboxes to create (default: 500).
+- `EFFECTIVE_BATCH_SIZE`: The effective batch size for training, also equal to the number of Daytona sandboxes to create (default: 500).
 - `MAX_TIMEOUT_SECONDS`: Timeout for code execution in each sandbox (default: 1 second). Prevents infinite loops from blocking training.
 
 ### Model Settings
@@ -70,9 +70,10 @@ The script has several configurable parameters:
 
 Key parameters in the training configuration:
 
-- `num_generations`: Number of completions to generate per prompt (default: 5)
+- `per_device_train_batch_size`: Batch size per device (default: 20)
+- `gradient_accumulation_steps`: Steps to accumulate before update (default: 25)
+- `max_steps`: Total training steps (default: 8)
 - `max_completion_length`: Maximum tokens for generated code (default: 512)
-- `max_steps`: Total training steps (default: 64)
 
 ### Adding New Tasks
 
