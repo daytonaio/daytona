@@ -41,7 +41,7 @@ export class SignedPortPreviewUrlDto {
 
   @ApiProperty({
     description: 'Singed preview url',
-    example: 'https://{port}-{token}.{proxyDomain',
+    example: 'https://{port}-{token}.{proxyDomain}',
   })
   @IsString()
   url: string
