@@ -168,7 +168,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           try {
             sandbox.desiredState = SandboxDesiredState.ARCHIVED
             await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-            this.syncInstanceState(sandbox.id)
+            this.syncInstanceState(sandbox.id).catch(this.logger.error)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
           } finally {
