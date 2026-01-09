@@ -76,7 +76,7 @@ async function main() {
 
     // Install the Claude Agent SDK
     console.log('Installing Agent SDK...')
-    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk').then((r: ExecuteResponse) => {
+    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk==0.1.19').then((r: ExecuteResponse) => {
       if (r.exitCode) throw new Error('Error installing Agent SDK: ' + r.result)
     })
 
