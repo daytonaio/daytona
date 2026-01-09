@@ -47,6 +47,18 @@ async function main() {
 
   let sandbox: Sandbox | undefined
 
+  // Reusable cleanup handler to delete the sandbox on exit
+  const cleanup = async () => {
+    try {
+      console.log('\nCleaning up...')
+      if (sandbox) await sandbox.delete()
+    } catch (e) {
+      console.error('Error deleting sandbox:', e)
+    } finally {
+      process.exit(0)
+    }
+  }
+
   try {
     // Create a new Daytona sandbox
     // The sandbox language is irrelevant since we will use the code interpreter SDK
@@ -59,17 +71,8 @@ async function main() {
       },
     })
 
-    // Register a handler to delete the sandbox on process exit
-    process.once('SIGINT', async () => {
-      try {
-        console.log('\nCleaning up...')
-        if (sandbox) await sandbox.delete()
-      } catch (e) {
-        console.error('Error deleting sandbox:', e)
-      } finally {
-        process.exit(0)
-      }
-    })
+    // Register cleanup handler on process exit
+    process.once('SIGINT', cleanup)
 
     // Install the Claude Agent SDK
     console.log('Installing Agent SDK...')
@@ -91,6 +94,9 @@ async function main() {
 
     // Set up readline interface for user input
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+    
+    // Register cleanup handler on readline SIGINT
+    rl.once('SIGINT', cleanup)
 
     // Start the interactive prompt loop
     console.log('Press Ctrl+C at any time to exit.')
