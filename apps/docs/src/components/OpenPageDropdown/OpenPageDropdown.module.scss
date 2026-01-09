@@ -73,6 +73,21 @@
       opacity: 0.5;
     }
   }
+
+  .mcpLinkContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1;
+    align-items: flex-start;
+  }
+
+  .mcpLinkSubtext {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--secondary-text-color);
+    opacity: 0.7;
+  }
 }
 
 @keyframes slideUpAndFade {
