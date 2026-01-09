@@ -1,3 +1,4 @@
+
 <div align="center">
 
 [![Documentation](https://img.shields.io/github/v/release/daytonaio/docs?label=Docs&color=23cc71)](https://www.daytona.io/docs)
@@ -5,8 +6,17 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
 [![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
 ![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
+ </div>
+&nbsp;
 
-</div>
+<p align="center" > <b> 
+    <a href="https://www.daytona.io/docs" > Documentation </a>·
+    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+"> Report Bug </a>·
+    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=%F0%9F%9A%80+Feature%3A+"> Request Feature </a>·
+    <a href="https://go.daytona.io/slack"> Join our Slack </a>·
+    <a href="https://x.com/daytonaio"> Connect on X </a> </b>
+</p>
+
 
 &nbsp;
 
@@ -14,49 +24,38 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
     <source media="(prefers-color-scheme: light)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-black.png">
-    <img alt="Daytona logo" src="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-black.png" width="50%">
+    <img alt="Daytona logo" src="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-black.png" width="60%">
   </picture>
 </div>
 
 <h3 align="center">
   Run AI Code.
-  <br/>
+  <br/>  <br/>
   Secure and Elastic Infrastructure for
   Running Your AI-Generated Code.
+
 </h3>
 
-<p align="center">
+<!-- <p align="center">
     <a href="https://www.daytona.io/docs"> Documentation </a>·
     <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+"> Report Bug </a>·
     <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=%F0%9F%9A%80+Feature%3A+"> Request Feature </a>·
     <a href="https://go.daytona.io/slack"> Join our Slack </a>·
     <a href="https://x.com/daytonaio"> Connect on X </a>
-</p>
+</p> -->
 
-<p align="center">
-    <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=957617&theme=neutral&period=daily&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+&nbsp;
+
+<p align="center" >
+    <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=957617&theme=neutral&period=daily&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>  &nbsp; &nbsp; &nbsp; &nbsp;
     <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-topic-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-topic-badge.svg?post_id=957617&theme=neutral&period=monthly&topic_id=237&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 </p>
 
----
-
-## Installation
-
-### Python SDK
-
-```bash
-pip install daytona
-```
-
-### TypeScript SDK
-
-```bash
-npm install @daytonaio/sdk
-```
 
 ---
 
-## Features
+<h1 align="center"> Features </h1>
 
 - **Lightning-Fast Infrastructure**: Sub-90ms Sandbox creation from code to execution.
 - **Separated & Isolated Runtime**: Execute AI-generated code with zero risk to your infrastructure.
@@ -64,16 +63,30 @@ npm install @daytonaio/sdk
 - **Programmatic Control**: File, Git, LSP, and Execute API
 - **Unlimited Persistence**: Your Sandboxes can live forever
 - **OCI/Docker Compatibility**: Use any OCI/Docker image to create a Sandbox
-
----
-
-## Quick Start
-
+ --- 
+ 
+ <h1 align="center"> Quick Start </h1>
+ 
 1. Create an account at https://app.daytona.io
 1. Generate a [new API key](https://app.daytona.io/dashboard/keys)
 1. Follow the [Getting Started docs](https://www.daytona.io/docs/getting-started/) to start using the Daytona SDK
+---
 
-## Creating your first Sandbox
+<h1 align="center"> Installation  </h1>
+
+### Python SDK or TypeScript SDK
+---
+<b> Python install </b>
+```bash
+pip install daytona
+```
+<b> TypeScript install </b>
+```bash
+npm install @daytonaio/sdk
+```
+---
+
+<h1 align="center">  Creating your first Sandbox  </h1> 
 
 ### Python SDK
 
