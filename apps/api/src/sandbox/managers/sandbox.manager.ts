@@ -399,8 +399,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       return
     }
 
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
-      id: sandboxId,
+    const sandbox = await this.sandboxRepository.findOneOrFail({
+      where: { id: sandboxId },
+      relations: ['buildInfo'],
     })
 
     if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {

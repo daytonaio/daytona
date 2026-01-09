@@ -189,7 +189,6 @@ export class Sandbox {
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
     nullable: true,
-    eager: true,
   })
   @JoinColumn()
   buildInfo?: BuildInfo
