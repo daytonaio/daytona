@@ -1,111 +1,138 @@
 <div align="center">
- <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
-  <img alt="Daytona logo" src="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-black.png" width="40%">
- </picture>
-</div>
-
-<br><br>
-
-<div align="center">
 
 [![Documentation](https://img.shields.io/github/v/release/daytonaio/docs?label=Docs&color=23cc71)](https://www.daytona.io/docs)
-[![License](https://img.shields.io/badge/License-Apache--2.0-blue)](#license)
-[![Issues - daytona](https://img.shields.io/github/issues/daytonaio/docs)](https://github.com/daytonaio/docs/issues)
+![License](https://img.shields.io/badge/License-AGPL--3-blue)
+[![Go Report Card](https://goreportcard.com/badge/github.com/daytonaio/daytona)](https://goreportcard.com/report/github.com/daytonaio/daytona)
+[![Issues - daytona](https://img.shields.io/github/issues/daytonaio/daytona)](https://github.com/daytonaio/daytona/issues)
+![GitHub Release](https://img.shields.io/github/v/release/daytonaio/daytona)
 
 </div>
 
-<h1 align="center">Daytona Documentation</h1>
+&nbsp;
+
 <div align="center">
-Daytona user and developer documentation.
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-white.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-black.png">
+    <img alt="Daytona logo" src="https://github.com/daytonaio/daytona/raw/main/assets/images/Daytona-logotype-black.png" width="50%">
+  </picture>
 </div>
-</br>
+
+<h3 align="center">
+  Run AI Code.
+  <br/>
+  Secure and Elastic Infrastructure for
+  Running Your AI-Generated Code.
+</h3>
 
 <p align="center">
-  <a href="https://github.com/daytonaio/docs/issues/new?assignees=&labels=bug">Report Bug</a>
-    ·
-  <a href="https://go.daytona.io/slack">Join Our Slack</a>
-    ·
-  <a href="https://twitter.com/daytonaio">Twitter</a>
+    <a href="https://www.daytona.io/docs"> Documentation </a>·
+    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%F0%9F%90%9B+Bug+Report%3A+"> Report Bug </a>·
+    <a href="https://github.com/daytonaio/daytona/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=%F0%9F%9A%80+Feature%3A+"> Request Feature </a>·
+    <a href="https://go.daytona.io/slack"> Join our Slack </a>·
+    <a href="https://x.com/daytonaio"> Connect on X </a>
 </p>
 
-The Daytona Documentation is developed with Astro and Starlight.
-Its core architecture leverages React, while documentation content is authored using Markdown (MDX).
+<p align="center">
+    <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=957617&theme=neutral&period=daily&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+    <a href="https://www.producthunt.com/posts/daytona-2?embed=true&utm_source=badge-top-post-topic-badge&utm_medium=badge&utm_souce=badge-daytona&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-topic-badge.svg?post_id=957617&theme=neutral&period=monthly&topic_id=237&t=1746176740150" alt="Daytona&#0032; - Secure&#0032;and&#0032;elastic&#0032;infra&#0032;for&#0032;running&#0032;your&#0032;AI&#0045;generated&#0032;code&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+</p>
 
-## Getting Started
+---
 
-If Node.js or Yarn are installed and set up on your local machine, you can clone this repository and install the required dependencies and configurations:
+## Installation
 
-```shell
-git clone https://github.com/daytonaio/docs.git
+### Python SDK
+
+```bash
+pip install daytona
 ```
 
-```shell
-yarn install
+### TypeScript SDK
+
+```bash
+npm install @daytonaio/sdk
 ```
 
-### Useful Commands
+---
 
-This repository utilizes `Yarn` to manage project dependencies and custom scripts. Below is a list of commonly used commands, defined in the `package.json`:
+## Features
 
-| Command                     | Action                                                                   |
-| :-------------------------- | :----------------------------------------------------------------------- |
-| `yarn dev`                  | Starts the local development server at `localhost:4321`.                 |
-| `yarn build`                | Builds the production site to the `./dist/` directory.                   |
-| `yarn preview`              | Previews the production build locally before deployment.                 |
-| `yarn astro [command]`      | Runs Astro CLI commands.                                                 |
-| `yarn astro -- --help`      | Displays help information for the Astro CLI.                             |
-| `yarn update-cli-reference` | Updates the Daytona CLI reference using autogenerated CLI documentation. |
+- **Lightning-Fast Infrastructure**: Sub-90ms Sandbox creation from code to execution.
+- **Separated & Isolated Runtime**: Execute AI-generated code with zero risk to your infrastructure.
+- **Massive Parallelization for Concurrent AI Workflows**: Fork Sandbox filesystem and memory state (Coming soon!)
+- **Programmatic Control**: File, Git, LSP, and Execute API
+- **Unlimited Persistence**: Your Sandboxes can live forever
+- **OCI/Docker Compatibility**: Use any OCI/Docker image to create a Sandbox
 
-### Documentation Structure
+---
 
-The documentation is organized as `.mdx` files within the `/src/content/docs` directory.
-Daytona documentation is divided into the following key sections:
+## Quick Start
 
-- **`Home`**
+1. Create an account at https://app.daytona.io
+1. Generate a [new API key](https://app.daytona.io/dashboard/keys)
+1. Follow the [Getting Started docs](https://www.daytona.io/docs/getting-started/) to start using the Daytona SDK
 
-  Overview of Daytona's SDK interfaces and quick start instructions.
+## Creating your first Sandbox
 
-- **`Getting Started`**
+### Python SDK
 
-  Instructions for installing Daytona across various environments.
+```py
+from daytona import Daytona, DaytonaConfig, CreateSandboxBaseParams
 
-- **`Configuration`**
+# Initialize the Daytona client
+daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
 
-  Guides to configuring Daytona's core options.
+# Create the Sandbox instance
+sandbox = daytona.create(CreateSandboxBaseParams(language="python"))
 
-- **`Management`**
+# Run code securely inside the Sandbox
+response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
+if response.exit_code != 0:
+    print(f"Error running code: {response.exit_code} {response.result}")
+else:
+    print(response.result)
 
-  Practical instructions for managing Daytona sandboxes.
+# Clean up the Sandbox
+daytona.delete(sandbox)
+```
 
-- **`Agent Toolbox`**
+### Typescript SDK
 
-  Information about the File System actions, Git Operations, the Language Server Protocol and Process & Code Execution.
+```jsx
+import { Daytona } from '@daytonaio/sdk'
+
+async function main() {
+  // Initialize the Daytona client
+  const daytona = new Daytona({
+    apiKey: 'YOUR_API_KEY',
+  })
+
+  let sandbox
+  try {
+    // Create the Sandbox instance
+    sandbox = await daytona.create({
+      language: 'typescript',
+    })
+    // Run code securely inside the Sandbox
+    const response = await sandbox.process.codeRun('console.log("Sum of 3 and 4 is " + (3 + 4))')
+    if (response.exitCode !== 0) {
+      console.error('Error running code:', response.exitCode, response.result)
+    } else {
+      console.log(response.result)
+    }
+  } catch (error) {
+    console.error('Sandbox flow error:', error)
+  } finally {
+    if (sandbox) await daytona.delete(sandbox)
+  }
+}
+
+main().catch(console.error)
+```
+
+---
 
 ## Contributing
 
-Daytona is licensed under the [Apache License 2.0](LICENSE). If you would like to contribute to the software, you must:
-
-1. Read the Developer Certificate of Origin Version 1.1 (<https://developercertificate.org/>)
-2. Sign all commits to the Daytona project.
-
-This ensures that users, distributors, and other contributors can rely on all the software related to Daytona being contributed under the terms of the [License](LICENSE). No contributions will be accepted without following this process.
-
-## License
-
-This repository contains Daytona's Documentation website, covered under the Apache License 2.0, except where noted (any Daytona logos or trademarks are not covered under the Apache License, and should be explicitly noted by a LICENSE file.)
-
-Daytona is a product produced from this open source software, exclusively by Daytona Platforms, Inc. It is distributed under our commercial terms.
-
-Others are allowed to make their own distribution of the software, but they cannot use any of the Daytona trademarks, cloud services, etc.
-
-We explicitly grant permission for you to make a build that includes our trademarks while developing Daytona itself. You may not publish or share the build, and you may not use that build to run Daytona for any other purpose.
-
-## Code of Conduct
-
-This project has adapted the Code of Conduct from the [Contributor Covenant](https://www.contributor-covenant.org/). For more information see the [Code of Conduct](CODE_OF_CONDUCT.md) or contact [codeofconduct@daytona.io.](mailto:codeofconduct@daytona.io) with any additional questions or comments.
-
-## Questions
-
-If you need guidance on contributing to Daytona, talk to us on
-[Slack](https://go.daytona.io/slack).
+Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.

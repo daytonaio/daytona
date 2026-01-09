@@ -1,0 +1,641 @@
+---
+title: Sandboxes
+---
+
+import sandboxDiagram from '@assets/docs/sandbox-states.svg?raw'
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import Image from 'astro/components/Image.astro'
+
+Sandboxes are isolated development environments managed by Daytona. This guide covers the lifecycle of Sandboxes and how to create, manage, and remove them using the Daytona SDK.
+
+Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk** by default.
+[Organizations](/docs/en/organizations) get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**.
+For more power, contact [support@daytona.io](mailto:support@daytona.io).
+
+## Sandbox lifecycle
+
+Throughout its lifecycle, a Daytona Sandbox can have several different states.
+The diagram below shows the states and possible transitions between them.
+
+<Fragment set:html={sandboxDiagram} />
+
+## Multiple runtime support
+
+Daytona Sandboxes support Python, TypeScript, and JavaScript programming language runtimes for direct code execution inside the sandbox.
+
+The `language` parameter controls which programming language runtime is used for the sandbox:
+
+- **`python`**
+- **`typescript`**
+- **`javascript`**
+
+If omitted, the Daytona SDK will default to `python`. To override this, explicitly set the `language` value when creating the sandbox.
+
+:::note
+**Sandbox Names**: You can specify a custom name for your sandbox using the `name` parameter. If not provided, the sandbox ID will be used as the name. Sandbox names are reusable - once a sandbox with a specific name is destroyed, that name becomes available for use again.
+:::
+
+## Create Sandboxes
+
+Daytona provides options to programmatically create sandboxes with default or custom configurations.
+You can specify [programming language runtime](/docs/sandboxes#multiple-runtime-support), [snapshots](/docs/snapshots), [resources](/docs/sandboxes#resources), [environment variables](/docs/configuration#environment-variables), and [volumes](/docs/volumes) for each sandbox.
+Running sandboxes utilize CPU, memory, and disk storage. Every resource is charged per second of usage.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+
+    # Create a sandbox
+    sandbox = daytona.create()
+
+    # Create a sandbox with python
+    params = CreateSandboxFromSnapshotParams(language="python")
+    sandbox = daytona.create(params)
+
+    # Create a sandbox with a custom name
+    params = CreateSandboxFromSnapshotParams(name="my_awesome_sandbox")
+    sandbox = daytona.create(params)
+
+    # Create a sandbox with custom labels
+    params = CreateSandboxFromSnapshotParams(labels={"LABEL": "label"})
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+
+    // Create a sandbox
+    const sandbox = await daytona.create();
+
+    // Create a sandbox with typescript
+    const sandbox = await daytona.create({ language: 'typescript' });
+
+    // Create a sandbox with a custom name
+    const sandbox = await daytona.create({ name: 'my_awesome_sandbox' });
+
+    // Create a sandbox with custom labels
+    const sandbox = await daytona.create({ labels: { LABEL: 'label' } });
+    ```
+
+  </TabItem>
+</Tabs>
+
+To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
+
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**create (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonacreate)
+>
+> [**create (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#create)
+
+### Resources
+
+Daytona Sandbox uses **1 vCPU**, **1GB RAM**, and **3GiB disk** by default.
+
+Daytona keeps a pool of warm sandboxes using default snapshots.
+When available, sandboxes launch within milliseconds instead of cold-booting.
+
+To set custom sandbox resources (CPU, memory, and disk space), use the `Resources` class:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
+
+    daytona = Daytona()
+
+    # Create a sandbox with custom resources
+    resources = Resources(
+        cpu=2,    # 2 CPU cores
+        memory=4, # 4GB RAM
+        disk=8,   # 8GB disk space
+    )
+
+    params = CreateSandboxFromImageParams(
+        image=Image.debian_slim("3.12"),
+        resources=resources
+    )
+
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Image } from "@daytonaio/sdk";
+
+    async function main() {
+      const daytona = new Daytona();
+
+      // Create a sandbox with custom resources
+      const sandbox = await daytona.create({
+        image: Image.debianSlim("3.13"),
+        resources: {
+          cpu: 2,     // 2 CPU cores
+          memory: 4,  // 4GB RAM
+          disk: 8,    // 8GB disk space
+        },
+      });
+    }
+
+    main();
+    ```
+
+  </TabItem>
+All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/daytona#resources) and [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources) references:
+
+> [**Resources (Python SDK)**](/docs/en/python-sdk/sync/sandbox#resources)
+>
+> [**Resources (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#createsnapshotparams)
+
+### Ephemeral Sandboxes
+
+Ephemeral Sandboxes are automatically deleted once they are stopped. They are useful for short-lived tasks or for testing purposes.
+
+To create an ephemeral Sandbox, set the `ephemeral` parameter to `True` when creating a sandbox:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+
+    # Create an ephemeral Sandbox
+    params = CreateSandboxFromSnapshotParams(
+      ephemeral=True,
+      auto_stop_interval=5 # The ephemeral sandbox will be deleted after 5 minutes of inactivity
+    )
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+
+    // Create an ephemeral sandbox
+    const sandbox = await daytona.create({
+      ephemeral: true,
+      autoStopInterval: 5 // The ephemeral sandbox will be deleted after 5 minutes of inactivity
+    });
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+Setting ["autoDeleteInterval: 0"](#auto-delete-interval) has the same effect as setting "ephemeral" to `true`.
+:::
+
+### Network settings (Firewall)
+
+Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity.
+By default, network access follows standard security policies, but you can [customize network settings](/docs/en/network-limits) when creating a sandbox.
+
+## Start Sandboxes
+
+Daytona provides options to start sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/).
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the start icon (**▶**) next to the sandbox you want to start.
+
+```text
+Starting sandbox with ID: <sandbox-id>
+```
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxParams(language="python"))
+    # Start Sandbox
+    sandbox.start()
+    ```
+
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({ language: 'typescript' });
+    // Start Sandbox
+    await sandbox.start();
+    ```
+
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop) and [TypeScript SDK](/docs/typescript-sdk/sandbox#stop) references:
+
+> [**start (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxstart)
+>
+> [**start (TypeScript SDK)**](/docs/typescript-sdk/sandbox#start)
+
+## List Sandboxes
+
+Daytona provides options to view information about sandboxes (ID, root directory, and status) and manage their lifecycle.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Get sandbox ID
+    sandbox_id = sandbox.id
+
+    # Get the root directory of the sandbox user
+    root_dir = sandbox.get_user_root_dir()
+
+    # Get the sandbox id, auto-stop interval and state
+    print(sandbox.id)
+    print(sandbox.auto_stop_interval)
+    print(sandbox.state)
+    ```
+
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Get sandbox ID
+    const sandboxId = sandbox.id;
+
+    // Get the root directory of the sandbox user
+    const rootDir = await sandbox.getUserRootDir();
+
+    // Get the sandbox id, auto-stop interval and state
+    console.log(sandbox.id)
+    console.log(sandbox.autoStopInterval)
+    console.log(sandbox.state)
+    ```
+
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop) and [TypeScript SDK](/docs/typescript-sdk/sandbox#stop) references:
+
+> [**list (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxlist)
+>
+> [**list (TypeScript SDK)**](/docs/typescript-sdk/sandbox#list)
+
+## Stop Sandboxes
+
+Daytona provides methods to stop sandboxes using Python and TypeScript.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the stop icon (**⏹**) next to the sandbox you want to stop.
+
+```text
+Stopping sandbox with ID: <sandbox-id>
+```
+
+Stopped sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed.
+
+The stopped state should be used when a sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the sandbox to eliminate disk usage costs.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxParams(language="python"))
+
+    # Stop sandbox
+    sandbox.stop()
+
+    print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+    # The sandbox ID can later be used to find the sandbox and start it
+    sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+
+    # Start sandbox
+    sandbox.start()
+    ```
+
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({ language: 'typescript' });
+
+    // Stop sandbox
+    await sandbox.stop();
+
+    console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+    // The sandbox ID can later be used to find the sandbox and start it
+    const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
+
+    // Start sandbox
+    await sandbox.start();
+    ```
+
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop) and [TypeScript SDK](/docs/typescript-sdk/sandbox#stop) references:
+
+> [**stop (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxstop), [**stop (TypeScript SDK)**](/docs/typescript-sdk/sandbox#stop)
+>
+> [**find_one (Python SDK)**](/docs/python-sdk/sync/daytona#daytonafind_one), [**findOne (TypeScript SDK)**](/docs/typescript-sdk/daytona#findone)
+
+## Archive Sandboxes
+
+Daytona provides methods to archive sandboxes using Python and TypeScript.
+
+When sandboxes are archived, the entire filesystem state is moved to very cost-effective object storage, making it possible to keep sandboxes available for an extended period.
+Starting an archived sandbox takes more time than starting a stopped sandbox, depending on its size.
+
+A sandbox must be stopped before it can be archived, and can be started again in the same way as a stopped sandbox.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Archive Sandbox
+    sandbox.archive()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Archive Sandbox
+    await sandbox.archive();
+    ```
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**archive (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxarchive)
+>
+> [**archive (TypeScript SDK)**](/docs/typescript-sdk/sandbox#archive)
+
+## Recover Sandboxes
+
+Daytona provides methods to recover sandboxes using Python and TypeScript.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+
+    ```python
+    # Recover sandbox
+    sandbox.recover()
+    ```
+
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+
+    ```typescript
+    // Recover sandbox
+    await sandbox.recover();
+    ```
+
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover) and [TypeScript SDK](/docs/typescript-sdk/sandbox#recover) references:
+
+> [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
+>
+> [**recover (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#recover)
+
+### Recover from error state
+
+When a sandbox enters an error state, it can sometimes be recovered using the `recover` method, depending on the underlying error reason. The `recoverable` flag indicates whether the error state can be resolved through an automated recovery procedure.
+
+:::note
+Recovery actions are not performed automatically because they address errors that require **further user intervention**, such as freeing up storage space.
+:::
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Check if the Sandbox is recoverable
+    if sandbox.recoverable:
+        sandbox.recover()
+        print("Sandbox recovered successfully")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Check if the Sandbox is recoverable
+    if (sandbox.recoverable) {
+        await sandbox.recover();
+        console.log('Sandbox recovered successfully');
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover) and [TypeScript SDK](/docs/typescript-sdk/sandbox#recover) references:
+
+> [**recover (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxrecover)
+>
+> [**recover (TypeScript SDK)**](/docs/typescript-sdk/sandbox#recover)
+
+
+## Delete Sandboxes
+
+Daytona provides methods to delete sandboxes.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the **Delete** button next to the sandbox you want to delete.
+
+```text
+Stopping sandbox with ID: <sandbox-id>
+```
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Delete sandbox
+    sandbox.delete()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Delete sandbox
+    await sandbox.delete();
+    ```
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**delete (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxdelete)
+>
+> [**delete (TypeScript SDK)**](/docs/typescript-sdk/sandbox#delete)
+
+## Automated lifecycle management
+
+Daytona Sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals.
+
+### Auto-stop interval
+
+The auto-stop interval parameter sets the amount of time after which a running sandbox will be automatically stopped.
+
+Sandbox activity, such as SDK API calls or network requests through [preview URLs](/docs/en/preview-and-authentication), resets the auto-stop timer.
+
+The parameter can either be set to:
+
+- a time interval in minutes
+- `0`: disables the auto-stop functionality, allowing the sandbox to run indefinitely
+
+If the parameter is not set, the default interval of `15` minutes will be used.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        # Disables the auto-stop feature - default is 15 minutes
+        auto_stop_interval=0,
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+         // Disables the auto-stop feature - default is 15 minutes
+        autoStopInterval: 0,
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval) and [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_stop_interval) references:
+
+> [**set_auto_stop_interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval)
+>
+> [**setAutostopInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautostopinterval)
+
+### Auto-archive interval
+
+The auto-archive interval parameter sets the amount of time after which a continuously stopped sandbox will be automatically archived.
+
+The parameter can either be set to:
+
+- a time interval in minutes
+- `0`: means the maximum interval of `30 days` will be used
+
+If the parameter is not set, the default interval of `7 days` days will be used.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        # Auto-archive after a sandbox has been stopped for 1 hour
+        auto_archive_interval=60,
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        // Auto-archive after a sandbox has been stopped for 1 hour
+        autoArchiveInterval: 60,
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval) and [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_archive_interval) references:
+
+> [**set_auto_archive_interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval)
+>
+> [**setAutoArchiveInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautoarchiveinterval)
+
+### Auto-delete interval
+
+The auto-delete interval parameter sets the amount of time after which a continuously stopped sandbox will be automatically deleted. By default, sandboxes will never be automatically deleted.
+
+The parameter can either be set to:
+
+- a time interval in minutes
+- `-1`: disables the auto-delete functionality
+- `0`: means the sandbox will be deleted immediately after stopping
+
+If the parameter is not set, the sandbox will not be deleted automatically.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        # Auto-delete after a sandbox has been stopped for 1 hour
+        auto_delete_interval=60,
+    ))
+
+    # Delete the sandbox immediately after it has been stopped
+    sandbox.set_auto_delete_interval(0)
+
+    # Disable auto-deletion
+    sandbox.set_auto_delete_interval(-1)
+    ```
+
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        // Auto-delete after a sandbox has been stopped for 1 hour
+        autoDeleteInterval: 60,
+    });
+
+    // Delete the sandbox immediately after it has been stopped
+    await sandbox.setAutoDeleteInterval(0)
+
+    // Disable auto-deletion
+    await sandbox.setAutoDeleteInterval(-1)
+    ```
+
+  </TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval) and [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_delete_interval) references:
+
+> [**set_auto_delete_interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval)
+>
+> [**setAutoDeleteInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautodeleteinterval)
+
+### Running indefinitely
+
+By default, Daytona Sandboxes auto-stop after 15 minutes of inactivity. To keep a sandbox running without interruption, set the auto-stop interval to `0` when creating a new sandbox:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my_awesome_snapshot",
+        # Disables the auto-stop feature - default is 15 minutes
+        auto_stop_interval=0,
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my_awesome_snapshot",
+        // Disables the auto-stop feature - default is 15 minutes
+        autoStopInterval: 0,
+    });
+    ```
+  </TabItem>
+</Tabs>

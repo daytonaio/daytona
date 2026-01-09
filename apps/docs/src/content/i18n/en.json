@@ -36,7 +36,7 @@
   "sidebarconfig.reference": "Reference",
   "sidebarconfig.documentation": "Docs",
   "sidebarconfig.guides": "Guides",
-  "sidebarconfig.tsSdkReference": "TS SDK Reference",
+  "sidebarconfig.tsSdkReference": "TypeScript SDK Reference",
   "sidebarconfig.pythonSdkReference": "Python SDK Reference",
   "sidebarconfig.apiReference": "API Reference",
   "sidebarconfig.cliReference": "CLI Reference",
