@@ -1,10 +1,12 @@
 ---
 import MobileMenuToggle from './MobileMenuToggle.astro'
 
-const { hasSidebar } = Astro.props
+const { hasSidebar: originalHasSidebar } = Astro.props
+const isApiPage = Astro.url.pathname.includes('/tools/api')
+const hasSidebar = originalHasSidebar && !isApiPage
 ---
 
-<div class="page sl-flex">
+<div class={`page sl-flex ${!hasSidebar ? 'no-sidebar' : ''}`}>
   <div class="header-wrapper"><slot name="header" /></div>
   <div class="grid-template">
     {
@@ -52,6 +54,11 @@ const { hasSidebar } = Astro.props
       grid-template-columns: 100%;
     }
   }
+
+  :global(.no-sidebar) .grid-template {
+    grid-template-columns: 100%;
+  }
+
   .header-wrapper {
     position: sticky;
     z-index: 4;

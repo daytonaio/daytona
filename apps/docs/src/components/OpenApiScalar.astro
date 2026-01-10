@@ -1,0 +1,70 @@
+---
+import { ScalarComponent } from '@scalar/astro'
+import fs from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+function findWorkspaceRoot(startPath: string): string {
+  let current = resolve(startPath)
+  const root = resolve(current, '/')
+
+  while (current !== root) {
+    const packageJson = join(current, 'package.json')
+    const appsDocs = join(current, 'apps/docs')
+
+    if (fs.existsSync(packageJson) && fs.existsSync(appsDocs)) {
+      return current
+    }
+
+    const parent = resolve(current, '..')
+    if (parent === current) break
+    current = parent
+  }
+
+  return process.cwd()
+}
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const workspaceRoot = findWorkspaceRoot(__dirname)
+const mainApiPath = join(workspaceRoot, 'dist/apps/api/openapi.3.1.0.json')
+const mainApiSpecRaw = JSON.parse(fs.readFileSync(mainApiPath, 'utf-8'))
+const mainApiSpec = {
+  ...mainApiSpecRaw,
+  servers: [{ url: 'https://app.daytona.io/api' }],
+}
+
+const toolboxApiPath = join(
+  workspaceRoot,
+  'apps/daemon/pkg/toolbox/docs/swagger.json'
+)
+const toolboxApiSpecRaw = JSON.parse(fs.readFileSync(toolboxApiPath, 'utf-8'))
+const toolboxApiSpec = {
+  ...toolboxApiSpecRaw,
+  servers: [{ url: 'https://proxy.app.daytona.io/toolbox' }],
+}
+---
+
+<ScalarComponent
+  configuration={{
+    sources: [
+      {
+        title: 'Daytona API',
+        slug: 'daytona',
+        content: mainApiSpec,
+        default: true,
+        url: 'https://app.daytona.io/api',
+      },
+      {
+        title: 'Daytona Toolbox API',
+        slug: 'daytona-toolbox',
+        content: toolboxApiSpec,
+        url: 'https://proxy.daytona.io/api',
+      },
+    ],
+    hideClientButton: true,
+    hideTestRequestButton: true,
+    theme: 'default',
+    telemetry: false,
+  }}
+/>

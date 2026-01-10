@@ -1,0 +1,51 @@
+---
+import arrowLeft from '@assets/icons/arrow-left.svg?raw'
+import { localizePath } from '../i18n/utils'
+
+// Extract locale from pathname (e.g., /docs/en/tools/api -> en)
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean)
+const localeIndex = pathSegments.indexOf('docs') + 1
+const currentLocale =
+  localeIndex > 0 && pathSegments[localeIndex]
+    ? pathSegments[localeIndex]
+    : 'en'
+const backHref = localizePath('/docs', currentLocale)
+---
+
+<div class="api-page-header">
+  <a href={backHref} class="back-button">
+    <Fragment set:html={arrowLeft} />
+    Back to Documentation
+  </a>
+</div>
+
+<style>
+  .api-page-header {
+    margin-bottom: 2rem;
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-extra);
+    border-radius: 0.1875rem;
+    text-decoration: none;
+    color: var(--primary-text-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+
+  .back-button:hover {
+    opacity: 0.8;
+    border-color: var(--hover-color);
+  }
+
+  .back-button svg {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+</style>
