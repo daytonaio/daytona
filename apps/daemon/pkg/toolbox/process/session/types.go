@@ -11,14 +11,16 @@ import (
 )
 
 type CreateSessionRequest struct {
-	SessionId string `json:"sessionId" validate:"required"`
-} // @name CreateSessionRequest
+	SessionId string            `json:"sessionId" validate:"required"`
+	Cwd       *string           `json:"cwd,omitempty" validate:"optional"`
+	Env       map[string]string `json:"env,omitempty" validate:"optional"`
+} //	@name	CreateSessionRequest
 
 type SessionExecuteRequest struct {
 	Command  string `json:"command" validate:"required"`
 	RunAsync bool   `json:"runAsync" validate:"optional"`
 	Async    bool   `json:"async" validate:"optional"`
-} // @name SessionExecuteRequest
+} //	@name	SessionExecuteRequest
 
 type SessionExecuteResponse struct {
 	CommandId *string `json:"cmdId" validate:"optional"`
@@ -26,12 +28,12 @@ type SessionExecuteResponse struct {
 	Stdout    *string `json:"stdout" validate:"optional"`
 	Stderr    *string `json:"stderr" validate:"optional"`
 	ExitCode  *int    `json:"exitCode" validate:"optional"`
-} // @name SessionExecuteResponse
+} //	@name	SessionExecuteResponse
 
 type Session struct {
 	SessionId string     `json:"sessionId" validate:"required"`
 	Commands  []*Command `json:"commands" validate:"required"`
-} // @name Session
+} //	@name	Session
 
 type session struct {
 	id          string
@@ -50,7 +52,7 @@ type Command struct {
 	Id       string `json:"id" validate:"required"`
 	Command  string `json:"command" validate:"required"`
 	ExitCode *int   `json:"exitCode,omitempty" validate:"optional"`
-} // @name Command
+} //	@name	Command
 
 func (c *Command) LogFilePath(sessionDir string) (string, string) {
 	return filepath.Join(sessionDir, c.Id, "output.log"), filepath.Join(sessionDir, c.Id, "exit_code")
@@ -59,4 +61,4 @@ func (c *Command) LogFilePath(sessionDir string) (string, string) {
 type SessionCommandLogsResponse struct {
 	Stdout string `json:"stdout" validate:"required"`
 	Stderr string `json:"stderr" validate:"required"`
-} // @name SessionCommandLogsResponse
+} //	@name	SessionCommandLogsResponse

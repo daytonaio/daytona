@@ -235,7 +235,12 @@ class AsyncProcess:
         return await self.exec(command, env=params.env if params else None, timeout=timeout)
 
     @intercept_errors(message_prefix="Failed to create session: ")
-    async def create_session(self, session_id: str) -> None:
+    async def create_session(
+        self,
+        session_id: str,
+        cwd: Optional[str] = None,
+        env: Optional[Dict[str, str]] = None,
+    ) -> None:
         """Creates a new long-running background session in the Sandbox.
 
         Sessions are background processes that maintain state between commands, making them ideal for
@@ -244,6 +249,8 @@ class AsyncProcess:
 
         Args:
             session_id (str): Unique identifier for the new session.
+            cwd (Optional[str]): Working directory for the session. If not specified, uses the default directory.
+            env (Optional[Dict[str, str]]): Environment variables to set in the session.
 
         Example:
             ```python
@@ -253,9 +260,12 @@ class AsyncProcess:
             session = await sandbox.process.get_session(session_id)
             # Do work...
             await sandbox.process.delete_session(session_id)
+
+            # Create a session with custom working directory and environment variables
+            await sandbox.process.create_session("my-session", cwd="/workspace", env={"DEBUG": "true"})
             ```
         """
-        request = CreateSessionRequest(sessionId=session_id)
+        request = CreateSessionRequest(sessionId=session_id, cwd=cwd, env=env)
         await self._api_client.create_session(request=request)
 
     @intercept_errors(message_prefix="Failed to get session: ")

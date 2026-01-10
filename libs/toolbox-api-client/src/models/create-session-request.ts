@@ -23,5 +23,17 @@ export interface CreateSessionRequest {
    * @type {string}
    * @memberof CreateSessionRequest
    */
+  cwd?: string
+  /**
+   *
+   * @type {{ [key: string]: string; }}
+   * @memberof CreateSessionRequest
+   */
+  env?: { [key: string]: string }
+  /**
+   *
+   * @type {string}
+   * @memberof CreateSessionRequest
+   */
   sessionId: string
 }

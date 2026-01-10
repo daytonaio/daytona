@@ -201,6 +201,8 @@ export class Process {
    * long-running commands and monitor process status.
    *
    * @param {string} sessionId - Unique identifier for the new session
+   * @param {string} [cwd] - Working directory for the session. If not specified, uses the default directory.
+   * @param {Record<string, string>} [env] - Environment variables to set in the session
    * @returns {Promise<void>}
    *
    * @example
@@ -210,10 +212,16 @@ export class Process {
    * const session = await process.getSession(sessionId);
    * // Do work...
    * await process.deleteSession(sessionId);
+   *
+   * @example
+   * // Create a session with custom working directory and environment variables
+   * await process.createSession('my-session', '/workspace', { DEBUG: 'true' });
    */
-  public async createSession(sessionId: string): Promise<void> {
+  public async createSession(sessionId: string, cwd?: string, env?: Record<string, string>): Promise<void> {
     await this.apiClient.createSession({
       sessionId,
+      cwd,
+      env,
     })
   }
 

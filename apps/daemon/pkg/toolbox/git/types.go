@@ -7,7 +7,7 @@ type GitAddRequest struct {
 	Path string `json:"path" validate:"required"`
 	// files to add (use . for all files)
 	Files []string `json:"files" validate:"required"`
-} // @name GitAddRequest
+} //	@name	GitAddRequest
 
 type GitCloneRequest struct {
 	URL      string  `json:"url" validate:"required"`
@@ -16,7 +16,7 @@ type GitCloneRequest struct {
 	Password *string `json:"password,omitempty" validate:"optional"`
 	Branch   *string `json:"branch,omitempty" validate:"optional"`
 	CommitID *string `json:"commit_id,omitempty" validate:"optional"`
-} // @name GitCloneRequest
+} //	@name	GitCloneRequest
 
 type GitCommitRequest struct {
 	Path       string `json:"path" validate:"required"`
@@ -24,16 +24,16 @@ type GitCommitRequest struct {
 	Author     string `json:"author" validate:"required"`
 	Email      string `json:"email" validate:"required"`
 	AllowEmpty bool   `json:"allow_empty,omitempty"`
-} // @name GitCommitRequest
+} //	@name	GitCommitRequest
 
 type GitCommitResponse struct {
 	Hash string `json:"hash" validate:"required"`
-} // @name GitCommitResponse
+} //	@name	GitCommitResponse
 
 type GitBranchRequest struct {
 	Path string `json:"path" validate:"required"`
 	Name string `json:"name" validate:"required"`
-} // @name GitBranchRequest
+} //	@name	GitBranchRequest
 
 type GitDeleteBranchRequest struct {
 	Path string `json:"path" validate:"required"`
@@ -42,15 +42,15 @@ type GitDeleteBranchRequest struct {
 
 type ListBranchResponse struct {
 	Branches []string `json:"branches" validate:"required"`
-} // @name ListBranchResponse
+} //	@name	ListBranchResponse
 
 type GitRepoRequest struct {
 	Path     string  `json:"path" validate:"required"`
 	Username *string `json:"username,omitempty" validate:"optional"`
 	Password *string `json:"password,omitempty" validate:"optional"`
-} // @name GitRepoRequest
+} //	@name	GitRepoRequest
 
 type GitCheckoutRequest struct {
 	Path   string `json:"path" validate:"required"`
 	Branch string `json:"branch" validate:"required"`
-} // @name GitCheckoutRequest
+} //	@name	GitCheckoutRequest

@@ -63,7 +63,7 @@ type Controller struct {
 type CreateContextRequest struct {
 	Cwd      *string `json:"cwd" validate:"optional"`
 	Language *string `json:"language" validate:"optional"`
-} // @name CreateContextRequest
+} //	@name	CreateContextRequest
 
 // ExecuteRequest represents a request to execute code
 type ExecuteRequest struct {
@@ -71,12 +71,12 @@ type ExecuteRequest struct {
 	ContextID *string            `json:"contextId" validate:"optional"`
 	Timeout   *int64             `json:"timeout" validate:"optional"` // seconds, 0 disables timeout
 	Envs      *map[string]string `json:"envs" validate:"optional"`
-} // @name ExecuteRequest
+} //	@name	ExecuteRequest
 
 // ListContextsResponse represents the response when listing contexts
 type ListContextsResponse struct {
 	Contexts []ContextInfo `json:"contexts" binding:"required"`
-} // @name ListContextsResponse
+} //	@name	ListContextsResponse
 
 // Context types
 
@@ -87,7 +87,7 @@ type ContextInfo struct {
 	CreatedAt time.Time `json:"createdAt" binding:"required"`
 	Active    bool      `json:"active" binding:"required"`
 	Language  string    `json:"language" binding:"required"`
-} // @name InterpreterContext
+} //	@name	InterpreterContext
 
 // Context represents an active interpreter context with operational methods
 type Context struct {

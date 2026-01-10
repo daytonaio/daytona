@@ -43,32 +43,42 @@ var sessions = map[string]*session{}
 func (s *SessionController) CreateSession(c *gin.Context) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	cmd := exec.CommandContext(ctx, common.GetShell())
-	cmd.Env = os.Environ()
-
-	// for backward compatibility (only sdk clients before 0.103.X), we use the home directory as the default directory
-	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
-	versionComparison, err := util.CompareVersions(sdkVersion, "0.103.0-0")
-	if err != nil {
-		log.Error(err)
-		versionComparison = util.Pointer(1)
-	}
-	isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
-	if isLegacy {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			cancel()
-			return
-		}
-		cmd.Dir = homeDir
-	}
-
 	var request CreateSessionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		cancel()
 		return
+	}
+
+	cmd := exec.CommandContext(ctx, common.GetShell())
+	cmd.Env = os.Environ()
+
+	// Apply custom environment variables if provided
+	for key, value := range request.Env {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, value))
+	}
+
+	// Apply custom working directory if provided
+	if request.Cwd != nil {
+		cmd.Dir = *request.Cwd
+	} else {
+		// for backward compatibility (only sdk clients before 0.103.X), we use the home directory as the default directory
+		sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
+		versionComparison, err := util.CompareVersions(sdkVersion, "0.103.0-0")
+		if err != nil {
+			log.Error(err)
+			versionComparison = util.Pointer(1)
+		}
+		isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
+		if isLegacy {
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				c.AbortWithError(http.StatusInternalServerError, err)
+				cancel()
+				return
+			}
+			cmd.Dir = homeDir
+		}
 	}
 
 	if _, ok := sessions[request.SessionId]; ok {

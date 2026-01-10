@@ -48,11 +48,11 @@ type Server struct {
 
 type WorkDirResponse struct {
 	Dir string `json:"dir"`
-} // @name WorkDirResponse
+} //	@name	WorkDirResponse
 
 type UserHomeDirResponse struct {
 	Dir string `json:"dir"`
-} // @name UserHomeDirResponse
+} //	@name	UserHomeDirResponse
 
 // GetWorkDir godoc
 //

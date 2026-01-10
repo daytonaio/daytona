@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,9 +26,11 @@ class CreateSessionRequest(BaseModel):
     """
     CreateSessionRequest
     """ # noqa: E501
+    cwd: Optional[StrictStr] = None
+    env: Optional[Dict[str, StrictStr]] = None
     session_id: StrictStr = Field(alias="sessionId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["sessionId"]
+    __properties: ClassVar[List[str]] = ["cwd", "env", "sessionId"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -88,6 +90,8 @@ class CreateSessionRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "cwd": obj.get("cwd"),
+            "env": obj.get("env"),
             "sessionId": obj.get("sessionId")
         })
         # store additional fields in additional_properties
