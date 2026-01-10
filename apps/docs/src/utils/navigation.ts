@@ -1,5 +1,6 @@
 // Navigation Configuration
 // This file defines the relationship between main navigation items and their related pages
+import matter from 'gray-matter'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -42,6 +43,7 @@ export interface NavigationGroup extends NavigationItem {
   // The referenced page should be a `MainNavigationLink`. It is ignored for `NavigationCategory.MAIN` groups.
   homePageHref?: string
   autopopulateFromDir?: string
+  collapse?: boolean
   translations?: {
     [key: string]: string
   }
@@ -329,6 +331,75 @@ export function getExploreMoreData(
       return {
         title: navLink.label,
         subtitle: navLink.description || '',
+        href: navLink.href,
+      }
+    })
+
+    return {
+      title: group.label || '',
+      items,
+    }
+  })
+}
+
+export function getGuidesData(
+  sidebarConfig: NavigationGroup[],
+  workspaceRoot: string = process.cwd()
+) {
+  processAutopopulateGroups(sidebarConfig)
+
+  const guideGroups = getNavGroupsByCategory(
+    sidebarConfig,
+    NavigationCategory.GUIDES
+  )
+
+  return guideGroups.map(group => {
+    const items = (group.entries || []).map(navLink => {
+      let description = navLink.description || ''
+
+      if (!description && navLink.href) {
+        try {
+          const hrefParts = navLink.href.replace(/^\/docs\//, '').split('/')
+          const locale = hrefParts[0] || 'en'
+          const restOfPath = hrefParts.slice(1).join('/')
+
+          const possiblePaths = [
+            path.join(
+              workspaceRoot,
+              '/src/content/docs',
+              locale,
+              restOfPath + '.mdx'
+            ),
+            path.join(
+              workspaceRoot,
+              '/src/content/docs',
+              locale,
+              restOfPath + '.md'
+            ),
+          ]
+
+          for (const filePath of possiblePaths) {
+            if (fs.existsSync(filePath)) {
+              const fileContent = fs.readFileSync(filePath, 'utf-8')
+              const { data } = matter(fileContent)
+              if (data.description && typeof data.description === 'string') {
+                description = data.description
+                break
+              }
+            }
+          }
+        } catch (error) {
+          // Silently fail if we can't read the file
+          console.warn(
+            `Failed to read description from ${navLink.href}:`,
+            error
+          )
+        }
+      }
+
+      return {
+        title: navLink.label,
+        subtitle: description,
         href: navLink.href,
       }
     })
