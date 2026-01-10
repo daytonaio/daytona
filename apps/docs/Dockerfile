@@ -26,6 +26,8 @@ ENV VERSION=${VERSION}
 
 RUN yarn
 
+RUN yarn nx run api:openapi
+
 RUN yarn nx build docs --configuration=production --nxBail=true
 
 FROM node:22-alpine AS docs
