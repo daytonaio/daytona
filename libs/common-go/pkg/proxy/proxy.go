@@ -4,6 +4,7 @@
 package proxy
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -16,7 +17,10 @@ import (
 var proxyTransport = &http.Transport{
 	MaxIdleConns:        100,
 	MaxIdleConnsPerHost: 100,
+	IdleConnTimeout:     90 * time.Second,
+	DisableCompression:  true,
 	DialContext: (&net.Dialer{
+		Timeout:   10 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).DialContext,
 }
@@ -38,7 +42,10 @@ var proxyTransport = &http.Transport{
 //	@Router			/workspaces/{workspaceId}/{projectId}/toolbox/{path} [get]
 func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.URL, extraHeaders map[string]string, err error), modifyResponse func(*http.Response) error) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		startTotal := time.Now()
 		target, extraHeaders, err := getProxyTarget(ctx)
+		getTargetTime := time.Since(startTotal)
+
 		if err != nil {
 			// Error already sent to the context
 			return
@@ -61,8 +68,17 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 			},
 			Transport:      proxyTransport,
 			ModifyResponse: modifyResponse,
+			FlushInterval:  -1, // Flush immediately for streaming
 		}
 
+		proxyStart := time.Now()
 		reverseProxy.ServeHTTP(ctx.Writer, ctx.Request)
+		proxyTime := time.Since(proxyStart)
+
+		// Log timing for debugging slow requests (only if took > 1s)
+		totalTime := time.Since(startTotal)
+		if totalTime > 1*time.Second {
+			fmt.Printf("[PROXY-SLOW] target=%s getTarget=%v proxy=%v total=%v\n", target.String(), getTargetTime, proxyTime, totalTime)
+		}
 	}
 }

@@ -93,12 +93,13 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 	}
 
 	session := &session{
-		id:          request.SessionId,
-		cmd:         cmd,
-		stdinWriter: stdinWriter,
-		commands:    map[string]*Command{},
-		ctx:         ctx,
-		cancel:      cancel,
+		id:           request.SessionId,
+		cmd:          cmd,
+		stdinWriter:  stdinWriter,
+		commands:     map[string]*Command{},
+		ctx:          ctx,
+		cancel:       cancel,
+		isPowerShell: common.IsPowerShell(shell),
 	}
 	sessions[request.SessionId] = session
 

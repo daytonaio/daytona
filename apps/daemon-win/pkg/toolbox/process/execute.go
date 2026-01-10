@@ -29,6 +29,8 @@ import (
 //
 //	@id				ExecuteCommand
 func ExecuteCommand(c *gin.Context) {
+	startTime := time.Now()
+
 	var request ExecuteRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.AbortWithError(http.StatusBadRequest, errors.New("command is required"))
@@ -46,12 +48,17 @@ func ExecuteCommand(c *gin.Context) {
 		log.Debugf("Parsed shell wrapper: %q -> %q (env: %v)", request.Command, parsedCommand, envVars)
 	}
 
-	// Build Windows command with env vars if any
-	finalCommand := common.BuildWindowsCommand(parsedCommand, envVars)
-
 	// Get the shell and appropriate arguments
 	shell := common.GetShell()
 	shellArgs := common.GetShellArgs(shell)
+
+	// Build Windows command with env vars for the appropriate shell
+	finalCommand := common.BuildWindowsCommandForShell(parsedCommand, envVars, common.IsPowerShell(shell))
+
+	log.Debugf("ExecuteCommand: shell=%s, isPowerShell=%v, command=%q, setup took %v",
+		shell, common.IsPowerShell(shell), finalCommand, time.Since(startTime))
+
+	execStartTime := time.Now()
 
 	// Build the command with the shell
 	args := append(shellArgs, finalCommand)
@@ -82,6 +89,9 @@ func ExecuteCommand(c *gin.Context) {
 	defer timer.Stop()
 
 	output, err := cmd.CombinedOutput()
+	execDuration := time.Since(execStartTime)
+	log.Debugf("ExecuteCommand: execution took %v, total time %v", execDuration, time.Since(startTime))
+
 	if err != nil {
 		if timeoutReached {
 			c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))

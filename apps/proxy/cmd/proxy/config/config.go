@@ -104,8 +104,16 @@ func GetConfig() (*Config, error) {
 
 	config.ApiClient = apiclient.NewAPIClient(clientConfig)
 
+	// Optimized HTTP client with connection pooling and timeouts
 	config.ApiClient.GetConfig().HTTPClient = &http.Client{
-		Transport: http.DefaultTransport,
+		Transport: &http.Transport{
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 100,
+			IdleConnTimeout:     90 * time.Second,
+			TLSHandshakeTimeout: 10 * time.Second,
+			DisableKeepAlives:   false,
+		},
+		Timeout: 30 * time.Second,
 	}
 
 	ctx := context.Background()

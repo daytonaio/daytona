@@ -88,7 +88,7 @@ func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 // GetVersion godoc
 //
 //	@Summary		Get version
-//	@Description	Get the current daemon version
+//	@Description	Get the current daemon version and build info
 //	@Tags			info
 //	@Produce		json
 //	@Success		200	{object}	map[string]string
@@ -97,7 +97,9 @@ func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 //	@id				GetVersion
 func (s *Server) GetVersion(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
-		"version": internal.Version,
+		"version":     internal.Version,
+		"buildNumber": internal.BuildNumber,
+		"buildTime":   internal.BuildTime,
 	})
 }
 

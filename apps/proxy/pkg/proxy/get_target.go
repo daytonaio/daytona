@@ -77,12 +77,15 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 
 	// Skip last activity update if header is set
 	if ctx.Request.Header.Get(SKIP_LAST_ACTIVITY_UPDATE_HEADER) != "true" {
-		p.updateLastActivity(ctx.Request.Context(), sandboxID, true)
+		// Run async to avoid blocking the proxy request - this is fire-and-forget
+		go p.updateLastActivity(context.Background(), sandboxID, true)
 		ctx.Request.Header.Del(SKIP_LAST_ACTIVITY_UPDATE_HEADER)
 	}
 
 	// Build the target URL
-	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
+	// Note: The runner's toolbox proxy endpoint is /sandboxes/{id}/toolbox/{path}
+	// The runner internally proxies to the daemon on port 2280 - no need for /proxy/{port} in path
+	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox", runnerInfo.ApiUrl, sandboxID)
 
 	// Ensure path always has a leading slash but not duplicate slashes
 	if targetPath == "" {
@@ -92,7 +95,9 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 	}
 
 	// Create the complete target URL with path
-	target, err := url.Parse(fmt.Sprintf("%s%s", targetURL, targetPath))
+	fullURL := fmt.Sprintf("%s%s", targetURL, targetPath)
+
+	target, err := url.Parse(fullURL)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
 		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
@@ -105,15 +110,13 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 }
 
 func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInfo, error) {
-	has, err := p.runnerCache.Has(ctx, sandboxId)
-	if err != nil {
-		return nil, err
+	// Try to get from cache first - single call instead of Has() + Get()
+	cached, err := p.runnerCache.Get(ctx, sandboxId)
+	if err == nil && cached != nil {
+		return cached, nil
 	}
 
-	if has {
-		return p.runnerCache.Get(ctx, sandboxId)
-	}
-
+	// Cache miss - fetch from API
 	runner, _, err := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
 	if err != nil {
 		return nil, err
@@ -128,7 +131,8 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 		ApiKey: runner.ApiKey,
 	}
 
-	err = p.runnerCache.Set(ctx, sandboxId, info, 2*time.Minute)
+	// Cache for 10 minutes - runner info rarely changes
+	err = p.runnerCache.Set(ctx, sandboxId, info, 10*time.Minute)
 	if err != nil {
 		log.Errorf("Failed to set runner info in cache: %v", err)
 	}

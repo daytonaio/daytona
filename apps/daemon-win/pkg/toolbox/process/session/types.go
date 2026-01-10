@@ -34,12 +34,13 @@ type Session struct {
 } // @name Session
 
 type session struct {
-	id          string
-	cmd         *exec.Cmd
-	stdinWriter io.Writer
-	commands    map[string]*Command
-	ctx         context.Context
-	cancel      context.CancelFunc
+	id           string
+	cmd          *exec.Cmd
+	stdinWriter  io.Writer
+	commands     map[string]*Command
+	ctx          context.Context
+	cancel       context.CancelFunc
+	isPowerShell bool
 }
 
 func (s *session) Dir(configDir string) string {

@@ -59,13 +59,13 @@ func ParseShellWrapper(command string) (parsedCommand string, envVars map[string
 	return command, envVars
 }
 
-// BuildWindowsCommand creates a PowerShell command with environment variables
+// BuildWindowsCommand creates a command with environment variables for the specified shell type
 func BuildWindowsCommand(command string, envVars map[string]string) string {
 	if len(envVars) == 0 {
 		return command
 	}
 
-	// Build env var assignments for PowerShell
+	// Build env var assignments for PowerShell (default for compatibility)
 	var envSetters []string
 	for key, value := range envVars {
 		// Escape double quotes in value
@@ -74,4 +74,30 @@ func BuildWindowsCommand(command string, envVars map[string]string) string {
 	}
 
 	return strings.Join(envSetters, "; ") + "; " + command
+}
+
+// BuildWindowsCommandForShell creates a command with environment variables for the specified shell type
+func BuildWindowsCommandForShell(command string, envVars map[string]string, isPowerShell bool) string {
+	if len(envVars) == 0 {
+		return command
+	}
+
+	if isPowerShell {
+		// PowerShell: $env:KEY="value"
+		var envSetters []string
+		for key, value := range envVars {
+			escaped := strings.ReplaceAll(value, `"`, "`\"")
+			envSetters = append(envSetters, "$env:"+key+"=\""+escaped+"\"")
+		}
+		return strings.Join(envSetters, "; ") + "; " + command
+	}
+
+	// cmd.exe: set "KEY=value" && command
+	var envSetters []string
+	for key, value := range envVars {
+		// Escape special characters for cmd.exe
+		escaped := strings.ReplaceAll(value, `"`, `""`)
+		envSetters = append(envSetters, `set "`+key+"="+escaped+`"`)
+	}
+	return strings.Join(envSetters, " && ") + " && " + command
 }

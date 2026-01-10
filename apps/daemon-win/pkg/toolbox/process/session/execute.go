@@ -54,20 +54,20 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		return
 	}
 
+	session, ok := sessions[sessionId]
+	if !ok {
+		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
+		return
+	}
+
 	// Parse Linux shell wrapper (sh -c "...") and extract actual command
 	parsedCommand, envVars := common.ParseShellWrapper(request.Command)
 	if parsedCommand != request.Command {
 		log.Debugf("Parsed shell wrapper: %q -> %q (env: %v)", request.Command, parsedCommand, envVars)
 	}
 
-	// Build Windows command with env vars if any
-	finalCommand := common.BuildWindowsCommand(parsedCommand, envVars)
-
-	session, ok := sessions[sessionId]
-	if !ok {
-		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
-		return
-	}
+	// Build Windows command with env vars for the appropriate shell type
+	finalCommand := common.BuildWindowsCommandForShell(parsedCommand, envVars, session.isPowerShell)
 
 	cmdId := util.Pointer(uuid.NewString())
 
@@ -85,10 +85,12 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		return
 	}
 
-	// Windows PowerShell command execution script
-	// This captures both stdout and stderr to the log file and writes exit code
-	// We use [Console]::Out to avoid BOM issues with Out-File
-	cmdToExec := fmt.Sprintf(`
+	var cmdToExec string
+	if session.isPowerShell {
+		// Windows PowerShell command execution script
+		// This captures both stdout and stderr to the log file and writes exit code
+		// We use [Console]::Out to avoid BOM issues with Out-File
+		cmdToExec = fmt.Sprintf(`
 $logFile = "%s"
 $exitCodeFile = "%s"
 $exitCode = 0
@@ -106,10 +108,22 @@ try {
 }
 [System.IO.File]::WriteAllText($exitCodeFile, $exitCode.ToString())
 `,
-		strings.ReplaceAll(logFilePath, `\`, `\\`),
-		strings.ReplaceAll(exitCodeFilePath, `\`, `\\`),
-		finalCommand,
-	)
+			strings.ReplaceAll(logFilePath, `\`, `\\`),
+			strings.ReplaceAll(exitCodeFilePath, `\`, `\\`),
+			finalCommand,
+		)
+	} else {
+		// cmd.exe batch command execution - much faster startup (~100ms vs ~2s)
+		// Captures stdout and stderr to log file and writes exit code
+		// Using call to ensure %errorlevel% is evaluated after command completion
+		// The @echo off reduces noise, and we use a single compound command
+		cmdToExec = fmt.Sprintf(`@(%s) > "%s" 2>&1 & call echo %%errorlevel%% > "%s"
+`,
+			finalCommand,
+			logFilePath,
+			exitCodeFilePath,
+		)
+	}
 
 	_, err := session.stdinWriter.Write([]byte(cmdToExec + "\n"))
 	if err != nil {
@@ -125,6 +139,8 @@ try {
 	}
 
 	// Wait for command completion by polling for exit code file
+	// Use short polling intervals for faster response time
+	const pollInterval = 5 * time.Millisecond
 	for {
 		select {
 		case <-session.ctx.Done():
@@ -135,7 +151,7 @@ try {
 			exitCode, err := os.ReadFile(exitCodeFilePath)
 			if err != nil {
 				if os.IsNotExist(err) {
-					time.Sleep(50 * time.Millisecond)
+					time.Sleep(pollInterval)
 					continue
 				}
 				c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to read exit code file: %w", err))
@@ -151,7 +167,7 @@ try {
 
 			// If empty, command might still be running, wait more
 			if exitCodeStr == "" {
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(pollInterval)
 				continue
 			}
 

@@ -16,7 +16,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - OIDC_CLIENT_ID=daytona
-      - OIDC_ISSUER_BASE_URL=http://dex:5556/dex
+      - OIDC_ISSUER_BASE_URL=${PUBLIC_OIDC_DOMAIN:-https://win.trydaytona.com/dex}
       - PUBLIC_OIDC_DOMAIN=${PUBLIC_OIDC_DOMAIN:-https://win.trydaytona.com/dex}
       - OIDC_AUDIENCE=daytona
       - DEFAULT_SNAPSHOT=daytonaio/sandbox:0.5.0-slim
@@ -61,13 +61,15 @@ services:
       - DEFAULT_REGION_NAME=us
       - DEFAULT_REGION_ENFORCE_QUOTAS=false
       - SSH_GATEWAY_API_KEY=${SSH_GATEWAY_API_KEY:-ssh_secret_api_token}
-      - SSH_GATEWAY_COMMAND="ssh -p 2222 {{TOKEN}}@${HOST_DOMAIN:-win.trydaytona.com}"
+      - "SSH_GATEWAY_COMMAND=ssh -p 2222 {{TOKEN}}@${HOST_DOMAIN:-win.trydaytona.com}"
       - SSH_GATEWAY_PUBLIC_KEY=${SSH_GATEWAY_PUBLIC_KEY}
-      - SSH_GATEWAY_URL="${HOST_DOMAIN:-win.trydaytona.com}:2222"
+      - "SSH_GATEWAY_URL=${HOST_DOMAIN:-win.trydaytona.com}:2222"
       - SKIP_USER_EMAIL_VERIFICATION=true
       - RUN_MIGRATIONS=true
       - OTEL_ENABLED=true
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    ports:
+      - "127.0.0.1:3000:3000"
     networks:
       - daytona-network
     restart: always
@@ -92,13 +94,15 @@ services:
       - PROXY_PROTOCOL=https
       - OIDC_CLIENT_ID=daytona
       - OIDC_CLIENT_SECRET=
-      - OIDC_DOMAIN=http://dex:5556/dex
+      - OIDC_DOMAIN=${PUBLIC_OIDC_DOMAIN:-https://win.trydaytona.com/dex}
       - OIDC_PUBLIC_DOMAIN=${PUBLIC_OIDC_DOMAIN:-https://win.trydaytona.com/dex}
       - OIDC_AUDIENCE=daytona
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - TOOLBOX_ONLY_MODE=false
       - PREVIEW_WARNING_ENABLED=false
+    ports:
+      - "127.0.0.1:4000:4000"
     networks:
       - daytona-network
     restart: always
@@ -146,6 +150,8 @@ services:
       - ./dex/config.yaml:/etc/dex/config.yaml
       - dex_db:/var/dex
     entrypoint: ['sh', '-c', 'touch /var/dex/dex.db && exec dex serve /etc/dex/config.yaml']
+    ports:
+      - "127.0.0.1:5556:5556"
     networks:
       - daytona-network
     healthcheck:
