@@ -34,6 +34,7 @@
     },
     "openapi": {
       "executor": "nx:run-commands",
+      "outputs": ["dist/apps/api/openapi.json", "dist/apps/api/openapi.3.1.0.json"],
       "options": {
         "commands": [
           "mkdir -p dist/apps/api",
