@@ -122,6 +122,12 @@ export class RunnerDto {
   currentSnapshotCount: number
 
   @ApiPropertyOptional({
+    description: 'Current number of started sandboxes',
+    example: 5,
+  })
+  currentStartedSandboxes: number
+
+  @ApiPropertyOptional({
     description: 'Runner availability score',
     example: 85,
   })
@@ -194,6 +200,7 @@ export class RunnerDto {
       currentAllocatedMemoryGiB: runner.currentAllocatedMemoryGiB,
       currentAllocatedDiskGiB: runner.currentAllocatedDiskGiB,
       currentSnapshotCount: runner.currentSnapshotCount,
+      currentStartedSandboxes: runner.currentStartedSandboxes,
       availabilityScore: runner.availabilityScore,
       region: runner.region,
       state: runner.state,

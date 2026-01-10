@@ -36,6 +36,7 @@ func RunnerInfo(ctx *gin.Context) {
 			CurrentAllocatedMemoryGiB:    metrics.AllocatedMemory,
 			CurrentAllocatedDiskGiB:      metrics.AllocatedDisk,
 			CurrentSnapshotCount:         metrics.SnapshotCount,
+			CurrentStartedSandboxes:      metrics.StartedSandboxes,
 		},
 		Version: internal.Version,
 	}

@@ -134,6 +134,12 @@ export interface Runner {
    */
   currentSnapshotCount?: number
   /**
+   * Current number of started sandboxes
+   * @type {number}
+   * @memberof Runner
+   */
+  currentStartedSandboxes?: number
+  /**
    * Runner availability score
    * @type {number}
    * @memberof Runner

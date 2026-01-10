@@ -118,14 +118,15 @@ func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMet
 
 		// Return default values if no metrics are cached
 		return &models.SystemMetrics{
-			CPUUsage:        -1.0,
-			RAMUsage:        -1.0,
-			DiskUsage:       -1.0,
-			AllocatedCPU:    -1,
-			AllocatedMemory: -1,
-			AllocatedDisk:   -1,
-			SnapshotCount:   -1,
-			LastUpdated:     time.Now(),
+			CPUUsage:         -1.0,
+			RAMUsage:         -1.0,
+			DiskUsage:        -1.0,
+			AllocatedCPU:     -1,
+			AllocatedMemory:  -1,
+			AllocatedDisk:    -1,
+			SnapshotCount:    -1,
+			StartedSandboxes: -1,
+			LastUpdated:      time.Now(),
 		}
 	}
 
@@ -142,6 +143,7 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 	var totalAllocatedCpuMicroseconds int64 = 0 // CPU quota in microseconds per period
 	var totalAllocatedMemoryBytes int64 = 0     // Memory in bytes
 	var totalAllocatedDiskGB int64 = 0          // Disk in GB
+	var startedSandboxes int64 = 0              // Count of running containers
 
 	for _, ctr := range containers {
 		cpu, memory, disk, err := s.getContainerAllocatedResources(ctx, ctr.ID)
@@ -152,6 +154,7 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 			if ctr.State == "running" {
 				totalAllocatedCpuMicroseconds += cpu
 				totalAllocatedMemoryBytes += memory
+				startedSandboxes++
 			}
 			// For disk: count all containers (running and stopped)
 			totalAllocatedDiskGB += disk
@@ -162,6 +165,7 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 	metrics.AllocatedCPU = totalAllocatedCpuMicroseconds / 100000              // Convert back to vCPUs
 	metrics.AllocatedMemory = totalAllocatedMemoryBytes / (1024 * 1024 * 1024) // Convert back to GB
 	metrics.AllocatedDisk = totalAllocatedDiskGB
+	metrics.StartedSandboxes = startedSandboxes
 }
 
 func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, containerId string) (int64, int64, int64, error) {

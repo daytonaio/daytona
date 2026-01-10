@@ -87,6 +87,11 @@ export class Runner {
   @Column({
     default: 0,
   })
+  currentStartedSandboxes: number
+
+  @Column({
+    default: 0,
+  })
   availabilityScore: number
 
   @Column()

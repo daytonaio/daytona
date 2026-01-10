@@ -9404,6 +9404,7 @@ components:
       type: string
     Runner:
       example:
+        currentStartedSandboxes: 5
         memory: 16
         apiKey: api-key-123
         currentMemoryUsagePercentage: 68.2
@@ -9502,6 +9503,10 @@ components:
         currentSnapshotCount:
           description: Current snapshot count
           example: 12
+          type: number
+        currentStartedSandboxes:
+          description: Current number of started sandboxes
+          example: 5
           type: number
         availabilityScore:
           description: Runner availability score

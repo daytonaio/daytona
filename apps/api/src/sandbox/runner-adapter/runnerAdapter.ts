@@ -35,6 +35,7 @@ export interface RunnerMetrics {
   currentDiskUsagePercentage?: number
   currentMemoryUsagePercentage?: number
   currentSnapshotCount?: number
+  currentStartedSandboxes?: number
 }
 
 export interface RunnerInfo {

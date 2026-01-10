@@ -234,6 +234,8 @@ definitions:
         type: number
       currentSnapshotCount:
         type: integer
+      currentStartedSandboxes:
+        type: integer
     type: object
   SandboxInfoResponse:
     properties:

@@ -171,6 +171,7 @@ const configuration = {
     allocatedCpuWeight: parseFloat(process.env.RUNNER_ALLOCATED_CPU_WEIGHT || '0.03'),
     allocatedMemoryWeight: parseFloat(process.env.RUNNER_ALLOCATED_MEMORY_WEIGHT || '0.03'),
     allocatedDiskWeight: parseFloat(process.env.RUNNER_ALLOCATED_DISK_WEIGHT || '0.03'),
+    startedSandboxesWeight: parseFloat(process.env.RUNNER_STARTED_SANDBOXES_WEIGHT || '0.1'),
     cpuPenaltyExponent: parseFloat(process.env.RUNNER_CPU_PENALTY_EXPONENT || '0.15'),
     memoryPenaltyExponent: parseFloat(process.env.RUNNER_MEMORY_PENALTY_EXPONENT || '0.15'),
     diskPenaltyExponent: parseFloat(process.env.RUNNER_DISK_PENALTY_EXPONENT || '0.15'),
