@@ -28,6 +28,7 @@ export enum NavigationCategory {
   GENERAL,
   TYPESCRIPT_SDK,
   PYTHON_SDK,
+  GUIDES,
 }
 
 /**
@@ -97,16 +98,15 @@ export const getSidebarConfig = (
             icon: 'terminal.svg',
           },
         },
-        // {
-        //   type: 'link',
-        //   href: 'https://www.daytona.io/dotfiles/guides',
-        //   label: t('sidebarconfig.guides'),
-        //   disablePagination: true,
-        //   external: true,
-        //   attrs: {
-        //     icon: 'book.svg',
-        //   },
-        // },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides', locale),
+          label: t('sidebarconfig.guides'),
+          attrs: {
+            icon: 'book.svg',
+          },
+          relatedGroupCategory: NavigationCategory.GUIDES,
+        },
       ],
     },
     {
@@ -416,98 +416,6 @@ export const getSidebarConfig = (
             icon: 'server.svg',
           },
         },
-        {
-          type: 'link',
-          href: localizePath('/docs/data-analysis-with-ai', locale),
-          label: t('sidebarconfig.dataAnalysis'),
-          disablePagination: true,
-          attrs: {
-            icon: 'chart.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.integrations'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/inngest-agentkit-coding-agent', locale),
-          label: t('sidebarconfig.inngestAgentKit'),
-          disablePagination: true,
-          attrs: {
-            icon: 'inngest-agentkit.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/langchain-data-analysis', locale),
-          label: t('sidebarconfig.langchain'),
-          disablePagination: true,
-          attrs: {
-            icon: 'langchain.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/mastra-coding-agent', locale),
-          label: t('sidebarconfig.mastra'),
-          disablePagination: true,
-          attrs: {
-            icon: 'mastra.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/claude', locale),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          attrs: {
-            icon: 'claude.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/claude-agent-sdk-interactive-terminal-sandbox',
-            locale
-          ),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          hideInSidebar: true,
-        },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/claude-agent-sdk-connect-service-sandbox',
-            locale
-          ),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          hideInSidebar: true,
-        },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/claude-code-run-tasks-stream-logs-sandbox',
-            locale
-          ),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          hideInSidebar: true,
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/trl-grpo-training', locale),
-          label: t('sidebarconfig.trlGrpo'),
-          disablePagination: true,
-          attrs: {
-            icon: 'trl-logo.svg',
-          },
-        },
       ],
     },
     {
@@ -588,6 +496,117 @@ export const getSidebarConfig = (
           type: 'link',
           href: localizePath('/docs/python-sdk/async/async-sandbox', locale),
           label: t('sidebarconfig.asyncSandbox'),
+        },
+      ],
+    },
+    {
+      type: 'group',
+      homePageHref: localizePath('/docs/guides', locale),
+      category: NavigationCategory.GUIDES,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/data-analysis-with-ai', locale),
+          label: t('sidebarconfig.dataAnalysis'),
+          attrs: {
+            icon: 'chart.svg',
+          },
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/claude', locale),
+          label: t('sidebarconfig.claude'),
+          attrs: {
+            icon: 'claude.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/claude/claude-agent-sdk-interactive-terminal-sandbox',
+            locale
+          ),
+          label: 'Build a Coding Agent Using Claude Agent SDK and Daytona',
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/claude/claude-agent-sdk-connect-service-sandbox',
+            locale
+          ),
+          label: 'Build a Two-Agent Coding System with Claude and Daytona',
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/claude/claude-code-run-tasks-stream-logs-sandbox',
+            locale
+          ),
+          label: 'Running Claude Code with Daytona',
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/agentkit', locale),
+          label: t('sidebarconfig.inngestAgentKit'),
+          attrs: {
+            icon: 'inngest-agentkit.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/agentkit/inngest-agentkit-coding-agent',
+            locale
+          ),
+          label: 'Build Coding Agent Using AgentKit and Daytona',
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/langchain', locale),
+          label: t('sidebarconfig.langchainIntegrations'),
+          attrs: {
+            icon: 'langchain.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/langchain/langchain-data-analysis',
+            locale
+          ),
+          label: 'Analyze Data With LangChain AI Agent',
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/reinforcement-learning', locale),
+          label: t('sidebarconfig.trlGrpo'),
+          attrs: {
+            icon: 'trl-logo.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/reinforcement-learning/trl-grpo-training',
+            locale
+          ),
+          label: 'Train LLMs with Reinforcement Learning Using TRL and Daytona',
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/mastra-coding-agent', locale),
+          label: t('sidebarconfig.mastra'),
+          disablePagination: true,
+          attrs: {
+            icon: 'mastra.svg',
+          },
         },
       ],
     },
