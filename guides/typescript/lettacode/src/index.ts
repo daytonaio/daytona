@@ -15,7 +15,9 @@ interface AccumulatedContent {
   content: string
 }
 
+// Handles parsed messages from Letta's stream-json output and updates the UI
 function handleParsedMessage(parsed: any, accumulated: AccumulatedContent, state: any): string | null {
+  // Handle system initialization message from Letta
   if (parsed.type === 'system' && parsed.subtype === 'init') {
     state.isInitialized = true
     return null
@@ -24,13 +26,15 @@ function handleParsedMessage(parsed: any, accumulated: AccumulatedContent, state
   if (parsed.type === 'message') {
     const msgType = parsed.message_type
 
+    // This is called for all tool calls even though approval is not required
     if (msgType === 'approval_request_message') {
       const toolCall = parsed.tool_call
       if (!toolCall) return null
 
       const currentToolId = toolCall.tool_call_id
 
-      // New tool call - flush the previous one
+      // New tool call detected - flush the previous one before starting a new accumulation
+      // This ensures each tool call is displayed separately
       if (currentToolId && state.lastToolId && currentToolId !== state.lastToolId) {
         const output = flushToolCall(accumulated, state)
         accumulated.content = toolCall.name || ''
@@ -51,9 +55,11 @@ function handleParsedMessage(parsed: any, accumulated: AccumulatedContent, state
       return null
     }
 
+    // When we receive a stop_reason, flush any pending tool call
     if (msgType === 'stop_reason') return flushToolCall(accumulated, state)
   }
 
+  // Handle the final result message from Letta (the agent's response)
   if (parsed.type === 'result') {
     accumulated.content = ''
     state.isComplete = true
@@ -64,12 +70,14 @@ function handleParsedMessage(parsed: any, accumulated: AccumulatedContent, state
   return null
 }
 
+// Flushes accumulated tool call data and formats it for display
 function flushToolCall(accumulated: any, state: any): string | null {
   if (!accumulated.content) return null
 
   const toolName = accumulated.content
   let description = toolName
 
+  // Generate an easy-to-read description based on tool arguments
   try {
     const args = JSON.parse(state.toolArgs || '{}')
     description =
@@ -87,12 +95,14 @@ function flushToolCall(accumulated: any, state: any): string | null {
   return `\n🔧 ${description}`
 }
 
+// Processes a user prompt by sending it to Letta and waiting for a response
 async function processPrompt(prompt: string, ptyHandle: any, state: any): Promise<void> {
   console.log('Thinking...')
 
   state.isComplete = false
   state.lastActivityTime = Date.now()
 
+  // Send the user's message to Letta in stream-json format
   await ptyHandle.sendInput(
     JSON.stringify({
       type: 'user',
@@ -100,11 +110,10 @@ async function processPrompt(prompt: string, ptyHandle: any, state: any): Promis
     }) + '\n',
   )
 
-  // Wait for the response to complete or timeout after 30 seconds of inactivity
+  // Wait for the response to complete by polling every 100ms
   while (!state.isComplete) {
     await new Promise((resolve) => setTimeout(resolve, 100))
-
-    // Check for timeout (30 seconds of no activity)
+    // Timeout after 30 seconds of inactivity
     if (Date.now() - state.lastActivityTime > 30000) {
       console.log('\n\n⏱️  Response timeout - no activity for 30 seconds')
       break
@@ -180,22 +189,26 @@ async function main() {
     // Start Letta Code using PTY for bidirectional communication
     console.log('Starting Letta Code...')
 
-    // Shared state for tracking completion and activity
+    // Shared state for tracking completion, initialization, and activity
     const state = { isComplete: false, isInitialized: false, lastActivityTime: Date.now() }
-    let buffer = ''
+    let buffer = '' // Buffer for accumulating partial JSON lines
     const accumulated: AccumulatedContent = { content: '' }
 
+    // Create a PTY (pseudo-terminal) for bidirectional communication with Letta
     const ptyHandle = await sandbox.process.createPty({
       id: `letta-pty-${Date.now()}`,
       cols: 120,
       rows: 30,
       onData: (data: Uint8Array) => {
+        // Decode incoming data and add to buffer
         buffer += new TextDecoder().decode(data)
         state.lastActivityTime = Date.now()
 
+        // Split buffer into lines, keeping incomplete line in buffer
         const lines = buffer.split('\n')
         buffer = lines.pop() || ''
 
+        // Process each complete line
         for (const line of lines) {
           const trimmed = line.trim()
           try {
