@@ -79,7 +79,21 @@ const Sandboxes: React.FC = () => {
 
   // Sorting
 
-  const [sorting, setSorting] = useState<SandboxSorting>(DEFAULT_SANDBOX_SORTING)
+  const [sorting, setSorting] = useState<SandboxSorting>(() => {
+    const saved = getLocalStorageItem(LocalStorageKey.SandboxTableSorting)
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return DEFAULT_SANDBOX_SORTING
+      }
+    }
+    return DEFAULT_SANDBOX_SORTING
+  })
+
+  useEffect(() => {
+    setLocalStorageItem(LocalStorageKey.SandboxTableSorting, JSON.stringify(sorting))
+  }, [sorting])
 
   const handleSortingChange = useCallback((sorting: SandboxSorting) => {
     setSorting(sorting)

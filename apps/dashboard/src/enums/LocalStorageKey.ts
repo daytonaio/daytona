@@ -8,4 +8,5 @@ export enum LocalStorageKey {
   SkipOnboardingPrefix = 'SkipOnboarding_',
   AnnouncementBannerDismissed = 'AnnouncementBannerDismissed',
   SandboxTableColumnVisibility = 'SandboxTableColumnVisibility',
+  SandboxTableSorting = 'SandboxTableSorting',
 }
