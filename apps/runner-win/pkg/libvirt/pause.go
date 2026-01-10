@@ -295,6 +295,12 @@ func (l *LibVirt) ResumeFromDisk(ctx context.Context, domainId string, metadata 
 	}
 	defer domain.Free()
 
+	// Get domain name for daemon readiness check
+	domainName, err := domain.GetName()
+	if err != nil {
+		return "", fmt.Errorf("failed to get domain name: %w", err)
+	}
+
 	// Check current state
 	state, _, err := domain.GetState()
 	if err != nil {
@@ -303,10 +309,15 @@ func (l *LibVirt) ResumeFromDisk(ctx context.Context, domainId string, metadata 
 
 	if state == libvirt.DOMAIN_RUNNING {
 		log.Infof("Domain %s is already running", domainId)
+		// Even if VM is running, wait for daemon to be ready before returning
+		if err := l.waitForDaemonReady(ctx, domainName, ""); err != nil {
+			log.Warnf("Daemon readiness check failed for already running domain %s: %v", domainId, err)
+			// Don't fail - the VM is running, daemon might just be slow
+		}
 		if l.statesCache != nil {
 			l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStarted)
 		}
-		return l.getDaemonVersion(ctx, domain)
+		return l.getDaemonVersion(ctx, domainName)
 	}
 
 	// Check if domain has a managed save image
@@ -326,17 +337,24 @@ func (l *LibVirt) ResumeFromDisk(ctx context.Context, domainId string, metadata 
 		return "", fmt.Errorf("failed to resume domain from disk: %w", err)
 	}
 
-	// Wait for domain to be running
+	// Wait for domain to be running at hypervisor level
 	if err := l.waitForDomainRunningWithDomain(ctx, domain); err != nil {
 		return "", fmt.Errorf("domain failed to start: %w", err)
+	}
+
+	log.Infof("Domain %s is running, waiting for daemon to be ready...", domainId)
+
+	// Wait for daemon inside VM to be ready to accept connections
+	if err := l.waitForDaemonReady(ctx, domainName, ""); err != nil {
+		return "", fmt.Errorf("daemon failed to become ready: %w", err)
 	}
 
 	if l.statesCache != nil {
 		l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateStarted)
 	}
-	log.Infof("Domain %s resumed from disk successfully", domainId)
+	log.Infof("Domain %s resumed from disk successfully and daemon is ready", domainId)
 
-	return l.getDaemonVersion(ctx, domain)
+	return l.getDaemonVersion(ctx, domainName)
 }
 
 // waitForDomainRunningWithDomain waits for a domain to reach running state
