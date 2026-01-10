@@ -22,7 +22,6 @@
         ],
         "parallel": false
       },
-      "dependsOn": ["api:openapi"],
       "configurations": {
         "production": {
           "commands": [
