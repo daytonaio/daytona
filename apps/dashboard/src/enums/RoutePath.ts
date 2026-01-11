@@ -14,6 +14,7 @@ export enum RoutePath {
   DASHBOARD = '/dashboard',
   DOCS = '/docs',
   SLACK = '/slack',
+  DEVICE = '/device',
 
   // Dashboard sub-routes
   KEYS = '/dashboard/keys',
