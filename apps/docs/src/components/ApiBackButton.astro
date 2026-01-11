@@ -2,7 +2,6 @@
 import arrowLeft from '@assets/icons/arrow-left.svg?raw'
 import { localizePath } from '../i18n/utils'
 
-// Extract locale from pathname (e.g., /docs/en/tools/api -> en)
 const pathSegments = Astro.url.pathname.split('/').filter(Boolean)
 const localeIndex = pathSegments.indexOf('docs') + 1
 const currentLocale =
@@ -21,7 +20,7 @@ const backHref = localizePath('/docs', currentLocale)
 
 <style>
   .api-page-header {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem !important;
   }
 
   .back-button {
