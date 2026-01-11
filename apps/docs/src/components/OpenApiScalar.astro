@@ -45,27 +45,229 @@ const toolboxApiSpec = {
 }
 ---
 
-<ScalarComponent
-  configuration={{
-    sources: [
-      {
-        title: 'Daytona API',
-        slug: 'daytona',
-        content: mainApiSpec,
-        default: true,
-        url: 'https://app.daytona.io/api',
-      },
-      {
-        title: 'Daytona Toolbox API',
-        slug: 'daytona-toolbox',
-        content: toolboxApiSpec,
-        url: 'https://proxy.daytona.io/api',
-      },
-    ],
-    hideClientButton: true,
-    hideTestRequestButton: true,
-    theme: 'default',
-    searchHotKey: 'l',
-    telemetry: false,
-  }}
-/>
+<div id="scalar-container">
+  <ScalarComponent
+    configuration={{
+      sources: [
+        {
+          title: 'Daytona API',
+          slug: 'daytona',
+          content: mainApiSpec,
+          default: true,
+          url: 'https://app.daytona.io/api',
+        },
+        {
+          title: 'Daytona Toolbox API',
+          slug: 'daytona-toolbox',
+          content: toolboxApiSpec,
+          url: 'https://proxy.daytona.io/api',
+        },
+      ],
+      hideClientButton: true,
+      hideTestRequestButton: true,
+      theme: 'default',
+      searchHotKey: 'l',
+      hideDarkModeToggle: true,
+      telemetry: false,
+    }}
+  />
+</div>
+
+<script>
+  function getCurrentTheme(): 'light' | 'dark' {
+    const theme = document.documentElement.dataset.theme
+    if (theme === 'light' || theme === 'dark') {
+      return theme
+    }
+    return window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light'
+      : 'dark'
+  }
+
+  function getScalarTheme(docsTheme: 'light' | 'dark'): string {
+    return docsTheme === 'dark' ? 'moon' : 'default'
+  }
+
+  function updateScalarTheme(): void {
+    const docsTheme = getCurrentTheme()
+    const scalarTheme = getScalarTheme(docsTheme)
+
+    const container = document.getElementById('scalar-container')
+    if (!container) return
+
+    const themeSelectors = [
+      'scalar-api',
+      'scalar-component',
+      '[data-scalar]',
+      '#scalar-container > *',
+      '#scalar-container scalar-api',
+      '#scalar-container iframe',
+    ]
+
+    let scalarElements: NodeListOf<Element> | null = null
+    for (const selector of themeSelectors) {
+      const elements = document.querySelectorAll(selector)
+      if (elements.length > 0) {
+        scalarElements = elements
+        break
+      }
+    }
+
+    function traverseShadowDOM(root: Element, callback: (el: Element) => void) {
+      callback(root)
+      if ((root as any).shadowRoot) {
+        const shadowRoot = (root as any).shadowRoot
+        const children = shadowRoot.querySelectorAll('*')
+        children.forEach((child: Element) => {
+          callback(child)
+          traverseShadowDOM(child, callback)
+        })
+      }
+    }
+
+    const allScalarElements: Element[] = []
+    if (scalarElements) {
+      scalarElements.forEach(el => {
+        allScalarElements.push(el)
+        traverseShadowDOM(el, shadowEl => {
+          if (shadowEl.tagName?.toLowerCase().includes('scalar')) {
+            allScalarElements.push(shadowEl)
+          }
+        })
+      })
+    }
+
+    function findAllChildren(parent: Element): Element[] {
+      const children: Element[] = []
+      Array.from(parent.children).forEach(child => {
+        children.push(child)
+        children.push(...findAllChildren(child))
+      })
+      return children
+    }
+
+    const allChildren = findAllChildren(container)
+    allChildren.forEach(el => {
+      if (!allScalarElements.includes(el)) {
+        allScalarElements.push(el)
+      }
+      traverseShadowDOM(el, shadowEl => {
+        if (!allScalarElements.includes(shadowEl)) {
+          allScalarElements.push(shadowEl)
+        }
+      })
+    })
+
+    if (allScalarElements.length === 0) {
+      return
+    }
+
+    allScalarElements.forEach((element: Element) => {
+      const el = element as any
+
+      try {
+        if ('setAttribute' in element) {
+          element.setAttribute('theme', scalarTheme)
+          element.setAttribute('data-theme', scalarTheme)
+          element.setAttribute('data-scalar-theme', scalarTheme)
+        }
+      } catch (e) {}
+
+      try {
+        if (docsTheme === 'dark') {
+          element.classList.add(
+            'dark',
+            'scalar-dark',
+            'theme-dark',
+            'dark-mode'
+          )
+          element.classList.remove(
+            'light',
+            'scalar-light',
+            'theme-light',
+            'light-mode'
+          )
+        } else {
+          element.classList.add(
+            'light',
+            'scalar-light',
+            'theme-light',
+            'light-mode'
+          )
+          element.classList.remove(
+            'dark',
+            'scalar-dark',
+            'theme-dark',
+            'dark-mode'
+          )
+        }
+      } catch (e) {}
+    })
+  }
+
+  function watchForScalar(): void {
+    const container = document.getElementById('scalar-container')
+    if (!container) return
+
+    const scalarObserver = new MutationObserver(() => {
+      updateScalarTheme()
+    })
+
+    scalarObserver.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+    })
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        updateScalarTheme()
+      })
+    })
+  }
+
+  function watchThemeChanges(): void {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'data-theme'
+        ) {
+          updateScalarTheme()
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    })
+  }
+
+  function initialize(): void {
+    watchForScalar()
+    watchThemeChanges()
+    updateScalarTheme()
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize)
+  } else {
+    initialize()
+  }
+
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', () => {
+      const currentTheme = document.documentElement.dataset.theme
+      const systemTheme = window.matchMedia('(prefers-color-scheme: light)')
+        .matches
+        ? 'light'
+        : 'dark'
+
+      if (!currentTheme || currentTheme === systemTheme) {
+        updateScalarTheme()
+      }
+    })
+  }
+</script>
