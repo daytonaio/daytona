@@ -82,10 +82,17 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 		ctx.Request.Header.Del(SKIP_LAST_ACTIVITY_UPDATE_HEADER)
 	}
 
-	// Build the target URL
-	// Note: The runner's toolbox proxy endpoint is /sandboxes/{id}/toolbox/{path}
-	// The runner internally proxies to the daemon on port 2280 - no need for /proxy/{port} in path
-	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox", runnerInfo.ApiUrl, sandboxID)
+	// Build the target URL based on request type
+	var targetURL string
+	if toolboxSubpathRequest || targetPort == TOOLBOX_PORT {
+		// Toolbox API access (daemon operations on port 2280)
+		// Route to runner's /sandboxes/{id}/toolbox endpoint
+		targetURL = fmt.Sprintf("%s/sandboxes/%s/toolbox", runnerInfo.ApiUrl, sandboxID)
+	} else {
+		// Port-based preview URL (applications on other ports)
+		// Route to runner's /sandboxes/{id}/proxy/{port} endpoint
+		targetURL = fmt.Sprintf("%s/sandboxes/%s/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
+	}
 
 	// Ensure path always has a leading slash but not duplicate slashes
 	if targetPath == "" {

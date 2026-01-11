@@ -71,39 +71,32 @@ ip addr show virbr0 | grep inet
 
 Expected output: `inet 10.100.0.1/16`
 
-## 3. Copy Windows Base Image
+## 3. Set Up Windows Base Image
 
-Copy the Windows base image and NVRAM template from an existing host:
+**CRITICAL**: The runner has hardcoded paths for the base image and NVRAM template:
 
-### Option A: Direct transfer (if hosts can reach each other)
+- Base image: `/var/lib/libvirt/images/winserver-autologin-base.qcow2`
+- NVRAM template: `/var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd`
 
-```bash
-# On the existing host (e.g., h1001)
-rsync -avP /var/lib/libvirt/images/winserver-autologin-base.qcow2 \
-    root@NEW_HOST_IP:/var/lib/libvirt/images/
+You have two options:
 
-rsync -avP /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd \
-    root@NEW_HOST_IP:/var/lib/libvirt/qemu/nvram/
-```
-
-### Option B: Via jump host
-
-If hosts can't reach each other directly, set up SSH keys first:
+### Option A: Copy to Standard Location (Recommended for new hosts)
 
 ```bash
-# On jump host: Add NEW_HOST's key to SOURCE_HOST
-ssh SOURCE_HOST "echo 'NEW_HOST_PUBLIC_KEY' >> ~/.ssh/authorized_keys"
+# Create directories
+ssh root@NEW_HOST "mkdir -p /var/lib/libvirt/images /var/lib/libvirt/qemu/nvram"
 
-# Or add SOURCE_HOST's key to NEW_HOST
-ssh NEW_HOST "echo 'SOURCE_HOST_PUBLIC_KEY' >> ~/.ssh/authorized_keys"
+# Copy base image from existing host
+scp root@SOURCE_HOST:/path/to/winserver-autologin-base.qcow2 \
+    root@NEW_HOST:/var/lib/libvirt/images/
 
-# Then pull from NEW_HOST
-ssh NEW_HOST "rsync -avP root@SOURCE_HOST_IP:/var/lib/libvirt/images/winserver-autologin-base.qcow2 /var/lib/libvirt/images/"
-```
+# Create NVRAM template from OVMF defaults
+ssh root@NEW_HOST "
+cp /usr/share/OVMF/OVMF_VARS_4M.fd \
+   /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd
+"
 
-### Set permissions
-
-```bash
+# Set permissions
 ssh root@NEW_HOST "
 chown libvirt-qemu:kvm /var/lib/libvirt/images/winserver-autologin-base.qcow2
 chmod 644 /var/lib/libvirt/images/winserver-autologin-base.qcow2
@@ -111,6 +104,49 @@ chown libvirt-qemu:kvm /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS
 chmod 644 /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd
 "
 ```
+
+### Option B: Use Custom Location with Symlink
+
+If you prefer to store the base image elsewhere (e.g., `/home/vedran/daytona-win-snapshots/`):
+
+```bash
+# Create snapshot directory and copy image there
+ssh root@NEW_HOST "mkdir -p /home/vedran/daytona-win-snapshots"
+
+# Copy base image to custom location
+scp root@SOURCE_HOST:/path/to/winserver-autologin-base.qcow2 \
+    root@NEW_HOST:/home/vedran/daytona-win-snapshots/
+
+# Create symlink to standard location (runner expects this path)
+ssh root@NEW_HOST "
+ln -sf /home/vedran/daytona-win-snapshots/winserver-autologin-base.qcow2 \
+       /var/lib/libvirt/images/winserver-autologin-base.qcow2
+"
+
+# Create NVRAM template
+ssh root@NEW_HOST "
+mkdir -p /var/lib/libvirt/qemu/nvram && \
+cp /usr/share/OVMF/OVMF_VARS_4M.fd \
+   /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd
+"
+```
+
+### Verify Setup
+
+```bash
+ssh root@NEW_HOST "
+echo '=== Base Image ===' && \
+qemu-img info /var/lib/libvirt/images/winserver-autologin-base.qcow2 | grep -E '(image:|virtual size:|disk size:)' && \
+echo '' && \
+echo '=== NVRAM Template ===' && \
+ls -lh /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd
+"
+```
+
+Expected output:
+
+- Base image: ~13GB qcow2 file (or symlink pointing to it)
+- NVRAM template: ~528KB file
 
 ## 4. Verify Base Image Works
 
