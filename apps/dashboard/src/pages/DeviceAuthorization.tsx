@@ -11,6 +11,7 @@ import { Input } from '../components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Alert, AlertDescription } from '../components/ui/alert'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 
 interface DeviceAuthInfo {
   client_id: string
@@ -20,6 +21,7 @@ interface DeviceAuthInfo {
 
 const DeviceAuthorization = () => {
   const { user, isAuthenticated, isLoading } = useAuth()
+  const { selectedOrganization } = useSelectedOrganization()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [userCode, setUserCode] = useState(searchParams.get('user_code') || '')
@@ -81,7 +83,7 @@ const DeviceAuthorization = () => {
         },
         body: JSON.stringify({
           user_code: userCode,
-          organization_id: user?.organizationId || user?.sub,
+          organization_id: selectedOrganization?.id || user?.profile?.sub,
         }),
       })
 
