@@ -19,9 +19,10 @@ import '../styles/components/search.scss'
 const ALGOLIA_APP_ID = import.meta.env.PUBLIC_ALGOLIA_APP_ID || null
 const ALGOLIA_API_KEY = import.meta.env.PUBLIC_ALGOLIA_API_KEY || null
 const DOCS_INDEX_NAME =
-  import.meta.env.PUBLIC_ALGOLIA_DOCS_INDEX_NAME || 'docs_test'
-const CLI_INDEX_NAME = import.meta.env.PUBLIC_ALGOLIA_CLI_INDEX_NAME || 'cli_test'
-const SDK_INDEX_NAME = import.meta.env.PUBLIC_ALGOLIA_SDK_INDEX_NAME || 'sdk_test'
+  import.meta.env.PUBLIC_ALGOLIA_DOCS_INDEX_NAME || 'docs'
+const CLI_INDEX_NAME = import.meta.env.PUBLIC_ALGOLIA_CLI_INDEX_NAME || 'cli'
+const SDK_INDEX_NAME = import.meta.env.PUBLIC_ALGOLIA_SDK_INDEX_NAME || 'sdk'
+const API_INDEX_NAME = import.meta.env.PUBLIC_ALGOLIA_API_INDEX_NAME || 'api'
 
 const searchClient =
   ALGOLIA_APP_ID && ALGOLIA_API_KEY
@@ -166,6 +167,13 @@ function SearchContent() {
                   setTotalHits={setTotalHits}
                   debounceQuery={debounceQuery}
                 />
+                <SearchIndex
+                  indexName={API_INDEX_NAME}
+                  setDisplayHits={setDisplayHits}
+                  setIsSearchVisible={setIsSearchVisible}
+                  setTotalHits={setTotalHits}
+                  debounceQuery={debounceQuery}
+                />
                 {totalHits === 0 && (
                   <div style={{ 
                     textAlign: 'center', 
@@ -277,7 +285,7 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
       }}
     >
       <a href={hit.url} tabIndex="-1" onClick={handleClick}>
-        {([DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME].includes(indexName) || indexName === 'website') && (
+        {([DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME, API_INDEX_NAME].includes(indexName) || indexName === 'website') && (
           <>
             <h5
               style={{
@@ -369,6 +377,8 @@ const CustomStats = ({ nbHits, indexName, setDisplayHits }) => {
         return 'CLI'
       case SDK_INDEX_NAME:
         return 'SDK'
+      case API_INDEX_NAME:
+        return 'API'
       default:
         return 'Results'
     }
