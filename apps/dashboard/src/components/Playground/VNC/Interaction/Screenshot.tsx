@@ -162,7 +162,7 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
       `Size: ${screenshotActionResponse.sizeBytes ?? 'unknown'}`,
       `Cursor position: ${screenshotActionResponse.cursorPosition ? `(${(screenshotActionResponse.cursorPosition as CursorPositionType).x}, ${(screenshotActionResponse.cursorPosition as CursorPositionType).y})` : ''}`,
     ].join('\n')
-    setVNCInteractionOptionsParamValue('responseText', screenshotActionsResponseText)
+    setVNCInteractionOptionsParamValue('responseContent', screenshotActionsResponseText)
   }
 
   return (

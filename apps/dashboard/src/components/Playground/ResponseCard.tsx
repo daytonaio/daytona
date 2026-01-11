@@ -8,10 +8,10 @@ import { ReactNode } from 'react'
 
 type ResponseCardProps = {
   titleText?: string
-  responseText: string | ReactNode
+  responseContent: string | ReactNode
 }
 
-const ResponseCard: React.FC<ResponseCardProps> = ({ titleText, responseText }) => {
+const ResponseCard: React.FC<ResponseCardProps> = ({ titleText, responseContent }) => {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -20,7 +20,7 @@ const ResponseCard: React.FC<ResponseCardProps> = ({ titleText, responseText }) 
       <CardContent>
         <div className="rounded-lg">
           <pre className="max-w-full bg-zinc-900 text-zinc-100 h-[250px] p-4 rounded-lg overflow-x-auto overflow-y-auto text-sm font-mono">
-            <code>{responseText}</code>
+            <code>{responseContent}</code>
           </pre>
         </div>
       </CardContent>

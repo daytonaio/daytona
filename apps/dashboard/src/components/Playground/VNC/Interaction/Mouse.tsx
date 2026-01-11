@@ -209,7 +209,7 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
         break
       }
     }
-    setVNCInteractionOptionsParamValue('responseText', mouseActionResponseText)
+    setVNCInteractionOptionsParamValue('responseContent', mouseActionResponseText)
   }
 
   return (

@@ -54,13 +54,13 @@ const VNCInteractionOptions: React.FC = () => {
     (invokeApi) => {
       return async (actionFormData) => {
         // Set running message
-        setVNCInteractionOptionsParamValue('responseText', `Running ${actionFormData.methodName}...`)
+        setVNCInteractionOptionsParamValue('responseContent', `Running ${actionFormData.methodName}...`)
 
         try {
           // Call the action API method
           await invokeApi(actionFormData)
         } catch (error) {
-          setVNCInteractionOptionsParamValue('responseText', createErrorMessageOutput(error))
+          setVNCInteractionOptionsParamValue('responseContent', createErrorMessageOutput(error))
         }
       }
     },

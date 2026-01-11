@@ -96,7 +96,7 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
         await KeyboardActionsClient[KeyboardActions.TYPE](typeParams.text, typeParams.delay ?? undefined)
         break
     }
-    setVNCInteractionOptionsParamValue('responseText', '')
+    setVNCInteractionOptionsParamValue('responseContent', '')
   }
 
   return (

@@ -67,7 +67,7 @@ const VNCDisplayOperations: React.FC<VNCInteractionOptionsSectionComponentProps>
         break
       }
     }
-    setVNCInteractionOptionsParamValue('responseText', displayActionResponseText)
+    setVNCInteractionOptionsParamValue('responseContent', displayActionResponseText)
   }
 
   return (

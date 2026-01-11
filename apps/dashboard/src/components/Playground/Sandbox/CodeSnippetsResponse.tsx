@@ -704,7 +704,7 @@ main().catch(console.error)`,
           </Tabs>
         </CardContent>
       </Card>
-      <ResponseCard titleText="Result" responseText={codeSnippetOutput} />
+      <ResponseCard titleText="Result" responseContent={codeSnippetOutput} />
     </>
   )
 }

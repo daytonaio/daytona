@@ -158,7 +158,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
           </div>
         </CardContent>
       </Card>
-      <ResponseCard responseText={VNCInteractionOptionsParamsState.responseText || ''} />
+      <ResponseCard responseContent={VNCInteractionOptionsParamsState.responseContent || ''} />
     </>
   )
 }

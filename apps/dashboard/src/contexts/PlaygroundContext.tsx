@@ -60,7 +60,7 @@ export interface VNCInteractionOptionsParams {
   mouseScrollParams: MouseScroll
   screenshotOptionsConfig: CustomizedScreenshotOptions
   screenshotRegionConfig: ScreenshotRegion
-  responseText?: string | ReactNode
+  responseContent?: string | ReactNode
   VNCSandboxData?: UseTemporarySandboxResult
   VNCUrl: string | null
 }
