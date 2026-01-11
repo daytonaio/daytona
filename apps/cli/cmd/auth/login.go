@@ -31,7 +31,8 @@ var LoginCmd = &cobra.Command{
 		}
 
 		items := []view_common.SelectItem{
-			{Title: "Login with Browser", Desc: "Authenticate using OAuth in your browser"},
+			{Title: "Login with Browser (Device Flow)", Desc: "Authenticate using device authorization flow (recommended)"},
+			{Title: "Login with Browser (OAuth)", Desc: "Authenticate using OAuth in your browser"},
 			{Title: "Set Daytona API Key", Desc: "Authenticate using Daytona API key"},
 		}
 
@@ -46,6 +47,7 @@ var LoginCmd = &cobra.Command{
 
 		var tokenConfig *config.Token
 		setApiKey := choice == "Set Daytona API Key"
+		useDeviceFlow := choice == "Login with Browser (Device Flow)"
 
 		if setApiKey {
 			// Prompt for API key
@@ -56,15 +58,28 @@ var LoginCmd = &cobra.Command{
 			return updateProfileWithLogin(nil, &apiKey)
 		}
 
-		token, err := login(ctx)
-		if err != nil {
-			return err
+		var token *oauth2.Token
+		if useDeviceFlow {
+			// Use device flow
+			deviceToken, err := loginWithDeviceFlow(ctx)
+			if err != nil {
+				return err
+			}
+			tokenConfig = deviceToken
+		} else {
+			// Use OAuth with localhost callback
+			token, err = login(ctx)
+			if err != nil {
+				return err
+			}
 		}
 
-		tokenConfig = &config.Token{
-			AccessToken:  token.AccessToken,
-			RefreshToken: token.RefreshToken,
-			ExpiresAt:    token.Expiry,
+		if token != nil && tokenConfig == nil {
+			tokenConfig = &config.Token{
+				AccessToken:  token.AccessToken,
+				RefreshToken: token.RefreshToken,
+				ExpiresAt:    token.Expiry,
+			}
 		}
 
 		return updateProfileWithLogin(tokenConfig, nil)

@@ -34,6 +34,7 @@ import { addPylonWidget } from './lib/pylon-widget'
 import AccountSettings from './pages/AccountSettings'
 import AuditLogs from './pages/AuditLogs'
 import Dashboard from './pages/Dashboard'
+import DeviceAuthorization from './pages/DeviceAuthorization'
 import EmailVerify from './pages/EmailVerify'
 import Keys from './pages/Keys'
 import LandingPage from './pages/LandingPage'
@@ -124,6 +125,7 @@ function App() {
       <Route path={RoutePath.LOGOUT} element={<Logout />} />
       <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
       <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
+      <Route path="/device" element={<DeviceAuthorization />} />
       <Route
         path={RoutePath.DASHBOARD}
         element={
