@@ -9874,6 +9874,52 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-toggle-group@npm:^1.1.11":
+  version: 1.1.11
+  resolution: "@radix-ui/react-toggle-group@npm:1.1.11"
+  dependencies:
+    "@radix-ui/primitive": "npm:1.1.3"
+    "@radix-ui/react-context": "npm:1.1.2"
+    "@radix-ui/react-direction": "npm:1.1.1"
+    "@radix-ui/react-primitive": "npm:2.1.3"
+    "@radix-ui/react-roving-focus": "npm:1.1.11"
+    "@radix-ui/react-toggle": "npm:1.1.10"
+    "@radix-ui/react-use-controllable-state": "npm:1.2.2"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/c8cbccda3e25754ed9f3145c67792df2d5d0ee1a910bde6dc07c4577ab508d4b939f145569d4e2af5b17dc4a5c701473380d8695248f8620cf0a372c05b8e958
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-toggle@npm:1.1.10":
+  version: 1.1.10
+  resolution: "@radix-ui/react-toggle@npm:1.1.10"
+  dependencies:
+    "@radix-ui/primitive": "npm:1.1.3"
+    "@radix-ui/react-primitive": "npm:2.1.3"
+    "@radix-ui/react-use-controllable-state": "npm:1.2.2"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/5406cdf5dd7299ae6cfdb4865dc5fd43ca3c475ebcd4e86830bd296d734255b61f749c9bde452ebfaad126033f92dd1112ee9d95982344ffad34491238dcc9b1
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-tooltip@npm:^1.1.8":
   version: 1.2.8
   resolution: "@radix-ui/react-tooltip@npm:1.2.8"
@@ -12969,6 +13015,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/devtools-event-client@npm:^0.3.5":
+  version: 0.3.5
+  resolution: "@tanstack/devtools-event-client@npm:0.3.5"
+  checksum: 10c0/10e4feec2cd346cd47adf94889f3f12d8662fb291d0d17fbf2a2f9c643f083a70d081b0fb104c2f54c0bd89dcfb1e31942dc959b74592fce9a7b9d55ed233220
+  languageName: node
+  linkType: hard
+
+"@tanstack/form-core@npm:1.27.4":
+  version: 1.27.4
+  resolution: "@tanstack/form-core@npm:1.27.4"
+  dependencies:
+    "@tanstack/devtools-event-client": "npm:^0.3.5"
+    "@tanstack/pacer-lite": "npm:^0.1.1"
+    "@tanstack/store": "npm:^0.7.7"
+  checksum: 10c0/74c83045980593fd33db39024686177f4eb20d228e917a3b324dd5768e1c961d42fbb6c0e5119ff97034340c62bcc7361d8a80bdaa0052cbd66f493b9184f807
+  languageName: node
+  linkType: hard
+
+"@tanstack/pacer-lite@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@tanstack/pacer-lite@npm:0.1.1"
+  checksum: 10c0/c74c2e67dba3a14cd14134c27cff4856977c9019cf4dbe6a545a06960f4c9c8edad846e526595206aa01c42cc5cd5ee217761547ab6d2a3edec6fb3d69864686
+  languageName: node
+  linkType: hard
+
 "@tanstack/query-core@npm:5.90.1":
   version: 5.90.1
   resolution: "@tanstack/query-core@npm:5.90.1"
@@ -12980,6 +13051,21 @@ __metadata:
   version: 5.90.1
   resolution: "@tanstack/query-devtools@npm:5.90.1"
   checksum: 10c0/3b69e5441438acf0e753adbf187abf54b5b2e19d7c6d1e465d97278cb8c248bb86d3be193092d50414e4093cbf014093103517cb523daae003e53c867f3c11c2
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-form@npm:^1.27.4":
+  version: 1.27.4
+  resolution: "@tanstack/react-form@npm:1.27.4"
+  dependencies:
+    "@tanstack/form-core": "npm:1.27.4"
+    "@tanstack/react-store": "npm:^0.8.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@tanstack/react-start":
+      optional: true
+  checksum: 10c0/209cb6a506fcbbff5c5c70d3e8f3b03b3b636c751171283d655729c87cdf98f34c7a6690ddb04d40c1589af289febb6e240bdd8e4d821f1ca2d97d86560dea4a
   languageName: node
   linkType: hard
 
@@ -13006,6 +13092,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-store@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "@tanstack/react-store@npm:0.8.0"
+  dependencies:
+    "@tanstack/store": "npm:0.8.0"
+    use-sync-external-store: "npm:^1.6.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/ecf7ad81d97810336d0a808a41442f235a444e98599c6e7e026efd3c4360548b84af9a23612f1d0da85e32a4d9e207632b2ee2cec6f635109a256209caa3bc59
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-table@npm:^8.21.2":
   version: 8.21.3
   resolution: "@tanstack/react-table@npm:8.21.3"
@@ -13015,6 +13114,20 @@ __metadata:
     react: ">=16.8"
     react-dom: ">=16.8"
   checksum: 10c0/85d1d0fcb690ecc011f68a5a61c96f82142e31a0270dcf9cbc699a6f36715b1653fe6ff1518302a6d08b7093351fc4cabefd055a7db3cd8ac01e068956b0f944
+  languageName: node
+  linkType: hard
+
+"@tanstack/store@npm:0.8.0":
+  version: 0.8.0
+  resolution: "@tanstack/store@npm:0.8.0"
+  checksum: 10c0/71841a7a7653f744bdea457d2c41768b8d5e5aed1d5ff22bd068e28ced9bf658208c730963809c2223b26b753e19da987c0d98acb7c543abd97de14e0d58991f
+  languageName: node
+  linkType: hard
+
+"@tanstack/store@npm:^0.7.7":
+  version: 0.7.7
+  resolution: "@tanstack/store@npm:0.7.7"
+  checksum: 10c0/bf90fa957bd97336d7dbc0d7b87379b5fe4baea030efef8a93fe4e49ac1c8bc929247d1a9f84b16a1642e386b67fe53be14df8d5415efdf85f83733ccdf8877a
   languageName: node
   linkType: hard
 
@@ -18966,6 +19079,7 @@ __metadata:
     "@radix-ui/react-slot": "npm:^1.2.3"
     "@radix-ui/react-switch": "npm:^1.2.5"
     "@radix-ui/react-tabs": "npm:^1.1.3"
+    "@radix-ui/react-toggle-group": "npm:^1.1.11"
     "@radix-ui/react-tooltip": "npm:^1.1.8"
     "@scalar/astro": "npm:0.1.8"
     "@socket.io/redis-adapter": "npm:^8.3.0"
@@ -18975,6 +19089,7 @@ __metadata:
     "@swc/core": "npm:~1.5.7"
     "@swc/helpers": "npm:~0.5.11"
     "@tailwindcss/postcss": "npm:^4.1.11"
+    "@tanstack/react-form": "npm:^1.27.4"
     "@tanstack/react-query": "npm:^5.90.1"
     "@tanstack/react-query-devtools": "npm:^5.90.1"
     "@tanstack/react-table": "npm:^8.21.2"
@@ -19096,8 +19211,8 @@ __metadata:
     suspend-react: "npm:^0.1.3"
     svix: "npm:^1.73.0"
     tailwind: "npm:^4.0.0"
-    tailwind-merge: "npm:^3.0.1"
-    tailwind-scrollbar: "npm:^3.1.0"
+    tailwind-merge: "npm:^3.4.0"
+    tailwind-scrollbar: "npm:^4.0.2"
     tailwindcss: "npm:3.4.3"
     tailwindcss-animate: "npm:^1.0.7"
     tar: "npm:^7.5.4"
@@ -19121,6 +19236,7 @@ __metadata:
     webpack-cli: "npm:^5.1.4"
     xml2js: "npm:^0.6.2"
     yaml: "npm:^2.8.0"
+    zod: "npm:^4.2.1"
     zustand: "npm:^5.0.9"
   languageName: unknown
   linkType: soft
@@ -35744,19 +35860,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwind-merge@npm:^3.0.1":
-  version: 3.3.1
-  resolution: "tailwind-merge@npm:3.3.1"
-  checksum: 10c0/b84c6a78d4669fa12bf5ab8f0cdc4400a3ce0a7c006511af4af4be70bb664a27466dbe13ee9e3b31f50ddf6c51d380e8192ce0ec9effce23ca729d71a9f63818
+"tailwind-merge@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "tailwind-merge@npm:3.4.0"
+  checksum: 10c0/eaf17bb695c51c7bb7a90366a9c62be295473ee97fcfd1da54287714d4a5788a88ff4ad1ab9e0128638257fda777d6c9ea88682e36195e31a7fa2cf43f45e310
   languageName: node
   linkType: hard
 
-"tailwind-scrollbar@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "tailwind-scrollbar@npm:3.1.0"
+"tailwind-scrollbar@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "tailwind-scrollbar@npm:4.0.2"
+  dependencies:
+    prism-react-renderer: "npm:^2.4.1"
   peerDependencies:
-    tailwindcss: 3.x
-  checksum: 10c0/dad4d5dcc37f09806cb1b5380d7908d113d139638ac606644ba0c689dffb2d72250f6997c0091c2ba596346390b31742859a20933c2d8543f8103e2ddfc3fb82
+    tailwindcss: 4.x
+  checksum: 10c0/942dd9ec381e09f65220fb9370f6ec1de137e88b9c7a043ee1eafd0397da1d0c4a9780e833ed159892106da820611867d358c73e05509746329cd0414102c587
   languageName: node
   linkType: hard
 
@@ -37527,6 +37645,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"use-sync-external-store@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "use-sync-external-store@npm:1.6.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/35e1179f872a53227bdf8a827f7911da4c37c0f4091c29b76b1e32473d1670ebe7bcd880b808b7549ba9a5605c233350f800ffab963ee4a4ee346ee983b6019b
+  languageName: node
+  linkType: hard
+
 "usehooks-ts@npm:^3.1.1":
   version: 3.1.1
   resolution: "usehooks-ts@npm:3.1.1"
@@ -39007,7 +39134,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^4.1.11":
+"zod@npm:^4.1.11, zod@npm:^4.2.1":
   version: 4.3.5
   resolution: "zod@npm:4.3.5"
   checksum: 10c0/5a2db7e59177a3d7e202543f5136cb87b97b047b77c8a3d824098d3fa8b80d3aa40a0a5f296965c3b82dfdccdd05dbbfacce91347f16a39c675680fd7b1ab109
