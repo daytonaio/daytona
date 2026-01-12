@@ -73,9 +73,10 @@ Expected output: `inet 10.100.0.1/16`
 
 ## 3. Set Up Windows Base Image
 
-**CRITICAL**: The runner has hardcoded paths for the base image and NVRAM template:
+**CRITICAL**: The runner has hardcoded paths for base images (snapshots) and sandbox overlays:
 
-- Base image: `/var/lib/libvirt/images/winserver-autologin-base.qcow2`
+- Snapshots directory: `/var/lib/libvirt/snapshots/` (base images / golden templates)
+- Sandboxes directory: `/var/lib/libvirt/sandboxes/` (per-sandbox overlay disks)
 - NVRAM template: `/var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd`
 
 You have two options:
@@ -84,11 +85,11 @@ You have two options:
 
 ```bash
 # Create directories
-ssh root@NEW_HOST "mkdir -p /var/lib/libvirt/images /var/lib/libvirt/qemu/nvram"
+ssh root@NEW_HOST "mkdir -p /var/lib/libvirt/snapshots /var/lib/libvirt/sandboxes /var/lib/libvirt/qemu/nvram"
 
 # Copy base image from existing host
 scp root@SOURCE_HOST:/path/to/winserver-autologin-base.qcow2 \
-    root@NEW_HOST:/var/lib/libvirt/images/
+    root@NEW_HOST:/var/lib/libvirt/snapshots/
 
 # Create NVRAM template from OVMF defaults
 ssh root@NEW_HOST "
@@ -98,8 +99,11 @@ cp /usr/share/OVMF/OVMF_VARS_4M.fd \
 
 # Set permissions
 ssh root@NEW_HOST "
-chown libvirt-qemu:kvm /var/lib/libvirt/images/winserver-autologin-base.qcow2
-chmod 644 /var/lib/libvirt/images/winserver-autologin-base.qcow2
+chown -R libvirt-qemu:kvm /var/lib/libvirt/snapshots
+chmod 755 /var/lib/libvirt/snapshots
+chmod 644 /var/lib/libvirt/snapshots/winserver-autologin-base.qcow2
+chown -R libvirt-qemu:kvm /var/lib/libvirt/sandboxes
+chmod 755 /var/lib/libvirt/sandboxes
 chown libvirt-qemu:kvm /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd
 chmod 644 /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd
 "
@@ -119,8 +123,10 @@ scp root@SOURCE_HOST:/path/to/winserver-autologin-base.qcow2 \
 
 # Create symlink to standard location (runner expects this path)
 ssh root@NEW_HOST "
+mkdir -p /var/lib/libvirt/snapshots /var/lib/libvirt/sandboxes
 ln -sf /home/vedran/daytona-win-snapshots/winserver-autologin-base.qcow2 \
-       /var/lib/libvirt/images/winserver-autologin-base.qcow2
+       /var/lib/libvirt/snapshots/winserver-autologin-base.qcow2
+chown -R libvirt-qemu:kvm /var/lib/libvirt/sandboxes
 "
 
 # Create NVRAM template
@@ -135,8 +141,11 @@ cp /usr/share/OVMF/OVMF_VARS_4M.fd \
 
 ```bash
 ssh root@NEW_HOST "
-echo '=== Base Image ===' && \
-qemu-img info /var/lib/libvirt/images/winserver-autologin-base.qcow2 | grep -E '(image:|virtual size:|disk size:)' && \
+echo '=== Base Image (Snapshot) ===' && \
+qemu-img info /var/lib/libvirt/snapshots/winserver-autologin-base.qcow2 | grep -E '(image:|virtual size:|disk size:)' && \
+echo '' && \
+echo '=== Sandboxes Directory ===' && \
+ls -la /var/lib/libvirt/sandboxes/ && \
 echo '' && \
 echo '=== NVRAM Template ===' && \
 ls -lh /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd
@@ -155,10 +164,11 @@ Test that VMs can be created from the base image:
 ```bash
 ssh root@NEW_HOST
 
-# Create overlay disk
+# Create overlay disk in sandboxes directory
 qemu-img create -f qcow2 -F qcow2 \
-    -b /var/lib/libvirt/images/winserver-autologin-base.qcow2 \
-    /var/lib/libvirt/images/test-vm.qcow2
+    -b /var/lib/libvirt/snapshots/winserver-autologin-base.qcow2 \
+    /var/lib/libvirt/sandboxes/test-vm.qcow2
+chown libvirt-qemu:kvm /var/lib/libvirt/sandboxes/test-vm.qcow2
 
 # Copy NVRAM
 cp /var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd \
@@ -191,7 +201,7 @@ cat > /tmp/test-vm.xml << 'EOF'
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='/var/lib/libvirt/images/test-vm.qcow2'/>
+      <source file='/var/lib/libvirt/sandboxes/test-vm.qcow2'/>
       <target dev='vda' bus='virtio'/>
     </disk>
     <interface type='network'>
@@ -224,7 +234,7 @@ Clean up test VM:
 ```bash
 virsh destroy test-vm
 virsh undefine test-vm --nvram
-rm -f /var/lib/libvirt/images/test-vm.qcow2
+rm -f /var/lib/libvirt/sandboxes/test-vm.qcow2
 ```
 
 ## 5. Deploy Runner Binary
@@ -489,7 +499,9 @@ cat /etc/daytona/runner.env
 | Binary | `/opt/daytona/runner` |
 | Config | `/etc/daytona/runner.env` |
 | Service | `/etc/systemd/system/daytona-runner.service` |
-| Base Image | `/var/lib/libvirt/images/winserver-autologin-base.qcow2` |
+| Snapshots Dir | `/var/lib/libvirt/snapshots/` (base images) |
+| Sandboxes Dir | `/var/lib/libvirt/sandboxes/` (overlay disks) |
+| Base Image | `/var/lib/libvirt/snapshots/winserver-autologin-base.qcow2` |
 | NVRAM Template | `/var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd` |
 | Logs | `journalctl -u daytona-runner` |
 

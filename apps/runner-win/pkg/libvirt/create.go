@@ -276,14 +276,17 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 
 // Base image and NVRAM paths for Windows sandboxes
 const (
-	baseImagePath  = "/var/lib/libvirt/images/winserver-autologin-base.qcow2"
-	templateNVRAM  = "/var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd"
-	imagesBasePath = "/var/lib/libvirt/images"
-	nvramBasePath  = "/var/lib/libvirt/qemu/nvram"
+	// Snapshots directory contains base images (golden templates)
+	snapshotsBasePath = "/var/lib/libvirt/snapshots"
+	baseImagePath     = "/var/lib/libvirt/snapshots/winserver-autologin-base.qcow2"
+	templateNVRAM     = "/var/lib/libvirt/qemu/nvram/winserver-autologin-base_VARS.fd"
+	// Sandboxes directory contains per-sandbox overlay disks
+	sandboxesBasePath = "/var/lib/libvirt/sandboxes"
+	nvramBasePath     = "/var/lib/libvirt/qemu/nvram"
 )
 
 func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, error) {
-	newDiskPath := filepath.Join(imagesBasePath, fmt.Sprintf("%s.qcow2", sandboxDto.Id))
+	newDiskPath := filepath.Join(sandboxesBasePath, fmt.Sprintf("%s.qcow2", sandboxDto.Id))
 
 	isLocal := l.isLocalURI()
 

@@ -124,7 +124,7 @@ func (l *LibVirt) cleanupDomainFiles(ctx context.Context, domainId string) {
 	}
 
 	// Build paths for disk and NVRAM
-	diskPath := filepath.Join(imagesBasePath, fmt.Sprintf("%s.qcow2", domainId))
+	diskPath := filepath.Join(sandboxesBasePath, fmt.Sprintf("%s.qcow2", domainId))
 	nvramPath := filepath.Join(nvramBasePath, fmt.Sprintf("%s_VARS.fd", domainId))
 
 	// Remove disk file
