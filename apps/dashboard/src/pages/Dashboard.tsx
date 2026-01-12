@@ -18,6 +18,7 @@ import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
+import { CookieBanner } from '@/components/CookieBanner'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
@@ -96,6 +97,7 @@ const Dashboard: React.FC = () => {
 
         <Toaster />
         <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
+        <CookieBanner />
       </SidebarProvider>
     </div>
   )

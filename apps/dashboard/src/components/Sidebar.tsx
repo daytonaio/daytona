@@ -59,6 +59,7 @@ import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+import { usePostHog } from 'posthog-js/react'
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -73,6 +74,7 @@ interface SidebarItem {
 }
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
+  const posthog = usePostHog()
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const { pathname } = useLocation()
@@ -180,6 +182,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   }, [billingEnabled, authenticatedUserOrganizationMember?.role])
 
   const handleSignOut = () => {
+    posthog?.reset()
     signoutRedirect()
   }
 
