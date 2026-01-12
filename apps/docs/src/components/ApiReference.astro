@@ -41,7 +41,7 @@ const toolboxApiPath = join(
 const toolboxApiSpecRaw = JSON.parse(fs.readFileSync(toolboxApiPath, 'utf-8'))
 const toolboxApiSpec = {
   ...toolboxApiSpecRaw,
-  servers: [{ url: 'https://proxy.app.daytona.io/toolbox' }],
+  servers: [{ url: 'https://proxy.app.daytona.io/toolbox/{sandboxId}' }],
 }
 ---
 
