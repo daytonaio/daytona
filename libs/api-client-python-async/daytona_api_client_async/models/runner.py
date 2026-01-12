@@ -47,6 +47,7 @@ class Runner(BaseModel):
     current_allocated_memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated memory in GiB", alias="currentAllocatedMemoryGiB")
     current_allocated_disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated disk in GiB", alias="currentAllocatedDiskGiB")
     current_snapshot_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current snapshot count", alias="currentSnapshotCount")
+    current_started_sandboxes: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current number of started sandboxes", alias="currentStartedSandboxes")
     availability_score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Runner availability score", alias="availabilityScore")
     region: StrictStr = Field(description="The region of the runner")
     state: RunnerState = Field(description="The state of the runner")
@@ -56,7 +57,7 @@ class Runner(BaseModel):
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -134,6 +135,7 @@ class Runner(BaseModel):
             "currentAllocatedMemoryGiB": obj.get("currentAllocatedMemoryGiB"),
             "currentAllocatedDiskGiB": obj.get("currentAllocatedDiskGiB"),
             "currentSnapshotCount": obj.get("currentSnapshotCount"),
+            "currentStartedSandboxes": obj.get("currentStartedSandboxes"),
             "availabilityScore": obj.get("availabilityScore"),
             "region": obj.get("region"),
             "state": obj.get("state"),

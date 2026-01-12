@@ -1736,6 +1736,9 @@ const docTemplate = `{
                 },
                 "currentSnapshotCount": {
                     "type": "integer"
+                },
+                "currentStartedSandboxes": {
+                    "type": "integer"
                 }
             }
         },

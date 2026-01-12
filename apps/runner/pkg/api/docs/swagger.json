@@ -1615,6 +1615,9 @@
         },
         "currentSnapshotCount": {
           "type": "integer"
+        },
+        "currentStartedSandboxes": {
+          "type": "integer"
         }
       }
     },
