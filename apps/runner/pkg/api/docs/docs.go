@@ -1505,6 +1505,9 @@ const docTemplate = `{
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
                 },
+                "skipStart": {
+                    "type": "boolean"
+                },
                 "snapshot": {
                     "type": "string"
                 },

@@ -39,6 +39,7 @@ import { DefaultRegionRequiredException } from '../../organization/exceptions/De
 import { Region } from '../../region/entities/region.entity'
 import { Runner } from '../entities/runner.entity'
 import { RunnerState } from '../enums/runner-state.enum'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -62,6 +63,7 @@ export class SnapshotService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly dockerRegistryService: DockerRegistryService,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -676,5 +678,35 @@ export class SnapshotService {
         error,
       )
     })
+  }
+
+  async pullSnapshotToRunner(snapshotRef: string, runner: Runner) {
+    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef)
+
+    // If no registry found by image name, use the default internal registry
+    if (!dockerRegistry) {
+      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      if (!dockerRegistry) {
+        throw new Error('No registry found for snapshot and no default internal registry configured')
+      }
+    }
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    let retries = 0
+    while (retries < 10) {
+      try {
+        await runnerAdapter.pullSnapshot(snapshotRef, dockerRegistry)
+        break
+      } catch (err) {
+        if (err.code !== 'ECONNRESET') {
+          throw err
+        }
+        if (++retries >= 10) {
+          throw err
+        }
+        await new Promise((resolve) => setTimeout(resolve, retries * 1000))
+      }
+    }
   }
 }

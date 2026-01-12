@@ -54,6 +54,7 @@ export interface RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
+    skipStart?: boolean,
   ): Promise<void>
   startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void>
   stopSandbox(sandboxId: string): Promise<void>

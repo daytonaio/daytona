@@ -19,13 +19,15 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 
 @Injectable()
 export class RunnerService {
@@ -39,10 +41,10 @@ export class RunnerService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
+    @InjectRedis()
+    private readonly redis: Redis,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -121,6 +123,7 @@ export class RunnerService {
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
+      isDraining: Not(true),
       availabilityScore: params.availabilityScoreThreshold
         ? MoreThanOrEqual(params.availabilityScoreThreshold)
         : MoreThanOrEqual(this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')),
@@ -296,6 +299,73 @@ export class RunnerService {
     }
   }
 
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-decommission-runners', waitForCompletion: true })
+  @LogExecution('check-decommission-runners')
+  @WithInstrumentation()
+  private async handleCheckDecommissionRunners() {
+    const lockKey = 'check-decommission-runners'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const drainingRunners = await this.runnerRepository.find({
+        where: {
+          isDraining: true,
+        },
+      })
+
+      this.logger.debug(`Checking ${drainingRunners.length} draining runners`)
+
+      await Promise.allSettled(
+        drainingRunners.map(async (runner) => {
+          try {
+            // Check if runner has any sandboxes with desiredState != DESTROYED
+            const nonDestroyedSandboxCount = await this.sandboxRepository.count({
+              where: {
+                runnerId: runner.id,
+                desiredState: Not(SandboxDesiredState.DESTROYED),
+              },
+            })
+
+            const redisKey = `runner:draining-check:${runner.id}`
+
+            if (nonDestroyedSandboxCount > 0) {
+              // Reset counter if there are non-destroyed sandboxes
+              await this.redis.set(redisKey, '0', 'EX', 600) // 10 minute TTL
+              this.logger.debug(
+                `Runner ${runner.id} has ${nonDestroyedSandboxCount} sandboxes with desiredState != DESTROYED, reset counter`,
+              )
+            } else {
+              // Increment counter
+              const currentCount = await this.redis.get(redisKey)
+              const count = currentCount ? parseInt(currentCount, 10) + 1 : 1
+
+              if (count >= 3) {
+                // Decommission the runner
+                await this.runnerRepository.update(runner.id, {
+                  state: RunnerState.DECOMMISSIONED,
+                })
+                await this.redis.del(redisKey)
+                this.logger.log(`Runner ${runner.id} has been decommissioned after 3 successful draining checks`)
+              } else {
+                await this.redis.set(redisKey, count.toString(), 'EX', 600) // 10 minute TTL
+                this.logger.debug(
+                  `Runner ${runner.id} draining check passed (${count}/3), all sandboxes have desiredState = DESTROYED`,
+                )
+              }
+            }
+          } catch (e) {
+            this.logger.error(`Error checking draining runner ${runner.id}`, e)
+          }
+        }),
+      )
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
   private async updateRunnerStatus(runnerId: string, runnerInfo?: RunnerInfo) {
     const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
     if (!runner) {
@@ -353,6 +423,16 @@ export class RunnerService {
     }
 
     runner.unschedulable = unschedulable
+    return this.runnerRepository.save(runner)
+  }
+
+  async updateDrainingStatus(id: string, isDraining: boolean): Promise<Runner> {
+    const runner = await this.runnerRepository.findOne({ where: { id } })
+    if (!runner) {
+      throw new Error('Runner not found')
+    }
+
+    runner.isDraining = isDraining
     return this.runnerRepository.save(runner)
   }
 
