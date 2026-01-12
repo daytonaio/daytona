@@ -199,7 +199,7 @@ class AsyncDaytona:
 
         # Initialize services
         self.volume = AsyncVolumeService(VolumesApi(self._api_client))
-        self.snapshot = AsyncSnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
+        self.snapshot = AsyncSnapshotService(SnapshotsApi(self._api_client), self._object_storage_api, self._target)
 
     # unasync: delete start
     async def __aenter__(self):

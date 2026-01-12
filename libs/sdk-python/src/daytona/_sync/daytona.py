@@ -200,7 +200,7 @@ class Daytona:
 
         # Initialize services
         self.volume = VolumeService(VolumesApi(self._api_client))
-        self.snapshot = SnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
+        self.snapshot = SnapshotService(SnapshotsApi(self._api_client), self._object_storage_api, self._target)
 
     @overload
     def create(
