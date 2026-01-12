@@ -3,17 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useEffect, useState } from 'react'
-import { Check, ClipboardIcon, Eye, EyeOff, Loader2, Plus } from 'lucide-react'
-import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
-import { CreateApiKeyPermissionsEnum, ApiKeyResponse, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import pythonIcon from '@/assets/python.svg'
 import typescriptIcon from '@/assets/typescript.svg'
+import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import CodeBlock from '@/components/CodeBlock'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { RoutePath } from '@/enums/RoutePath'
 import { useApi } from '@/hooks/useApi'
@@ -21,6 +16,11 @@ import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { getMaskedToken } from '@/lib/utils'
+import { ApiKeyResponse, CreateApiKeyPermissionsEnum, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { Check, ClipboardIcon, Eye, EyeOff, Loader2, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 const Onboarding: React.FC = () => {
   const { apiKeyApi } = useApi()
@@ -124,11 +124,17 @@ const Onboarding: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2">
               <Tabs value={language} onValueChange={(value) => setLanguage(value as 'typescript' | 'python')}>
-                <TabsList className="bg-foreground/10">
-                  <TabsTrigger value="python">
+                <TabsList className="bg-foreground/10 p-0 rounded-none">
+                  <TabsTrigger
+                    value="python"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
+                  >
                     <img src={pythonIcon} alt="Python" className="w-4 h-4" />
                   </TabsTrigger>
-                  <TabsTrigger value="typescript">
+                  <TabsTrigger
+                    value="typescript"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-foreground border-b-2 data-[state=active]:border-primary rounded-none h-full"
+                  >
                     <img src={typescriptIcon} alt="TypeScript" className="w-4 h-4" />
                   </TabsTrigger>
                 </TabsList>
