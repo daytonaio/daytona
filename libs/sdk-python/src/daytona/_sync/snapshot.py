@@ -27,9 +27,12 @@ from .object_storage import ObjectStorage
 class SnapshotService:
     """Service for managing Daytona Snapshots. Can be used to list, get, create and delete Snapshots."""
 
-    def __init__(self, snapshots_api: SnapshotsApi, object_storage_api: ObjectStorageApi):
+    def __init__(
+        self, snapshots_api: SnapshotsApi, object_storage_api: ObjectStorageApi, default_region_id: Optional[str] = None
+    ):
         self.__snapshots_api = snapshots_api
         self.__object_storage_api = object_storage_api
+        self.__default_region_id = default_region_id
 
     @intercept_errors(message_prefix="Failed to list snapshots: ")
     def list(self, page: Optional[int] = None, limit: Optional[int] = None) -> PaginatedSnapshots:
@@ -150,8 +153,7 @@ class SnapshotService:
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 
-        if params.region_id:
-            create_snapshot_req.region_id = params.region_id
+        create_snapshot_req.region_id = params.region_id or self.__default_region_id
 
         created_snapshot = self.__snapshots_api.create_snapshot(create_snapshot_req)
 

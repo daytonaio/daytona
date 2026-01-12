@@ -80,6 +80,7 @@ export class SnapshotService {
     private clientConfig: Configuration,
     private snapshotsApi: SnapshotsApi,
     private objectStorageApi: ObjectStorageApi,
+    private defaultRegionId?: string,
   ) {}
 
   /**
@@ -180,9 +181,7 @@ export class SnapshotService {
       createSnapshotReq.disk = params.resources.disk
     }
 
-    if (params.regionId) {
-      createSnapshotReq.regionId = params.regionId
-    }
+    createSnapshotReq.regionId = params.regionId || this.defaultRegionId
 
     let createdSnapshot = (
       await this.snapshotsApi.createSnapshot(createSnapshotReq, undefined, {
