@@ -297,6 +297,7 @@ export class Daytona {
       configuration,
       new SnapshotsApi(configuration, '', axiosInstance),
       this.objectStorageApi,
+      this.target,
     )
     this.clientConfig = configuration
   }
