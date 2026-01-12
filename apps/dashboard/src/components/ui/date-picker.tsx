@@ -6,9 +6,9 @@
 import { format } from 'date-fns'
 import { Calendar as CalendarIcon, X } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { InputGroup, InputGroupAddon, InputGroupButton } from './input-group'
 
 interface DatePickerProps {
   value?: Date
@@ -26,24 +26,27 @@ export function DatePicker({ value, onChange, required, disabledBefore, id }: Da
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
+      <InputGroup className="overflow-clip">
+        <PopoverTrigger
+          data-slot="input-group-control"
           id={id}
-          variant="outline"
           data-empty={!value}
-          className="flex w-full data-[empty=true]:text-muted-foreground justify-between text-left font-normal hover:bg-background"
+          className="flex flex-1 data-[empty=true]:text-muted-foreground justify-between text-left font-normal focus-visible:outline-none pl-2 h-full"
         >
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4" />
             {value ? format(value, 'PPP') : <span>Select date</span>}
           </div>
-          {value && (
-            <Button type="button" variant="ghost" size="sm" className="h-auto p-1 hover:bg-muted" onClick={handleClear}>
+        </PopoverTrigger>
+        {value && (
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton type="button" size="icon-xs" onClick={handleClear}>
               <X className="h-3 w-3" />
-            </Button>
-          )}
-        </Button>
-      </PopoverTrigger>
+            </InputGroupButton>
+          </InputGroupAddon>
+        )}
+      </InputGroup>
+
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
