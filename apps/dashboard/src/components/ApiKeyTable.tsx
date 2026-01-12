@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiKeyList } from '@daytonaio/api-client'
+import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { getRelativeTimeString } from '@/lib/utils'
+import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytonaio/api-client'
+
 import {
   ColumnDef,
   flexRender,
@@ -13,9 +17,12 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
+import { KeyRound, Loader2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Pagination } from './Pagination'
+import { TableEmptyState } from './TableEmptyState'
+import { Badge } from './ui/badge'
 import { Button } from './ui/button'
-import { useState } from 'react'
 import {
   Dialog,
   DialogClose,
@@ -26,12 +33,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import { Skeleton } from './ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { Pagination } from './Pagination'
-import { Loader2, KeyRound } from 'lucide-react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { getRelativeTimeString } from '@/lib/utils'
-import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
   data: ApiKeyList[]
@@ -79,11 +84,19 @@ export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTable
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from(new Array(5)).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column, i, arr) =>
+                      i === arr.length - 1 ? null : (
+                        <TableCell key={column.id}>
+                          <Skeleton className="h-4 w-10/12" />
+                        </TableCell>
+                      ),
+                    )}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -176,21 +189,7 @@ const getColumns = ({
         return <div className="max-w-md px-3">Permissions</div>
       },
       cell: ({ row }) => {
-        const permissions = row.original.permissions.join(', ')
-        return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="truncate max-w-md px-3 cursor-text">{permissions || '-'}</div>
-              </TooltipTrigger>
-              {permissions && (
-                <TooltipContent>
-                  <p className="max-w-[300px]">{permissions}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        )
+        return <PermissionsTooltip permissions={row.original.permissions} availablePermissions={allPermissions} />
       },
     },
     {
@@ -223,7 +222,7 @@ const getColumns = ({
         const relativeTime = getRelativeTimeString(lastUsedAt).relativeTimeString
 
         if (!lastUsedAt) {
-          return relativeTime
+          return <span className="text-muted-foreground">{relativeTime}</span>
         }
 
         const fullDate = new Date(lastUsedAt).toLocaleString()
@@ -250,7 +249,7 @@ const getColumns = ({
         const relativeTime = getRelativeTimeString(expiresAt).relativeTimeString
 
         if (!expiresAt) {
-          return relativeTime
+          return <span className="text-muted-foreground">{relativeTime}</span>
         }
 
         const fullDate = new Date(expiresAt).toLocaleString()
@@ -272,16 +271,14 @@ const getColumns = ({
     },
     {
       id: 'actions',
-      header: () => {
-        return <div className="px-4">Actions</div>
-      },
+      size: 80,
       cell: ({ row }) => {
         const isLoading = isLoadingKey(row.original)
 
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={isLoading} className="w-20" title="Revoke Key">
+              <Button variant="ghost" size={isLoading ? 'icon-sm' : 'sm'} disabled={isLoading} title="Revoke Key">
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Revoke'}
               </Button>
             </DialogTrigger>
@@ -312,4 +309,64 @@ const getColumns = ({
   ]
 
   return columns
+}
+
+const allPermissions = Object.values(CreateApiKeyPermissionsEnum)
+
+function PermissionsTooltip({
+  permissions,
+  availablePermissions,
+}: {
+  permissions: ApiKeyListPermissionsEnum[]
+  availablePermissions: CreateApiKeyPermissionsEnum[]
+}) {
+  const isFullAccess = allPermissions.length === permissions.length
+  const isSingleResourceAccess = CREATE_API_KEY_PERMISSIONS_GROUPS.find((group) =>
+    group.permissions.every((p) => permissions.includes(p)),
+  )
+
+  const availableGroups = useMemo(() => {
+    return CREATE_API_KEY_PERMISSIONS_GROUPS.map((group) => ({
+      ...group,
+      permissions: group.permissions.filter((p) => availablePermissions.includes(p)),
+    })).filter((group) => group.permissions.length > 0)
+  }, [availablePermissions])
+
+  const badgeVariant = isFullAccess ? 'warning' : 'outline'
+  const badgeText = isFullAccess ? 'Full' : isSingleResourceAccess ? isSingleResourceAccess.name : 'Restricted'
+
+  return (
+    <Popover>
+      <PopoverTrigger>
+        <Badge variant={badgeVariant} className="whitespace-nowrap">
+          {badgeText} <span className="hidden xs:inline ml-1">Access</span>
+        </Badge>
+      </PopoverTrigger>
+      <PopoverContent className="p-0">
+        <p className="p-2 text-muted-foreground text-xs font-medium border-b">Permissions</p>
+        <div className="flex flex-col">
+          {availableGroups.map((group) => {
+            const selectedPermissions = group.permissions.filter((p) => permissions.includes(p))
+
+            if (selectedPermissions.length === 0) {
+              return null
+            }
+
+            return (
+              <div key={group.name} className="flex justify-between gap-3 border-b last:border-b-0 p-2">
+                <h3 className="text-sm">{group.name}</h3>
+                <div className="flex gap-2 flex-wrap justify-end">
+                  {selectedPermissions.map((p) => (
+                    <Badge key={p} variant="outline" className="capitalize rounded-sm">
+                      {p.split(':')[0]}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
 }
