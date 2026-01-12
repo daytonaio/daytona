@@ -40,6 +40,7 @@ import LandingPage from './pages/LandingPage'
 import Limits from './pages/Limits'
 import Logout from './pages/Logout'
 import NotFound from './pages/NotFound'
+import DeviceAuthorization from './pages/DeviceAuthorization'
 import Registries from './pages/Registries'
 import Sandboxes from './pages/Sandboxes'
 import Snapshots from './pages/Snapshots'
@@ -124,6 +125,7 @@ function App() {
       <Route path={RoutePath.LOGOUT} element={<Logout />} />
       <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
       <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
+      <Route path={RoutePath.DEVICE} element={<DeviceAuthorization />} />
       <Route
         path={RoutePath.DASHBOARD}
         element={

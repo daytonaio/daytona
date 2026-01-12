@@ -38,6 +38,7 @@ func init() {
 
 	rootCmd.AddCommand(auth.LoginCmd)
 	rootCmd.AddCommand(auth.LogoutCmd)
+	rootCmd.AddCommand(auth.TokenNewCmd)
 	rootCmd.AddCommand(sandbox.SandboxCmd)
 	rootCmd.AddCommand(snapshot.SnapshotsCmd)
 	rootCmd.AddCommand(volume.VolumeCmd)

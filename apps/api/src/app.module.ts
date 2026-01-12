@@ -39,6 +39,7 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
 import { Redis } from 'ioredis'
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { RegionModule } from './region/region.module'
+import { DeviceAuthModule } from './device-auth/device-auth.module'
 
 @Module({
   imports: [
@@ -201,6 +202,7 @@ import { RegionModule } from './region/region.module'
     ObjectStorageModule,
     AuditModule,
     HealthModule,
+    DeviceAuthModule,
     OpenFeatureModule.forRoot({
       contextFactory: (request: ExecutionContext) => {
         const req = request.switchToHttp().getRequest()
