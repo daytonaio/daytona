@@ -220,6 +220,96 @@ type SnapshotExistsResponse struct {
 	Exists bool `json:"exists" example:"true"`
 } //	@name	SnapshotExistsResponse
 
+// PushSnapshot godoc
+//
+//	@Tags			snapshots
+//	@Summary		Push a snapshot to the snapshot store
+//	@Description	Create a snapshot from a sandbox's disk and upload it to the S3-compatible snapshot store
+//	@Param			request	body		dto.PushSnapshotRequestDTO	true	"Push snapshot request"
+//	@Success		200		{object}	dto.PushSnapshotResponseDTO	"Snapshot successfully pushed"
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		409		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
+//
+//	@Router			/snapshots/push [post]
+//
+//	@id				PushSnapshot
+func PushSnapshot(ctx *gin.Context) {
+	var request dto.PushSnapshotRequestDTO
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	if request.SandboxId == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("sandboxId is required")))
+		return
+	}
+
+	if request.SnapshotName == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshotName is required")))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	response, err := runner.LibVirt.PushSnapshot(ctx.Request.Context(), request)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
+// CreateSnapshot godoc
+//
+//	@Tags			snapshots
+//	@Summary		Create a snapshot from a running or stopped sandbox
+//	@Description	Create a snapshot from a sandbox's disk and upload it to the S3-compatible snapshot store. Supports two modes: safe mode (live=false, default) pauses the VM briefly for a consistent snapshot, optimistic mode (live=true) takes the snapshot without pausing but may be inconsistent if the VM is actively writing.
+//	@Param			request	body		dto.CreateSnapshotRequestDTO	true	"Create snapshot request"
+//	@Success		200		{object}	dto.CreateSnapshotResponseDTO	"Snapshot successfully created"
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		409		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
+//
+//	@Router			/snapshots/create [post]
+//
+//	@id				CreateSnapshot
+func CreateSnapshot(ctx *gin.Context) {
+	var request dto.CreateSnapshotRequestDTO
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	if request.SandboxId == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("sandboxId is required")))
+		return
+	}
+
+	if request.Name == "" {
+		ctx.Error(common_errors.NewBadRequestError(errors.New("name is required")))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	response, err := runner.LibVirt.CreateSnapshot(ctx.Request.Context(), request)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}
+
 // GetBuildLogs godoc
 //
 //	@Tags			snapshots

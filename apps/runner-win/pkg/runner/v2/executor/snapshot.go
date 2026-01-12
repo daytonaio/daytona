@@ -58,3 +58,23 @@ func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any,
 
 	return nil, e.libvirt.RemoveImage(ctx, *job.Payload, true)
 }
+
+func (e *Executor) pushSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
+	var request dto.PushSnapshotRequestDTO
+	err := e.parsePayload(job.Payload, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return e.libvirt.PushSnapshot(ctx, request)
+}
+
+func (e *Executor) createSandboxSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
+	var request dto.CreateSnapshotRequestDTO
+	err := e.parsePayload(job.Payload, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	return e.libvirt.CreateSnapshot(ctx, request)
+}

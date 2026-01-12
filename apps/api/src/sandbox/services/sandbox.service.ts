@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike, IsNull } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -20,6 +27,10 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
 import { SandboxWarmPoolService } from './sandbox-warm-pool.service'
+import { Job } from '../entities/job.entity'
+import { JobType } from '../enums/job-type.enum'
+import { JobStatus } from '../enums/job-status.enum'
+import { ResourceType } from '../enums/resource-type.enum'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
@@ -93,6 +104,8 @@ export class SandboxService {
     private readonly buildInfoRepository: Repository<BuildInfo>,
     @InjectRepository(SshAccess)
     private readonly sshAccessRepository: Repository<SshAccess>,
+    @InjectRepository(Job)
+    private readonly jobRepository: Repository<Job>,
     private readonly runnerService: RunnerService,
     private readonly volumeService: VolumeService,
     private readonly configService: TypedConfigService,
@@ -732,6 +745,59 @@ export class SandboxService {
     })
 
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
+
+    return sandbox
+  }
+
+  /**
+   * Create a snapshot from an existing sandbox.
+   * This captures the current state of the sandbox's filesystem and saves it as a new snapshot.
+   *
+   * @param sandboxIdOrName - ID or name of the sandbox to snapshot
+   * @param snapshotName - Name for the new snapshot
+   * @param organizationId - Organization ID
+   * @param live - If true, use live mode (no pause, may be inconsistent). Default: false (safe mode with pause)
+   * @returns The sandbox
+   */
+  async createSnapshotFromSandbox(
+    sandboxIdOrName: string,
+    snapshotName: string,
+    organizationId: string,
+    live?: boolean,
+  ): Promise<Sandbox> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    // Validate sandbox state - must be started or stopped
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
+      throw new BadRequestException(
+        `Sandbox must be in STARTED or STOPPED state to create a snapshot. Current state: ${sandbox.state}`,
+      )
+    }
+
+    // Check for existing active snapshot jobs for this sandbox
+    const existingJob = await this.jobRepository.findOne({
+      where: {
+        resourceType: ResourceType.SANDBOX,
+        resourceId: sandbox.id,
+        type: JobType.CREATE_SANDBOX_SNAPSHOT,
+        completedAt: IsNull(),
+      },
+    })
+
+    if (existingJob) {
+      throw new ConflictException('Snapshot creation is already in progress for this sandbox')
+    }
+
+    // Get runner adapter and create the snapshot job
+    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner for sandbox not found`)
+    }
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+    await runnerAdapter.createSnapshotFromSandbox(sandbox.id, snapshotName, live)
+
+    this.logger.log(`Created snapshot job for sandbox ${sandbox.id} with name ${snapshotName}`)
 
     return sandbox
   }

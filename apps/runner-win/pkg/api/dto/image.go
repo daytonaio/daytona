@@ -24,3 +24,27 @@ type TagImageRequestDTO struct {
 	SourceImage string `json:"sourceImage" validate:"required"`
 	TargetImage string `json:"targetImage" validate:"required"`
 } //	@name	TagImageRequestDTO
+
+type PushSnapshotRequestDTO struct {
+	SandboxId    string `json:"sandboxId" validate:"required"`    // ID of the sandbox to create snapshot from
+	SnapshotName string `json:"snapshotName" validate:"required"` // Name for the new snapshot (e.g., "myapp-v1.0")
+} //	@name	PushSnapshotRequestDTO
+
+type PushSnapshotResponseDTO struct {
+	SnapshotName string `json:"snapshotName" example:"myapp-v1.0"`
+	SnapshotPath string `json:"snapshotPath" example:"snapshots/myapp-v1.0.qcow2"`
+	SizeBytes    int64  `json:"sizeBytes" example:"15032385536"`
+} //	@name	PushSnapshotResponseDTO
+
+type CreateSnapshotRequestDTO struct {
+	SandboxId string `json:"sandboxId" validate:"required"` // ID of the sandbox to create snapshot from
+	Name      string `json:"name" validate:"required"`      // Name for the snapshot (e.g., "myapp-v1.0")
+	Live      bool   `json:"live"`                          // If true, use optimistic mode (no pause); if false (default), pause VM for consistency
+} //	@name	CreateSnapshotRequestDTO
+
+type CreateSnapshotResponseDTO struct {
+	Name         string `json:"name" example:"myapp-v1.0"`
+	SnapshotPath string `json:"snapshotPath" example:"snapshots/myapp-v1.0.qcow2"`
+	SizeBytes    int64  `json:"sizeBytes" example:"15032385536"`
+	LiveMode     bool   `json:"liveMode" example:"false"` // Which mode was used
+} //	@name	CreateSnapshotResponseDTO

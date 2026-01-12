@@ -9,6 +9,8 @@ import { Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
+import { Runner } from '../entities/runner.entity'
+import { SnapshotRegion } from '../entities/snapshot-region.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
@@ -33,6 +35,10 @@ export class JobStateHandlerService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
+    @InjectRepository(SnapshotRegion)
+    private readonly snapshotRegionRepository: Repository<SnapshotRegion>,
   ) {}
 
   /**
@@ -72,6 +78,9 @@ export class JobStateHandlerService {
         break
       case JobType.CREATE_BACKUP:
         await this.handleCreateBackupJobCompletion(job)
+        break
+      case JobType.CREATE_SANDBOX_SNAPSHOT:
+        await this.handleCreateSandboxSnapshotJobCompletion(job)
         break
       default:
         break
@@ -387,6 +396,90 @@ export class JobStateHandlerService {
       }
     } catch (error) {
       this.logger.error(`Error handling CREATE_BACKUP job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handleCreateSandboxSnapshotJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    const runnerId = job.runnerId
+    if (!sandboxId || !runnerId) return
+
+    try {
+      // Parse job payload to get snapshot name
+      const payload = job.payload ? JSON.parse(job.payload) : {}
+      const snapshotName = payload.name
+
+      if (!snapshotName) {
+        this.logger.error(`CREATE_SANDBOX_SNAPSHOT job ${job.id} has no snapshot name in payload`)
+        return
+      }
+
+      // Get sandbox to retrieve organization and other info
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for CREATE_SANDBOX_SNAPSHOT job ${job.id}`)
+        return
+      }
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.log(`CREATE_SANDBOX_SNAPSHOT job ${job.id} completed successfully for sandbox ${sandboxId}`)
+
+        // Get result metadata from job
+        const metadata = job.getResultMetadata()
+        const snapshotPath = metadata?.snapshotPath || metadata?.SnapshotPath
+        const sizeBytes = metadata?.sizeBytes || metadata?.SizeBytes
+
+        // Get runner to determine runner class
+        const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+        if (!runner) {
+          this.logger.warn(`Runner ${runnerId} not found for CREATE_SANDBOX_SNAPSHOT job ${job.id}`)
+          return
+        }
+
+        // Create Snapshot entity
+        const snapshot = new Snapshot()
+        snapshot.organizationId = sandbox.organizationId
+        snapshot.name = snapshotName
+        snapshot.imageName = snapshotPath || snapshotName // S3 path or name
+        snapshot.ref = snapshotPath || snapshotName
+        snapshot.state = SnapshotState.ACTIVE
+        snapshot.cpu = sandbox.cpu
+        snapshot.gpu = sandbox.gpu
+        snapshot.mem = sandbox.mem
+        snapshot.disk = sandbox.disk
+        snapshot.initialRunnerId = runnerId
+        snapshot.runnerClass = runner.class // Use runner's class (linux, windows-exp, etc.)
+
+        if (sizeBytes) {
+          // Convert bytes to GB
+          snapshot.size = Number(sizeBytes) / (1024 * 1024 * 1024)
+        }
+
+        await this.snapshotRepository.save(snapshot)
+        this.logger.log(`Created snapshot entity ${snapshot.id} with name ${snapshotName}`)
+
+        // Create SnapshotRegion entry - associate snapshot with sandbox's region
+        if (sandbox.region) {
+          const snapshotRegion = new SnapshotRegion()
+          snapshotRegion.snapshotId = snapshot.id
+          snapshotRegion.regionId = sandbox.region
+          await this.snapshotRegionRepository.save(snapshotRegion)
+          this.logger.log(`Created SnapshotRegion for snapshot ${snapshotName} in region ${sandbox.region}`)
+        }
+
+        // Create SnapshotRunner entry for the runner that created the snapshot
+        const snapshotRunner = new SnapshotRunner()
+        snapshotRunner.snapshotRef = snapshot.ref || snapshotName
+        snapshotRunner.runnerId = runnerId
+        snapshotRunner.state = SnapshotRunnerState.READY // 'ready' in DB enum
+        await this.snapshotRunnerRepository.save(snapshotRunner)
+        this.logger.log(`Created SnapshotRunner for snapshot ${snapshotName} on runner ${runnerId}`)
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`CREATE_SANDBOX_SNAPSHOT job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+        // Note: No snapshot entity to update since we create it on success
+      }
+    } catch (error) {
+      this.logger.error(`Error handling CREATE_SANDBOX_SNAPSHOT job completion for sandbox ${sandboxId}:`, error)
     }
   }
 }

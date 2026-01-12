@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path"
 	"strings"
 
 	"github.com/daytonaio/runner-win/cmd/runner/config"
@@ -15,6 +16,9 @@ import (
 )
 
 const CONTEXT_TAR_FILE_NAME = "context.tar"
+
+// Snapshot storage prefix in the bucket
+const SNAPSHOTS_PREFIX = "snapshots"
 
 type minioClient struct {
 	client     *minio.Client
@@ -79,4 +83,78 @@ func (m *minioClient) GetObject(ctx context.Context, organizationId, hash string
 	}
 
 	return data, nil
+}
+
+// getSnapshotPath returns the full object path for a snapshot
+func (m *minioClient) getSnapshotPath(snapshotName string) string {
+	// Strip "snapshots/" prefix if already present (snapshot.ref contains S3 path)
+	snapshotName = strings.TrimPrefix(snapshotName, SNAPSHOTS_PREFIX+"/")
+
+	// Ensure snapshot name has .qcow2 extension
+	if !strings.HasSuffix(snapshotName, ".qcow2") {
+		snapshotName = snapshotName + ".qcow2"
+	}
+	return path.Join(SNAPSHOTS_PREFIX, snapshotName)
+}
+
+// PutSnapshot uploads a snapshot file to the snapshot store
+func (m *minioClient) PutSnapshot(ctx context.Context, snapshotName string, reader io.Reader, size int64) (string, error) {
+	objectPath := m.getSnapshotPath(snapshotName)
+
+	_, err := m.client.PutObject(ctx, m.bucketName, objectPath, reader, size, minio.PutObjectOptions{
+		ContentType: "application/octet-stream",
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to upload snapshot to storage: %w", err)
+	}
+
+	return objectPath, nil
+}
+
+// GetSnapshot retrieves a snapshot file from the snapshot store
+func (m *minioClient) GetSnapshot(ctx context.Context, snapshotName string) (io.ReadCloser, int64, error) {
+	objectPath := m.getSnapshotPath(snapshotName)
+
+	obj, err := m.client.GetObject(ctx, m.bucketName, objectPath, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get snapshot from storage: %w", err)
+	}
+
+	// Get object info for size
+	stat, err := obj.Stat()
+	if err != nil {
+		obj.Close()
+		return nil, 0, fmt.Errorf("failed to get snapshot info: %w", err)
+	}
+
+	return obj, stat.Size, nil
+}
+
+// DeleteSnapshot removes a snapshot from the snapshot store
+func (m *minioClient) DeleteSnapshot(ctx context.Context, snapshotName string) error {
+	objectPath := m.getSnapshotPath(snapshotName)
+
+	err := m.client.RemoveObject(ctx, m.bucketName, objectPath, minio.RemoveObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to delete snapshot from storage: %w", err)
+	}
+
+	return nil
+}
+
+// SnapshotExists checks if a snapshot exists in the store
+func (m *minioClient) SnapshotExists(ctx context.Context, snapshotName string) (bool, error) {
+	objectPath := m.getSnapshotPath(snapshotName)
+
+	_, err := m.client.StatObject(ctx, m.bucketName, objectPath, minio.StatObjectOptions{})
+	if err != nil {
+		// Check if it's a "not found" error
+		errResp := minio.ToErrorResponse(err)
+		if errResp.Code == "NoSuchKey" {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to check snapshot existence: %w", err)
+	}
+
+	return true, nil
 }

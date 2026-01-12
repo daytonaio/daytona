@@ -69,6 +69,12 @@ func NewLibVirt(config LibVirtConfig) (*LibVirt, error) {
 		return nil, fmt.Errorf("failed to connect to libvirt: %w", err)
 	}
 
+	// Initialize required directories on the libvirt host
+	if err := l.initDirectories(); err != nil {
+		log.Warnf("Failed to initialize directories: %v", err)
+		// Don't fail startup, directories might already exist or be created manually
+	}
+
 	return l, nil
 }
 

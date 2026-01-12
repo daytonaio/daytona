@@ -415,4 +415,24 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       `Created UPDATE_SANDBOX_NETWORK_SETTINGS job for sandbox ${sandboxId} on runner ${this.runner.id}`,
     )
   }
+
+  @Transactional()
+  async createSnapshotFromSandbox(sandboxId: string, snapshotName: string, live?: boolean): Promise<void> {
+    const payload = {
+      sandboxId,
+      name: snapshotName,
+      live: live ?? false,
+    }
+
+    await this.jobService.createJob(
+      null,
+      JobType.CREATE_SANDBOX_SNAPSHOT,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload,
+    )
+
+    this.logger.debug(`Created CREATE_SANDBOX_SNAPSHOT job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+  }
 }

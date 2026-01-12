@@ -285,6 +285,46 @@ const (
 	nvramBasePath     = "/var/lib/libvirt/qemu/nvram"
 )
 
+// initDirectories ensures required directories exist on the libvirt host
+// This is called during client initialization to prevent sandbox creation failures
+func (l *LibVirt) initDirectories() error {
+	directories := []string{
+		snapshotsBasePath,
+		sandboxesBasePath,
+		nvramBasePath,
+	}
+
+	isLocal := l.isLocalURI()
+	host := ""
+	if !isLocal {
+		host = l.extractHostFromURI()
+		if host == "" {
+			return fmt.Errorf("could not extract host from libvirt URI: %s", l.libvirtURI)
+		}
+	}
+
+	for _, dir := range directories {
+		// Create directory with proper ownership (libvirt-qemu:kvm)
+		mkdirCmd := fmt.Sprintf("mkdir -p %s && chown libvirt-qemu:kvm %s 2>/dev/null || true", dir, dir)
+
+		var cmd *exec.Cmd
+		if isLocal {
+			cmd = exec.Command("bash", "-c", mkdirCmd)
+		} else {
+			cmd = exec.Command("ssh", host, mkdirCmd)
+		}
+
+		if output, err := cmd.CombinedOutput(); err != nil {
+			log.Warnf("Failed to create directory %s: %v (output: %s)", dir, err, string(output))
+			// Continue with other directories
+		} else {
+			log.Debugf("Ensured directory exists: %s", dir)
+		}
+	}
+
+	return nil
+}
+
 func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, error) {
 	newDiskPath := filepath.Join(sandboxesBasePath, fmt.Sprintf("%s.qcow2", sandboxDto.Id))
 
@@ -306,12 +346,45 @@ func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDT
 		return newDiskPath, nil
 	}
 
-	log.Infof("Creating disk %s from base image %s", newDiskPath, baseImagePath)
+	// Determine the base image path from the snapshot reference
+	// If snapshot is provided, use it; otherwise fall back to default base image
+	var snapshotPath string
+	if sandboxDto.Snapshot != "" {
+		snapshotPath = l.getSnapshotLocalPath(sandboxDto.Snapshot)
+		log.Infof("Using snapshot '%s' as base image", sandboxDto.Snapshot)
+
+		// Check if the snapshot exists on the runner filesystem
+		snapshotExists, err := l.fileExists(ctx, snapshotPath)
+		if err != nil {
+			log.Warnf("Error checking snapshot existence: %v", err)
+			snapshotExists = false
+		}
+
+		if !snapshotExists {
+			// Snapshot not found locally - pull it from the object store
+			log.Infof("Snapshot '%s' not found locally, pulling from object store", sandboxDto.Snapshot)
+			pullReq := dto.PullSnapshotRequestDTO{
+				Snapshot: sandboxDto.Snapshot,
+			}
+			if err := l.PullSnapshot(ctx, pullReq); err != nil {
+				return "", fmt.Errorf("failed to pull snapshot '%s' from object store: %w", sandboxDto.Snapshot, err)
+			}
+			log.Infof("Successfully pulled snapshot '%s' from object store", sandboxDto.Snapshot)
+		} else {
+			log.Infof("Snapshot '%s' already exists at '%s'", sandboxDto.Snapshot, snapshotPath)
+		}
+	} else {
+		// No snapshot specified - use default base image
+		snapshotPath = baseImagePath
+		log.Infof("No snapshot specified, using default base image: %s", baseImagePath)
+	}
+
+	log.Infof("Creating disk %s from base image %s", newDiskPath, snapshotPath)
 
 	// Create a qcow2 overlay disk with the base image as backing file
 	// This uses copy-on-write, so each VM has its own changes without modifying the base
 	createDiskCmd := fmt.Sprintf("qemu-img create -f qcow2 -F qcow2 -b %s %s && chown libvirt-qemu:kvm %s",
-		baseImagePath, newDiskPath, newDiskPath)
+		snapshotPath, newDiskPath, newDiskPath)
 
 	var cmd *exec.Cmd
 	if isLocal {
@@ -397,7 +470,13 @@ func (l *LibVirt) extractHostFromURI() string {
 // isLocalURI checks if the libvirt URI is a local connection (e.g., qemu:///system)
 // Local URIs don't have a host component, so commands should run directly without SSH
 func (l *LibVirt) isLocalURI() bool {
-	uri := l.libvirtURI
+	return IsLocalURI(l.libvirtURI)
+}
+
+// IsLocalURI checks if a libvirt URI is a local connection (e.g., qemu:///system)
+// Local URIs don't have a host component, so commands should run directly without SSH
+// Remote URIs: qemu+ssh://user@host/system, qemu+tcp://host/system
+func IsLocalURI(uri string) bool {
 	// Local URIs: qemu:///system, qemu:///session, qemu+unix:///system
 	// Remote URIs: qemu+ssh://user@host/system, qemu+tcp://host/system
 	return !strings.Contains(uri, "@") && !strings.Contains(uri, "+tcp://") && !strings.Contains(uri, "+tls://")

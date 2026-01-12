@@ -68,6 +68,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
+import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
@@ -1050,7 +1051,65 @@ export class SandboxController {
     return new ToolboxProxyUrlDto(url)
   }
 
-  // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
+  @Post(':sandboxIdOrName/snapshot')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Create a snapshot from a sandbox',
+    description:
+      'Create a new snapshot from an existing sandbox. The snapshot captures the current state of the sandbox filesystem. Supports safe mode (pauses VM during operation) and live mode (no pause, may be inconsistent).',
+    operationId: 'createSandboxSnapshot',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox to create a snapshot from',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Snapshot creation job has been started. The snapshot will be available once the job completes.',
+    type: SandboxDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Sandbox is not in a valid state for snapshot creation (must be STARTED or STOPPED)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sandbox not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Snapshot creation is already in progress for this sandbox',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.CREATE_SNAPSHOT,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxIdOrName,
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      body: (req) => ({
+        name: req.body.name,
+        live: req.body.live,
+      }),
+    },
+  })
+  async createSandboxSnapshot(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() dto: CreateSandboxSnapshotDto,
+  ): Promise<SandboxDto> {
+    const sandbox = await this.sandboxService.createSnapshotFromSandbox(
+      sandboxIdOrName,
+      dto.name,
+      authContext.organizationId,
+      dto.live,
+    )
+    return SandboxDto.fromSandbox(sandbox)
+  }
+
+  // wait up to `timeoutSeconds` for the sandbox to start; if it doesn't, return current sandbox
   private async waitForSandboxStarted(sandbox: SandboxDto, timeoutSeconds: number): Promise<SandboxDto> {
     let latestSandbox: Sandbox
     const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {

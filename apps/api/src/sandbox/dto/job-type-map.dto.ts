@@ -38,6 +38,9 @@ export interface JobTypeMap {
   [JobType.UPDATE_SANDBOX_NETWORK_SETTINGS]: {
     resourceType: ResourceType.SANDBOX
   }
+  [JobType.CREATE_SANDBOX_SNAPSHOT]: {
+    resourceType: ResourceType.SANDBOX
+  }
 }
 
 /**

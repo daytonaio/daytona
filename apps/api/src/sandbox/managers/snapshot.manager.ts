@@ -14,6 +14,7 @@ import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { RunnerState } from '../enums/runner-state.enum'
+import { RunnerClass } from '../enums/runner-class'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { v4 as uuidv4 } from 'uuid'
 import { RunnerNotReadyError } from '../errors/runner-not-ready.error'
@@ -283,19 +284,28 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         return
       }
 
-      let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshot.ref)
+      // Separate Windows runners from Docker-based runners
+      const windowsRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.WINDOWS_EXPERIMENTAL)
+      const dockerRunners = runnersToPropagateTo.filter((runner) => runner.class !== RunnerClass.WINDOWS_EXPERIMENTAL)
 
-      // If no registry found by image name, use the default internal registry
-      if (!dockerRegistry) {
-        dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      // For Docker-based runners, get the registry
+      let dockerRegistry: DockerRegistry | undefined
+      if (dockerRunners.length > 0) {
+        dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshot.ref)
+
+        // If no registry found by image name, use the default internal registry
         if (!dockerRegistry) {
-          throw new Error('No registry found for snapshot and no default internal registry configured')
+          dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+          if (!dockerRegistry) {
+            throw new Error('No registry found for snapshot and no default internal registry configured')
+          }
         }
       }
 
       const results = await Promise.allSettled(
         runnersToPropagateTo.map(async (runner) => {
           const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
+          const isWindowsRunner = runner.class === RunnerClass.WINDOWS_EXPERIMENTAL
 
           try {
             if (!snapshotRunner) {
@@ -304,7 +314,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                 snapshot.ref,
                 SnapshotRunnerState.PULLING_SNAPSHOT,
               )
-              await this.pullSnapshotRunnerWithRetries(runner, snapshot.ref, dockerRegistry)
+              // Windows runners pull from object storage, Docker runners use registry
+              await this.pullSnapshotRunnerWithRetries(
+                runner,
+                snapshot.ref,
+                isWindowsRunner ? undefined : dockerRegistry,
+              )
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
               await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
             }

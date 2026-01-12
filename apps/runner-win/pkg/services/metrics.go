@@ -25,24 +25,29 @@ import (
 const systemMetricsKey = "__system_metrics__"
 
 type MetricsServiceConfig struct {
-	LibVirt  *libvirt.LibVirt
-	Interval time.Duration
+	LibVirt   *libvirt.LibVirt
+	Interval  time.Duration
+	LocalMode bool // true when running with local libvirt, false for remote SSH connections
 }
 
 type MetricsService struct {
-	cache    common_cache.ICache[models.SystemMetrics]
-	libvirt  *libvirt.LibVirt
-	interval time.Duration
+	cache     common_cache.ICache[models.SystemMetrics]
+	libvirt   *libvirt.LibVirt
+	interval  time.Duration
+	localMode bool
 }
 
-// NewPrometheusParser creates a new parser instance
+// NewMetricsService creates a new metrics service instance
+// When localMode is false (remote mode), system metrics (CPU, RAM, disk usage)
+// are not collected as they would represent the runner host, not the remote libvirt host
 func NewMetricsService(config MetricsServiceConfig) *MetricsService {
 	metricsCache := common_cache.NewMapCache[models.SystemMetrics]()
 
 	return &MetricsService{
-		cache:    metricsCache,
-		libvirt:  config.LibVirt,
-		interval: config.Interval,
+		cache:     metricsCache,
+		libvirt:   config.LibVirt,
+		interval:  config.Interval,
+		localMode: config.LocalMode,
 	}
 }
 
@@ -72,6 +77,33 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	// Get current cached metrics to preserve valid values
 	metrics := s.GetSystemMetrics(ctx)
 
+	// Collect system metrics (CPU, RAM, disk)
+	if s.localMode {
+		// Local mode: collect from local system using gopsutil
+		s.collectLocalSystemMetrics(ctx, metrics)
+	} else {
+		// Remote mode: collect from remote libvirt host via SSH
+		s.collectRemoteSystemMetrics(ctx, metrics)
+	}
+
+	// Get snapshot count (this queries libvirt, so it's always valid)
+	info, err := s.libvirt.Info(ctx)
+	if err != nil {
+		log.Errorf("Error getting snapshot count: %v", err)
+	} else {
+		// For libvirt, we don't track images separately, use total domains
+		metrics.SnapshotCount = info.DomainsTotal
+	}
+
+	// Get container allocated resources (this queries libvirt, so it's always valid)
+	s.getAllocatedResources(ctx, metrics)
+
+	// Store in cache with final values
+	return s.cache.Set(ctx, systemMetricsKey, *metrics, 2*time.Hour)
+}
+
+// collectLocalSystemMetrics collects system metrics from the local machine
+func (s *MetricsService) collectLocalSystemMetrics(ctx context.Context, metrics *models.SystemMetrics) {
 	// Get CPU metrics
 	cpuPercent, err := cpu.Percent(15*time.Second, false)
 	if err != nil {
@@ -95,21 +127,27 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	} else {
 		metrics.DiskUsage = diskUsage.UsedPercent
 	}
+}
 
-	// Get snapshot count
-	info, err := s.libvirt.Info(ctx)
+// collectRemoteSystemMetrics collects system metrics from the remote libvirt host via SSH
+func (s *MetricsService) collectRemoteSystemMetrics(ctx context.Context, metrics *models.SystemMetrics) {
+	log.Debug("Collecting system metrics from remote libvirt host")
+
+	remoteMetrics, err := s.libvirt.GetRemoteMetrics(ctx)
 	if err != nil {
-		log.Errorf("Error getting snapshot count: %v", err)
-	} else {
-		// For libvirt, we don't track images separately, use total domains
-		metrics.SnapshotCount = info.DomainsTotal
+		log.Warnf("Failed to collect remote metrics, using -1 values: %v", err)
+		metrics.CPUUsage = -1.0
+		metrics.RAMUsage = -1.0
+		metrics.DiskUsage = -1.0
+		return
 	}
 
-	// Get container allocated resources
-	s.getAllocatedResources(ctx, metrics)
+	metrics.CPUUsage = remoteMetrics.CPUUsagePercent
+	metrics.RAMUsage = remoteMetrics.MemoryUsagePercent
+	metrics.DiskUsage = remoteMetrics.DiskUsagePercent
 
-	// Store in cache with final values
-	return s.cache.Set(ctx, systemMetricsKey, *metrics, 2*time.Hour)
+	log.Debugf("Remote system metrics: CPU=%.2f%%, RAM=%.2f%%, Disk=%.2f%%",
+		metrics.CPUUsage, metrics.RAMUsage, metrics.DiskUsage)
 }
 
 // GetCachedSystemMetrics returns cached metrics if available, otherwise returns defaults

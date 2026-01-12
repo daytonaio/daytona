@@ -220,6 +220,33 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   async pullSnapshotToRunner(snapshotRef: string, runner: Runner) {
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    // Windows runners use qcow2 snapshots from object storage, not Docker registries
+    // The runner will pull from object storage directly when creating the sandbox
+    const isWindowsRunner = runner.class === RunnerClass.WINDOWS_EXPERIMENTAL
+    if (isWindowsRunner) {
+      // For Windows runners, we call pullSnapshot without a Docker registry
+      // The runner will handle pulling from object storage
+      let retries = 0
+      while (retries < 10) {
+        try {
+          await runnerAdapter.pullSnapshot(snapshotRef, undefined)
+          break
+        } catch (err) {
+          if (err.code !== 'ECONNRESET') {
+            throw err
+          }
+          if (++retries >= 10) {
+            throw err
+          }
+          await new Promise((resolve) => setTimeout(resolve, retries * 1000))
+        }
+      }
+      return
+    }
+
+    // Docker-based runners need a registry
     let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef)
 
     // If no registry found by image name, use the default internal registry
@@ -229,8 +256,6 @@ export class SandboxStartAction extends SandboxAction {
         throw new Error('No registry found for snapshot and no default internal registry configured')
       }
     }
-
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     let retries = 0
     while (retries < 10) {
@@ -309,16 +334,22 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    let registry: DockerRegistry
+    // Windows runners use qcow2 snapshots from object storage, not Docker registries
+    const isWindowsRunner = runner.class === RunnerClass.WINDOWS_EXPERIMENTAL
+
+    let registry: DockerRegistry | undefined
     let entrypoint: string[]
     if (!sandbox.buildInfo) {
       //  get internal snapshot name
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       const snapshotRef = snapshot.ref
 
-      registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef, sandbox.organizationId)
-      if (!registry) {
-        throw new Error('No registry found for snapshot')
+      // Only look up Docker registry for non-Windows runners
+      if (!isWindowsRunner) {
+        registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef, sandbox.organizationId)
+        if (!registry) {
+          throw new Error('No registry found for snapshot')
+        }
       }
 
       sandbox.snapshot = snapshotRef

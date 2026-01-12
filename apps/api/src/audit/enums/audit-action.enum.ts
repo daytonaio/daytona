@@ -26,6 +26,7 @@ export enum AuditAction {
   STOP = 'stop',
   REPLACE_LABELS = 'replace_labels',
   CREATE_BACKUP = 'create_backup',
+  CREATE_SNAPSHOT = 'create_snapshot',
   UPDATE_PUBLIC_STATUS = 'update_public_status',
   SET_AUTO_STOP_INTERVAL = 'set_auto_stop_interval',
   SET_AUTO_ARCHIVE_INTERVAL = 'set_auto_archive_interval',

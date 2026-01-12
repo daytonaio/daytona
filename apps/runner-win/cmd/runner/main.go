@@ -109,9 +109,13 @@ func main() {
 
 	sandboxService := services.NewSandboxService(statesCache, libvirtClient)
 
+	// Check if running in local mode (local libvirt connection vs remote SSH)
+	isLocalMode := libvirt.IsLocalURI(cfg.LibvirtURI)
+
 	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
-		LibVirt:  libvirtClient,
-		Interval: 15 * time.Second,
+		LibVirt:   libvirtClient,
+		Interval:  15 * time.Second,
+		LocalMode: isLocalMode,
 	})
 	metricsService.StartMetricsCollection(ctx)
 
@@ -150,8 +154,8 @@ func main() {
 	slogLogger := newSLogger()
 
 	if cfg.ApiVersion == 2 {
-		// Create metrics collector
-		metricsCollector := metrics.NewCollector(slogLogger)
+		// Create metrics collector (uses isLocalMode defined earlier for MetricsService)
+		metricsCollector := metrics.NewCollector(slogLogger, isLocalMode, libvirtClient)
 
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
 			Interval:        cfg.HealthcheckInterval,

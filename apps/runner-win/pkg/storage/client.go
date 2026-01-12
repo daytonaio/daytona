@@ -5,9 +5,20 @@ package storage
 
 import (
 	"context"
+	"io"
 )
 
 // ObjectStorageClient defines the interface for object storage operations
 type ObjectStorageClient interface {
+	// GetObject retrieves an object from storage
 	GetObject(ctx context.Context, organizationId, hash string) ([]byte, error)
+	// PutSnapshot uploads a snapshot file to the snapshot store
+	// Returns the object path in the bucket
+	PutSnapshot(ctx context.Context, snapshotName string, reader io.Reader, size int64) (string, error)
+	// GetSnapshot retrieves a snapshot file from the snapshot store
+	GetSnapshot(ctx context.Context, snapshotName string) (io.ReadCloser, int64, error)
+	// DeleteSnapshot removes a snapshot from the snapshot store
+	DeleteSnapshot(ctx context.Context, snapshotName string) error
+	// SnapshotExists checks if a snapshot exists in the store
+	SnapshotExists(ctx context.Context, snapshotName string) (bool, error)
 }

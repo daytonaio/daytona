@@ -130,6 +130,8 @@ func (a *ApiServer) Start() error {
 	snapshotController := protected.Group("/snapshots")
 	{
 		snapshotController.POST("/pull", controllers.PullSnapshot)
+		snapshotController.POST("/push", controllers.PushSnapshot)
+		snapshotController.POST("/create", controllers.CreateSnapshot)
 		snapshotController.POST("/build", controllers.BuildSnapshot)
 		snapshotController.POST("/tag", controllers.TagImage)
 		snapshotController.GET("/exists", controllers.SnapshotExists)
