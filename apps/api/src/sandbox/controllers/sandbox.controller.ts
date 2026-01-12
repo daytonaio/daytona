@@ -58,8 +58,6 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { EventEmitter2 } from '@nestjs/event-emitter'
-import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -75,6 +73,9 @@ import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorato
 import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 import { ToolboxProxyUrlDto } from '../dto/toolbox-proxy-url.dto'
 import { UrlDto } from '../../common/dto/url.dto'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
+import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -84,12 +85,29 @@ import { UrlDto } from '../../common/dto/url.dto'
 @ApiBearerAuth()
 export class SandboxController {
   private readonly logger = new Logger(SandboxController.name)
-
+  private readonly sandboxCallbacks: Map<string, (event: SandboxStateUpdatedEvent) => void> = new Map()
+  private readonly redisSubscriber: Redis
   constructor(
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
-    private readonly eventEmitter: EventEmitter2,
-  ) {}
+    @InjectRedis() private readonly redis: Redis,
+  ) {
+    this.redisSubscriber = this.redis.duplicate()
+    this.redisSubscriber.subscribe(SANDBOX_EVENT_CHANNEL)
+    this.redisSubscriber.on('message', (channel, message) => {
+      if (channel !== 'sandbox.event.channel') {
+        return
+      }
+
+      try {
+        const event = JSON.parse(message) as SandboxStateUpdatedEvent
+        this.handleSandboxStateUpdated(event)
+      } catch (error) {
+        this.logger.error('Failed to parse sandbox state updated event:', error)
+        return
+      }
+    })
+  }
 
   @Get()
   @ApiOperation({
@@ -1160,21 +1178,21 @@ export class SandboxController {
         }
         latestSandbox = event.sandbox
         if (event.sandbox.state === SandboxState.STARTED) {
-          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          this.sandboxCallbacks.delete(sandbox.id)
           clearTimeout(timeout)
           resolve(SandboxDto.fromSandbox(event.sandbox))
         }
         if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
-          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          this.sandboxCallbacks.delete(sandbox.id)
           clearTimeout(timeout)
           reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
         }
       }
 
-      this.eventEmitter.on(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+      this.sandboxCallbacks.set(sandbox.id, handleStateUpdated)
 
       timeout = setTimeout(() => {
-        this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+        this.sandboxCallbacks.delete(sandbox.id)
         if (latestSandbox) {
           resolve(SandboxDto.fromSandbox(latestSandbox))
         } else {
@@ -1184,5 +1202,12 @@ export class SandboxController {
     })
 
     return waitForStarted
+  }
+
+  private handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
+    const callback = this.sandboxCallbacks.get(event.sandbox.id)
+    if (callback) {
+      callback(event)
+    }
   }
 }

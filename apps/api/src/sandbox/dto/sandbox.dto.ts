@@ -284,13 +284,13 @@ export class SandboxDto {
       desiredState: sandbox.desiredState,
       errorReason: sandbox.errorReason,
       backupState: sandbox.backupState,
-      backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
+      backupCreatedAt: sandbox.lastBackupAt ? new Date(sandbox.lastBackupAt).toISOString() : undefined,
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
       autoDeleteInterval: sandbox.autoDeleteInterval,
       class: sandbox.class,
-      createdAt: sandbox.createdAt?.toISOString(),
-      updatedAt: sandbox.updatedAt?.toISOString(),
+      createdAt: sandbox.createdAt ? new Date(sandbox.createdAt).toISOString() : undefined,
+      updatedAt: sandbox.updatedAt ? new Date(sandbox.updatedAt).toISOString() : undefined,
       buildInfo: sandbox.buildInfo
         ? {
             dockerfileContent: sandbox.buildInfo.dockerfileContent,
