@@ -5,6 +5,7 @@
 
 const { createGlobPatternsForDependencies } = require('@nx/react/tailwind')
 const { join } = require('path')
+const plugin = require('tailwindcss/plugin')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -15,6 +16,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: '480px',
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -116,5 +120,11 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate'), require('tailwind-scrollbar')],
+  plugins: [
+    require('tailwind-scrollbar'),
+    require('tailwindcss-animate'),
+    plugin(function ({ addVariant }) {
+      addVariant('aria-invalid', '&[aria-invalid="true"]')
+    }),
+  ],
 }
