@@ -211,6 +211,7 @@ const toolboxApiSpec = {
 
     const scalarObserver = new MutationObserver(() => {
       updateScalarTheme()
+      showMoreButtonStyles()
     })
 
     scalarObserver.observe(container, {
@@ -222,6 +223,7 @@ const toolboxApiSpec = {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         updateScalarTheme()
+        showMoreButtonStyles()
       })
     })
   }
@@ -244,10 +246,70 @@ const toolboxApiSpec = {
     })
   }
 
+  function showMoreButtonStyles(): void {
+    const styleId = 'scalar-show-more-custom-styles'
+    const styleContent = `
+      button.show-more {
+        margin-left: 0px !important;
+        transform: translateX(0px) !important;
+        margin-top: 32px !important;
+      }
+
+      @media (max-width: 768px) {
+        button.show-more {
+          margin-left: auto !important;
+          margin-right: auto !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          white-space: nowrap !important;
+          flex-wrap: nowrap !important;
+        }
+
+        button.show-more > * {
+          flex-shrink: 0 !important;
+          white-space: nowrap !important;
+        }
+      }
+    `
+
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style')
+      style.id = styleId
+      style.textContent = styleContent
+      document.head.appendChild(style)
+    }
+
+    const container = document.getElementById('scalar-container')
+    if (container) {
+      function injectIntoShadowRoots(root: Element) {
+        if ((root as any).shadowRoot) {
+          const shadowRoot = (root as any).shadowRoot
+          const existingStyle = shadowRoot.querySelector(`#${styleId}`)
+          if (!existingStyle) {
+            const shadowStyle = document.createElement('style')
+            shadowStyle.id = styleId
+            shadowStyle.textContent = styleContent
+            shadowRoot.appendChild(shadowStyle)
+          }
+        }
+        Array.from(root.children).forEach(child => {
+          injectIntoShadowRoots(child)
+        })
+      }
+      injectIntoShadowRoots(container)
+    }
+  }
+
   function initialize(): void {
     watchForScalar()
     watchThemeChanges()
     updateScalarTheme()
+    showMoreButtonStyles()
+
+    setTimeout(() => {
+      showMoreButtonStyles()
+    }, 500)
   }
 
   if (document.readyState === 'loading') {
