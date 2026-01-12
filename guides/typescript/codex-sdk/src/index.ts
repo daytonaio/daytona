@@ -90,9 +90,11 @@ async function main() {
     // Register cleanup handler on process exit
     process.once('SIGINT', cleanup)
 
-    // Get the preview URL for the sandbox
+    // Create the URL pattern for Daytona preview links
+    // This is a URL where PORTNUMBER is a placeholder for the port number
+    // We first generate a preview link with the dummy port 1234, then replace it with PORTNUMBER
     const previewLink = await sandbox.getPreviewLink(1234)
-    const previewUrlPattern = previewLink.url.replace('1234', 'PORTNUMBER')
+    const previewUrlPattern = previewLink.url.replace(/1234/, 'PORTNUMBER')
 
     // Configure the Codex system prompt
     const systemPrompt = [
