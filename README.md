@@ -54,18 +54,19 @@ pip install daytona
 npm install @daytonaio/sdk
 ```
 
----
+diff --git a/README.md b/README.md
+index 1234567..abcdef0 100644
+--- a/README.md
++++ b/README.md
+@@ -86,7 +86,7 @@ npm install @daytonaio/sdk
+ ## Features
+ 
+-- **Lightning-Fast Infrastructure**: Sub-90ms Sandbox creation from code to execution.
++- **Lightning-Fast Infrastructure**: Sandbox creation in under 90 milliseconds, from code submission to execution.
+ - **Separated & Isolated Runtime**: Execute AI-generated code with zero risk to your infrastructure.
+ - **Massive Parallelization for Concurrent AI Workflows**: Fork Sandbox filesystem and memory state (Coming soon!)
+ - **Programmatic Control**: File, Git, LSP, and Execute API
 
-## Features
-
-- **Lightning-Fast Infrastructure**: Sub-90ms Sandbox creation from code to execution.
-- **Separated & Isolated Runtime**: Execute AI-generated code with zero risk to your infrastructure.
-- **Massive Parallelization for Concurrent AI Workflows**: Fork Sandbox filesystem and memory state (Coming soon!)
-- **Programmatic Control**: File, Git, LSP, and Execute API
-- **Unlimited Persistence**: Your Sandboxes can live forever
-- **OCI/Docker Compatibility**: Use any OCI/Docker image to create a Sandbox
-
----
 
 ## Quick Start
 
