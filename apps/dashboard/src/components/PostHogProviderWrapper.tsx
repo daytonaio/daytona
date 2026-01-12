@@ -28,6 +28,7 @@ export const PostHogProviderWrapper: FC<PostHogProviderWrapperProps> = ({ childr
       apiKey={config.posthog.apiKey}
       options={{
         api_host: config.posthog.host,
+        cookieless_mode: 'on_reject',
         person_profiles: 'always',
         autocapture: false, // ignore default frontend events
         capture_pageview: false, // initial pageview (handled in App.tsx)
