@@ -14,8 +14,9 @@ import {
   ValidatePlaygroundActionRequiredParams,
   RunPlaygroundActionBasic,
   RunPlaygroundActionWithParams,
-  ValidateSandboxCodeSnippetActionWithParams,
-  SandboxCodeSnippetActionParamValueSetter,
+  ValidatePlaygroundActionWithParams,
+  PlaygroundActionParamValueSetter,
+  SetPlaygroundActionParamValue,
 } from '@/contexts/PlaygroundContext'
 import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enums/Playground'
 import { Daytona } from '@daytonaio/sdk'
@@ -120,6 +121,27 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setVNCInteractionOptionsParamsState((prev) => ({ ...prev, [key]: value }))
   }, [])
 
+  const setPlaygroundActionParamValue: SetPlaygroundActionParamValue = useCallback(
+    (key, value) => {
+      if (key in sandboxParametersState) {
+        setSandboxParameterValue(key as keyof SandboxParams, value as SandboxParams[keyof SandboxParams])
+      } else if (key in VNCInteractionOptionsParamsState) {
+        setVNCInteractionOptionsParamValue(
+          key as keyof VNCInteractionOptionsParams,
+          value as VNCInteractionOptionsParams[keyof VNCInteractionOptionsParams],
+        )
+      } else {
+        console.error(`Unknown parameter key: ${String(key)}`)
+      }
+    },
+    [
+      setSandboxParameterValue,
+      setVNCInteractionOptionsParamValue,
+      sandboxParametersState,
+      VNCInteractionOptionsParamsState,
+    ],
+  )
+
   const [runningActionMethod, setRunningActionMethod] = useState<RunningActionMethodName>(null)
   const [actionRuntimeError, setActionRuntimeError] = useState<ActionRuntimeError>({})
 
@@ -177,7 +199,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     [runPlaygroundAction, validatePlaygroundActionRequiredParams],
   )
 
-  const validateSandboxCodeSnippetAction: ValidateSandboxCodeSnippetActionWithParams = useCallback(
+  const validatePlaygroundActionWithParams: ValidatePlaygroundActionWithParams = useCallback(
     (actionFormData, parametersState) => {
       const validationError = validatePlaygroundActionRequiredParams(
         actionFormData.parametersFormItems,
@@ -198,17 +220,18 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     [validatePlaygroundActionRequiredParams],
   )
 
-  const sandboxCodeSnippetActionParamValueSetter: SandboxCodeSnippetActionParamValueSetter = useCallback(
-    (actionFormData, paramFormData, setState, sandboxParameterKey, value) => {
+  const playgroundActionParamValueSetter: PlaygroundActionParamValueSetter = useCallback(
+    (actionFormData, paramFormData, setState, actionParamsKey, value) => {
       setState((prev) => {
         const newState = { ...prev, [paramFormData.key]: value }
-        setSandboxParameterValue(sandboxParameterKey, newState)
+        setPlaygroundActionParamValue(actionParamsKey, newState)
         // Validate action params
-        validateSandboxCodeSnippetAction(actionFormData, newState)
+        if (!actionFormData.onChangeParamsValidationDisabled)
+          validatePlaygroundActionWithParams(actionFormData, newState)
         return newState
       })
     },
-    [setSandboxParameterValue, validateSandboxCodeSnippetAction],
+    [setPlaygroundActionParamValue, validatePlaygroundActionWithParams],
   )
 
   const DaytonaClient = useMemo(() => {
@@ -229,8 +252,8 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setVNCInteractionOptionsParamValue,
         runPlaygroundActionWithParams,
         runPlaygroundActionWithoutParams: runPlaygroundAction,
-        validateSandboxCodeSnippetAction,
-        sandboxCodeSnippetActionParamValueSetter,
+        validatePlaygroundActionWithParams,
+        playgroundActionParamValueSetter,
         runningActionMethod,
         actionRuntimeError,
         DaytonaClient,

@@ -20,7 +20,7 @@ import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
 const SandboxFileSystem: React.FC = () => {
-  const { sandboxParametersState, sandboxCodeSnippetActionParamValueSetter } = usePlayground()
+  const { sandboxParametersState, playgroundActionParamValueSetter } = usePlayground()
   const [createFolderParams, setCreateFolderParams] = useState<CreateFolderParams>(
     sandboxParametersState['createFolderParams'],
   )
@@ -98,7 +98,7 @@ const SandboxFileSystem: React.FC = () => {
                   formItem={listFilesDirectoryFormData}
                   textValue={listFilesParams[listFilesDirectoryFormData.key]}
                   onChangeHandler={(value) =>
-                    sandboxCodeSnippetActionParamValueSetter(
+                    playgroundActionParamValueSetter(
                       fileSystemAction,
                       listFilesDirectoryFormData,
                       setListFilesParams,
@@ -117,7 +117,7 @@ const SandboxFileSystem: React.FC = () => {
                       formItem={createFolderParamFormItem}
                       textValue={createFolderParams[createFolderParamFormItem.key]}
                       onChangeHandler={(value) =>
-                        sandboxCodeSnippetActionParamValueSetter(
+                        playgroundActionParamValueSetter(
                           fileSystemAction,
                           createFolderParamFormItem,
                           setCreateFolderParams,
@@ -137,7 +137,7 @@ const SandboxFileSystem: React.FC = () => {
                     formItem={deleteFileLocationFormData}
                     textValue={deleteFileParams[deleteFileLocationFormData.key]}
                     onChangeHandler={(value) =>
-                      sandboxCodeSnippetActionParamValueSetter(
+                      playgroundActionParamValueSetter(
                         fileSystemAction,
                         deleteFileLocationFormData,
                         setDeleteFileParams,
@@ -152,7 +152,7 @@ const SandboxFileSystem: React.FC = () => {
                     formItem={deleteFileRecursiveFormData}
                     checkedValue={deleteFileParams[deleteFileRecursiveFormData.key]}
                     onChangeHandler={(checked) =>
-                      sandboxCodeSnippetActionParamValueSetter(
+                      playgroundActionParamValueSetter(
                         fileSystemAction,
                         deleteFileRecursiveFormData,
                         setDeleteFileParams,

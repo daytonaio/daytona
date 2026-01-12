@@ -22,7 +22,6 @@ import {
   GitBranchesParams,
   CodeRunParams,
   ShellCommandRunParams,
-  SandboxCodeSnippetsActions,
   ParameterFormItem,
   ListFilesParams,
   CreateFolderParams,
@@ -70,6 +69,13 @@ export type SetVNCInteractionOptionsParamValue = <K extends keyof VNCInteraction
   value: VNCInteractionOptionsParams[K],
 ) => void
 
+export type PlaygroundActionParams = SandboxParams & VNCInteractionOptionsParams
+
+export type SetPlaygroundActionParamValue = <K extends keyof PlaygroundActionParams>(
+  key: K,
+  value: PlaygroundActionParams[K],
+) => void
+
 // Currently running action, or none
 export type RunningActionMethodName = PlaygroundActions | null
 
@@ -98,16 +104,16 @@ export type PlaygroundActionInvokeApi = <A, T>(
   actionFormData: PlaygroundActionFormDataBasic<A> | PlaygroundActionWithParamsFormData<A, T>,
 ) => Promise<void>
 
-export type ValidateSandboxCodeSnippetActionWithParams = <A extends SandboxCodeSnippetsActions, T>(
+export type ValidatePlaygroundActionWithParams = <A extends PlaygroundActions, T>(
   actionFormData: PlaygroundActionWithParamsFormData<A, T>,
   parametersState: T,
 ) => void
 
-export type SandboxCodeSnippetActionParamValueSetter = <A extends SandboxCodeSnippetsActions, T, S extends T>( // S type is one of types contained inside T union
+export type PlaygroundActionParamValueSetter = <A extends PlaygroundActions, T, S extends T>( // S type is one of types contained inside T union
   actionFormData: PlaygroundActionWithParamsFormData<A, T>,
   paramFormData: ParameterFormItem,
   setState: React.Dispatch<React.SetStateAction<S>>,
-  sandboxParameterKey: keyof SandboxParams,
+  actionParamsKey: keyof PlaygroundActionParams,
   value: any,
 ) => void
 
@@ -118,8 +124,8 @@ export interface IPlaygroundContext {
   setVNCInteractionOptionsParamValue: SetVNCInteractionOptionsParamValue
   runPlaygroundActionWithParams: RunPlaygroundActionWithParams
   runPlaygroundActionWithoutParams: RunPlaygroundActionBasic
-  validateSandboxCodeSnippetAction: ValidateSandboxCodeSnippetActionWithParams
-  sandboxCodeSnippetActionParamValueSetter: SandboxCodeSnippetActionParamValueSetter
+  validatePlaygroundActionWithParams: ValidatePlaygroundActionWithParams
+  playgroundActionParamValueSetter: PlaygroundActionParamValueSetter
   runningActionMethod: RunningActionMethodName
   actionRuntimeError: ActionRuntimeError
   DaytonaClient: Daytona | null

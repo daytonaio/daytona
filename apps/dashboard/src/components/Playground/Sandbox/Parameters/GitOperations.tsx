@@ -19,7 +19,7 @@ import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
 const SandboxGitOperations: React.FC = () => {
-  const { sandboxParametersState, sandboxCodeSnippetActionParamValueSetter } = usePlayground()
+  const { sandboxParametersState, playgroundActionParamValueSetter } = usePlayground()
   const [gitCloneParams, setGitCloneParams] = useState<GitCloneParams>(sandboxParametersState['gitCloneParams'])
   const [gitStatusParams, setGitStatusParams] = useState<GitStatusParams>(sandboxParametersState['gitStatusParams'])
   const [gitBranchesParams, setGitBranchesParams] = useState<GitBranchesParams>(
@@ -87,7 +87,7 @@ const SandboxGitOperations: React.FC = () => {
                       formItem={gitCloneParamFormItem}
                       textValue={gitCloneParams[gitCloneParamFormItem.key]}
                       onChangeHandler={(value) =>
-                        sandboxCodeSnippetActionParamValueSetter(
+                        playgroundActionParamValueSetter(
                           gitOperationsAction,
                           gitCloneParamFormItem,
                           setGitCloneParams,
@@ -106,7 +106,7 @@ const SandboxGitOperations: React.FC = () => {
                   formItem={gitRepoLocationFormData}
                   textValue={gitStatusParams[gitRepoLocationFormData.key]}
                   onChangeHandler={(value) =>
-                    sandboxCodeSnippetActionParamValueSetter(
+                    playgroundActionParamValueSetter(
                       gitOperationsAction,
                       gitRepoLocationFormData,
                       setGitStatusParams,
@@ -123,7 +123,7 @@ const SandboxGitOperations: React.FC = () => {
                   formItem={gitRepoLocationFormData}
                   textValue={gitBranchesParams[gitRepoLocationFormData.key]}
                   onChangeHandler={(value) =>
-                    sandboxCodeSnippetActionParamValueSetter(
+                    playgroundActionParamValueSetter(
                       gitOperationsAction,
                       gitRepoLocationFormData,
                       setGitBranchesParams,

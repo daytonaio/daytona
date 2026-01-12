@@ -27,8 +27,12 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
   ComputerUseClient,
   wrapVNCInvokeApi,
 }) => {
-  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue, runPlaygroundActionWithParams } =
-    usePlayground()
+  const {
+    VNCInteractionOptionsParamsState,
+    setVNCInteractionOptionsParamValue,
+    playgroundActionParamValueSetter,
+    runPlaygroundActionWithParams,
+  } = usePlayground()
   const [hotKeyParams, setHotKeyParams] = useState<KeyboardHotKey>(
     VNCInteractionOptionsParamsState['keyboardHotKeyParams'],
   )
@@ -56,6 +60,7 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
       description: 'Presses a hotkey combination',
       parametersFormItems: hotKeyParamsFormData,
       parametersState: hotKeyParams,
+      onChangeParamsValidationDisabled: true,
     },
     {
       methodName: KeyboardActions.PRESS,
@@ -63,6 +68,7 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
       description: 'Presses a key with optional modifiers',
       parametersFormItems: pressParamsFormData,
       parametersState: pressParams,
+      onChangeParamsValidationDisabled: true,
     },
     {
       methodName: KeyboardActions.TYPE,
@@ -70,6 +76,7 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
       description: 'Types the specified text',
       parametersFormItems: typeParamsFormData,
       parametersState: typeParams,
+      onChangeParamsValidationDisabled: true,
     },
   ]
 
@@ -116,11 +123,15 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
                 <FormTextInput
                   formItem={hotKeyParamsFormData[0]}
                   textValue={hotKeyParams[hotKeyParamsFormData[0].key]}
-                  onChangeHandler={(value) => {
-                    const hotKeyParamsNew = { ...hotKeyParams, [hotKeyParamsFormData[0].key]: value }
-                    setHotKeyParams(hotKeyParamsNew)
-                    setVNCInteractionOptionsParamValue('keyboardHotKeyParams', hotKeyParamsNew)
-                  }}
+                  onChangeHandler={(value) =>
+                    playgroundActionParamValueSetter(
+                      keyboardAction,
+                      hotKeyParamsFormData[0],
+                      setHotKeyParams,
+                      'keyboardHotKeyParams',
+                      value,
+                    )
+                  }
                 />
               </InlineInputFormControl>
             )}
@@ -131,11 +142,15 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
                     <FormTextInput
                       formItem={pressParamFormItem}
                       textValue={pressParams[pressParamFormItem.key]}
-                      onChangeHandler={(value) => {
-                        const pressParamsNew = { ...pressParams, [pressParamFormItem.key]: value }
-                        setPressParams(pressParamsNew)
-                        setVNCInteractionOptionsParamValue('keyboardPressParams', pressParamsNew)
-                      }}
+                      onChangeHandler={(value) =>
+                        playgroundActionParamValueSetter(
+                          keyboardAction,
+                          pressParamFormItem,
+                          setPressParams,
+                          'keyboardPressParams',
+                          value,
+                        )
+                      }
                     />
                   </InlineInputFormControl>
                 ))}
@@ -147,22 +162,30 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
                   <FormTextInput
                     formItem={typeParamsFormData[0]}
                     textValue={typeParams[typeParamsFormData[0].key as 'text']}
-                    onChangeHandler={(value) => {
-                      const typeParamsNew = { ...typeParams, [typeParamsFormData[0].key]: value }
-                      setTypeParams(typeParamsNew)
-                      setVNCInteractionOptionsParamValue('keyboardTypeParams', typeParamsNew)
-                    }}
+                    onChangeHandler={(value) =>
+                      playgroundActionParamValueSetter(
+                        keyboardAction,
+                        typeParamsFormData[0],
+                        setTypeParams,
+                        'keyboardTypeParams',
+                        value,
+                      )
+                    }
                   />
                 </InlineInputFormControl>
                 <InlineInputFormControl formItem={typeParamsFormData[1]}>
                   <FormNumberInput
                     numberFormItem={typeParamsFormData[1] as NumberParameterFormItem}
                     numberValue={typeParams[typeParamsFormData[1].key as 'delay']}
-                    onChangeHandler={(value) => {
-                      const typeParamsNew = { ...typeParams, [typeParamsFormData[1].key]: value }
-                      setTypeParams(typeParamsNew)
-                      setVNCInteractionOptionsParamValue('keyboardTypeParams', typeParamsNew)
-                    }}
+                    onChangeHandler={(value) =>
+                      playgroundActionParamValueSetter(
+                        keyboardAction,
+                        typeParamsFormData[1],
+                        setTypeParams,
+                        'keyboardTypeParams',
+                        value,
+                      )
+                    }
                   />
                 </InlineInputFormControl>
               </>

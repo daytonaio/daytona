@@ -67,7 +67,7 @@ const SandboxProcessCodeExecution: React.FC = () => {
     })
   }, [sandboxParametersState.language, setSandboxParameterValue])
 
-  //TODO -> Currently codeRun and executeCommand values are fixed -> when we enable user to define them implement onChange handlers with validateSandboxCodeSnippetAction logic
+  //TODO -> Currently codeRun and executeCommand values are fixed -> when we enable user to define them implement onChange handlers with validatePlaygroundActionWithParams logic
   return (
     <div className="space-y-6">
       {processCodeExecutionActionsFormData.map((processCodeExecutionAction) => (

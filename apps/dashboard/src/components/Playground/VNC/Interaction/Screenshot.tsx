@@ -30,8 +30,12 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
   ComputerUseClient,
   wrapVNCInvokeApi,
 }) => {
-  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue, runPlaygroundActionWithParams } =
-    usePlayground()
+  const {
+    VNCInteractionOptionsParamsState,
+    setVNCInteractionOptionsParamValue,
+    playgroundActionParamValueSetter,
+    runPlaygroundActionWithParams,
+  } = usePlayground()
   const [screenshotOptions, setScreenshotOptions] = useState<CustomizedScreenshotOptions>(
     VNCInteractionOptionsParamsState['screenshotOptionsConfig'],
   )
@@ -91,6 +95,7 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
       description: 'Takes a compressed screenshot of the entire screen',
       parametersFormItems: screenshotOptionsFormData,
       parametersState: screenshotOptions,
+      onChangeParamsValidationDisabled: true,
     },
     {
       methodName: ScreenshotActions.TAKE_COMPRESSED_REGION,
@@ -101,6 +106,7 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
         ...screenshotOptions,
         ...screenshotRegion,
       },
+      onChangeParamsValidationDisabled: true,
     },
     {
       methodName: ScreenshotActions.TAKE_FULL_SCREEN,
@@ -108,6 +114,7 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
       description: 'Takes a screenshot of the entire screen',
       parametersFormItems: [screenshotShowCursorFormData],
       parametersState: screenshotOptions,
+      onChangeParamsValidationDisabled: true,
     },
     {
       methodName: ScreenshotActions.TAKE_REGION,
@@ -118,6 +125,7 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
         ...screenshotRegion,
         ...screenshotOptions,
       },
+      onChangeParamsValidationDisabled: true,
     },
   ]
 
@@ -178,12 +186,14 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
               selectValue={screenshotOptions[screenshotFormatFormData.key as 'format']}
               formItem={screenshotFormatFormData}
               onChangeHandler={(value) => {
-                const screenshotOptionsNew = {
-                  ...screenshotOptions,
-                  [screenshotFormatFormData.key]: value as ScreenshotFormatOption,
-                }
-                setScreenshotOptions(screenshotOptionsNew)
-                setVNCInteractionOptionsParamValue('screenshotOptionsConfig', screenshotOptionsNew)
+                // Since all screenshot actions have onChangeParamsValidationDisabled set, the actionFormData parameter is irrelevant. We pass the first action simply to satisfy the method's parameter requirements.
+                playgroundActionParamValueSetter(
+                  screenshotActionsFormData[0],
+                  screenshotFormatFormData,
+                  setScreenshotOptions,
+                  'screenshotOptionsConfig',
+                  value,
+                )
               }}
             />
           </InlineInputFormControl>
@@ -193,9 +203,14 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
                 numberValue={screenshotOptions[screenshotOptionParamFormItem.key]}
                 numberFormItem={screenshotOptionParamFormItem}
                 onChangeHandler={(value) => {
-                  const screenshotOptionsNew = { ...screenshotOptions, [screenshotOptionParamFormItem.key]: value }
-                  setScreenshotOptions(screenshotOptionsNew)
-                  setVNCInteractionOptionsParamValue('screenshotOptionsConfig', screenshotOptionsNew)
+                  // Since all screenshot actions have onChangeParamsValidationDisabled set, the actionFormData parameter is irrelevant. We pass the first action simply to satisfy the method's parameter requirements.
+                  playgroundActionParamValueSetter(
+                    screenshotActionsFormData[0],
+                    screenshotOptionParamFormItem,
+                    setScreenshotOptions,
+                    'screenshotOptionsConfig',
+                    value,
+                  )
                 }}
               />
             </InlineInputFormControl>
@@ -205,9 +220,14 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
               checkedValue={screenshotOptions[screenshotShowCursorFormData.key as 'showCursor']}
               formItem={screenshotShowCursorFormData}
               onChangeHandler={(checked) => {
-                const screenshotOptionsNew = { ...screenshotOptions, [screenshotShowCursorFormData.key]: checked }
-                setScreenshotOptions(screenshotOptionsNew)
-                setVNCInteractionOptionsParamValue('screenshotOptionsConfig', screenshotOptionsNew)
+                // Since all screenshot actions have onChangeParamsValidationDisabled set, the actionFormData parameter is irrelevant. We pass the first action simply to satisfy the method's parameter requirements.
+                playgroundActionParamValueSetter(
+                  screenshotActionsFormData[0],
+                  screenshotShowCursorFormData,
+                  setScreenshotOptions,
+                  'screenshotOptionsConfig',
+                  checked,
+                )
               }}
             />
           </InlineInputFormControl>
@@ -224,9 +244,14 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
                 numberValue={screenshotRegion[screenshotRegionParamFormItem.key]}
                 numberFormItem={screenshotRegionParamFormItem}
                 onChangeHandler={(value) => {
-                  const screenshotRegionNew = { ...screenshotRegion, [screenshotRegionParamFormItem.key]: value }
-                  setScreenshotRegion(screenshotRegionNew)
-                  setVNCInteractionOptionsParamValue('screenshotRegionConfig', screenshotRegionNew)
+                  // Since all screenshot actions have onChangeParamsValidationDisabled set, the actionFormData parameter is irrelevant. We pass the first action simply to satisfy the method's parameter requirements.
+                  playgroundActionParamValueSetter(
+                    screenshotActionsFormData[0],
+                    screenshotRegionParamFormItem,
+                    setScreenshotRegion,
+                    'screenshotRegionConfig',
+                    value,
+                  )
                 }}
               />
             </InlineInputFormControl>

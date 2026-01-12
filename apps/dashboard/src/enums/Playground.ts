@@ -176,6 +176,7 @@ export interface PlaygroundActionFormDataBasic<A> {
   label: string
   description: string
   methodName: A
+  onChangeParamsValidationDisabled?: boolean
 }
 
 // Form data structure for actions which use certain parameters for their execution
@@ -261,10 +262,7 @@ export type ProcessCodeExecutionOperationsActionFormData<T extends CodeRunParams
 
 export type SandboxCodeSnippetsActions = FileSystemActions | GitOperationsActions | ProcessCodeExecutionActions
 
+export type VNCInteractionActions = DisplayActions | KeyboardActions | MouseActions | ScreenshotActions
+
 // Actions enums values represent method names for TypeScript SDK
-export type PlaygroundActions =
-  | DisplayActions
-  | KeyboardActions
-  | MouseActions
-  | ScreenshotActions
-  | SandboxCodeSnippetsActions
+export type PlaygroundActions = VNCInteractionActions | SandboxCodeSnippetsActions
