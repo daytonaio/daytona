@@ -809,8 +809,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Daytona Daemon API
-  title: Daytona Daemon API
+  description: Daytona Toolbox API
+  title: Daytona Toolbox API
   version: v0.0.0-dev
 paths:
   /computeruse/display/info:

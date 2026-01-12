@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "daytona_toolbox_api_client"
 version = "0.0.0-dev"
-description = "Daytona Daemon API"
+description = "Daytona Toolbox API"
 authors = ["OpenAPI Generator Community <team@openapitools.org>"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/daytonaio/daytona"
-keywords = ["OpenAPI", "OpenAPI-Generator", "Daytona Daemon API"]
+keywords = ["OpenAPI", "OpenAPI-Generator", "Daytona Toolbox API"]
 include = ["daytona_toolbox_api_client/py.typed"]
 
 [tool.poetry.dependencies]

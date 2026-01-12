@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Daytona Daemon API",
-    "title": "Daytona Daemon API",
+    "description": "Daytona Toolbox API",
+    "title": "Daytona Toolbox API",
     "contact": {},
     "version": "v0.0.0-dev"
   },

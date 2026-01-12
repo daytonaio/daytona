@@ -1,9 +1,9 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-//	@title			Daytona Daemon API
+//	@title			Daytona Toolbox API
 //	@version		v0.0.0-dev
-//	@description	Daytona Daemon API
+//	@description	Daytona Toolbox API
 
 package toolbox
 
@@ -112,8 +112,8 @@ func (s *Server) GetVersion(ctx *gin.Context) {
 }
 
 func (s *Server) Start() error {
-	docs.SwaggerInfo.Description = "Daytona Daemon API"
-	docs.SwaggerInfo.Title = "Daytona Daemon API"
+	docs.SwaggerInfo.Description = "Daytona Toolbox API"
+	docs.SwaggerInfo.Title = "Daytona Toolbox API"
 	docs.SwaggerInfo.BasePath = "/"
 
 	// Set Gin to release mode in production
