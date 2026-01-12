@@ -19,6 +19,7 @@ import {
   UpdateJobStatusDto,
 } from '../dto/job.dto'
 import { JobService } from '../services/job.service'
+import { JobAccessGuard } from '../guards/job-access.guard'
 
 @ApiTags('jobs')
 @Controller('jobs')
@@ -147,6 +148,7 @@ export class JobController {
     description: 'Job details',
     type: JobDto,
   })
+  @UseGuards(JobAccessGuard)
   async getJob(@RunnerContextDecorator() runnerContext: RunnerContext, @Param('jobId') jobId: string): Promise<JobDto> {
     this.logger.log(`Runner ${runnerContext.runnerId} fetching job ${jobId}`)
 
@@ -173,6 +175,7 @@ export class JobController {
     description: 'Job status updated successfully',
     type: JobDto,
   })
+  @UseGuards(JobAccessGuard)
   async updateJobStatus(
     @RunnerContextDecorator() runnerContext: RunnerContext,
     @Param('jobId') jobId: string,
