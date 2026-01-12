@@ -226,21 +226,21 @@ function App() {
         <Route
           path={getRouteSubPath(RoutePath.REGIONS)}
           element={
-            <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
-              <Regions />
-            </RequiredFeatureFlagWrapper>
+            // <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
+            <Regions />
+            // </RequiredFeatureFlagWrapper>
           }
         />
         <Route
           path={getRouteSubPath(RoutePath.RUNNERS)}
           element={
-            <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
-              <RequiredPermissionsOrganizationPageWrapper
-                requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
-              >
-                <Runners />
-              </RequiredPermissionsOrganizationPageWrapper>
-            </RequiredFeatureFlagWrapper>
+            // <RequiredFeatureFlagWrapper flagKey={FeatureFlags.ORGANIZATION_INFRASTRUCTURE}>
+            <RequiredPermissionsOrganizationPageWrapper
+              requiredPermissions={[OrganizationRolePermissionsEnum.READ_RUNNERS]}
+            >
+              <Runners />
+            </RequiredPermissionsOrganizationPageWrapper>
+            // </RequiredFeatureFlagWrapper>
           }
         />
         <Route
