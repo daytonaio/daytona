@@ -271,6 +271,18 @@ const toolboxApiSpec = {
           white-space: nowrap !important;
         }
       }
+
+      section.section {
+        margin-top: 24px !important;
+        margin-bottom: 24px !important;
+        padding-top: 24px !important;
+        padding-bottom: 24px !important;
+      }
+
+      section.section:first-child {
+        margin-top: 32px !important;
+        padding-top: 0 !important;
+      }
     `
 
     if (!document.getElementById(styleId)) {
