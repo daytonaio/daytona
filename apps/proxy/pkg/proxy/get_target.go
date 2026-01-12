@@ -76,10 +76,12 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 
 	// Skip last activity update if header is set
 	if ctx.Request.Header.Get(SKIP_LAST_ACTIVITY_UPDATE_HEADER) != "true" {
-		stopActivityPoll := p.updateLastActivity(ctx.Request.Context(), sandboxID, true)
-		// Store the stop function in the context so the proxy handler can call it when done
-		ctx.Set(ACTIVITY_POLL_STOP_KEY, stopActivityPoll)
+		doneCh := make(chan struct{})
+		go p.updateLastActivity(ctx.Request.Context(), sandboxID, true, doneCh)
 		ctx.Request.Header.Del(SKIP_LAST_ACTIVITY_UPDATE_HEADER)
+		ctx.Set(ACTIVITY_POLL_STOP_KEY, func() {
+			close(doneCh)
+		})
 	}
 
 	// Build the target URL
@@ -227,14 +229,13 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxID string, err
 
 // updateLastActivity updates the last activity timestamp for a sandbox.
 // If shouldPollUpdate is true, it starts a goroutine that updates every 50 seconds.
-// Returns a stop function that should be called when the connection closes.
-func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, shouldPollUpdate bool) func() {
+func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, shouldPollUpdate bool, doneCh chan struct{}) {
 	// Prevent frequent updates by caching the last update
 	cached, err := p.sandboxLastActivityUpdateCache.Has(ctx, sandboxId)
 	if err != nil {
 		// If cache doesn't work, skip the update to avoid spamming the API
 		log.Errorf("failed to check last activity update cache for sandbox %s: %v", sandboxId, err)
-		return func() {}
+		return
 	}
 
 	// Poll interval is 50 seconds to avoid spamming the API which will also cache updates for 45 seconds
@@ -244,7 +245,7 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 		_, err := p.apiclient.SandboxAPI.UpdateLastActivity(ctx, sandboxId).Execute()
 		if err != nil {
 			log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
-			return func() {}
+			return
 		}
 
 		// Expire a bit before the poll interval to avoid skipping one interval
@@ -255,9 +256,6 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 	}
 
 	if shouldPollUpdate {
-		// Create a done channel to signal the goroutine to stop
-		done := make(chan struct{})
-
 		// Update keep alive every pollInterval until stopped
 		go func() {
 			ticker := time.NewTicker(pollInterval)
@@ -266,20 +264,13 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 			for {
 				select {
 				case <-ticker.C:
-					p.updateLastActivity(context.WithoutCancel(ctx), sandboxId, false)
-				case <-done:
+					p.updateLastActivity(context.WithoutCancel(ctx), sandboxId, false, doneCh)
+				case <-doneCh:
 					return
 				}
 			}
 		}()
-
-		// Return a function to stop the polling
-		return func() {
-			close(done)
-		}
 	}
-
-	return func() {}
 }
 
 func (p *Proxy) parseToolboxSubpath(path string) (string, string, string, error) {
