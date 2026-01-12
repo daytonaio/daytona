@@ -1,0 +1,370 @@
+---
+import { ScalarComponent } from '@scalar/astro'
+import fs from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+function findWorkspaceRoot(startPath: string): string {
+  let current = resolve(startPath)
+  const root = resolve(current, '/')
+
+  while (current !== root) {
+    const packageJson = join(current, 'package.json')
+    const appsDocs = join(current, 'apps/docs')
+
+    if (fs.existsSync(packageJson) && fs.existsSync(appsDocs)) {
+      return current
+    }
+
+    const parent = resolve(current, '..')
+    if (parent === current) break
+    current = parent
+  }
+
+  return process.cwd()
+}
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const workspaceRoot = findWorkspaceRoot(__dirname)
+const mainApiPath = join(workspaceRoot, 'dist/apps/api/openapi.3.1.0.json')
+const mainApiSpecRaw = JSON.parse(fs.readFileSync(mainApiPath, 'utf-8'))
+const mainApiSpec = {
+  ...mainApiSpecRaw,
+  servers: [{ url: 'https://app.daytona.io/api' }],
+}
+
+const toolboxApiPath = join(
+  workspaceRoot,
+  'apps/daemon/pkg/toolbox/docs/swagger.json'
+)
+const toolboxApiSpecRaw = JSON.parse(fs.readFileSync(toolboxApiPath, 'utf-8'))
+const toolboxApiSpec = {
+  ...toolboxApiSpecRaw,
+  servers: [{ url: 'https://proxy.app.daytona.io/toolbox/{sandboxId}' }],
+  info: {
+    ...toolboxApiSpecRaw.info,
+    description: `${toolboxApiSpecRaw.info.description || 'Daytona Daemon API'}
+
+To get the toolbox proxy URL for your sandbox, call the \`/api/config\` endpoint from the main Daytona API. The response includes a \`proxyToolboxUrl\` field which provides the base URL template. Replace \`{sandboxId}\` in the URL with your actual sandbox ID to get the full toolbox API endpoint for that sandbox.
+
+Example:
+\`\`\`
+GET /api/config
+Response: { "proxyToolboxUrl": "https://proxy.app.daytona.io/toolbox/{sandboxId}" }
+\`\`\`
+
+Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
+  },
+}
+---
+
+<div id="scalar-container">
+  <ScalarComponent
+    configuration={{
+      sources: [
+        {
+          title: 'Daytona API',
+          slug: 'daytona',
+          content: mainApiSpec,
+          default: true,
+          url: 'https://app.daytona.io/api',
+        },
+        {
+          title: 'Daytona Toolbox API',
+          slug: 'daytona-toolbox',
+          content: toolboxApiSpec,
+          url: 'https://proxy.daytona.io/api',
+        },
+      ],
+      hideClientButton: true,
+      hideTestRequestButton: true,
+      theme: 'default',
+      searchHotKey: 'l',
+      hideDarkModeToggle: true,
+      telemetry: false,
+    }}
+  />
+</div>
+
+<script>
+  function getCurrentTheme(): 'light' | 'dark' {
+    const theme = document.documentElement.dataset.theme
+    if (theme === 'light' || theme === 'dark') {
+      return theme
+    }
+    return window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light'
+      : 'dark'
+  }
+
+  function getScalarTheme(docsTheme: 'light' | 'dark'): string {
+    return docsTheme === 'dark' ? 'moon' : 'default'
+  }
+
+  function updateScalarTheme(): void {
+    const docsTheme = getCurrentTheme()
+    const scalarTheme = getScalarTheme(docsTheme)
+
+    const container = document.getElementById('scalar-container')
+    if (!container) return
+
+    const themeSelectors = [
+      'scalar-api',
+      'scalar-component',
+      '[data-scalar]',
+      '#scalar-container > *',
+      '#scalar-container scalar-api',
+      '#scalar-container iframe',
+    ]
+
+    let scalarElements: NodeListOf<Element> | null = null
+    for (const selector of themeSelectors) {
+      const elements = document.querySelectorAll(selector)
+      if (elements.length > 0) {
+        scalarElements = elements
+        break
+      }
+    }
+
+    function traverseShadowDOM(root: Element, callback: (el: Element) => void) {
+      callback(root)
+      if ((root as any).shadowRoot) {
+        const shadowRoot = (root as any).shadowRoot
+        const children = shadowRoot.querySelectorAll('*')
+        children.forEach((child: Element) => {
+          callback(child)
+          traverseShadowDOM(child, callback)
+        })
+      }
+    }
+
+    const allScalarElements: Element[] = []
+    if (scalarElements) {
+      scalarElements.forEach(el => {
+        allScalarElements.push(el)
+        traverseShadowDOM(el, shadowEl => {
+          if (shadowEl.tagName?.toLowerCase().includes('scalar')) {
+            allScalarElements.push(shadowEl)
+          }
+        })
+      })
+    }
+
+    function findAllChildren(parent: Element): Element[] {
+      const children: Element[] = []
+      Array.from(parent.children).forEach(child => {
+        children.push(child)
+        children.push(...findAllChildren(child))
+      })
+      return children
+    }
+
+    const allChildren = findAllChildren(container)
+    allChildren.forEach(el => {
+      if (!allScalarElements.includes(el)) {
+        allScalarElements.push(el)
+      }
+      traverseShadowDOM(el, shadowEl => {
+        if (!allScalarElements.includes(shadowEl)) {
+          allScalarElements.push(shadowEl)
+        }
+      })
+    })
+
+    if (allScalarElements.length === 0) {
+      return
+    }
+
+    allScalarElements.forEach((element: Element) => {
+      const el = element as any
+
+      try {
+        if ('setAttribute' in element) {
+          element.setAttribute('theme', scalarTheme)
+          element.setAttribute('data-theme', scalarTheme)
+          element.setAttribute('data-scalar-theme', scalarTheme)
+        }
+      } catch (e) {}
+
+      try {
+        if (docsTheme === 'dark') {
+          element.classList.add(
+            'dark',
+            'scalar-dark',
+            'theme-dark',
+            'dark-mode'
+          )
+          element.classList.remove(
+            'light',
+            'scalar-light',
+            'theme-light',
+            'light-mode'
+          )
+        } else {
+          element.classList.add(
+            'light',
+            'scalar-light',
+            'theme-light',
+            'light-mode'
+          )
+          element.classList.remove(
+            'dark',
+            'scalar-dark',
+            'theme-dark',
+            'dark-mode'
+          )
+        }
+      } catch (e) {}
+    })
+  }
+
+  function watchForScalar(): void {
+    const container = document.getElementById('scalar-container')
+    if (!container) return
+
+    const scalarObserver = new MutationObserver(() => {
+      updateScalarTheme()
+      showMoreButtonStyles()
+    })
+
+    scalarObserver.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+    })
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        updateScalarTheme()
+        showMoreButtonStyles()
+      })
+    })
+  }
+
+  function watchThemeChanges(): void {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'data-theme'
+        ) {
+          updateScalarTheme()
+        }
+      })
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    })
+  }
+
+  function showMoreButtonStyles(): void {
+    const styleId = 'scalar-show-more-custom-styles'
+    const styleContent = `
+      button.show-more {
+        margin-left: 0px !important;
+        transform: translateX(0px) !important;
+        margin-top: 32px !important;
+      }
+
+      @media (max-width: 768px) {
+        button.show-more {
+          margin-left: auto !important;
+          margin-right: auto !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          white-space: nowrap !important;
+          flex-wrap: nowrap !important;
+        }
+
+        button.show-more > * {
+          flex-shrink: 0 !important;
+          white-space: nowrap !important;
+        }
+      }
+
+      section.section {
+        margin-top: 24px !important;
+        margin-bottom: 24px !important;
+        padding-top: 24px !important;
+        padding-bottom: 24px !important;
+      }
+
+      section.section:first-child {
+        margin-top: 32px !important;
+        padding-top: 0 !important;
+      }
+
+      .scalar-reference-intro-auth h2,
+      .scalar-reference-intro-auth h2 span,
+      .scalar-reference-intro-auth .section-header-label {
+        font-weight: 500 !important;
+        font-size: 0.90rem !important;
+        line-height: 1.5 !important;
+        font-family: 'Inter', sans-serif !important;
+      }
+    `
+
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style')
+      style.id = styleId
+      style.textContent = styleContent
+      document.head.appendChild(style)
+    }
+
+    const container = document.getElementById('scalar-container')
+    if (container) {
+      function injectIntoShadowRoots(root: Element) {
+        if ((root as any).shadowRoot) {
+          const shadowRoot = (root as any).shadowRoot
+          const existingStyle = shadowRoot.querySelector(`#${styleId}`)
+          if (!existingStyle) {
+            const shadowStyle = document.createElement('style')
+            shadowStyle.id = styleId
+            shadowStyle.textContent = styleContent
+            shadowRoot.appendChild(shadowStyle)
+          }
+        }
+        Array.from(root.children).forEach(child => {
+          injectIntoShadowRoots(child)
+        })
+      }
+      injectIntoShadowRoots(container)
+    }
+  }
+
+  function initialize(): void {
+    watchForScalar()
+    watchThemeChanges()
+    updateScalarTheme()
+    showMoreButtonStyles()
+
+    setTimeout(() => {
+      showMoreButtonStyles()
+    }, 500)
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize)
+  } else {
+    initialize()
+  }
+
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', () => {
+      const currentTheme = document.documentElement.dataset.theme
+      const systemTheme = window.matchMedia('(prefers-color-scheme: light)')
+        .matches
+        ? 'light'
+        : 'dark'
+
+      if (!currentTheme || currentTheme === systemTheme) {
+        updateScalarTheme()
+      }
+    })
+  }
+</script>

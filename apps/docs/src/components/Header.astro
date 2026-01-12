@@ -16,6 +16,9 @@ const algoliaEnabled =
   import.meta.env.PUBLIC_ALGOLIA_APP_ID &&
   import.meta.env.PUBLIC_ALGOLIA_API_KEY &&
   Astro.props.lang === gtconfig.defaultLocale
+
+// Show search in production when enabled, or always in dev mode
+const showSearch = algoliaEnabled || import.meta.env.DEV
 ---
 
 <header class="navbar">
@@ -49,7 +52,7 @@ const algoliaEnabled =
     <div class="nav__items_side_menu">
       <a href={import.meta.env.BASE_URL} class="dotfiles-logo">v<Version /> </a>
       {
-        algoliaEnabled && (
+        showSearch && (
           <button id="search-icon" class="search-click search-click-desktop">
             <div class="search-label">
               <Fragment set:html={searchIcon} />
@@ -73,7 +76,7 @@ const algoliaEnabled =
       </a>
     </div>
     {
-      algoliaEnabled && (
+      showSearch && (
         <p id="search-icon-mobile" class="search-click">
           <Fragment set:html={searchIcon} />
         </p>
@@ -84,7 +87,7 @@ const algoliaEnabled =
 
 {
   // Skip search for translations (for now)
-  algoliaEnabled && <Search client:load locale={Astro.props.lang} />
+  showSearch && <Search client:load locale={Astro.props.lang} />
 }
 
 <style>
