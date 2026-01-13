@@ -23,7 +23,7 @@ func GetApiClient() (*apiclient.APIClient, error) {
 
 	var newApiClient *apiclient.APIClient
 
-	serverUrl := c.ServerUrl
+	serverUrl := c.DaytonaApiUrl
 
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{

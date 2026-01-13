@@ -35,5 +35,5 @@ export interface RunnerSnapshotDto {
    * @type {string}
    * @memberof RunnerSnapshotDto
    */
-  runnerDomain: string
+  runnerDomain?: string
 }

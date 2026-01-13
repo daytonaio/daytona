@@ -80,6 +80,8 @@ type Workspace struct {
 	Class *string `json:"class,omitempty"`
 	// The version of the daemon running in the sandbox
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// The runner ID of the sandbox
+	RunnerId *string `json:"runnerId,omitempty"`
 	// The image used for the workspace
 	Image *string `json:"image,omitempty"`
 	// The state of the snapshot
@@ -950,6 +952,38 @@ func (o *Workspace) SetDaemonVersion(v string) {
 	o.DaemonVersion = &v
 }
 
+// GetRunnerId returns the RunnerId field value if set, zero value otherwise.
+func (o *Workspace) GetRunnerId() string {
+	if o == nil || IsNil(o.RunnerId) {
+		var ret string
+		return ret
+	}
+	return *o.RunnerId
+}
+
+// GetRunnerIdOk returns a tuple with the RunnerId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetRunnerIdOk() (*string, bool) {
+	if o == nil || IsNil(o.RunnerId) {
+		return nil, false
+	}
+	return o.RunnerId, true
+}
+
+// HasRunnerId returns a boolean if a field has been set.
+func (o *Workspace) HasRunnerId() bool {
+	if o != nil && !IsNil(o.RunnerId) {
+		return true
+	}
+
+	return false
+}
+
+// SetRunnerId gets a reference to the given string and assigns it to the RunnerId field.
+func (o *Workspace) SetRunnerId(v string) {
+	o.RunnerId = &v
+}
+
 // GetImage returns the Image field value if set, zero value otherwise.
 func (o *Workspace) GetImage() string {
 	if o == nil || IsNil(o.Image) {
@@ -1149,6 +1183,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.DaemonVersion) {
 		toSerialize["daemonVersion"] = o.DaemonVersion
 	}
+	if !IsNil(o.RunnerId) {
+		toSerialize["runnerId"] = o.RunnerId
+	}
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
@@ -1245,6 +1282,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
+		delete(additionalProperties, "runnerId")
 		delete(additionalProperties, "image")
 		delete(additionalProperties, "snapshotState")
 		delete(additionalProperties, "snapshotCreatedAt")

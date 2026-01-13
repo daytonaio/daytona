@@ -66,11 +66,14 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { SnapshotService } from './snapshot.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SandboxCreatedEvent } from '../events/sandbox-create.event'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -100,6 +103,7 @@ export class SandboxService {
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRedis() private readonly redis: Redis,
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
   ) {}
@@ -268,7 +272,7 @@ export class SandboxService {
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: SandboxState.STOPPED })
 
-    this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
     return sandbox
   }
 
@@ -478,6 +482,9 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -680,6 +687,9 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -1062,6 +1072,92 @@ export class SandboxService {
     }
   }
 
+  async getSignedPortPreviewUrl(
+    sandboxIdOrName: string,
+    organizationId: string,
+    port: number,
+    expiresInSeconds = 60,
+  ): Promise<SignedPortPreviewUrlDto> {
+    if (port < 1 || port > 65535) {
+      throw new BadRequestError('Invalid port')
+    }
+
+    if (expiresInSeconds < 1 || expiresInSeconds > 60 * 60 * 24) {
+      throw new BadRequestError('expiresInSeconds must be between 1 second and 24 hours')
+    }
+
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
+
+    const where: FindOptionsWhere<Sandbox> = {
+      organizationId: organizationId,
+      state: Not(SandboxState.DESTROYED),
+    }
+
+    const sandbox = await this.sandboxRepository.findOne({
+      where: [
+        {
+          id: sandboxIdOrName,
+          ...where,
+        },
+        {
+          name: sandboxIdOrName,
+          ...where,
+        },
+      ],
+      cache: {
+        id: `sandbox:${sandboxIdOrName}:organization:${organizationId}`,
+        milliseconds: 1000,
+      },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    const token = customNanoid(urlAlphabet.replace('_', '').replace('-', ''))(16).toLocaleLowerCase()
+
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    await this.redis.setex(lockKey, expiresInSeconds, sandbox.id)
+
+    let url = `${proxyProtocol}://${port}-${token}.${proxyDomain}`
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+    if (region && region.proxyUrl) {
+      // Insert port and sandbox.id into the custom proxy URL
+      url = region.proxyUrl.replace(/(https?:\/)(\/)/, `$1/${port}-${token}.`)
+    }
+
+    return {
+      sandboxId: sandbox.id,
+      url,
+    }
+  }
+
+  async getSandboxIdFromSignedPreviewUrlToken(token: string, port: number): Promise<string> {
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    const sandboxId = await this.redis.get(lockKey)
+    if (!sandboxId) {
+      throw new ForbiddenException('Invalid or expired token')
+    }
+    return sandboxId
+  }
+
+  async expireSignedPreviewUrlToken(
+    sandboxIdOrName: string,
+    organizationId: string,
+    token: string,
+    port: number,
+  ): Promise<void> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    await this.redis.del(lockKey)
+  }
+
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1071,7 +1167,7 @@ export class SandboxService {
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-    this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     return sandbox
   }
 
@@ -1082,56 +1178,60 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
-      return sandbox
-    }
-
-    if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      // Allow start of stopped | archived and archiving | archived sandboxes
-      if (
-        sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
-        (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
-      ) {
-        throw new SandboxError('State change in progress')
-      }
-    }
-
-    if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
-      throw new SandboxError('Sandbox is not in valid state')
-    }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-      await this.validateOrganizationQuotas(
-        organization,
-        sandbox.region,
-        sandbox.cpu,
-        sandbox.mem,
-        sandbox.disk,
-        sandbox.id,
-      )
-
-    if (pendingCpuIncremented) {
-      pendingCpuIncrement = sandbox.cpu
-    }
-    if (pendingMemoryIncremented) {
-      pendingMemoryIncrement = sandbox.mem
-    }
-    if (pendingDiskIncremented) {
-      pendingDiskIncrement = sandbox.disk
-    }
-
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.STARTED
-    sandbox.authToken = nanoid(32).toLocaleLowerCase()
-
     try {
+      if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
+        return sandbox
+      }
+
+      if (String(sandbox.state) !== String(sandbox.desiredState)) {
+        // Allow start of stopped | archived and archiving | archived sandboxes
+        if (
+          sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
+          (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
+        ) {
+          throw new SandboxError('State change in progress')
+        }
+      }
+
+      if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
+        throw new SandboxError('Sandbox is not in valid state')
+      }
+
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(
+          organization,
+          sandbox.region,
+          sandbox.cpu,
+          sandbox.mem,
+          sandbox.disk,
+          sandbox.id,
+        )
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = sandbox.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = sandbox.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sandbox.disk
+      }
+
+      sandbox.pending = true
+      sandbox.desiredState = SandboxDesiredState.STARTED
+      sandbox.authToken = nanoid(32).toLocaleLowerCase()
+
       await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+      await this.eventEmitter.emitAsync(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
+
+      return sandbox
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -1142,10 +1242,6 @@ export class SandboxService {
       )
       throw error
     }
-
-    this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
-
-    return sandbox
   }
 
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
@@ -1174,9 +1270,9 @@ export class SandboxService {
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
     if (sandbox.autoDeleteInterval === 0) {
-      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     } else {
-      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
     }
     return sandbox
   }
@@ -1215,6 +1311,26 @@ export class SandboxService {
     }
 
     return this.configService.getOrThrow('proxy.toolboxUrl')
+  }
+
+  async getBuildLogsUrl(sandboxIdOrName: string): Promise<string> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName)
+
+    if (!sandbox.buildInfo?.snapshotRef) {
+      throw new NotFoundException(`Sandbox ${sandboxIdOrName} has no build info`)
+    }
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+
+    if (!region) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} not found`)
+    }
+
+    if (!region.proxyUrl) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} has no proxy URL`)
+    }
+
+    return region.proxyUrl + '/sandboxes/' + sandbox.id + '/build-logs'
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, regionIdOrName?: string): Promise<string> {

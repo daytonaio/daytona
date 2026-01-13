@@ -27,12 +27,16 @@ import { RunnerCreatedEvent } from '../../sandbox/events/runner-created.event'
 import { RunnerStateUpdatedEvent } from '../../sandbox/events/runner-state-updated.event'
 import { RunnerUnschedulableUpdatedEvent } from '../../sandbox/events/runner-unschedulable-updated.event'
 import { RegionService } from '../../region/services/region.service'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
+import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 
 @Injectable()
 export class NotificationService {
   constructor(
     private readonly notificationGateway: NotificationGateway,
     private readonly regionService: RegionService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @OnEvent(SandboxEvents.CREATED)
@@ -45,12 +49,14 @@ export class NotificationService {
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
     const dto = SandboxDto.fromSandbox(event.sandbox)
     this.notificationGateway.emitSandboxStateUpdated(dto, event.oldState, event.newState)
+    this.redis.publish(SANDBOX_EVENT_CHANNEL, JSON.stringify(event))
   }
 
   @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
   async handleSandboxDesiredStateUpdated(event: SandboxDesiredStateUpdatedEvent) {
     const dto = SandboxDto.fromSandbox(event.sandbox)
     this.notificationGateway.emitSandboxDesiredStateUpdated(dto, event.oldDesiredState, event.newDesiredState)
+    this.redis.publish(SANDBOX_EVENT_CHANNEL, JSON.stringify(event))
   }
 
   @OnEvent(SnapshotEvents.CREATED)
