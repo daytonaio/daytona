@@ -403,6 +403,7 @@ export class SandboxService {
           cpu: cpu,
           mem: mem,
           disk: disk,
+          gpu: gpu,
           osUser: createSandboxDto.user,
           env: createSandboxDto.env,
           state: SandboxState.STARTED,
