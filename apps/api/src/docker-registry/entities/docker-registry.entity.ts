@@ -4,9 +4,12 @@
  */
 
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity()
+@Index(['organizationId', 'registryType'])
+@Index(['region', 'registryType'])
+@Index(['registryType', 'isDefault'])
 export class DockerRegistry {
   @PrimaryGeneratedColumn('uuid')
   id: string

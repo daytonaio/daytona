@@ -5,8 +5,12 @@
 
 import * as crypto from 'crypto'
 
+export function generateRandomString(size: number): string {
+  return crypto.randomBytes(size).toString('hex')
+}
+
 export function generateApiKeyValue(): string {
-  return `dtn_${crypto.randomBytes(32).toString('hex')}`
+  return `dtn_${generateRandomString(32)}`
 }
 
 export function generateApiKeyHash(value: string): string {
