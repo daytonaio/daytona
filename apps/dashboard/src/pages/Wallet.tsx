@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Invoice } from '@/billing-api/types/Invoice'
 import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
+import { InvoicesTable } from '@/components/Invoices'
 import { OrganizationEmailsTable } from '@/components/OrganizationEmails'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -14,31 +16,29 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAddOrganizationEmailMutation } from '@/hooks/mutations/useAddOrganizationEmailMutation'
+import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
 import { useDeleteOrganizationEmailMutation } from '@/hooks/mutations/useDeleteOrganizationEmailMutation'
 import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
 import { useResendOrganizationEmailVerificationMutation } from '@/hooks/mutations/useResendOrganizationEmailVerificationMutation'
 import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
+import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
+import { useVoidInvoiceMutation } from '@/hooks/mutations/useVoidInvoiceMutation'
 import {
   useOwnerBillingPortalUrlQuery,
+  useOwnerInvoicesQuery,
   useOwnerOrganizationEmailsQuery,
   useOwnerWalletQuery,
 } from '@/hooks/queries/billingQueries'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { ArrowUpRight, CheckCircleIcon, CreditCardIcon, InfoIcon, Loader2, TriangleAlertIcon } from 'lucide-react'
+import { formatAmount } from '@/lib/utils'
+import { CheckCircleIcon, CreditCardIcon, InfoIcon, Loader2, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
-const formatAmount = (amount: number) => {
-  return Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount / 100)
-}
+const DEFAULT_PAGE_SIZE = 10
 
 const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
@@ -48,12 +48,18 @@ const Wallet = () => {
   const [couponCode, setCouponCode] = useState<string>('')
   const [redeemCouponError, setRedeemCouponError] = useState<string | null>(null)
   const [redeemCouponSuccess, setRedeemCouponSuccess] = useState<string | null>(null)
-  const walletQuery = useOwnerWalletQuery()
+  const [oneTimeTopUpAmount, setOneTimeTopUpAmount] = useState<number | undefined>(undefined)
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(null)
+  const [invoicesPagination, setInvoicesPagination] = useState({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  })
+  const walletQuery = useOwnerWalletQuery({ refetchOnMount: 'always' })
   const billingPortalUrlQuery = useOwnerBillingPortalUrlQuery()
   const organizationEmailsQuery = useOwnerOrganizationEmailsQuery()
+  const invoicesQuery = useOwnerInvoicesQuery(invoicesPagination.pageIndex + 1, invoicesPagination.pageSize)
 
   const wallet = walletQuery.data
-  const billingPortalUrl = billingPortalUrlQuery.data
   const organizationEmails = organizationEmailsQuery.data
 
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
@@ -61,6 +67,9 @@ const Wallet = () => {
   const addOrganizationEmailMutation = useAddOrganizationEmailMutation()
   const deleteOrganizationEmailMutation = useDeleteOrganizationEmailMutation()
   const resendOrganizationEmailVerificationMutation = useResendOrganizationEmailVerificationMutation()
+  const topUpWalletMutation = useTopUpWalletMutation()
+  const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
+  const voidInvoiceMutation = useVoidInvoiceMutation()
 
   useEffect(() => {
     if (wallet?.automaticTopUp) {
@@ -210,6 +219,76 @@ const Wallet = () => {
     [selectedOrganization, addOrganizationEmailMutation],
   )
 
+  const handleTopUpWallet = useCallback(async () => {
+    if (!selectedOrganization) {
+      return
+    }
+    const amount = selectedPreset ?? oneTimeTopUpAmount
+    if (!amount) {
+      return
+    }
+
+    try {
+      const result = await topUpWalletMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        amountCents: amount * 100,
+      })
+      window.open(result.url, '_blank')
+    } catch (error) {
+      toast.error('Failed to initiate top-up', {
+        description: String(error),
+      })
+    }
+  }, [selectedOrganization, selectedPreset, oneTimeTopUpAmount, topUpWalletMutation])
+
+  const handleViewInvoice = useCallback(
+    async (invoice: Invoice) => {
+      if (!selectedOrganization) {
+        return
+      }
+
+      if (invoice.fileUrl) {
+        window.open(invoice.fileUrl, '_blank')
+        return
+      }
+
+      if (invoice.paymentStatus === 'pending' && invoice.totalDueAmountCents > 0) {
+        try {
+          const result = await createInvoicePaymentUrlMutation.mutateAsync({
+            organizationId: selectedOrganization.id,
+            invoiceId: invoice.id,
+          })
+          window.open(result.url, '_blank')
+        } catch (error) {
+          toast.error('Failed to open invoice', {
+            description: String(error),
+          })
+        }
+      }
+    },
+    [selectedOrganization, createInvoicePaymentUrlMutation],
+  )
+
+  const handleVoidInvoice = useCallback(
+    async (invoice: Invoice) => {
+      if (!selectedOrganization) {
+        return
+      }
+      try {
+        await voidInvoiceMutation.mutateAsync({
+          organizationId: selectedOrganization.id,
+          invoiceId: invoice.id,
+        })
+        toast.success('Invoice voided successfully')
+      } catch (error) {
+        toast.error('Failed to void invoice', {
+          description: String(error),
+        })
+      }
+    },
+    [selectedOrganization, voidInvoiceMutation],
+  )
+
   const isBillingLoading = walletQuery.isLoading || billingPortalUrlQuery.isLoading
 
   return (
@@ -282,6 +361,16 @@ const Wallet = () => {
                 )}
               </>
             )}
+            {wallet.hasFailedOrPendingInvoice && (
+              <Alert variant="destructive">
+                <TriangleAlertIcon />
+                <AlertTitle>Outstanding invoices</AlertTitle>
+                <AlertDescription>
+                  You have failed or pending invoices that need to be resolved before adding new funds. Please review
+                  your invoices below and complete or void any outstanding payments.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <Card className="h-full">
               <CardHeader>
@@ -303,14 +392,6 @@ const Wallet = () => {
                       </div>
                     </div>
                   </div>
-                  {wallet.creditCardConnected && billingPortalUrl && (
-                    <Button variant="default" asChild className="flex items-center gap-2">
-                      <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
-                        Top-up
-                        <ArrowUpRight />
-                      </a>
-                    </Button>
-                  )}
                 </div>
               </CardContent>
               <CardContent className="border-t border-border">
@@ -474,6 +555,112 @@ const Wallet = () => {
                 </CardFooter>
               </Card>
             )}
+
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle>One time top-up</CardTitle>
+                <CardDescription>
+                  Add funds to your wallet instantly. Select a preset amount or enter a custom value.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-10 items-center lg:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-medium">Select amount</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {[25, 500, 1000, 2000].map((amount) => (
+                        <Button
+                          key={amount}
+                          type="button"
+                          variant={selectedPreset === amount ? 'default' : 'outline'}
+                          size="default"
+                          className="flex h-9"
+                          onClick={() => {
+                            setSelectedPreset(amount)
+                            setOneTimeTopUpAmount(undefined)
+                          }}
+                        >
+                          <span className="font-semibold">${amount.toLocaleString()}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 lg:hidden">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-sm text-muted-foreground">or</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="customTopUpAmount" className="text-sm font-medium">
+                      Enter custom amount
+                    </Label>
+                    <InputGroup>
+                      <InputGroupAddon>
+                        <InputGroupText>$</InputGroupText>
+                      </InputGroupAddon>
+                      <NumericFormat
+                        placeholder="0.00"
+                        customInput={InputGroupInput}
+                        id="customTopUpAmount"
+                        inputMode="decimal"
+                        thousandSeparator
+                        decimalScale={2}
+                        value={oneTimeTopUpAmount ?? ''}
+                        onValueChange={({ floatValue }) => {
+                          const value = floatValue ?? undefined
+                          setOneTimeTopUpAmount(value)
+                          setSelectedPreset(null)
+                        }}
+                        onFocus={() => {
+                          setSelectedPreset(null)
+                        }}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>USD</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between gap-2">
+                <div className="text-sm text-muted-foreground">
+                  You will be redirected to Stripe to complete the payment.
+                </div>
+                <Button
+                  onClick={handleTopUpWallet}
+                  disabled={
+                    walletQuery.isLoading ||
+                    !wallet ||
+                    topUpWalletMutation.isPending ||
+                    (selectedPreset === null && !oneTimeTopUpAmount)
+                  }
+                  size="sm"
+                >
+                  {topUpWalletMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Top up'}
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle>Invoices</CardTitle>
+                <CardDescription>
+                  View and download your billing invoices. All invoices are automatically generated and sent to your
+                  billing emails.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InvoicesTable
+                  data={invoicesQuery.data?.items ?? []}
+                  pagination={invoicesPagination}
+                  pageCount={invoicesQuery.data?.totalPages ?? 0}
+                  onPaginationChange={setInvoicesPagination}
+                  loading={invoicesQuery.isLoading}
+                  onViewInvoice={handleViewInvoice}
+                  onVoidInvoice={handleVoidInvoice}
+                />
+              </CardContent>
+            </Card>
           </>
         )}
 

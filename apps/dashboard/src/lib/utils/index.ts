@@ -110,6 +110,15 @@ export function formatTimestamp(timestamp: string | Date | undefined | null): st
   return new Date(timestamp).toLocaleString()
 }
 
+export function formatAmount(amount: number): string {
+  return Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount / 100)
+}
+
 export function findLast<T>(arr: T[], predicate: (item: T, index: number, array: T[]) => boolean): T | undefined {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (predicate(arr[i], i, arr)) {

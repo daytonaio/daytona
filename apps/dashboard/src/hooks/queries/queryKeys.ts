@@ -31,5 +31,12 @@ export const queryKeys = {
     tiers: () => [...queryKeys.billing.all, 'tiers'] as const,
     emails: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'emails'] as const,
     portalUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'portal-url'] as const,
+    invoices: (organizationId: string, page?: number, perPage?: number) =>
+      [
+        ...queryKeys.billing.all,
+        organizationId,
+        'invoices',
+        ...(page !== undefined && perPage !== undefined ? [{ page, perPage }] : []),
+      ] as const,
   },
 } as const
