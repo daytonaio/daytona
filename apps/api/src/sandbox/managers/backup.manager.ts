@@ -317,7 +317,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
     // Generate backup snapshot name
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const backupSnapshot = `${registry.url.replace('https://', '').replace('http://', '')}/${registry.project}/backup-${sandbox.id}:${timestamp}`
+    const backupSnapshot = `${registry.url.replace('https://', '').replace('http://', '')}/${registry.project || 'daytona'}/backup-${sandbox.id}:${timestamp}`
 
     await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.PENDING, backupSnapshot, registry.id)
   }

@@ -875,6 +875,7 @@ class DockerRegistryApi:
     async def get_transient_push_access(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        region_id: Annotated[Optional[StrictStr], Field(description="ID of the region where the snapshot will be available (defaults to organization default region)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -893,6 +894,8 @@ class DockerRegistryApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param region_id: ID of the region where the snapshot will be available (defaults to organization default region)
+        :type region_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -917,6 +920,7 @@ class DockerRegistryApi:
 
         _param = self._get_transient_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
+            region_id=region_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -941,6 +945,7 @@ class DockerRegistryApi:
     async def get_transient_push_access_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        region_id: Annotated[Optional[StrictStr], Field(description="ID of the region where the snapshot will be available (defaults to organization default region)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -959,6 +964,8 @@ class DockerRegistryApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param region_id: ID of the region where the snapshot will be available (defaults to organization default region)
+        :type region_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -983,6 +990,7 @@ class DockerRegistryApi:
 
         _param = self._get_transient_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
+            region_id=region_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1007,6 +1015,7 @@ class DockerRegistryApi:
     async def get_transient_push_access_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        region_id: Annotated[Optional[StrictStr], Field(description="ID of the region where the snapshot will be available (defaults to organization default region)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1025,6 +1034,8 @@ class DockerRegistryApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param region_id: ID of the region where the snapshot will be available (defaults to organization default region)
+        :type region_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1049,6 +1060,7 @@ class DockerRegistryApi:
 
         _param = self._get_transient_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
+            region_id=region_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1068,6 +1080,7 @@ class DockerRegistryApi:
     def _get_transient_push_access_serialize(
         self,
         x_daytona_organization_id,
+        region_id,
         _request_auth,
         _content_type,
         _headers,
@@ -1090,6 +1103,10 @@ class DockerRegistryApi:
 
         # process the path parameters
         # process the query parameters
+        if region_id is not None:
+            
+            _query_params.append(('regionId', region_id))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id

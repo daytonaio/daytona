@@ -36,4 +36,10 @@ export interface CreateRegion {
    * @memberof CreateRegion
    */
   sshGatewayUrl?: string | null
+  /**
+   * Snapshot Manager URL for the region
+   * @type {string}
+   * @memberof CreateRegion
+   */
+  snapshotManagerUrl?: string | null
 }

@@ -26,8 +26,12 @@ type CreateRegionResponse struct {
 	// Proxy API key for the region
 	ProxyApiKey NullableString `json:"proxyApiKey,omitempty"`
 	// SSH Gateway API key for the region
-	SshGatewayApiKey     NullableString `json:"sshGatewayApiKey,omitempty"`
-	AdditionalProperties map[string]interface{}
+	SshGatewayApiKey NullableString `json:"sshGatewayApiKey,omitempty"`
+	// Snapshot Manager username for the region
+	SnapshotManagerUsername NullableString `json:"snapshotManagerUsername,omitempty"`
+	// Snapshot Manager password for the region
+	SnapshotManagerPassword NullableString `json:"snapshotManagerPassword,omitempty"`
+	AdditionalProperties    map[string]interface{}
 }
 
 type _CreateRegionResponse CreateRegionResponse
@@ -160,6 +164,92 @@ func (o *CreateRegionResponse) UnsetSshGatewayApiKey() {
 	o.SshGatewayApiKey.Unset()
 }
 
+// GetSnapshotManagerUsername returns the SnapshotManagerUsername field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *CreateRegionResponse) GetSnapshotManagerUsername() string {
+	if o == nil || IsNil(o.SnapshotManagerUsername.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.SnapshotManagerUsername.Get()
+}
+
+// GetSnapshotManagerUsernameOk returns a tuple with the SnapshotManagerUsername field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateRegionResponse) GetSnapshotManagerUsernameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SnapshotManagerUsername.Get(), o.SnapshotManagerUsername.IsSet()
+}
+
+// HasSnapshotManagerUsername returns a boolean if a field has been set.
+func (o *CreateRegionResponse) HasSnapshotManagerUsername() bool {
+	if o != nil && o.SnapshotManagerUsername.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetSnapshotManagerUsername gets a reference to the given NullableString and assigns it to the SnapshotManagerUsername field.
+func (o *CreateRegionResponse) SetSnapshotManagerUsername(v string) {
+	o.SnapshotManagerUsername.Set(&v)
+}
+
+// SetSnapshotManagerUsernameNil sets the value for SnapshotManagerUsername to be an explicit nil
+func (o *CreateRegionResponse) SetSnapshotManagerUsernameNil() {
+	o.SnapshotManagerUsername.Set(nil)
+}
+
+// UnsetSnapshotManagerUsername ensures that no value is present for SnapshotManagerUsername, not even an explicit nil
+func (o *CreateRegionResponse) UnsetSnapshotManagerUsername() {
+	o.SnapshotManagerUsername.Unset()
+}
+
+// GetSnapshotManagerPassword returns the SnapshotManagerPassword field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *CreateRegionResponse) GetSnapshotManagerPassword() string {
+	if o == nil || IsNil(o.SnapshotManagerPassword.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.SnapshotManagerPassword.Get()
+}
+
+// GetSnapshotManagerPasswordOk returns a tuple with the SnapshotManagerPassword field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateRegionResponse) GetSnapshotManagerPasswordOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SnapshotManagerPassword.Get(), o.SnapshotManagerPassword.IsSet()
+}
+
+// HasSnapshotManagerPassword returns a boolean if a field has been set.
+func (o *CreateRegionResponse) HasSnapshotManagerPassword() bool {
+	if o != nil && o.SnapshotManagerPassword.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetSnapshotManagerPassword gets a reference to the given NullableString and assigns it to the SnapshotManagerPassword field.
+func (o *CreateRegionResponse) SetSnapshotManagerPassword(v string) {
+	o.SnapshotManagerPassword.Set(&v)
+}
+
+// SetSnapshotManagerPasswordNil sets the value for SnapshotManagerPassword to be an explicit nil
+func (o *CreateRegionResponse) SetSnapshotManagerPasswordNil() {
+	o.SnapshotManagerPassword.Set(nil)
+}
+
+// UnsetSnapshotManagerPassword ensures that no value is present for SnapshotManagerPassword, not even an explicit nil
+func (o *CreateRegionResponse) UnsetSnapshotManagerPassword() {
+	o.SnapshotManagerPassword.Unset()
+}
+
 func (o CreateRegionResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -176,6 +266,12 @@ func (o CreateRegionResponse) ToMap() (map[string]interface{}, error) {
 	}
 	if o.SshGatewayApiKey.IsSet() {
 		toSerialize["sshGatewayApiKey"] = o.SshGatewayApiKey.Get()
+	}
+	if o.SnapshotManagerUsername.IsSet() {
+		toSerialize["snapshotManagerUsername"] = o.SnapshotManagerUsername.Get()
+	}
+	if o.SnapshotManagerPassword.IsSet() {
+		toSerialize["snapshotManagerPassword"] = o.SnapshotManagerPassword.Get()
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -223,6 +319,8 @@ func (o *CreateRegionResponse) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "proxyApiKey")
 		delete(additionalProperties, "sshGatewayApiKey")
+		delete(additionalProperties, "snapshotManagerUsername")
+		delete(additionalProperties, "snapshotManagerPassword")
 		o.AdditionalProperties = additionalProperties
 	}
 

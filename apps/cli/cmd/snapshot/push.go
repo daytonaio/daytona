@@ -69,7 +69,11 @@ var PushCmd = &cobra.Command{
 			return err
 		}
 
-		tokenResponse, res, err := apiClient.DockerRegistryAPI.GetTransientPushAccess(ctx).Execute()
+		pushAccessRequest := apiClient.DockerRegistryAPI.GetTransientPushAccess(ctx)
+		if regionIdFlag != "" {
+			pushAccessRequest = pushAccessRequest.RegionId(regionIdFlag)
+		}
+		tokenResponse, res, err := pushAccessRequest.Execute()
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
@@ -170,6 +174,7 @@ func init() {
 	PushCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores that will be allocated to the underlying sandboxes (default: 1)")
 	PushCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	PushCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
+	PushCmd.Flags().StringVar(&regionIdFlag, "region", "", "ID of the region where the snapshot will be available (defaults to organization default region)")
 
 	_ = PushCmd.MarkFlagRequired("name")
 }
