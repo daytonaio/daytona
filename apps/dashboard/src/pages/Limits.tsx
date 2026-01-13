@@ -223,7 +223,6 @@ export default function Limits() {
                     creditCardLinked: !!wallet?.creditCardConnected,
                     githubConnected: githubConnected,
                     businessEmailVerified: !!organizationTier?.hasVerifiedBusinessEmail,
-                    phoneVerified: !!user?.profile?.phone_verified,
                   }}
                 />
 

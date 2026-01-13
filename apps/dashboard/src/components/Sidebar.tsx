@@ -22,6 +22,7 @@ import {
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { RoutePath } from '@/enums/RoutePath'
+import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
@@ -51,6 +52,7 @@ import {
   TriangleAlert,
   Users,
 } from 'lucide-react'
+import { usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation } from 'react-router-dom'
@@ -59,7 +61,6 @@ import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { usePostHog } from 'posthog-js/react'
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -75,6 +76,7 @@ interface SidebarItem {
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const posthog = usePostHog()
+  const config = useConfig()
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const { pathname } = useLocation()
@@ -368,14 +370,16 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.ACCOUNT_SETTINGS}>
-                      <Settings className="w-4 h-4" />
-                      Account Settings
-                    </Link>
-                  </Button>
-                </DropdownMenuItem>
+                {config.linkedAccountsEnabled && (
+                  <DropdownMenuItem asChild>
+                    <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
+                      <Link to={RoutePath.ACCOUNT_SETTINGS}>
+                        <Settings className="w-4 h-4" />
+                        Account Settings
+                      </Link>
+                    </Button>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
                     <Link to={RoutePath.USER_INVITATIONS}>
