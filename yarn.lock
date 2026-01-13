@@ -12955,21 +12955,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/devtools-event-client@npm:^0.3.5":
-  version: 0.3.5
-  resolution: "@tanstack/devtools-event-client@npm:0.3.5"
-  checksum: 10c0/10e4feec2cd346cd47adf94889f3f12d8662fb291d0d17fbf2a2f9c643f083a70d081b0fb104c2f54c0bd89dcfb1e31942dc959b74592fce9a7b9d55ed233220
+"@tanstack/devtools-event-client@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@tanstack/devtools-event-client@npm:0.4.0"
+  checksum: 10c0/f6603f9f9542ff0e6037726b7e023b6e32c7228d968e4d301e8970b9a8a9ec021249c1eca054a32b5ffb46aed75bc0d54aefda01bda804246caaee27842f1deb
   languageName: node
   linkType: hard
 
-"@tanstack/form-core@npm:1.27.4":
-  version: 1.27.4
-  resolution: "@tanstack/form-core@npm:1.27.4"
+"@tanstack/form-core@npm:1.27.7":
+  version: 1.27.7
+  resolution: "@tanstack/form-core@npm:1.27.7"
   dependencies:
-    "@tanstack/devtools-event-client": "npm:^0.3.5"
+    "@tanstack/devtools-event-client": "npm:^0.4.0"
     "@tanstack/pacer-lite": "npm:^0.1.1"
     "@tanstack/store": "npm:^0.7.7"
-  checksum: 10c0/74c83045980593fd33db39024686177f4eb20d228e917a3b324dd5768e1c961d42fbb6c0e5119ff97034340c62bcc7361d8a80bdaa0052cbd66f493b9184f807
+  checksum: 10c0/dc5057a6cb3cb2aa759b91cc7af913f80bf2967d0cc946f886a47ac9195a773ecaa8eb27604dd052f7182aab45a561da086bc9045fc35bbfbdb8a475f110958a
   languageName: node
   linkType: hard
 
@@ -12995,17 +12995,17 @@ __metadata:
   linkType: hard
 
 "@tanstack/react-form@npm:^1.27.4":
-  version: 1.27.4
-  resolution: "@tanstack/react-form@npm:1.27.4"
+  version: 1.27.7
+  resolution: "@tanstack/react-form@npm:1.27.7"
   dependencies:
-    "@tanstack/form-core": "npm:1.27.4"
+    "@tanstack/form-core": "npm:1.27.7"
     "@tanstack/react-store": "npm:^0.8.0"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@tanstack/react-start":
       optional: true
-  checksum: 10c0/209cb6a506fcbbff5c5c70d3e8f3b03b3b636c751171283d655729c87cdf98f34c7a6690ddb04d40c1589af289febb6e240bdd8e4d821f1ca2d97d86560dea4a
+  checksum: 10c0/6944f77a87108620017093fcf72b5bfe9d60b7cf22c170fed4569c0d261aeea9c42419943663a468cbf851dd1ea21f908523080aa93e8ef93ad08a2fd70a58f3
   languageName: node
   linkType: hard
 

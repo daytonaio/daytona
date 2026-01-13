@@ -70,7 +70,7 @@ export default defineConfig({
   outDir: '../../dist/apps/docs',
   vite: {
     ssr: {
-      noExternal: ['path-to-regexp', '@astrojs/react'],
+      noExternal: ['path-to-regexp', '@astrojs/react', 'zod'],
     },
   },
 })
