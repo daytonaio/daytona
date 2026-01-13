@@ -5,18 +5,12 @@ package interpreter
 
 import (
 	"encoding/json"
-	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
-
-// WebSocket upgrader with permissive origin policy
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
 
 // attachWebSocket connects a WebSocket client to the interpreter context
 func (c *Context) attachWebSocket(ws *websocket.Conn) {

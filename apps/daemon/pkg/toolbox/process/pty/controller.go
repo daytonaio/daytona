@@ -192,8 +192,8 @@ func (p *PTYController) ConnectPTYSession(c *gin.Context) {
 		return
 	}
 
-	// Always upgrade to WebSocket first
-	ws, err := ptyUpgrader.Upgrade(c.Writer, c.Request, nil)
+	// Upgrade to WebSocket
+	ws, err := util.UpgradeToWebSocket(c.Writer, c.Request)
 	if err != nil {
 		log.WithError(err).Error("ws upgrade failed")
 		return

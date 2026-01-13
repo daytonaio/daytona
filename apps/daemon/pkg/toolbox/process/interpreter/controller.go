@@ -11,6 +11,7 @@ import (
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/internal/util"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -94,7 +95,8 @@ func (c *Controller) CreateContext(ctx *gin.Context) {
 //
 //	@id				ExecuteInterpreterCode
 func (c *Controller) Execute(ctx *gin.Context) {
-	ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	// Upgrade to WebSocket
+	ws, err := util.UpgradeToWebSocket(ctx.Writer, ctx.Request)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return

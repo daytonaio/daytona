@@ -51,12 +51,6 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
 
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
-	if sdkVersion != "" {
-		upgrader.Subprotocols = []string{"X-Daytona-SDK-Version~" + sdkVersion}
-	} else {
-		upgrader.Subprotocols = []string{}
-	}
-
 	versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
 	if err != nil {
 		log.Debug(err)
@@ -159,19 +153,14 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 	c.String(http.StatusOK, string(logBytes))
 }
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
 // ReadLog reads from the logReader and writes to the websocket.
 // T is the type of the message to be read from the logReader
 func ReadLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, string, chan T, chan error), exitCodeFilePath string, wsWriteFunc func(*websocket.Conn, chan T, chan error)) {
 	followQuery := ginCtx.Query("follow")
 	follow := followQuery == "true"
 
-	ws, err := upgrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
+	// Upgrade to WebSocket
+	ws, err := util.UpgradeToWebSocket(ginCtx.Writer, ginCtx.Request)
 	if err != nil {
 		log.Error(err)
 		return

@@ -23,20 +23,34 @@ func ExtractSdkVersionFromHeader(header http.Header) string {
 	}
 
 	// no explicit header; look through Sec-WebSocket-Protocol entries
-	protocols := header.Get("Sec-WebSocket-Protocol")
-	if protocols == "" {
+	protocol := ExtractSdkVersionSubprotocol(header)
+	if protocol != "" {
+		// found version protocol; split off the version
+		parts := strings.SplitN(protocol, "~", 2)
+		if len(parts) == 2 {
+			return parts[1]
+		}
+	}
+
+	return ""
+}
+
+// ExtractSdkVersionSubprotocol extracts the SDK version subprotocol from request headers
+// It looks for the X-Daytona-SDK-Version~<version> subprotocol in the Sec-WebSocket-Protocol header.
+// Returns an empty string if no SDK version subprotocol is found.
+func ExtractSdkVersionSubprotocol(header http.Header) string {
+	subprotocols := header.Get("Sec-WebSocket-Protocol")
+	if subprotocols == "" {
 		return ""
 	}
+
 	const prefix = "X-Daytona-SDK-Version~"
 	// split comma-separated protocols
-	for _, protocol := range strings.Split(protocols, ",") {
-		protocol = strings.TrimSpace(protocol)
-		if strings.HasPrefix(protocol, prefix) {
-			// found version protocol; split off the version
-			parts := strings.SplitN(protocol, "~", 2)
-			if len(parts) == 2 {
-				return parts[1]
-			}
+	for _, subprotocol := range strings.Split(subprotocols, ",") {
+		subprotocol = strings.TrimSpace(subprotocol)
+		if strings.HasPrefix(subprotocol, prefix) {
+			// Return the full subprotocol string
+			return subprotocol
 		}
 	}
 

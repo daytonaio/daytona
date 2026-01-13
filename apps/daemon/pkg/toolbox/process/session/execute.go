@@ -187,12 +187,6 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 			logContent := string(logBytes)
 
 			sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
-			if sdkVersion != "" {
-				upgrader.Subprotocols = []string{"X-Daytona-SDK-Version~" + sdkVersion}
-			} else {
-				upgrader.Subprotocols = []string{}
-			}
-
 			versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
 			if err != nil {
 				log.Error(err)
