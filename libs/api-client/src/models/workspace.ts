@@ -216,6 +216,12 @@ export interface Workspace {
    */
   daemonVersion?: string
   /**
+   * The runner ID of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  runnerId?: string
+  /**
    * The image used for the workspace
    * @type {string}
    * @memberof Workspace

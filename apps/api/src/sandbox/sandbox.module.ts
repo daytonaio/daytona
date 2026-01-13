@@ -50,6 +50,10 @@ import { ProxyCacheInvalidationService } from './services/proxy-cache-invalidati
 import { RegionModule } from '../region/region.module'
 import { Region } from '../region/entities/region.entity'
 import { SnapshotRegion } from './entities/snapshot-region.entity'
+import { JobController } from './controllers/job.controller'
+import { JobService } from './services/job.service'
+import { JobStateHandlerService } from './services/job-state-handler.service'
+import { Job } from './entities/job.entity'
 
 @Module({
   imports: [
@@ -69,6 +73,7 @@ import { SnapshotRegion } from './entities/snapshot-region.entity'
       Volume,
       SshAccess,
       Region,
+      Job,
     ]),
   ],
   controllers: [
@@ -79,6 +84,7 @@ import { SnapshotRegion } from './entities/snapshot-region.entity'
     WorkspaceController,
     PreviewController,
     VolumeController,
+    JobController,
   ],
   providers: [
     SandboxService,
@@ -102,6 +108,8 @@ import { SnapshotRegion } from './entities/snapshot-region.entity'
     SandboxStopAction,
     SandboxDestroyAction,
     SandboxArchiveAction,
+    JobService,
+    JobStateHandlerService,
     {
       provide: SandboxRepository,
       inject: [DataSource],

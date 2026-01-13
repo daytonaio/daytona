@@ -46,7 +46,6 @@ import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
 import { RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
-import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerAccessGuard } from '../guards/runner-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
@@ -61,6 +60,7 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionService } from '../../region/services/region.service'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
+import { RunnerHealthcheckDto } from '../dto/runner-health.dto'
 
 @ApiTags('runners')
 @Controller('runners')
@@ -89,9 +89,6 @@ export class RunnerController {
     targetIdFromResult: (result: CreateRunnerResponseDto) => result?.id,
     requestMetadata: {
       body: (req: TypedRequest<CreateRunnerDto>) => ({
-        domain: req.body?.domain,
-        apiUrl: req.body?.apiUrl,
-        proxyUrl: req.body?.proxyUrl,
         regionId: req.body?.regionId,
         name: req.body?.name,
       }),
@@ -118,19 +115,9 @@ export class RunnerController {
 
     // create the runner
     const { runner, apiKey } = await this.runnerService.create({
-      domain: createRunnerDto.domain,
-      apiUrl: createRunnerDto.apiUrl,
-      proxyUrl: createRunnerDto.proxyUrl,
-      cpu: -1,
-      memoryGiB: -1,
-      diskGiB: -1,
       regionId: createRunnerDto.regionId,
       name: createRunnerDto.name,
-      gpu: 0,
-      gpuType: '',
-      class: SandboxClass.SMALL,
-      // TODO
-      version: '0',
+      apiVersion: '2',
     })
 
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)
@@ -177,6 +164,33 @@ export class RunnerController {
     }
 
     return RunnerDto.fromRunner(runner)
+  }
+
+  @Get(':id/full')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get runner by ID',
+    operationId: 'getRunnerFullById',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerFullDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Runner ID',
+    type: String,
+  })
+  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RunnerAccessGuard]))
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
+  async getRunnerByIdFull(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerFullDto> {
+    const runner = await this.runnerService.findOne(id)
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return RunnerFullDto.fromRunner(runner)
   }
 
   @Get()
@@ -303,5 +317,53 @@ export class RunnerController {
   @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
   async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
     return this.runnerService.getRunnersBySnapshotRef(ref)
+  }
+
+  @Get('/inital-by-snapshot-id/:snapshotId')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get initial runner by snapshot ID',
+    operationId: 'getInitialRunnerBySnapshotId',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerFullDto,
+  })
+  @ApiParam({
+    name: 'snapshotId',
+    description: 'Snapshot ID',
+    type: String,
+    required: true,
+  })
+  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
+  async getInitialRunnerBySnapshotId(@Param('snapshotId') snapshotId: string): Promise<RunnerFullDto> {
+    const runner = await this.runnerService.getInitialRunnerBySnapshotId(snapshotId)
+    return RunnerFullDto.fromRunner(runner)
+  }
+
+  @Post('healthcheck')
+  @ApiOperation({
+    summary: 'Runner healthcheck',
+    operationId: 'runnerHealthcheck',
+    description:
+      'Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Healthcheck received',
+  })
+  async runnerHealthcheck(
+    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @Body() healthcheck: RunnerHealthcheckDto,
+  ): Promise<void> {
+    await this.runnerService.updateRunnerHealth(
+      runnerContext.runnerId,
+      healthcheck.domain,
+      healthcheck.apiUrl,
+      healthcheck.proxyUrl,
+      healthcheck.metrics,
+      healthcheck.appVersion,
+    )
   }
 }

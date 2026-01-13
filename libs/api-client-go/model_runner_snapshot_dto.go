@@ -26,7 +26,7 @@ type RunnerSnapshotDto struct {
 	// Runner ID
 	RunnerId string `json:"runnerId"`
 	// Runner domain
-	RunnerDomain         string `json:"runnerDomain"`
+	RunnerDomain         *string `json:"runnerDomain,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -36,11 +36,10 @@ type _RunnerSnapshotDto RunnerSnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerSnapshotDto(runnerSnapshotId string, runnerId string, runnerDomain string) *RunnerSnapshotDto {
+func NewRunnerSnapshotDto(runnerSnapshotId string, runnerId string) *RunnerSnapshotDto {
 	this := RunnerSnapshotDto{}
 	this.RunnerSnapshotId = runnerSnapshotId
 	this.RunnerId = runnerId
-	this.RunnerDomain = runnerDomain
 	return &this
 }
 
@@ -100,28 +99,36 @@ func (o *RunnerSnapshotDto) SetRunnerId(v string) {
 	o.RunnerId = v
 }
 
-// GetRunnerDomain returns the RunnerDomain field value
+// GetRunnerDomain returns the RunnerDomain field value if set, zero value otherwise.
 func (o *RunnerSnapshotDto) GetRunnerDomain() string {
-	if o == nil {
+	if o == nil || IsNil(o.RunnerDomain) {
 		var ret string
 		return ret
 	}
-
-	return o.RunnerDomain
+	return *o.RunnerDomain
 }
 
-// GetRunnerDomainOk returns a tuple with the RunnerDomain field value
+// GetRunnerDomainOk returns a tuple with the RunnerDomain field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *RunnerSnapshotDto) GetRunnerDomainOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.RunnerDomain) {
 		return nil, false
 	}
-	return &o.RunnerDomain, true
+	return o.RunnerDomain, true
 }
 
-// SetRunnerDomain sets field value
+// HasRunnerDomain returns a boolean if a field has been set.
+func (o *RunnerSnapshotDto) HasRunnerDomain() bool {
+	if o != nil && !IsNil(o.RunnerDomain) {
+		return true
+	}
+
+	return false
+}
+
+// SetRunnerDomain gets a reference to the given string and assigns it to the RunnerDomain field.
 func (o *RunnerSnapshotDto) SetRunnerDomain(v string) {
-	o.RunnerDomain = v
+	o.RunnerDomain = &v
 }
 
 func (o RunnerSnapshotDto) MarshalJSON() ([]byte, error) {
@@ -136,7 +143,9 @@ func (o RunnerSnapshotDto) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["runnerSnapshotId"] = o.RunnerSnapshotId
 	toSerialize["runnerId"] = o.RunnerId
-	toSerialize["runnerDomain"] = o.RunnerDomain
+	if !IsNil(o.RunnerDomain) {
+		toSerialize["runnerDomain"] = o.RunnerDomain
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -152,7 +161,6 @@ func (o *RunnerSnapshotDto) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"runnerSnapshotId",
 		"runnerId",
-		"runnerDomain",
 	}
 
 	allProperties := make(map[string]interface{})

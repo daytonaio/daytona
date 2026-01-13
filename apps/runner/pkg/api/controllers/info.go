@@ -38,7 +38,7 @@ func RunnerInfo(ctx *gin.Context) {
 			CurrentSnapshotCount:         metrics.SnapshotCount,
 			CurrentStartedSandboxes:      metrics.StartedSandboxes,
 		},
-		Version: internal.Version,
+		AppVersion: internal.Version,
 	}
 
 	ctx.JSON(http.StatusOK, response)

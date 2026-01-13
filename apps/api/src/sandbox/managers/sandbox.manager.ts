@@ -15,9 +15,7 @@ import { RunnerService } from '../services/runner.service'
 import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
-import { checkRecoverable } from '../utils/recoverable.util'
 
-import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
@@ -32,7 +30,6 @@ import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './sandbox-actions/sandbox-archive.action'
 import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
-import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
@@ -41,6 +38,8 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -56,8 +55,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
-    private readonly runnerAdapterFactory: RunnerAdapterFactory,
-  ) {}
+  ) { }
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish
@@ -118,7 +116,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-                this.syncInstanceState(sandbox.id)
+
+                this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -170,7 +169,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           try {
             sandbox.desiredState = SandboxDesiredState.ARCHIVED
             await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-            this.syncInstanceState(sandbox.id)
+            this.syncInstanceState(sandbox.id).catch(this.logger.error)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
           } finally {
@@ -227,7 +226,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               try {
                 sandbox.applyDesiredDestroyedState()
                 await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
-                this.syncInstanceState(sandbox.id)
+
+                this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -444,14 +444,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         return
       }
       sandbox.state = SandboxState.ERROR
-      sandbox.errorReason = error.message || String(error)
-      sandbox.recoverable = false
 
-      try {
-        sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
-      } catch (err) {
-        this.logger.error(`Error checking if sandbox ${sandboxId} is recoverable:`, err)
-      }
+      const { recoverable, errorReason } = sanitizeSandboxError(error)
+      sandbox.errorReason = errorReason
+      sandbox.recoverable = recoverable
 
       await this.sandboxRepository.save(sandbox)
     }
@@ -462,33 +458,43 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @OnEvent(SandboxEvents.ARCHIVED)
+  @OnAsyncEvent({
+    event: SandboxEvents.ARCHIVED,
+  })
   @TrackJobExecution()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.DESTROYED)
+  @OnAsyncEvent({
+    event: SandboxEvents.DESTROYED,
+  })
   @TrackJobExecution()
   private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.STARTED)
+  @OnAsyncEvent({
+    event: SandboxEvents.STARTED,
+  })
   @TrackJobExecution()
   private async handleSandboxStartedEvent(event: SandboxStartedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.STOPPED)
+  @OnAsyncEvent({
+    event: SandboxEvents.STOPPED,
+  })
   @TrackJobExecution()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 
-  @OnEvent(SandboxEvents.CREATED)
+  @OnAsyncEvent({
+    event: SandboxEvents.CREATED,
+  })
   @TrackJobExecution()
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
-    this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
+    await this.syncInstanceState(event.sandbox.id)
   }
 }

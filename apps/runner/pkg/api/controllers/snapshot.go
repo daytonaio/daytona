@@ -26,6 +26,7 @@ import (
 //
 //	@Tags			snapshots
 //	@Summary		Tag an image
+//	@Deprecated		New snapshot tags are sent in PullSnapshot
 //	@Description	Tag an existing local image with a new target reference
 //	@Param			request	body		dto.TagImageRequestDTO	true	"Tag image request"
 //	@Success		200		{string}	string					"Image successfully tagged"
@@ -97,49 +98,10 @@ func PullSnapshot(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	// Pull the image using the pull registry (or none for public images)
-	err = runner.Docker.PullImage(ctx.Request.Context(), request.Snapshot, request.Registry)
+	err = runner.Docker.PullSnapshot(ctx.Request.Context(), request)
 	if err != nil {
 		ctx.Error(err)
 		return
-	}
-
-	if request.DestinationRegistry != nil {
-		if request.DestinationRegistry.Project == nil {
-			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to registry")))
-			return
-		}
-
-		var targetRef string
-
-		// If destination ref is provided, use it directly; otherwise build it from the image info
-		if request.DestinationRef != nil {
-			targetRef = *request.DestinationRef
-		} else {
-			// Get image info to retrieve the hash
-			imageInfo, err := runner.Docker.GetImageInfo(ctx.Request.Context(), request.Snapshot)
-			if err != nil {
-				ctx.Error(err)
-				return
-			}
-
-			ref := "daytona-" + getHashWithoutPrefix(imageInfo.Hash) + ":daytona"
-			targetRef = fmt.Sprintf("%s/%s/%s", request.DestinationRegistry.Url, *request.DestinationRegistry.Project, ref)
-		}
-
-		// Tag the image for the target registry
-		err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, targetRef)
-		if err != nil {
-			ctx.Error(err)
-			return
-		}
-
-		// Push the tagged image
-		err = runner.Docker.PushImage(ctx.Request.Context(), targetRef, request.DestinationRegistry)
-		if err != nil {
-			ctx.Error(err)
-			return
-		}
 	}
 
 	ctx.JSON(http.StatusOK, "Snapshot pulled successfully")
@@ -176,34 +138,10 @@ func BuildSnapshot(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err = runner.Docker.BuildImage(ctx.Request.Context(), request)
+	err = runner.Docker.BuildSnapshot(ctx.Request.Context(), request)
 	if err != nil {
 		ctx.Error(err)
 		return
-	}
-
-	tag := request.Snapshot
-
-	if request.PushToInternalRegistry {
-		if request.Registry.Project == nil {
-			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to internal registry")))
-			return
-		}
-		tag = fmt.Sprintf("%s/%s/%s", request.Registry.Url, *request.Registry.Project, request.Snapshot)
-	}
-
-	err = runner.Docker.TagImage(ctx.Request.Context(), request.Snapshot, tag)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	if request.PushToInternalRegistry {
-		err = runner.Docker.PushImage(ctx.Request.Context(), tag, request.Registry)
-		if err != nil {
-			ctx.Error(err)
-			return
-		}
 	}
 
 	ctx.JSON(http.StatusOK, "Snapshot built successfully")
@@ -396,7 +334,7 @@ func GetBuildLogs(ctx *gin.Context) {
 //	@Description	Get information about a specified snapshot including size and entrypoint
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
-//	@Success		200			{object}	SnapshotInfoResponse
+//	@Success		200			{object}	dto.SnapshotInfoResponse
 //	@Failure		400			{object}	common_errors.ErrorResponse
 //	@Failure		401			{object}	common_errors.ErrorResponse
 //	@Failure		404			{object}	common_errors.ErrorResponse
@@ -430,23 +368,44 @@ func GetSnapshotInfo(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, SnapshotInfoResponse{
+	ctx.JSON(http.StatusOK, dto.SnapshotInfoResponse{
 		Name:       snapshot,
 		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024), // Convert bytes to GB
 		Entrypoint: info.Entrypoint,
 		Cmd:        info.Cmd,
-		Hash:       getHashWithoutPrefix(info.Hash),
+		Hash:       dto.HashWithoutPrefix(info.Hash),
 	})
 }
 
-type SnapshotInfoResponse struct {
-	Name       string   `json:"name" example:"nginx:latest"`
-	SizeGB     float64  `json:"sizeGB" example:"0.13"`
-	Entrypoint []string `json:"entrypoint,omitempty" example:"[\"nginx\",\"-g\",\"daemon off;\"]"`
-	Cmd        []string `json:"cmd,omitempty" example:"[\"nginx\",\"-g\",\"daemon off;\"]"`
-	Hash       string   `json:"hash,omitempty" example:"a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff"`
-} //	@name	SnapshotInfoResponse
+// InspectSnapshotInRegistry godoc
+//
+//	@Tags			snapshots
+//	@Summary		Inspect a snapshot in a registry
+//	@Description	Inspect a specified snapshot in a registry
+//	@Produce		json
+//	@Param			request	body		dto.InspectSnapshotInRegistryRequestDTO	true	"Inspect snapshot in registry request"
+//	@Success		200		{object}	dto.SnapshotDigestResponse
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
+//
+//	@Router			/snapshots/inspect [post]
+//	@id				InspectSnapshotInRegistry
+func InspectSnapshotInRegistry(ctx *gin.Context) {
+	var request dto.InspectSnapshotInRegistryRequestDTO
+	err := ctx.ShouldBindJSON(&request)
 
-func getHashWithoutPrefix(hash string) string {
-	return strings.TrimPrefix(hash, "sha256:")
+	runner := runner.GetInstance(nil)
+
+	digest, err := runner.Docker.InspectImageInRegistry(ctx.Request.Context(), request.Snapshot, request.Registry)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.SnapshotDigestResponse{
+		Hash:   dto.HashWithoutPrefix(digest.Digest),
+		SizeGB: float64(digest.Size) / (1024 * 1024 * 1024),
+	})
 }

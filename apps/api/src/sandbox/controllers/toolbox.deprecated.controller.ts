@@ -16,6 +16,7 @@ import {
   HttpCode,
   UseInterceptors,
   RawBodyRequest,
+  BadRequestException,
   Res,
   Next,
 } from '@nestjs/common'
@@ -240,6 +241,10 @@ export class ToolboxController {
 
     if (!runnerInfo) {
       const runner = await this.toolboxService.getRunner(sandboxId)
+      if (!runner.proxyUrl) {
+        throw new BadRequestException('Runner proxy URL not found')
+      }
+
       runnerInfo = {
         apiKey: runner.apiKey,
         apiUrl: runner.proxyUrl,

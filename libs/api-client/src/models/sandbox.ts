@@ -212,6 +212,12 @@ export interface Sandbox {
    * @memberof Sandbox
    */
   daemonVersion?: string
+  /**
+   * The runner ID of the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   */
+  runnerId?: string
 }
 
 export const SandboxBackupStateEnum = {

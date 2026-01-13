@@ -23,24 +23,6 @@ export interface CreateRunner {
    * @type {string}
    * @memberof CreateRunner
    */
-  domain: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  apiUrl: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
-  proxyUrl: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateRunner
-   */
   regionId: string
   /**
    *

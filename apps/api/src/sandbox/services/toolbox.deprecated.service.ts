@@ -27,6 +27,10 @@ export class ToolboxService {
   async forwardRequestToRunner(sandboxId: string, method: string, path: string, data?: any): Promise<any> {
     const runner = await this.getRunner(sandboxId)
 
+    if (!runner.proxyUrl) {
+      throw new NotFoundException(`Runner for sandbox ${sandboxId} has no proxy URL`)
+    }
+
     const maxRetries = 5
     let attempt = 1
 
