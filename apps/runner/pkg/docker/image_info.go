@@ -5,7 +5,11 @@ package docker
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"strings"
+
+	"github.com/daytonaio/runner/pkg/api/dto"
 )
 
 type ImageInfo struct {
@@ -13,6 +17,11 @@ type ImageInfo struct {
 	Entrypoint []string
 	Cmd        []string
 	Hash       string // Image hash/digest
+}
+
+type ImageDigest struct {
+	Digest string
+	Size   int64
 }
 
 func (d *DockerClient) GetImageInfo(ctx context.Context, imageName string) (*ImageInfo, error) {
@@ -41,5 +50,22 @@ func (d *DockerClient) GetImageInfo(ctx context.Context, imageName string) (*Ima
 		Entrypoint: inspect.Config.Entrypoint,
 		Cmd:        inspect.Config.Cmd,
 		Hash:       hash,
+	}, nil
+}
+
+func (d *DockerClient) InspectImageInRegistry(ctx context.Context, imageName string, registry *dto.RegistryDTO) (*ImageDigest, error) {
+	encodedRegistryAuth := ""
+	if registry != nil {
+		encodedRegistryAuth = base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "{ \"username\": \"%s\", \"password\": \"%s\" }", registry.Username, registry.Password))
+	}
+
+	digest, err := d.apiClient.DistributionInspect(ctx, imageName, encodedRegistryAuth)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ImageDigest{
+		Digest: digest.Descriptor.Digest.String(),
+		Size:   digest.Descriptor.Size,
 	}, nil
 }

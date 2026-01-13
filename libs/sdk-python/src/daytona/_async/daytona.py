@@ -427,15 +427,7 @@ class AsyncDaytona:
         response = await self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=timeout or None)
 
         if response.state == SandboxState.PENDING_BUILD and on_snapshot_create_logs:
-            _, url, *_ = self._sandbox_api._get_build_logs_serialize(  # pylint: disable=protected-access
-                response.id,
-                follow=True,
-                x_daytona_organization_id=None,
-                _request_auth=None,
-                _content_type=None,
-                _headers=None,
-                _host_index=None,
-            )
+            build_logs_url = await self._sandbox_api.get_build_logs_url(response.id)
 
             response_ref = {"response": response}
 
@@ -453,7 +445,7 @@ class AsyncDaytona:
                 response_ref["response"] = await self._sandbox_api.get_sandbox(response_ref["response"].id)
 
             await process_streaming_response(
-                url=url,
+                url=build_logs_url + "?follow=true",
                 headers=self._sandbox_api.api_client.default_headers,
                 on_chunk=lambda chunk: on_snapshot_create_logs(chunk.rstrip()),
                 should_terminate=should_terminate,

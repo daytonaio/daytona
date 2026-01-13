@@ -115,6 +115,16 @@ definitions:
       - statusCode
       - timestamp
     type: object
+  InspectSnapshotInRegistryRequest:
+    properties:
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        example: nginx:latest
+        type: string
+    required:
+      - snapshot
+    type: object
   IsRecoverableDTO:
     properties:
       errorReason:
@@ -133,6 +143,8 @@ definitions:
         type: string
       destinationRegistry:
         $ref: '#/definitions/RegistryDTO'
+      newTag:
+        type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
       snapshot:
@@ -213,10 +225,10 @@ definitions:
     type: object
   RunnerInfoResponseDTO:
     properties:
+      appVersion:
+        type: string
       metrics:
         $ref: '#/definitions/RunnerMetrics'
-      version:
-        type: string
     type: object
   RunnerMetrics:
     properties:
@@ -243,8 +255,19 @@ definitions:
         type: string
       backupState:
         $ref: '#/definitions/enums.BackupState'
+      daemonVersion:
+        type: string
       state:
         $ref: '#/definitions/enums.SandboxState'
+    type: object
+  SnapshotDigestResponse:
+    properties:
+      hash:
+        example: a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff
+        type: string
+      sizeGB:
+        example: 0.13
+        type: number
     type: object
   SnapshotExistsResponse:
     properties:
@@ -279,6 +302,11 @@ definitions:
       sizeGB:
         example: 0.13
         type: number
+    type: object
+  StartSandboxResponse:
+    properties:
+      daemonVersion:
+        type: string
     type: object
   TagImageRequestDTO:
     properties:
@@ -399,7 +427,7 @@ paths:
         '201':
           description: Created
           schema:
-            type: string
+            $ref: '#/definitions/StartSandboxResponse'
         '400':
           description: Bad Request
           schema:
@@ -816,11 +844,12 @@ paths:
             type: object
       produces:
         - application/json
+        - application/json
       responses:
         '200':
           description: Sandbox started
           schema:
-            type: string
+            $ref: '#/definitions/StartSandboxResponse'
         '400':
           description: Bad Request
           schema:
@@ -1120,6 +1149,43 @@ paths:
       summary: Get snapshot information
       tags:
         - snapshots
+  /snapshots/inspect:
+    post:
+      description: Inspect a specified snapshot in a registry
+      operationId: InspectSnapshotInRegistry
+      parameters:
+        - description: Inspect snapshot in registry request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/InspectSnapshotInRegistryRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SnapshotDigestResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Inspect a snapshot in a registry
+      tags:
+        - snapshots
   /snapshots/logs:
     get:
       description: Stream build logs
@@ -1240,6 +1306,7 @@ paths:
         - snapshots
   /snapshots/tag:
     post:
+      deprecated: true
       description: Tag an existing local image with a new target reference
       operationId: TagImage
       parameters:

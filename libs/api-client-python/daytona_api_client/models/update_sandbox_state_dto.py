@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,8 +29,9 @@ class UpdateSandboxStateDto(BaseModel):
     """ # noqa: E501
     state: StrictStr = Field(description="The new state for the sandbox")
     error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", alias="errorReason")
+    recoverable: Optional[StrictBool] = Field(default=None, description="Whether the sandbox is recoverable")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["state", "errorReason"]
+    __properties: ClassVar[List[str]] = ["state", "errorReason", "recoverable"]
 
     @field_validator('state')
     def state_validate_enum(cls, value):
@@ -98,7 +99,8 @@ class UpdateSandboxStateDto(BaseModel):
 
         _obj = cls.model_validate({
             "state": obj.get("state"),
-            "errorReason": obj.get("errorReason")
+            "errorReason": obj.get("errorReason"),
+            "recoverable": obj.get("recoverable")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -18,8 +18,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,22 +28,24 @@ class AdminCreateRunner(BaseModel):
     """
     AdminCreateRunner
     """ # noqa: E501
-    domain: StrictStr
-    api_url: StrictStr = Field(alias="apiUrl")
-    proxy_url: StrictStr = Field(alias="proxyUrl")
     region_id: StrictStr = Field(alias="regionId")
     name: StrictStr
     api_key: StrictStr = Field(alias="apiKey")
-    var_class: StrictStr = Field(alias="class")
-    version: StrictStr
+    api_version: Annotated[str, Field(strict=True)] = Field(description="The api version of the runner to create", alias="apiVersion")
+    domain: Optional[StrictStr] = Field(default=None, description="The domain of the runner")
+    api_url: Optional[StrictStr] = Field(default=None, description="The API URL of the runner", alias="apiUrl")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="The proxy URL of the runner", alias="proxyUrl")
+    cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The CPU capacity of the runner")
+    memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The memory capacity of the runner in GiB", alias="memoryGiB")
+    disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk capacity of the runner in GiB", alias="diskGiB")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "proxyUrl", "regionId", "name", "apiKey", "class", "version"]
+    __properties: ClassVar[List[str]] = ["regionId", "name", "apiKey", "apiVersion", "domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB"]
 
-    @field_validator('var_class')
-    def var_class_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['small', 'medium', 'large']):
-            raise ValueError("must be one of enum values ('small', 'medium', 'large')")
+    @field_validator('api_version')
+    def api_version_validate_regular_expression(cls, value):
+        """Validates the regular expression"""
+        if not re.match(r"^(0|2)$", value):
+            raise ValueError(r"must validate the regular expression /^(0|2)$/")
         return value
 
     model_config = ConfigDict(
@@ -103,14 +106,16 @@ class AdminCreateRunner(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "domain": obj.get("domain"),
-            "apiUrl": obj.get("apiUrl"),
-            "proxyUrl": obj.get("proxyUrl"),
             "regionId": obj.get("regionId"),
             "name": obj.get("name"),
             "apiKey": obj.get("apiKey"),
-            "class": obj.get("class"),
-            "version": obj.get("version")
+            "apiVersion": obj.get("apiVersion"),
+            "domain": obj.get("domain"),
+            "apiUrl": obj.get("apiUrl"),
+            "proxyUrl": obj.get("proxyUrl"),
+            "cpu": obj.get("cpu"),
+            "memoryGiB": obj.get("memoryGiB"),
+            "diskGiB": obj.get("diskGiB")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

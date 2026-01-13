@@ -4,6 +4,8 @@
 package common
 
 import (
+	"encoding/json"
+	"errors"
 	"strings"
 
 	"github.com/daytonaio/runner/pkg/models"
@@ -46,4 +48,21 @@ func DeduceRecoveryType(errorReason string) models.RecoveryType {
 // IsRecoverable checks if an error reason is recoverable (any type)
 func IsRecoverable(errorReason string) bool {
 	return DeduceRecoveryType(errorReason) != models.UnknownRecoveryType
+}
+
+func FormatRecoverableError(err error) error {
+	msg := err.Error()
+
+	if IsRecoverable(msg) {
+		res := map[string]any{
+			"errorReason": msg,
+			"recoverable": true,
+		}
+		b, marshalErr := json.Marshal(res)
+		if marshalErr == nil {
+			return errors.New(string(b))
+		}
+	}
+
+	return err
 }

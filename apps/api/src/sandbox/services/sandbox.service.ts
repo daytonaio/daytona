@@ -48,7 +48,6 @@ import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
-import { checkRecoverable } from '../utils/recoverable.util'
 import {
   SandboxSortField,
   SandboxSortDirection,
@@ -67,11 +66,14 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { SnapshotService } from './snapshot.service'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SandboxCreatedEvent } from '../events/sandbox-create.event'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -101,9 +103,10 @@ export class SandboxService {
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRedis() private readonly redis: Redis,
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
-  ) {}
+  ) { }
 
   protected getLockKey(id: string): string {
     return `sandbox:${id}:state-change`
@@ -269,7 +272,7 @@ export class SandboxService {
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: SandboxState.STOPPED })
 
-    this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
     return sandbox
   }
 
@@ -483,6 +486,9 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -689,6 +695,9 @@ export class SandboxService {
       sandbox.pending = true
 
       await this.sandboxRepository.insert(sandbox)
+
+      await this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
       if (error.code === '23505') {
@@ -1073,6 +1082,92 @@ export class SandboxService {
     }
   }
 
+  async getSignedPortPreviewUrl(
+    sandboxIdOrName: string,
+    organizationId: string,
+    port: number,
+    expiresInSeconds = 60,
+  ): Promise<SignedPortPreviewUrlDto> {
+    if (port < 1 || port > 65535) {
+      throw new BadRequestError('Invalid port')
+    }
+
+    if (expiresInSeconds < 1 || expiresInSeconds > 60 * 60 * 24) {
+      throw new BadRequestError('expiresInSeconds must be between 1 second and 24 hours')
+    }
+
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
+
+    const where: FindOptionsWhere<Sandbox> = {
+      organizationId: organizationId,
+      state: Not(SandboxState.DESTROYED),
+    }
+
+    const sandbox = await this.sandboxRepository.findOne({
+      where: [
+        {
+          id: sandboxIdOrName,
+          ...where,
+        },
+        {
+          name: sandboxIdOrName,
+          ...where,
+        },
+      ],
+      cache: {
+        id: `sandbox:${sandboxIdOrName}:organization:${organizationId}`,
+        milliseconds: 1000,
+      },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    const token = customNanoid(urlAlphabet.replace('_', '').replace('-', ''))(16).toLocaleLowerCase()
+
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    await this.redis.setex(lockKey, expiresInSeconds, sandbox.id)
+
+    let url = `${proxyProtocol}://${port}-${token}.${proxyDomain}`
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+    if (region && region.proxyUrl) {
+      // Insert port and sandbox.id into the custom proxy URL
+      url = region.proxyUrl.replace(/(https?:\/)(\/)/, `$1/${port}-${token}.`)
+    }
+
+    return {
+      sandboxId: sandbox.id,
+      url,
+    }
+  }
+
+  async getSandboxIdFromSignedPreviewUrlToken(token: string, port: number): Promise<string> {
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    const sandboxId = await this.redis.get(lockKey)
+    if (!sandboxId) {
+      throw new ForbiddenException('Invalid or expired token')
+    }
+    return sandboxId
+  }
+
+  async expireSignedPreviewUrlToken(
+    sandboxIdOrName: string,
+    organizationId: string,
+    token: string,
+    port: number,
+  ): Promise<void> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    const lockKey = `sandbox:signed-preview-url-token:${port}:${token}`
+    await this.redis.del(lockKey)
+  }
+
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
@@ -1082,7 +1177,7 @@ export class SandboxService {
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
-    this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+    await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     return sandbox
   }
 
@@ -1093,56 +1188,60 @@ export class SandboxService {
 
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
-      return sandbox
-    }
-
-    if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      // Allow start of stopped | archived and archiving | archived sandboxes
-      if (
-        sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
-        (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
-      ) {
-        throw new SandboxError('State change in progress')
-      }
-    }
-
-    if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
-      throw new SandboxError('Sandbox is not in valid state')
-    }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-      await this.validateOrganizationQuotas(
-        organization,
-        sandbox.region,
-        sandbox.cpu,
-        sandbox.mem,
-        sandbox.disk,
-        sandbox.id,
-      )
-
-    if (pendingCpuIncremented) {
-      pendingCpuIncrement = sandbox.cpu
-    }
-    if (pendingMemoryIncremented) {
-      pendingMemoryIncrement = sandbox.mem
-    }
-    if (pendingDiskIncremented) {
-      pendingDiskIncrement = sandbox.disk
-    }
-
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.STARTED
-    sandbox.authToken = nanoid(32).toLocaleLowerCase()
-
     try {
+      if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
+        return sandbox
+      }
+
+      if (String(sandbox.state) !== String(sandbox.desiredState)) {
+        // Allow start of stopped | archived and archiving | archived sandboxes
+        if (
+          sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
+          (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
+        ) {
+          throw new SandboxError('State change in progress')
+        }
+      }
+
+      if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
+        throw new SandboxError('Sandbox is not in valid state')
+      }
+
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(
+          organization,
+          sandbox.region,
+          sandbox.cpu,
+          sandbox.mem,
+          sandbox.disk,
+          sandbox.id,
+        )
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = sandbox.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = sandbox.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sandbox.disk
+      }
+
+      sandbox.pending = true
+      sandbox.desiredState = SandboxDesiredState.STARTED
+      sandbox.authToken = nanoid(32).toLocaleLowerCase()
+
       await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+      await this.eventEmitter.emitAsync(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
+
+      return sandbox
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -1153,10 +1252,6 @@ export class SandboxService {
       )
       throw error
     }
-
-    this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
-
-    return sandbox
   }
 
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
@@ -1185,9 +1280,9 @@ export class SandboxService {
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
     if (sandbox.autoDeleteInterval === 0) {
-      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
     } else {
-      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+      await this.eventEmitter.emitAsync(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
     }
     return sandbox
   }
@@ -1212,10 +1307,17 @@ export class SandboxService {
       throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
     }
 
+    if (runner.apiVersion === '2') {
+      // TODO: we need "recovering" state that can be set after calling recover
+      // Once in recovering, we abort further processing and let the manager/job handler take care of it
+      // (Also, since desiredState would be STARTED, we need to check the quota)
+      throw new ForbiddenException('Recovering sandboxes with runner API version 2 is not supported')
+    }
+
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     try {
-      await runnerAdapter.recover(sandbox)
+      await runnerAdapter.recoverSandbox(sandbox)
     } catch (error) {
       if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
         const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(sandbox.disk * 0.1).toFixed(2)}GB (10% of original ${sandbox.disk.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
@@ -1270,6 +1372,26 @@ export class SandboxService {
     }
 
     return this.configService.getOrThrow('proxy.toolboxUrl')
+  }
+
+  async getBuildLogsUrl(sandboxIdOrName: string): Promise<string> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName)
+
+    if (!sandbox.buildInfo?.snapshotRef) {
+      throw new NotFoundException(`Sandbox ${sandboxIdOrName} has no build info`)
+    }
+
+    const region = await this.regionService.findOne(sandbox.region, true)
+
+    if (!region) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} not found`)
+    }
+
+    if (!region.proxyUrl) {
+      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} has no proxy URL`)
+    }
+
+    return region.proxyUrl + '/sandboxes/' + sandbox.id + '/build-logs'
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, regionIdOrName?: string): Promise<string> {
@@ -1415,7 +1537,12 @@ export class SandboxService {
 
   // used by internal services to update the state of a sandbox to resolve domain and runner state mismatch
   // notably, when a sandbox instance stops or errors on the runner, the domain state needs to be updated to reflect the actual state
-  async updateState(sandboxId: string, newState: SandboxState, errorReason?: string): Promise<void> {
+  async updateState(
+    sandboxId: string,
+    newState: SandboxState,
+    recoverable = false,
+    errorReason?: string,
+  ): Promise<void> {
     const sandbox = await this.sandboxRepository.findOne({
       where: { id: sandboxId },
     })
@@ -1442,15 +1569,11 @@ export class SandboxService {
     const oldState = sandbox.state
     const oldDesiredState = sandbox.desiredState
     sandbox.state = newState
+    sandbox.recoverable = false
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
       if (newState === SandboxState.ERROR) {
-        sandbox.recoverable = false
-        try {
-          sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
-        } catch (err) {
-          this.logger.error(`Error checking if sandbox ${sandboxId} is recoverable:`, err)
-        }
+        sandbox.recoverable = recoverable
       }
     }
     //  we need to update the desired state to match the new state

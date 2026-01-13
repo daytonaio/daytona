@@ -30,6 +30,12 @@ export interface UpdateSandboxStateDto {
    * @memberof UpdateSandboxStateDto
    */
   errorReason?: string
+  /**
+   * Whether the sandbox is recoverable
+   * @type {boolean}
+   * @memberof UpdateSandboxStateDto
+   */
+  recoverable?: boolean
 }
 
 export const UpdateSandboxStateDtoStateEnum = {

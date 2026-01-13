@@ -39,6 +39,46 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
   return {
     /**
      *
+     * @summary Get sandbox ID from signed preview URL token
+     * @param {string} signedPreviewToken Signed preview URL token
+     * @param {number} port Port number to get sandbox ID from signed preview URL token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxIdFromSignedPreviewUrlToken: async (
+      signedPreviewToken: string,
+      port: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'signedPreviewToken' is not null or undefined
+      assertParamExists('getSandboxIdFromSignedPreviewUrlToken', 'signedPreviewToken', signedPreviewToken)
+      // verify required parameter 'port' is not null or undefined
+      assertParamExists('getSandboxIdFromSignedPreviewUrlToken', 'port', port)
+      const localVarPath = `/preview/{signedPreviewToken}/{port}/sandbox-id`
+        .replace(`{${'signedPreviewToken'}}`, encodeURIComponent(String(signedPreviewToken)))
+        .replace(`{${'port'}}`, encodeURIComponent(String(port)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Check if user has access to the sandbox
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -163,6 +203,35 @@ export const PreviewApiFp = function (configuration?: Configuration) {
   return {
     /**
      *
+     * @summary Get sandbox ID from signed preview URL token
+     * @param {string} signedPreviewToken Signed preview URL token
+     * @param {number} port Port number to get sandbox ID from signed preview URL token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxIdFromSignedPreviewUrlToken(
+      signedPreviewToken: string,
+      port: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxIdFromSignedPreviewUrlToken(
+        signedPreviewToken,
+        port,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['PreviewApi.getSandboxIdFromSignedPreviewUrlToken']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Check if user has access to the sandbox
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -244,6 +313,23 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
   return {
     /**
      *
+     * @summary Get sandbox ID from signed preview URL token
+     * @param {string} signedPreviewToken Signed preview URL token
+     * @param {number} port Port number to get sandbox ID from signed preview URL token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxIdFromSignedPreviewUrlToken(
+      signedPreviewToken: string,
+      port: number,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<string> {
+      return localVarFp
+        .getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken, port, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Check if user has access to the sandbox
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -283,6 +369,25 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class PreviewApi extends BaseAPI {
+  /**
+   *
+   * @summary Get sandbox ID from signed preview URL token
+   * @param {string} signedPreviewToken Signed preview URL token
+   * @param {number} port Port number to get sandbox ID from signed preview URL token
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof PreviewApi
+   */
+  public getSandboxIdFromSignedPreviewUrlToken(
+    signedPreviewToken: string,
+    port: number,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return PreviewApiFp(this.configuration)
+      .getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken, port, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
   /**
    *
    * @summary Check if user has access to the sandbox

@@ -80,7 +80,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/StartSandboxResponse"
                         }
                     },
                     "400": {
@@ -683,6 +683,7 @@ const docTemplate = `{
             "post": {
                 "description": "Start sandbox",
                 "produces": [
+                    "application/json",
                     "application/json"
                 ],
                 "tags": [
@@ -711,7 +712,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Sandbox started",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/StartSandboxResponse"
                         }
                     },
                     "400": {
@@ -1159,6 +1160,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/snapshots/inspect": {
+            "post": {
+                "description": "Inspect a specified snapshot in a registry",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Inspect a snapshot in a registry",
+                "operationId": "InspectSnapshotInRegistry",
+                "parameters": [
+                    {
+                        "description": "Inspect snapshot in registry request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InspectSnapshotInRegistryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SnapshotDigestResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/snapshots/logs": {
             "get": {
                 "description": "Stream build logs",
@@ -1343,6 +1400,7 @@ const docTemplate = `{
                 ],
                 "summary": "Tag an image",
                 "operationId": "TagImage",
+                "deprecated": true,
                 "parameters": [
                     {
                         "description": "Tag image request",
@@ -1561,6 +1619,21 @@ const docTemplate = `{
                 }
             }
         },
+        "InspectSnapshotInRegistryRequest": {
+            "type": "object",
+            "required": [
+                "snapshot"
+            ],
+            "properties": {
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "type": "string",
+                    "example": "nginx:latest"
+                }
+            }
+        },
         "IsRecoverableDTO": {
             "type": "object",
             "required": [
@@ -1591,6 +1664,9 @@ const docTemplate = `{
                 },
                 "destinationRegistry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "newTag": {
+                    "type": "string"
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
@@ -1705,11 +1781,11 @@ const docTemplate = `{
         "RunnerInfoResponseDTO": {
             "type": "object",
             "properties": {
+                "appVersion": {
+                    "type": "string"
+                },
                 "metrics": {
                     "$ref": "#/definitions/RunnerMetrics"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },
@@ -1751,8 +1827,24 @@ const docTemplate = `{
                 "backupState": {
                     "$ref": "#/definitions/enums.BackupState"
                 },
+                "daemonVersion": {
+                    "type": "string"
+                },
                 "state": {
                     "$ref": "#/definitions/enums.SandboxState"
+                }
+            }
+        },
+        "SnapshotDigestResponse": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string",
+                    "example": "a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff"
+                },
+                "sizeGB": {
+                    "type": "number",
+                    "example": 0.13
                 }
             }
         },
@@ -1801,6 +1893,14 @@ const docTemplate = `{
                 "sizeGB": {
                     "type": "number",
                     "example": 0.13
+                }
+            }
+        },
+        "StartSandboxResponse": {
+            "type": "object",
+            "properties": {
+                "daemonVersion": {
+                    "type": "string"
                 }
             }
         },

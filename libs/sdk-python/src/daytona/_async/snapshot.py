@@ -154,22 +154,14 @@ class AsyncSnapshotService:
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
 
         async def start_log_streaming():
-            _, url, *_ = self.__snapshots_api._get_snapshot_build_logs_serialize(  # pylint: disable=protected-access
-                id=created_snapshot.id,
-                follow=True,
-                x_daytona_organization_id=None,
-                _request_auth=None,
-                _content_type=None,
-                _headers=None,
-                _host_index=None,
-            )
+            build_logs_url = await self.__snapshots_api.get_snapshot_build_logs_url(created_snapshot.id)
 
             async def should_terminate():
                 latest_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
                 return latest_snapshot.state in terminal_states
 
             await process_streaming_response(
-                url=url,
+                url=build_logs_url + "?follow=true",
                 headers=self.__snapshots_api.api_client.default_headers,
                 on_chunk=lambda chunk: on_logs(chunk.rstrip()),
                 should_terminate=should_terminate,

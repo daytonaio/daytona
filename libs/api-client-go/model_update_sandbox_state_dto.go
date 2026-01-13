@@ -24,7 +24,9 @@ type UpdateSandboxStateDto struct {
 	// The new state for the sandbox
 	State string `json:"state"`
 	// Optional error message when reporting an error state
-	ErrorReason          *string `json:"errorReason,omitempty"`
+	ErrorReason *string `json:"errorReason,omitempty"`
+	// Whether the sandbox is recoverable
+	Recoverable          *bool `json:"recoverable,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -104,6 +106,38 @@ func (o *UpdateSandboxStateDto) SetErrorReason(v string) {
 	o.ErrorReason = &v
 }
 
+// GetRecoverable returns the Recoverable field value if set, zero value otherwise.
+func (o *UpdateSandboxStateDto) GetRecoverable() bool {
+	if o == nil || IsNil(o.Recoverable) {
+		var ret bool
+		return ret
+	}
+	return *o.Recoverable
+}
+
+// GetRecoverableOk returns a tuple with the Recoverable field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateSandboxStateDto) GetRecoverableOk() (*bool, bool) {
+	if o == nil || IsNil(o.Recoverable) {
+		return nil, false
+	}
+	return o.Recoverable, true
+}
+
+// HasRecoverable returns a boolean if a field has been set.
+func (o *UpdateSandboxStateDto) HasRecoverable() bool {
+	if o != nil && !IsNil(o.Recoverable) {
+		return true
+	}
+
+	return false
+}
+
+// SetRecoverable gets a reference to the given bool and assigns it to the Recoverable field.
+func (o *UpdateSandboxStateDto) SetRecoverable(v bool) {
+	o.Recoverable = &v
+}
+
 func (o UpdateSandboxStateDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -117,6 +151,9 @@ func (o UpdateSandboxStateDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["state"] = o.State
 	if !IsNil(o.ErrorReason) {
 		toSerialize["errorReason"] = o.ErrorReason
+	}
+	if !IsNil(o.Recoverable) {
+		toSerialize["recoverable"] = o.Recoverable
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -163,6 +200,7 @@ func (o *UpdateSandboxStateDto) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "state")
 		delete(additionalProperties, "errorReason")
+		delete(additionalProperties, "recoverable")
 		o.AdditionalProperties = additionalProperties
 	}
 

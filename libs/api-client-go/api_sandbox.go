@@ -89,16 +89,48 @@ type SandboxAPI interface {
 	DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
+		ExpireSignedPortPreviewUrl Expire signed preview URL for a sandbox port
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxIdOrName ID or name of the sandbox
+		@param port Port number to expire signed preview URL for
+		@param token Token to expire signed preview URL for
+		@return SandboxAPIExpireSignedPortPreviewUrlRequest
+	*/
+	ExpireSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32, token string) SandboxAPIExpireSignedPortPreviewUrlRequest
+
+	// ExpireSignedPortPreviewUrlExecute executes the request
+	ExpireSignedPortPreviewUrlExecute(r SandboxAPIExpireSignedPortPreviewUrlRequest) (*http.Response, error)
+
+	/*
 		GetBuildLogs Get build logs
+
+		This endpoint is deprecated. Use `getBuildLogsUrl` instead.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIGetBuildLogsRequest
+
+		Deprecated
 	*/
 	GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest
 
 	// GetBuildLogsExecute executes the request
+	// Deprecated
 	GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest) (*http.Response, error)
+
+	/*
+		GetBuildLogsUrl Get build logs URL
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxIdOrName ID or name of the sandbox
+		@return SandboxAPIGetBuildLogsUrlRequest
+	*/
+	GetBuildLogsUrl(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsUrlRequest
+
+	// GetBuildLogsUrlExecute executes the request
+	//  @return Url
+	GetBuildLogsUrlExecute(r SandboxAPIGetBuildLogsUrlRequest) (*Url, *http.Response, error)
 
 	/*
 		GetPortPreviewUrl Get preview URL for a sandbox port
@@ -138,6 +170,20 @@ type SandboxAPI interface {
 	// GetSandboxesForRunnerExecute executes the request
 	//  @return []Sandbox
 	GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxesForRunnerRequest) ([]Sandbox, *http.Response, error)
+
+	/*
+		GetSignedPortPreviewUrl Get signed preview URL for a sandbox port
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxIdOrName ID or name of the sandbox
+		@param port Port number to get signed preview URL for
+		@return SandboxAPIGetSignedPortPreviewUrlRequest
+	*/
+	GetSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetSignedPortPreviewUrlRequest
+
+	// GetSignedPortPreviewUrlExecute executes the request
+	//  @return SingedPortPreviewUrl
+	GetSignedPortPreviewUrlExecute(r SandboxAPIGetSignedPortPreviewUrlRequest) (*SingedPortPreviewUrl, *http.Response, error)
 
 	/*
 		GetToolboxProxyUrl Get toolbox proxy URL for a sandbox
@@ -914,6 +960,114 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type SandboxAPIExpireSignedPortPreviewUrlRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxIdOrName        string
+	port                   float32
+	token                  string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIExpireSignedPortPreviewUrlRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIExpireSignedPortPreviewUrlRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIExpireSignedPortPreviewUrlRequest) Execute() (*http.Response, error) {
+	return r.ApiService.ExpireSignedPortPreviewUrlExecute(r)
+}
+
+/*
+ExpireSignedPortPreviewUrl Expire signed preview URL for a sandbox port
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param port Port number to expire signed preview URL for
+	@param token Token to expire signed preview URL for
+	@return SandboxAPIExpireSignedPortPreviewUrlRequest
+*/
+func (a *SandboxAPIService) ExpireSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32, token string) SandboxAPIExpireSignedPortPreviewUrlRequest {
+	return SandboxAPIExpireSignedPortPreviewUrlRequest{
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		port:            port,
+		token:           token,
+	}
+}
+
+// Execute executes the request
+func (a *SandboxAPIService) ExpireSignedPortPreviewUrlExecute(r SandboxAPIExpireSignedPortPreviewUrlRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ExpireSignedPortPreviewUrl")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url/{token}/expire"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"port"+"}", url.PathEscape(parameterValueToString(r.port, "port")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"token"+"}", url.PathEscape(parameterValueToString(r.token, "token")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type SandboxAPIGetBuildLogsRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
@@ -941,9 +1095,13 @@ func (r SandboxAPIGetBuildLogsRequest) Execute() (*http.Response, error) {
 /*
 GetBuildLogs Get build logs
 
+This endpoint is deprecated. Use `getBuildLogsUrl` instead.
+
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIGetBuildLogsRequest
+
+Deprecated
 */
 func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest {
 	return SandboxAPIGetBuildLogsRequest{
@@ -954,6 +1112,7 @@ func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxIdOrName st
 }
 
 // Execute executes the request
+// Deprecated
 func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodGet
@@ -1022,6 +1181,118 @@ func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest)
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetBuildLogsUrlRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxIdOrName        string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetBuildLogsUrlRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetBuildLogsUrlRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIGetBuildLogsUrlRequest) Execute() (*Url, *http.Response, error) {
+	return r.ApiService.GetBuildLogsUrlExecute(r)
+}
+
+/*
+GetBuildLogsUrl Get build logs URL
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIGetBuildLogsUrlRequest
+*/
+func (a *SandboxAPIService) GetBuildLogsUrl(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsUrlRequest {
+	return SandboxAPIGetBuildLogsUrlRequest{
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Url
+func (a *SandboxAPIService) GetBuildLogsUrlExecute(r SandboxAPIGetBuildLogsUrlRequest) (*Url, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Url
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetBuildLogsUrl")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/build-logs-url"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPIGetPortPreviewUrlRequest struct {
@@ -1332,6 +1603,132 @@ func (a *SandboxAPIService) GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxe
 	}
 	if r.skipReconcilingSandboxes != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "skipReconcilingSandboxes", r.skipReconcilingSandboxes, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSignedPortPreviewUrlRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxIdOrName        string
+	port                   float32
+	xDaytonaOrganizationID *string
+	expiresInSeconds       *float32
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSignedPortPreviewUrlRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSignedPortPreviewUrlRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Expiration time in seconds (default: 60 seconds)
+func (r SandboxAPIGetSignedPortPreviewUrlRequest) ExpiresInSeconds(expiresInSeconds float32) SandboxAPIGetSignedPortPreviewUrlRequest {
+	r.expiresInSeconds = &expiresInSeconds
+	return r
+}
+
+func (r SandboxAPIGetSignedPortPreviewUrlRequest) Execute() (*SingedPortPreviewUrl, *http.Response, error) {
+	return r.ApiService.GetSignedPortPreviewUrlExecute(r)
+}
+
+/*
+GetSignedPortPreviewUrl Get signed preview URL for a sandbox port
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@param port Port number to get signed preview URL for
+	@return SandboxAPIGetSignedPortPreviewUrlRequest
+*/
+func (a *SandboxAPIService) GetSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetSignedPortPreviewUrlRequest {
+	return SandboxAPIGetSignedPortPreviewUrlRequest{
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		port:            port,
+	}
+}
+
+// Execute executes the request
+//
+//	@return SingedPortPreviewUrl
+func (a *SandboxAPIService) GetSignedPortPreviewUrlExecute(r SandboxAPIGetSignedPortPreviewUrlRequest) (*SingedPortPreviewUrl, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SingedPortPreviewUrl
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSignedPortPreviewUrl")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"port"+"}", url.PathEscape(parameterValueToString(r.port, "port")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.expiresInSeconds != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "expiresInSeconds", r.expiresInSeconds, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

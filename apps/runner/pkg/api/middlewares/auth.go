@@ -5,7 +5,6 @@ package middlewares
 
 import (
 	"errors"
-	"os"
 	"strings"
 
 	"github.com/daytonaio/runner/internal/constants"
@@ -14,7 +13,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(apiToken string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader(constants.DAYTONA_AUTHORIZATION_HEADER)
 		if authHeader == "" {
@@ -38,8 +37,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		token := parts[1]
-		// Compare with API token from environment variable
-		if token != os.Getenv("API_TOKEN") {
+
+		if token != apiToken {
 			ctx.Error(common_errors.NewUnauthorizedError(errors.New("invalid token")))
 			ctx.Abort()
 			return

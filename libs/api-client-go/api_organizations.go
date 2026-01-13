@@ -90,10 +90,9 @@ type OrganizationsAPI interface {
 		CreateRegion Create a new region
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param organizationId Organization ID
 		@return OrganizationsAPICreateRegionRequest
 	*/
-	CreateRegion(ctx context.Context, organizationId string) OrganizationsAPICreateRegionRequest
+	CreateRegion(ctx context.Context) OrganizationsAPICreateRegionRequest
 
 	// CreateRegionExecute executes the request
 	//  @return CreateRegionResponse
@@ -154,10 +153,9 @@ type OrganizationsAPI interface {
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id Region ID
-		@param organizationId Organization ID
 		@return OrganizationsAPIDeleteRegionRequest
 	*/
-	DeleteRegion(ctx context.Context, id string, organizationId string) OrganizationsAPIDeleteRegionRequest
+	DeleteRegion(ctx context.Context, id string) OrganizationsAPIDeleteRegionRequest
 
 	// DeleteRegionExecute executes the request
 	DeleteRegionExecute(r OrganizationsAPIDeleteRegionRequest) (*http.Response, error)
@@ -218,10 +216,9 @@ type OrganizationsAPI interface {
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id Region ID
-		@param organizationId Organization ID
 		@return OrganizationsAPIGetRegionByIdRequest
 	*/
-	GetRegionById(ctx context.Context, id string, organizationId string) OrganizationsAPIGetRegionByIdRequest
+	GetRegionById(ctx context.Context, id string) OrganizationsAPIGetRegionByIdRequest
 
 	// GetRegionByIdExecute executes the request
 	//  @return Region
@@ -256,10 +253,9 @@ type OrganizationsAPI interface {
 		ListAvailableRegions List all available regions for the organization
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param organizationId Organization ID
 		@return OrganizationsAPIListAvailableRegionsRequest
 	*/
-	ListAvailableRegions(ctx context.Context, organizationId string) OrganizationsAPIListAvailableRegionsRequest
+	ListAvailableRegions(ctx context.Context) OrganizationsAPIListAvailableRegionsRequest
 
 	// ListAvailableRegionsExecute executes the request
 	//  @return []Region
@@ -333,10 +329,9 @@ type OrganizationsAPI interface {
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id Region ID
-		@param organizationId Organization ID
 		@return OrganizationsAPIRegenerateProxyApiKeyRequest
 	*/
-	RegenerateProxyApiKey(ctx context.Context, id string, organizationId string) OrganizationsAPIRegenerateProxyApiKeyRequest
+	RegenerateProxyApiKey(ctx context.Context, id string) OrganizationsAPIRegenerateProxyApiKeyRequest
 
 	// RegenerateProxyApiKeyExecute executes the request
 	//  @return RegenerateApiKeyResponse
@@ -347,10 +342,9 @@ type OrganizationsAPI interface {
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id Region ID
-		@param organizationId Organization ID
 		@return OrganizationsAPIRegenerateSshGatewayApiKeyRequest
 	*/
-	RegenerateSshGatewayApiKey(ctx context.Context, id string, organizationId string) OrganizationsAPIRegenerateSshGatewayApiKeyRequest
+	RegenerateSshGatewayApiKey(ctx context.Context, id string) OrganizationsAPIRegenerateSshGatewayApiKeyRequest
 
 	// RegenerateSshGatewayApiKeyExecute executes the request
 	//  @return RegenerateApiKeyResponse
@@ -1007,14 +1001,20 @@ func (a *OrganizationsAPIService) CreateOrganizationRoleExecute(r OrganizationsA
 }
 
 type OrganizationsAPICreateRegionRequest struct {
-	ctx            context.Context
-	ApiService     OrganizationsAPI
-	organizationId string
-	createRegion   *CreateRegion
+	ctx                    context.Context
+	ApiService             OrganizationsAPI
+	createRegion           *CreateRegion
+	xDaytonaOrganizationID *string
 }
 
 func (r OrganizationsAPICreateRegionRequest) CreateRegion(createRegion CreateRegion) OrganizationsAPICreateRegionRequest {
 	r.createRegion = &createRegion
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r OrganizationsAPICreateRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) OrganizationsAPICreateRegionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
 	return r
 }
 
@@ -1026,14 +1026,12 @@ func (r OrganizationsAPICreateRegionRequest) Execute() (*CreateRegionResponse, *
 CreateRegion Create a new region
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId Organization ID
 	@return OrganizationsAPICreateRegionRequest
 */
-func (a *OrganizationsAPIService) CreateRegion(ctx context.Context, organizationId string) OrganizationsAPICreateRegionRequest {
+func (a *OrganizationsAPIService) CreateRegion(ctx context.Context) OrganizationsAPICreateRegionRequest {
 	return OrganizationsAPICreateRegionRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		organizationId: organizationId,
+		ApiService: a,
+		ctx:        ctx,
 	}
 }
 
@@ -1053,8 +1051,7 @@ func (a *OrganizationsAPIService) CreateRegionExecute(r OrganizationsAPICreateRe
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/regions"
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+	localVarPath := localBasePath + "/regions"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1079,6 +1076,9 @@ func (a *OrganizationsAPIService) CreateRegionExecute(r OrganizationsAPICreateRe
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	// body params
 	localVarPostBody = r.createRegion
@@ -1488,10 +1488,16 @@ func (a *OrganizationsAPIService) DeleteOrganizationRoleExecute(r OrganizationsA
 }
 
 type OrganizationsAPIDeleteRegionRequest struct {
-	ctx            context.Context
-	ApiService     OrganizationsAPI
-	id             string
-	organizationId string
+	ctx                    context.Context
+	ApiService             OrganizationsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r OrganizationsAPIDeleteRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) OrganizationsAPIDeleteRegionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
 }
 
 func (r OrganizationsAPIDeleteRegionRequest) Execute() (*http.Response, error) {
@@ -1503,15 +1509,13 @@ DeleteRegion Delete a region
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Region ID
-	@param organizationId Organization ID
 	@return OrganizationsAPIDeleteRegionRequest
 */
-func (a *OrganizationsAPIService) DeleteRegion(ctx context.Context, id string, organizationId string) OrganizationsAPIDeleteRegionRequest {
+func (a *OrganizationsAPIService) DeleteRegion(ctx context.Context, id string) OrganizationsAPIDeleteRegionRequest {
 	return OrganizationsAPIDeleteRegionRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		id:             id,
-		organizationId: organizationId,
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
@@ -1528,9 +1532,8 @@ func (a *OrganizationsAPIService) DeleteRegionExecute(r OrganizationsAPIDeleteRe
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/regions/{id}"
+	localVarPath := localBasePath + "/regions/{id}"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1552,6 +1555,9 @@ func (a *OrganizationsAPIService) DeleteRegionExecute(r OrganizationsAPIDeleteRe
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -1986,10 +1992,16 @@ func (a *OrganizationsAPIService) GetOrganizationUsageOverviewExecute(r Organiza
 }
 
 type OrganizationsAPIGetRegionByIdRequest struct {
-	ctx            context.Context
-	ApiService     OrganizationsAPI
-	id             string
-	organizationId string
+	ctx                    context.Context
+	ApiService             OrganizationsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r OrganizationsAPIGetRegionByIdRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) OrganizationsAPIGetRegionByIdRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
 }
 
 func (r OrganizationsAPIGetRegionByIdRequest) Execute() (*Region, *http.Response, error) {
@@ -2001,15 +2013,13 @@ GetRegionById Get region by ID
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Region ID
-	@param organizationId Organization ID
 	@return OrganizationsAPIGetRegionByIdRequest
 */
-func (a *OrganizationsAPIService) GetRegionById(ctx context.Context, id string, organizationId string) OrganizationsAPIGetRegionByIdRequest {
+func (a *OrganizationsAPIService) GetRegionById(ctx context.Context, id string) OrganizationsAPIGetRegionByIdRequest {
 	return OrganizationsAPIGetRegionByIdRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		id:             id,
-		organizationId: organizationId,
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
@@ -2029,9 +2039,8 @@ func (a *OrganizationsAPIService) GetRegionByIdExecute(r OrganizationsAPIGetRegi
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/regions/{id}"
+	localVarPath := localBasePath + "/regions/{id}"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2053,6 +2062,9 @@ func (a *OrganizationsAPIService) GetRegionByIdExecute(r OrganizationsAPIGetRegi
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -2284,9 +2296,15 @@ func (a *OrganizationsAPIService) LeaveOrganizationExecute(r OrganizationsAPILea
 }
 
 type OrganizationsAPIListAvailableRegionsRequest struct {
-	ctx            context.Context
-	ApiService     OrganizationsAPI
-	organizationId string
+	ctx                    context.Context
+	ApiService             OrganizationsAPI
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r OrganizationsAPIListAvailableRegionsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) OrganizationsAPIListAvailableRegionsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
 }
 
 func (r OrganizationsAPIListAvailableRegionsRequest) Execute() ([]Region, *http.Response, error) {
@@ -2297,14 +2315,12 @@ func (r OrganizationsAPIListAvailableRegionsRequest) Execute() ([]Region, *http.
 ListAvailableRegions List all available regions for the organization
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId Organization ID
 	@return OrganizationsAPIListAvailableRegionsRequest
 */
-func (a *OrganizationsAPIService) ListAvailableRegions(ctx context.Context, organizationId string) OrganizationsAPIListAvailableRegionsRequest {
+func (a *OrganizationsAPIService) ListAvailableRegions(ctx context.Context) OrganizationsAPIListAvailableRegionsRequest {
 	return OrganizationsAPIListAvailableRegionsRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		organizationId: organizationId,
+		ApiService: a,
+		ctx:        ctx,
 	}
 }
 
@@ -2324,8 +2340,7 @@ func (a *OrganizationsAPIService) ListAvailableRegionsExecute(r OrganizationsAPI
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/regions"
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+	localVarPath := localBasePath + "/regions"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2347,6 +2362,9 @@ func (a *OrganizationsAPIService) ListAvailableRegionsExecute(r OrganizationsAPI
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -2888,10 +2906,16 @@ func (a *OrganizationsAPIService) ListOrganizationsExecute(r OrganizationsAPILis
 }
 
 type OrganizationsAPIRegenerateProxyApiKeyRequest struct {
-	ctx            context.Context
-	ApiService     OrganizationsAPI
-	id             string
-	organizationId string
+	ctx                    context.Context
+	ApiService             OrganizationsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r OrganizationsAPIRegenerateProxyApiKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) OrganizationsAPIRegenerateProxyApiKeyRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
 }
 
 func (r OrganizationsAPIRegenerateProxyApiKeyRequest) Execute() (*RegenerateApiKeyResponse, *http.Response, error) {
@@ -2903,15 +2927,13 @@ RegenerateProxyApiKey Regenerate proxy API key for a region
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Region ID
-	@param organizationId Organization ID
 	@return OrganizationsAPIRegenerateProxyApiKeyRequest
 */
-func (a *OrganizationsAPIService) RegenerateProxyApiKey(ctx context.Context, id string, organizationId string) OrganizationsAPIRegenerateProxyApiKeyRequest {
+func (a *OrganizationsAPIService) RegenerateProxyApiKey(ctx context.Context, id string) OrganizationsAPIRegenerateProxyApiKeyRequest {
 	return OrganizationsAPIRegenerateProxyApiKeyRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		id:             id,
-		organizationId: organizationId,
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
@@ -2931,9 +2953,8 @@ func (a *OrganizationsAPIService) RegenerateProxyApiKeyExecute(r OrganizationsAP
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/regions/{id}/regenerate-proxy-api-key"
+	localVarPath := localBasePath + "/regions/{id}/regenerate-proxy-api-key"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2955,6 +2976,9 @@ func (a *OrganizationsAPIService) RegenerateProxyApiKeyExecute(r OrganizationsAP
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -2994,10 +3018,16 @@ func (a *OrganizationsAPIService) RegenerateProxyApiKeyExecute(r OrganizationsAP
 }
 
 type OrganizationsAPIRegenerateSshGatewayApiKeyRequest struct {
-	ctx            context.Context
-	ApiService     OrganizationsAPI
-	id             string
-	organizationId string
+	ctx                    context.Context
+	ApiService             OrganizationsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r OrganizationsAPIRegenerateSshGatewayApiKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) OrganizationsAPIRegenerateSshGatewayApiKeyRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
 }
 
 func (r OrganizationsAPIRegenerateSshGatewayApiKeyRequest) Execute() (*RegenerateApiKeyResponse, *http.Response, error) {
@@ -3009,15 +3039,13 @@ RegenerateSshGatewayApiKey Regenerate SSH gateway API key for a region
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Region ID
-	@param organizationId Organization ID
 	@return OrganizationsAPIRegenerateSshGatewayApiKeyRequest
 */
-func (a *OrganizationsAPIService) RegenerateSshGatewayApiKey(ctx context.Context, id string, organizationId string) OrganizationsAPIRegenerateSshGatewayApiKeyRequest {
+func (a *OrganizationsAPIService) RegenerateSshGatewayApiKey(ctx context.Context, id string) OrganizationsAPIRegenerateSshGatewayApiKeyRequest {
 	return OrganizationsAPIRegenerateSshGatewayApiKeyRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		id:             id,
-		organizationId: organizationId,
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
@@ -3037,9 +3065,8 @@ func (a *OrganizationsAPIService) RegenerateSshGatewayApiKeyExecute(r Organizati
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/regions/{id}/regenerate-ssh-gateway-api-key"
+	localVarPath := localBasePath + "/regions/{id}/regenerate-ssh-gateway-api-key"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -3061,6 +3088,9 @@ func (a *OrganizationsAPIService) RegenerateSshGatewayApiKeyExecute(r Organizati
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {

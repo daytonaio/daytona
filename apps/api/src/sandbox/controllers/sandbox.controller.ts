@@ -53,14 +53,11 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { TypedConfigService } from '../../config/typed-config.service'
-import { EventEmitter2 } from '@nestjs/event-emitter'
-import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -75,6 +72,10 @@ import { SkipThrottle } from '@nestjs/throttler'
 import { ThrottlerScope } from '../../common/decorators/throttler-scope.decorator'
 import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 import { ToolboxProxyUrlDto } from '../dto/toolbox-proxy-url.dto'
+import { UrlDto } from '../../common/dto/url.dto'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
+import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -84,13 +85,29 @@ import { ToolboxProxyUrlDto } from '../dto/toolbox-proxy-url.dto'
 @ApiBearerAuth()
 export class SandboxController {
   private readonly logger = new Logger(SandboxController.name)
-
+  private readonly sandboxCallbacks: Map<string, (event: SandboxStateUpdatedEvent) => void> = new Map()
+  private readonly redisSubscriber: Redis
   constructor(
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
-    private readonly configService: TypedConfigService,
-    private readonly eventEmitter: EventEmitter2,
-  ) {}
+    @InjectRedis() private readonly redis: Redis,
+  ) {
+    this.redisSubscriber = this.redis.duplicate()
+    this.redisSubscriber.subscribe(SANDBOX_EVENT_CHANNEL)
+    this.redisSubscriber.on('message', (channel, message) => {
+      if (channel !== 'sandbox.event.channel') {
+        return
+      }
+
+      try {
+        const event = JSON.parse(message) as SandboxStateUpdatedEvent
+        this.handleSandboxStateUpdated(event)
+      } catch (error) {
+        this.logger.error('Failed to parse sandbox state updated event:', error)
+        return
+      }
+    })
+  }
 
   @Get()
   @ApiOperation({
@@ -570,7 +587,12 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
     @Body() updateStateDto: UpdateSandboxStateDto,
   ): Promise<void> {
-    await this.sandboxService.updateState(sandboxId, updateStateDto.state, updateStateDto.errorReason)
+    await this.sandboxService.updateState(
+      sandboxId,
+      updateStateDto.state,
+      updateStateDto.recoverable,
+      updateStateDto.errorReason,
+    )
   }
 
   @Post(':sandboxIdOrName/backup')
@@ -902,10 +924,87 @@ export class SandboxController {
     return this.sandboxService.getPortPreviewUrl(sandboxIdOrName, authContext.organizationId, port)
   }
 
+  @Get(':sandboxIdOrName/ports/:port/signed-preview-url')
+  @ApiOperation({
+    summary: 'Get signed preview URL for a sandbox port',
+    operationId: 'getSignedPortPreviewUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'port',
+    description: 'Port number to get signed preview URL for',
+    type: 'number',
+  })
+  @ApiQuery({
+    name: 'expiresInSeconds',
+    required: false,
+    type: Number,
+    description: 'Expiration time in seconds (default: 60 seconds)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed preview URL for the specified port',
+    type: SignedPortPreviewUrlDto,
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getSignedPortPreviewUrl(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Param('port') port: number,
+    @Query('expiresInSeconds') expiresInSeconds?: number,
+  ): Promise<SignedPortPreviewUrlDto> {
+    return this.sandboxService.getSignedPortPreviewUrl(
+      sandboxIdOrName,
+      authContext.organizationId,
+      port,
+      expiresInSeconds,
+    )
+  }
+
+  @Post(':sandboxIdOrName/ports/:port/signed-preview-url/:token/expire')
+  @ApiOperation({
+    summary: 'Expire signed preview URL for a sandbox port',
+    operationId: 'expireSignedPortPreviewUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'port',
+    description: 'Port number to expire signed preview URL for',
+    type: 'number',
+  })
+  @ApiParam({
+    name: 'token',
+    description: 'Token to expire signed preview URL for',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Signed preview URL has been expired',
+  })
+  @UseGuards(SandboxAccessGuard)
+  async expireSignedPortPreviewUrl(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Param('port') port: number,
+    @Param('token') token: string,
+  ): Promise<void> {
+    await this.sandboxService.expireSignedPreviewUrlToken(sandboxIdOrName, authContext.organizationId, token, port)
+  }
+
   @Get(':sandboxIdOrName/build-logs')
   @ApiOperation({
     summary: 'Get build logs',
     operationId: 'getBuildLogs',
+    deprecated: true,
+    description: 'This endpoint is deprecated. Use `getBuildLogsUrl` instead.',
   })
   @ApiParam({
     name: 'sandboxIdOrName',
@@ -945,6 +1044,10 @@ export class SandboxController {
       throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} not found`)
     }
 
+    if (!runner.apiUrl) {
+      throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} has no API URL`)
+    }
+
     const logProxy = new LogProxy(
       runner.apiUrl,
       sandbox.buildInfo.snapshotRef.split(':')[0],
@@ -955,6 +1058,28 @@ export class SandboxController {
       next,
     )
     return logProxy.create()
+  }
+
+  @Get(':sandboxIdOrName/build-logs-url')
+  @ApiOperation({
+    summary: 'Get build logs URL',
+    operationId: 'getBuildLogsUrl',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Build logs URL',
+    type: UrlDto,
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getBuildLogsUrl(@Param('sandboxIdOrName') sandboxIdOrName: string): Promise<UrlDto> {
+    const buildLogsUrl = await this.sandboxService.getBuildLogsUrl(sandboxIdOrName)
+
+    return new UrlDto(buildLogsUrl)
   }
 
   @Post(':sandboxIdOrName/ssh-access')
@@ -1098,21 +1223,21 @@ export class SandboxController {
         }
         latestSandbox = event.sandbox
         if (event.sandbox.state === SandboxState.STARTED) {
-          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          this.sandboxCallbacks.delete(sandbox.id)
           clearTimeout(timeout)
           resolve(SandboxDto.fromSandbox(event.sandbox))
         }
         if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
-          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          this.sandboxCallbacks.delete(sandbox.id)
           clearTimeout(timeout)
           reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
         }
       }
 
-      this.eventEmitter.on(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+      this.sandboxCallbacks.set(sandbox.id, handleStateUpdated)
 
       timeout = setTimeout(() => {
-        this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+        this.sandboxCallbacks.delete(sandbox.id)
         if (latestSandbox) {
           resolve(SandboxDto.fromSandbox(latestSandbox))
         } else {
@@ -1122,5 +1247,12 @@ export class SandboxController {
     })
 
     return waitForStarted
+  }
+
+  private handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
+    const callback = this.sandboxCallbacks.get(event.sandbox.id)
+    if (callback) {
+      callback(event)
+    }
   }
 }

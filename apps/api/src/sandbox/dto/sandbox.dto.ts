@@ -262,6 +262,14 @@ export class SandboxDto {
   @IsOptional()
   daemonVersion?: string
 
+  @ApiPropertyOptional({
+    description: 'The runner ID of the sandbox',
+    example: 'runner123',
+    required: false,
+  })
+  @IsOptional()
+  runnerId?: string
+
   static fromSandbox(sandbox: Sandbox): SandboxDto {
     return {
       id: sandbox.id,
@@ -285,22 +293,24 @@ export class SandboxDto {
       errorReason: sandbox.errorReason,
       recoverable: sandbox.recoverable,
       backupState: sandbox.backupState,
-      backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
+      backupCreatedAt: sandbox.lastBackupAt ? new Date(sandbox.lastBackupAt).toISOString() : undefined,
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
       autoDeleteInterval: sandbox.autoDeleteInterval,
       class: sandbox.class,
-      createdAt: sandbox.createdAt?.toISOString(),
-      updatedAt: sandbox.updatedAt?.toISOString(),
+      createdAt: sandbox.createdAt ? new Date(sandbox.createdAt).toISOString() : undefined,
+      updatedAt: sandbox.updatedAt ? new Date(sandbox.updatedAt).toISOString() : undefined,
       buildInfo: sandbox.buildInfo
         ? {
             dockerfileContent: sandbox.buildInfo.dockerfileContent,
             contextHashes: sandbox.buildInfo.contextHashes,
             createdAt: sandbox.buildInfo.createdAt,
             updatedAt: sandbox.buildInfo.updatedAt,
+            snapshotRef: sandbox.buildInfo.snapshotRef,
           }
         : undefined,
       daemonVersion: sandbox.daemonVersion,
+      runnerId: sandbox.runnerId,
     }
   }
 

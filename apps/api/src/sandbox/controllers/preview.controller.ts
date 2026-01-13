@@ -152,4 +152,31 @@ export class PreviewController {
     await this.redis.setex(`preview:access:${sandboxId}:${userId}`, 30, '1')
     return true
   }
+
+  @Get(':signedPreviewToken/:port/sandbox-id')
+  @ApiOperation({
+    summary: 'Get sandbox ID from signed preview URL token',
+    operationId: 'getSandboxIdFromSignedPreviewUrlToken',
+  })
+  @ApiParam({
+    name: 'signedPreviewToken',
+    description: 'Signed preview URL token',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'port',
+    description: 'Port number to get sandbox ID from signed preview URL token',
+    type: 'number',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox ID from signed preview URL token',
+    type: String,
+  })
+  async getSandboxIdFromSignedPreviewUrlToken(
+    @Param('signedPreviewToken') signedPreviewToken: string,
+    @Param('port') port: number,
+  ): Promise<string> {
+    return this.sandboxService.getSandboxIdFromSignedPreviewUrlToken(signedPreviewToken, port)
+  }
 }
