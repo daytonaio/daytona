@@ -13,7 +13,6 @@ import { SandboxState } from '../../enums/sandbox-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
-import { checkRecoverable } from '../../utils/recoverable.util'
 
 export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -92,12 +91,7 @@ export abstract class SandboxAction {
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
       if (state === SandboxState.ERROR) {
-        sandbox.recoverable = false
-        try {
-          sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
-        } catch (err) {
-          this.logger.error(`Error checking if sandbox ${sandboxId} is recoverable:`, err)
-        }
+        sandbox.recoverable = recoverable ?? false
       }
     }
 

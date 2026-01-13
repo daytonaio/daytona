@@ -21,14 +21,23 @@ var _ MappedNullable = &AdminCreateRunner{}
 
 // AdminCreateRunner struct for AdminCreateRunner
 type AdminCreateRunner struct {
-	Domain               string `json:"domain"`
-	ApiUrl               string `json:"apiUrl"`
-	ProxyUrl             string `json:"proxyUrl"`
-	RegionId             string `json:"regionId"`
-	Name                 string `json:"name"`
-	ApiKey               string `json:"apiKey"`
-	Class                string `json:"class"`
-	Version              string `json:"version"`
+	RegionId string `json:"regionId"`
+	Name     string `json:"name"`
+	ApiKey   string `json:"apiKey"`
+	// The api version of the runner to create
+	ApiVersion string `json:"apiVersion" validate:"regexp=^(0|2)$"`
+	// The domain of the runner
+	Domain *string `json:"domain,omitempty"`
+	// The API URL of the runner
+	ApiUrl *string `json:"apiUrl,omitempty"`
+	// The proxy URL of the runner
+	ProxyUrl *string `json:"proxyUrl,omitempty"`
+	// The CPU capacity of the runner
+	Cpu *float32 `json:"cpu,omitempty"`
+	// The memory capacity of the runner in GiB
+	MemoryGiB *float32 `json:"memoryGiB,omitempty"`
+	// The disk capacity of the runner in GiB
+	DiskGiB              *float32 `json:"diskGiB,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -38,16 +47,12 @@ type _AdminCreateRunner AdminCreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAdminCreateRunner(domain string, apiUrl string, proxyUrl string, regionId string, name string, apiKey string, class string, version string) *AdminCreateRunner {
+func NewAdminCreateRunner(regionId string, name string, apiKey string, apiVersion string) *AdminCreateRunner {
 	this := AdminCreateRunner{}
-	this.Domain = domain
-	this.ApiUrl = apiUrl
-	this.ProxyUrl = proxyUrl
 	this.RegionId = regionId
 	this.Name = name
 	this.ApiKey = apiKey
-	this.Class = class
-	this.Version = version
+	this.ApiVersion = apiVersion
 	return &this
 }
 
@@ -57,78 +62,6 @@ func NewAdminCreateRunner(domain string, apiUrl string, proxyUrl string, regionI
 func NewAdminCreateRunnerWithDefaults() *AdminCreateRunner {
 	this := AdminCreateRunner{}
 	return &this
-}
-
-// GetDomain returns the Domain field value
-func (o *AdminCreateRunner) GetDomain() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Domain
-}
-
-// GetDomainOk returns a tuple with the Domain field value
-// and a boolean to check if the value has been set.
-func (o *AdminCreateRunner) GetDomainOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Domain, true
-}
-
-// SetDomain sets field value
-func (o *AdminCreateRunner) SetDomain(v string) {
-	o.Domain = v
-}
-
-// GetApiUrl returns the ApiUrl field value
-func (o *AdminCreateRunner) GetApiUrl() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ApiUrl
-}
-
-// GetApiUrlOk returns a tuple with the ApiUrl field value
-// and a boolean to check if the value has been set.
-func (o *AdminCreateRunner) GetApiUrlOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ApiUrl, true
-}
-
-// SetApiUrl sets field value
-func (o *AdminCreateRunner) SetApiUrl(v string) {
-	o.ApiUrl = v
-}
-
-// GetProxyUrl returns the ProxyUrl field value
-func (o *AdminCreateRunner) GetProxyUrl() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ProxyUrl
-}
-
-// GetProxyUrlOk returns a tuple with the ProxyUrl field value
-// and a boolean to check if the value has been set.
-func (o *AdminCreateRunner) GetProxyUrlOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ProxyUrl, true
-}
-
-// SetProxyUrl sets field value
-func (o *AdminCreateRunner) SetProxyUrl(v string) {
-	o.ProxyUrl = v
 }
 
 // GetRegionId returns the RegionId field value
@@ -203,52 +136,220 @@ func (o *AdminCreateRunner) SetApiKey(v string) {
 	o.ApiKey = v
 }
 
-// GetClass returns the Class field value
-func (o *AdminCreateRunner) GetClass() string {
+// GetApiVersion returns the ApiVersion field value
+func (o *AdminCreateRunner) GetApiVersion() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.Class
+	return o.ApiVersion
 }
 
-// GetClassOk returns a tuple with the Class field value
+// GetApiVersionOk returns a tuple with the ApiVersion field value
 // and a boolean to check if the value has been set.
-func (o *AdminCreateRunner) GetClassOk() (*string, bool) {
+func (o *AdminCreateRunner) GetApiVersionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Class, true
+	return &o.ApiVersion, true
 }
 
-// SetClass sets field value
-func (o *AdminCreateRunner) SetClass(v string) {
-	o.Class = v
+// SetApiVersion sets field value
+func (o *AdminCreateRunner) SetApiVersion(v string) {
+	o.ApiVersion = v
 }
 
-// GetVersion returns the Version field value
-func (o *AdminCreateRunner) GetVersion() string {
-	if o == nil {
+// GetDomain returns the Domain field value if set, zero value otherwise.
+func (o *AdminCreateRunner) GetDomain() string {
+	if o == nil || IsNil(o.Domain) {
 		var ret string
 		return ret
 	}
-
-	return o.Version
+	return *o.Domain
 }
 
-// GetVersionOk returns a tuple with the Version field value
+// GetDomainOk returns a tuple with the Domain field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdminCreateRunner) GetVersionOk() (*string, bool) {
-	if o == nil {
+func (o *AdminCreateRunner) GetDomainOk() (*string, bool) {
+	if o == nil || IsNil(o.Domain) {
 		return nil, false
 	}
-	return &o.Version, true
+	return o.Domain, true
 }
 
-// SetVersion sets field value
-func (o *AdminCreateRunner) SetVersion(v string) {
-	o.Version = v
+// HasDomain returns a boolean if a field has been set.
+func (o *AdminCreateRunner) HasDomain() bool {
+	if o != nil && !IsNil(o.Domain) {
+		return true
+	}
+
+	return false
+}
+
+// SetDomain gets a reference to the given string and assigns it to the Domain field.
+func (o *AdminCreateRunner) SetDomain(v string) {
+	o.Domain = &v
+}
+
+// GetApiUrl returns the ApiUrl field value if set, zero value otherwise.
+func (o *AdminCreateRunner) GetApiUrl() string {
+	if o == nil || IsNil(o.ApiUrl) {
+		var ret string
+		return ret
+	}
+	return *o.ApiUrl
+}
+
+// GetApiUrlOk returns a tuple with the ApiUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AdminCreateRunner) GetApiUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.ApiUrl) {
+		return nil, false
+	}
+	return o.ApiUrl, true
+}
+
+// HasApiUrl returns a boolean if a field has been set.
+func (o *AdminCreateRunner) HasApiUrl() bool {
+	if o != nil && !IsNil(o.ApiUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetApiUrl gets a reference to the given string and assigns it to the ApiUrl field.
+func (o *AdminCreateRunner) SetApiUrl(v string) {
+	o.ApiUrl = &v
+}
+
+// GetProxyUrl returns the ProxyUrl field value if set, zero value otherwise.
+func (o *AdminCreateRunner) GetProxyUrl() string {
+	if o == nil || IsNil(o.ProxyUrl) {
+		var ret string
+		return ret
+	}
+	return *o.ProxyUrl
+}
+
+// GetProxyUrlOk returns a tuple with the ProxyUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AdminCreateRunner) GetProxyUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.ProxyUrl) {
+		return nil, false
+	}
+	return o.ProxyUrl, true
+}
+
+// HasProxyUrl returns a boolean if a field has been set.
+func (o *AdminCreateRunner) HasProxyUrl() bool {
+	if o != nil && !IsNil(o.ProxyUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetProxyUrl gets a reference to the given string and assigns it to the ProxyUrl field.
+func (o *AdminCreateRunner) SetProxyUrl(v string) {
+	o.ProxyUrl = &v
+}
+
+// GetCpu returns the Cpu field value if set, zero value otherwise.
+func (o *AdminCreateRunner) GetCpu() float32 {
+	if o == nil || IsNil(o.Cpu) {
+		var ret float32
+		return ret
+	}
+	return *o.Cpu
+}
+
+// GetCpuOk returns a tuple with the Cpu field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AdminCreateRunner) GetCpuOk() (*float32, bool) {
+	if o == nil || IsNil(o.Cpu) {
+		return nil, false
+	}
+	return o.Cpu, true
+}
+
+// HasCpu returns a boolean if a field has been set.
+func (o *AdminCreateRunner) HasCpu() bool {
+	if o != nil && !IsNil(o.Cpu) {
+		return true
+	}
+
+	return false
+}
+
+// SetCpu gets a reference to the given float32 and assigns it to the Cpu field.
+func (o *AdminCreateRunner) SetCpu(v float32) {
+	o.Cpu = &v
+}
+
+// GetMemoryGiB returns the MemoryGiB field value if set, zero value otherwise.
+func (o *AdminCreateRunner) GetMemoryGiB() float32 {
+	if o == nil || IsNil(o.MemoryGiB) {
+		var ret float32
+		return ret
+	}
+	return *o.MemoryGiB
+}
+
+// GetMemoryGiBOk returns a tuple with the MemoryGiB field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AdminCreateRunner) GetMemoryGiBOk() (*float32, bool) {
+	if o == nil || IsNil(o.MemoryGiB) {
+		return nil, false
+	}
+	return o.MemoryGiB, true
+}
+
+// HasMemoryGiB returns a boolean if a field has been set.
+func (o *AdminCreateRunner) HasMemoryGiB() bool {
+	if o != nil && !IsNil(o.MemoryGiB) {
+		return true
+	}
+
+	return false
+}
+
+// SetMemoryGiB gets a reference to the given float32 and assigns it to the MemoryGiB field.
+func (o *AdminCreateRunner) SetMemoryGiB(v float32) {
+	o.MemoryGiB = &v
+}
+
+// GetDiskGiB returns the DiskGiB field value if set, zero value otherwise.
+func (o *AdminCreateRunner) GetDiskGiB() float32 {
+	if o == nil || IsNil(o.DiskGiB) {
+		var ret float32
+		return ret
+	}
+	return *o.DiskGiB
+}
+
+// GetDiskGiBOk returns a tuple with the DiskGiB field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AdminCreateRunner) GetDiskGiBOk() (*float32, bool) {
+	if o == nil || IsNil(o.DiskGiB) {
+		return nil, false
+	}
+	return o.DiskGiB, true
+}
+
+// HasDiskGiB returns a boolean if a field has been set.
+func (o *AdminCreateRunner) HasDiskGiB() bool {
+	if o != nil && !IsNil(o.DiskGiB) {
+		return true
+	}
+
+	return false
+}
+
+// SetDiskGiB gets a reference to the given float32 and assigns it to the DiskGiB field.
+func (o *AdminCreateRunner) SetDiskGiB(v float32) {
+	o.DiskGiB = &v
 }
 
 func (o AdminCreateRunner) MarshalJSON() ([]byte, error) {
@@ -261,14 +362,28 @@ func (o AdminCreateRunner) MarshalJSON() ([]byte, error) {
 
 func (o AdminCreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["domain"] = o.Domain
-	toSerialize["apiUrl"] = o.ApiUrl
-	toSerialize["proxyUrl"] = o.ProxyUrl
 	toSerialize["regionId"] = o.RegionId
 	toSerialize["name"] = o.Name
 	toSerialize["apiKey"] = o.ApiKey
-	toSerialize["class"] = o.Class
-	toSerialize["version"] = o.Version
+	toSerialize["apiVersion"] = o.ApiVersion
+	if !IsNil(o.Domain) {
+		toSerialize["domain"] = o.Domain
+	}
+	if !IsNil(o.ApiUrl) {
+		toSerialize["apiUrl"] = o.ApiUrl
+	}
+	if !IsNil(o.ProxyUrl) {
+		toSerialize["proxyUrl"] = o.ProxyUrl
+	}
+	if !IsNil(o.Cpu) {
+		toSerialize["cpu"] = o.Cpu
+	}
+	if !IsNil(o.MemoryGiB) {
+		toSerialize["memoryGiB"] = o.MemoryGiB
+	}
+	if !IsNil(o.DiskGiB) {
+		toSerialize["diskGiB"] = o.DiskGiB
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -282,14 +397,10 @@ func (o *AdminCreateRunner) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"domain",
-		"apiUrl",
-		"proxyUrl",
 		"regionId",
 		"name",
 		"apiKey",
-		"class",
-		"version",
+		"apiVersion",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -319,14 +430,16 @@ func (o *AdminCreateRunner) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "domain")
-		delete(additionalProperties, "apiUrl")
-		delete(additionalProperties, "proxyUrl")
 		delete(additionalProperties, "regionId")
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "apiKey")
-		delete(additionalProperties, "class")
-		delete(additionalProperties, "version")
+		delete(additionalProperties, "apiVersion")
+		delete(additionalProperties, "domain")
+		delete(additionalProperties, "apiUrl")
+		delete(additionalProperties, "proxyUrl")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "memoryGiB")
+		delete(additionalProperties, "diskGiB")
 		o.AdditionalProperties = additionalProperties
 	}
 

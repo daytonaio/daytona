@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { IsEnum, IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator'
 import { SandboxState } from '../enums/sandbox-state.enum'
 
 export class UpdateSandboxStateDto {
@@ -23,4 +23,12 @@ export class UpdateSandboxStateDto {
     example: 'Failed to pull snapshot image',
   })
   errorReason?: string
+
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: 'Whether the sandbox is recoverable',
+    example: true,
+  })
+  recoverable?: boolean
 }

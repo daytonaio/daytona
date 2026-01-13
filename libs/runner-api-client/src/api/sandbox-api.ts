@@ -48,6 +48,8 @@ import type { ResizeSandboxDTO } from '../models'
 // @ts-ignore
 import type { SandboxInfoResponse } from '../models'
 // @ts-ignore
+import type { StartSandboxResponse } from '../models'
+// @ts-ignore
 import type { UpdateNetworkSettingsDTO } from '../models'
 /**
  * SandboxApi - axios parameter creator
@@ -567,7 +569,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     async create(
       sandbox: CreateSandboxDTO,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StartSandboxResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.create(sandbox, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -783,7 +785,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       metadata?: object,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StartSandboxResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.start(sandboxId, metadata, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -860,7 +862,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    create(sandbox: CreateSandboxDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+    create(sandbox: CreateSandboxDTO, options?: RawAxiosRequestConfig): AxiosPromise<StartSandboxResponse> {
       return localVarFp.create(sandbox, options).then((request) => request(axios, basePath))
     },
     /**
@@ -959,7 +961,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    start(sandboxId: string, metadata?: object, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+    start(sandboxId: string, metadata?: object, options?: RawAxiosRequestConfig): AxiosPromise<StartSandboxResponse> {
       return localVarFp.start(sandboxId, metadata, options).then((request) => request(axios, basePath))
     },
     /**

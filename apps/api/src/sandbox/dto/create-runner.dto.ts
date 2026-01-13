@@ -8,18 +8,6 @@ import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'CreateRunner' })
 export class CreateRunnerDto {
-  @ApiProperty()
-  @IsString()
-  domain: string
-
-  @IsString()
-  @ApiProperty()
-  apiUrl: string
-
-  @IsString()
-  @ApiProperty()
-  proxyUrl: string
-
   @IsString()
   @ApiProperty()
   regionId: string

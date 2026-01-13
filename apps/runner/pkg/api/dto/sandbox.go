@@ -58,3 +58,6 @@ type IsRecoverableDTO struct {
 type IsRecoverableResponse struct {
 	Recoverable bool `json:"recoverable"`
 } //	@name	IsRecoverableResponse
+type StartSandboxResponse struct {
+	DaemonVersion string `json:"daemonVersion"`
+} //	@name	StartSandboxResponse

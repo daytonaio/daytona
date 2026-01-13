@@ -18,6 +18,7 @@ models/enums-backup-state.ts
 models/enums-sandbox-state.ts
 models/error-response.ts
 models/index.ts
+models/inspect-snapshot-in-registry-request.ts
 models/is-recoverable-dto.ts
 models/is-recoverable-response.ts
 models/pull-snapshot-request-dto.ts
@@ -27,7 +28,9 @@ models/resize-sandbox-dto.ts
 models/runner-info-response-dto.ts
 models/runner-metrics.ts
 models/sandbox-info-response.ts
+models/snapshot-digest-response.ts
 models/snapshot-exists-response.ts
 models/snapshot-info-response.ts
+models/start-sandbox-response.ts
 models/tag-image-request-dto.ts
 models/update-network-settings-dto.ts

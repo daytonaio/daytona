@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -60,6 +61,7 @@ type Proxy struct {
 
 	apiclient                      *apiclient.APIClient
 	runnerCache                    common_cache.ICache[RunnerInfo]
+	sandboxRunnerCache             common_cache.ICache[RunnerInfo]
 	sandboxPublicCache             common_cache.ICache[bool]
 	sandboxAuthKeyValidCache       common_cache.ICache[bool]
 	sandboxLastActivityUpdateCache common_cache.ICache[bool]
@@ -83,7 +85,11 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 
 	if config.Redis != nil {
 		var err error
-		proxy.runnerCache, err = common_cache.NewRedisCache[RunnerInfo](config.Redis, "proxy:sandbox-runner-info:")
+		proxy.sandboxRunnerCache, err = common_cache.NewRedisCache[RunnerInfo](config.Redis, "proxy:sandbox-runner-info:")
+		if err != nil {
+			return err
+		}
+		proxy.runnerCache, err = common_cache.NewRedisCache[RunnerInfo](config.Redis, "proxy:runner-info:")
 		if err != nil {
 			return err
 		}
@@ -100,6 +106,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 			return err
 		}
 	} else {
+		proxy.sandboxRunnerCache = common_cache.NewMapCache[RunnerInfo]()
 		proxy.runnerCache = common_cache.NewMapCache[RunnerInfo]()
 		proxy.sandboxPublicCache = common_cache.NewMapCache[bool]()
 		proxy.sandboxAuthKeyValidCache = common_cache.NewMapCache[bool]()
@@ -172,13 +179,25 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		if err != nil {
 			switch ctx.Request.Method {
 			case "GET":
-				switch ctx.Request.URL.Path {
-				case "/callback":
-					proxy.AuthCallback(ctx)
-					return
-				case "/health":
-					ctx.JSON(http.StatusOK, gin.H{"status": "ok", "version": internal.Version})
-					return
+				{
+					switch ctx.Request.URL.Path {
+					case "/callback":
+						proxy.AuthCallback(ctx)
+						return
+					case "/health":
+						ctx.JSON(http.StatusOK, gin.H{"status": "ok", "version": internal.Version})
+						return
+					}
+
+					if regexp.MustCompile(`^/snapshots/[\w-]+/build-logs$`).MatchString(ctx.Request.URL.Path) {
+						common_proxy.NewProxyRequestHandler(proxy.getSnapshotTarget, nil)(ctx)
+						return
+					}
+
+					if regexp.MustCompile(`^/sandboxes/[\w-]+/build-logs$`).MatchString(ctx.Request.URL.Path) {
+						common_proxy.NewProxyRequestHandler(proxy.getSandboxBuildTarget, nil)(ctx)
+						return
+					}
 				}
 			}
 

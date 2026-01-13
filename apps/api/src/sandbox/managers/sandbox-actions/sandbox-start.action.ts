@@ -25,7 +25,6 @@ import { TypedConfigService } from '../../../config/typed-config.service'
 import { Runner } from '../../entities/runner.entity'
 import { Organization } from '../../../organization/entities/organization.entity'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
-import { checkRecoverable } from '../../utils/recoverable.util'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 
@@ -79,30 +78,8 @@ export class SandboxStartAction extends SandboxAction {
         return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
       }
       case SandboxState.ERROR: {
-        const runner = await this.runnerService.findOne(sandbox.runnerId)
-        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-        const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-        if (sandboxInfo.state === SandboxState.STARTED) {
-          let daemonVersion: string | undefined
-          try {
-            daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
-          } catch (error) {
-            this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, error)
-          }
-
-          await this.updateSandboxState(
-            sandbox.id,
-            SandboxState.STARTED,
-            lockCode,
-            undefined,
-            undefined,
-            daemonVersion,
-            BackupState.NONE,
-            false,
-          )
-          return DONT_SYNC_AGAIN
-        }
+        this.logger.error(`Sandbox ${sandbox.id} is in error state on desired state start`)
+        return DONT_SYNC_AGAIN
       }
     }
 
@@ -182,8 +159,8 @@ export class SandboxStartAction extends SandboxAction {
         snapshotRef: snapshotRef,
         ...(isBuild &&
           declarativeBuildScoreThreshold !== undefined && {
-            availabilityScoreThreshold: declarativeBuildScoreThreshold,
-          }),
+          availabilityScoreThreshold: declarativeBuildScoreThreshold,
+        }),
       })
       if (runner) {
         await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode, runner.id)
@@ -228,8 +205,8 @@ export class SandboxStartAction extends SandboxAction {
         excludedRunnerIds: excludedRunnerIds,
         ...(isBuild &&
           declarativeBuildScoreThreshold !== undefined && {
-            availabilityScoreThreshold: declarativeBuildScoreThreshold,
-          }),
+          availabilityScoreThreshold: declarativeBuildScoreThreshold,
+        }),
       })
     } catch {
       // TODO: reconsider the timeout here
@@ -376,9 +353,16 @@ export class SandboxStartAction extends SandboxAction {
       }
     }
 
-    await runnerAdapter.createSandbox(sandbox, internalRegistry, entrypoint, metadata)
+    const result = await runnerAdapter.createSandbox(sandbox, internalRegistry, entrypoint, metadata)
 
-    await this.updateSandboxState(sandbox.id, SandboxState.CREATING, lockCode)
+    await this.updateSandboxState(
+      sandbox.id,
+      SandboxState.CREATING,
+      lockCode,
+      undefined,
+      undefined,
+      result?.daemonVersion,
+    )
     //  sync states again immediately for sandbox
     return SYNC_AGAIN
   }
@@ -516,6 +500,7 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     const runner = await this.runnerService.findOne(sandbox.runnerId)
+
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
@@ -542,18 +527,12 @@ export class SandboxStartAction extends SandboxAction {
   //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
   private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
+
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
     switch (sandboxInfo.state) {
       case SandboxState.STARTED: {
-        let daemonVersion: string | undefined
-        try {
-          daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
-        } catch (error) {
-          this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, error)
-        }
-
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
           await this.updateSandboxState(
@@ -562,12 +541,19 @@ export class SandboxStartAction extends SandboxAction {
             lockCode,
             undefined,
             undefined,
-            daemonVersion,
+            sandboxInfo.daemonVersion,
             BackupState.NONE,
           )
           return DONT_SYNC_AGAIN
         } else {
-          await this.updateSandboxState(sandbox.id, SandboxState.STARTED, lockCode, undefined, undefined, daemonVersion)
+          await this.updateSandboxState(
+            sandbox.id,
+            SandboxState.STARTED,
+            lockCode,
+            undefined,
+            undefined,
+            sandboxInfo.daemonVersion,
+          )
 
           //  if sandbox was transferred to a new runner, remove it from the old runner
           if (sandbox.prevRunnerId) {
@@ -644,11 +630,6 @@ export class SandboxStartAction extends SandboxAction {
       sandbox.state = SandboxState.ERROR
       sandbox.errorReason = errorReason
       sandbox.recoverable = false
-      try {
-        sandbox.recoverable = await checkRecoverable(sandbox, this.runnerService, this.runnerAdapterFactory)
-      } catch (err) {
-        this.logger.error(`Error checking if sandbox ${sandbox.id} is recoverable:`, err)
-      }
       await this.sandboxRepository.save(sandbox)
       return true
     }
@@ -773,11 +754,11 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
-          regions: [sandbox.region],
-          sandboxClass: sandbox.class,
-          snapshotRef,
-          excludedRunnerIds,
-        })
+        regions: [sandbox.region],
+        sandboxClass: sandbox.class,
+        snapshotRef,
+        excludedRunnerIds,
+      })
       : []
     if (runnersWithBaseSnapshot.length > 0) {
       availableRunners = runnersWithBaseSnapshot

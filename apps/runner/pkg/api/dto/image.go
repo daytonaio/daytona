@@ -8,6 +8,7 @@ type PullSnapshotRequestDTO struct {
 	Registry            *RegistryDTO `json:"registry,omitempty"`
 	DestinationRegistry *RegistryDTO `json:"destinationRegistry,omitempty"`
 	DestinationRef      *string      `json:"destinationRef,omitempty"`
+	NewTag              *string      `json:"newTag,omitempty"`
 } //	@name	PullSnapshotRequestDTO
 
 type BuildSnapshotRequestDTO struct {

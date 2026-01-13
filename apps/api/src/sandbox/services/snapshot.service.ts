@@ -19,7 +19,7 @@ import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
-import { OnEvent } from '@nestjs/event-emitter'
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
@@ -35,7 +35,7 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 import { PER_SANDBOX_LIMIT_MESSAGE } from '../../common/constants/error-messages'
-import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
 import { Region } from '../../region/entities/region.entity'
 import { RunnerState } from '../enums/runner-state.enum'
@@ -44,6 +44,10 @@ import { RunnerEvents } from '../constants/runner-events'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { SnapshotRegion } from '../entities/snapshot-region.entity'
 import { RegionType } from '../../region/enums/region-type.enum'
+import { SnapshotEvents } from '../constants/snapshot-events'
+import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
+import { RunnerService } from './runner.service'
+import { RegionService } from '../../region/services/region.service'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -66,7 +70,10 @@ export class SnapshotService {
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly runnerService: RunnerService,
+    private readonly regionService: RegionService,
     private readonly dockerRegistryService: DockerRegistryService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -140,9 +147,9 @@ export class SnapshotService {
     }
 
     try {
-      let entrypoint = createSnapshotDto.entrypoint
-      let ref: string | undefined = undefined
-      let state: SnapshotState = SnapshotState.PENDING
+      const entrypoint = createSnapshotDto.entrypoint
+      const ref: string | undefined = undefined
+      const state: SnapshotState = SnapshotState.PENDING
 
       const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
       if (nameValidationError) {
@@ -170,46 +177,6 @@ export class SnapshotService {
         pendingSnapshotCountIncrement = newSnapshotCount
       }
 
-      let imageDetails: ImageDetails | undefined = undefined
-
-      try {
-        imageDetails = await this.dockerRegistryService.getImageDetails(createSnapshotDto.imageName, regionId)
-      } catch (error) {
-        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
-      }
-
-      if (imageDetails) {
-        if (imageDetails?.sizeGB > organization.maxSnapshotSize) {
-          throw new ForbiddenException(
-            `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
-          )
-        }
-
-        if ((!entrypoint || entrypoint.length === 0) && imageDetails) {
-          if (imageDetails.entrypoint && imageDetails.entrypoint.length > 0) {
-            entrypoint = imageDetails.entrypoint
-          } else {
-            entrypoint = ['sleep', 'infinity']
-          }
-        }
-
-        const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(regionId)
-        if (!internalRegistry) {
-          throw new Error('No internal registry found for snapshot')
-        }
-        const hash =
-          imageDetails.digest && imageDetails.digest.startsWith('sha256:')
-            ? imageDetails.digest.substring('sha256:'.length)
-            : imageDetails.digest
-        ref = `${internalRegistry.url.replace(/^https?:\/\//, '')}/${internalRegistry.project || 'daytona'}/daytona-${hash}:daytona`
-
-        const exists = await this.readySnapshotRunnerExists(ref, regionId)
-
-        if (exists) {
-          state = SnapshotState.ACTIVE
-        }
-      }
-
       try {
         const snapshotId = uuidv4()
 
@@ -224,6 +191,8 @@ export class SnapshotService {
           general,
           snapshotRegions: [{ snapshotId, regionId }],
         })
+
+        await this.eventEmitter.emitAsync(SnapshotEvents.CREATED, new SnapshotCreatedEvent(snapshot))
 
         return await this.snapshotRepository.save(snapshot)
       } catch (error) {
@@ -326,6 +295,8 @@ export class SnapshotService {
       }
 
       try {
+        await this.eventEmitter.emitAsync(SnapshotEvents.CREATED, new SnapshotCreatedEvent(snapshot))
+
         return await this.snapshotRepository.save(snapshot)
       } catch (error) {
         if (error.code === '23505') {
@@ -453,6 +424,29 @@ export class SnapshotService {
 
     snapshot.general = general
     return await this.snapshotRepository.save(snapshot)
+  }
+
+  async getBuildLogsUrl(snapshot: Snapshot): Promise<string> {
+    if (!snapshot.initialRunnerId) {
+      throw new NotFoundException(`Snapshot ${snapshot.id} has no initial runner`)
+    }
+
+    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
+    if (!runner) {
+      throw new NotFoundException(`Initial runner for snapshot ${snapshot.id} not found`)
+    }
+
+    const region = await this.regionService.findOne(runner.region, true)
+
+    if (!region) {
+      throw new NotFoundException(`Region for initial runner for snapshot ${snapshot.id} not found`)
+    }
+
+    if (!region.proxyUrl) {
+      throw new NotFoundException(`Region for initial runner for snapshot ${snapshot.id} has no proxy URL`)
+    }
+
+    return region.proxyUrl + '/snapshots/' + snapshot.id + '/build-logs'
   }
 
   private async validateOrganizationQuotas(
