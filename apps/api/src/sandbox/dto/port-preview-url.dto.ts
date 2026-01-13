@@ -17,7 +17,7 @@ export class PortPreviewUrlDto {
 
   @ApiProperty({
     description: 'Preview url',
-    example: 'https://123456-mysandbox.runner.com',
+    example: 'https://{port}-{sandboxId}.{proxyDomain}',
   })
   @IsString()
   url: string
@@ -28,4 +28,21 @@ export class PortPreviewUrlDto {
   })
   @IsString()
   token: string
+}
+
+@ApiSchema({ name: 'SingedPortPreviewUrl' })
+export class SignedPortPreviewUrlDto {
+  @ApiProperty({
+    description: 'ID of the sandbox',
+    example: '123456',
+  })
+  @IsString()
+  sandboxId: string
+
+  @ApiProperty({
+    description: 'Singed preview url',
+    example: 'https://{port}-{token}.{proxyDomain}',
+  })
+  @IsString()
+  url: string
 }

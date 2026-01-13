@@ -1,0 +1,40 @@
+[Unit]
+Description=Daytona Runner Service
+Documentation=https://github.com/daytonaio/daytona
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/var/lib/daytona/runner
+
+# Binary location
+ExecStart=/opt/daytona/runner
+
+# Environment file for configuration
+EnvironmentFile=-/etc/daytona/runner.env
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/daytona/runner /var/log/daytona /tmp
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=daytona-runner
+
+[Install]
+WantedBy=multi-user.target

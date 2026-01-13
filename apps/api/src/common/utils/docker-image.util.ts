@@ -19,6 +19,36 @@ export interface DockerImageInfo {
   originalName: string
 }
 
+export class DockerImage implements DockerImageInfo {
+  registry?: string
+  project?: string
+  repository: string
+  tag?: string
+  originalName: string
+
+  constructor(info: DockerImageInfo) {
+    this.registry = info.registry
+    this.project = info.project
+    this.repository = info.repository
+    this.tag = info.tag
+    this.originalName = info.originalName
+  }
+
+  getFullName(): string {
+    let name = this.repository
+    if (this.project) {
+      name = `${this.project}/${name}`
+    }
+    if (this.registry) {
+      name = `${this.registry}/${name}`
+    }
+    if (this.tag) {
+      name = `${name}:${this.tag}`
+    }
+    return name
+  }
+}
+
 /**
  * Parses a Docker image name into its component parts
  *
@@ -31,7 +61,7 @@ export interface DockerImageInfo {
  * - ubuntu:20.04 -> { registry: undefined, project: undefined, repository: 'ubuntu', tag: '20.04' }
  * - ubuntu -> { registry: undefined, project: undefined, repository: 'ubuntu', tag: undefined }
  */
-export function parseDockerImage(imageName: string): DockerImageInfo {
+export function parseDockerImage(imageName: string): DockerImage {
   // Handle empty or invalid input
   if (!imageName) {
     throw new Error('Image name cannot be empty')
@@ -86,5 +116,5 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
     result.repository = parts[0]
   }
 
-  return result
+  return new DockerImage(result)
 }

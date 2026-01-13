@@ -32,8 +32,9 @@ class BuildInfo(BaseModel):
     context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", alias="contextHashes")
     created_at: datetime = Field(description="The creation timestamp", alias="createdAt")
     updated_at: datetime = Field(description="The last update timestamp", alias="updatedAt")
+    snapshot_ref: StrictStr = Field(description="The snapshot reference", alias="snapshotRef")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["dockerfileContent", "contextHashes", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["dockerfileContent", "contextHashes", "createdAt", "updatedAt", "snapshotRef"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,7 +97,8 @@ class BuildInfo(BaseModel):
             "dockerfileContent": obj.get("dockerfileContent"),
             "contextHashes": obj.get("contextHashes"),
             "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "updatedAt": obj.get("updatedAt"),
+            "snapshotRef": obj.get("snapshotRef")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

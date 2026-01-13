@@ -61,12 +61,13 @@ class Workspace(BaseModel):
     updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the sandbox", alias="updatedAt")
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion")
+    runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", alias="runnerId")
     image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
     snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", alias="snapshotState")
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "image", "snapshotState", "snapshotCreatedAt", "info"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "runnerId", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -198,6 +199,7 @@ class Workspace(BaseModel):
             "updatedAt": obj.get("updatedAt"),
             "class": obj.get("class"),
             "daemonVersion": obj.get("daemonVersion"),
+            "runnerId": obj.get("runnerId"),
             "image": obj.get("image"),
             "snapshotState": obj.get("snapshotState"),
             "snapshotCreatedAt": obj.get("snapshotCreatedAt"),

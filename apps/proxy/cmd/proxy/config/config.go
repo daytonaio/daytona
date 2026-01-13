@@ -88,7 +88,7 @@ func GetConfig() (*Config, error) {
 	}
 
 	if config.Redis != nil {
-		if config.Redis.Host == nil && config.Redis.Port == nil && config.Redis.Password == nil {
+		if config.Redis.Host == nil || *config.Redis.Host == "" {
 			config.Redis = nil
 		}
 	}
@@ -114,9 +114,9 @@ func GetConfig() (*Config, error) {
 	err = utils.RetryWithExponentialBackoff(
 		ctx,
 		"get Daytona API config",
-		utils.DEFAULT_MAX_RETRIES,
+		10,
 		time.Second,
-		10*time.Second,
+		1*time.Minute,
 		func() error {
 			apiConfig, _, err := config.ApiClient.ConfigAPI.ConfigControllerGetConfig(ctx).Execute()
 			if err != nil {
