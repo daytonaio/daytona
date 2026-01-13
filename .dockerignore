@@ -11,6 +11,7 @@ node_modules
 dist
 !dist/libs/computer-use-amd64
 !dist/apps/runner-amd64
+!dist/apps/snapshot-manager
 docker
 .tmp
 libs/sdk-python
