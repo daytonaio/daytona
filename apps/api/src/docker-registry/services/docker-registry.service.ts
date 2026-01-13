@@ -488,6 +488,28 @@ export class DockerRegistryService {
     return registry.url.startsWith('http') ? registry.url : `https://${registry.url}`
   }
 
+  private async findRegistryByImageName(imageName: string, regionId: string): Promise<DockerRegistry | null> {
+    // Remove docker.io prefix since it's the default registry
+    imageName = imageName.replace(/^docker\.io\//, '')
+
+    // Parse the image to extract potential registry hostname
+    const parsedImage = parseDockerImage(imageName)
+
+    if (parsedImage.registry) {
+      // Image has registry prefix, try to find matching registry in database first
+      const registry = await this.findSourceRegistryBySnapshotImageName(imageName, regionId)
+      if (registry) {
+        return registry
+      }
+      // Not found in database, create temporary registry config for public access
+      return this.createTemporaryRegistryConfig(parsedImage.registry)
+    } else {
+      // Image has no registry prefix (e.g., "alpine:3.21")
+      // Create temporary Docker Hub config
+      return this.createTemporaryRegistryConfig('docker.io')
+    }
+  }
+
   /**
    * Finds a registry with a URL that matches the start of the target string.
    *
@@ -584,20 +606,7 @@ export class DockerRegistryService {
       const parsedImage = parseDockerImage(image)
 
       // Find the registry for this image (tries database first, then creates temporary config)
-      let registry: DockerRegistry
-
-      if (parsedImage.registry) {
-        // Image has registry prefix, try to find matching registry in database first
-        registry = await this.findSourceRegistryBySnapshotImageName(image, regionId)
-        if (!registry) {
-          // Not found in database, create temporary registry config for public access
-          registry = this.createTemporaryRegistryConfig(parsedImage.registry)
-        }
-      } else {
-        // Image has no registry prefix (e.g., "alpine:3.21")
-        // Create temporary Docker Hub config
-        registry = this.createTemporaryRegistryConfig('docker.io')
-      }
+      const registry = await this.findRegistryByImageName(image, regionId)
 
       const registryUrl = this.getRegistryUrl(registry)
 
