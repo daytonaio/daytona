@@ -7169,6 +7169,15 @@ paths:
           schema:
             type: string
           style: simple
+        - description: ID of the region where the snapshot will be available (defaults
+            to organization default region)
+          explode: true
+          in: query
+          name: regionId
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         '200':
           content:
@@ -8996,6 +9005,7 @@ components:
       type: object
     CreateRegion:
       example:
+        snapshotManagerUrl: https://snapshot-manager.example.com
         proxyUrl: https://proxy.example.com
         name: us-east-1
         sshGatewayUrl: ssh://ssh-gateway.example.com
@@ -9014,12 +9024,19 @@ components:
           example: ssh://ssh-gateway.example.com
           nullable: true
           type: string
+        snapshotManagerUrl:
+          description: Snapshot Manager URL for the region
+          example: https://snapshot-manager.example.com
+          nullable: true
+          type: string
       required:
         - name
       type: object
     CreateRegionResponse:
       example:
         proxyApiKey: proxy-api-key-xyz
+        snapshotManagerUsername: daytona
+        snapshotManagerPassword: snapshotManagerPassword
         id: region_12345
         sshGatewayApiKey: ssh-gateway-api-key-abc
       properties:
@@ -9035,6 +9052,15 @@ components:
         sshGatewayApiKey:
           description: SSH Gateway API key for the region
           example: ssh-gateway-api-key-abc
+          nullable: true
+          type: string
+        snapshotManagerUsername:
+          description: Snapshot Manager username for the region
+          example: daytona
+          nullable: true
+          type: string
+        snapshotManagerPassword:
+          description: Snapshot Manager password for the region
           nullable: true
           type: string
       required:
