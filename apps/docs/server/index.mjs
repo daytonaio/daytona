@@ -9,10 +9,10 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN')
   next()
 })
-app.use('/docs', express.static('/client/'))
+app.use('/docs', express.static('client/'))
 app.use(ssrHandler)
 app.use((req, res) => {
-  res.sendFile('404.html', { root: '/client/' })
+  res.sendFile('404.html', { root: 'client/' })
 })
 
 app.listen(env.FUNCTIONS_PORT, () => {
