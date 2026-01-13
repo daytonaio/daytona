@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/daytonaio/runner-win/pkg/api/dto"
 	"github.com/daytonaio/runner-win/pkg/storage"
@@ -126,12 +127,17 @@ func (l *LibVirt) PushSnapshot(ctx context.Context, req dto.PushSnapshotRequestD
 // flattenDisk converts an overlay qcow2 disk (with backing file) into a standalone qcow2 image.
 // This is done using qemu-img convert which reads the entire chain and writes a new independent image.
 // The command runs on the local or remote host depending on the libvirt URI.
+// Note: Uses -U (force-share) to bypass lock checks - caller must ensure VM is paused for consistency.
 func (l *LibVirt) flattenDisk(ctx context.Context, sourcePath, destPath string) error {
 	isLocal := l.isLocalURI()
 
-	// qemu-img convert -O qcow2 source.qcow2 dest.qcow2
+	// qemu-img convert -U -O qcow2 source.qcow2 dest.qcow2
+	// -U (--force-share) bypasses lock check - safe because VM should be paused by caller
 	// This reads the entire backing chain and creates a standalone image
-	convertCmd := fmt.Sprintf("qemu-img convert -O qcow2 %s %s", sourcePath, destPath)
+	convertCmd := fmt.Sprintf("qemu-img convert -U -O qcow2 %s %s", sourcePath, destPath)
+
+	startTime := time.Now()
+	log.Infof("flattenDisk: Starting qemu-img convert (this may take several minutes for large disks)...")
 
 	var cmd *exec.Cmd
 	if isLocal {
@@ -147,10 +153,14 @@ func (l *LibVirt) flattenDisk(ctx context.Context, sourcePath, destPath string) 
 	}
 
 	output, err := cmd.CombinedOutput()
+	elapsed := time.Since(startTime)
+
 	if err != nil {
+		log.Errorf("flattenDisk: qemu-img convert failed after %v", elapsed)
 		return fmt.Errorf("qemu-img convert failed: %w (output: %s)", err, string(output))
 	}
 
+	log.Infof("flattenDisk: qemu-img convert completed in %v", elapsed)
 	return nil
 }
 

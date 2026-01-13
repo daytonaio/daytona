@@ -4,9 +4,9 @@
  */
 
 import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
-import { Sandbox, SandboxDesiredState, RunnerClass } from '@daytonaio/api-client'
+import { Sandbox, SandboxDesiredState, RunnerClass, SandboxBackupStateEnum } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp } from 'lucide-react'
+import { ArrowDown, ArrowUp, Loader2 } from 'lucide-react'
 import React from 'react'
 import { EllipsisWithTooltip } from '../EllipsisWithTooltip'
 import { Checkbox } from '../ui/checkbox'
@@ -104,6 +104,7 @@ interface GetColumnsProps {
   deletePermitted: boolean
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  handleCreateSnapshot: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
   runnerClassMap: Record<string, RunnerClass>
 }
@@ -120,6 +121,7 @@ export function getColumns({
   deletePermitted,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handleCreateSnapshot,
   getRegionName,
   runnerClassMap,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
@@ -210,11 +212,24 @@ export function getColumns({
       header: ({ column }) => {
         return <SortableHeader column={column} label="State" />
       },
-      cell: ({ row }) => (
-        <div className="w-full truncate">
-          <SandboxStateComponent state={row.original.state} errorReason={row.original.errorReason} />
-        </div>
-      ),
+      cell: ({ row }) => {
+        // Show "Snapshotting" when backup state is in progress (used for snapshot creation)
+        if (row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS) {
+          return (
+            <div className="w-full truncate">
+              <div className="flex items-center gap-1">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="truncate">Snapshotting</span>
+              </div>
+            </div>
+          )
+        }
+        return (
+          <div className="w-full truncate">
+            <SandboxStateComponent state={row.original.state} errorReason={row.original.errorReason} />
+          </div>
+        )
+      },
       accessorKey: 'state',
     },
     {
@@ -384,7 +399,9 @@ export function getColumns({
             sandbox={row.original}
             writePermitted={writePermitted}
             deletePermitted={deletePermitted}
-            isLoading={sandboxIsLoading[row.original.id]}
+            isLoading={
+              sandboxIsLoading[row.original.id] || row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS
+            }
             onStart={handleStart}
             onStop={handleStop}
             onDelete={handleDelete}
@@ -393,6 +410,7 @@ export function getColumns({
             onOpenWebTerminal={handleOpenWebTerminal}
             onCreateSshAccess={handleCreateSshAccess}
             onRevokeSshAccess={handleRevokeSshAccess}
+            onCreateSnapshot={handleCreateSnapshot}
           />
         </div>
       ),

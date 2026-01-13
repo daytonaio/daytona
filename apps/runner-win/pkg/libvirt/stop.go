@@ -52,13 +52,18 @@ func (l *LibVirt) Stop(ctx context.Context, domainId string) error {
 		return nil
 	}
 
-	// Try graceful shutdown first
-	log.Infof("Attempting graceful shutdown of domain %s", domainId)
-	if err := domain.Shutdown(); err != nil {
-		log.Warnf("Graceful shutdown failed: %v, attempting force destroy", err)
-		// If graceful shutdown fails, force destroy
-		if err := domain.Destroy(); err != nil {
-			return fmt.Errorf("failed to force stop domain: %w", err)
+	// Try graceful shutdown via Windows shutdown command first
+	// This avoids the "Display Shutdown Event Tracker" dialog
+	log.Infof("Attempting graceful shutdown of domain %s via guest command", domainId)
+	if err := l.ShutdownGuest(ctx, domainId); err != nil {
+		log.Warnf("Guest shutdown command failed: %v, trying libvirt shutdown", err)
+		// Fall back to libvirt shutdown
+		if err := domain.Shutdown(); err != nil {
+			log.Warnf("Libvirt shutdown also failed: %v, attempting force destroy", err)
+			// If graceful shutdown fails, force destroy
+			if err := domain.Destroy(); err != nil {
+				return fmt.Errorf("failed to force stop domain: %w", err)
+			}
 		}
 	}
 

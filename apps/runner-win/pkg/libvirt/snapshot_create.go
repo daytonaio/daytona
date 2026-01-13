@@ -50,31 +50,51 @@ func (l *LibVirt) CreateSnapshot(ctx context.Context, req dto.CreateSnapshotRequ
 	wasRunning := (originalState == libvirt.DOMAIN_RUNNING)
 	didPause := false
 
-	// If not live mode and VM is running, pause it for consistent snapshot
+	// If not live mode and VM is running, shut it down cleanly for consistent snapshot
+	// Using "shutdown /s /t 0" avoids the Display Shutdown Event Tracker dialog
 	if !req.Live && wasRunning {
-		log.Infof("CreateSnapshot: Pausing VM '%s' for consistent snapshot", req.SandboxId)
-		if err := domain.Suspend(); err != nil {
-			return nil, fmt.Errorf("failed to pause VM: %w", err)
+		log.Infof("CreateSnapshot: Shutting down VM '%s' cleanly for consistent snapshot", req.SandboxId)
+
+		// Execute Windows shutdown command inside the guest
+		if err := l.ShutdownGuest(ctx, req.SandboxId); err != nil {
+			log.Warnf("CreateSnapshot: Guest shutdown command failed: %v, falling back to suspend", err)
+			// Fall back to suspend
+			if err := domain.Suspend(); err != nil {
+				return nil, fmt.Errorf("failed to pause VM: %w", err)
+			}
 		}
 		didPause = true
 
-		// Wait for the VM to fully pause and release disk locks
-		// Verify the domain is actually paused
-		for i := 0; i < 10; i++ {
+		// Wait for the VM to fully shut off
+		log.Infof("CreateSnapshot: Waiting for VM '%s' to shut down", req.SandboxId)
+		shutdownTimeout := 60 * time.Second
+		shutdownDeadline := time.Now().Add(shutdownTimeout)
+		vmShutOff := false
+
+		for time.Now().Before(shutdownDeadline) {
 			state, _, err := domain.GetState()
 			if err != nil {
-				log.Warnf("CreateSnapshot: Failed to get domain state after suspend: %v", err)
+				log.Warnf("CreateSnapshot: Failed to get domain state: %v", err)
+				break
+			}
+			if state == libvirt.DOMAIN_SHUTOFF {
+				log.Infof("CreateSnapshot: VM '%s' has shut down cleanly", req.SandboxId)
+				vmShutOff = true
 				break
 			}
 			if state == libvirt.DOMAIN_PAUSED {
-				log.Infof("CreateSnapshot: VM '%s' is now paused", req.SandboxId)
+				log.Infof("CreateSnapshot: VM '%s' is paused (fallback mode)", req.SandboxId)
 				break
 			}
-			log.Debugf("CreateSnapshot: Waiting for VM to pause (state=%d, attempt=%d)", state, i+1)
-			time.Sleep(500 * time.Millisecond)
+			log.Debugf("CreateSnapshot: Waiting for VM to shut down (state=%d)", state)
+			time.Sleep(1 * time.Second)
 		}
 
-		// Additional delay to ensure disk locks are released
+		if !vmShutOff {
+			log.Warnf("CreateSnapshot: VM did not shut down within timeout, proceeding with current state")
+		}
+
+		// Additional delay to ensure disk is fully flushed
 		time.Sleep(2 * time.Second)
 	}
 
@@ -93,12 +113,22 @@ func (l *LibVirt) CreateSnapshot(ctx context.Context, req dto.CreateSnapshotRequ
 		flattenErr = l.flattenDisk(ctx, sandboxDiskPath, tempSnapshotPath)
 	}
 
-	// Resume VM immediately after flattening (before upload) - only if we paused it
+	// Restart VM immediately after flattening (before upload) - only if we stopped/paused it
 	if didPause {
-		log.Infof("CreateSnapshot: Resuming VM '%s' after disk flatten", req.SandboxId)
-		if resumeErr := domain.Resume(); resumeErr != nil {
-			log.Errorf("CreateSnapshot: Failed to resume VM after flatten: %v", resumeErr)
-			// Continue with error handling - we still want to clean up
+		// Check if VM is shut off (clean shutdown) or paused (fallback)
+		state, _, _ := domain.GetState()
+		if state == libvirt.DOMAIN_SHUTOFF {
+			log.Infof("CreateSnapshot: Starting VM '%s' after disk flatten (was shut down)", req.SandboxId)
+			if startErr := domain.Create(); startErr != nil {
+				log.Errorf("CreateSnapshot: Failed to start VM after flatten: %v", startErr)
+				// Continue - we still want to upload the snapshot
+			}
+		} else if state == libvirt.DOMAIN_PAUSED {
+			log.Infof("CreateSnapshot: Resuming VM '%s' after disk flatten (was paused)", req.SandboxId)
+			if resumeErr := domain.Resume(); resumeErr != nil {
+				log.Errorf("CreateSnapshot: Failed to resume VM after flatten: %v", resumeErr)
+				// Continue - we still want to upload the snapshot
+			}
 		}
 	}
 
@@ -108,10 +138,13 @@ func (l *LibVirt) CreateSnapshot(ctx context.Context, req dto.CreateSnapshotRequ
 		return nil, fmt.Errorf("failed to flatten disk: %w", flattenErr)
 	}
 
-	// Ensure cleanup of temp file on the target host
+	// Track if we need to clean up the temp file (only if we fail before moving it)
+	tempFileNeedsCleanup := true
 	defer func() {
-		if err := l.removeFile(ctx, tempSnapshotPath); err != nil {
-			log.Warnf("CreateSnapshot: Failed to clean up temp file %s: %v", tempSnapshotPath, err)
+		if tempFileNeedsCleanup {
+			if err := l.removeFile(ctx, tempSnapshotPath); err != nil {
+				log.Warnf("CreateSnapshot: Failed to clean up temp file %s: %v", tempSnapshotPath, err)
+			}
 		}
 	}()
 
@@ -121,7 +154,7 @@ func (l *LibVirt) CreateSnapshot(ctx context.Context, req dto.CreateSnapshotRequ
 		return nil, fmt.Errorf("failed to get snapshot file info: %w", err)
 	}
 
-	log.Infof("CreateSnapshot: Uploading snapshot '%s' (%d bytes) to object storage", req.Name, snapshotSize)
+	log.Infof("CreateSnapshot: Uploading snapshot '%s' (%d bytes) to object storage (org: %s)", req.Name, snapshotSize, req.OrganizationId)
 
 	// Get storage client
 	storageClient, err := storage.GetObjectStorageClient()
@@ -129,7 +162,8 @@ func (l *LibVirt) CreateSnapshot(ctx context.Context, req dto.CreateSnapshotRequ
 		return nil, fmt.Errorf("failed to get storage client: %w", err)
 	}
 
-	// Upload the snapshot to S3
+	// Upload the snapshot to S3 with organization namespacing
+	// Path format: snapshots/{organizationId}/{snapshotName}.qcow2
 	var objectPath string
 	if l.isLocalURI() {
 		// Local: open file directly
@@ -139,7 +173,7 @@ func (l *LibVirt) CreateSnapshot(ctx context.Context, req dto.CreateSnapshotRequ
 		}
 		defer snapshotFile.Close()
 
-		objectPath, err = storageClient.PutSnapshot(ctx, req.Name, snapshotFile, snapshotSize)
+		objectPath, err = storageClient.PutSnapshotWithOrg(ctx, req.OrganizationId, req.Name, snapshotFile, snapshotSize)
 		if err != nil {
 			return nil, fmt.Errorf("failed to upload snapshot: %w", err)
 		}
@@ -152,13 +186,32 @@ func (l *LibVirt) CreateSnapshot(ctx context.Context, req dto.CreateSnapshotRequ
 		}
 		defer reader.Close()
 
-		objectPath, err = storageClient.PutSnapshot(ctx, req.Name, reader, snapshotSize)
+		objectPath, err = storageClient.PutSnapshotWithOrg(ctx, req.OrganizationId, req.Name, reader, snapshotSize)
 		if err != nil {
 			return nil, fmt.Errorf("failed to upload snapshot: %w", err)
 		}
 	}
 
 	log.Infof("CreateSnapshot: Successfully uploaded snapshot '%s' to '%s'", req.Name, objectPath)
+
+	// Keep the snapshot locally for faster access when creating VMs on the same runner
+	// Use the objectPath (which includes org ID) to derive local path for consistency
+	localSnapshotPath := l.getSnapshotLocalPath(objectPath)
+	log.Infof("CreateSnapshot: Moving snapshot to local cache: %s", localSnapshotPath)
+
+	// Ensure the org subdirectory exists (for namespaced paths like /var/lib/libvirt/snapshots/{orgId}/)
+	localDir := filepath.Dir(localSnapshotPath)
+	if err := l.ensureDir(ctx, localDir); err != nil {
+		log.Warnf("CreateSnapshot: Failed to create snapshot directory %s: %v", localDir, err)
+	}
+
+	if err := l.renameFile(ctx, tempSnapshotPath, localSnapshotPath); err != nil {
+		log.Warnf("CreateSnapshot: Failed to move snapshot to local cache: %v (will be downloaded from S3 on next use)", err)
+		// Don't fail the operation - the snapshot is already in S3
+	} else {
+		tempFileNeedsCleanup = false // File was moved, no need to clean up
+		log.Infof("CreateSnapshot: Snapshot cached locally at %s", localSnapshotPath)
+	}
 
 	return &dto.CreateSnapshotResponseDTO{
 		Name:         req.Name,
@@ -178,6 +231,9 @@ func (l *LibVirt) flattenDiskLive(ctx context.Context, sourcePath, destPath stri
 	// -U (--force-share) allows reading the disk even if it's in use
 	convertCmd := fmt.Sprintf("qemu-img convert -U -O qcow2 %s %s", sourcePath, destPath)
 
+	startTime := time.Now()
+	log.Infof("flattenDiskLive: Starting qemu-img convert (live mode, this may take several minutes)...")
+
 	var cmd *exec.Cmd
 	if isLocal {
 		log.Debugf("Executing locally (live mode): %s", convertCmd)
@@ -192,9 +248,13 @@ func (l *LibVirt) flattenDiskLive(ctx context.Context, sourcePath, destPath stri
 	}
 
 	output, err := cmd.CombinedOutput()
+	elapsed := time.Since(startTime)
+
 	if err != nil {
+		log.Errorf("flattenDiskLive: qemu-img convert failed after %v", elapsed)
 		return fmt.Errorf("qemu-img convert (live) failed: %w (output: %s)", err, string(output))
 	}
 
+	log.Infof("flattenDiskLive: qemu-img convert completed in %v", elapsed)
 	return nil
 }

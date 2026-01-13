@@ -474,9 +474,15 @@ export class JobStateHandlerService {
         snapshotRunner.state = SnapshotRunnerState.READY // 'ready' in DB enum
         await this.snapshotRunnerRepository.save(snapshotRunner)
         this.logger.log(`Created SnapshotRunner for snapshot ${snapshotName} on runner ${runnerId}`)
+
+        // Update sandbox backupState to COMPLETED
+        sandbox.backupState = BackupState.COMPLETED
+        await this.sandboxRepository.save(sandbox)
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_SANDBOX_SNAPSHOT job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        // Note: No snapshot entity to update since we create it on success
+        // Update sandbox backupState to ERROR
+        sandbox.backupState = BackupState.ERROR
+        await this.sandboxRepository.save(sandbox)
       }
     } catch (error) {
       this.logger.error(`Error handling CREATE_SANDBOX_SNAPSHOT job completion for sandbox ${sandboxId}:`, error)

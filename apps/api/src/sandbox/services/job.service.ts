@@ -322,21 +322,54 @@ export class JobService {
   }
 
   /**
+   * Get the timeout threshold in minutes for a given job type.
+   * Some job types (like snapshot creation) may take much longer than others.
+   */
+  private getJobTimeoutMinutes(jobType: JobType): number {
+    switch (jobType) {
+      case JobType.CREATE_SANDBOX_SNAPSHOT:
+        // Snapshot creation involves disk flattening and S3 upload of potentially large (10GB+) disk images
+        return 60
+      case JobType.BUILD_SNAPSHOT:
+        // Building snapshots can involve downloading base images and running build commands
+        return 30
+      case JobType.PULL_SNAPSHOT:
+        // Pulling snapshots involves downloading large disk images
+        return 30
+      default:
+        // Default timeout for other job types
+        return 10
+    }
+  }
+
+  /**
    * Cron job to check for stale jobs and mark them as failed
    * Runs every minute to find jobs that have been IN_PROGRESS for too long
    */
   @Cron(CronExpression.EVERY_MINUTE)
   async handleStaleJobs(): Promise<void> {
-    const staleThresholdMinutes = 10
-    const staleThreshold = new Date(Date.now() - staleThresholdMinutes * 60 * 1000)
+    const defaultThresholdMinutes = 10
+    const defaultThreshold = new Date(Date.now() - defaultThresholdMinutes * 60 * 1000)
 
     try {
-      // Find jobs that are IN_PROGRESS but haven't been updated in the threshold time
-      const staleJobs = await this.jobRepository.find({
+      // Find jobs that are IN_PROGRESS but haven't been updated in the default threshold time
+      // We'll then filter based on per-job-type thresholds
+      const potentiallyStaleJobs = await this.jobRepository.find({
         where: {
           status: JobStatus.IN_PROGRESS,
-          updatedAt: LessThan(staleThreshold),
+          updatedAt: LessThan(defaultThreshold),
         },
+      })
+
+      if (potentiallyStaleJobs.length === 0) {
+        return
+      }
+
+      // Filter jobs based on their type-specific timeout
+      const staleJobs = potentiallyStaleJobs.filter((job) => {
+        const timeoutMinutes = this.getJobTimeoutMinutes(job.type)
+        const threshold = new Date(Date.now() - timeoutMinutes * 60 * 1000)
+        return job.updatedAt < threshold
       })
 
       if (staleJobs.length === 0) {
@@ -348,10 +381,11 @@ export class JobService {
       // Mark each stale job as failed with timeout error
       for (const job of staleJobs) {
         try {
+          const timeoutMinutes = this.getJobTimeoutMinutes(job.type)
           await this.updateJobStatus(
             job.id,
             JobStatus.FAILED,
-            `Job timed out - no update received for ${staleThresholdMinutes} minutes`,
+            `Job timed out - no update received for ${timeoutMinutes} minutes`,
           )
 
           this.logger.warn(

@@ -382,6 +382,10 @@ const getColumns = ({
       header: 'Image',
       cell: ({ row }) => {
         const snapshot = row.original
+        // Don't show image for Windows-based snapshots (they use qcow2 disk images, not Docker images)
+        if (snapshot.runnerClass === 'windows-exp') {
+          return '-'
+        }
         if (!snapshot.imageName && snapshot.buildInfo) {
           return (
             <Badge variant="secondary" className="rounded-sm px-1 font-medium">

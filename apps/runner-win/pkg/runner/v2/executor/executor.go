@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -198,6 +199,43 @@ func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status api
 	}
 
 	return err
+}
+
+// startJobHeartbeat starts a background goroutine that sends periodic heartbeat updates
+// to keep the job alive during long-running operations. Returns a stop function that
+// should be called when the operation completes.
+func (e *Executor) startJobHeartbeat(ctx context.Context, jobID string, interval time.Duration) (stop func()) {
+	done := make(chan struct{})
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-done:
+				return
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				// Send heartbeat by updating job status to IN_PROGRESS
+				updateStatus := apiclient.NewUpdateJobStatus(apiclient.JOBSTATUS_IN_PROGRESS)
+				req := e.client.JobsAPI.UpdateJobStatus(ctx, jobID).UpdateJobStatus(*updateStatus)
+				if _, _, err := req.Execute(); err != nil {
+					e.log.Warn("Failed to send job heartbeat",
+						slog.String("job_id", jobID),
+						slog.Any("error", err),
+					)
+				} else {
+					e.log.Debug("Sent job heartbeat", slog.String("job_id", jobID))
+				}
+			}
+		}
+	}()
+
+	return func() {
+		close(done)
+	}
 }
 
 // parsePayload is a helper to parse job payload into a specific type

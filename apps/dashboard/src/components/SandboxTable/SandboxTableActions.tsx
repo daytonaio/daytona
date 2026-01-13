@@ -29,6 +29,7 @@ export function SandboxTableActions({
   onOpenWebTerminal,
   onCreateSshAccess,
   onRevokeSshAccess,
+  onCreateSnapshot,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
@@ -61,6 +62,16 @@ export function SandboxTableActions({
           key: 'archive',
           label: 'Archive',
           onClick: () => onArchive(sandbox.id),
+          disabled: isLoading,
+        })
+      }
+
+      // Add Create Snapshot option (only for STARTED or STOPPED)
+      if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) {
+        items.push({
+          key: 'create-snapshot',
+          label: 'Create Snapshot',
+          onClick: () => onCreateSnapshot(sandbox.id),
           disabled: isLoading,
         })
       }
@@ -108,6 +119,7 @@ export function SandboxTableActions({
     onVnc,
     onCreateSshAccess,
     onRevokeSshAccess,
+    onCreateSnapshot,
   ])
 
   if (!writePermitted && !deletePermitted) {

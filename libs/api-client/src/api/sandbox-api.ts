@@ -34,6 +34,8 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { CreateSandbox } from '../models'
 // @ts-ignore
+import type { CreateSandboxSnapshot } from '../models'
+// @ts-ignore
 import type { PaginatedSandboxes } from '../models'
 // @ts-ignore
 import type { PortPreviewUrl } from '../models'
@@ -193,6 +195,61 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(createSandbox, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Create a new snapshot from an existing sandbox. The snapshot captures the current state of the sandbox filesystem. Supports safe mode (pauses VM during operation) and live mode (no pause, may be inconsistent).
+     * @summary Create a snapshot from a sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox to create a snapshot from
+     * @param {CreateSandboxSnapshot} createSandboxSnapshot
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createSandboxSnapshot: async (
+      sandboxIdOrName: string,
+      createSandboxSnapshot: CreateSandboxSnapshot,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('createSandboxSnapshot', 'sandboxIdOrName', sandboxIdOrName)
+      // verify required parameter 'createSandboxSnapshot' is not null or undefined
+      assertParamExists('createSandboxSnapshot', 'createSandboxSnapshot', createSandboxSnapshot)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/snapshot`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(createSandboxSnapshot, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -1436,6 +1493,38 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Create a new snapshot from an existing sandbox. The snapshot captures the current state of the sandbox filesystem. Supports safe mode (pauses VM during operation) and live mode (no pause, may be inconsistent).
+     * @summary Create a snapshot from a sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox to create a snapshot from
+     * @param {CreateSandboxSnapshot} createSandboxSnapshot
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createSandboxSnapshot(
+      sandboxIdOrName: string,
+      createSandboxSnapshot: CreateSandboxSnapshot,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createSandboxSnapshot(
+        sandboxIdOrName,
+        createSandboxSnapshot,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.createSandboxSnapshot']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      *
      * @summary Create SSH access for sandbox
      * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -2173,6 +2262,25 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Create a new snapshot from an existing sandbox. The snapshot captures the current state of the sandbox filesystem. Supports safe mode (pauses VM during operation) and live mode (no pause, may be inconsistent).
+     * @summary Create a snapshot from a sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox to create a snapshot from
+     * @param {CreateSandboxSnapshot} createSandboxSnapshot
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createSandboxSnapshot(
+      sandboxIdOrName: string,
+      createSandboxSnapshot: CreateSandboxSnapshot,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Sandbox> {
+      return localVarFp
+        .createSandboxSnapshot(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      *
      * @summary Create SSH access for sandbox
      * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -2650,6 +2758,27 @@ export class SandboxApi extends BaseAPI {
   public createSandbox(createSandbox: CreateSandbox, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
       .createSandbox(createSandbox, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Create a new snapshot from an existing sandbox. The snapshot captures the current state of the sandbox filesystem. Supports safe mode (pauses VM during operation) and live mode (no pause, may be inconsistent).
+   * @summary Create a snapshot from a sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox to create a snapshot from
+   * @param {CreateSandboxSnapshot} createSandboxSnapshot
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public createSandboxSnapshot(
+    sandboxIdOrName: string,
+    createSandboxSnapshot: CreateSandboxSnapshot,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .createSandboxSnapshot(sandboxIdOrName, createSandboxSnapshot, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -795,7 +795,11 @@ export class SandboxService {
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    await runnerAdapter.createSnapshotFromSandbox(sandbox.id, snapshotName, live)
+    await runnerAdapter.createSnapshotFromSandbox(sandbox.id, snapshotName, organizationId, live)
+
+    // Set backupState to IN_PROGRESS to track snapshot creation
+    sandbox.backupState = BackupState.IN_PROGRESS
+    await this.sandboxRepository.save(sandbox)
 
     this.logger.log(`Created snapshot job for sandbox ${sandbox.id} with name ${snapshotName}`)
 

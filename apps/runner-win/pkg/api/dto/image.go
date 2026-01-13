@@ -37,9 +37,10 @@ type PushSnapshotResponseDTO struct {
 } //	@name	PushSnapshotResponseDTO
 
 type CreateSnapshotRequestDTO struct {
-	SandboxId string `json:"sandboxId" validate:"required"` // ID of the sandbox to create snapshot from
-	Name      string `json:"name" validate:"required"`      // Name for the snapshot (e.g., "myapp-v1.0")
-	Live      bool   `json:"live"`                          // If true, use optimistic mode (no pause); if false (default), pause VM for consistency
+	SandboxId      string `json:"sandboxId" validate:"required"`      // ID of the sandbox to create snapshot from
+	Name           string `json:"name" validate:"required"`           // Name for the snapshot (e.g., "myapp-v1.0")
+	OrganizationId string `json:"organizationId" validate:"required"` // Organization ID to namespace the snapshot in S3
+	Live           bool   `json:"live"`                               // If true, use optimistic mode (no pause); if false (default), pause VM for consistency
 } //	@name	CreateSnapshotRequestDTO
 
 type CreateSnapshotResponseDTO struct {

@@ -377,7 +377,12 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
   }
 
-  async createSnapshotFromSandbox(_sandboxId: string, _snapshotName: string, _live?: boolean): Promise<void> {
+  async createSnapshotFromSandbox(
+    _sandboxId: string,
+    _snapshotName: string,
+    _organizationId: string,
+    _live?: boolean,
+  ): Promise<void> {
     throw new Error('createSnapshotFromSandbox is not supported for V0 runners')
   }
 }

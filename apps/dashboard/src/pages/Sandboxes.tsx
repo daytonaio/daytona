@@ -39,6 +39,7 @@ import {
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { formatDuration } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Check, Copy } from 'lucide-react'
 import { useConfig } from '@/hooks/useConfig'
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
@@ -267,6 +268,12 @@ const Sandboxes: React.FC = () => {
   const [revokeSshToken, setRevokeSshToken] = useState<string>('')
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
   const [copied, setCopied] = useState<string | null>(null)
+
+  // Create Snapshot Dialog
+  const [showCreateSnapshotDialog, setShowCreateSnapshotDialog] = useState(false)
+  const [snapshotName, setSnapshotName] = useState<string>('')
+  const [snapshotSandboxId, setSnapshotSandboxId] = useState<string>('')
+  const [snapshotLive, setSnapshotLive] = useState<boolean>(false)
 
   // Snapshot Filter
 
@@ -749,6 +756,44 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  // Create Snapshot
+  const openCreateSnapshotDialog = (id: string) => {
+    setSnapshotSandboxId(id)
+    setSnapshotName('')
+    setSnapshotLive(false)
+    setShowCreateSnapshotDialog(true)
+  }
+
+  const handleCreateSnapshot = async () => {
+    if (!snapshotName.trim()) {
+      toast.error('Please enter a snapshot name')
+      return
+    }
+
+    setSandboxIsLoading((prev) => ({ ...prev, [snapshotSandboxId]: true }))
+    try {
+      await sandboxApi.createSandboxSnapshot(
+        snapshotSandboxId,
+        {
+          name: snapshotName,
+          live: snapshotLive,
+        },
+        selectedOrganization?.id,
+      )
+      setShowCreateSnapshotDialog(false)
+      setSnapshotName('')
+      setSnapshotSandboxId('')
+      setSnapshotLive(false)
+      toast.success('Snapshot creation started')
+      // Refetch to get updated backupState
+      refetchSandboxesData()
+    } catch (error) {
+      handleApiError(error, 'Failed to create snapshot')
+    } finally {
+      setSandboxIsLoading((prev) => ({ ...prev, [snapshotSandboxId]: false }))
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
 
@@ -814,6 +859,7 @@ const Sandboxes: React.FC = () => {
         getWebTerminalUrl={getWebTerminalUrl}
         handleCreateSshAccess={openCreateSshDialog}
         handleRevokeSshAccess={openRevokeSshDialog}
+        handleCreateSnapshot={openCreateSnapshotDialog}
         handleRefresh={handleRefresh}
         isRefreshing={sandboxDataIsRefreshing}
         data={sandboxesData?.items || []}
@@ -980,6 +1026,60 @@ const Sandboxes: React.FC = () => {
               className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
             >
               Revoke Access
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Create Snapshot Dialog */}
+      <AlertDialog
+        open={showCreateSnapshotDialog}
+        onOpenChange={(isOpen) => {
+          setShowCreateSnapshotDialog(isOpen)
+          if (!isOpen) {
+            setSnapshotName('')
+            setSnapshotSandboxId('')
+            setSnapshotLive(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create Snapshot</AlertDialogTitle>
+            <AlertDialogDescription>
+              Create a new snapshot from this sandbox. The snapshot will capture the current state of the filesystem.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Snapshot Name:</Label>
+              <input
+                type="text"
+                value={snapshotName}
+                onChange={(e) => setSnapshotName(e.target.value)}
+                placeholder="Enter snapshot name"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="snapshot-live"
+                checked={snapshotLive}
+                onCheckedChange={(checked) => setSnapshotLive(checked === true)}
+              />
+              <Label htmlFor="snapshot-live" className="text-sm cursor-pointer">
+                Live mode (faster, but may be less consistent)
+              </Label>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCreateSnapshot}
+              disabled={!snapshotName.trim() || !snapshotSandboxId || sandboxIsLoading[snapshotSandboxId]}
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            >
+              {sandboxIsLoading[snapshotSandboxId] ? 'Creating...' : 'Create Snapshot'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

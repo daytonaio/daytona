@@ -417,10 +417,16 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   @Transactional()
-  async createSnapshotFromSandbox(sandboxId: string, snapshotName: string, live?: boolean): Promise<void> {
+  async createSnapshotFromSandbox(
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    live?: boolean,
+  ): Promise<void> {
     const payload = {
       sandboxId,
       name: snapshotName,
+      organizationId,
       live: live ?? false,
     }
 

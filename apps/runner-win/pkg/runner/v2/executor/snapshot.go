@@ -8,6 +8,7 @@ package executor
 import (
 	"context"
 	"errors"
+	"time"
 
 	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/runner-win/pkg/api/dto"
@@ -29,6 +30,10 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) (any, e
 	if err != nil {
 		return nil, err
 	}
+
+	// Start heartbeat to keep the job alive during long-running downloads
+	stopHeartbeat := e.startJobHeartbeat(ctx, job.GetId(), 2*time.Minute)
+	defer stopHeartbeat()
 
 	err = e.libvirt.PullSnapshot(ctx, request)
 	if err != nil {
@@ -75,6 +80,11 @@ func (e *Executor) createSandboxSnapshot(ctx context.Context, job *apiclient.Job
 	if err != nil {
 		return nil, err
 	}
+
+	// Start heartbeat to keep the job alive during long-running operations
+	// (disk flattening and S3 upload can take 30+ minutes for large disks)
+	stopHeartbeat := e.startJobHeartbeat(ctx, job.GetId(), 2*time.Minute)
+	defer stopHeartbeat()
 
 	return e.libvirt.CreateSnapshot(ctx, request)
 }

@@ -38,6 +38,7 @@ export interface SandboxTableProps {
   getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  handleCreateSnapshot: (id: string) => void
   handleRefresh: () => void
   isRefreshing?: boolean
   onRowClick?: (sandbox: Sandbox) => void
@@ -67,6 +68,7 @@ export interface SandboxTableActionsProps {
   onOpenWebTerminal: (id: string) => void
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
+  onCreateSnapshot: (id: string) => void
 }
 
 export interface SandboxTableHeaderProps {

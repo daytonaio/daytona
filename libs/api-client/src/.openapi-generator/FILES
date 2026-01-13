@@ -52,6 +52,7 @@ models/create-region-response.ts
 models/create-region.ts
 models/create-runner-response.ts
 models/create-runner.ts
+models/create-sandbox-snapshot.ts
 models/create-sandbox.ts
 models/create-session-request.ts
 models/create-snapshot.ts
