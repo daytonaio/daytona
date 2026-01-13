@@ -499,6 +499,24 @@ export const getSidebarConfig = (
             icon: 'trl-logo.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/tailscale', locale),
+          label: t('sidebarconfig.tailscale'),
+          disablePagination: true,
+          attrs: {
+            icon: 'tailscale.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/openvpn', locale),
+          label: t('sidebarconfig.openvpn'),
+          disablePagination: true,
+          attrs: {
+            icon: 'openvpn.svg',
+          },
+        },
       ],
     },
     {

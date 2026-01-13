@@ -118,6 +118,8 @@
   "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.claude": "Claude",
   "sidebarconfig.trlGrpo": "TRL",
+  "sidebarconfig.tailscale": "Tailscale",
+  "sidebarconfig.openvpn": "OpenVPN",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
 }

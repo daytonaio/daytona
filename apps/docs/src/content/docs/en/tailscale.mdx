@@ -1,0 +1,122 @@
+---
+title: Connect Daytona Sandboxes to Tailscale Network
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona provides an option to run sandboxes that can be connected to private networks. One common use case is accessing the sandbox over a private mesh network using [Tailscale](https://tailscale.com/).
+
+## 1. Setup
+
+### Daytona account
+
+Open [Daytona Dashboard ↗](https://app.daytona.io/) to create or access your Daytona account.
+
+### Daytona API key
+
+Generate an [API key](/docs/en/api-keys).
+
+### Daytona sandbox
+
+Create a Daytona sandbox to connect to Tailscale network. The following snippet is an example of creating a default sandbox using the [Daytona SDK](/docs/en/getting-started#sdks). For more information on creating and configuring a Daytona sandbox, see the [sandboxes documentation](/docs/en/sandboxes).
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+  
+    ```python
+    # Import the Daytona SDK
+    from daytona import Daytona, DaytonaConfig
+
+    # Define the configuration
+    config = DaytonaConfig(api_key="YOUR_API_KEY") # Replace with your API key
+
+    # Initialize the Daytona client
+    daytona = Daytona(config)
+
+    # Create the Sandbox instance
+    sandbox = daytona.create()
+    ```
+
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+  
+    ```typescript
+    // Import the Daytona SDK
+    import { Daytona } from '@daytonaio/sdk';
+
+    // Initialize the Daytona client
+    const daytona = new Daytona({ apiKey: 'YOUR_API_KEY' }); // Replace with your API key
+
+    // Create the Sandbox instance
+    const sandbox = await daytona.create({
+      language: 'typescript',
+    });
+    ```
+
+  </TabItem>
+</Tabs>
+
+### Tailscale account
+
+Create or access your [Tailscale account](https://login.tailscale.com/).
+
+## 2. Install Tailscale
+
+Navigate to your sandbox [web terminal](/docs/en/web-terminal) or [access it via SSH](/docs/en/ssh-access) and install Tailscale using the official installation script:
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+```
+
+This begins the Tailscale installation process and initializes the Tailscale CLI inside the sandbox.
+
+## 3. Start Tailscale
+
+Daytona requires the Tailscale daemon to be running in the background to connect the sandbox to the Tailscale network. The recommended approach is to run it in a detached tmux (or similar) session:
+
+```bash
+sudo apt install tmux
+```
+
+Start the Tailscale daemon in a detached tmux session:
+
+```bash
+tmux new -d -s tailscale 'tailscaled'
+```
+
+:::note
+If the sandbox requires elevated privileges, use:
+
+<br />
+<br />
+
+```bash
+tmux new -d -s tailscale 'sudo tailscaled'
+```
+
+:::
+
+This starts the Tailscale daemon in a detached tmux session and persists even if you disconnect from the sandbox.
+
+## 4. Connect Sandbox to Tailscale
+
+Connect and authenticate your sandbox with the Tailscale network:
+
+```bash
+sudo tailscale up
+```
+
+Visit the authentication URL in the web browser and follow the instructions to authenticate.
+
+```txt
+To authenticate, visit:
+https://login.tailscale.com/a/<id>
+```
+
+Once authenticated, you will see the following confirmation message:
+
+```txt
+Your device <id> is logged in to the <address> tailnet.
+```
+
+You've now successfully connected your Daytona sandbox to your Tailscale network. The sandbox should appear in your [Tailscale dashboard](https://login.tailscale.com/admin/machines).
