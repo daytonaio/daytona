@@ -36,13 +36,13 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 	cmdId := c.Param("commandId")
 
-	session, ok := sessions[sessionId]
+	session, ok := sessions.Get(sessionId)
 	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
 	}
 
-	command, ok := sessions[sessionId].commands[cmdId]
+	command, ok := session.commands.Get(cmdId)
 	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("command not found"))
 		return

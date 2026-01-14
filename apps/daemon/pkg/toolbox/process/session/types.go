@@ -8,6 +8,8 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
+
+	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
 type CreateSessionRequest struct {
@@ -37,7 +39,7 @@ type session struct {
 	id          string
 	cmd         *exec.Cmd
 	stdinWriter io.Writer
-	commands    map[string]*Command
+	commands    cmap.ConcurrentMap[string, *Command]
 	ctx         context.Context
 	cancel      context.CancelFunc
 }

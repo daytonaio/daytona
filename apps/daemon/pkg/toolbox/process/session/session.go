@@ -18,15 +18,15 @@ import (
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/shirou/gopsutil/v4/process"
-
 	log "github.com/sirupsen/logrus"
 )
 
 const TERMINATION_GRACE_PERIOD = 5 * time.Second
 const TERMINATION_CHECK_INTERVAL = 100 * time.Millisecond
 
-var sessions = map[string]*session{}
+var sessions = cmap.New[*session]()
 
 // CreateSession godoc
 //
@@ -71,7 +71,7 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 		return
 	}
 
-	if _, ok := sessions[request.SessionId]; ok {
+	if _, ok := sessions.Get(request.SessionId); ok {
 		c.AbortWithError(http.StatusConflict, errors.New("session already exists"))
 		cancel()
 		return
@@ -95,11 +95,11 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 		id:          request.SessionId,
 		cmd:         cmd,
 		stdinWriter: stdinWriter,
-		commands:    map[string]*Command{},
+		commands:    cmap.New[*Command](),
 		ctx:         ctx,
 		cancel:      cancel,
 	}
-	sessions[request.SessionId] = session
+	sessions.Set(request.SessionId, session)
 
 	err = os.MkdirAll(session.Dir(s.configDir), 0755)
 	if err != nil {
@@ -123,7 +123,7 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 func (s *SessionController) DeleteSession(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 
-	session, ok := sessions[sessionId]
+	session, ok := sessions.Get(sessionId)
 	if !ok {
 		_ = c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
@@ -146,7 +146,7 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 		return
 	}
 
-	delete(sessions, session.id)
+	sessions.Remove(session.id)
 	c.Status(http.StatusNoContent)
 }
 
@@ -163,7 +163,7 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 func (s *SessionController) ListSessions(c *gin.Context) {
 	sessionDTOs := []Session{}
 
-	for sessionId := range sessions {
+	for _, sessionId := range sessions.Keys() {
 		commands, err := s.getSessionCommands(sessionId)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -193,7 +193,7 @@ func (s *SessionController) ListSessions(c *gin.Context) {
 func (s *SessionController) GetSession(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 
-	_, ok := sessions[sessionId]
+	_, ok := sessions.Get(sessionId)
 	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
@@ -237,13 +237,13 @@ func (s *SessionController) GetSessionCommand(c *gin.Context) {
 }
 
 func (s *SessionController) getSessionCommands(sessionId string) ([]*Command, error) {
-	session, ok := sessions[sessionId]
+	session, ok := sessions.Get(sessionId)
 	if !ok {
 		return nil, errors.New("session not found")
 	}
 
 	commands := []*Command{}
-	for _, command := range session.commands {
+	for _, command := range session.commands.Items() {
 		cmd, err := s.getSessionCommand(sessionId, command.Id)
 		if err != nil {
 			return nil, err
@@ -255,12 +255,12 @@ func (s *SessionController) getSessionCommands(sessionId string) ([]*Command, er
 }
 
 func (s *SessionController) getSessionCommand(sessionId, cmdId string) (*Command, error) {
-	session, ok := sessions[sessionId]
+	session, ok := sessions.Get(sessionId)
 	if !ok {
 		return nil, errors.New("session not found")
 	}
 
-	command, ok := session.commands[cmdId]
+	command, ok := session.commands.Get(cmdId)
 	if !ok {
 		return nil, errors.New("command not found")
 	}

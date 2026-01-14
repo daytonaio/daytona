@@ -64,7 +64,7 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		return
 	}
 
-	session, ok := sessions[sessionId]
+	session, ok := sessions.Get(sessionId)
 	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
@@ -76,7 +76,7 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		Id:      *cmdId,
 		Command: request.Command,
 	}
-	session.commands[*cmdId] = command
+	session.commands.Set(*cmdId, command)
 
 	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
 	logDir := filepath.Dir(logFilePath)
@@ -146,7 +146,12 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	for {
 		select {
 		case <-session.ctx.Done():
-			session.commands[*cmdId].ExitCode = util.Pointer(1)
+			command, ok := session.commands.Get(*cmdId)
+			if !ok {
+				c.AbortWithError(http.StatusBadRequest, errors.New("command not found"))
+				return
+			}
+			command.ExitCode = util.Pointer(1)
 
 			c.AbortWithError(http.StatusBadRequest, errors.New("session cancelled"))
 			return
@@ -167,7 +172,12 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 				return
 			}
 
-			sessions[sessionId].commands[*cmdId].ExitCode = &exitCodeInt
+			command, ok := session.commands.Get(*cmdId)
+			if !ok {
+				c.AbortWithError(http.StatusBadRequest, errors.New("command not found"))
+				return
+			}
+			command.ExitCode = &exitCodeInt
 
 			logBytes, err := os.ReadFile(logFilePath)
 			if err != nil {
