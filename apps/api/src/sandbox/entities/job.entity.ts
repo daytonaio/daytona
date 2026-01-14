@@ -22,7 +22,7 @@ import { v4 } from 'uuid'
 @Index(['runnerId', 'status'])
 @Index(['status', 'createdAt'])
 @Index(['resourceType', 'resourceId'])
-@Index('IDX_UNIQUE_INCOMPLETE_JOB', ['resourceType', 'resourceId'], {
+@Index('IDX_UNIQUE_INCOMPLETE_JOB', ['resourceType', 'resourceId', 'runnerId'], {
   unique: true,
   where: '"completedAt" IS NULL',
 })
