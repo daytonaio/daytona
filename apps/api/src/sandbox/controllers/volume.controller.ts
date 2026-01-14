@@ -146,6 +146,10 @@ export class VolumeController {
     status: 200,
     description: 'Volume has been marked for deletion',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Volume is in use by one or more sandboxes',
+  })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_VOLUMES])
   @Audit({
     action: AuditAction.DELETE,

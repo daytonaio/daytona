@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In } from 'typeorm'
+import { Repository, Not, In, Raw } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
@@ -19,6 +26,9 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { SandboxRepository } from '../repositories/sandbox.repository'
+import { SandboxState } from '../enums/sandbox-state.enum'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 
 @Injectable()
 export class VolumeService {
@@ -27,6 +37,7 @@ export class VolumeService {
   constructor(
     @InjectRepository(Volume)
     private readonly volumeRepository: Repository<Volume>,
+    private readonly sandboxRepository: SandboxRepository,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly configService: TypedConfigService,
@@ -130,6 +141,22 @@ export class VolumeService {
 
     if (!volume) {
       throw new NotFoundException(`Volume with ID ${volumeId} not found`)
+    }
+
+    // Check if any non-destroyed sandboxes are using this volume
+    const sandboxesUsingVolume = await this.sandboxRepository.find({
+      where: {
+        volumes: Raw((alias) => `${alias} @> '[{"volumeId":"${volumeId}"}]'::jsonb`),
+        desiredState: Not(SandboxDesiredState.DESTROYED),
+      },
+      select: ['id', 'name'],
+    })
+
+    if (sandboxesUsingVolume.length > 0) {
+      const sandboxNames = sandboxesUsingVolume.map((s) => s.name).join(', ')
+      throw new ConflictException(
+        `Volume cannot be deleted because it is in use by the following sandboxes: ${sandboxNames}`,
+      )
     }
 
     if (volume.state !== VolumeState.READY) {
