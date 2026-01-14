@@ -110,9 +110,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 
 	// Build healthcheck request
 	healthcheck := apiclient.NewRunnerHealthcheck(internal.Version)
-	if metricsPtr != nil {
-		healthcheck.SetMetrics(*metricsPtr)
-	}
+	healthcheck.SetMetrics(*metricsPtr)
 
 	healthcheck.SetDomain(s.domain)
 	proxyUrl := fmt.Sprintf("http://%s:%d", s.domain, s.proxyPort)

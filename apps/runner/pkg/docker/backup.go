@@ -44,7 +44,10 @@ func (d *DockerClient) CreateBackupAsync(ctx context.Context, containerId string
 	log.Infof("Creating backup for container %s...", containerId)
 
 	go func() {
-		d.createBackup(containerId, backupDto)
+		err := d.createBackup(containerId, backupDto)
+		if err != nil {
+			log.Errorf("Error creating backup for container %s: %v", containerId, err)
+		}
 	}()
 
 	return nil

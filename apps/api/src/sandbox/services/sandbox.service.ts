@@ -106,7 +106,7 @@ export class SandboxService {
     @InjectRedis() private readonly redis: Redis,
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
-  ) { }
+  ) {}
 
   protected getLockKey(id: string): string {
     return `sandbox:${id}:state-change`

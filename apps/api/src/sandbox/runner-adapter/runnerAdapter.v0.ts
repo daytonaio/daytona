@@ -197,11 +197,11 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       env: sandbox.env,
       registry: registry
         ? {
-          project: registry.project,
-          url: registry.url.replace(/^(https?:\/\/)/, ''),
-          username: registry.username,
-          password: registry.password,
-        }
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
         : undefined,
       entrypoint: entrypoint,
       volumes: sandbox.volumes?.map((volume) => ({
@@ -368,11 +368,11 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       snapshot: snapshotName,
       registry: registry
         ? {
-          project: registry.project,
-          url: registry.url.replace(/^(https?:\/\/)/, ''),
-          username: registry.username,
-          password: registry.password,
-        }
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
         : undefined,
     })
 

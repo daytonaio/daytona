@@ -55,7 +55,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
-  ) { }
+  ) {}
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish

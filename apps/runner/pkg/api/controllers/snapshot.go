@@ -395,6 +395,10 @@ func GetSnapshotInfo(ctx *gin.Context) {
 func InspectSnapshotInRegistry(ctx *gin.Context) {
 	var request dto.InspectSnapshotInRegistryRequestDTO
 	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
 
 	runner := runner.GetInstance(nil)
 
