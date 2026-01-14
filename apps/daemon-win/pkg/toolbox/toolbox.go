@@ -217,35 +217,44 @@ func (s *Server) Start() error {
 	}
 
 	// Computer use endpoints
+	cu := &computeruse.ComputerUse{}
 	computerUseController := r.Group("/computeruse")
 	{
-		// Status endpoint checks VNC on port 6080
-		computerUseController.GET("/status", computeruse.GetStatus)
+		// Status endpoint
+		computerUseController.GET("/status", computeruse.WrapStatusHandler(cu.GetStatus))
 
-		// Start/Stop endpoints
-		computerUseController.POST("/start", computeruse.Start)
-		computerUseController.POST("/stop", computeruse.Stop)
+		// Start/Stop endpoints (VNC is managed externally on Windows)
+		computerUseController.POST("/start", computeruse.StartHandler)
+		computerUseController.POST("/stop", computeruse.StopHandler)
 
-		// Other endpoints return service unavailable
+		// Process management endpoints (not applicable for Windows - VNC is managed externally)
 		computerUseController.GET("/process-status", computeruse.ComputerUseDisabledMiddleware())
 		computerUseController.GET("/process/:processName/status", computeruse.ComputerUseDisabledMiddleware())
 		computerUseController.POST("/process/:processName/restart", computeruse.ComputerUseDisabledMiddleware())
 		computerUseController.GET("/process/:processName/logs", computeruse.ComputerUseDisabledMiddleware())
 		computerUseController.GET("/process/:processName/errors", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.GET("/screenshot", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.GET("/screenshot/region", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.GET("/screenshot/compressed", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.GET("/screenshot/region/compressed", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.GET("/mouse/position", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.POST("/mouse/move", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.POST("/mouse/click", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.POST("/mouse/drag", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.POST("/mouse/scroll", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.POST("/keyboard/type", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.POST("/keyboard/key", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.POST("/keyboard/hotkey", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.GET("/display/info", computeruse.ComputerUseDisabledMiddleware())
-		computerUseController.GET("/display/windows", computeruse.ComputerUseDisabledMiddleware())
+
+		// Screenshot endpoints
+		computerUseController.GET("/screenshot", computeruse.WrapScreenshotHandler(cu.TakeScreenshot))
+		computerUseController.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(cu.TakeRegionScreenshot))
+		computerUseController.GET("/screenshot/compressed", computeruse.WrapCompressedScreenshotHandler(cu.TakeCompressedScreenshot))
+		computerUseController.GET("/screenshot/region/compressed", computeruse.WrapCompressedRegionScreenshotHandler(cu.TakeCompressedRegionScreenshot))
+
+		// Mouse control endpoints
+		computerUseController.GET("/mouse/position", computeruse.WrapMousePositionHandler(cu.GetMousePosition))
+		computerUseController.POST("/mouse/move", computeruse.WrapMoveMouseHandler(cu.MoveMouse))
+		computerUseController.POST("/mouse/click", computeruse.WrapClickHandler(cu.Click))
+		computerUseController.POST("/mouse/drag", computeruse.WrapDragHandler(cu.Drag))
+		computerUseController.POST("/mouse/scroll", computeruse.WrapScrollHandler(cu.Scroll))
+
+		// Keyboard control endpoints
+		computerUseController.POST("/keyboard/type", computeruse.WrapTypeTextHandler(cu.TypeText))
+		computerUseController.POST("/keyboard/key", computeruse.WrapPressKeyHandler(cu.PressKey))
+		computerUseController.POST("/keyboard/hotkey", computeruse.WrapPressHotkeyHandler(cu.PressHotkey))
+
+		// Display info endpoints
+		computerUseController.GET("/display/info", computeruse.WrapDisplayInfoHandler(cu.GetDisplayInfo))
+		computerUseController.GET("/display/windows", computeruse.WrapWindowsHandler(cu.GetWindows))
 	}
 
 	go portDetector.Start(context.Background())

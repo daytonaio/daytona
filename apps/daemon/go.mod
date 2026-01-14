@@ -13,7 +13,7 @@ require (
 	github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
 	github.com/creack/pty v1.1.23
 	github.com/gin-gonic/gin v1.10.1
-	github.com/gliderlabs/ssh v0.3.7
+	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-git/go-git/v5 v5.12.1-0.20240617075238-c127d1b35535
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/google/uuid v1.6.0
@@ -22,7 +22,7 @@ require (
 	github.com/hashicorp/go-plugin v1.6.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/orcaman/concurrent-map/v2 v2.0.1
-	github.com/pkg/sftp v1.13.6
+	github.com/pkg/sftp v1.13.7
 	github.com/shirou/gopsutil/v4 v4.25.9
 	github.com/sirupsen/logrus v1.9.3
 	github.com/sourcegraph/jsonrpc2 v0.2.0
