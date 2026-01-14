@@ -201,7 +201,7 @@ export class DockerRegistryService {
    *
    * @param regionId - (Optional) The ID of the region.
    */
-  async getAvailableTransientRegistry(regionId: string): Promise<DockerRegistry | null> {
+  async getAvailableTransientRegistry(regionId?: string): Promise<DockerRegistry | null> {
     if (regionId) {
       const region = await this.regionService.findOne(regionId)
       if (!region) {
