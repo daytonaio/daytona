@@ -50,7 +50,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     private readonly jobService: JobService,
-  ) { }
+  ) {}
 
   async init(runner: Runner): Promise<void> {
     this.runner = runner
@@ -150,11 +150,11 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       env: sandbox.env,
       registry: registry
         ? {
-          project: registry.project,
-          url: registry.url.replace(/^(https?:\/\/)/, ''),
-          username: registry.username,
-          password: registry.password,
-        }
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
         : undefined,
       entrypoint: entrypoint,
       volumes: sandbox.volumes?.map((volume) => ({
@@ -233,7 +233,14 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       errorReason: sandbox.errorReason,
       backupErrorReason: sandbox.backupErrorReason,
     }
-    await this.jobService.createJob(null, JobType.RECOVER_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandbox.id, recoverSandboxDTO)
+    await this.jobService.createJob(
+      null,
+      JobType.RECOVER_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandbox.id,
+      recoverSandboxDTO,
+    )
 
     this.logger.debug(`Created RECOVER_SANDBOX job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
   }
@@ -447,11 +454,11 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       snapshot: snapshotName,
       registry: registry
         ? {
-          project: registry.project,
-          url: registry.url.replace(/^(https?:\/\/)/, ''),
-          username: registry.username,
-          password: registry.password,
-        }
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
         : undefined,
     }
 
