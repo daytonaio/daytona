@@ -400,9 +400,9 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/regions', locale),
-          label: t('sidebarconfig.regions'),
-          description: t('sidebarconfig.regionsDescription'),
+          href: localizePath('/docs/regions-and-runners', locale),
+          label: t('sidebarconfig.regionsAndRunners'),
+          description: t('sidebarconfig.regionsAndRunnersDescription'),
           attrs: {
             icon: 'globe.svg',
           },
