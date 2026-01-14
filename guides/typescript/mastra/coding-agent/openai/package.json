@@ -1,0 +1,35 @@
+{
+  "name": "coding-agent",
+  "version": "0.2.0",
+  "description": "Advanced Mastra AI coding agent with secure sandbox execution, comprehensive file management, and multi-language support for Python, JavaScript, and TypeScript development workflows",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "mastra dev",
+    "build": "mastra build",
+    "start": "mastra start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "dependencies": {
+    "@daytonaio/sdk": "^0.120.0",
+    "@mastra/core": "beta",
+    "@mastra/fastembed": "beta",
+    "@mastra/libsql": "beta",
+    "@mastra/loggers": "beta",
+    "@mastra/mcp": "beta",
+    "@mastra/memory": "beta",
+    "@mastra/observability": "beta",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "mastra": "beta",
+    "typescript": "^5.8.3"
+  }
+}
