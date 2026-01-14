@@ -21,15 +21,22 @@ import (
 // for creating new sandboxes.
 //
 // The process:
-// 1. Check if snapshot already exists on the target host (skip download if valid)
-// 2. Check if snapshot exists in the remote store
-// 3. Download the snapshot to the target host's snapshots directory
-// 4. Set proper permissions for libvirt
-// 5. Validate the downloaded image
+// 1. Acquire a lock to prevent concurrent pulls of the same snapshot
+// 2. Check if snapshot already exists on the target host (skip download if valid)
+// 3. Check if snapshot exists in the remote store
+// 4. Download the snapshot to the target host's snapshots directory
+// 5. Set proper permissions for libvirt
+// 6. Validate the downloaded image
+// 7. Release the lock
 //
 // This function handles both local and remote libvirt hosts. When connected to a remote
 // host via SSH (e.g., qemu+ssh://root@host/system), the snapshot is streamed from S3
 // to the remote host via SSH.
+//
+// Thread-safety: This function uses file-based locking to prevent multiple concurrent
+// pull operations from corrupting each other. Only one pull per snapshot can proceed
+// at a time. Other callers will wait for the lock and then find the snapshot already
+// exists.
 func (l *LibVirt) PullSnapshot(ctx context.Context, req dto.PullSnapshotRequestDTO) error {
 	snapshotName := req.Snapshot
 	if snapshotName == "" {
@@ -42,7 +49,16 @@ func (l *LibVirt) PullSnapshot(ctx context.Context, req dto.PullSnapshotRequestD
 	targetPath := l.getSnapshotLocalPath(snapshotName)
 	tempPath := targetPath + ".downloading"
 
-	// Check if snapshot already exists on the target host
+	// Acquire lock to prevent concurrent pulls of the same snapshot
+	// This is critical to prevent race conditions where multiple sandbox creations
+	// try to pull the same snapshot simultaneously, causing file corruption
+	releaseLock, err := l.acquireSnapshotLock(ctx, targetPath)
+	if err != nil {
+		return fmt.Errorf("failed to acquire snapshot lock: %w", err)
+	}
+	defer releaseLock()
+
+	// Re-check if snapshot exists after acquiring lock (another process may have completed the download)
 	exists, err := l.fileExists(ctx, targetPath)
 	if err != nil {
 		log.Warnf("PullSnapshot: Error checking if snapshot exists: %v", err)
@@ -57,6 +73,12 @@ func (l *LibVirt) PullSnapshot(ctx context.Context, req dto.PullSnapshotRequestD
 		} else {
 			return nil // Already exists and is valid
 		}
+	}
+
+	// Also check for and clean up any stale temp files from interrupted downloads
+	if tempExists, _ := l.fileExists(ctx, tempPath); tempExists {
+		log.Warnf("PullSnapshot: Removing stale temp file from interrupted download: %s", tempPath)
+		l.removeFile(ctx, tempPath)
 	}
 
 	// Get storage client
