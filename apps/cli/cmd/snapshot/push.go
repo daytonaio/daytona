@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/docker"
 	views_common "github.com/daytonaio/daytona/cli/views/common"
 	views_util "github.com/daytonaio/daytona/cli/views/util"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"

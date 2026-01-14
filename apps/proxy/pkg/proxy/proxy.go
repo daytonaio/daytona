@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	apiclient "github.com/daytonaio/apiclient"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/proxy/cmd/proxy/config"
 	"github.com/daytonaio/proxy/internal"
 	"github.com/gin-contrib/cors"

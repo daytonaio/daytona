@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/apiclient"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"golang.org/x/crypto/ssh"
 
 	log "github.com/sirupsen/logrus"
