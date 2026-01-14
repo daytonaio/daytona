@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, LessThan, EntityManager } from 'typeorm'
 import { Job } from '../entities/job.entity'
@@ -49,28 +49,39 @@ export class JobService {
 
     const encodedPayload = typeof payload === 'string' ? payload : payload ? JSON.stringify(payload) : undefined
 
-    const savedJob = await repo.save(
-      new Job({
-        type,
-        runnerId,
-        resourceType,
-        resourceId,
-        status: JobStatus.PENDING,
-        payload: encodedPayload,
-        traceContext,
-      }),
-    )
+    try {
+      const savedJob = await repo.save(
+        new Job({
+          type,
+          runnerId,
+          resourceType,
+          resourceId,
+          status: JobStatus.PENDING,
+          payload: encodedPayload,
+          traceContext,
+        }),
+      )
 
-    // Log with context-specific info
-    const contextInfo = resourceId ? `${resourceType} ${resourceId}` : 'N/A'
+      // Log with context-specific info
+      const contextInfo = resourceId ? `${resourceType} ${resourceId}` : 'N/A'
 
-    this.logger.debug(`Created job ${savedJob.id} of type ${type} for ${contextInfo} on runner ${runnerId}`)
+      this.logger.debug(`Created job ${savedJob.id} of type ${type} for ${contextInfo} on runner ${runnerId}`)
 
-    // Notify runner via Redis - happens outside transaction
-    // If transaction rolls back, notification is harmless (runner will poll and find nothing)
-    await this.notifyRunner(runnerId, savedJob.id)
+      // Notify runner via Redis - happens outside transaction
+      // If transaction rolls back, notification is harmless (runner will poll and find nothing)
+      await this.notifyRunner(runnerId, savedJob.id)
 
-    return savedJob
+      return savedJob
+    } catch (error) {
+      if (error.code === '23505') {
+        if (error.constraint === 'IDX_UNIQUE_INCOMPLETE_JOB') {
+          this.logger.error(`An incomplete job already exists for ${resourceType} ${resourceId} on runner ${runnerId}`)
+        }
+        throw new ConflictException('An operation is already in progress for this resource')
+      }
+      this.logger.error(`Error creating job: ${error}`)
+      throw error
+    }
   }
 
   private async notifyRunner(runnerId: string, jobId: string): Promise<void> {
