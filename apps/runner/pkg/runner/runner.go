@@ -6,6 +6,7 @@ package runner
 import (
 	"log"
 
+	"github.com/daytonaio/runner/internal/metrics"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/netrules"
@@ -16,8 +17,8 @@ import (
 type RunnerInstanceConfig struct {
 	StatesCache       *cache.StatesCache
 	Docker            *docker.DockerClient
+	MetricsCollector  *metrics.Collector
 	SandboxService    *services.SandboxService
-	MetricsService    *services.MetricsService
 	NetRulesManager   *netrules.NetRulesManager
 	SSHGatewayService *sshgateway.Service
 }
@@ -25,8 +26,8 @@ type RunnerInstanceConfig struct {
 type Runner struct {
 	StatesCache       *cache.StatesCache
 	Docker            *docker.DockerClient
+	MetricsCollector  *metrics.Collector
 	SandboxService    *services.SandboxService
-	MetricsService    *services.MetricsService
 	NetRulesManager   *netrules.NetRulesManager
 	SSHGatewayService *sshgateway.Service
 }
@@ -47,7 +48,7 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 			StatesCache:       config.StatesCache,
 			Docker:            config.Docker,
 			SandboxService:    config.SandboxService,
-			MetricsService:    config.MetricsService,
+			MetricsCollector:  config.MetricsCollector,
 			NetRulesManager:   config.NetRulesManager,
 			SSHGatewayService: config.SSHGatewayService,
 		}

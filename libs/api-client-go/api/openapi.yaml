@@ -10887,6 +10887,10 @@ components:
       type: object
     RunnerHealthMetrics:
       properties:
+        currentCpuLoadAverage:
+          description: Current CPU load average
+          example: 0.98
+          type: number
         currentCpuUsagePercentage:
           description: Current CPU usage percentage
           example: 45.5
@@ -10936,6 +10940,7 @@ components:
         - currentAllocatedCpu
         - currentAllocatedDiskGiB
         - currentAllocatedMemoryGiB
+        - currentCpuLoadAverage
         - currentCpuUsagePercentage
         - currentDiskUsagePercentage
         - currentMemoryUsagePercentage

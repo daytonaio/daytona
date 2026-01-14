@@ -6,16 +6,32 @@
 package metrics
 
 import (
+	"container/ring"
 	"context"
+	"errors"
+	"fmt"
 	"log/slog"
+	"sync"
+	"time"
 
-	"github.com/shirou/gopsutil/v3/cpu"
-	"github.com/shirou/gopsutil/v3/disk"
-	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/daytonaio/runner/pkg/common"
+	"github.com/daytonaio/runner/pkg/docker"
+	"github.com/docker/docker/api/types/container"
+	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/load"
+	"github.com/shirou/gopsutil/v4/mem"
 )
+
+// CPUSnapshot represents a point-in-time CPU measurement
+type CPUSnapshot struct {
+	timestamp  time.Time
+	cpuPercent float64
+}
 
 // Metrics holds runner metrics
 type Metrics struct {
+	CPULoadAverage        float32
 	CPUUsagePercentage    float32
 	MemoryUsagePercentage float32
 	DiskUsagePercentage   float32
@@ -31,127 +47,267 @@ type Metrics struct {
 
 // Collector collects system metrics
 type Collector struct {
-	log *slog.Logger
-	// For now, allocations are tracked manually
-	// In a real implementation, these would query container runtime
+	docker *docker.DockerClient
+	log    *slog.Logger
+
+	// CPU usage - ring buffer for sliding window
+	cpuRing  *ring.Ring
+	cpuMutex sync.RWMutex
+
+	resourcesMutex      sync.RWMutex
 	allocatedCPU        float32
 	allocatedMemoryGiB  float32
 	allocatedDiskGiB    float32
-	snapshotCount       float32
 	startedSandboxCount float32
 }
 
 // NewCollector creates a new metrics collector
-func NewCollector(logger *slog.Logger) *Collector {
+func NewCollector(logger *slog.Logger, docker *docker.DockerClient, windowSize int) *Collector {
+	if windowSize <= 0 {
+		// Default to size 60
+		windowSize = 60
+	}
+
 	return &Collector{
-		log: logger.With(slog.String("component", "metrics")),
+		log:     logger.With(slog.String("component", "metrics")),
+		docker:  docker,
+		cpuRing: ring.New(windowSize),
 	}
 }
 
+// Start begins needed metrics collection processes
+func (c *Collector) Start(ctx context.Context) {
+	go c.snapshotCPUUsage(ctx)
+	go c.snapshotAllocatedResources(ctx)
+}
+
 // Collect gathers current system metrics
-func (c *Collector) Collect(ctx context.Context) *Metrics {
-	metrics := &Metrics{
-		AllocatedCPU:        c.allocatedCPU,
-		AllocatedMemoryGiB:  c.allocatedMemoryGiB,
-		AllocatedDiskGiB:    c.allocatedDiskGiB,
-		SnapshotCount:       c.snapshotCount,
-		StartedSandboxCount: c.startedSandboxCount,
+func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
+	timeout := 30 * time.Second
+	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	for {
+		select {
+		case <-timeoutCtx.Done():
+			return nil, errors.New("timeout collecting metrics")
+		default:
+			metrics, err := c.collect(ctx)
+			if err != nil {
+				c.log.Warn("Failed to collect metrics", slog.Any("error", err))
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			return metrics, nil
+		}
 	}
+}
+
+func (c *Collector) collect(ctx context.Context) (*Metrics, error) {
+	metrics := &Metrics{}
 
 	// Collect CPU count
 	cpuCount, err := cpu.CountsWithContext(ctx, true)
 	if err != nil {
-		c.log.Warn("Failed to collect CPU count", slog.Any("error", err))
-	} else {
-		metrics.TotalCPU = float32(cpuCount)
+		return nil, fmt.Errorf("failed to collect CPU count: %v", err)
 	}
+	metrics.TotalCPU = float32(cpuCount)
+
+	// Update CPU load averages
+	// Make sure that `cpuCount` exists and is greater than 0
+	loadAvg, err := load.Avg()
+	if err != nil {
+		return nil, fmt.Errorf("failed to collect CPU load averages: %v", err)
+	}
+	if cpuCount <= 0 {
+		return nil, errors.New("CPU count must be greater than zero")
+	}
+	metrics.CPULoadAverage = float32(loadAvg.Load15) / float32(cpuCount)
 
 	// Collect CPU usage
-	cpuPercent, err := cpu.PercentWithContext(ctx, 0, false)
+	cpuUsage, err := c.collectCPUUsageAverage()
 	if err != nil {
-		c.log.Warn("Failed to collect CPU metrics", slog.Any("error", err))
-	} else if len(cpuPercent) > 0 {
-		metrics.CPUUsagePercentage = float32(cpuPercent[0])
+		return nil, fmt.Errorf("failed to collect CPU usage: %v", err)
 	}
+	metrics.CPUUsagePercentage = float32(cpuUsage)
 
 	// Collect memory usage and total
 	memStats, err := mem.VirtualMemoryWithContext(ctx)
 	if err != nil {
-		c.log.Warn("Failed to collect memory metrics", slog.Any("error", err))
-	} else {
-		metrics.MemoryUsagePercentage = float32(memStats.UsedPercent)
-		// Convert bytes to GiB (1 GiB = 1024^3 bytes)
-		metrics.TotalRAMGiB = float32(memStats.Total) / (1024 * 1024 * 1024)
+		return nil, fmt.Errorf("failed to collect memory usage: %v", err)
 	}
+	metrics.MemoryUsagePercentage = float32(memStats.UsedPercent)
+	// Convert bytes to GiB (1 GiB = 1024^3 bytes)
+	metrics.TotalRAMGiB = float32(memStats.Total) / (1024 * 1024 * 1024)
 
 	// Collect disk usage and total
-	diskStats, err := disk.UsageWithContext(ctx, "/")
+	diskStats, err := disk.UsageWithContext(ctx, "/var/lib/docker")
 	if err != nil {
-		c.log.Warn("Failed to collect disk metrics", slog.Any("error", err))
-	} else {
-		metrics.DiskUsagePercentage = float32(diskStats.UsedPercent)
-		// Convert bytes to GiB (1 GiB = 1024^3 bytes)
-		metrics.TotalDiskGiB = float32(diskStats.Total) / (1024 * 1024 * 1024)
+		return nil, fmt.Errorf("failed to collect disk usage: %v", err)
 	}
+	metrics.DiskUsagePercentage = float32(diskStats.UsedPercent)
+	// Convert bytes to GiB (1 GiB = 1024^3 bytes)
+	metrics.TotalDiskGiB = float32(diskStats.Total) / (1024 * 1024 * 1024)
 
-	return metrics
-}
-
-// UpdateAllocations updates the allocation metrics
-// These would typically be called when sandboxes are created/destroyed
-func (c *Collector) UpdateAllocations(cpu, memoryGiB, diskGiB, snapshots float32) {
-	c.allocatedCPU = cpu
-	c.allocatedMemoryGiB = memoryGiB
-	c.allocatedDiskGiB = diskGiB
-	c.snapshotCount = snapshots
-}
-
-// IncrementStartedSandboxes increments the started sandbox count
-func (c *Collector) IncrementStartedSandboxes() {
-	c.startedSandboxCount++
-}
-
-// DecrementStartedSandboxes decrements the started sandbox count
-func (c *Collector) DecrementStartedSandboxes() {
-	// Ensure non-negative
-	if c.startedSandboxCount > 0 {
-		c.startedSandboxCount--
+	// Get snapshot count
+	info, err := c.docker.ApiClient().Info(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get snapshot count: %v", err)
 	}
+	metrics.SnapshotCount = float32(info.Images)
+
+	c.resourcesMutex.RLock()
+	metrics.AllocatedCPU = c.allocatedCPU
+	metrics.AllocatedMemoryGiB = c.allocatedMemoryGiB
+	metrics.AllocatedDiskGiB = c.allocatedDiskGiB
+	metrics.StartedSandboxCount = c.startedSandboxCount
+	c.resourcesMutex.RUnlock()
+
+	return metrics, nil
 }
 
-// IncrementAllocations increments the allocation metrics
-func (c *Collector) IncrementAllocations(cpu, memoryGiB, diskGiB float32) {
-	c.allocatedCPU += cpu
-	c.allocatedMemoryGiB += memoryGiB
-	c.allocatedDiskGiB += diskGiB
-}
+// snapshotCPUUsage runs in a background goroutine, continuously monitoring CPU usage
+func (c *Collector) snapshotCPUUsage(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
 
-// DecrementAllocations decrements the allocation metrics
-func (c *Collector) DecrementAllocations(cpu, memoryGiB, diskGiB float32) {
-	c.allocatedCPU -= cpu
-	c.allocatedMemoryGiB -= memoryGiB
-	c.allocatedDiskGiB -= diskGiB
+	for {
+		select {
+		case <-ctx.Done():
+			c.log.Info("CPU usage snapshotting stopped")
+			return
+		case <-ticker.C:
+			// Add a new CPU snapshot to the ring buffer
+			cpuPercent, err := cpu.PercentWithContext(ctx, 0, false)
+			if err != nil {
+				c.log.Warn("Failed to collect next CPU usage ring", slog.Any("error", err))
+				continue
+			}
 
-	// Ensure non-negative
-	if c.allocatedCPU < 0 {
-		c.allocatedCPU = 0
-	}
-	if c.allocatedMemoryGiB < 0 {
-		c.allocatedMemoryGiB = 0
-	}
-	if c.allocatedDiskGiB < 0 {
-		c.allocatedDiskGiB = 0
+			c.cpuMutex.Lock()
+			c.cpuRing.Value = CPUSnapshot{
+				timestamp:  time.Now(),
+				cpuPercent: cpuPercent[0],
+			}
+			c.cpuRing = c.cpuRing.Next()
+			c.cpuMutex.Unlock()
+		}
 	}
 }
 
-// IncrementSnapshots increments the snapshot count
-func (c *Collector) IncrementSnapshots() {
-	c.snapshotCount++
+// collectCPUUsageAverage calculates the average CPU usage from the ring buffer
+func (c *Collector) collectCPUUsageAverage() (float64, error) {
+	var total float64
+	var count int
+
+	c.cpuMutex.RLock()
+	defer c.cpuMutex.RUnlock()
+
+	c.cpuRing.Do(func(x interface{}) {
+		if x != nil {
+			snapshot, ok := x.(CPUSnapshot)
+			if !ok {
+				return
+			}
+
+			total += snapshot.cpuPercent
+			count++
+		}
+	})
+
+	if count == 0 {
+		return -1.0, errors.New("CPU metrics not yet available")
+	}
+
+	return total / float64(count), nil
 }
 
-// DecrementSnapshots decrements the snapshot count
-func (c *Collector) DecrementSnapshots() {
-	if c.snapshotCount > 0 {
-		c.snapshotCount--
+func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			c.log.Info("Allocated resources snapshotting stopped")
+			return
+		case <-ticker.C:
+			containers, err := c.docker.ApiClient().ContainerList(ctx, container.ListOptions{All: true})
+			if err != nil {
+				c.log.Error("Error listing containers when getting allocated resources", slog.Any("error", err))
+				continue
+			}
+
+			var totalAllocatedCpuMicroseconds float32 = 0 // CPU quota in microseconds per period
+			var totalAllocatedMemoryBytes float32 = 0     // Memory in bytes
+			var totalAllocatedDiskGB float32 = 0          // Disk in GB
+			var startedSandboxCount float32 = 0           // Count of running containers
+
+			for _, ctr := range containers {
+				cpu, memory, disk, err := c.getContainerAllocatedResources(ctx, ctr.ID)
+				if err != nil {
+					continue
+				}
+
+				// For CPU and memory: only count running containers
+				if ctr.State == "running" {
+					totalAllocatedCpuMicroseconds += cpu
+					totalAllocatedMemoryBytes += memory
+					startedSandboxCount++
+				}
+
+				// For disk: count all containers (running and stopped)
+				totalAllocatedDiskGB += disk
+			}
+
+			// Convert to original API units
+			c.resourcesMutex.Lock()
+			c.allocatedCPU = totalAllocatedCpuMicroseconds / 100000                 // Convert back to vCPUs
+			c.allocatedMemoryGiB = totalAllocatedMemoryBytes / (1024 * 1024 * 1024) // Convert back to GB
+			c.allocatedDiskGiB = totalAllocatedDiskGB
+			c.startedSandboxCount = startedSandboxCount
+			c.resourcesMutex.Unlock()
+		}
 	}
+}
+
+func (c *Collector) getContainerAllocatedResources(ctx context.Context, containerId string) (float32, float32, float32, error) {
+	// Inspect the container to get its resource configuration
+	containerJSON, err := c.docker.ContainerInspect(ctx, containerId)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+
+	if containerJSON.HostConfig == nil {
+		return 0, 0, 0, nil
+	}
+
+	var allocatedCpu, allocatedMemory, allocatedDisk float32 = 0, 0, 0
+
+	resources := containerJSON.HostConfig.Resources
+
+	if resources.CPUQuota > 0 {
+		allocatedCpu = float32(resources.CPUQuota)
+	}
+
+	if resources.Memory > 0 {
+		allocatedMemory = float32(resources.Memory)
+	}
+
+	if containerJSON.HostConfig.StorageOpt == nil {
+		return allocatedCpu, allocatedMemory, 0, nil
+	}
+
+	// Disk allocation from StorageOpt (assuming xfs filesystem)
+	storageGB, err := common.ParseStorageOptSizeGB(containerJSON.HostConfig.StorageOpt)
+	if err != nil {
+		return allocatedCpu, allocatedMemory, 0, fmt.Errorf("error parsing storage quota for container %s: %v", containerId, err)
+	}
+
+	if storageGB > 0 {
+		allocatedDisk = float32(storageGB)
+	}
+
+	return allocatedCpu, allocatedMemory, allocatedDisk, nil
 }

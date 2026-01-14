@@ -27,6 +27,7 @@ class RunnerHealthMetrics(BaseModel):
     """
     RunnerHealthMetrics
     """ # noqa: E501
+    current_cpu_load_average: Union[StrictFloat, StrictInt] = Field(description="Current CPU load average", serialization_alias="currentCpuLoadAverage")
     current_cpu_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current CPU usage percentage", serialization_alias="currentCpuUsagePercentage")
     current_memory_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current memory usage percentage", serialization_alias="currentMemoryUsagePercentage")
     current_disk_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current disk usage percentage", serialization_alias="currentDiskUsagePercentage")
@@ -39,7 +40,7 @@ class RunnerHealthMetrics(BaseModel):
     memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total RAM in GiB on the runner", serialization_alias="memoryGiB")
     disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total disk space in GiB on the runner", serialization_alias="diskGiB")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"]
+    __properties: ClassVar[List[str]] = ["currentCpuLoadAverage", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -99,6 +100,7 @@ class RunnerHealthMetrics(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "current_cpu_load_average": obj.get("currentCpuLoadAverage"),
             "current_cpu_usage_percentage": obj.get("currentCpuUsagePercentage"),
             "current_memory_usage_percentage": obj.get("currentMemoryUsagePercentage"),
             "current_disk_usage_percentage": obj.get("currentDiskUsagePercentage"),

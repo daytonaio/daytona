@@ -24,19 +24,23 @@ import (
 func RunnerInfo(ctx *gin.Context) {
 	runnerInstance := runner.GetInstance(nil)
 
-	// Get cached system metrics
-	metrics := runnerInstance.MetricsService.GetSystemMetrics(ctx.Request.Context())
+	metrics, err := runnerInstance.MetricsCollector.Collect(ctx.Request.Context())
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	response := dto.RunnerInfoResponseDTO{
 		Metrics: &dto.RunnerMetrics{
-			CurrentCpuUsagePercentage:    metrics.CPUUsage,
-			CurrentMemoryUsagePercentage: metrics.RAMUsage,
-			CurrentDiskUsagePercentage:   metrics.DiskUsage,
-			CurrentAllocatedCpu:          metrics.AllocatedCPU,
-			CurrentAllocatedMemoryGiB:    metrics.AllocatedMemory,
-			CurrentAllocatedDiskGiB:      metrics.AllocatedDisk,
-			CurrentSnapshotCount:         metrics.SnapshotCount,
-			CurrentStartedSandboxes:      metrics.StartedSandboxes,
+			CurrentCpuLoadAverage:        float64(metrics.CPULoadAverage),
+			CurrentCpuUsagePercentage:    float64(metrics.CPUUsagePercentage),
+			CurrentMemoryUsagePercentage: float64(metrics.MemoryUsagePercentage),
+			CurrentDiskUsagePercentage:   float64(metrics.DiskUsagePercentage),
+			CurrentAllocatedCpu:          int64(metrics.AllocatedCPU),
+			CurrentAllocatedMemoryGiB:    int64(metrics.AllocatedMemoryGiB),
+			CurrentAllocatedDiskGiB:      int64(metrics.AllocatedDiskGiB),
+			CurrentSnapshotCount:         int(metrics.SnapshotCount),
+			CurrentStartedSandboxes:      int64(metrics.StartedSandboxCount),
 		},
 		AppVersion: internal.Version,
 	}

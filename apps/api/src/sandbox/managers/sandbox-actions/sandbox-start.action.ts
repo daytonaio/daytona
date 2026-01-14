@@ -149,7 +149,7 @@ export class SandboxStartAction extends SandboxAction {
       snapshotRef = snapshot.ref
     }
 
-    const declarativeBuildScoreThreshold = this.configService.get('runnerUsage.declarativeBuildScoreThreshold')
+    const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
 
     // Try to assign an available runner with the snapshot already available
     try {
@@ -380,7 +380,7 @@ export class SandboxStartAction extends SandboxAction {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       const originalRunnerId = sandbox.runnerId // Store original value
 
-      const startScoreThreshold = this.configService.get('runnerUsage.startScoreThreshold') || 0
+      const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
 
       const shouldMoveToNewRunner =
         (runner.unschedulable || runner.state != RunnerState.READY || runner.availabilityScore < startScoreThreshold) &&
@@ -400,7 +400,7 @@ export class SandboxStartAction extends SandboxAction {
       // If the sandbox is on a runner and its backupState is COMPLETED
       // but there are too many running sandboxes on that runner, move it to a less used runner
       if (sandbox.backupState === BackupState.COMPLETED) {
-        if (runner.availabilityScore < this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')) {
+        if (runner.availabilityScore < this.configService.getOrThrow('runnerScore.thresholds.availability')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
             regions: [sandbox.region],
             sandboxClass: sandbox.class,

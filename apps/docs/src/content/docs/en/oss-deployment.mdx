@@ -234,6 +234,7 @@ Below is a full list of environment variables with their default values:
 | `RUNNER_DOMAIN`             | string  | (none)                            | Runner domain name (hostname for runner URLs)        |
 | `POLL_TIMEOUT`              | string  | `30s`                             | Poller service timeout duration (e.g., `30s`, `1m`)  |
 | `POLL_LIMIT`                | number  | `10`                              | Maximum poll attempts per request (min: 1, max: 100) |
+| `COLLECTOR_WINDOW_SIZE`     | number  | `60`                              | Metrics collector window size (number of samples)    |
 | `HEALTHCHECK_INTERVAL`      | string  | `30s`                             | Interval between health checks (minimum: 10s)        |
 | `HEALTHCHECK_TIMEOUT`       | string  | `10s`                             | Health check timeout duration                        |
 | `API_VERSION`               | number  | `2`                               | Runner API version (default: 2)                      |

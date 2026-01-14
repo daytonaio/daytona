@@ -41,6 +41,12 @@ export interface RunnerMetrics {
    * @type {number}
    * @memberof RunnerMetrics
    */
+  currentCpuLoadAverage?: number
+  /**
+   *
+   * @type {number}
+   * @memberof RunnerMetrics
+   */
   currentCpuUsagePercentage?: number
   /**
    *
