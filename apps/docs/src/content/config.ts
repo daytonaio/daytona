@@ -364,11 +364,20 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/vpn-connections', locale),
+          label: t('sidebarconfig.vpnConnection'),
+          description: t('sidebarconfig.vpnConnectionDescription'),
+          attrs: {
+            icon: 'shield.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/preview-and-authentication', locale),
           label: t('sidebarconfig.previewAuthentication'),
           description: t('sidebarconfig.previewAuthenticationDescription'),
           attrs: {
-            icon: 'shield.svg',
+            icon: 'globe.svg',
           },
         },
         {
@@ -499,24 +508,6 @@ export const getSidebarConfig = (
             icon: 'trl-logo.svg',
           },
         },
-        {
-          type: 'link',
-          href: localizePath('/docs/tailscale', locale),
-          label: t('sidebarconfig.tailscale'),
-          disablePagination: true,
-          attrs: {
-            icon: 'tailscale.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/openvpn', locale),
-          label: t('sidebarconfig.openvpn'),
-          disablePagination: true,
-          attrs: {
-            icon: 'openvpn.svg',
-          },
-        },
       ],
     },
     {
@@ -561,6 +552,7 @@ export const getSidebarConfig = (
       homePageHref: localizePath('/docs/python-sdk', locale),
       category: NavigationCategory.PYTHON_SDK,
       autopopulateFromDir: localizePath('/docs/python-sdk/common', locale),
+      entries: [],
     },
     {
       type: 'group',

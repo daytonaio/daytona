@@ -90,6 +90,8 @@
   "sidebarconfig.networkLimits": "Network Limits",
   "sidebarconfig.networkLimitsDescription": "Network egress limits for Daytona Sandboxes.",
   "sidebarconfig.sshAccess": "SSH Access",
+  "sidebarconfig.vpnConnection": "VPN Connections",
+  "sidebarconfig.vpnConnectionDescription": "Connect Daytona Sandboxes to VPN networks.",
   "sidebarconfig.sshAccessDescription": "SSH access to Daytona Sandboxes.",
   "sidebarconfig.previewAuthentication": "Preview & Authentication",
   "sidebarconfig.previewAuthenticationDescription": "Preview URLs and authentication tokens.",
@@ -118,8 +120,6 @@
   "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.claude": "Claude",
   "sidebarconfig.trlGrpo": "TRL",
-  "sidebarconfig.tailscale": "Tailscale",
-  "sidebarconfig.openvpn": "OpenVPN",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
 }
