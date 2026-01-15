@@ -65,7 +65,7 @@ async function main() {
     console.log('Creating sandbox...')
     sandbox = await daytona.create({
       // Claude Code is memory intensive, so we use a medium snapshot
-      snapshot: "daytona-medium", // This snapshot has 4GiB RAM and 2 vCPUs
+      snapshot: 'daytona-medium', // This snapshot has 4GiB RAM and 2 vCPUs
       envVars: {
         ANTHROPIC_API_KEY: process.env.SANDBOX_ANTHROPIC_API_KEY,
       },
@@ -76,25 +76,29 @@ async function main() {
 
     // Install the Claude Agent SDK
     console.log('Installing Agent SDK...')
-    await sandbox.process.executeCommand('python3 -m pip install claude-agent-sdk==0.1.19').then((r: ExecuteResponse) => {
-      if (r.exitCode) throw new Error('Error installing Agent SDK: ' + r.result)
-    })
+    await sandbox.process
+      .executeCommand('python3 -m pip install claude-agent-sdk==0.1.19')
+      .then((r: ExecuteResponse) => {
+        if (r.exitCode) throw new Error('Error installing Agent SDK: ' + r.result)
+      })
 
     // Initialize the code interpreter and upload the coding agent script
     console.log('Initializing Agent SDK...')
     const ctx = await sandbox.codeInterpreter.createContext()
     await sandbox.fs.uploadFile('src/coding_agent.py', '/tmp/coding_agent.py')
     const previewLink = await sandbox.getPreviewLink(80)
-    await sandbox.codeInterpreter.runCode(`import os, coding_agent;`, {
-      context: ctx,
-      envs: { PREVIEW_URL: previewLink.url },
-    }).then((r: ExecutionResult) => {
-      if (r.error) throw new Error('Error initializing Agent SDK: ' + r.error.value)
-    })
+    await sandbox.codeInterpreter
+      .runCode(`import os, coding_agent;`, {
+        context: ctx,
+        envs: { PREVIEW_URL: previewLink.url },
+      })
+      .then((r: ExecutionResult) => {
+        if (r.error) throw new Error('Error initializing Agent SDK: ' + r.error.value)
+      })
 
     // Set up readline interface for user input
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-    
+
     // Register cleanup handler on readline SIGINT
     rl.once('SIGINT', cleanup)
 
