@@ -7,7 +7,7 @@ import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 
 @Entity()
-@Index('idx_api_key_org_user', ['organizationId', 'userId'])
+@Index('api_key_org_user_idx', ['organizationId', 'userId'])
 export class ApiKey {
   @PrimaryColumn({
     type: 'uuid',
