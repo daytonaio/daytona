@@ -12,7 +12,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, Raw } from 'typeorm'
+import { Repository, Not, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
@@ -27,7 +27,6 @@ import { OrganizationUsageService } from '../../organization/services/organizati
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxRepository } from '../repositories/sandbox.repository'
-import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 
 @Injectable()
@@ -144,18 +143,20 @@ export class VolumeService {
     }
 
     // Check if any non-destroyed sandboxes are using this volume
-    const sandboxesUsingVolume = await this.sandboxRepository.find({
-      where: {
-        volumes: Raw((alias) => `${alias} @> '[{"volumeId":"${volumeId}"}]'::jsonb`),
-        desiredState: Not(SandboxDesiredState.DESTROYED),
-      },
-      select: ['id', 'name'],
-    })
+    const sandboxUsingVolume = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .where('sandbox.volumes @> :volFilter::jsonb', {
+        volFilter: JSON.stringify([{ volumeId }]),
+      })
+      .andWhere('sandbox.desiredState != :destroyed', {
+        destroyed: SandboxDesiredState.DESTROYED,
+      })
+      .select(['sandbox.id', 'sandbox.name'])
+      .getOne()
 
-    if (sandboxesUsingVolume.length > 0) {
-      const sandboxNames = sandboxesUsingVolume.map((s) => s.name).join(', ')
+    if (sandboxUsingVolume) {
       throw new ConflictException(
-        `Volume cannot be deleted because it is in use by the following sandboxes: ${sandboxNames}`,
+        `Volume cannot be deleted because it is in use by one or more sandboxes (e.g. ${sandboxUsingVolume.name})`,
       )
     }
 
