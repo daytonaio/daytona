@@ -16,7 +16,8 @@ Service for managing Daytona Snapshots. Can be used to list, get, create and del
 new SnapshotService(
    clientConfig: Configuration, 
    snapshotsApi: SnapshotsApi, 
-   objectStorageApi: ObjectStorageApi): SnapshotService
+   objectStorageApi: ObjectStorageApi, 
+   defaultRegionId?: string): SnapshotService
 ```
 
 **Parameters**:
@@ -24,6 +25,7 @@ new SnapshotService(
 - `clientConfig` _Configuration_
 - `snapshotsApi` _SnapshotsApi_
 - `objectStorageApi` _ObjectStorageApi_
+- `defaultRegionId?` _string_
 
 
 **Returns**:

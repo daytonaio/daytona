@@ -2491,7 +2491,7 @@ paths:
           name: port
           required: true
           schema:
-            type: number
+            type: integer
           style: simple
         - description: 'Expiration time in seconds (default: 60 seconds)'
           explode: true
@@ -2499,14 +2499,14 @@ paths:
           name: expiresInSeconds
           required: false
           schema:
-            type: number
+            type: integer
           style: form
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SingedPortPreviewUrl'
+                $ref: '#/components/schemas/SignedPortPreviewUrl'
           description: Signed preview URL for the specified port
       security:
         - bearer: []
@@ -2543,7 +2543,7 @@ paths:
           name: port
           required: true
           schema:
-            type: number
+            type: integer
           style: simple
         - description: Token to expire signed preview URL for
           explode: false
@@ -10296,21 +10296,33 @@ components:
         - token
         - url
       type: object
-    SingedPortPreviewUrl:
+    SignedPortPreviewUrl:
       example:
+        port: 3000
         sandboxId: '123456'
         url: 'https://{port}-{token}.{proxyDomain}'
+        token: jl6wb9z5o3eii
       properties:
         sandboxId:
           description: ID of the sandbox
           example: '123456'
           type: string
+        port:
+          description: Port number of the signed preview URL
+          example: 3000
+          type: integer
+        token:
+          description: Token of the signed preview URL
+          example: jl6wb9z5o3eii
+          type: string
         url:
-          description: Singed preview url
+          description: Signed preview url
           example: 'https://{port}-{token}.{proxyDomain}'
           type: string
       required:
+        - port
         - sandboxId
+        - token
         - url
       type: object
     Url:

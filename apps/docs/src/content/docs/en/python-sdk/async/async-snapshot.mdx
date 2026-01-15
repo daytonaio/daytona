@@ -1,5 +1,5 @@
 ---
-title: 'AsyncSnapshot'
+title: "AsyncSnapshot"
 hideTitleOnPage: true
 ---
 
@@ -30,6 +30,7 @@ Represents a Daytona Snapshot which is a pre-configured sandbox.
 - `updated_at` _StrictStr_ - Timestamp when the Snapshot was last updated.
 - `last_used_at` _StrictStr_ - Timestamp when the Snapshot was last used.
 
+
 ## AsyncSnapshotService
 
 ```python
@@ -52,10 +53,12 @@ Returns paginated list of Snapshots.
 
 - `page` _Optional[int]_ - Page number for pagination (starting from 1).
 - `limit` _Optional[int]_ - Maximum number of items per page.
+  
 
 **Returns**:
 
 - `PaginatedSnapshots` - Paginated list of Snapshots.
+  
 
 **Example**:
 
@@ -78,6 +81,7 @@ Delete a Snapshot.
 **Arguments**:
 
 - `snapshot` _Snapshot_ - Snapshot to delete.
+  
 
 **Example**:
 
@@ -100,10 +104,12 @@ Get a Snapshot by name.
 **Arguments**:
 
 - `name` _str_ - Name of the Snapshot to get.
+  
 
 **Returns**:
 
 - `Snapshot` - The Snapshot object.
+  
 
 **Example**:
 
@@ -159,7 +165,7 @@ Activate a snapshot.
 
 - `Snapshot` - The activated Snapshot instance.
 
-#### AsyncSnapshotService.process_image_context
+#### AsyncSnapshotService.process\_image\_context
 
 ```python
 @staticmethod
@@ -210,3 +216,4 @@ Parameters for creating a new snapshot.
 - `entrypoint` _Optional[List[str]]_ - Entrypoint of the snapshot.
 - `region_id` _Optional[str]_ - ID of the region where the snapshot will be available.
   Defaults to organization default region if not specified.
+

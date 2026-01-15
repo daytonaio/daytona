@@ -330,6 +330,26 @@ Deletes the Sandbox.
 
 ***
 
+#### expireSignedPreviewUrl()
+
+```ts
+expireSignedPreviewUrl(port: number, token: string): Promise<void>
+```
+
+Expires a signed preview url for the sandbox at the specified port.
+
+**Parameters**:
+
+- `port` _number_ - The port to expire the signed preview url on.
+- `token` _string_ - The token to expire the signed preview url on.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+***
+
 #### getPreviewLink()
 
 ```ts
@@ -357,6 +377,26 @@ const previewLink = await sandbox.getPreviewLink(3000);
 console.log(`Preview URL: ${previewLink.url}`);
 console.log(`Token: ${previewLink.token}`);
 ```
+
+***
+
+#### getSignedPreviewUrl()
+
+```ts
+getSignedPreviewUrl(port: number, expiresInSeconds?: number): Promise<SignedPortPreviewUrl>
+```
+
+Retrieves a signed preview url for the sandbox at the specified port.
+
+**Parameters**:
+
+- `port` _number_ - The port to open the preview link on.
+- `expiresInSeconds?` _number_ - The number of seconds the signed preview url will be valid for. Defaults to 60 seconds.
+
+
+**Returns**:
+
+- `Promise<SignedPortPreviewUrl>` - The response object for the signed preview url.
 
 ***
 

@@ -26,7 +26,7 @@ from daytona_api_client_async.models.paginated_sandboxes import PaginatedSandbox
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
 from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
-from daytona_api_client_async.models.singed_port_preview_url import SingedPortPreviewUrl
+from daytona_api_client_async.models.signed_port_preview_url import SignedPortPreviewUrl
 from daytona_api_client_async.models.ssh_access_dto import SshAccessDto
 from daytona_api_client_async.models.ssh_access_validation_dto import SshAccessValidationDto
 from daytona_api_client_async.models.toolbox_proxy_url import ToolboxProxyUrl
@@ -1455,7 +1455,7 @@ class SandboxApi:
     async def expire_signed_port_preview_url(
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
-        port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to expire signed preview URL for")],
+        port: Annotated[StrictInt, Field(description="Port number to expire signed preview URL for")],
         token: Annotated[StrictStr, Field(description="Token to expire signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1477,7 +1477,7 @@ class SandboxApi:
         :param sandbox_id_or_name: ID or name of the sandbox (required)
         :type sandbox_id_or_name: str
         :param port: Port number to expire signed preview URL for (required)
-        :type port: float
+        :type port: int
         :param token: Token to expire signed preview URL for (required)
         :type token: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1533,7 +1533,7 @@ class SandboxApi:
     async def expire_signed_port_preview_url_with_http_info(
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
-        port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to expire signed preview URL for")],
+        port: Annotated[StrictInt, Field(description="Port number to expire signed preview URL for")],
         token: Annotated[StrictStr, Field(description="Token to expire signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1555,7 +1555,7 @@ class SandboxApi:
         :param sandbox_id_or_name: ID or name of the sandbox (required)
         :type sandbox_id_or_name: str
         :param port: Port number to expire signed preview URL for (required)
-        :type port: float
+        :type port: int
         :param token: Token to expire signed preview URL for (required)
         :type token: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1611,7 +1611,7 @@ class SandboxApi:
     async def expire_signed_port_preview_url_without_preload_content(
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
-        port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to expire signed preview URL for")],
+        port: Annotated[StrictInt, Field(description="Port number to expire signed preview URL for")],
         token: Annotated[StrictStr, Field(description="Token to expire signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1633,7 +1633,7 @@ class SandboxApi:
         :param sandbox_id_or_name: ID or name of the sandbox (required)
         :type sandbox_id_or_name: str
         :param port: Port number to expire signed preview URL for (required)
-        :type port: float
+        :type port: int
         :param token: Token to expire signed preview URL for (required)
         :type token: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3189,9 +3189,9 @@ class SandboxApi:
     async def get_signed_port_preview_url(
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
-        port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get signed preview URL for")],
+        port: Annotated[StrictInt, Field(description="Port number to get signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        expires_in_seconds: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
+        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3204,18 +3204,18 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> SingedPortPreviewUrl:
+    ) -> SignedPortPreviewUrl:
         """Get signed preview URL for a sandbox port
 
 
         :param sandbox_id_or_name: ID or name of the sandbox (required)
         :type sandbox_id_or_name: str
         :param port: Port number to get signed preview URL for (required)
-        :type port: float
+        :type port: int
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param expires_in_seconds: Expiration time in seconds (default: 60 seconds)
-        :type expires_in_seconds: float
+        :type expires_in_seconds: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3250,7 +3250,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SingedPortPreviewUrl",
+            '200': "SignedPortPreviewUrl",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3267,9 +3267,9 @@ class SandboxApi:
     async def get_signed_port_preview_url_with_http_info(
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
-        port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get signed preview URL for")],
+        port: Annotated[StrictInt, Field(description="Port number to get signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        expires_in_seconds: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
+        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3282,18 +3282,18 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[SingedPortPreviewUrl]:
+    ) -> ApiResponse[SignedPortPreviewUrl]:
         """Get signed preview URL for a sandbox port
 
 
         :param sandbox_id_or_name: ID or name of the sandbox (required)
         :type sandbox_id_or_name: str
         :param port: Port number to get signed preview URL for (required)
-        :type port: float
+        :type port: int
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param expires_in_seconds: Expiration time in seconds (default: 60 seconds)
-        :type expires_in_seconds: float
+        :type expires_in_seconds: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3328,7 +3328,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SingedPortPreviewUrl",
+            '200': "SignedPortPreviewUrl",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3345,9 +3345,9 @@ class SandboxApi:
     async def get_signed_port_preview_url_without_preload_content(
         self,
         sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
-        port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get signed preview URL for")],
+        port: Annotated[StrictInt, Field(description="Port number to get signed preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        expires_in_seconds: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
+        expires_in_seconds: Annotated[Optional[StrictInt], Field(description="Expiration time in seconds (default: 60 seconds)")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3367,11 +3367,11 @@ class SandboxApi:
         :param sandbox_id_or_name: ID or name of the sandbox (required)
         :type sandbox_id_or_name: str
         :param port: Port number to get signed preview URL for (required)
-        :type port: float
+        :type port: int
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param expires_in_seconds: Expiration time in seconds (default: 60 seconds)
-        :type expires_in_seconds: float
+        :type expires_in_seconds: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3406,7 +3406,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SingedPortPreviewUrl",
+            '200': "SignedPortPreviewUrl",
         }
         response_data = await self.api_client.call_api(
             *_param,

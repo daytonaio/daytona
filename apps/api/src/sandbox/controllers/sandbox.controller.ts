@@ -937,12 +937,12 @@ export class SandboxController {
   @ApiParam({
     name: 'port',
     description: 'Port number to get signed preview URL for',
-    type: 'number',
+    type: 'integer',
   })
   @ApiQuery({
     name: 'expiresInSeconds',
     required: false,
-    type: Number,
+    type: 'integer',
     description: 'Expiration time in seconds (default: 60 seconds)',
   })
   @ApiResponse({
@@ -978,7 +978,7 @@ export class SandboxController {
   @ApiParam({
     name: 'port',
     description: 'Port number to expire signed preview URL for',
-    type: 'number',
+    type: 'integer',
   })
   @ApiParam({
     name: 'token',
