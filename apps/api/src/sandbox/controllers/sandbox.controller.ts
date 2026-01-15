@@ -95,7 +95,7 @@ export class SandboxController {
     this.redisSubscriber = this.redis.duplicate()
     this.redisSubscriber.subscribe(SANDBOX_EVENT_CHANNEL)
     this.redisSubscriber.on('message', (channel, message) => {
-      if (channel !== 'sandbox.event.channel') {
+      if (channel !== SANDBOX_EVENT_CHANNEL) {
         return
       }
 
