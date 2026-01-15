@@ -26,6 +26,17 @@ import { RegionType } from '../enums/region-type.enum'
   unique: true,
   where: '"organizationId" IS NULL',
 })
+@Index('region_proxyApiKeyHash_unique', ['proxyApiKeyHash'], {
+  unique: true,
+  where: '"proxyApiKeyHash" IS NOT NULL',
+})
+@Index('region_sshGatewayApiKeyHash_unique', ['sshGatewayApiKeyHash'], {
+  unique: true,
+  where: '"sshGatewayApiKeyHash" IS NOT NULL',
+})
+@Index('idx_region_custom', ['organizationId'], {
+  where: '"regionType" = \'custom\'',
+})
 @Check('region_not_shared', '"organizationId" IS NULL OR "regionType" != \'shared\'')
 @Check('region_not_custom', '"organizationId" IS NOT NULL OR "regionType" != \'custom\'')
 export class Region {
