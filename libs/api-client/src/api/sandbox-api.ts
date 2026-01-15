@@ -42,7 +42,7 @@ import type { Sandbox } from '../models'
 // @ts-ignore
 import type { SandboxLabels } from '../models'
 // @ts-ignore
-import type { SingedPortPreviewUrl } from '../models'
+import type { SignedPortPreviewUrl } from '../models'
 // @ts-ignore
 import type { SshAccessDto } from '../models'
 // @ts-ignore
@@ -1919,7 +1919,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       expiresInSeconds?: number,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SingedPortPreviewUrl>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SignedPortPreviewUrl>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSignedPortPreviewUrl(
         sandboxIdOrName,
         port,
@@ -2682,7 +2682,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       expiresInSeconds?: number,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<SingedPortPreviewUrl> {
+    ): AxiosPromise<SignedPortPreviewUrl> {
       return localVarFp
         .getSignedPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID, expiresInSeconds, options)
         .then((request) => request(axios, basePath))
