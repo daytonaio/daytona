@@ -12,24 +12,24 @@ export class Migration1768400000000 implements MigrationInterface {
     // Note: not using CONCURRENTLY + skipping transactions because of reverting issue: https://github.com/typeorm/typeorm/issues/9981
 
     // api_key indexes
-    await queryRunner.query(`CREATE INDEX "idx_api_key_org_user" ON "api_key" ("organizationId", "userId")`)
+    await queryRunner.query(`CREATE INDEX "api_key_org_user_idx" ON "api_key" ("organizationId", "userId")`)
 
     // sandbox indexes
     await queryRunner.query(
-      `CREATE INDEX "idx_sandbox_active_only" ON "sandbox" ("id") WHERE "state" <> ALL (ARRAY['destroyed'::sandbox_state_enum, 'archived'::sandbox_state_enum])`,
+      `CREATE INDEX "sandbox_active_only_idx" ON "sandbox" ("id") WHERE "state" <> ALL (ARRAY['destroyed'::sandbox_state_enum, 'archived'::sandbox_state_enum])`,
     )
     await queryRunner.query(
-      `CREATE INDEX "idx_sandbox_labels_gin_full" ON "sandbox" USING gin ("labels" jsonb_path_ops)`,
+      `CREATE INDEX "sandbox_labels_gin_full_idx" ON "sandbox" USING gin ("labels" jsonb_path_ops)`,
     )
-    await queryRunner.query(`CREATE INDEX "idx_sandbox_pending_sync" ON "sandbox" ("id") WHERE "pending" = true`)
+    await queryRunner.query(`CREATE INDEX "sandbox_pending_idx" ON "sandbox" ("id") WHERE "pending" = true`)
     await queryRunner.query(
-      `CREATE INDEX "idx_sandbox_runner_state_desired" ON "sandbox" ("runnerId", "state", "desiredState") WHERE "pending" = false`,
+      `CREATE INDEX "sandbox_runner_state_desired_idx" ON "sandbox" ("runnerId", "state", "desiredState") WHERE "pending" = false`,
     )
     await queryRunner.query(`CREATE INDEX "sandbox_state_idx" ON "sandbox" ("state")`)
     await queryRunner.query(`CREATE INDEX "sandbox_desiredstate_idx" ON "sandbox" ("desiredState")`)
     await queryRunner.query(`CREATE INDEX "sandbox_snapshot_idx" ON "sandbox" ("snapshot")`)
     await queryRunner.query(`CREATE INDEX "sandbox_runnerid_idx" ON "sandbox" ("runnerId")`)
-    await queryRunner.query(`CREATE INDEX "idx_sandbox_runner_state" ON "sandbox" ("runnerId", "state")`)
+    await queryRunner.query(`CREATE INDEX "sandbox_runner_state_idx" ON "sandbox" ("runnerId", "state")`)
     await queryRunner.query(`CREATE INDEX "sandbox_organizationid_idx" ON "sandbox" ("organizationId")`)
     await queryRunner.query(`CREATE INDEX "sandbox_region_idx" ON "sandbox" ("region")`)
     await queryRunner.query(`CREATE INDEX "sandbox_resources_idx" ON "sandbox" ("cpu", "mem", "disk", "gpu")`)
@@ -72,17 +72,17 @@ export class Migration1768400000000 implements MigrationInterface {
     await queryRunner.query(`DROP INDEX "public"."sandbox_resources_idx"`)
     await queryRunner.query(`DROP INDEX "public"."sandbox_region_idx"`)
     await queryRunner.query(`DROP INDEX "public"."sandbox_organizationid_idx"`)
-    await queryRunner.query(`DROP INDEX "public"."idx_sandbox_runner_state"`)
+    await queryRunner.query(`DROP INDEX "public"."sandbox_runner_state_idx"`)
     await queryRunner.query(`DROP INDEX "public"."sandbox_runnerid_idx"`)
     await queryRunner.query(`DROP INDEX "public"."sandbox_snapshot_idx"`)
     await queryRunner.query(`DROP INDEX "public"."sandbox_desiredstate_idx"`)
     await queryRunner.query(`DROP INDEX "public"."sandbox_state_idx"`)
-    await queryRunner.query(`DROP INDEX "public"."idx_sandbox_runner_state_desired"`)
-    await queryRunner.query(`DROP INDEX "public"."idx_sandbox_pending_sync"`)
-    await queryRunner.query(`DROP INDEX "public"."idx_sandbox_labels_gin_full"`)
-    await queryRunner.query(`DROP INDEX "public"."idx_sandbox_active_only"`)
+    await queryRunner.query(`DROP INDEX "public"."sandbox_runner_state_desired_idx"`)
+    await queryRunner.query(`DROP INDEX "public"."sandbox_pending_idx"`)
+    await queryRunner.query(`DROP INDEX "public"."sandbox_labels_gin_full_idx"`)
+    await queryRunner.query(`DROP INDEX "public"."sandbox_active_only_idx"`)
 
     // api_key indexes
-    await queryRunner.query(`DROP INDEX "public"."idx_api_key_org_user"`)
+    await queryRunner.query(`DROP INDEX "public"."api_key_org_user_idx"`)
   }
 }
