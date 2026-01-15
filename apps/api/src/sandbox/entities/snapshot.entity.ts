@@ -32,8 +32,11 @@ export class Snapshot {
   organizationId?: string
 
   //  general snapshot is available to all organizations
-  @Column({ default: false })
-  general: boolean
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
+  general = false
 
   @Column()
   name: string
@@ -49,7 +52,7 @@ export class Snapshot {
     enum: SnapshotState,
     default: SnapshotState.PENDING,
   })
-  state: SnapshotState
+  state = SnapshotState.PENDING
 
   @Column({ nullable: true })
   errorReason?: string
@@ -58,19 +61,19 @@ export class Snapshot {
   size?: number
 
   @Column({ type: 'int', default: 1 })
-  cpu: number
+  cpu = 1
 
   @Column({ type: 'int', default: 0 })
-  gpu: number
+  gpu = 0
 
   @Column({ type: 'int', default: 1 })
-  mem: number
+  mem = 1
 
   @Column({ type: 'int', default: 3 })
-  disk: number
+  disk = 3
 
-  @Column({ default: false })
-  hideFromUsers: boolean
+  @Column({ type: 'boolean', default: false })
+  hideFromUsers = false
 
   @OneToMany(() => SnapshotRunner, (runner) => runner.snapshotRef)
   runners: SnapshotRunner[]
