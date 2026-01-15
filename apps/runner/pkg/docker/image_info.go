@@ -5,8 +5,6 @@ package docker
 
 import (
 	"context"
-	"encoding/base64"
-	"fmt"
 	"strings"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -54,12 +52,7 @@ func (d *DockerClient) GetImageInfo(ctx context.Context, imageName string) (*Ima
 }
 
 func (d *DockerClient) InspectImageInRegistry(ctx context.Context, imageName string, registry *dto.RegistryDTO) (*ImageDigest, error) {
-	encodedRegistryAuth := ""
-	if registry != nil {
-		encodedRegistryAuth = base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "{ \"username\": \"%s\", \"password\": \"%s\" }", registry.Username, registry.Password))
-	}
-
-	digest, err := d.apiClient.DistributionInspect(ctx, imageName, encodedRegistryAuth)
+	digest, err := d.apiClient.DistributionInspect(ctx, imageName, getRegistryAuth(registry))
 	if err != nil {
 		return nil, err
 	}

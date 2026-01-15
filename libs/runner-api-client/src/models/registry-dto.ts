@@ -23,7 +23,7 @@ export interface RegistryDTO {
    * @type {string}
    * @memberof RegistryDTO
    */
-  password: string
+  password?: string
   /**
    *
    * @type {string}
@@ -41,5 +41,5 @@ export interface RegistryDTO {
    * @type {string}
    * @memberof RegistryDTO
    */
-  username: string
+  username?: string
 }
