@@ -20,7 +20,7 @@
     "build-windows": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "BUILD_NUM=$(apps/daemon-win/scripts/increment-build.sh) && BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) && echo \"Building daemon-win build #$BUILD_NUM\" && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags \"-X 'github.com/daytonaio/daemon-win/internal.BuildNumber=$BUILD_NUM' -X 'github.com/daytonaio/daemon-win/internal.BuildTime=$BUILD_TIME'\" -o dist/apps/daemon-win.exe apps/daemon-win/cmd/daemon-win/main.go",
+        "command": "BUILD_NUM=$(apps/daemon-win/scripts/increment-build.sh) && BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) && echo \"Building daemon-win build #$BUILD_NUM\" && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags \"-H windowsgui -X 'github.com/daytonaio/daemon-win/internal.BuildNumber=$BUILD_NUM' -X 'github.com/daytonaio/daemon-win/internal.BuildTime=$BUILD_TIME'\" -o dist/apps/daemon-win.exe apps/daemon-win/cmd/daemon-win/main.go",
         "cwd": "."
       }
     },

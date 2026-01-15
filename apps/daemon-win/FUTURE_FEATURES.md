@@ -72,11 +72,20 @@ If the daemon runs in Session 0 (e.g., as a Windows Service or via certain sched
 - `This operation requires an interactive window station` (mouse/keyboard)
 - `Access is denied` (input injection)
 
-**Solution**: Configure the daemon to start via a scheduled task with:
+**Solution**: The daemon uses a two-part approach:
 
-- **Trigger**: At user logon
-- **Principal**: Interactive logon type (`-LogonType Interactive`)
-- **Combined with**: Auto-logon for the Administrator user
+1. **Built as GUI application** (`-H windowsgui` linker flag):
+   - No console window appears when daemon starts
+   - Users cannot accidentally close the daemon
+   - Daemon runs invisibly in the background
+   - Logging continues to file (`C:\Windows\Temp\daytona-daemon.log`)
+
+2. **Interactive scheduled task**:
+   - Trigger: At user logon
+   - Principal: Interactive logon type (`-LogonType Interactive`)
+   - Combined with: Auto-logon for the Administrator user
+
+This ensures the daemon runs **invisibly** in Session 1 with full desktop access, and users cannot accidentally terminate it by closing a window.
 
 See `BASE_IMAGE_SETUP.md` for detailed configuration instructions.
 

@@ -252,8 +252,15 @@ Start-ScheduledTask -TaskName "DaytonaDaemon"
 Ensure CGO is disabled for Windows builds:
 
 ```bash
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o daemon-win.exe ./cmd/daemon-win
+# Build as GUI application (no console window, runs invisibly)
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-H windowsgui" -o daemon-win.exe ./cmd/daemon-win
 ```
+
+The `-H windowsgui` flag builds the daemon as a Windows GUI application, which:
+
+- Runs without a visible console window
+- Cannot be accidentally closed by users
+- Logs to file instead of stdout (`C:\Windows\Temp\daytona-daemon.log`)
 
 ## SDK Command Compatibility
 

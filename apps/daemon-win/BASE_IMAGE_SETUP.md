@@ -69,12 +69,26 @@ If the daemon runs in Session 0, these operations will fail:
 - Mouse control (`This operation requires an interactive window station`)
 - Keyboard input (`Access is denied`)
 
-### Solution: Auto-Logon + Interactive Scheduled Task
+### Solution: Invisible GUI Application + Interactive Session
 
-The base image must be configured with:
+The daemon uses a two-part approach to run invisibly with GUI access:
 
-1. **Auto-logon**: Windows automatically logs in as Administrator at boot
-2. **Interactive scheduled task**: Daemon starts in the user's interactive session
+1. **Built as GUI application** (`-H windowsgui` linker flag):
+   - No console window appears when daemon starts
+   - Users cannot accidentally close the daemon by closing a window
+   - Daemon runs completely invisibly in the background
+   - Logging continues to file (`C:\Windows\Temp\daytona-daemon.log`)
+
+2. **Auto-logon**: Windows automatically logs in as Administrator at boot
+
+3. **Interactive scheduled task**: Daemon starts in the user's interactive session (Session 1)
+
+This combination ensures the daemon:
+
+- Has full desktop/GUI access for computer use features
+- Runs invisibly without a visible console window
+- Cannot be accidentally terminated by users
+- Survives indefinitely until system shutdown or manual termination
 
 ---
 
@@ -328,6 +342,24 @@ Get-Process -Name daemon-win | Select-Object Id, SessionId
 # Expected: SessionId = 1 (not 0)
 ```
 
+### Viewing Daemon Logs
+
+Since the daemon runs without a console window, check the log file for troubleshooting:
+
+```powershell
+# View recent log entries
+Get-Content C:\Windows\Temp\daytona-daemon.log -Tail 50
+
+# Follow log in real-time
+Get-Content C:\Windows\Temp\daytona-daemon.log -Wait -Tail 20
+```
+
+Or via the daemon API:
+
+```bash
+curl http://<vm-ip>:2280/version
+```
+
 ### Daemon Not Starting After Reboot
 
 1. Check scheduled task:
@@ -381,6 +413,7 @@ Get-Process -Name daemon-win | Select-Object Id, SessionId
 | File | Path |
 |------|------|
 | Daemon binary | `C:\daemon-win.exe` |
+| Daemon log | `C:\Windows\Temp\daytona-daemon.log` |
 | noVNC | `C:\noVNC\` |
 | VNC password | Stored in TightVNC registry |
 | Startup script | `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\start-daemon.bat` |
