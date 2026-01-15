@@ -4,56 +4,146 @@ title: Preview & Authentication
 
 import { Tabs, TabItem } from '@astrojs/starlight/components'
 
-The Daytona SDK provides a method to generate preview links for Sandboxes. A preview link's schema consists of the port and Sandbox ID (e.g.
-`https://3000-sandboxid.proxy.daytona.works`).
+The Daytona SDK provides methods to generate preview links for accessing Sandboxes. Any process listening for HTTP traffic on ports 3000–9999 can be previewed.
 
-Any process listening for HTTP traffic on ports 3000–9999 can be previewed.
+Daytona offers two approaches for preview URLs, each with different authentication mechanisms: **Standard Preview URL** and **Signed Preview URL**.
 
-## Fetching a Preview Link
+## Authentication
 
-To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
+If the Sandbox has its `public` property set to `true`, preview links will be publicly accessible without authentication. Otherwise, authentication is required.
+
+For private sandboxes, the authentication differs based on the preview URL type.
+
+## Standard Preview URL
+
+The standard preview URL uses your sandbox ID in the URL structure and requires a separate authentication token sent via header.
+
+**URL Structure:** `https://3000-sandboxid.proxy.daytona.works`
+
+**How it works:**
+- The URL contains the port and your sandbox ID
+- A separate authentication token is provided
+- The token must be sent in the `x-daytona-preview-token` request header
+- The token automatically resets when the sandbox restarts
+
+**When to use:**
+- Programmatic access and API integrations where you control the HTTP headers
+- Internal tools where token management through headers is straightforward
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 ```python
-
 preview_info = sandbox.get_preview_link(3000)
 
-print(f"Preview link url: {preview_info.url}")
-print(f"Preview link token: {preview_info.token}")
+print(f"URL: {preview_info.url}")
+print(f"Token: {preview_info.token}")
 
+# Use with requests
+import requests
+response = requests.get(
+    preview_info.url,
+    headers={"x-daytona-preview-token": preview_info.token}
+)
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-
 const previewInfo = await sandbox.getPreviewLink(3000);
 
-console.log(`Preview link url: ${previewInfo.url}`);
-console.log(`Preview link token: ${previewInfo.token}`);
+console.log(`URL: ${previewInfo.url}`);
+console.log(`Token: ${previewInfo.token}`);
 
+// Use with fetch
+const response = await fetch(previewInfo.url, {
+  headers: { 'x-daytona-preview-token': previewInfo.token }
+});
 ```
 
 </TabItem>
 </Tabs>
 
+See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink)
+
+### Authentication
+
+The URL uses the sandbox ID, and authentication is done via header:
+
+```bash
+# URL structure: port-sandboxid.domain
+curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
+  https://3000-sandbox-123456.proxy.daytona.work
+```
+
+## Signed Preview URL
+
+The signed preview URL embeds the authentication token directly into the URL structure itself, eliminating the need for separate authentication headers.
+
+**URL Structure:** `https://3000-token.proxy.daytona.works`
+
+**How it works:**
+- The URL contains the port and the signed authentication token (instead of the sandbox ID)
+- Authentication is embedded in the URL - no headers needed
+- You set a custom expiry time for the token (defaults to 60 seconds)
+- The token persists across sandbox restarts until it expires
+- You can manually revoke tokens before they expire if needed
+
+**When to use:**
+- Sharing preview links with users who can't easily set custom headers
+- Embedding in iframes, emails, or other contexts where header control is limited
+- Creating time-limited shareable links with explicit expiration
+- Webhooks and integrations that don't support custom headers
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+# Create a signed preview URL that expires in 3600 seconds (1 hour)
+signed_url = sandbox.create_signed_preview_url(3000, expires_in_seconds=3600)
+
+print(f"URL: {signed_url.url}")  # Token is embedded in the URL
+print(f"Token: {signed_url.token}")  # Can be used to revoke access
+
+# Use directly - no headers needed
+import requests
+response = requests.get(signed_url.url)
+
+# Revoke the token before expiry if needed
+sandbox.expire_signed_preview_url(3000, signed_url.token)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Create a signed preview URL that expires in 3600 seconds (1 hour)
+const signedUrl = await sandbox.getSignedPreviewUrl(3000, 3600);
+
+console.log(`URL: ${signedUrl.url}`);  // Token is embedded in the URL
+console.log(`Token: ${signedUrl.token}`);  // Can be used to revoke access
+
+// Use directly - no headers needed
+const response = await fetch(signedUrl.url);
+
+// Revoke the token before expiry if needed
+await sandbox.expireSignedPreviewUrl(3000, signedUrl.token);
+```
+
+</TabItem>
+</Tabs>
+
+See: [create_signed_preview_url (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxcreate_signed_preview_url), [getSignedPreviewUrl (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getsignedpreviewurl)
+
+### Authentication
+
+The URL embeds the token in place of the sandbox ID - no headers needed:
+
+```bash
+# URL structure: port-token.domain (token is in the URL itself)
+curl https://3000-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.proxy.daytona.work
+```
+
 :::tip
 If you want to serve the previews under your own domain instead of using Daytona's URLs, check out the [Custom Domain/Authentication](/docs/en/custom-domain-authentication) section.
 :::
-
-See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink)
-
-## Authentication
-
-If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
-
-For programmatic access, use the authorization token to access the preview URL:
-
-```bash
-curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
-https://3000-sandbox-123456.proxy.daytona.work
-```
 
 ## Warning Page
 

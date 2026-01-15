@@ -463,6 +463,42 @@ print(f"Preview URL: {preview_link.url}")
 print(f"Token: {preview_link.token}")
 ```
 
+#### AsyncSandbox.create\_signed\_preview\_url
+
+```python
+@intercept_errors(message_prefix="Failed to create signed preview url: ")
+async def create_signed_preview_url(
+        port: int,
+        expires_in_seconds: Optional[int] = None) -> SignedPortPreviewUrl
+```
+
+Creates a signed preview URL for the sandbox at the specified port.
+
+**Arguments**:
+
+- `port` _int_ - The port to open the preview link on.
+- `expires_in_seconds` _Optional[int]_ - The number of seconds the signed preview
+  url will be valid for. Defaults to 60 seconds.
+  
+
+**Returns**:
+
+- `SignedPortPreviewUrl` - The response object for the signed preview url.
+
+#### AsyncSandbox.expire\_signed\_preview\_url
+
+```python
+@intercept_errors(message_prefix="Failed to expire signed preview url: ")
+async def expire_signed_preview_url(port: int, token: str) -> None
+```
+
+Expires a signed preview URL for the sandbox at the specified port.
+
+**Arguments**:
+
+- `port` _int_ - The port to expire the signed preview url on.
+- `token` _str_ - The token to expire the signed preview url on.
+
 #### AsyncSandbox.archive
 
 ```python
