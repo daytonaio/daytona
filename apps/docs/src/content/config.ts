@@ -568,7 +568,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/guides/langchain', locale),
-          label: t('sidebarconfig.langchainIntegrations'),
+          label: t('sidebarconfig.langchain'),
           attrs: {
             icon: 'langchain.svg',
           },
