@@ -545,6 +545,8 @@ func (l *LibVirt) waitForDaemonReady(ctx context.Context, sandboxId, _ string) e
 			if actualIP != lastIP {
 				log.Infof("Domain %s has IP: %s", sandboxId, actualIP)
 				lastIP = actualIP
+				// Cache the actual IP for future proxy requests
+				GetIPCache().Set(sandboxId, actualIP)
 			}
 
 			daemonURL := fmt.Sprintf("http://%s:2280/version", actualIP)

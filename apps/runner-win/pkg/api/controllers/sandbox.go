@@ -4,11 +4,13 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
 	"sync"
 
 	"github.com/daytonaio/runner-win/pkg/api/dto"
 	"github.com/daytonaio/runner-win/pkg/common"
+	"github.com/daytonaio/runner-win/pkg/libvirt"
 	"github.com/daytonaio/runner-win/pkg/models/enums"
 	"github.com/daytonaio/runner-win/pkg/runner"
 	"github.com/gin-gonic/gin"
@@ -302,6 +304,20 @@ func Start(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
+
+	// Log current IP address for debugging
+	go func() {
+		container, err := runner.LibVirt.ContainerInspect(context.Background(), sandboxId)
+		if err != nil {
+			log.Warnf("Failed to inspect container %s after start: %v", sandboxId, err)
+			return
+		}
+
+		currentIP := libvirt.GetDomainIpAddress(context.Background(), container)
+		if currentIP != "" {
+			log.Infof("Sandbox %s started with IP %s", sandboxId, currentIP)
+		}
+	}()
 
 	ctx.JSON(http.StatusOK, dto.StartSandboxResponse{
 		DaemonVersion: daemonVersion,

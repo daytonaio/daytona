@@ -96,6 +96,9 @@ func (l *LibVirt) Destroy(ctx context.Context, domainId string) error {
 		// Don't fail the destroy operation for DHCP cleanup failure
 	}
 
+	// Remove IP from cache
+	GetIPCache().Delete(domainId)
+
 	if l.statesCache != nil {
 		l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateDestroyed)
 	}

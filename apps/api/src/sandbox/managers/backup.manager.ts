@@ -34,6 +34,8 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { SandboxService } from '../services/sandbox.service'
+import { Snapshot } from '../entities/snapshot.entity'
+import { RunnerClass } from '../enums/runner-class'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -44,6 +46,8 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   constructor(
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
+    @InjectRepository(Snapshot)
+    private readonly snapshotRepository: Repository<Snapshot>,
     private readonly sandboxService: SandboxService,
     private readonly runnerService: RunnerService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
@@ -287,6 +291,17 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   async setBackupPending(sandbox: Sandbox): Promise<void> {
     if (sandbox.backupState === BackupState.COMPLETED) {
       return
+    }
+
+    // Skip backups for windows-exp snapshots
+    if (sandbox.snapshot) {
+      const snapshot = await this.snapshotRepository.findOne({
+        where: [{ name: sandbox.snapshot }, { id: sandbox.snapshot }],
+      })
+      if (snapshot && snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL) {
+        this.logger.log(`Skipping backup for sandbox ${sandbox.id} with windows-exp snapshot ${sandbox.snapshot}`)
+        return
+      }
     }
 
     // Allow backups for STARTED sandboxes or STOPPED sandboxes with runnerId

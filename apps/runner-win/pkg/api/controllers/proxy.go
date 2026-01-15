@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/runner-win/pkg/libvirt"
 	"github.com/daytonaio/runner-win/pkg/runner"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
@@ -87,10 +88,24 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 		return nil, nil, errors.New("sandbox ID is required")
 	}
 
-	// Skip domain state check for performance - use deterministic IP directly
-	// The IP is calculated from sandbox ID and pre-configured via DHCP reservation
-	// If sandbox doesn't exist or isn't running, the proxy will fail at connection time
-	containerIP := libvirt.GetReservedIP(sandboxId)
+	// Get IP from cache - the IP is stored when the VM is created/started
+	// This is the actual IP assigned by DHCP, not a pre-calculated one
+	ipCache := libvirt.GetIPCache()
+	containerIP := ipCache.Get(sandboxId)
+
+	// If not in cache, try to fetch from libvirt
+	if containerIP == "" {
+		runner := runner.GetInstance(nil)
+		if runner != nil && runner.LibVirt != nil {
+			containerIP = ipCache.GetOrFetch(ctx.Request.Context(), sandboxId, runner.LibVirt)
+		}
+	}
+
+	// Fallback to calculated IP if still empty (backwards compatibility)
+	if containerIP == "" {
+		containerIP = libvirt.GetReservedIP(sandboxId)
+		log.Warnf("Using fallback calculated IP %s for sandbox %s (not in cache)", containerIP, sandboxId)
+	}
 
 	// Build the target URL
 	targetURL := fmt.Sprintf("http://%s:2280", containerIP)
@@ -180,8 +195,23 @@ func getProxyToPortTarget(ctx *gin.Context) (*url.URL, map[string]string, error)
 		return nil, nil, errors.New("port is required")
 	}
 
-	// Get the VM IP
-	containerIP := libvirt.GetReservedIP(sandboxId)
+	// Get IP from cache - the IP is stored when the VM is created/started
+	ipCache := libvirt.GetIPCache()
+	containerIP := ipCache.Get(sandboxId)
+
+	// If not in cache, try to fetch from libvirt
+	if containerIP == "" {
+		r := runner.GetInstance(nil)
+		if r != nil && r.LibVirt != nil {
+			containerIP = ipCache.GetOrFetch(ctx.Request.Context(), sandboxId, r.LibVirt)
+		}
+	}
+
+	// Fallback to calculated IP if still empty
+	if containerIP == "" {
+		containerIP = libvirt.GetReservedIP(sandboxId)
+		log.Warnf("Using fallback calculated IP %s for sandbox %s (not in cache)", containerIP, sandboxId)
+	}
 
 	// Build the target URL to daemon's proxy endpoint
 	// Daemon will forward /proxy/:port/* to localhost:port/*
