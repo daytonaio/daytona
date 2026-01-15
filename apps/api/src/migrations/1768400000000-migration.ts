@@ -9,6 +9,8 @@ export class Migration1768400000000 implements MigrationInterface {
   name = 'Migration1768400000000'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // Note: not using CONCURRENTLY + skipping transactions because of reverting issue: https://github.com/typeorm/typeorm/issues/9981
+
     // api_key indexes
     await queryRunner.query(`CREATE INDEX "idx_api_key_org_user" ON "api_key" ("organizationId", "userId")`)
 
