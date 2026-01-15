@@ -704,10 +704,6 @@ export class SandboxService {
       throw new SandboxError('Sandbox backup is already in progress')
     }
 
-    await this.sandboxRepository.update(sandbox.id, {
-      backupState: BackupState.PENDING,
-    })
-
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
 
     return sandbox
