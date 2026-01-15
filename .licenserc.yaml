@@ -3,8 +3,11 @@ header:
     spdx-id: AGPL-3.0
     copyright-owner: Daytona Platforms Inc.
     content: |
-      Copyright 2025 Daytona Platforms Inc.
+      Copyright Daytona Platforms Inc.
       SPDX-License-Identifier: AGPL-3.0
+    pattern: |
+      Copyright (\d{4}(-\d{4})? )?Daytona Platforms Inc\.
+      SPDX-License-Identifier: AGPL-3\.0
   paths:
     - '**/*.go'
     - '**/*.sh'
