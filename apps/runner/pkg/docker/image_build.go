@@ -147,9 +147,13 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 	if len(buildImageDto.SourceRegistries) > 0 {
 		authConfigs = make(map[string]docker_registry.AuthConfig, len(buildImageDto.SourceRegistries)*2)
 		for _, sourceRegistry := range buildImageDto.SourceRegistries {
+			if !sourceRegistry.HasAuth() {
+				continue
+			}
+
 			authConfig := docker_registry.AuthConfig{
-				Username: sourceRegistry.Username,
-				Password: sourceRegistry.Password,
+				Username: *sourceRegistry.Username,
+				Password: *sourceRegistry.Password,
 			}
 
 			url := sourceRegistry.Url

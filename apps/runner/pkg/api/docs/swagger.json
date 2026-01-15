@@ -1617,7 +1617,7 @@
     },
     "RegistryDTO": {
       "type": "object",
-      "required": ["password", "url", "username"],
+      "required": ["url"],
       "properties": {
         "password": {
           "type": "string"

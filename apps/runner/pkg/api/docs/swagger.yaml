@@ -207,9 +207,7 @@ definitions:
       username:
         type: string
     required:
-      - password
       - url
-      - username
     type: object
   ResizeSandboxDTO:
     properties:

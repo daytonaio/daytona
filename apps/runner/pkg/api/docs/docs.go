@@ -1742,9 +1742,7 @@ const docTemplate = `{
         "RegistryDTO": {
             "type": "object",
             "required": [
-                "password",
-                "url",
-                "username"
+                "url"
             ],
             "properties": {
                 "password": {
