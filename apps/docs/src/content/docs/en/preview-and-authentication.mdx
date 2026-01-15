@@ -18,7 +18,7 @@ For private sandboxes, the authentication differs based on the preview URL type.
 
 The standard preview URL uses your sandbox ID in the URL structure and requires a separate authentication token sent via header.
 
-**URL Structure:** `https://3000-sandboxid.proxy.daytona.works`
+**URL Structure:** `https://{port}-{sandboxId}.{daytonaProxyDomain}`
 
 **How it works:**
 - The URL contains the port and your sandbox ID
@@ -79,7 +79,7 @@ curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
 
 The signed preview URL embeds the authentication token directly into the URL structure itself, eliminating the need for separate authentication headers.
 
-**URL Structure:** `https://3000-token.proxy.daytona.works`
+**URL Structure:** `https://{port}-{token}.{daytonaProxyDomain}`
 
 **How it works:**
 - The URL contains the port and the signed authentication token (instead of the sandbox ID)
