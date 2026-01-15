@@ -6,7 +6,7 @@ header:
       Copyright Daytona Platforms Inc.
       SPDX-License-Identifier: AGPL-3.0
     pattern: |
-      Copyright (\d{4}(-\d{4})? )?Daytona Platforms Inc\.
+      Copyright (\d{4} )?Daytona Platforms Inc\.
       SPDX-License-Identifier: AGPL-3\.0
   paths:
     - '**/*.go'
