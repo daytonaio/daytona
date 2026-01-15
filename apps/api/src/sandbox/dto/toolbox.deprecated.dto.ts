@@ -53,13 +53,22 @@ export class SearchFilesResponseDto {
 
 @ApiSchema({ name: 'ReplaceRequest' })
 export class ReplaceRequestDto {
-  @ApiProperty({ type: [String] })
+  @ApiProperty({
+    type: [String],
+    description: 'List of files to perform replacement in',
+  })
   files: string[]
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The pattern to search for',
+    example: 'old-value',
+  })
   pattern: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The new value to replace the pattern with',
+    example: 'new-value',
+  })
   newValue: string
 }
 
@@ -77,7 +86,10 @@ export class ReplaceResultDto {
 
 @ApiSchema({ name: 'GitAddRequest' })
 export class GitAddRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path to the git repository',
+    example: '/home/user/project',
+  })
   path: string
 
   @ApiProperty({
@@ -89,55 +101,94 @@ export class GitAddRequestDto {
 
 @ApiSchema({ name: 'GitBranchRequest' })
 export class GitBranchRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path to the git repository',
+    example: '/home/user/project',
+  })
   path: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Name of the branch to create',
+    example: 'feature-branch',
+  })
   name: string
 }
 
 @ApiSchema({ name: 'GitDeleteBranchRequest' })
 export class GitDeleteBranchRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path to the git repository',
+    example: '/home/user/project',
+  })
   path: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Name of the branch to delete',
+    example: 'feature-branch',
+  })
   name: string
 }
 
 @ApiSchema({ name: 'GitCloneRequest' })
 export class GitCloneRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'URL of the git repository to clone',
+    example: 'https://github.com/user/repo.git',
+  })
   url: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path where to clone the repository',
+    example: '/home/user/project',
+  })
   path: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Username for authentication',
+  })
   username?: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Password or token for authentication',
+  })
   password?: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Branch to clone',
+    example: 'main',
+  })
   branch?: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Specific commit ID to checkout after cloning',
+  })
   commit_id?: string
 }
 
 @ApiSchema({ name: 'GitCommitRequest' })
 export class GitCommitRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path to the git repository',
+    example: '/home/user/project',
+  })
   path: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Commit message',
+    example: 'Initial commit',
+  })
   message: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Author name',
+    example: 'John Doe',
+  })
   author: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Author email',
+    example: 'john@example.com',
+  })
   email: string
 
   @ApiPropertyOptional({
@@ -155,22 +206,35 @@ export class GitCommitResponseDto {
 
 @ApiSchema({ name: 'GitCheckoutRequest' })
 export class GitCheckoutRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path to the git repository',
+    example: '/home/user/project',
+  })
   path: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Branch or commit ID to checkout',
+    example: 'main',
+  })
   branch: string
 }
 
 @ApiSchema({ name: 'GitRepoRequest' })
 export class GitRepoRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Path to the git repository',
+    example: '/home/user/project',
+  })
   path: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Username for authentication',
+  })
   username?: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Password or token for authentication',
+  })
   password?: string
 }
 
@@ -235,7 +299,10 @@ export class GitCommitInfoDto {
 
 @ApiSchema({ name: 'ExecuteRequest' })
 export class ExecuteRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The command to execute',
+    example: 'ls -la',
+  })
   command: string
 
   @ApiPropertyOptional({

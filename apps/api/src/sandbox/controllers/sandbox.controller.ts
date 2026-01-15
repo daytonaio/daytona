@@ -27,6 +27,7 @@ import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SandboxService } from '../services/sandbox.service'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import {
+  ApiBody,
   ApiOAuth2,
   ApiResponse,
   ApiQuery,
@@ -220,6 +221,7 @@ export class SandboxController {
     summary: 'Create a new sandbox',
     operationId: 'createSandbox',
   })
+  @ApiBody({ type: CreateSandboxDto })
   @ApiResponse({
     status: 200,
     description: 'The sandbox has been successfully created.',
@@ -512,6 +514,7 @@ export class SandboxController {
     summary: 'Replace sandbox labels',
     operationId: 'replaceLabels',
   })
+  @ApiBody({ type: SandboxLabelsDto })
   @ApiParam({
     name: 'sandboxIdOrName',
     description: 'ID or name of the sandbox',
@@ -554,6 +557,7 @@ export class SandboxController {
     summary: 'Update sandbox state',
     operationId: 'updateSandboxState',
   })
+  @ApiBody({ type: UpdateSandboxStateDto })
   @ApiParam({
     name: 'sandboxId',
     description: 'ID of the sandbox',
