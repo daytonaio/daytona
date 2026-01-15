@@ -43,6 +43,18 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	if state == enums.SandboxStateStopped || state == enums.SandboxStateCreating {
+		// Ensure FUSE volumes are mounted before starting the container
+		// This is critical when restarting containers that were restored from snapshots
+		// to prevent files from being written to empty ext4 directories before FUSE mounts complete
+		if sandboxDto.Volumes != nil {
+			// getVolumesMountPathBinds mounts volumes on the runner node and waits for them to be ready
+			// The container already has bind mounts configured, so we don't need the return value
+			_, err = d.getVolumesMountPathBinds(ctx, sandboxDto.Volumes)
+			if err != nil {
+				return "", err
+			}
+		}
+
 		err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata)
 		if err != nil {
 			return "", err
