@@ -319,29 +319,6 @@ export class RunnerController {
     return this.runnerService.getRunnersBySnapshotRef(ref)
   }
 
-  @Get('/inital-by-snapshot-id/:snapshotId')
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get initial runner by snapshot ID',
-    operationId: 'getInitialRunnerBySnapshotId',
-  })
-  @ApiResponse({
-    status: 200,
-    type: RunnerFullDto,
-  })
-  @ApiParam({
-    name: 'snapshotId',
-    description: 'Snapshot ID',
-    type: String,
-    required: true,
-  })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
-  async getInitialRunnerBySnapshotId(@Param('snapshotId') snapshotId: string): Promise<RunnerFullDto> {
-    const runner = await this.runnerService.getInitialRunnerBySnapshotId(snapshotId)
-    return RunnerFullDto.fromRunner(runner)
-  }
-
   @Post('healthcheck')
   @ApiOperation({
     summary: 'Runner healthcheck',
