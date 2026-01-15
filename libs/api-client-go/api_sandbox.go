@@ -97,7 +97,7 @@ type SandboxAPI interface {
 		@param token Token to expire signed preview URL for
 		@return SandboxAPIExpireSignedPortPreviewUrlRequest
 	*/
-	ExpireSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32, token string) SandboxAPIExpireSignedPortPreviewUrlRequest
+	ExpireSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port int32, token string) SandboxAPIExpireSignedPortPreviewUrlRequest
 
 	// ExpireSignedPortPreviewUrlExecute executes the request
 	ExpireSignedPortPreviewUrlExecute(r SandboxAPIExpireSignedPortPreviewUrlRequest) (*http.Response, error)
@@ -179,11 +179,11 @@ type SandboxAPI interface {
 		@param port Port number to get signed preview URL for
 		@return SandboxAPIGetSignedPortPreviewUrlRequest
 	*/
-	GetSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetSignedPortPreviewUrlRequest
+	GetSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port int32) SandboxAPIGetSignedPortPreviewUrlRequest
 
 	// GetSignedPortPreviewUrlExecute executes the request
-	//  @return SingedPortPreviewUrl
-	GetSignedPortPreviewUrlExecute(r SandboxAPIGetSignedPortPreviewUrlRequest) (*SingedPortPreviewUrl, *http.Response, error)
+	//  @return SignedPortPreviewUrl
+	GetSignedPortPreviewUrlExecute(r SandboxAPIGetSignedPortPreviewUrlRequest) (*SignedPortPreviewUrl, *http.Response, error)
 
 	/*
 		GetToolboxProxyUrl Get toolbox proxy URL for a sandbox
@@ -964,7 +964,7 @@ type SandboxAPIExpireSignedPortPreviewUrlRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
 	sandboxIdOrName        string
-	port                   float32
+	port                   int32
 	token                  string
 	xDaytonaOrganizationID *string
 }
@@ -988,7 +988,7 @@ ExpireSignedPortPreviewUrl Expire signed preview URL for a sandbox port
 	@param token Token to expire signed preview URL for
 	@return SandboxAPIExpireSignedPortPreviewUrlRequest
 */
-func (a *SandboxAPIService) ExpireSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32, token string) SandboxAPIExpireSignedPortPreviewUrlRequest {
+func (a *SandboxAPIService) ExpireSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port int32, token string) SandboxAPIExpireSignedPortPreviewUrlRequest {
 	return SandboxAPIExpireSignedPortPreviewUrlRequest{
 		ApiService:      a,
 		ctx:             ctx,
@@ -1665,9 +1665,9 @@ type SandboxAPIGetSignedPortPreviewUrlRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
 	sandboxIdOrName        string
-	port                   float32
+	port                   int32
 	xDaytonaOrganizationID *string
-	expiresInSeconds       *float32
+	expiresInSeconds       *int32
 }
 
 // Use with JWT to specify the organization ID
@@ -1677,12 +1677,12 @@ func (r SandboxAPIGetSignedPortPreviewUrlRequest) XDaytonaOrganizationID(xDayton
 }
 
 // Expiration time in seconds (default: 60 seconds)
-func (r SandboxAPIGetSignedPortPreviewUrlRequest) ExpiresInSeconds(expiresInSeconds float32) SandboxAPIGetSignedPortPreviewUrlRequest {
+func (r SandboxAPIGetSignedPortPreviewUrlRequest) ExpiresInSeconds(expiresInSeconds int32) SandboxAPIGetSignedPortPreviewUrlRequest {
 	r.expiresInSeconds = &expiresInSeconds
 	return r
 }
 
-func (r SandboxAPIGetSignedPortPreviewUrlRequest) Execute() (*SingedPortPreviewUrl, *http.Response, error) {
+func (r SandboxAPIGetSignedPortPreviewUrlRequest) Execute() (*SignedPortPreviewUrl, *http.Response, error) {
 	return r.ApiService.GetSignedPortPreviewUrlExecute(r)
 }
 
@@ -1694,7 +1694,7 @@ GetSignedPortPreviewUrl Get signed preview URL for a sandbox port
 	@param port Port number to get signed preview URL for
 	@return SandboxAPIGetSignedPortPreviewUrlRequest
 */
-func (a *SandboxAPIService) GetSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetSignedPortPreviewUrlRequest {
+func (a *SandboxAPIService) GetSignedPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port int32) SandboxAPIGetSignedPortPreviewUrlRequest {
 	return SandboxAPIGetSignedPortPreviewUrlRequest{
 		ApiService:      a,
 		ctx:             ctx,
@@ -1705,13 +1705,13 @@ func (a *SandboxAPIService) GetSignedPortPreviewUrl(ctx context.Context, sandbox
 
 // Execute executes the request
 //
-//	@return SingedPortPreviewUrl
-func (a *SandboxAPIService) GetSignedPortPreviewUrlExecute(r SandboxAPIGetSignedPortPreviewUrlRequest) (*SingedPortPreviewUrl, *http.Response, error) {
+//	@return SignedPortPreviewUrl
+func (a *SandboxAPIService) GetSignedPortPreviewUrlExecute(r SandboxAPIGetSignedPortPreviewUrlRequest) (*SignedPortPreviewUrl, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *SingedPortPreviewUrl
+		localVarReturnValue *SignedPortPreviewUrl
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSignedPortPreviewUrl")

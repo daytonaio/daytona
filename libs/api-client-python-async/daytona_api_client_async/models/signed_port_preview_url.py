@@ -18,19 +18,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SingedPortPreviewUrl(BaseModel):
+class SignedPortPreviewUrl(BaseModel):
     """
-    SingedPortPreviewUrl
+    SignedPortPreviewUrl
     """ # noqa: E501
     sandbox_id: StrictStr = Field(description="ID of the sandbox", alias="sandboxId")
-    url: StrictStr = Field(description="Singed preview url")
+    port: StrictInt = Field(description="Port number of the signed preview URL")
+    token: StrictStr = Field(description="Token of the signed preview URL")
+    url: StrictStr = Field(description="Signed preview url")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["sandboxId", "url"]
+    __properties: ClassVar[List[str]] = ["sandboxId", "port", "token", "url"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +52,7 @@ class SingedPortPreviewUrl(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SingedPortPreviewUrl from a JSON string"""
+        """Create an instance of SignedPortPreviewUrl from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -82,7 +84,7 @@ class SingedPortPreviewUrl(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SingedPortPreviewUrl from a dict"""
+        """Create an instance of SignedPortPreviewUrl from a dict"""
         if obj is None:
             return None
 
@@ -91,6 +93,8 @@ class SingedPortPreviewUrl(BaseModel):
 
         _obj = cls.model_validate({
             "sandboxId": obj.get("sandboxId"),
+            "port": obj.get("port"),
+            "token": obj.get("token"),
             "url": obj.get("url")
         })
         # store additional fields in additional_properties

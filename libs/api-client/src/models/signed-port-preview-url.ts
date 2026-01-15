@@ -15,19 +15,31 @@
 /**
  *
  * @export
- * @interface SingedPortPreviewUrl
+ * @interface SignedPortPreviewUrl
  */
-export interface SingedPortPreviewUrl {
+export interface SignedPortPreviewUrl {
   /**
    * ID of the sandbox
    * @type {string}
-   * @memberof SingedPortPreviewUrl
+   * @memberof SignedPortPreviewUrl
    */
   sandboxId: string
   /**
-   * Singed preview url
+   * Port number of the signed preview URL
+   * @type {number}
+   * @memberof SignedPortPreviewUrl
+   */
+  port: number
+  /**
+   * Token of the signed preview URL
    * @type {string}
-   * @memberof SingedPortPreviewUrl
+   * @memberof SignedPortPreviewUrl
+   */
+  token: string
+  /**
+   * Signed preview url
+   * @type {string}
+   * @memberof SignedPortPreviewUrl
    */
   url: string
 }

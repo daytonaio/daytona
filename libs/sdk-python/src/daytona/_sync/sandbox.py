@@ -11,7 +11,7 @@ from typing import Callable, Dict, List, Optional
 from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
-from daytona_api_client import SandboxApi, SandboxState, SshAccessDto, SshAccessValidationDto
+from daytona_api_client import SandboxApi, SandboxState, SignedPortPreviewUrl, SshAccessDto, SshAccessValidationDto
 from daytona_toolbox_api_client import (
     ApiClient,
     ComputerUseApi,
@@ -513,6 +513,30 @@ class Sandbox(SandboxDto):
             ```
         """
         return self._sandbox_api.get_port_preview_url(self.id, port)
+
+    @intercept_errors(message_prefix="Failed to create signed preview url: ")
+    def create_signed_preview_url(self, port: int, expires_in_seconds: Optional[int] = None) -> SignedPortPreviewUrl:
+        """Creates a signed preview URL for the sandbox at the specified port.
+
+        Args:
+            port (int): The port to open the preview link on.
+            expires_in_seconds (Optional[int]): The number of seconds the signed preview
+                url will be valid for. Defaults to 60 seconds.
+
+        Returns:
+            SignedPortPreviewUrl: The response object for the signed preview url.
+        """
+        return self._sandbox_api.get_signed_port_preview_url(self.id, port, expires_in_seconds=expires_in_seconds)
+
+    @intercept_errors(message_prefix="Failed to expire signed preview url: ")
+    def expire_signed_preview_url(self, port: int, token: str) -> None:
+        """Expires a signed preview URL for the sandbox at the specified port.
+
+        Args:
+            port (int): The port to expire the signed preview url on.
+            token (str): The token to expire the signed preview url on.
+        """
+        self._sandbox_api.expire_signed_port_preview_url(self.id, port, token)
 
     @intercept_errors(message_prefix="Failed to archive sandbox: ")
     def archive(self) -> None:

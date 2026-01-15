@@ -1137,6 +1137,8 @@ export class SandboxService {
 
     return {
       sandboxId: sandbox.id,
+      port,
+      token,
       url,
     }
   }
