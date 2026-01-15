@@ -1487,7 +1487,11 @@ export class SandboxService {
   }
 
   private resolveNetworkAllowList(networkAllowList: string): string {
-    validateNetworkAllowList(networkAllowList)
+    try {
+      validateNetworkAllowList(networkAllowList)
+    } catch (error) {
+      throw new BadRequestError(error instanceof Error ? error.message : 'Invalid network allow list')
+    }
 
     return networkAllowList
   }
