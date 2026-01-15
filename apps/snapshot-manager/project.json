@@ -35,8 +35,12 @@
     "tidy": {
       "executor": "@nx-go/nx-go:tidy"
     },
+    "check-version-env": {},
     "docker": {
-      "dependsOn": ["build"]
-    }
+      "options": {
+        "target": "snapshot-manager"
+      }
+    },
+    "push-manifest": {}
   }
 }
