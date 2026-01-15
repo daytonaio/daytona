@@ -1,6 +1,10 @@
 """Core type definitions for deeper-rlm."""
 
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 
 @dataclass
@@ -26,6 +30,25 @@ class Config:
 
     model: ModelConfig
     rlm: RLMConfig
+
+    @classmethod
+    def from_yaml(cls, path: str | Path) -> "Config":
+        """Load configuration from a YAML file."""
+        with open(path) as f:
+            data: dict[str, Any] = yaml.safe_load(f)
+
+        model = data["model"]
+        rlm = data["rlm"]
+
+        return cls(
+            model=ModelConfig(name=model["name"]),
+            rlm=RLMConfig(
+                max_sandboxes=rlm["max_sandboxes"],
+                max_iterations=rlm["max_iterations"],
+                global_timeout=rlm["global_timeout"],
+                result_truncation_limit=rlm["result_truncation_limit"],
+            ),
+        )
 
 
 @dataclass

@@ -9,13 +9,13 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 
-from config import load_config
 from output_logging.console import ConsoleOutput
 from output_logging.tree_logger import TreeLogger
 from rlm.agent import RLMAgent
 from rlm.budget import SandboxBudget
 from rlm.client import create_client
 from rlm.sandbox import SandboxManager
+from rlm.types import Config
 
 # Load environment variables
 load_dotenv()
@@ -56,7 +56,7 @@ def main(
 
     # Load configuration
     try:
-        config = load_config(config_path)
+        config = Config.from_yaml(config_path)
     except Exception as e:
         print(f"Error loading config: {e}")
         raise typer.Exit(1)
