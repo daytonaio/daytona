@@ -14,6 +14,7 @@ import {
 import { RegionService } from '../services/region.service'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { RegionType } from '../enums/region-type.enum'
 
 @Injectable()
 export class RegionAccessGuard implements CanActivate {
@@ -29,9 +30,15 @@ export class RegionAccessGuard implements CanActivate {
     const authContext: OrganizationAuthContext = request.user
 
     try {
-      const regionOrganizationId = await this.regionService.getOrganizationId(regionId)
-      if (authContext.role !== SystemRole.ADMIN && regionOrganizationId !== authContext.organizationId) {
+      const region = await this.regionService.findOne(regionId)
+      if (!region) {
+        throw new NotFoundException('Region not found')
+      }
+      if (authContext.role !== SystemRole.ADMIN && region.organizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
+      }
+      if (authContext.role !== SystemRole.ADMIN && region.regionType !== RegionType.CUSTOM) {
+        throw new ForbiddenException('Region is not a custom region')
       }
       return true
     } catch (error) {
