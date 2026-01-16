@@ -227,6 +227,10 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToke
 		return "", "", errors.New("invalid host format")
 	}
 
+	if len(parts) < 2 {
+		return "", "", errors.New("invalid host format: must has subdomain")
+	}
+
 	// Extract port from the first part (e.g., "1234-some-id-uuid")
 	hostPrefix := parts[0]
 	before, after, ok := strings.Cut(hostPrefix, "-")
