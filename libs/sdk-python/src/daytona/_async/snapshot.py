@@ -150,7 +150,7 @@ class AsyncSnapshotService:
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
 
         async def start_log_streaming():
-            build_logs_url = await self.__snapshots_api.get_snapshot_build_logs_url(created_snapshot.id)
+            build_logs_url = (await self.__snapshots_api.get_snapshot_build_logs_url(created_snapshot.id)).url
 
             async def should_terminate():
                 latest_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)

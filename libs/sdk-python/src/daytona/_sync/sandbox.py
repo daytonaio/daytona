@@ -114,7 +114,9 @@ class Sandbox(SandboxDto):
         self._git = Git(GitApi(self._toolbox_api))
         self._process = Process(code_toolbox, ProcessApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
         self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api))
-        self._code_interpreter = CodeInterpreter(InterpreterApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
+        self._code_interpreter = CodeInterpreter(
+            InterpreterApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
+        )
         self._info_api = InfoApi(self._toolbox_api)
 
     @property
@@ -169,7 +171,9 @@ class Sandbox(SandboxDto):
         return response.dir
 
     @deprecated(
-        reason=("Method is deprecated. Use `get_user_home_dir` instead. This method will be removed in a future version.")
+        reason=(
+            "Method is deprecated. Use `get_user_home_dir` instead. This method will be removed in a future version."
+        )
     )
     def get_user_root_dir(self) -> str:
         return self.get_user_home_dir()
@@ -246,7 +250,9 @@ class Sandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout(
-        error_message=lambda self, timeout: (f"Sandbox {self.id} failed to start within the {timeout} seconds timeout period")
+        error_message=lambda self, timeout: (
+            f"Sandbox {self.id} failed to start within the {timeout} seconds timeout period"
+        )
     )
     def start(self, timeout: Optional[float] = 60):
         """Starts the Sandbox and waits for it to be ready.
@@ -272,7 +278,9 @@ class Sandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to recover sandbox: ")
     @with_timeout(
-        error_message=lambda self, timeout: (f"Sandbox {self.id} failed to recover within the {timeout} seconds timeout period")
+        error_message=lambda self, timeout: (
+            f"Sandbox {self.id} failed to recover within the {timeout} seconds timeout period"
+        )
     )
     def recover(self, timeout: Optional[float] = 60):
         """Recovers the Sandbox from a recoverable error and waits for it to be ready.
@@ -298,7 +306,9 @@ class Sandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
-        error_message=lambda self, timeout: (f"Sandbox {self.id} failed to stop within the {timeout} seconds timeout period")
+        error_message=lambda self, timeout: (
+            f"Sandbox {self.id} failed to stop within the {timeout} seconds timeout period"
+        )
     )
     def stop(self, timeout: Optional[float] = 60):
         """Stops the Sandbox and waits for it to be fully stopped.
@@ -359,7 +369,9 @@ class Sandbox(SandboxDto):
                 return
 
             if self.state in ["error", "build_failed"]:
-                err_msg = f"Sandbox {self.id} failed to start with state: {self.state}, error reason: {self.error_reason}"
+                err_msg = (
+                    f"Sandbox {self.id} failed to start with state: {self.state}, error reason: {self.error_reason}"
+                )
                 raise DaytonaError(err_msg)
 
             time.sleep(0.1)  # Wait 100ms between checks
@@ -390,7 +402,9 @@ class Sandbox(SandboxDto):
                 self.__refresh_data_safe()
 
                 if self.state in ["error", "build_failed"]:
-                    err_msg = f"Sandbox {self.id} failed to stop with status: {self.state}, error reason: {self.error_reason}"
+                    err_msg = (
+                        f"Sandbox {self.id} failed to stop with status: {self.state}, error reason: {self.error_reason}"
+                    )
                     raise DaytonaError(err_msg)
             except Exception as e:
                 # If there's a validation error, continue waiting

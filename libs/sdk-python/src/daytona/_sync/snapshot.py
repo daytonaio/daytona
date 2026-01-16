@@ -104,7 +104,9 @@ class SnapshotService:
         return Snapshot.from_dto(self.__snapshots_api.get_snapshot(name))
 
     @intercept_errors(message_prefix="Failed to create snapshot: ")
-    @with_timeout(error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period."))
+    @with_timeout(
+        error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period.")
+    )
     def create(
         self,
         params: CreateSnapshotParams,
@@ -139,7 +141,9 @@ class SnapshotService:
             create_snapshot_req.build_info = CreateBuildInfo(
                 context_hashes=context_hashes,
                 dockerfile_content=(
-                    params.image.entrypoint(params.entrypoint).dockerfile() if params.entrypoint else params.image.dockerfile()
+                    params.image.entrypoint(params.entrypoint).dockerfile()
+                    if params.entrypoint
+                    else params.image.dockerfile()
                 ),
             )
 
@@ -156,7 +160,7 @@ class SnapshotService:
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
 
         def start_log_streaming():
-            build_logs_url = self.__snapshots_api.get_snapshot_build_logs_url(created_snapshot.id)
+            build_logs_url = (self.__snapshots_api.get_snapshot_build_logs_url(created_snapshot.id)).url
 
             def should_terminate():
                 latest_snapshot = self.__snapshots_api.get_snapshot(created_snapshot.id)
@@ -200,7 +204,9 @@ class SnapshotService:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
         if created_snapshot.state in (SnapshotState.ERROR, SnapshotState.BUILD_FAILED):
-            raise DaytonaError(f"Failed to create snapshot {created_snapshot.name}, reason: {created_snapshot.error_reason}")
+            raise DaytonaError(
+                f"Failed to create snapshot {created_snapshot.name}, reason: {created_snapshot.error_reason}"
+            )
 
         return created_snapshot if isinstance(created_snapshot, Snapshot) else Snapshot.from_dto(created_snapshot)
 
@@ -235,7 +241,9 @@ class SnapshotService:
         )
         context_hashes = []
         for context in image._context_list:  # pylint: disable=protected-access
-            context_hash = object_storage.upload(context.source_path, push_access_creds.organization_id, context.archive_path)
+            context_hash = object_storage.upload(
+                context.source_path, push_access_creds.organization_id, context.archive_path
+            )
             context_hashes.append(context_hash)
 
         return context_hashes
