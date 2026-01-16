@@ -363,9 +363,7 @@ class Image(BaseModel):
             if not os.path.isdir(context_dir):
                 raise DaytonaError(f"Context directory {context_dir} does not exist")
 
-        for context_path, original_path in Image.__extract_copy_sources(
-            "\n".join(dockerfile_commands), context_dir or ""
-        ):
+        for context_path, original_path in Image.__extract_copy_sources("\n".join(dockerfile_commands), context_dir or ""):
             archive_base_path = context_path
             if context_dir and not original_path.startswith(context_dir):
                 archive_base_path = context_path.removeprefix(context_dir)

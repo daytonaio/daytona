@@ -18,6 +18,4 @@ class SandboxJsCodeToolbox:
             argv = " ".join(params.argv)
 
         # Combine everything into the final command for TypeScript
-        return (
-            f""" sh -c 'echo {base64_code} | base64 --decode | node -e "$(cat)" {argv} 2>&1 | grep -vE "npm notice"' """
-        )
+        return f""" sh -c 'echo {base64_code} | base64 --decode | node -e "$(cat)" {argv} 2>&1 | grep -vE "npm notice"' """

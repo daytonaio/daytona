@@ -81,9 +81,7 @@ class ToolboxApiClientProxyLazyBaseUrl(_ToolboxApiClientProxy[ApiClient]):
     While delegating all other attributes and methods to the underlying sync API client.
     """
 
-    def __init__(
-        self, api_client: ApiClient, sandbox_id: str, region_id: str, get_toolbox_base_url: Callable[[str, str], str]
-    ):
+    def __init__(self, api_client: ApiClient, sandbox_id: str, region_id: str, get_toolbox_base_url: Callable[[str, str], str]):
         super().__init__(api_client, sandbox_id)
         self._get_toolbox_base_url = get_toolbox_base_url
         self._region_id = region_id
