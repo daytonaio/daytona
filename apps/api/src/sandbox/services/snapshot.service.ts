@@ -48,6 +48,7 @@ import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { RunnerService } from './runner.service'
 import { RegionService } from '../../region/services/region.service'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -74,6 +75,7 @@ export class SnapshotService {
     private readonly regionService: RegionService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly configService: TypedConfigService,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -447,7 +449,7 @@ export class SnapshotService {
     }
 
     if (!region.proxyUrl) {
-      throw new NotFoundException(`Region for initial runner for snapshot ${snapshot.id} has no proxy URL`)
+      return `${this.configService.getOrThrow('proxy.protocol')}://${this.configService.getOrThrow('proxy.domain')}/snapshots/${snapshot.id}/build-logs`
     }
 
     return region.proxyUrl + '/snapshots/' + snapshot.id + '/build-logs'
