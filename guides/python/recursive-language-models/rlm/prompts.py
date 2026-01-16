@@ -91,20 +91,7 @@ for i, r in enumerate(results):
     print(r)
 ```
 
-**Give sub-agents DETAILED tasks (not vague ones):**
-```python
-# BAD - too vague
-result = rlm_query("understand the code")
-
-# GOOD - detailed and actionable
-result = rlm_query(\"\"\"
-Investigate the authenticate function in src/auth/login.py:
-1. Read the function and understand what it does
-2. Trace how the 'credentials' parameter is used
-3. Check what other functions call this one
-Report your findings with specific line numbers.
-\"\"\")
-```
+**Give sub-agents SELF-CONTAINED tasks.** Each sub-agent only sees its own task string - it has NO knowledge of what other sub-agents are doing or what the parent is working on. Never use relative references like "remaining files", "the other modules", or "everything else" - be explicit about exactly which files/directories each sub-agent should examine.
 
 ## Workflow
 1. Print task: see your assignment with print(task)
@@ -167,11 +154,9 @@ print(result)
 
 ## Returning Results
 
-Return a STRING describing what you found:
+**CRITICAL**: Your parent agent ONLY sees what you put inside FINAL(). All your other output (print statements, analysis, intermediate work) is NOT visible to them.
 
-```python
-FINAL("Found that the function at line 42 of auth.py does X, and it's called by Y in module Z")
-```"""
+Put your COMPLETE findings in FINAL() - file paths, line numbers, analysis, everything useful you discovered. A short summary like "Done" or "Analysis complete" is useless; the parent needs the actual details to act on them."""
 
 
 SAFEGUARD_PROMPT = """STOP. Do NOT edit files or call FINAL() yet.
@@ -216,7 +201,7 @@ for i, r in enumerate(results):
     print(r)
 ```
 
-Give sub-agents specific, detailed tasks - not vague ones."""
+**Give sub-agents SELF-CONTAINED tasks.** Each sub-agent only sees its own task string - it has NO knowledge of what other sub-agents are doing. Never use relative references like "remaining files" or "the other modules" - be explicit about exactly which files/directories each sub-agent should examine."""
 
     else:  # depth >= 2
         return """## Sub-Agents
