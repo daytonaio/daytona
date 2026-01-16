@@ -37,13 +37,7 @@ from .._utils.timeout import with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
-from ..common.daytona import (
-    CodeLanguage,
-    CreateSandboxFromImageParams,
-    CreateSandboxFromSnapshotParams,
-    DaytonaConfig,
-    Image,
-)
+from ..common.daytona import CodeLanguage, CreateSandboxFromImageParams, CreateSandboxFromSnapshotParams, DaytonaConfig, Image
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
@@ -319,9 +313,7 @@ class Daytona:
         return self._create(params, timeout=timeout, on_snapshot_create_logs=on_snapshot_create_logs)
 
     @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Failed to create and start sandbox within {timeout} seconds timeout period."
-        )
+        error_message=lambda self, timeout: (f"Failed to create and start sandbox within {timeout} seconds timeout period.")
     )
     def _create(
         self,
@@ -647,14 +639,14 @@ class Daytona:
         return toolbox_api_client
 
     def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
-        if self._proxy_toolbox_url_futures[region_id] is not None:
-            return self._proxy_toolbox_url_futures[region_id].result()
+        if self._proxy_toolbox_url_futures.get(region_id) is not None:
+            return self._proxy_toolbox_url_futures.get(region_id).result()
 
         with self._proxy_toolbox_url_lock:
             # Double-check: another thread might have created the future
             # Create local variable "future" so that the thread knows if it created the future
             # and should do the API call and set the result
-            if self._proxy_toolbox_url_futures[region_id] is None:
+            if self._proxy_toolbox_url_futures.get(region_id) is None:
                 future = Future()
                 self._proxy_toolbox_url_futures[region_id] = future
             else:
@@ -671,4 +663,4 @@ class Daytona:
                 raise
 
         # Allows other threads to wait on the same future in parallel
-        return self._proxy_toolbox_url_futures[region_id].result()
+        return self._proxy_toolbox_url_futures.get(region_id).result()

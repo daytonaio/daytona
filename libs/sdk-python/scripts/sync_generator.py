@@ -178,9 +178,7 @@ def transform_docstrings(text: str) -> str:
                 break
 
             # Handle async with pattern
-            async_with_match = re.match(
-                r"^(\s*)async\s+with\s+(?:Async)?Daytona\(\)(?:\([^)]*\))?\s+as\s+(\w+):\s*(#.*)?$", line
-            )
+            async_with_match = re.match(r"^(\s*)async\s+with\s+(?:Async)?Daytona\(\)(?:\([^)]*\))?\s+as\s+(\w+):\s*(#.*)?$", line)
             if async_with_match:
                 indent, var_name, comment = async_with_match.groups()
                 # Transform to variable assignment
@@ -798,14 +796,14 @@ def convert_proxy_toolbox_url_method(text: str) -> str:
         return text
 
     sync_method = """    def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
-        if self._proxy_toolbox_url_futures[region_id] is not None:
-            return self._proxy_toolbox_url_futures[region_id].result()
+        if self._proxy_toolbox_url_futures.get(region_id) is not None:
+            return self._proxy_toolbox_url_futures.get(region_id).result()
 
         with self._proxy_toolbox_url_lock:
             # Double-check: another thread might have created the future
             # Create local variable "future" so that the thread knows if it created the future
             # and should do the API call and set the result
-            if self._proxy_toolbox_url_futures[region_id] is None:
+            if self._proxy_toolbox_url_futures.get(region_id) is None:
                 future = Future()
                 self._proxy_toolbox_url_futures[region_id] = future
             else:
@@ -822,7 +820,7 @@ def convert_proxy_toolbox_url_method(text: str) -> str:
                 raise
 
         # Allows other threads to wait on the same future in parallel
-        return self._proxy_toolbox_url_futures[region_id].result()"""
+        return self._proxy_toolbox_url_futures.get(region_id).result()"""
 
     # Replace the method
     text = method_pattern.sub(sync_method, text, count=1)
@@ -873,12 +871,7 @@ def replace_asyncio_create_task_with_threading(text: str) -> str:
             # Insert after the last import but before other code
             insert_idx = 0
             for i, l in enumerate(final_lines):
-                if (
-                    l.strip().startswith("import")
-                    or l.strip().startswith("from")
-                    or l.strip().startswith("#")
-                    or not l.strip()
-                ):
+                if l.strip().startswith("import") or l.strip().startswith("from") or l.strip().startswith("#") or not l.strip():
                     insert_idx = i + 1
                 else:
                     break

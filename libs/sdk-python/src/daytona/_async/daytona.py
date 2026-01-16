@@ -31,13 +31,7 @@ from .._utils.timeout import with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
-from ..common.daytona import (
-    CodeLanguage,
-    CreateSandboxFromImageParams,
-    CreateSandboxFromSnapshotParams,
-    DaytonaConfig,
-    Image,
-)
+from ..common.daytona import CodeLanguage, CreateSandboxFromImageParams, CreateSandboxFromSnapshotParams, DaytonaConfig, Image
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
@@ -359,9 +353,7 @@ class AsyncDaytona:
         return await self._create(params, timeout=timeout, on_snapshot_create_logs=on_snapshot_create_logs)
 
     @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Failed to create and start sandbox within {timeout} seconds timeout period."
-        )
+        error_message=lambda self, timeout: (f"Failed to create and start sandbox within {timeout} seconds timeout period.")
     )
     async def _create(
         self,
@@ -410,9 +402,7 @@ class AsyncDaytona:
                     dockerfile_content=Image.base(params.image).dockerfile(),
                 )
             elif isinstance(params.image, Image):
-                context_hashes = await AsyncSnapshotService.process_image_context(
-                    self._object_storage_api, params.image
-                )
+                context_hashes = await AsyncSnapshotService.process_image_context(self._object_storage_api, params.image)
                 sandbox_data.build_info = CreateBuildInfo(
                     context_hashes=context_hashes,
                     dockerfile_content=params.image.dockerfile(),
@@ -556,9 +546,7 @@ class AsyncDaytona:
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
-    async def find_one(
-        self, sandbox_id_or_name: Optional[str] = None, labels: Optional[Dict[str, str]] = None
-    ) -> AsyncSandbox:
+    async def find_one(self, sandbox_id_or_name: Optional[str] = None, labels: Optional[Dict[str, str]] = None) -> AsyncSandbox:
         """Finds a Sandbox by its ID or name or labels.
 
         Args:
@@ -689,12 +677,12 @@ class AsyncDaytona:
         return toolbox_api_client
 
     async def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
-        if self._proxy_toolbox_url_tasks[region_id] is not None:
-            return await self._proxy_toolbox_url_tasks[region_id]
+        if self._proxy_toolbox_url_tasks.get(region_id) is not None:
+            return await self._proxy_toolbox_url_tasks.get(region_id)
 
         async with self._proxy_toolbox_url_lock:
             # Double-check: another coroutine might have created the task
-            if self._proxy_toolbox_url_tasks[region_id] is None:
+            if self._proxy_toolbox_url_tasks.get(region_id) is None:
 
                 async def _fetch():
                     response = await self._sandbox_api.get_toolbox_proxy_url(sandbox_id)
@@ -703,4 +691,4 @@ class AsyncDaytona:
                 self._proxy_toolbox_url_tasks[region_id] = asyncio.create_task(_fetch())
 
         # All coroutines that made it here can now await the same task in parallel
-        return await self._proxy_toolbox_url_tasks[region_id]
+        return await self._proxy_toolbox_url_tasks.get(region_id)

@@ -156,9 +156,7 @@ class Process:
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
         return ExecuteResponse.model_construct(
-            exit_code=(
-                response.exit_code if response.exit_code is not None else response.additional_properties.get("code")
-            ),
+            exit_code=(response.exit_code if response.exit_code is not None else response.additional_properties.get("code")),
             result=artifacts.stdout,
             artifacts=artifacts,
             additional_properties=response.additional_properties,
@@ -390,9 +388,7 @@ class Process:
             print(f"Command stderr: {logs.stderr}")
             ```
         """
-        response = self._api_client.get_session_command_logs_without_preload_content(
-            session_id=session_id, command_id=command_id
-        )
+        response = self._api_client.get_session_command_logs_without_preload_content(session_id=session_id, command_id=command_id)
 
         return parse_session_command_logs(response.data)
 
