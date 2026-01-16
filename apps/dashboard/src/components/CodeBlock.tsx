@@ -4,10 +4,10 @@
  */
 
 import { useTheme } from '@/contexts/ThemeContext'
-import { CheckIcon, ClipboardIcon } from 'lucide-react'
-import { useState } from 'react'
-import { Highlight, themes, type PrismTheme, type Token } from 'prism-react-renderer'
 import { cn } from '@/lib/utils'
+import { CheckIcon, ClipboardIcon } from 'lucide-react'
+import { Highlight, themes, type PrismTheme, type Token } from 'prism-react-renderer'
+import { useState } from 'react'
 
 interface CodeBlockProps {
   code: string
@@ -23,6 +23,14 @@ interface HighlightProps {
   getTokenProps: (props: { token: Token; key: number }) => React.HTMLAttributes<HTMLSpanElement>
 }
 
+const oneDark = {
+  ...themes.oneDark,
+  plain: {
+    ...themes.oneDark.plain,
+    background: 'hsl(var(--code-background))',
+  },
+}
+
 const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, codeAreaClassName }) => {
   const [copied, setCopied] = useState(false)
   const { theme } = useTheme()
@@ -36,7 +44,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, 
   return (
     <div className="relative rounded-lg">
       <Highlight
-        theme={(theme === 'dark' ? themes.oneDark : themes.oneLight) as PrismTheme}
+        theme={(theme === 'dark' ? oneDark : themes.oneLight) as PrismTheme}
         code={code.trim()}
         language={language}
       >
