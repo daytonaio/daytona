@@ -3,6 +3,8 @@
 
 """RLM core module."""
 
+# pylint: disable=import-outside-toplevel
+
 
 # Lazy imports to avoid circular dependencies
 def __getattr__(name):
@@ -10,15 +12,15 @@ def __getattr__(name):
         from rlm.agent import RLMAgent
 
         return RLMAgent
-    elif name == "AgentResult":
+    if name == "AgentResult":
         from rlm.types import AgentResult
 
         return AgentResult
-    elif name == "RLMConfig":
+    if name == "RLMConfig":
         from rlm.types import RLMConfig
 
         return RLMConfig
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-__all__ = ["RLMAgent", "AgentResult", "RLMConfig"]
+__all__ = ["RLMAgent", "AgentResult", "RLMConfig"]  # pylint: disable=undefined-all-variable

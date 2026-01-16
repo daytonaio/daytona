@@ -22,13 +22,12 @@ from threading import Event, Lock, Thread
 from typing import TYPE_CHECKING, Callable
 
 import requests
-
 from rlm.types import CodeBlockResult
+
+from daytona import SessionExecuteRequest
 
 if TYPE_CHECKING:
     from daytona import Sandbox
-
-from daytona import SessionExecuteRequest
 
 
 def _retry_file_op(op_func, max_retries: int = 3, operation_name: str = "file operation"):

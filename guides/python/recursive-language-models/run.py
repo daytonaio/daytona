@@ -10,7 +10,6 @@ from pathlib import Path
 
 import typer
 from dotenv import load_dotenv
-
 from output_logging.console import ConsoleOutput
 from output_logging.tree_logger import TreeLogger
 from rlm.agent import RLMAgent
@@ -101,7 +100,7 @@ def main(
 
         # Create sandbox from GitHub repo
         print("Creating sandbox from repository...")
-        sandbox, info = sandbox_manager.create_sandbox_from_repo(
+        sandbox, _ = sandbox_manager.create_sandbox_from_repo(
             repo_url=repo,
             branch=branch,
             commit=commit,

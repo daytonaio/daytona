@@ -219,8 +219,8 @@ it has NO knowledge of what other sub-agents are doing. Never use relative refer
 like "remaining files" or "the other modules" - be explicit about exactly which
 files/directories each sub-agent should examine."""
 
-    else:  # depth >= 2
-        return """## Sub-Agents
+    # depth >= 2
+    return """## Sub-Agents
 
 You can spawn sub-agents if needed for complex sub-tasks:
 ```python

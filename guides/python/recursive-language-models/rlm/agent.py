@@ -10,21 +10,16 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Callable
 
+from rlm import prompts
 from rlm.client import BaseLMClient
-from rlm.prompts import build_system_prompt, build_user_prompt, format_execution_result
 from rlm.repl import DaytonaREPL
 from rlm.sandbox import SandboxExecutor, SandboxManager
-from rlm.types import (
-    AgentResult,
-    Config,
-    Iteration,
-    UsageStats,
-)
+from rlm.types import AgentResult, Config, Iteration, UsageStats
 
 if TYPE_CHECKING:
-    from daytona import Sandbox
-
     from output_logging.console import ConsoleOutput
+
+    from daytona import Sandbox
 
 
 logger = logging.getLogger(__name__)
@@ -185,7 +180,7 @@ class RLMAgent:
     def _run_loop(self) -> None:
         """Run the main iteration loop."""
         # Build system prompt
-        system_prompt = build_system_prompt(depth=self.depth)
+        system_prompt = prompts.build_system_prompt(depth=self.depth)
 
         messages = [{"role": "system", "content": system_prompt}]
         execution_result = None
@@ -197,7 +192,7 @@ class RLMAgent:
                 break
 
             # Build user prompt
-            user_prompt = build_user_prompt(iteration, execution_result)
+            user_prompt = prompts.build_user_prompt(iteration, execution_result)
             messages.append({"role": "user", "content": user_prompt})
 
             # Get model completion
@@ -235,7 +230,9 @@ class RLMAgent:
             if repl_result.code_blocks:
                 result_parts = []
                 for block in repl_result.code_blocks:
-                    result_parts.append(format_execution_result(block.code, block.stdout, block.stderr, block.error))
+                    result_parts.append(
+                        prompts.format_execution_result(block.code, block.stdout, block.stderr, block.error)
+                    )
                 execution_result = "\n\n".join(result_parts)
             else:
                 execution_result = None

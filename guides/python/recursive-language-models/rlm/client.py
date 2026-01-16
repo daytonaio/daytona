@@ -8,8 +8,7 @@ import time
 from abc import ABC, abstractmethod
 from typing import Any
 
-import litellm
-
+import litellm  # pylint: disable=import-error
 from rlm.types import UsageStats
 
 logger = logging.getLogger(__name__)
@@ -78,10 +77,9 @@ class LiteLLMClient(BaseLMClient):
         """Prepare messages for API."""
         if isinstance(prompt, str):
             return [{"role": "user", "content": prompt}]
-        elif isinstance(prompt, list):
+        if isinstance(prompt, list):
             return prompt
-        else:
-            raise ValueError(f"Invalid prompt type: {type(prompt)}")
+        raise ValueError(f"Invalid prompt type: {type(prompt)}")
 
     def _track_usage(self, response):
         """Track token usage from response."""
