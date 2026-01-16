@@ -72,7 +72,7 @@ export const CreateRunnerDialog: React.FC<CreateRunnerDialogProps> = ({ regions,
     setLoading(true)
     try {
       const runner = await onCreateRunner({
-        name: formData.name,
+        name: formData.name.trim(),
         regionId: formData.regionId,
       })
       if (runner) {
