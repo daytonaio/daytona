@@ -17,33 +17,34 @@ import (
 )
 
 type Config struct {
-	DaytonaApiUrl          string        `envconfig:"DAYTONA_API_URL"`
-	ApiToken               string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
-	ApiPort                int           `envconfig:"API_PORT"`
-	TLSCertFile            string        `envconfig:"TLS_CERT_FILE"`
-	TLSKeyFile             string        `envconfig:"TLS_KEY_FILE"`
-	EnableTLS              bool          `envconfig:"ENABLE_TLS"`
-	CacheRetentionDays     int           `envconfig:"CACHE_RETENTION_DAYS"`
-	Environment            string        `envconfig:"ENVIRONMENT"`
-	ContainerRuntime       string        `envconfig:"CONTAINER_RUNTIME"`
-	ContainerNetwork       string        `envconfig:"CONTAINER_NETWORK"`
-	LogFilePath            string        `envconfig:"LOG_FILE_PATH"`
-	AWSRegion              string        `envconfig:"AWS_REGION"`
-	AWSEndpointUrl         string        `envconfig:"AWS_ENDPOINT_URL"`
-	AWSAccessKeyId         string        `envconfig:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey     string        `envconfig:"AWS_SECRET_ACCESS_KEY"`
-	AWSDefaultBucket       string        `envconfig:"AWS_DEFAULT_BUCKET"`
-	ResourceLimitsDisabled bool          `envconfig:"RESOURCE_LIMITS_DISABLED"`
-	DaemonStartTimeoutSec  int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
-	SandboxStartTimeoutSec int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
-	UseSnapshotEntrypoint  bool          `envconfig:"USE_SNAPSHOT_ENTRYPOINT"`
-	LibvirtURI             string        `envconfig:"LIBVIRT_URI" default:"qemu:///system"`
-	Domain                 string        `envconfig:"RUNNER_DOMAIN" validate:"omitempty,hostname|ip"`
-	PollTimeout            time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
-	PollLimit              int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
-	HealthcheckInterval    time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
-	HealthcheckTimeout     time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
-	ApiVersion             int           `envconfig:"API_VERSION" default:"2"`
+	DaytonaApiUrl              string        `envconfig:"DAYTONA_API_URL"`
+	ApiToken                   string        `envconfig:"DAYTONA_RUNNER_TOKEN"`
+	ApiPort                    int           `envconfig:"API_PORT"`
+	TLSCertFile                string        `envconfig:"TLS_CERT_FILE"`
+	TLSKeyFile                 string        `envconfig:"TLS_KEY_FILE"`
+	EnableTLS                  bool          `envconfig:"ENABLE_TLS"`
+	CacheRetentionDays         int           `envconfig:"CACHE_RETENTION_DAYS"`
+	Environment                string        `envconfig:"ENVIRONMENT"`
+	ContainerRuntime           string        `envconfig:"CONTAINER_RUNTIME"`
+	ContainerNetwork           string        `envconfig:"CONTAINER_NETWORK"`
+	LogFilePath                string        `envconfig:"LOG_FILE_PATH"`
+	AWSRegion                  string        `envconfig:"AWS_REGION"`
+	AWSEndpointUrl             string        `envconfig:"AWS_ENDPOINT_URL"`
+	AWSAccessKeyId             string        `envconfig:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey         string        `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AWSDefaultBucket           string        `envconfig:"AWS_DEFAULT_BUCKET"`
+	ResourceLimitsDisabled     bool          `envconfig:"RESOURCE_LIMITS_DISABLED"`
+	DaemonStartTimeoutSec      int           `envconfig:"DAEMON_START_TIMEOUT_SEC"`
+	SandboxStartTimeoutSec     int           `envconfig:"SANDBOX_START_TIMEOUT_SEC"`
+	SnapshotDownloadTimeoutMin int           `envconfig:"SNAPSHOT_DOWNLOAD_TIMEOUT_MIN" default:"30"`
+	UseSnapshotEntrypoint      bool          `envconfig:"USE_SNAPSHOT_ENTRYPOINT"`
+	LibvirtURI                 string        `envconfig:"LIBVIRT_URI" default:"qemu:///system"`
+	Domain                     string        `envconfig:"RUNNER_DOMAIN" validate:"omitempty,hostname|ip"`
+	PollTimeout                time.Duration `envconfig:"POLL_TIMEOUT" default:"30s"`
+	PollLimit                  int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
+	HealthcheckInterval        time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
+	HealthcheckTimeout         time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
+	ApiVersion                 int           `envconfig:"API_VERSION" default:"2"`
 }
 
 var DEFAULT_API_PORT int = 8080

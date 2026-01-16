@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daytonaio/runner-win/cmd/runner/config"
 	"github.com/daytonaio/runner-win/pkg/api/dto"
 	"github.com/daytonaio/runner-win/pkg/models/enums"
 	log "github.com/sirupsen/logrus"
@@ -362,11 +363,20 @@ func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDT
 
 		if !snapshotExists {
 			// Snapshot not found locally - pull it from the object store
-			log.Infof("Snapshot '%s' not found locally, pulling from object store", sandboxDto.Snapshot)
+			// Use a separate context with a long timeout for large snapshot downloads
+			// (the HTTP request context may timeout before a large download completes)
+			downloadTimeout := 30 * time.Minute // Default 30 minutes for large snapshots
+			if cfg, err := config.GetConfig(); err == nil && cfg.SnapshotDownloadTimeoutMin > 0 {
+				downloadTimeout = time.Duration(cfg.SnapshotDownloadTimeoutMin) * time.Minute
+			}
+			downloadCtx, downloadCancel := context.WithTimeout(context.Background(), downloadTimeout)
+			defer downloadCancel()
+
+			log.Infof("Snapshot '%s' not found locally, pulling from object store (timeout: %v)", sandboxDto.Snapshot, downloadTimeout)
 			pullReq := dto.PullSnapshotRequestDTO{
 				Snapshot: sandboxDto.Snapshot,
 			}
-			if err := l.PullSnapshot(ctx, pullReq); err != nil {
+			if err := l.PullSnapshot(downloadCtx, pullReq); err != nil {
 				return "", fmt.Errorf("failed to pull snapshot '%s' from object store: %w", sandboxDto.Snapshot, err)
 			}
 			log.Infof("Successfully pulled snapshot '%s' from object store", sandboxDto.Snapshot)
