@@ -2,9 +2,8 @@
 title: Sandboxes
 ---
 
-import sandboxDiagram from '@assets/docs/sandbox-states.svg?raw'
 import { TabItem, Tabs } from '@astrojs/starlight/components'
-import Image from 'astro/components/Image.astro'
+import SandboxDiagram from '@components/SandboxDiagram.astro'
 
 Sandboxes are isolated development environments managed by Daytona. This guide covers the lifecycle of Sandboxes and how to create, manage, and remove them using the Daytona SDK.
 
@@ -17,7 +16,7 @@ For more power, contact [support@daytona.io](mailto:support@daytona.io).
 Throughout its lifecycle, a Daytona Sandbox can have several different states.
 The diagram below shows the states and possible transitions between them.
 
-<Fragment set:html={sandboxDiagram} />
+<SandboxDiagram />
 
 ## Multiple runtime support
 
@@ -441,7 +440,6 @@ For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandbox
 > [**recover (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxrecover)
 >
 > [**recover (TypeScript SDK)**](/docs/typescript-sdk/sandbox#recover)
-
 
 ## Delete Sandboxes
 
