@@ -717,8 +717,8 @@ main().catch(console.error)`,
                 size="icon-sm"
                 variant="outline"
                 onClick={() => {
-                  if (resultPanelRef.current.isCollapsed) {
-                    resultPanelRef.current.resize(100)
+                  if (resultPanelRef.current.isCollapsed()) {
+                    resultPanelRef.current.resize('20%')
                   } else {
                     resultPanelRef.current.collapse()
                   }
@@ -755,7 +755,7 @@ main().catch(console.error)`,
             </Panel>
 
             <Panel maxSize="80%" minSize="20%" panelRef={resultPanelRef} collapsedSize={0} collapsible defaultSize={33}>
-              <div className="bg-background w-full border rounded-md overflow-auto h-full">
+              <div className="bg-background w-full border rounded-md overflow-auto h-full flex flex-col">
                 <div className="flex justify-between border-b px-4 pr-2 py-1 text-xs items-center bg-muted/50">
                   <div className="text-muted-foreground font-mono">Result</div>
                   <div className="flex items-center gap-2">
@@ -779,8 +779,15 @@ main().catch(console.error)`,
                     </TooltipButton>
                   </div>
                 </div>
-
-                <ResponseCard titleText="Result" responseContent={codeSnippetOutput} />
+                <div className="flex-1 overflow-y-auto">
+                  <ResponseCard
+                    responseContent={
+                      codeSnippetOutput || (
+                        <div className="text-muted-foreground font-mono">Code output will be shown here...</div>
+                      )
+                    }
+                  />
+                </div>
               </div>
             </Panel>
           </Group>

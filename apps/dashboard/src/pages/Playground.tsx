@@ -155,15 +155,13 @@ const Playground: React.FC = () => {
                     </div>
                   </DrawerContent>
                 </Drawer>
-                <PlaygroundLayoutContent>
-                  {playgroundCategory === PlaygroundCategories.SANDBOX && (
-                    <SandboxCodeSnippetsResponse className="w-full max-w-[90%]" />
-                  )}
+                <PlaygroundLayoutContent className="[&>*]:w-full [&>*]:max-w-[min(90%,1024px)]">
+                  {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxCodeSnippetsResponse />}
                   {playgroundCategory === PlaygroundCategories.TERMINAL && (
-                    <WebTerminal getPortPreviewUrl={getPortPreviewUrl} className="w-full max-w-[90%]" />
+                    <WebTerminal getPortPreviewUrl={getPortPreviewUrl} />
                   )}
                   {playgroundCategory === PlaygroundCategories.VNC && (
-                    <VNCDesktopWindowResponse getPortPreviewUrl={getPortPreviewUrl} className="w-full max-w-[90%]" />
+                    <VNCDesktopWindowResponse getPortPreviewUrl={getPortPreviewUrl} />
                   )}
                 </PlaygroundLayoutContent>
               </PlaygroundLayout>

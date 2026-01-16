@@ -49,7 +49,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className 
     <Window className={className}>
       <WindowTitleBar>Sandbox Terminal</WindowTitleBar>
       <WindowContent>
-        <div className="w-full h-[400px]">
+        <div className="w-full bg-muted/40 dark:bg-muted/10 min-h-[500px] flex flex-col [&>*]:flex-1">
           {loadingTerminalUrl || !terminalUrl ? (
             <div className="h-full flex items-center justify-center rounded-lg">
               <p>{loadingTerminalUrl ? 'Loading terminal...' : 'Unable to open the terminal. Please try again.'}</p>

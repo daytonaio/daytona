@@ -3,13 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import TooltipButton from '@/components/TooltipButton'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useApi } from '@/hooks/useApi'
 import { usePlayground } from '@/hooks/usePlayground'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { Sandbox } from '@daytonaio/sdk'
+import { ChevronUpIcon, XIcon } from 'lucide-react'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { Group, Panel, usePanelRef } from 'react-resizable-panels'
 import { toast } from 'sonner'
 import ResponseCard from '../ResponseCard'
 import { Window, WindowContent, WindowTitleBar } from '../Window'
@@ -141,18 +144,69 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
     } else if (VNCSandboxData.error) setLoadingVNCUrl(false)
   }, [setVNCInteractionOptionsParamValue, VNCSandboxData, getVNCComputerUseUrl])
 
+  const resultPanelRef = usePanelRef()
+
+  useEffect(() => {
+    if (resultPanelRef.current.isCollapsed()) {
+      resultPanelRef.current.resize('20%')
+    }
+  }, [VNCInteractionOptionsParamsState.responseContent, resultPanelRef])
+
   return (
     <Window className={className}>
-      <WindowTitleBar>Desktop Window</WindowTitleBar>
-      <WindowContent className="w-full aspect-[4/3] md:aspect-[16/9] flex flex-col items-center justify-center">
-        {loadingVNCUrl || VNCLoadingError || !VNCUrl ? (
-          <div className="h-full flex items-center justify-center rounded-lg">
-            <p>{loadingVNCUrl ? 'Loading VNC...' : VNCLoadingError || 'Unable to open VNC. Please try again.'}</p>
-          </div>
-        ) : (
-          <iframe title="VNC desktop window" src={VNCUrl} className="w-full h-full" />
-        )}
-        {/* <ResponseCard responseContent={VNCInteractionOptionsParamsState.responseContent || ''} /> */}
+      <WindowTitleBar>Desktop Window </WindowTitleBar>
+      <WindowContent className="w-full flex flex-col items-center justify-center">
+        <Group orientation="vertical" className="aspect-[4/3] md:aspect-[16/9] border-border rounded-b-md">
+          <Panel minSize={'20%'} className="overflow-auto">
+            <div className="aspect-[4/3] md:aspect-[16/9] bg-muted/40 dark:bg-muted/10 rounded-lg">
+              {loadingVNCUrl || VNCLoadingError || !VNCUrl ? (
+                <div className="h-full flex items-center justify-center rounded-lg">
+                  <p>{loadingVNCUrl ? 'Loading VNC...' : VNCLoadingError || 'Unable to open VNC. Please try again.'}</p>
+                  {/* todo: add retry button */}
+                </div>
+              ) : (
+                <iframe title="VNC desktop window" src={VNCUrl} className="w-full h-full" />
+              )}
+            </div>
+          </Panel>
+
+          <Panel maxSize="80%" minSize="20%" panelRef={resultPanelRef} collapsedSize={0} collapsible defaultSize={0}>
+            <div className="bg-background w-full border rounded-md overflow-auto flex flex-col h-full">
+              <div className="flex justify-between border-b px-4 pr-2 py-1 text-xs items-center dark:bg-muted/50">
+                <div className="text-muted-foreground font-mono">Result</div>
+                <div className="flex items-center gap-2">
+                  <TooltipButton
+                    onClick={() => resultPanelRef.current.resize('80%')}
+                    tooltipText="Maximize"
+                    className="h-6 w-6"
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <ChevronUpIcon className="w-4 h-4" />
+                  </TooltipButton>
+                  <TooltipButton
+                    tooltipText="Close"
+                    className="h-6 w-6"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => resultPanelRef.current.collapse()}
+                  >
+                    <XIcon />
+                  </TooltipButton>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <ResponseCard
+                  responseContent={
+                    VNCInteractionOptionsParamsState.responseContent || (
+                      <div className="text-muted-foreground font-mono">Interaction results will be shown here...</div>
+                    )
+                  }
+                />
+              </div>
+            </div>
+          </Panel>
+        </Group>
       </WindowContent>
     </Window>
   )
