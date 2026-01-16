@@ -9333,7 +9333,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-dialog@npm:1.1.15, @radix-ui/react-dialog@npm:^1.1.6":
+"@radix-ui/react-dialog@npm:1.1.15, @radix-ui/react-dialog@npm:^1.1.1, @radix-ui/react-dialog@npm:^1.1.6":
   version: 1.1.15
   resolution: "@radix-ui/react-dialog@npm:1.1.15"
   dependencies:
@@ -19333,6 +19333,7 @@ __metadata:
     react-instantsearch-dom: "npm:^6.40.4"
     react-number-format: "npm:^5.4.4"
     react-oidc-context: "npm:^3.3.0"
+    react-resizable-panels: "npm:^4.4.1"
     react-router-dom: "npm:6.29.0"
     recharts: "npm:^2.15.3"
     reflect-metadata: "npm:^0.1.13"
@@ -19366,6 +19367,7 @@ __metadata:
     typescript-eslint: "npm:^8.19.0"
     usehooks-ts: "npm:^3.1.1"
     uuid: "npm:^11.0.3"
+    vaul: "npm:^1.1.2"
     verdaccio: "npm:6.0.5"
     vite: "npm:^7.1.12"
     vite-plugin-checker: "npm:^0.8.0"
@@ -32719,6 +32721,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-resizable-panels@npm:^4.4.1":
+  version: 4.4.1
+  resolution: "react-resizable-panels@npm:4.4.1"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10c0/360f4b076cae704484e438f864a1ee451ce319fbf5b5902e8a4af282ec2e3546ea0c68ab02b5af9bd8ca2d1a69fe1806867eff486841f36c475dbc78c15fb3ec
+  languageName: node
+  linkType: hard
+
 "react-router-dom@npm:6.29.0":
   version: 6.29.0
   resolution: "react-router-dom@npm:6.29.0"
@@ -38380,6 +38392,18 @@ __metadata:
   version: 1.1.2
   resolution: "vary@npm:1.1.2"
   checksum: 10c0/f15d588d79f3675135ba783c91a4083dcd290a2a5be9fcb6514220a1634e23df116847b1cc51f66bfb0644cf9353b2abb7815ae499bab06e46dd33c1a6bf1f4f
+  languageName: node
+  linkType: hard
+
+"vaul@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "vaul@npm:1.1.2"
+  dependencies:
+    "@radix-ui/react-dialog": "npm:^1.1.1"
+  peerDependencies:
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
+  checksum: 10c0/a6da539eb5576c0004a6b17e3673ea1db2c34e80355860131183abf53279ce025bbd016d542c345d1cc8464ad12f9dc9860949c751055d8a84961e8472a53707
   languageName: node
   linkType: hard
 
