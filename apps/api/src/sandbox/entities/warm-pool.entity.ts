@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 
 @Entity()
+@Index('warm_pool_find_idx', ['snapshot', 'target', 'class', 'cpu', 'mem', 'disk', 'gpu', 'osUser', 'env'])
 export class WarmPool {
   @PrimaryGeneratedColumn('uuid')
   id: string

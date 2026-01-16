@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, Entity, PrimaryColumn } from 'typeorm'
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 
 @Entity()
+@Index('api_key_org_user_idx', ['organizationId', 'userId'])
 export class ApiKey {
   @PrimaryColumn({
     type: 'uuid',

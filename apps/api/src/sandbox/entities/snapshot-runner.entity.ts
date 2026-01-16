@@ -3,10 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 
 @Entity()
+@Index('snapshot_runner_snapshotref_idx', ['snapshotRef'])
+@Index('snapshot_runner_runnerid_snapshotref_idx', ['runnerId', 'snapshotRef'])
+@Index('snapshot_runner_runnerid_idx', ['runnerId'])
+@Index('snapshot_runner_state_idx', ['state'])
 export class SnapshotRunner {
   @PrimaryGeneratedColumn('uuid')
   id: string

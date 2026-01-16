@@ -37,6 +37,7 @@ export type FetchWarmPoolSandboxParams = {
   cpu: number
   mem: number
   disk: number
+  gpu: number
   osUser: string
   env: { [key: string]: string }
   organizationId: string
@@ -100,6 +101,7 @@ export class SandboxWarmPoolService {
         cpu: params.cpu,
         mem: params.mem,
         disk: params.disk,
+        gpu: params.gpu,
         osUser: params.osUser,
         env: params.env,
         pool: MoreThan(0),

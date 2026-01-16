@@ -7,6 +7,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -20,6 +21,8 @@ import { BuildInfo } from './build-info.entity'
 
 @Entity()
 @Unique(['organizationId', 'name'])
+@Index('snapshot_name_idx', ['name'])
+@Index('snapshot_state_idx', ['state'])
 export class Snapshot {
   @PrimaryGeneratedColumn('uuid')
   id: string
