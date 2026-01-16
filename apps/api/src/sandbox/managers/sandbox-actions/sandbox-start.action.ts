@@ -159,8 +159,8 @@ export class SandboxStartAction extends SandboxAction {
         snapshotRef: snapshotRef,
         ...(isBuild &&
           declarativeBuildScoreThreshold !== undefined && {
-          availabilityScoreThreshold: declarativeBuildScoreThreshold,
-        }),
+            availabilityScoreThreshold: declarativeBuildScoreThreshold,
+          }),
       })
       if (runner) {
         await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode, runner.id)
@@ -205,8 +205,8 @@ export class SandboxStartAction extends SandboxAction {
         excludedRunnerIds: excludedRunnerIds,
         ...(isBuild &&
           declarativeBuildScoreThreshold !== undefined && {
-          availabilityScoreThreshold: declarativeBuildScoreThreshold,
-        }),
+            availabilityScoreThreshold: declarativeBuildScoreThreshold,
+          }),
       })
     } catch {
       // TODO: reconsider the timeout here
@@ -754,11 +754,11 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnersWithBaseSnapshot: Runner[] = snapshotRef
       ? await this.runnerService.findAvailableRunners({
-        regions: [sandbox.region],
-        sandboxClass: sandbox.class,
-        snapshotRef,
-        excludedRunnerIds,
-      })
+          regions: [sandbox.region],
+          sandboxClass: sandbox.class,
+          snapshotRef,
+          excludedRunnerIds,
+        })
       : []
     if (runnersWithBaseSnapshot.length > 0) {
       availableRunners = runnersWithBaseSnapshot
