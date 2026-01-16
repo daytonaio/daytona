@@ -6,7 +6,7 @@
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
+import { FindOptionsWhere, In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -36,6 +36,7 @@ import { DockerRegistry } from '../../docker-registry/entities/docker-registry.e
 import { SandboxService } from '../services/sandbox.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerClass } from '../enums/runner-class'
+import { isValidUuid } from '../../common/utils/uuid'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -295,8 +296,12 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
     // Skip backups for windows-exp snapshots
     if (sandbox.snapshot) {
+      const snapshotFilter: FindOptionsWhere<Snapshot>[] = [{ name: sandbox.snapshot }]
+      if (isValidUuid(sandbox.snapshot)) {
+        snapshotFilter.push({ id: sandbox.snapshot })
+      }
       const snapshot = await this.snapshotRepository.findOne({
-        where: [{ name: sandbox.snapshot }, { id: sandbox.snapshot }],
+        where: snapshotFilter,
       })
       if (snapshot && snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL) {
         this.logger.log(`Skipping backup for sandbox ${sandbox.id} with windows-exp snapshot ${sandbox.snapshot}`)
