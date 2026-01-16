@@ -25,6 +25,11 @@ import {
   ProcessRestartResponse,
   ProcessLogsResponse,
   ProcessErrorsResponse,
+  Recording as RecordingModel,
+  StartRecordingResponse,
+  StopRecordingResponse,
+  ListRecordingsResponse,
+  GetRecordingResponse,
 } from '@daytonaio/toolbox-api-client'
 
 /**
@@ -451,15 +456,114 @@ export class Display {
 }
 
 /**
+ * Recording operations for computer use functionality.
+ * Note: Screen recording is only available on Windows sandboxes.
+ */
+export class Recording {
+  constructor(private readonly apiClient: ComputerUseApi) {}
+
+  /**
+   * Starts a new screen recording session
+   *
+   * @param {string} [label] - Optional custom label for the recording
+   * @returns {Promise<StartRecordingResponse>} Recording start response with ID and file path
+   *
+   * @example
+   * ```typescript
+   * // Start a recording with a label
+   * const recording = await sandbox.computerUse.recording.start('my-test-recording');
+   * console.log(`Recording started: ${recording.id}`);
+   * console.log(`File: ${recording.filePath}`);
+   * ```
+   */
+  public async start(label?: string): Promise<StartRecordingResponse> {
+    const response = await this.apiClient.startRecording({ label })
+    return response.data
+  }
+
+  /**
+   * Stops an active screen recording session
+   *
+   * @param {string} id - The ID of the recording to stop
+   * @returns {Promise<StopRecordingResponse>} Recording stop response with duration and file info
+   *
+   * @example
+   * ```typescript
+   * const result = await sandbox.computerUse.recording.stop(recording.id);
+   * console.log(`Recording stopped: ${result.durationSeconds} seconds`);
+   * console.log(`Saved to: ${result.filePath}`);
+   * ```
+   */
+  public async stop(id: string): Promise<StopRecordingResponse> {
+    const response = await this.apiClient.stopRecording({ id })
+    return response.data
+  }
+
+  /**
+   * Lists all recordings (active and completed)
+   *
+   * @returns {Promise<ListRecordingsResponse>} List of all recordings
+   *
+   * @example
+   * ```typescript
+   * const recordings = await sandbox.computerUse.recording.list();
+   * console.log(`Found ${recordings.recordings.length} recordings`);
+   * recordings.recordings.forEach(rec => {
+   *   console.log(`- ${rec.fileName}: ${rec.status}`);
+   * });
+   * ```
+   */
+  public async list(): Promise<ListRecordingsResponse> {
+    const response = await this.apiClient.listRecordings()
+    return response.data
+  }
+
+  /**
+   * Gets details of a specific recording by ID
+   *
+   * @param {string} id - The ID of the recording to retrieve
+   * @returns {Promise<GetRecordingResponse>} Recording details
+   *
+   * @example
+   * ```typescript
+   * const recording = await sandbox.computerUse.recording.get(recordingId);
+   * console.log(`Recording: ${recording.fileName}`);
+   * console.log(`Status: ${recording.status}`);
+   * console.log(`Duration: ${recording.durationSeconds} seconds`);
+   * ```
+   */
+  public async get(id: string): Promise<GetRecordingResponse> {
+    const response = await this.apiClient.getRecording(id)
+    return response.data
+  }
+
+  /**
+   * Deletes a recording by ID
+   *
+   * @param {string} id - The ID of the recording to delete
+   *
+   * @example
+   * ```typescript
+   * await sandbox.computerUse.recording.delete(recordingId);
+   * console.log('Recording deleted');
+   * ```
+   */
+  public async delete(id: string): Promise<void> {
+    await this.apiClient.deleteRecording(id)
+  }
+}
+
+/**
  * Computer Use functionality for interacting with the desktop environment.
  *
- * Provides access to mouse, keyboard, screenshot, and display operations
+ * Provides access to mouse, keyboard, screenshot, display, and recording operations
  * for automating desktop interactions within a sandbox.
  *
  * @property {Mouse} mouse - Mouse operations interface
  * @property {Keyboard} keyboard - Keyboard operations interface
  * @property {Screenshot} screenshot - Screenshot operations interface
  * @property {Display} display - Display operations interface
+ * @property {Recording} recording - Screen recording operations interface (Windows only)
  *
  * @class
  */
@@ -468,12 +572,14 @@ export class ComputerUse {
   public readonly keyboard: Keyboard
   public readonly screenshot: Screenshot
   public readonly display: Display
+  public readonly recording: Recording
 
   constructor(private readonly apiClient: ComputerUseApi) {
     this.mouse = new Mouse(apiClient)
     this.keyboard = new Keyboard(apiClient)
     this.screenshot = new Screenshot(apiClient)
     this.display = new Display(apiClient)
+    this.recording = new Recording(apiClient)
   }
 
   /**

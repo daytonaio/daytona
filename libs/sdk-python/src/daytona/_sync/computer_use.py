@@ -13,9 +13,11 @@ from daytona_toolbox_api_client import (
     ComputerUseStatusResponse,
     ComputerUseStopResponse,
     DisplayInfoResponse,
+    GetRecordingResponse,
     KeyboardHotkeyRequest,
     KeyboardPressRequest,
     KeyboardTypeRequest,
+    ListRecordingsResponse,
     MouseClickRequest,
     MouseClickResponse,
     MouseDragRequest,
@@ -28,6 +30,10 @@ from daytona_toolbox_api_client import (
     ProcessRestartResponse,
     ProcessStatusResponse,
     ScreenshotResponse,
+    StartRecordingRequest,
+    StartRecordingResponse,
+    StopRecordingRequest,
+    StopRecordingResponse,
     WindowsResponse,
 )
 
@@ -439,10 +445,117 @@ class Display:
         return response
 
 
+class Recording:
+    """Recording operations for computer use functionality.
+
+    Note: Screen recording is only available on Windows sandboxes.
+    """
+
+    def __init__(self, api_client: ComputerUseApi):
+        self._api_client = api_client
+
+    @intercept_errors(message_prefix="Failed to start recording: ")
+    def start(self, label: Optional[str] = None) -> StartRecordingResponse:
+        """Starts a new screen recording session.
+
+        Args:
+            label (str, optional): Optional custom label for the recording.
+
+        Returns:
+            StartRecordingResponse: Recording start response with ID and file path.
+
+        Example:
+            ```python
+            # Start a recording with a label
+            recording = sandbox.computer_use.recording.start("my-test-recording")
+            print(f"Recording started: {recording.id}")
+            print(f"File: {recording.file_path}")
+            ```
+        """
+        request = StartRecordingRequest(label=label)
+        response = self._api_client.start_recording(request=request)
+        return response
+
+    @intercept_errors(message_prefix="Failed to stop recording: ")
+    def stop(self, recording_id: str) -> StopRecordingResponse:
+        """Stops an active screen recording session.
+
+        Args:
+            recording_id (str): The ID of the recording to stop.
+
+        Returns:
+            StopRecordingResponse: Recording stop response with duration and file info.
+
+        Example:
+            ```python
+            result = sandbox.computer_use.recording.stop(recording.id)
+            print(f"Recording stopped: {result.duration_seconds} seconds")
+            print(f"Saved to: {result.file_path}")
+            ```
+        """
+        request = StopRecordingRequest(id=recording_id)
+        response = self._api_client.stop_recording(request=request)
+        return response
+
+    @intercept_errors(message_prefix="Failed to list recordings: ")
+    def list(self) -> ListRecordingsResponse:
+        """Lists all recordings (active and completed).
+
+        Returns:
+            ListRecordingsResponse: List of all recordings.
+
+        Example:
+            ```python
+            recordings = sandbox.computer_use.recording.list()
+            print(f"Found {len(recordings.recordings)} recordings")
+            for rec in recordings.recordings:
+                print(f"- {rec.file_name}: {rec.status}")
+            ```
+        """
+        response = self._api_client.list_recordings()
+        return response
+
+    @intercept_errors(message_prefix="Failed to get recording: ")
+    def get(self, recording_id: str) -> GetRecordingResponse:
+        """Gets details of a specific recording by ID.
+
+        Args:
+            recording_id (str): The ID of the recording to retrieve.
+
+        Returns:
+            GetRecordingResponse: Recording details.
+
+        Example:
+            ```python
+            recording = sandbox.computer_use.recording.get(recording_id)
+            print(f"Recording: {recording.file_name}")
+            print(f"Status: {recording.status}")
+            print(f"Duration: {recording.duration_seconds} seconds")
+            ```
+        """
+        response = self._api_client.get_recording(id=recording_id)
+        return response
+
+    @intercept_errors(message_prefix="Failed to delete recording: ")
+    def delete(self, recording_id: str) -> None:
+        """Deletes a recording by ID.
+
+        Args:
+            recording_id (str): The ID of the recording to delete.
+
+        Example:
+            ```python
+            sandbox.computer_use.recording.delete(recording_id)
+            print("Recording deleted")
+            ```
+        """
+        self._api_client.delete_recording(id=recording_id)
+
+
 class ComputerUse:
     """Computer Use functionality for interacting with the desktop environment.
 
-    Provides access to mouse, keyboard, screenshot, and display operations
+    Provides access to mouse, keyboard, screenshot, display, and recording operations
     for automating desktop interactions within a sandbox.
 
     Attributes:
@@ -450,6 +563,7 @@ class ComputerUse:
         keyboard (Keyboard): Keyboard operations interface.
         screenshot (Screenshot): Screenshot operations interface.
         display (Display): Display operations interface.
+        recording (Recording): Screen recording operations interface (Windows only).
     """
 
     def __init__(self, api_client: ComputerUseApi):
@@ -459,6 +573,7 @@ class ComputerUse:
         self.keyboard = Keyboard(api_client)
         self.screenshot = Screenshot(api_client)
         self.display = Display(api_client)
+        self.recording = Recording(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     def start(self) -> ComputerUseStartResponse:

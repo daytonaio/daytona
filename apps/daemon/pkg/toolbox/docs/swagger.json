@@ -382,6 +382,171 @@
         }
       }
     },
+    "/computeruse/recordings": {
+      "get": {
+        "description": "Get a list of all recordings (active and completed)",
+        "produces": ["application/json"],
+        "tags": ["computer-use"],
+        "summary": "List all recordings",
+        "operationId": "ListRecordings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ListRecordingsResponse"
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/computeruse/recordings/start": {
+      "post": {
+        "description": "Start a new screen recording session",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["computer-use"],
+        "summary": "Start a new recording",
+        "operationId": "StartRecording",
+        "parameters": [
+          {
+            "description": "Recording options",
+            "name": "request",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/StartRecordingRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/StartRecordingResponse"
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/computeruse/recordings/stop": {
+      "post": {
+        "description": "Stop an active screen recording session",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["computer-use"],
+        "summary": "Stop a recording",
+        "operationId": "StopRecording",
+        "parameters": [
+          {
+            "description": "Recording ID to stop",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StopRecordingRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/StopRecordingResponse"
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/computeruse/recordings/{id}": {
+      "get": {
+        "description": "Get details of a specific recording by ID",
+        "produces": ["application/json"],
+        "tags": ["computer-use"],
+        "summary": "Get recording details",
+        "operationId": "GetRecording",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Recording ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GetRecordingResponse"
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a recording file by ID",
+        "tags": ["computer-use"],
+        "summary": "Delete a recording",
+        "operationId": "DeleteRecording",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Recording ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "501": {
+            "description": "Not Implemented",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
     "/computeruse/screenshot": {
       "get": {
         "description": "Take a screenshot of the entire screen",
@@ -2384,6 +2549,35 @@
         }
       }
     },
+    "GetRecordingResponse": {
+      "type": "object",
+      "properties": {
+        "durationSeconds": {
+          "type": "number"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "sizeBytes": {
+          "type": "integer"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
     "GitAddRequest": {
       "type": "object",
       "required": ["files", "path"],
@@ -2623,6 +2817,17 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/InterpreterContext"
+          }
+        }
+      }
+    },
+    "ListRecordingsResponse": {
+      "type": "object",
+      "properties": {
+        "recordings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Recording"
           }
         }
       }
@@ -3019,6 +3224,35 @@
         }
       }
     },
+    "Recording": {
+      "type": "object",
+      "properties": {
+        "durationSeconds": {
+          "type": "number"
+        },
+        "endTime": {
+          "type": "string"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "sizeBytes": {
+          "type": "integer"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
     "ReplaceRequest": {
       "type": "object",
       "required": ["files", "newValue", "pattern"],
@@ -3135,6 +3369,35 @@
         }
       }
     },
+    "StartRecordingRequest": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "Optional custom label for the recording",
+          "type": "string"
+        }
+      }
+    },
+    "StartRecordingResponse": {
+      "type": "object",
+      "properties": {
+        "fileName": {
+          "type": "string"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
     "Status": {
       "type": "string",
       "enum": ["Unmodified", "Untracked", "Modified", "Added", "Deleted", "Renamed", "Copied", "Updated but unmerged"],
@@ -3148,6 +3411,33 @@
         "Copied",
         "UpdatedButUnmerged"
       ]
+    },
+    "StopRecordingRequest": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "description": "Recording ID to stop",
+          "type": "string"
+        }
+      }
+    },
+    "StopRecordingResponse": {
+      "type": "object",
+      "properties": {
+        "durationSeconds": {
+          "type": "number"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
     },
     "UserHomeDirResponse": {
       "type": "object",

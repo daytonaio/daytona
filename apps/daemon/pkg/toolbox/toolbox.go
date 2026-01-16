@@ -297,7 +297,20 @@ func (s *Server) Start() error {
 			// Display info endpoints
 			computerUseController.GET("/display/info", computeruse.WrapDisplayInfoHandler(s.ComputerUse.GetDisplayInfo))
 			computerUseController.GET("/display/windows", computeruse.WrapWindowsHandler(s.ComputerUse.GetWindows))
-		} else {
+		}
+
+		// Recording endpoints - always registered, returns "not implemented" on Linux
+		recordingHandler := computeruse.NewRecordingHandler()
+		recordingsGroup := computerUseController.Group("/recordings")
+		{
+			recordingsGroup.POST("/start", recordingHandler.StartRecording)
+			recordingsGroup.POST("/stop", recordingHandler.StopRecording)
+			recordingsGroup.GET("", recordingHandler.ListRecordings)
+			recordingsGroup.GET("/:id", recordingHandler.GetRecording)
+			recordingsGroup.DELETE("/:id", recordingHandler.DeleteRecording)
+		}
+
+		if s.ComputerUse == nil {
 			// Register all endpoints with disabled middleware when plugin is not available
 			computerUseController.GET("/status", computeruse.ComputerUseDisabledMiddleware())
 			computerUseController.POST("/start", computeruse.ComputerUseDisabledMiddleware())

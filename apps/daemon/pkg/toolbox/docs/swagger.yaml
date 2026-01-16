@@ -186,6 +186,25 @@ definitions:
     required:
       - paths
     type: object
+  GetRecordingResponse:
+    properties:
+      durationSeconds:
+        type: number
+      endTime:
+        type: string
+      fileName:
+        type: string
+      filePath:
+        type: string
+      id:
+        type: string
+      sizeBytes:
+        type: integer
+      startTime:
+        type: string
+      status:
+        type: string
+    type: object
   GitAddRequest:
     properties:
       files:
@@ -375,6 +394,13 @@ definitions:
         type: array
     required:
       - contexts
+    type: object
+  ListRecordingsResponse:
+    properties:
+      recordings:
+        items:
+          $ref: '#/definitions/Recording'
+        type: array
     type: object
   LspCompletionParams:
     properties:
@@ -657,6 +683,25 @@ definitions:
       rows:
         type: integer
     type: object
+  Recording:
+    properties:
+      durationSeconds:
+        type: number
+      endTime:
+        type: string
+      fileName:
+        type: string
+      filePath:
+        type: string
+      id:
+        type: string
+      sizeBytes:
+        type: integer
+      startTime:
+        type: string
+      status:
+        type: string
+    type: object
   ReplaceRequest:
     properties:
       files:
@@ -740,6 +785,25 @@ definitions:
       stdout:
         type: string
     type: object
+  StartRecordingRequest:
+    properties:
+      label:
+        description: Optional custom label for the recording
+        type: string
+    type: object
+  StartRecordingResponse:
+    properties:
+      fileName:
+        type: string
+      filePath:
+        type: string
+      id:
+        type: string
+      startTime:
+        type: string
+      status:
+        type: string
+    type: object
   Status:
     enum:
       - Unmodified
@@ -760,6 +824,25 @@ definitions:
       - Renamed
       - Copied
       - UpdatedButUnmerged
+  StopRecordingRequest:
+    properties:
+      id:
+        description: Recording ID to stop
+        type: string
+    required:
+      - id
+    type: object
+  StopRecordingResponse:
+    properties:
+      durationSeconds:
+        type: number
+      filePath:
+        type: string
+      id:
+        type: string
+      status:
+        type: string
+    type: object
   UserHomeDirResponse:
     properties:
       dir:
@@ -1108,6 +1191,130 @@ paths:
           schema:
             $ref: '#/definitions/ProcessStatusResponse'
       summary: Get specific process status
+      tags:
+        - computer-use
+  /computeruse/recordings:
+    get:
+      description: Get a list of all recordings (active and completed)
+      operationId: ListRecordings
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRecordingsResponse'
+        '501':
+          description: Not Implemented
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all recordings
+      tags:
+        - computer-use
+  /computeruse/recordings/{id}:
+    delete:
+      description: Delete a recording file by ID
+      operationId: DeleteRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '501':
+          description: Not Implemented
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a recording
+      tags:
+        - computer-use
+    get:
+      description: Get details of a specific recording by ID
+      operationId: GetRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/GetRecordingResponse'
+        '501':
+          description: Not Implemented
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get recording details
+      tags:
+        - computer-use
+  /computeruse/recordings/start:
+    post:
+      consumes:
+        - application/json
+      description: Start a new screen recording session
+      operationId: StartRecording
+      parameters:
+        - description: Recording options
+          in: body
+          name: request
+          schema:
+            $ref: '#/definitions/StartRecordingRequest'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/StartRecordingResponse'
+        '501':
+          description: Not Implemented
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start a new recording
+      tags:
+        - computer-use
+  /computeruse/recordings/stop:
+    post:
+      consumes:
+        - application/json
+      description: Stop an active screen recording session
+      operationId: StopRecording
+      parameters:
+        - description: Recording ID to stop
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/StopRecordingRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/StopRecordingResponse'
+        '501':
+          description: Not Implemented
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Stop a recording
       tags:
         - computer-use
   /computeruse/screenshot:

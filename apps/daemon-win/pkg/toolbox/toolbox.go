@@ -25,6 +25,7 @@ import (
 	"github.com/daytonaio/daemon-win/pkg/toolbox/process"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/proxy"
+	"github.com/daytonaio/daemon-win/pkg/toolbox/recording"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -255,6 +256,17 @@ func (s *Server) Start() error {
 		// Display info endpoints
 		computerUseController.GET("/display/info", computeruse.WrapDisplayInfoHandler(cu.GetDisplayInfo))
 		computerUseController.GET("/display/windows", computeruse.WrapWindowsHandler(cu.GetWindows))
+
+		// Recording endpoints
+		recordingController := recording.NewRecordingController(configDir)
+		recordingsGroup := computerUseController.Group("/recordings")
+		{
+			recordingsGroup.POST("/start", recordingController.StartRecording)
+			recordingsGroup.POST("/stop", recordingController.StopRecording)
+			recordingsGroup.GET("", recordingController.ListRecordings)
+			recordingsGroup.GET("/:id", recordingController.GetRecording)
+			recordingsGroup.DELETE("/:id", recordingController.DeleteRecording)
+		}
 	}
 
 	go portDetector.Start(context.Background())
