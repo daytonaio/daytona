@@ -1387,7 +1387,7 @@ export class SandboxService {
     }
 
     if (!region.proxyUrl) {
-      throw new NotFoundException(`Region for runner for sandbox ${sandboxIdOrName} has no proxy URL`)
+      return `${this.configService.getOrThrow('proxy.protocol')}://${this.configService.getOrThrow('proxy.domain')}/sandboxes/${sandbox.id}/build-logs`
     }
 
     return region.proxyUrl + '/sandboxes/' + sandbox.id + '/build-logs'
