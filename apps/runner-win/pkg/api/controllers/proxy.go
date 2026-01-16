@@ -147,6 +147,30 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 //	@Router			/sandboxes/{sandboxId}/proxy/{port}/{path} [post]
 //	@Router			/sandboxes/{sandboxId}/proxy/{port}/{path} [delete]
 func ProxyToPort(ctx *gin.Context) {
+	// For noVNC (port 6080), auto-add connection parameters to vnc.html requests
+	// This removes the "Connect" button and auto-connects on page load
+	port := ctx.Param("port")
+	path := ctx.Param("path")
+	if port == "6080" && strings.HasSuffix(path, "vnc.html") {
+		// Check if autoconnect is already set
+		if ctx.Query("autoconnect") == "" {
+			// Get just the filename from path (e.g., "/vnc.html" -> "vnc.html")
+			filename := path
+			if strings.HasPrefix(filename, "/") {
+				filename = filename[1:]
+			}
+			// Redirect to same file with autoconnect params
+			// Use manual header to avoid Gin converting to absolute path
+			redirectURL := filename + "?autoconnect=true&resize=scale"
+			if ctx.Request.URL.RawQuery != "" {
+				redirectURL = filename + "?" + ctx.Request.URL.RawQuery + "&autoconnect=true&resize=scale"
+			}
+			ctx.Header("Location", redirectURL)
+			ctx.AbortWithStatus(http.StatusFound)
+			return
+		}
+	}
+
 	r := runner.GetInstance(nil)
 
 	// Dev environment: use SSH tunnel for remote libvirt
