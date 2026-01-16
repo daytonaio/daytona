@@ -108,7 +108,8 @@ class RLMAgent:
                 self.sandbox = self.existing_sandbox
                 self.sandbox_id = self.sandbox.id
                 logger.info(
-                    f"Agent {self.agent_id} (depth={self.depth}) using existing sandbox {self.sandbox_id}"
+                    f"Agent {self.agent_id} (depth={self.depth}) "
+                    f"using existing sandbox {self.sandbox_id}"
                 )
             else:
                 self.sandbox, info = self.sandbox_manager.create_sandbox_from_repo(
@@ -264,9 +265,10 @@ class RLMAgent:
 
         # Check budget
         if not self.sandbox_manager.budget.can_acquire():
+            budget = self.sandbox_manager.budget
             return (
                 f"Error: Cannot spawn sub-agent - sandbox budget exhausted "
-                f"({self.sandbox_manager.budget.status.created}/{self.sandbox_manager.budget.max} used). "
+                f"({budget.status.created}/{budget.max} used). "
                 f"Complete the task with the resources you have."
             )
 
@@ -328,7 +330,8 @@ class RLMAgent:
         if not self.sandbox_manager.budget.can_acquire(len(tasks)):
             remaining = self.sandbox_manager.budget.remaining
             return [
-                f"Error: Cannot spawn {len(tasks)} sub-agents - only {remaining} sandbox slots remaining. "
+                f"Error: Cannot spawn {len(tasks)} sub-agents - "
+                f"only {remaining} sandbox slots remaining. "
                 f"Reduce batch size or use sequential rlm_query() calls."
             ] * len(tasks)
 

@@ -65,9 +65,8 @@ class ConsoleOutput:
         task_preview = ""
         if agent.task:
             task_preview = f": {agent.task[:40]}..." if len(agent.task) > 40 else f": {agent.task}"
-        print(
-            f"{prefix}{agent.agent_id} (depth={agent.depth}, iters={len(agent.iterations)}){task_preview}"
-        )
+        iters = len(agent.iterations)
+        print(f"{prefix}{agent.agent_id} (depth={agent.depth}, iters={iters}){task_preview}")
 
         for i, sub in enumerate(agent.spawned_agents):
             is_last = i == len(agent.spawned_agents) - 1
@@ -77,9 +76,8 @@ class ConsoleOutput:
             sub_task = ""
             if sub.task:
                 sub_task = f": {sub.task[:40]}..." if len(sub.task) > 40 else f": {sub.task}"
-            print(
-                f"{prefix}{connector}{sub.agent_id} (depth={sub.depth}, iters={len(sub.iterations)}){sub_task}"
-            )
+            info = f"(depth={sub.depth}, iters={len(sub.iterations)})"
+            print(f"{prefix}{connector}{sub.agent_id} {info}{sub_task}")
 
             # Recurse for children of this sub-agent
             for subsub in sub.spawned_agents:

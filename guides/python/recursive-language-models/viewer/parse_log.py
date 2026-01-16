@@ -31,7 +31,6 @@ def parse_log(log_path: str) -> dict:
 
     agents = {}  # agent_id -> Agent
     agent_tasks = {}  # agent_id -> task (from spawning)
-    current_code = {}  # agent_id -> current code block
 
     lines = content.split("\n")
 
@@ -133,16 +132,14 @@ def parse_log(log_path: str) -> dict:
     task_idx = 0
     for agent in depth1_agents:
         if task_idx < len(tasks):
-            agent.task = (
-                tasks[task_idx][:200] + "..." if len(tasks[task_idx]) > 200 else tasks[task_idx]
-            )
+            task_text = tasks[task_idx]
+            agent.task = task_text[:200] + "..." if len(task_text) > 200 else task_text
             task_idx += 1
 
     for agent in depth2_agents:
         if task_idx < len(tasks):
-            agent.task = (
-                tasks[task_idx][:200] + "..." if len(tasks[task_idx]) > 200 else tasks[task_idx]
-            )
+            task_text = tasks[task_idx]
+            agent.task = task_text[:200] + "..." if len(task_text) > 200 else task_text
             task_idx += 1
 
     # Build parent-child relationships based on timing

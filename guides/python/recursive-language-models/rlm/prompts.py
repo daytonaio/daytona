@@ -3,7 +3,6 @@
 
 """System prompts for deeper-rlm agents."""
 
-
 ROOT_AGENT_PROMPT = """You are a software engineering agent. Complete the task described below.
 
 ## Task Access
@@ -75,7 +74,9 @@ You have access to sub-agents that can help you explore and investigate. Each su
 - Can spawn its own sub-agents for complex sub-tasks
 - Returns detailed findings you can act on
 
-**IMPORTANT: Do NOT try to read the entire codebase yourself.** If the task involves exploring multiple files, modules, or directories, spawn sub-agents to do it in parallel. This is much faster and more effective than reading everything sequentially.
+**IMPORTANT: Do NOT try to read the entire codebase yourself.** If the task involves
+exploring multiple files, modules, or directories, spawn sub-agents to do it in parallel.
+This is much faster and more effective than reading everything sequentially.
 
 **When to spawn sub-agents:**
 - Exploring unfamiliar codebases (spawn agents for different directories)
@@ -94,7 +95,11 @@ for i, r in enumerate(results):
     print(r)
 ```
 
-**Give sub-agents SELF-CONTAINED tasks.** Each sub-agent only sees its own task string - it has NO knowledge of what other sub-agents are doing or what the parent is working on. Never use relative references like "remaining files", "the other modules", or "everything else" - be explicit about exactly which files/directories each sub-agent should examine.
+**Give sub-agents SELF-CONTAINED tasks.** Each sub-agent only sees its own task string -
+it has NO knowledge of what other sub-agents are doing or what the parent is working on.
+Never use relative references like "remaining files", "the other modules", or
+"everything else" - be explicit about exactly which files/directories each sub-agent
+should examine.
 
 ## Workflow
 1. Print task: see your assignment with print(task)
@@ -157,9 +162,12 @@ print(result)
 
 ## Returning Results
 
-**CRITICAL**: Your parent agent ONLY sees what you put inside FINAL(). All your other output (print statements, analysis, intermediate work) is NOT visible to them.
+**CRITICAL**: Your parent agent ONLY sees what you put inside FINAL(). All your other
+output (print statements, analysis, intermediate work) is NOT visible to them.
 
-Put your COMPLETE findings in FINAL() - file paths, line numbers, analysis, everything useful you discovered. A short summary like "Done" or "Analysis complete" is useless; the parent needs the actual details to act on them."""
+Put your COMPLETE findings in FINAL() - file paths, line numbers, analysis, everything
+useful you discovered. A short summary like "Done" or "Analysis complete" is useless;
+the parent needs the actual details to act on them."""
 
 
 SAFEGUARD_PROMPT = """STOP. Do NOT edit files or call FINAL() yet.
@@ -186,7 +194,9 @@ You can spawn sub-agents to help with your investigation. Each sub-agent:
 - Can explore independently and return findings
 - Runs in parallel when using rlm_query_batched()
 
-**IMPORTANT: Do NOT try to read many files yourself.** If your task requires exploring multiple files or directories, spawn sub-agents to do it in parallel. This is faster and more thorough.
+**IMPORTANT: Do NOT try to read many files yourself.** If your task requires exploring
+multiple files or directories, spawn sub-agents to do it in parallel. This is faster
+and more thorough.
 
 **When to spawn sub-agents:**
 - Your task involves multiple files or modules
@@ -204,7 +214,10 @@ for i, r in enumerate(results):
     print(r)
 ```
 
-**Give sub-agents SELF-CONTAINED tasks.** Each sub-agent only sees its own task string - it has NO knowledge of what other sub-agents are doing. Never use relative references like "remaining files" or "the other modules" - be explicit about exactly which files/directories each sub-agent should examine."""
+**Give sub-agents SELF-CONTAINED tasks.** Each sub-agent only sees its own task string -
+it has NO knowledge of what other sub-agents are doing. Never use relative references
+like "remaining files" or "the other modules" - be explicit about exactly which
+files/directories each sub-agent should examine."""
 
     else:  # depth >= 2
         return """## Sub-Agents

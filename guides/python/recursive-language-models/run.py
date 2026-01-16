@@ -29,6 +29,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def main(
     repo: str = typer.Argument(..., help="GitHub repository URL"),
     prompt: str = typer.Option(..., "--prompt", "-p", help="Task prompt for the agent"),

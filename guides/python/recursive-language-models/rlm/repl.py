@@ -447,12 +447,14 @@ def edit_file(file_path: str, old_string: str, new_string: str, replace_all: boo
         # Provide helpful debug info
         lines = old_string.split('\\n')
         first_line = lines[0][:50] if lines else old_string[:50]
-        return "Error: old_string not found in {{}}. First line of search: '{{}}...'".format(file_path, first_line)
+        return "Error: old_string not found in {{}}. First line: '{{}}...'".format(
+            file_path, first_line)
 
     # Check uniqueness (unless replace_all)
     count = content.count(old_string)
     if count > 1 and not replace_all:
-        return "Error: old_string appears {{}} times in {{}}. Use replace_all=True or provide more context to make it unique.".format(count, file_path)
+        return "Error: old_string appears {{}} times in {{}}. ".format(count, file_path) + \
+            "Use replace_all=True or provide more context to make it unique."
 
     # Perform replacement
     if replace_all:
@@ -477,7 +479,8 @@ def edit_file(file_path: str, old_string: str, new_string: str, replace_all: boo
         return "Error writing file: {{}}".format(e)
 
     suffix = 's' if replaced_count > 1 else ''
-    return "Successfully edited {{}} ({{}} replacement{{}})".format(file_path, replaced_count, suffix)
+    return "Successfully edited {{}} ({{}} replacement{{}})".format(
+        file_path, replaced_count, suffix)
 
 
 # =============================================================================
@@ -666,7 +669,8 @@ print(json.dumps({{
                 if any(code in error_str for code in ["502", "503", "504", "Bad Gateway"]):
                     if attempt < max_retries - 1:
                         logger.warning(
-                            f"Command execution failed with gateway error, retrying ({attempt + 1}/{max_retries})"
+                            f"Command execution failed with gateway error, "
+                            f"retrying ({attempt + 1}/{max_retries})"
                         )
                         time.sleep(2 * (attempt + 1))
                         continue

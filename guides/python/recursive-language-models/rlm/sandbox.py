@@ -85,7 +85,8 @@ class SandboxManager:
         # Check budget
         if not self.budget.try_acquire():
             raise RuntimeError(
-                f"Cannot create sandbox - budget exhausted ({self.budget.status.created}/{self.budget.max} used)"
+                f"Cannot create sandbox - budget exhausted "
+                f"({self.budget.status.created}/{self.budget.max} used)"
             )
 
         try:
