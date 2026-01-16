@@ -46,8 +46,8 @@ Create a `.env` file in the project directory with these variables.
 When this example is run, the agent follows the following workflow:
 
 1. A new Daytona sandbox is created.
-2. Letta Code is installed and in the sandbox.
-3. Letta code is launched with in [biderectional headless mode](https://docs.letta.com/letta-code/headless#bidirectional-mode) with a Daytona-specific system prompt.
+2. Letta Code is installed in the sandbox.
+3. Letta code is launched with in [bidirectional headless mode](https://docs.letta.com/letta-code/headless#bidirectional-mode) with a Daytona-specific system prompt.
 4. User queries are passed to the agent as JSON, and JSON responses are parsed and displayed to the user.
 6. When the script is terminated, the sandbox is deleted.
 
