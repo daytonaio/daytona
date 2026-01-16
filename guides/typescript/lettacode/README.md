@@ -10,6 +10,7 @@ This example runs a Letta Code agent inside a Daytona sandbox. You can interact 
 
 - **Secure sandbox execution:** The agent operates within a controlled environment, along with code or commands run by the agent.
 - **Letta Code integration:** Includes the full capabilities of Letta Code, including reading and editing code files, running shell commands, and persistent memory.
+- **Stateful Agents:** Letta Code uses stateful agents under the hood (with the Letta API), so have built-in memory and can be resumed across sandbox sessions. Agents can also be viewed in Letta's [Agent Development Environment](https://app.letta.com/).
 - **Preview deployed apps:** Use Daytona preview links to view and interact with your deployed applications.
 
 ## Prerequisites
