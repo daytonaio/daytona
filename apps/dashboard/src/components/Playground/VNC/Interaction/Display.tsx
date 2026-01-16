@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import {
   DisplayActions,
   PlaygroundActionFormDataBasic,
   VNCInteractionOptionsSectionComponentProps,
 } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
-import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import { DisplayInfoResponse, WindowsResponse } from '@daytonaio/api-client'
 import { ComputerUse } from '@daytonaio/sdk'
 import PlaygroundActionForm from '../../ActionForm'
@@ -71,7 +71,7 @@ const VNCDisplayOperations: React.FC<VNCInteractionOptionsSectionComponentProps>
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {displayActionsFormData.map((displayActionFormData) => (
         <div key={displayActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<DisplayActions>

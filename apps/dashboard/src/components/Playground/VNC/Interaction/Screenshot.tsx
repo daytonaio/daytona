@@ -4,26 +4,26 @@
  */
 
 import { Label } from '@/components/ui/label'
-import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
-import FormSelectInput from '../../Inputs/SelectInput'
-import FormNumberInput from '../../Inputs/NumberInput'
-import FormCheckboxInput from '../../Inputs/CheckboxInput'
-import { usePlayground } from '@/hooks/usePlayground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
-import { ScreenshotRegion, ComputerUse } from '@daytonaio/sdk'
-import { ScreenshotResponse, RegionScreenshotResponse, CompressedScreenshotResponse } from '@daytonaio/api-client'
 import {
   CustomizedScreenshotOptions,
-  ScreenshotActions,
-  ScreenshotActionFormData,
-  ParameterFormData,
-  VNCInteractionOptionsSectionComponentProps,
   NumberParameterFormItem,
+  ParameterFormData,
   ParameterFormItem,
+  ScreenshotActionFormData,
+  ScreenshotActions,
   ScreenshotFormatOption,
+  VNCInteractionOptionsSectionComponentProps,
 } from '@/enums/Playground'
-import PlaygroundActionForm from '../../ActionForm'
+import { usePlayground } from '@/hooks/usePlayground'
+import { CompressedScreenshotResponse, RegionScreenshotResponse, ScreenshotResponse } from '@daytonaio/api-client'
+import { ComputerUse, ScreenshotRegion } from '@daytonaio/sdk'
 import { useState } from 'react'
+import PlaygroundActionForm from '../../ActionForm'
+import FormCheckboxInput from '../../Inputs/CheckboxInput'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
+import FormNumberInput from '../../Inputs/NumberInput'
+import FormSelectInput from '../../Inputs/SelectInput'
 
 const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
   disableActions,
@@ -174,12 +174,14 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
   }
 
   return (
-    <div>
-      <div className="space-y-2 mt-4">
-        <div className="w-full text-center mb-4">
-          <Label htmlFor="screenshot-options">Screenshot Options</Label>
+    <div className="flex flex-col gap-6">
+      <div className="space-y-2">
+        <div className="w-full">
+          <Label htmlFor="screenshot-options" className="text-sm text-muted-foreground">
+            Screenshot Options
+          </Label>
         </div>
-        <div id="screenshot-options" className="px-4 space-y-2">
+        <div id="screenshot-options" className="space-y-2">
           <InlineInputFormControl formItem={screenshotFormatFormData}>
             <FormSelectInput
               selectOptions={screenshotFormatOptions}
@@ -233,11 +235,13 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
           </InlineInputFormControl>
         </div>
       </div>
-      <div className="space-y-2 mt-4">
-        <div className="w-full text-center mb-4">
-          <Label htmlFor="screenshot-options">Screenshot Region</Label>
+      <div className="space-y-2">
+        <div className="w-full">
+          <Label htmlFor="screenshot-options" className="text-sm text-muted-foreground">
+            Screenshot Region
+          </Label>
         </div>
-        <div id="screenshot-region" className="px-4 space-y-2">
+        <div id="screenshot-region" className="space-y-2">
           {screenshotRegionNumberParametersFormData.map((screenshotRegionParamFormItem) => (
             <InlineInputFormControl key={screenshotRegionParamFormItem.key} formItem={screenshotRegionParamFormItem}>
               <FormNumberInput
@@ -258,7 +262,7 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
           ))}
         </div>
       </div>
-      <div className="space-y-6 mt-6">
+      <div className="flex flex-col gap-4">
         {screenshotActionsFormData.map((screenshotAction) => (
           <div key={screenshotAction.methodName}>
             <PlaygroundActionForm<ScreenshotActions>

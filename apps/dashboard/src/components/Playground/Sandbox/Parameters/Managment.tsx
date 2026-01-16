@@ -4,14 +4,14 @@
  */
 
 import { Label } from '@/components/ui/label'
-import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
-import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
-import FormSelectInput from '../../Inputs/SelectInput'
-import FormNumberInput from '../../Inputs/NumberInput'
-import { CodeLanguage, Resources, CreateSandboxBaseParams } from '@daytonaio/sdk-typescript/src'
-import { usePlayground } from '@/hooks/usePlayground'
 import { NumberParameterFormItem, ParameterFormItem } from '@/enums/Playground'
+import { usePlayground } from '@/hooks/usePlayground'
+import { CodeLanguage, CreateSandboxBaseParams, Resources } from '@daytonaio/sdk-typescript/src'
 import { useState } from 'react'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
+import FormNumberInput from '../../Inputs/NumberInput'
+import FormSelectInput from '../../Inputs/SelectInput'
+import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
 
 const SandboxManagmentParameters: React.FC = () => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
@@ -70,8 +70,10 @@ const SandboxManagmentParameters: React.FC = () => {
         />
       </StackedInputFormControl>
       <div className="space-y-2">
-        <Label htmlFor="resources">Resources</Label>
-        <div id="resources" className="px-4 space-y-2">
+        <Label htmlFor="resources" className="text-sm text-muted-foreground">
+          Resources
+        </Label>
+        <div id="resources" className="space-y-2">
           {resourcesFormData.map((resourceParamFormItem) => (
             <InlineInputFormControl key={resourceParamFormItem.key} formItem={resourceParamFormItem}>
               <FormNumberInput
@@ -88,8 +90,10 @@ const SandboxManagmentParameters: React.FC = () => {
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="lifecycle">Lifecycle</Label>
-        <div id="lifecycle" className="px-4 space-y-2">
+        <Label htmlFor="lifecycle" className="text-sm text-muted-foreground">
+          Lifecycle
+        </Label>
+        <div id="lifecycle" className="space-y-2">
           {lifecycleParamsFormData.map((lifecycleParamFormItem) => (
             <InlineInputFormControl key={lifecycleParamFormItem.key} formItem={lifecycleParamFormItem}>
               <FormNumberInput

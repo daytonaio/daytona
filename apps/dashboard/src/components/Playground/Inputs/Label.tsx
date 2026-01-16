@@ -14,9 +14,9 @@ type InputLabelProps = {
 const InputLabel: React.FC<InputLabelProps> = ({ formItem, isInline }) => {
   return (
     <Label htmlFor={formItem.key} className="w-32 flex-shrink-0">
-      <span>
-        {formItem.required ? <span className="text-red-500">* </span> : null}
-        <span>{`${formItem.label}${isInline ? ':' : ''}`}</span>
+      <span className="relative">
+        {`${formItem.label}${isInline ? '' : ''}`}
+        {formItem.required ? <span className="text-muted-foreground">* </span> : null}
       </span>
     </Label>
   )

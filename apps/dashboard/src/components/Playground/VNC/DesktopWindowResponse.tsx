@@ -3,22 +3,23 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import ResponseCard from '../ResponseCard'
-import { Sandbox } from '@daytonaio/sdk'
-import { toast } from 'sonner'
-import { handleApiError } from '@/lib/error-handling'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { useApi } from '@/hooks/useApi'
 import { usePlayground } from '@/hooks/usePlayground'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useApi } from '@/hooks/useApi'
-import { useState, useEffect, useCallback, ReactNode } from 'react'
+import { handleApiError } from '@/lib/error-handling'
+import { Sandbox } from '@daytonaio/sdk'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import ResponseCard from '../ResponseCard'
+import { Window, WindowContent, WindowTitleBar } from '../Window'
 
 type VNCDesktopWindowResponseProps = {
   getPortPreviewUrl: (sandboxId: string, port: number) => Promise<string>
+  className?: string
 }
 
-const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ getPortPreviewUrl }) => {
+const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ getPortPreviewUrl, className }) => {
   const [loadingVNCUrl, setLoadingVNCUrl] = useState(true)
   const [VNCLoadingError, setVNCLoadingError] = useState<string | ReactNode>('')
 
@@ -141,25 +142,19 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
   }, [setVNCInteractionOptionsParamValue, VNCSandboxData, getVNCComputerUseUrl])
 
   return (
-    <>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Desktop window</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full aspect-[4/3] md:aspect-[16/9]">
-            {loadingVNCUrl || VNCLoadingError || !VNCUrl ? (
-              <div className="h-full flex items-center justify-center rounded-lg">
-                <p>{loadingVNCUrl ? 'Loading VNC...' : VNCLoadingError || 'Unable to open VNC. Please try again.'}</p>
-              </div>
-            ) : (
-              <iframe title="VNC desktop window" src={VNCUrl} className="w-full h-full" />
-            )}
+    <Window className={className}>
+      <WindowTitleBar>Desktop Window</WindowTitleBar>
+      <WindowContent className="w-full aspect-[4/3] md:aspect-[16/9] flex flex-col items-center justify-center">
+        {loadingVNCUrl || VNCLoadingError || !VNCUrl ? (
+          <div className="h-full flex items-center justify-center rounded-lg">
+            <p>{loadingVNCUrl ? 'Loading VNC...' : VNCLoadingError || 'Unable to open VNC. Please try again.'}</p>
           </div>
-        </CardContent>
-      </Card>
-      <ResponseCard responseContent={VNCInteractionOptionsParamsState.responseContent || ''} />
-    </>
+        ) : (
+          <iframe title="VNC desktop window" src={VNCUrl} className="w-full h-full" />
+        )}
+        {/* <ResponseCard responseContent={VNCInteractionOptionsParamsState.responseContent || ''} /> */}
+      </WindowContent>
+    </Window>
   )
 }
 

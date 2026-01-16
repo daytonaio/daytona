@@ -3,19 +3,42 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import {
+  PlaygroundLayout,
+  PlaygroundLayoutContent,
+  PlaygroundLayoutSidebar,
+} from '@/components/Playground/PlaygroundLayout'
 import SandboxCodeSnippetsResponse from '@/components/Playground/Sandbox/CodeSnippetsResponse'
 import SandboxParameters from '@/components/Playground/Sandbox/Parameters'
 import TerminalDescription from '@/components/Playground/Terminal/Description'
 import WebTerminal from '@/components/Playground/Terminal/WebTerminal'
-import VNCInteractionOptions from '@/components/Playground/VNC/Interaction'
 import VNCDesktopWindowResponse from '@/components/Playground/VNC/DesktopWindowResponse'
+import VNCInteractionOptions from '@/components/Playground/VNC/Interaction'
+import { Button } from '@/components/ui/button'
+import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PlaygroundCategories, playgroundCategoriesData } from '@/enums/Playground'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { PlaygroundCategories, playgroundCategoriesData } from '@/enums/Playground'
 import { PlaygroundProvider } from '@/providers/PlaygroundProvider'
-import { useState, useCallback } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { SettingsIcon } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useResizeObserver } from 'usehooks-ts'
+
+const SlideLeftRight = ({ children, direction }: { children: React.ReactNode; direction: 'left' | 'right' }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, filter: 'blur(2px)', x: direction === 'left' ? -20 : 20 }}
+      animate={{ opacity: 1, filter: 'blur(0px)', x: 0 }}
+      exit={{ opacity: 0, filter: 'blur(2px)', x: direction === 'left' ? 20 : -20 }}
+      transition={{ duration: 0.2 }}
+    >
+      {children}
+    </motion.div>
+  )
+}
 
 const Playground: React.FC = () => {
   const [playgroundCategory, setPlaygroundCategory] = useState<PlaygroundCategories>(PlaygroundCategories.SANDBOX)
@@ -31,46 +54,124 @@ const Playground: React.FC = () => {
     [sandboxApi, selectedOrganization],
   )
 
+  const [drawerOpen, setDrawerOpen] = useState<PlaygroundCategories | null>(null)
+  const handleDrawerOpenChange = (open: boolean) => {
+    if (!open) {
+      setDrawerOpen(null)
+    }
+  }
+
+  const pageContentRef = useRef<HTMLDivElement>(null)
+
+  useResizeObserver({
+    ref: pageContentRef,
+    onResize: () => {
+      if (pageContentRef.current) {
+        const { width } = pageContentRef.current.getBoundingClientRect()
+        if (width < 1024) {
+          setDrawerOpen(null)
+        }
+      }
+    },
+  })
+
+  const prevCategory = useRef<PlaygroundCategories>(playgroundCategory)
+  useEffect(() => {
+    prevCategory.current = playgroundCategory
+  }, [playgroundCategory])
+
+  const direction = useMemo(() => {
+    const currentIndex = playgroundCategoriesData.findIndex((category) => category.value === playgroundCategory)
+    const prevIndex = playgroundCategoriesData.findIndex((category) => category.value === prevCategory.current)
+    return currentIndex > prevIndex ? 'right' : 'left'
+  }, [playgroundCategory])
+
   return (
-    <div className="flex flex-col min-h-dvh px-6 py-2">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Playground</h1>
-      </div>
-      <PlaygroundProvider>
-        <div className="w-full flex flex-1 flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
-          <Card className="basis-full md:basis-1/3 md:max-w-[33.33%] flex-shrink-0 min-h-full">
-            <CardHeader>
-              <div className="w-full flex items-center justify-center overflow-x-auto space-x-4">
+    <PageLayout>
+      <PageHeader>
+        <PageTitle>Playground</PageTitle>
+      </PageHeader>
+
+      <PageContent
+        size="full"
+        className="!p-0 h-full flex flex-col flex-1 max-h-[calc(100vh-111px)]"
+        ref={pageContentRef}
+      >
+        <PlaygroundProvider>
+          <Tabs
+            value={playgroundCategory}
+            onValueChange={(value) => setPlaygroundCategory(value as PlaygroundCategories)}
+            className="h-full"
+          >
+            <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border pr-4">
+              <TabsList className="px-2 w-full shadow-none">
                 {playgroundCategoriesData.map((category) => (
-                  <Button
+                  <TabsTrigger
+                    value={category.value}
                     key={category.value}
-                    variant={category.value === playgroundCategory ? 'default' : 'secondary'}
-                    className="text-md"
-                    onClick={() => setPlaygroundCategory(category.value)}
+                    className="data-[state=inactive]:border-b-transparent"
                   >
                     {category.label}
-                  </Button>
+                  </TabsTrigger>
                 ))}
-              </div>
-            </CardHeader>
-            <CardContent>
-              {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxParameters />}
-              {playgroundCategory === PlaygroundCategories.TERMINAL && <TerminalDescription />}
-              {playgroundCategory === PlaygroundCategories.VNC && <VNCInteractionOptions />}
-            </CardContent>
-          </Card>
-          <div className="flex-1 min-w-0 flex flex-col space-y-2">
-            {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxCodeSnippetsResponse />}
-            {playgroundCategory === PlaygroundCategories.TERMINAL && (
-              <WebTerminal getPortPreviewUrl={getPortPreviewUrl} />
-            )}
-            {playgroundCategory === PlaygroundCategories.VNC && (
-              <VNCDesktopWindowResponse getPortPreviewUrl={getPortPreviewUrl} />
-            )}
-          </div>
-        </div>
-      </PlaygroundProvider>
-    </div>
+              </TabsList>
+              <Button onClick={() => setDrawerOpen(playgroundCategory)} variant="ghost" size="sm" className="lg:hidden">
+                <SettingsIcon className="size-4 mr-2" /> Configure
+              </Button>
+            </div>
+            <TabsContent
+              value={playgroundCategory}
+              key={playgroundCategory}
+              className="mt-0 data-[state=inactive]:hidden"
+              asChild
+            >
+              <PlaygroundLayout>
+                <PlaygroundLayoutSidebar>
+                  <AnimatePresence mode="popLayout">
+                    {playgroundCategory === PlaygroundCategories.SANDBOX && (
+                      <SlideLeftRight direction={direction} key="sandbox-parameters">
+                        <SandboxParameters />
+                      </SlideLeftRight>
+                    )}
+                    {playgroundCategory === PlaygroundCategories.TERMINAL && (
+                      <SlideLeftRight direction={direction} key="terminal-description">
+                        <TerminalDescription />
+                      </SlideLeftRight>
+                    )}
+                    {playgroundCategory === PlaygroundCategories.VNC && (
+                      <SlideLeftRight direction={direction} key="vnc-interaction-options">
+                        <VNCInteractionOptions />
+                      </SlideLeftRight>
+                    )}
+                  </AnimatePresence>
+                </PlaygroundLayoutSidebar>
+
+                <Drawer open={drawerOpen === playgroundCategory} onOpenChange={handleDrawerOpenChange}>
+                  <DrawerContent>
+                    <div className="p-4 overflow-auto">
+                      {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxParameters />}
+                      {playgroundCategory === PlaygroundCategories.TERMINAL && <TerminalDescription />}
+                      {playgroundCategory === PlaygroundCategories.VNC && <VNCInteractionOptions />}
+                    </div>
+                  </DrawerContent>
+                </Drawer>
+                <PlaygroundLayoutContent>
+                  {playgroundCategory === PlaygroundCategories.SANDBOX && (
+                    <SandboxCodeSnippetsResponse className="w-full max-w-[90%]" />
+                  )}
+                  {playgroundCategory === PlaygroundCategories.TERMINAL && (
+                    <WebTerminal getPortPreviewUrl={getPortPreviewUrl} className="w-full max-w-[90%]" />
+                  )}
+                  {playgroundCategory === PlaygroundCategories.VNC && (
+                    <VNCDesktopWindowResponse getPortPreviewUrl={getPortPreviewUrl} className="w-full max-w-[90%]" />
+                  )}
+                </PlaygroundLayoutContent>
+              </PlaygroundLayout>
+            </TabsContent>
+          </Tabs>
+        </PlaygroundProvider>
+      </PageContent>
+    </PageLayout>
   )
 }
 

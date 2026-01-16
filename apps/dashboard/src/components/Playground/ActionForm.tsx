@@ -5,8 +5,8 @@
 
 import { Label } from '@/components/ui/label'
 import { PlaygroundActionFormDataBasic, PlaygroundActions } from '@/enums/Playground'
-import PlaygroundActionRunButton from './ActionRunButton'
 import { usePlayground } from '@/hooks/usePlayground'
+import PlaygroundActionRunButton from './ActionRunButton'
 
 type PlaygroundActionFormProps<A> = {
   actionFormItem: PlaygroundActionFormDataBasic<A>
@@ -28,7 +28,7 @@ function PlaygroundActionForm<A extends PlaygroundActions>({
       <div className="flex items-center justify-between">
         <div>
           <Label htmlFor={actionFormItem.methodName as string}>{actionFormItem.label}</Label>
-          <p id={actionFormItem.methodName as string} className="text-sm text-muted-foreground mt-1 pl-1">
+          <p id={actionFormItem.methodName as string} className="text-sm text-muted-foreground mt-1">
             {actionFormItem.description}
           </p>
         </div>
@@ -40,7 +40,7 @@ function PlaygroundActionForm<A extends PlaygroundActions>({
           />
         )}
       </div>
-      <div>
+      <div className="empty:hidden">
         {actionRuntimeError[actionFormItem.methodName] && (
           <p className="text-sm text-red-500 mt-2">{actionRuntimeError[actionFormItem.methodName]}</p>
         )}

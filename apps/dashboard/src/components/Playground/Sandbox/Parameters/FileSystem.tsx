@@ -4,20 +4,20 @@
  */
 
 import {
-  FileSystemActions,
-  ParameterFormData,
-  ParameterFormItem,
-  ListFilesParams,
   CreateFolderParams,
   DeleteFileParams,
   FileSystemActionFormData,
+  FileSystemActions,
+  ListFilesParams,
+  ParameterFormData,
+  ParameterFormItem,
 } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
+import { useState } from 'react'
+import PlaygroundActionForm from '../../ActionForm'
+import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormTextInput from '../../Inputs/TextInput'
-import FormCheckboxInput from '../../Inputs/CheckboxInput'
-import PlaygroundActionForm from '../../ActionForm'
-import { useState } from 'react'
 
 const SandboxFileSystem: React.FC = () => {
   const { sandboxParametersState, playgroundActionParamValueSetter } = usePlayground()
@@ -91,7 +91,7 @@ const SandboxFileSystem: React.FC = () => {
       {fileSystemActionsFormData.map((fileSystemAction) => (
         <div key={fileSystemAction.methodName} className="space-y-4">
           <PlaygroundActionForm<FileSystemActions> actionFormItem={fileSystemAction} hideRunActionButton />
-          <div className="px-4 space-y-2">
+          <div className="space-y-2">
             {fileSystemAction.methodName === FileSystemActions.LIST_FILES && (
               <InlineInputFormControl formItem={listFilesDirectoryFormData}>
                 <FormTextInput

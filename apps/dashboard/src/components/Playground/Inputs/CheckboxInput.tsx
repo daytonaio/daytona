@@ -14,7 +14,7 @@ type FormCheckboxInputProps = {
 
 const FormCheckboxInput: React.FC<FormCheckboxInputProps> = ({ checkedValue, formItem, onChangeHandler }) => {
   return (
-    <div className="flex-1 text-center">
+    <div className="flex-1">
       <Checkbox id={formItem.key} checked={checkedValue} onCheckedChange={(value) => onChangeHandler(!!value)} />
     </div>
   )

@@ -29,7 +29,7 @@ const FormSelectInput: React.FC<FormSelectInputProps> = ({
 }) => {
   return (
     <Select value={selectValue} onValueChange={onChangeHandler}>
-      <SelectTrigger className="w-full box-border rounded-lg" aria-label={formItem.label}>
+      <SelectTrigger className="w-full box-border" size="sm" aria-label={formItem.label}>
         {loading ? (
           <div className="w-full flex items-center justify-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

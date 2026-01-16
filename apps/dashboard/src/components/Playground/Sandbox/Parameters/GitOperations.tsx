@@ -4,19 +4,19 @@
  */
 
 import {
+  GitBranchesParams,
+  GitCloneParams,
+  GitOperationsActionFormData,
   GitOperationsActions,
+  GitStatusParams,
   ParameterFormData,
   ParameterFormItem,
-  GitCloneParams,
-  GitStatusParams,
-  GitBranchesParams,
-  GitOperationsActionFormData,
 } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
+import { useState } from 'react'
+import PlaygroundActionForm from '../../ActionForm'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormTextInput from '../../Inputs/TextInput'
-import PlaygroundActionForm from '../../ActionForm'
-import { useState } from 'react'
 
 const SandboxGitOperations: React.FC = () => {
   const { sandboxParametersState, playgroundActionParamValueSetter } = usePlayground()
@@ -78,7 +78,7 @@ const SandboxGitOperations: React.FC = () => {
       {gitOperationsActionsFormData.map((gitOperationsAction) => (
         <div key={gitOperationsAction.methodName} className="space-y-4">
           <PlaygroundActionForm<GitOperationsActions> actionFormItem={gitOperationsAction} hideRunActionButton />
-          <div className="px-4 space-y-2">
+          <div className="space-y-2">
             {gitOperationsAction.methodName === GitOperationsActions.GIT_CLONE && (
               <>
                 {gitCloneParamsFormData.map((gitCloneParamFormItem) => (

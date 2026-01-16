@@ -3,20 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import CodeBlock from '@/components/CodeBlock'
 import {
-  ProcessCodeExecutionActions,
   CodeRunParams,
-  ShellCommandRunParams,
   ParameterFormItem,
+  ProcessCodeExecutionActions,
   ProcessCodeExecutionOperationsActionFormData,
+  ShellCommandRunParams,
 } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
+import { getLanguageCodeToRun } from '@/lib/playground'
 import { CodeLanguage } from '@daytonaio/sdk'
+import { useEffect, useState } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
-import CodeBlock from '@/components/CodeBlock'
-import { getLanguageCodeToRun } from '@/lib/playground'
-import { useEffect, useState } from 'react'
 
 const SandboxProcessCodeExecution: React.FC = () => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
@@ -76,7 +76,7 @@ const SandboxProcessCodeExecution: React.FC = () => {
             actionFormItem={processCodeExecutionAction}
             hideRunActionButton
           />
-          <div className="px-4 space-y-2">
+          <div className="space-y-2">
             {processCodeExecutionAction.methodName === ProcessCodeExecutionActions.CODE_RUN && (
               <StackedInputFormControl formItem={codeRunLanguageCodeFormData}>
                 <CodeBlock

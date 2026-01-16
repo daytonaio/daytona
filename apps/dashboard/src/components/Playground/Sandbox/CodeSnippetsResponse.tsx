@@ -3,28 +3,33 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import CodeBlock from '@/components/CodeBlock'
+import { CopyButton } from '@/components/CopyButton'
+import TooltipButton from '@/components/TooltipButton'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Image,
-  CodeLanguage,
-  CreateSandboxFromSnapshotParams,
-  CreateSandboxFromImageParams,
-  Sandbox,
-} from '@daytonaio/sdk'
 import {
   codeSnippetSupportedLanguages,
   FileSystemActions,
   GitOperationsActions,
   ProcessCodeExecutionActions,
 } from '@/enums/Playground'
-import CodeBlock from '@/components/CodeBlock'
-import { Button } from '@/components/ui/button'
 import { usePlayground } from '@/hooks/usePlayground'
-import { Loader2, Play } from 'lucide-react'
 import { createErrorMessageOutput } from '@/lib/playground'
-import { ReactNode, useCallback, useMemo, useState, useRef } from 'react'
+import { cn } from '@/lib/utils'
+import {
+  CodeLanguage,
+  CreateSandboxFromImageParams,
+  CreateSandboxFromSnapshotParams,
+  Image,
+  Sandbox,
+} from '@daytonaio/sdk'
+import { ChevronUpIcon, Loader2, PanelBottom, Play, XIcon } from 'lucide-react'
+import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { Group, Panel, usePanelRef } from 'react-resizable-panels'
 import ResponseCard from '../ResponseCard'
+import { Window, WindowContent, WindowTitleBar } from '../Window'
 
 type CodeSnippetsSectionStartNewLinesData = {
   isFileSystemOperationsFirstSectionSnippet: boolean
@@ -34,7 +39,7 @@ type CodeSnippetsSectionStartNewLinesData = {
 // Type for the keys
 type CodeSnippetsSectionFlagKey = keyof CodeSnippetsSectionStartNewLinesData
 
-const SandboxCodeSnippetsResponse: React.FC = () => {
+const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
   const [codeSnippetOutput, setCodeSnippetOutput] = useState<string | ReactNode>('')
   const [isCodeSnippetRunning, setIsCodeSnippetRunning] = useState<boolean>(false)
@@ -663,24 +668,26 @@ main().catch(console.error)`,
     }
   }
 
+  const resultPanelRef = usePanelRef()
+
   return (
-    <>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Code</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            value={codeSnippetLanguage}
-            className="flex flex-col"
-            onValueChange={(languageValue) => setCodeSnippetLanguage(languageValue as CodeLanguage)}
-          >
-            <TabsList className="px-4 w-full flex-shrink-0">
+    <Window className={className}>
+      <WindowTitleBar>Sandbox Code</WindowTitleBar>
+      <WindowContent className="relative">
+        <Tabs
+          value={codeSnippetLanguage}
+          className="flex flex-col gap-4"
+          onValueChange={(languageValue) => setCodeSnippetLanguage(languageValue as CodeLanguage)}
+        >
+          <div className="flex justify-between items-center">
+            <TabsList>
               {codeSnippetSupportedLanguages.map((language) => (
                 <TabsTrigger
                   key={language.value}
                   value={language.value}
-                  className={codeSnippetLanguage === language.value ? 'bg-foreground/10' : ''}
+                  className={cn('py-1 rounded-t-md', {
+                    'bg-foreground/10': codeSnippetLanguage === language.value,
+                  })}
                 >
                   <div className="flex items-center text-sm">
                     <img src={language.icon} alt={language.icon} className="w-4 h-4" />
@@ -688,24 +695,98 @@ main().catch(console.error)`,
                   </div>
                 </TabsTrigger>
               ))}
-              <Button disabled={isCodeSnippetRunning} variant="outline" className="ml-auto" onClick={runCodeSnippet}>
+            </TabsList>
+            <div className="flex items-center gap-2">
+              <Button
+                disabled={isCodeSnippetRunning}
+                variant="outline"
+                className="ml-auto"
+                onClick={() => {
+                  runCodeSnippet()
+
+                  if (resultPanelRef.current.isCollapsed) {
+                    resultPanelRef.current.resize(100)
+                  }
+                }}
+              >
                 {isCodeSnippetRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="w-4 h-4" />} Run
               </Button>
-            </TabsList>
-            {codeSnippetSupportedLanguages.map((language) => (
-              <TabsContent key={language.value} value={language.value}>
-                <CodeBlock
-                  language={language.value}
-                  code={sandboxCodeSnippetsData[language.value].code}
-                  codeAreaClassName="overflow-y-scroll h-[350px]"
-                />
-              </TabsContent>
-            ))}
-          </Tabs>
-        </CardContent>
-      </Card>
-      <ResponseCard titleText="Result" responseContent={codeSnippetOutput} />
-    </>
+              <TooltipButton
+                tooltipText="Show result"
+                className="!px-2"
+                size="icon-sm"
+                variant="outline"
+                onClick={() => {
+                  if (resultPanelRef.current.isCollapsed) {
+                    resultPanelRef.current.resize(100)
+                  } else {
+                    resultPanelRef.current.collapse()
+                  }
+                }}
+              >
+                <PanelBottom />
+              </TooltipButton>
+            </div>
+          </div>
+          <Group orientation="vertical" className="min-h-[500px] border-border rounded-b-md">
+            <Panel minSize={'20%'}>
+              {codeSnippetSupportedLanguages.map((language) => (
+                <TabsContent
+                  key={language.value}
+                  value={language.value}
+                  className="rounded-md h-full overflow-auto mt-0"
+                >
+                  <CopyButton
+                    className="absolute right-4 z-10 backdrop-blur-sm"
+                    variant="ghost"
+                    size="icon-sm"
+                    value={sandboxCodeSnippetsData[language.value].code}
+                  />
+                  <ScrollArea fade="mask" horizontal className="h-full overflow-auto" fadeOffset={35}>
+                    <CodeBlock
+                      showCopy={false}
+                      language={language.value}
+                      code={sandboxCodeSnippetsData[language.value].code}
+                      codeAreaClassName="text-sm [overflow:initial] min-w-fit"
+                    />
+                  </ScrollArea>
+                </TabsContent>
+              ))}
+            </Panel>
+
+            <Panel maxSize="80%" minSize="20%" panelRef={resultPanelRef} collapsedSize={0} collapsible defaultSize={33}>
+              <div className="bg-background w-full border rounded-md overflow-auto h-full">
+                <div className="flex justify-between border-b px-4 pr-2 py-1 text-xs items-center bg-muted/50">
+                  <div className="text-muted-foreground font-mono">Result</div>
+                  <div className="flex items-center gap-2">
+                    <TooltipButton
+                      onClick={() => resultPanelRef.current.resize('80%')}
+                      tooltipText="Maximize"
+                      className="h-6 w-6"
+                      size="sm"
+                      variant="ghost"
+                    >
+                      <ChevronUpIcon className="w-4 h-4" />
+                    </TooltipButton>
+                    <TooltipButton
+                      tooltipText="Close"
+                      className="h-6 w-6"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => resultPanelRef.current.collapse()}
+                    >
+                      <XIcon />
+                    </TooltipButton>
+                  </div>
+                </div>
+
+                <ResponseCard titleText="Result" responseContent={codeSnippetOutput} />
+              </div>
+            </Panel>
+          </Group>
+        </Tabs>
+      </WindowContent>
+    </Window>
   )
 }
 

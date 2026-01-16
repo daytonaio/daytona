@@ -3,24 +3,24 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
-import FormTextInput from '../../Inputs/TextInput'
-import FormNumberInput from '../../Inputs/NumberInput'
+import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import {
-  KeyboardActions,
   KeyboardActionFormData,
-  ParameterFormData,
-  NumberParameterFormItem,
+  KeyboardActions,
   KeyboardHotKey,
   KeyboardPress,
   KeyboardType,
+  NumberParameterFormItem,
+  ParameterFormData,
   VNCInteractionOptionsSectionComponentProps,
 } from '@/enums/Playground'
-import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
 import { ComputerUse } from '@daytonaio/sdk'
-import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
+import PlaygroundActionForm from '../../ActionForm'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
+import FormNumberInput from '../../Inputs/NumberInput'
+import FormTextInput from '../../Inputs/TextInput'
 
 const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
   disableActions,
@@ -117,7 +117,7 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
             }
             disable={disableActions}
           />
-          <div className="px-4 space-y-2">
+          <div className="space-y-2">
             {keyboardAction.methodName === KeyboardActions.HOTKEY && (
               <InlineInputFormControl formItem={hotKeyParamsFormData[0]}>
                 <FormTextInput

@@ -3,30 +3,30 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { usePlayground } from '@/hooks/usePlayground'
-import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
-import FormNumberInput from '../../Inputs/NumberInput'
-import FormSelectInput from '../../Inputs/SelectInput'
-import FormCheckboxInput from '../../Inputs/CheckboxInput'
+import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import {
-  MouseClick,
+  MouseActionFormData,
+  MouseActions,
   MouseButton,
+  MouseClick,
   MouseDrag,
   MouseMove,
   MouseScroll,
-  ParameterFormData,
-  MouseActions,
-  NumberParameterFormItem,
   MouseScrollDirection,
+  NumberParameterFormItem,
+  ParameterFormData,
   ParameterFormItem,
   PlaygroundActionFormDataBasic,
-  MouseActionFormData,
   VNCInteractionOptionsSectionComponentProps,
 } from '@/enums/Playground'
-import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
+import { usePlayground } from '@/hooks/usePlayground'
 import { ComputerUse } from '@daytonaio/sdk'
-import PlaygroundActionForm from '../../ActionForm'
 import React, { useState } from 'react'
+import PlaygroundActionForm from '../../ActionForm'
+import FormCheckboxInput from '../../Inputs/CheckboxInput'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
+import FormNumberInput from '../../Inputs/NumberInput'
+import FormSelectInput from '../../Inputs/SelectInput'
 
 const mouseButtonFormData: ParameterFormItem & { key: 'button' } = {
   label: 'Button',
@@ -220,7 +220,7 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {mouseActionsWithParamsFormData.map((mouseActionFormData) => (
         <div key={mouseActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<MouseActions>
@@ -230,7 +230,7 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
             }
             disable={disableActions}
           />
-          <div className="px-4 space-y-2">
+          <div className="space-y-2">
             {mouseActionFormData.methodName === MouseActions.CLICK && (
               <>
                 {mouseClickNumberParamsFormData.map((mouseClickNumberParamFormItem) => (

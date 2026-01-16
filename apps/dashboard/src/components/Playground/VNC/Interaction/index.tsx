@@ -3,29 +3,36 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import {
+  VNCInteractionOptionsSectionComponentProps,
   VNCInteractionOptionsSections,
   VNCInteractionOptionsSectionsData,
-  VNCInteractionOptionsSectionComponentProps,
   WrapVNCInvokeApiType,
 } from '@/enums/Playground'
+import { useApi } from '@/hooks/useApi'
+import { usePlayground } from '@/hooks/usePlayground'
+import { useTemporarySandbox } from '@/hooks/useTemporarySandbox'
+import { createErrorMessageOutput } from '@/lib/playground'
+import { ComputerUse } from '@daytonaio/sdk'
+import { CameraIcon, KeyboardIcon, MonitorIcon, MousePointer2Icon } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import VNCDisplayOperations from './Display'
 import VNCKeyboardOperations from './Keyboard'
 import VNCMouseOperations from './Mouse'
 import VNCScreenshootOperations from './Screenshot'
-import { useTemporarySandbox } from '@/hooks/useTemporarySandbox'
-import { usePlayground } from '@/hooks/usePlayground'
-import { useApi } from '@/hooks/useApi'
-import { createErrorMessageOutput } from '@/lib/playground'
-import { ComputerUse } from '@daytonaio/sdk'
-import { Plus, Minus } from 'lucide-react'
-import { useState, useEffect, useCallback } from 'react'
+
+const sectionIcons = {
+  [VNCInteractionOptionsSections.DISPLAY]: <MonitorIcon strokeWidth={1.5} />,
+  [VNCInteractionOptionsSections.KEYBOARD]: <KeyboardIcon strokeWidth={1.5} />,
+  [VNCInteractionOptionsSections.MOUSE]: <MousePointer2Icon strokeWidth={1.5} />,
+  [VNCInteractionOptionsSections.SCREENSHOT]: <CameraIcon strokeWidth={1.5} />,
+}
 
 const VNCInteractionOptions: React.FC = () => {
   const [openedInteractionOptionsSections, setOpenedInteractionOptionsSections] = useState<
     VNCInteractionOptionsSections[]
-  >([])
+  >([VNCInteractionOptionsSections.DISPLAY])
   const [disableOnSandboxError, setDisableOnSandboxError] = useState(true)
   const [ComputerUseClient, setComputerUseClient] = useState<ComputerUse | null>(null)
 
@@ -77,7 +84,13 @@ const VNCInteractionOptions: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2>Computer Use</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Automate GUI interactions or manually control the desktop environment.
+        </p>
+      </div>
       <Accordion
         type="multiple"
         value={openedInteractionOptionsSections}
@@ -88,13 +101,19 @@ const VNCInteractionOptions: React.FC = () => {
         {VNCInteractionOptionsSectionsData.map((section) => {
           const isCollapsed = !openedInteractionOptionsSections.includes(section.value as VNCInteractionOptionsSections)
           return (
-            <AccordionItem key={section.value} value={section.value}>
-              <AccordionTrigger className="text-lg" icon={isCollapsed ? <Plus /> : <Minus />}>
-                {section.label}
+            <AccordionItem
+              key={section.value}
+              value={section.value}
+              className="border px-3 last:border-b first:rounded-t-lg last:rounded-b-lg border-t-0 first:border-t"
+            >
+              <AccordionTrigger className="font-semibold text-muted-foreground hover:no-underline dark:bg-muted/50 bg-muted/80 hover:text-primary py-3 border-b border-b-transparent data-[state=open]:border-b-border -mx-3 px-3">
+                <div className="flex items-center gap-2 [&_svg]:size-4 text-sm font-medium">
+                  {sectionIcons[section.value]} {section.label}
+                </div>
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="pb-3 mt-3">
                 {!isCollapsed && (
-                  <div className="px-2 space-y-4">
+                  <div className="space-y-4">
                     {section.value === VNCInteractionOptionsSections.DISPLAY && (
                       <VNCDisplayOperations {...interactionOptionsSectionComponentProps} />
                     )}
