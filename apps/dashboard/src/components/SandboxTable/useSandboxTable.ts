@@ -40,6 +40,7 @@ interface UseSandboxTableProps {
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
+  handleScreenRecordings: (id: string) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -69,6 +70,7 @@ export function useSandboxTable({
   handleCreateSshAccess,
   handleRevokeSshAccess,
   handleCreateSnapshot,
+  handleScreenRecordings,
   pagination,
   pageCount,
   onPaginationChange,
@@ -123,6 +125,7 @@ export function useSandboxTable({
         handleCreateSshAccess,
         handleRevokeSshAccess,
         handleCreateSnapshot,
+        handleScreenRecordings,
         getRegionName,
         runnerClassMap,
       }),
@@ -139,6 +142,7 @@ export function useSandboxTable({
       handleCreateSshAccess,
       handleRevokeSshAccess,
       handleCreateSnapshot,
+      handleScreenRecordings,
       getRegionName,
       runnerClassMap,
     ],

@@ -30,18 +30,29 @@ export function SandboxTableActions({
   onCreateSshAccess,
   onRevokeSshAccess,
   onCreateSnapshot,
+  onScreenRecordings,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
 
     if (writePermitted) {
+      // VNC - always visible, disabled when not started
+      items.push({
+        key: 'vnc',
+        label: 'VNC',
+        onClick: () => onVnc(sandbox.id),
+        disabled: isLoading || sandbox.state !== SandboxState.STARTED,
+      })
+
+      // Screen Recordings - always visible, disabled when not started
+      items.push({
+        key: 'screen-recordings',
+        label: 'Screen Recordings',
+        onClick: () => onScreenRecordings(sandbox.id),
+        disabled: isLoading || sandbox.state !== SandboxState.STARTED,
+      })
+
       if (sandbox.state === SandboxState.STARTED) {
-        items.push({
-          key: 'vnc',
-          label: 'VNC',
-          onClick: () => onVnc(sandbox.id),
-          disabled: isLoading,
-        })
         items.push({
           key: 'stop',
           label: 'Stop',
@@ -117,6 +128,7 @@ export function SandboxTableActions({
     onDelete,
     onArchive,
     onVnc,
+    onScreenRecordings,
     onCreateSshAccess,
     onRevokeSshAccess,
     onCreateSnapshot,

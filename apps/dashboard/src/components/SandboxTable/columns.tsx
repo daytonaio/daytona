@@ -105,6 +105,7 @@ interface GetColumnsProps {
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
+  handleScreenRecordings: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
   runnerClassMap: Record<string, RunnerClass>
 }
@@ -122,6 +123,7 @@ export function getColumns({
   handleCreateSshAccess,
   handleRevokeSshAccess,
   handleCreateSnapshot,
+  handleScreenRecordings,
   getRegionName,
   runnerClassMap,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
@@ -411,6 +413,7 @@ export function getColumns({
             onCreateSshAccess={handleCreateSshAccess}
             onRevokeSshAccess={handleRevokeSshAccess}
             onCreateSnapshot={handleCreateSnapshot}
+            onScreenRecordings={handleScreenRecordings}
           />
         </div>
       ),

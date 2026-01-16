@@ -39,6 +39,7 @@ export interface SandboxTableProps {
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
+  handleScreenRecordings: (id: string) => void
   handleRefresh: () => void
   isRefreshing?: boolean
   onRowClick?: (sandbox: Sandbox) => void
@@ -69,6 +70,7 @@ export interface SandboxTableActionsProps {
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
   onCreateSnapshot: (id: string) => void
+  onScreenRecordings: (id: string) => void
 }
 
 export interface SandboxTableHeaderProps {

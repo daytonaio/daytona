@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/google/uuid"
@@ -108,6 +109,12 @@ func (m *RecordingManager) StartRecording(label string) (*Recording, error) {
 		"-y", // Overwrite output file if exists
 		filePath,
 	)
+
+	// Hide the ffmpeg console window on Windows
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:    true,
+		CreationFlags: 0x08000000, // CREATE_NO_WINDOW
+	}
 
 	// Get stdin pipe for graceful shutdown
 	stdinPipe, err := cmd.StdinPipe()

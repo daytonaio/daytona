@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daemon-win/internal"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/config"
+	"github.com/daytonaio/daemon-win/pkg/toolbox/dashboard"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/git"
 	"github.com/daytonaio/daemon-win/pkg/toolbox/middlewares"
@@ -270,6 +271,15 @@ func (s *Server) Start() error {
 	}
 
 	go portDetector.Start(context.Background())
+
+	// Start recording dashboard server
+	recordingsDir := filepath.Join(configDir, "recordings")
+	dashboardServer := dashboard.NewDashboardServer(recordingsDir, config.TOOLBOX_API_PORT)
+	go func() {
+		if err := dashboardServer.Start(); err != nil {
+			log.Errorf("Dashboard server error: %v", err)
+		}
+	}()
 
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),
