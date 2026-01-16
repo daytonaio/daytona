@@ -327,7 +327,11 @@ export class DockerRegistryService {
    * @param imageName - The user-provided image.
    * @param regionId - The ID of the region which needs access to the source registry.
    */
-  async findSourceRegistryBySnapshotImageName(imageName: string, regionId: string): Promise<DockerRegistry | null> {
+  async findSourceRegistryBySnapshotImageName(
+    imageName: string,
+    regionId: string,
+    organizationId?: string,
+  ): Promise<DockerRegistry | null> {
     const region = await this.regionService.findOne(regionId)
     if (!region) {
       return null
@@ -339,6 +343,13 @@ export class DockerRegistryService {
       // registries manually added by the organization
       whereCondition.push({
         organizationId: region.organizationId,
+        registryType: RegistryType.ORGANIZATION,
+      })
+    }
+
+    if (organizationId) {
+      whereCondition.push({
+        organizationId: organizationId,
         registryType: RegistryType.ORGANIZATION,
       })
     }
@@ -498,7 +509,11 @@ export class DockerRegistryService {
     return registry.url.startsWith('http') ? registry.url : `https://${registry.url}`
   }
 
-  public async findRegistryByImageName(imageName: string, regionId: string): Promise<DockerRegistry | null> {
+  public async findRegistryByImageName(
+    imageName: string,
+    regionId: string,
+    organizationId?: string,
+  ): Promise<DockerRegistry | null> {
     // Remove docker.io prefix since it's the default registry
     imageName = imageName.replace(/^docker\.io\//, '')
 
@@ -507,7 +522,7 @@ export class DockerRegistryService {
 
     if (parsedImage.registry) {
       // Image has registry prefix, try to find matching registry in database first
-      const registry = await this.findSourceRegistryBySnapshotImageName(imageName, regionId)
+      const registry = await this.findSourceRegistryBySnapshotImageName(imageName, regionId, organizationId)
       if (registry) {
         return registry
       }
