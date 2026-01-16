@@ -3,11 +3,22 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { useTemporarySandbox } from '@/hooks/useTemporarySandbox'
 import { handleApiError } from '@/lib/error-handling'
 import { Sandbox } from '@daytonaio/sdk'
+import { AnimatePresence, motion } from 'framer-motion'
+import { RefreshCcw } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Window, WindowContent, WindowTitleBar } from '../Window'
+
+const motionLoadingProps = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+  transition: { duration: 0.175 },
+}
 
 type WebTerminalProps = {
   getPortPreviewUrl: (sandboxId: string, port: number) => Promise<string>
@@ -33,17 +44,17 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className 
     [getPortPreviewUrl],
   )
 
+  const setupWebTerminal = useCallback(async () => {
+    setLoadingTerminalUrl(true)
+    await getWebTerminalUrl(terminalSandbox)
+    setLoadingTerminalUrl(false)
+  }, [terminalSandbox, getWebTerminalUrl])
+
   useEffect(() => {
     if (terminalSandbox) {
-      // Temporary sandbox created -> setup terminal
-      const setupWebTerminal = async () => {
-        setLoadingTerminalUrl(true)
-        await getWebTerminalUrl(terminalSandbox)
-        setLoadingTerminalUrl(false)
-      }
       setupWebTerminal()
     } else if (terminalSandboxError) setLoadingTerminalUrl(false)
-  }, [terminalSandbox, terminalSandboxError, getWebTerminalUrl])
+  }, [terminalSandbox, terminalSandboxError, getWebTerminalUrl, setupWebTerminal])
 
   return (
     <Window className={className}>
@@ -52,7 +63,31 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className 
         <div className="w-full bg-muted/40 dark:bg-muted/10 min-h-[500px] flex flex-col [&>*]:flex-1">
           {loadingTerminalUrl || !terminalUrl ? (
             <div className="h-full flex items-center justify-center rounded-lg">
-              <p>{loadingTerminalUrl ? 'Loading terminal...' : 'Unable to open the terminal. Please try again.'}</p>
+              <AnimatePresence mode="wait">
+                {loadingTerminalUrl ? (
+                  <motion.p className="flex items-center gap-2" key="loading" {...motionLoadingProps}>
+                    <Spinner className="size-4 mr-2" /> Loading terminal...
+                  </motion.p>
+                ) : (
+                  <motion.p
+                    key="error"
+                    className="flex flex-col items-center justify-center gap-2"
+                    {...motionLoadingProps}
+                  >
+                    There was an error loading the terminal.
+                    <Button
+                      variant="outline"
+                      className="ml-2"
+                      onClick={() => {
+                        setupWebTerminal()
+                      }}
+                    >
+                      <RefreshCcw className="size-4" />
+                      Retry
+                    </Button>
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
             <iframe title="Interactive web terminal for sandbox" src={terminalUrl} width={'100%'} height={'100%'} />

@@ -4,13 +4,16 @@
  */
 
 import TooltipButton from '@/components/TooltipButton'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { useApi } from '@/hooks/useApi'
 import { usePlayground } from '@/hooks/usePlayground'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { Sandbox } from '@daytonaio/sdk'
-import { ChevronUpIcon, XIcon } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronUpIcon, RefreshCcw, XIcon } from 'lucide-react'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Group, Panel, usePanelRef } from 'react-resizable-panels'
 import { toast } from 'sonner'
@@ -20,6 +23,13 @@ import { Window, WindowContent, WindowTitleBar } from '../Window'
 type VNCDesktopWindowResponseProps = {
   getPortPreviewUrl: (sandboxId: string, port: number) => Promise<string>
   className?: string
+}
+
+const motionLoadingProps = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+  transition: { duration: 0.175 },
 }
 
 const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ getPortPreviewUrl, className }) => {
@@ -51,7 +61,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
       toast.info('Checking VNC desktop status...')
       try {
         // First, check if computer use is already started
-        const statusResponse = await toolboxApi.getComputerUseStatus(sandbox.id, selectedOrganization?.id)
+        const statusResponse = await toolboxApi.getComputerUseStatusDeprecated(sandbox.id, selectedOrganization?.id)
         const status = statusResponse.data.status
 
         // Check if computer use is active (all processes running)
@@ -61,14 +71,17 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
         } else {
           // Computer use is not active, try to start it
           try {
-            await toolboxApi.startComputerUse(sandbox.id, selectedOrganization?.id)
+            await toolboxApi.startComputerUseDeprecated(sandbox.id, selectedOrganization?.id)
             toast.success('Starting VNC desktop...')
 
             // Wait a moment for processes to start, then open VNC
             await new Promise((resolve) => setTimeout(resolve, 5000))
 
             try {
-              const newStatusResponse = await toolboxApi.getComputerUseStatus(sandbox.id, selectedOrganization?.id)
+              const newStatusResponse = await toolboxApi.getComputerUseStatusDeprecated(
+                sandbox.id,
+                selectedOrganization?.id,
+              )
               const newStatus = newStatusResponse.data.status
 
               if (newStatus === 'active') {
@@ -130,19 +143,20 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
     [getVNCUrl, selectedOrganization, toolboxApi, setVNCInteractionOptionsParamValue],
   )
 
+  const setupVNCComputerUse = useCallback(async () => {
+    setLoadingVNCUrl(true)
+    await getVNCComputerUseUrl(VNCSandboxData.sandbox as Sandbox) // if (VNCSandboxData.sandbox) guarantes that value isn't null so we put as Sandbox to silence TS compiler
+    setLoadingVNCUrl(false)
+  }, [VNCSandboxData, getVNCComputerUseUrl])
+
   useEffect(() => {
     setVNCInteractionOptionsParamValue('VNCUrl', null) // Reset VNCurl value
     if (!VNCSandboxData) return
     if (VNCSandboxData.sandbox) {
       // Temporary sandbox created -> setup VNC
-      const setupVNCComputerUse = async () => {
-        setLoadingVNCUrl(true)
-        await getVNCComputerUseUrl(VNCSandboxData.sandbox as Sandbox) // if (VNCSandboxData.sandbox) guarantes that value isn't null so we put as Sandbox to silence TS compiler
-        setLoadingVNCUrl(false)
-      }
       setupVNCComputerUse()
     } else if (VNCSandboxData.error) setLoadingVNCUrl(false)
-  }, [setVNCInteractionOptionsParamValue, VNCSandboxData, getVNCComputerUseUrl])
+  }, [setVNCInteractionOptionsParamValue, VNCSandboxData, getVNCComputerUseUrl, setupVNCComputerUse])
 
   const resultPanelRef = usePanelRef()
 
@@ -161,8 +175,31 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
             <div className="aspect-[4/3] md:aspect-[16/9] bg-muted/40 dark:bg-muted/10 rounded-lg">
               {loadingVNCUrl || VNCLoadingError || !VNCUrl ? (
                 <div className="h-full flex items-center justify-center rounded-lg">
-                  <p>{loadingVNCUrl ? 'Loading VNC...' : VNCLoadingError || 'Unable to open VNC. Please try again.'}</p>
-                  {/* todo: add retry button */}
+                  <AnimatePresence mode="wait">
+                    {loadingVNCUrl ? (
+                      <motion.p className="flex items-center gap-2" key="loading" {...motionLoadingProps}>
+                        <Spinner className="size-4 mr-2" /> Loading VNC...
+                      </motion.p>
+                    ) : (
+                      <motion.p
+                        key="error"
+                        className="flex flex-col items-center justify-center gap-2"
+                        {...motionLoadingProps}
+                      >
+                        {VNCLoadingError || 'There was an error loading VNC.'}
+                        <Button
+                          variant="outline"
+                          className="ml-2"
+                          onClick={() => {
+                            setupVNCComputerUse()
+                          }}
+                        >
+                          <RefreshCcw className="size-4" />
+                          Retry
+                        </Button>
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
               ) : (
                 <iframe title="VNC desktop window" src={VNCUrl} className="w-full h-full" />

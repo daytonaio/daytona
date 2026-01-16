@@ -49,7 +49,7 @@ const Playground: React.FC = () => {
 
   const getPortPreviewUrl = useCallback(
     async (sandboxId: string, port: number): Promise<string> => {
-      return (await sandboxApi.getPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url
+      return (await sandboxApi.getSignedPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url
     },
     [sandboxApi, selectedOrganization],
   )
