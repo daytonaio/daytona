@@ -357,7 +357,9 @@ class Screenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed region screenshot: ")
-    def take_compressed_region(self, region: ScreenshotRegion, options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse:
+    def take_compressed_region(
+        self, region: ScreenshotRegion, options: Optional[ScreenshotOptions] = None
+    ) -> ScreenshotResponse:
         """Takes a compressed screenshot of a specific region.
 
         Args:

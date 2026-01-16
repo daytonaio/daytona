@@ -37,7 +37,13 @@ from .._utils.timeout import with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
-from ..common.daytona import CodeLanguage, CreateSandboxFromImageParams, CreateSandboxFromSnapshotParams, DaytonaConfig, Image
+from ..common.daytona import (
+    CodeLanguage,
+    CreateSandboxFromImageParams,
+    CreateSandboxFromSnapshotParams,
+    DaytonaConfig,
+    Image,
+)
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
@@ -313,7 +319,9 @@ class Daytona:
         return self._create(params, timeout=timeout, on_snapshot_create_logs=on_snapshot_create_logs)
 
     @with_timeout(
-        error_message=lambda self, timeout: (f"Failed to create and start sandbox within {timeout} seconds timeout period.")
+        error_message=lambda self, timeout: (
+            f"Failed to create and start sandbox within {timeout} seconds timeout period."
+        )
     )
     def _create(
         self,
@@ -377,7 +385,7 @@ class Daytona:
         response = self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=timeout or None)
 
         if response.state == SandboxState.PENDING_BUILD and on_snapshot_create_logs:
-            build_logs_url = self._sandbox_api.get_build_logs_url(response.id)
+            build_logs_url = (self._sandbox_api.get_build_logs_url(response.id)).url
 
             response_ref = {"response": response}
 

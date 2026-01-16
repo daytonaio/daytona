@@ -31,7 +31,13 @@ from .._utils.timeout import with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
-from ..common.daytona import CodeLanguage, CreateSandboxFromImageParams, CreateSandboxFromSnapshotParams, DaytonaConfig, Image
+from ..common.daytona import (
+    CodeLanguage,
+    CreateSandboxFromImageParams,
+    CreateSandboxFromSnapshotParams,
+    DaytonaConfig,
+    Image,
+)
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
@@ -353,7 +359,9 @@ class AsyncDaytona:
         return await self._create(params, timeout=timeout, on_snapshot_create_logs=on_snapshot_create_logs)
 
     @with_timeout(
-        error_message=lambda self, timeout: (f"Failed to create and start sandbox within {timeout} seconds timeout period.")
+        error_message=lambda self, timeout: (
+            f"Failed to create and start sandbox within {timeout} seconds timeout period."
+        )
     )
     async def _create(
         self,
@@ -402,7 +410,9 @@ class AsyncDaytona:
                     dockerfile_content=Image.base(params.image).dockerfile(),
                 )
             elif isinstance(params.image, Image):
-                context_hashes = await AsyncSnapshotService.process_image_context(self._object_storage_api, params.image)
+                context_hashes = await AsyncSnapshotService.process_image_context(
+                    self._object_storage_api, params.image
+                )
                 sandbox_data.build_info = CreateBuildInfo(
                     context_hashes=context_hashes,
                     dockerfile_content=params.image.dockerfile(),
@@ -417,7 +427,7 @@ class AsyncDaytona:
         response = await self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=timeout or None)
 
         if response.state == SandboxState.PENDING_BUILD and on_snapshot_create_logs:
-            build_logs_url = await self._sandbox_api.get_build_logs_url(response.id)
+            build_logs_url = (await self._sandbox_api.get_build_logs_url(response.id)).url
 
             response_ref = {"response": response}
 
@@ -546,7 +556,9 @@ class AsyncDaytona:
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
-    async def find_one(self, sandbox_id_or_name: Optional[str] = None, labels: Optional[Dict[str, str]] = None) -> AsyncSandbox:
+    async def find_one(
+        self, sandbox_id_or_name: Optional[str] = None, labels: Optional[Dict[str, str]] = None
+    ) -> AsyncSandbox:
         """Finds a Sandbox by its ID or name or labels.
 
         Args:

@@ -150,7 +150,9 @@ class FileSystem:
         local_path = args[1]
         timeout = args[2] if len(args) == 3 else 30 * 60
         # pylint: disable=protected-access
-        response = (self.download_files([FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout))[0]
+        response = (
+            self.download_files([FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout)
+        )[0]
         if response.error:
             raise DaytonaError(response.error)
         return None
@@ -650,5 +652,7 @@ class FileSystem:
             headers.pop("Content-Type", None)
 
             with httpx.Client(timeout=timeout or None) as client:
-                response = client.post(url, data=data_fields, files=file_fields, headers=headers)  # any non-file form fields
+                response = client.post(
+                    url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
+                )
                 response.raise_for_status()
