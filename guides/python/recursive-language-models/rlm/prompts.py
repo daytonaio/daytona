@@ -65,23 +65,21 @@ The edit_file() function:
 **NEVER use raw file I/O (open(), write(), writelines()).**
 Always use edit_file() for ALL file modifications.
 
-## Sub-Agents (MANDATORY)
+## Sub-Agents (HIGHLY RECOMMENDED)
 
-**MANDATORY: You MUST spawn exactly 3 sub-agents before making any edits or calling FINAL().**
-
-This is NOT optional. Each sub-agent:
+You have access to sub-agents that can help you explore and investigate. Each sub-agent:
 - Gets its own FRESH sandbox (clean repo copy)
 - Can spawn its own sub-agents for complex sub-tasks
-- Returns detailed findings you can act on immediately
+- Returns detailed findings you can act on
 
-**Your required workflow:**
-1. Print and read your task to understand what's needed
-2. Explore the codebase briefly
-3. Spawn exactly 3 sub-agents using rlm_query_batched() to investigate in parallel
-4. Wait for and review their results
-5. Only THEN can you edit files and submit your work
+**IMPORTANT: Do NOT try to read the entire codebase yourself.** If the task involves exploring multiple files, modules, or directories, spawn sub-agents to do it in parallel. This is much faster and more effective than reading everything sequentially.
 
-**Required spawning pattern:**
+**When to spawn sub-agents:**
+- Exploring unfamiliar codebases (spawn agents for different directories)
+- Tasks requiring investigation of multiple areas
+- Any time you'd need to read more than 3-4 files
+
+**Spawning pattern:**
 ```python
 results = rlm_query_batched([
     "Investigate [aspect 1] - read the relevant source files and report what you find",
@@ -107,8 +105,6 @@ Investigate the authenticate function in src/auth/login.py:
 Report your findings with specific line numbers.
 \"\"\")
 ```
-
-Do NOT skip sub-agent spawning. Do NOT edit files before spawning 3 sub-agents.
 
 ## Workflow
 1. Print task: see your assignment with print(task)
@@ -191,36 +187,48 @@ def get_subagent_motivation(depth: int) -> str:
     """
     Get sub-agent motivation text based on depth.
 
-    Depth 1: Must spawn exactly 2 sub-agents
-    Depth 2+: Leaf nodes, no sub-agent access (return empty string)
+    Depth 1: Strong encouragement to use sub-agents
+    Depth 2+: Neutral - sub-agents available but not pushed
     """
     if depth == 1:
-        return """## Sub-Agents (MANDATORY)
+        return """## Sub-Agents (HIGHLY RECOMMENDED)
 
-**MANDATORY: You MUST spawn exactly 2 sub-agents before calling FINAL().**
+You can spawn sub-agents to help with your investigation. Each sub-agent:
+- Gets its own FRESH sandbox (clean repo copy)
+- Can explore independently and return findings
+- Runs in parallel when using rlm_query_batched()
 
-This is NOT optional. Your workflow is:
-1. Analyze your assigned task
-2. Spawn exactly 2 sub-agents to help investigate different aspects
-3. Wait for and review their results
-4. Only THEN can you return your findings via FINAL()
+**IMPORTANT: Do NOT try to read many files yourself.** If your task requires exploring multiple files or directories, spawn sub-agents to do it in parallel. This is faster and more thorough.
 
-**Required spawning pattern (replace the example tasks with your actual tasks):**
+**When to spawn sub-agents:**
+- Your task involves multiple files or modules
+- You need to search across different parts of the codebase
+- Any time you'd need to read more than 2-3 files
+
+**Spawning pattern:**
 ```python
 results = rlm_query_batched([
-    "Investigate how X works by reading the source code and report findings",
-    "Check how Y is used across the codebase"
+    "Investigate [aspect 1] and report findings",
+    "Investigate [aspect 2] and report findings"
 ])
 for i, r in enumerate(results):
     print(f"=== Sub-agent {{i+1}} ===")
     print(r)
 ```
 
-Do NOT copy the example tasks literally - write specific tasks relevant to your investigation.
-Do NOT call FINAL() before spawning and receiving results from exactly 2 sub-agents."""
+Give sub-agents specific, detailed tasks - not vague ones."""
 
-    else:  # depth >= 2 - leaf nodes
-        return ""  # No sub-agent section for leaf nodes
+    else:  # depth >= 2
+        return """## Sub-Agents
+
+You can spawn sub-agents if needed for complex sub-tasks:
+```python
+result = rlm_query("Specific task description")
+# or for parallel execution:
+results = rlm_query_batched(["Task 1", "Task 2"])
+```
+
+Each sub-agent gets its own fresh sandbox and returns findings as a string."""
 
 
 def build_system_prompt(depth: int) -> str:

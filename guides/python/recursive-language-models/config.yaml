@@ -6,7 +6,7 @@ model:
 
 # RLM configuration
 rlm:
-  max_sandboxes: 25
-  max_iterations: 30
+  max_sandboxes: 50
+  max_iterations: 50
   global_timeout: 1800  # 30 minutes
   result_truncation_limit: 10000

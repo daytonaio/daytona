@@ -2,7 +2,7 @@
 name = "deeper-rlm"
 version = "0.1.0"
 description = "Recursive Language Model agent system with unlimited depth recursion"
-readme = "spec.md"
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "litellm>=1.50.0",
