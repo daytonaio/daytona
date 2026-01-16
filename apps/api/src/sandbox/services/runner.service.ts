@@ -46,6 +46,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 @Injectable()
 export class RunnerService {
   private readonly logger = new Logger(RunnerService.name)
+  private readonly serviceStartTime = new Date()
 
   constructor(
     @InjectRepository(Runner)
@@ -568,6 +569,13 @@ export class RunnerService {
    * v2 runners report health via the healthcheck endpoint, so we check if lastChecked is within threshold.
    */
   private async checkRunnerV2Health(runner: Runner): Promise<void> {
+    const markAsUnresponsive = async () => {
+      this.logger.warn(
+        `v2 Runner ${runner.id} health check stale (last: ${Math.round((Date.now() - runner.lastChecked.getTime()) / 1000)}s ago), marking as UNRESPONSIVE`,
+      )
+      await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+    }
+
     if (!runner.lastChecked) {
       return
     }
@@ -576,14 +584,22 @@ export class RunnerService {
     // Allow 60 seconds (6 missed healthchecks) before marking as UNRESPONSIVE
     const healthCheckThresholdMs = 60 * 1000
 
-    const timeSinceLastCheck = Date.now() - runner.lastChecked.getTime()
+    if (runner.lastChecked < this.serviceStartTime) {
+      // Allow the runner a grace period to re-establish health checks
+      const timeSinceServiceStart = Date.now() - this.serviceStartTime.getTime()
 
-    if (timeSinceLastCheck > healthCheckThresholdMs) {
-      this.logger.warn(
-        `v2 Runner ${runner.id} health check stale (last: ${Math.round(timeSinceLastCheck / 1000)}s ago), marking as UNRESPONSIVE`,
-      )
-      // TODO: if api is restarted, all runners will go unresponsive
-      await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+      if (timeSinceServiceStart > healthCheckThresholdMs) {
+        // Grace period expired and runner still hasn't checked in
+        await markAsUnresponsive()
+      }
+    } else {
+      // Runner has checked in since API started - use normal threshold
+      const timeSinceLastCheck = Date.now() - runner.lastChecked.getTime()
+
+      if (timeSinceLastCheck > healthCheckThresholdMs) {
+        // Runner hasn't reported health recently
+        await markAsUnresponsive()
+      }
     }
   }
 
