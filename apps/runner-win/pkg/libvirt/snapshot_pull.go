@@ -21,13 +21,14 @@ import (
 // for creating new sandboxes.
 //
 // The process:
-// 1. Acquire a lock to prevent concurrent pulls of the same snapshot
-// 2. Check if snapshot already exists on the target host (skip download if valid)
-// 3. Check if snapshot exists in the remote store
-// 4. Download the snapshot to the target host's snapshots directory
-// 5. Set proper permissions for libvirt
-// 6. Validate the downloaded image
-// 7. Release the lock
+// 1. Ensure the snapshots directory exists on the target host
+// 2. Acquire a lock to prevent concurrent pulls of the same snapshot
+// 3. Check if snapshot already exists on the target host (skip download if valid)
+// 4. Check if snapshot exists in the remote store
+// 5. Download the snapshot to the target host's snapshots directory
+// 6. Set proper permissions for libvirt
+// 7. Validate the downloaded image
+// 8. Release the lock
 //
 // This function handles both local and remote libvirt hosts. When connected to a remote
 // host via SSH (e.g., qemu+ssh://root@host/system), the snapshot is streamed from S3
@@ -48,6 +49,20 @@ func (l *LibVirt) PullSnapshot(ctx context.Context, req dto.PullSnapshotRequestD
 	// Determine the path for the snapshot on the target host
 	targetPath := l.getSnapshotLocalPath(snapshotName)
 	tempPath := targetPath + ".downloading"
+
+	// Ensure the snapshots directory exists on the target host BEFORE acquiring the lock
+	// This is necessary because the lock file is created in the snapshots directory
+	if err := l.ensureDir(ctx, snapshotsBasePath); err != nil {
+		return fmt.Errorf("failed to create snapshots directory: %w", err)
+	}
+
+	// For remote libvirt hosts, also ensure the directory exists locally for lock files
+	// The lock mechanism uses local files (os.OpenFile) even when libvirt is remote
+	if !l.isLocalURI() {
+		if err := os.MkdirAll(snapshotsBasePath, 0755); err != nil {
+			return fmt.Errorf("failed to create local snapshots directory for lock files: %w", err)
+		}
+	}
 
 	// Acquire lock to prevent concurrent pulls of the same snapshot
 	// This is critical to prevent race conditions where multiple sandbox creations
@@ -104,11 +119,6 @@ func (l *LibVirt) PullSnapshot(ctx context.Context, req dto.PullSnapshotRequestD
 		return fmt.Errorf("failed to get snapshot from storage: %w", err)
 	}
 	defer reader.Close()
-
-	// Ensure the snapshots directory exists on the target host
-	if err := l.ensureDir(ctx, snapshotsBasePath); err != nil {
-		return fmt.Errorf("failed to create snapshots directory: %w", err)
-	}
 
 	// Write to the target host (local or remote)
 	var written int64
