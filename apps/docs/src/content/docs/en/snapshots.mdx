@@ -24,6 +24,8 @@ Daytona provides options to create snapshots using [public images](#using-public
 Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
 :::
 
+Snapshots automatically become inactive after 2 weeks of not being used. To reactivate an inactive snapshot, create a new sandbox using that snapshot.
+
 For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#create) and [TypeScript SDK](/docs/typescript-sdk/snapshot#create) references:
 
 > [**create (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotservicecreate)
