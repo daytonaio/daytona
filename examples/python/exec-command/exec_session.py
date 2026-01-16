@@ -13,7 +13,9 @@ def main():
     print(session)
 
     # Execute a first command in the session
-    exec_command1 = sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(command="export FOO=BAR"))
+    exec_command1 = sandbox.process.execute_session_command(
+        exec_session_id, SessionExecuteRequest(command="export FOO=BAR")
+    )
     if exec_command1.exit_code != 0:
         print(f"Error: {exec_command1.exit_code} {exec_command1.stderr}")
 

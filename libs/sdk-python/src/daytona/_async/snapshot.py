@@ -98,7 +98,9 @@ class AsyncSnapshotService:
         return Snapshot.from_dto(await self.__snapshots_api.get_snapshot(name))
 
     @intercept_errors(message_prefix="Failed to create snapshot: ")
-    @with_timeout(error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period."))
+    @with_timeout(
+        error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period.")
+    )
     async def create(
         self,
         params: CreateSnapshotParams,
@@ -133,7 +135,9 @@ class AsyncSnapshotService:
             create_snapshot_req.build_info = CreateBuildInfo(
                 context_hashes=context_hashes,
                 dockerfile_content=(
-                    params.image.entrypoint(params.entrypoint).dockerfile() if params.entrypoint else params.image.dockerfile()
+                    params.image.entrypoint(params.entrypoint).dockerfile()
+                    if params.entrypoint
+                    else params.image.dockerfile()
                 ),
             )
 
@@ -190,7 +194,9 @@ class AsyncSnapshotService:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
         if created_snapshot.state in (SnapshotState.ERROR, SnapshotState.BUILD_FAILED):
-            raise DaytonaError(f"Failed to create snapshot {created_snapshot.name}, reason: {created_snapshot.error_reason}")
+            raise DaytonaError(
+                f"Failed to create snapshot {created_snapshot.name}, reason: {created_snapshot.error_reason}"
+            )
 
         return created_snapshot if isinstance(created_snapshot, Snapshot) else Snapshot.from_dto(created_snapshot)
 

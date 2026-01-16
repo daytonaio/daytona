@@ -152,7 +152,9 @@ class AsyncProcess:
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
         return ExecuteResponse.model_construct(
-            exit_code=(response.exit_code if response.exit_code is not None else response.additional_properties.get("code")),
+            exit_code=(
+                response.exit_code if response.exit_code is not None else response.additional_properties.get("code")
+            ),
             result=artifacts.stdout,
             artifacts=artifacts,
             additional_properties=response.additional_properties,

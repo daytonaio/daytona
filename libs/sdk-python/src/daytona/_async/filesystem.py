@@ -149,14 +149,18 @@ class AsyncFileSystem:
         timeout = args[2] if len(args) == 3 else 30 * 60
         # pylint: disable=protected-access
         response = (
-            await self.download_files([FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout)
+            await self.download_files(
+                [FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout
+            )
         )[0]
         if response.error:
             raise DaytonaError(response.error)
         return None
 
     @intercept_errors(message_prefix="Failed to download files: ")
-    async def download_files(self, files: List[FileDownloadRequest], timeout: int = 30 * 60) -> List[FileDownloadResponse]:
+    async def download_files(
+        self, files: List[FileDownloadRequest], timeout: int = 30 * 60
+    ) -> List[FileDownloadResponse]:
         """Downloads multiple files from the Sandbox. If the files already exist locally, they will be overwritten.
 
         Args:

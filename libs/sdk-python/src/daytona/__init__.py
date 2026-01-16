@@ -17,7 +17,16 @@ from ._async.daytona import AsyncDaytona
 from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from ._sync.daytona import Daytona
 from ._sync.sandbox import Sandbox
-from .common.charts import BarChart, BoxAndWhiskerChart, Chart, ChartType, CompositeChart, LineChart, PieChart, ScatterChart
+from .common.charts import (
+    BarChart,
+    BoxAndWhiskerChart,
+    Chart,
+    ChartType,
+    CompositeChart,
+    LineChart,
+    PieChart,
+    ScatterChart,
+)
 from .common.code_interpreter import ExecutionError, ExecutionResult, OutputHandler, OutputMessage
 from .common.daytona import (
     CodeLanguage,
