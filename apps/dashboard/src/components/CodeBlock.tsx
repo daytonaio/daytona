@@ -5,9 +5,8 @@
 
 import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/lib/utils'
-import { CheckIcon, ClipboardIcon } from 'lucide-react'
 import { Highlight, themes, type PrismTheme, type Token } from 'prism-react-renderer'
-import { useState } from 'react'
+import { CopyButton } from './CopyButton'
 
 interface CodeBlockProps {
   code: string
@@ -32,14 +31,7 @@ const oneDark = {
 }
 
 const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, codeAreaClassName }) => {
-  const [copied, setCopied] = useState(false)
   const { theme } = useTheme()
-
-  const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   return (
     <div className="relative rounded-lg">
@@ -69,13 +61,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, 
         )}
       </Highlight>
       {showCopy && (
-        <button
-          onClick={copyToClipboard}
-          className="absolute right-2 top-2.5 p-2 text-gray-400 hover:text-white transition-colors"
-          aria-label="Copy code"
-        >
-          {copied ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
-        </button>
+        <CopyButton value={code} variant="ghost" className="absolute text-muted-foreground right-2 top-2.5 p-2" />
       )}
     </div>
   )
