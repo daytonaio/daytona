@@ -15,6 +15,9 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { SandboxEvents } from '../../constants/sandbox-events.constants'
+import { SandboxBackupCreatedEvent } from '../../events/sandbox-backup-created.event'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -25,6 +28,7 @@ export class SandboxArchiveAction extends SandboxAction {
     protected sandboxRepository: Repository<Sandbox>,
     protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
@@ -59,10 +63,8 @@ export class SandboxArchiveAction extends SandboxAction {
           }
           await this.redis.setex('archive-error-retry-' + sandbox.id, 720, String(archiveErrorRetryCount + 1))
 
-          //  reset the backup state to pending to retry the backup
-          await this.sandboxRepository.update(sandbox.id, {
-            backupState: BackupState.PENDING,
-          })
+          //  recreate the backup to retry
+          this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
 
           return DONT_SYNC_AGAIN
         }
