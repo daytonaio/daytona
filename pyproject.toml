@@ -39,10 +39,10 @@ typeCheckingMode = "off"
 
 [tool.black]
 target-version = ['py310']
-line-length = 120
+line-length = 130
 
 [tool.pylint]
-max-line-length = 120
+max-line-length = 130
 disable = [
     "C0111",  # missing-docstring
     "R0903",  # too-few-public-methods
