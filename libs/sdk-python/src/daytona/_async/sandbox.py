@@ -8,13 +8,7 @@ from typing import Awaitable, Callable, Dict, List, Optional
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client_async import PortPreviewUrl
 from daytona_api_client_async import Sandbox as SandboxDto
-from daytona_api_client_async import (
-    SandboxApi,
-    SandboxState,
-    SignedPortPreviewUrl,
-    SshAccessDto,
-    SshAccessValidationDto,
-)
+from daytona_api_client_async import SandboxApi, SandboxState, SignedPortPreviewUrl, SshAccessDto, SshAccessValidationDto
 from daytona_toolbox_api_client_async import (
     ApiClient,
     ComputerUseApi,
@@ -111,19 +105,13 @@ class AsyncSandbox(SandboxDto):
         self._sandbox_api = sandbox_api
         self._code_toolbox = code_toolbox
         # Wrap the toolbox API client to inject the sandbox ID into the resource path and lazy load the base URL
-        self._toolbox_api = AsyncToolboxApiClientProxyLazyBaseUrl(
-            toolbox_api, self.id, self.target, get_toolbox_base_url
-        )
+        self._toolbox_api = AsyncToolboxApiClientProxyLazyBaseUrl(toolbox_api, self.id, self.target, get_toolbox_base_url)
 
         self._fs = AsyncFileSystem(FileSystemApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
         self._git = AsyncGit(GitApi(self._toolbox_api))
-        self._process = AsyncProcess(
-            code_toolbox, ProcessApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
-        )
+        self._process = AsyncProcess(code_toolbox, ProcessApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
         self._computer_use = AsyncComputerUse(ComputerUseApi(self._toolbox_api))
-        self._code_interpreter = AsyncCodeInterpreter(
-            InterpreterApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
-        )
+        self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
         self._info_api = InfoApi(self._toolbox_api)
 
     @property
@@ -178,9 +166,7 @@ class AsyncSandbox(SandboxDto):
         return response.dir
 
     @deprecated(
-        reason=(
-            "Method is deprecated. Use `get_user_home_dir` instead. This method will be removed in a future version."
-        )
+        reason=("Method is deprecated. Use `get_user_home_dir` instead. This method will be removed in a future version.")
     )
     async def get_user_root_dir(self) -> str:
         return await self.get_user_home_dir()
@@ -257,9 +243,7 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Sandbox {self.id} failed to start within the {timeout} seconds timeout period"
-        )
+        error_message=lambda self, timeout: (f"Sandbox {self.id} failed to start within the {timeout} seconds timeout period")
     )
     async def start(self, timeout: Optional[float] = 60):
         """Starts the Sandbox and waits for it to be ready.
@@ -285,9 +269,7 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to recover sandbox: ")
     @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Sandbox {self.id} failed to recover within the {timeout} seconds timeout period"
-        )
+        error_message=lambda self, timeout: (f"Sandbox {self.id} failed to recover within the {timeout} seconds timeout period")
     )
     async def recover(self, timeout: Optional[float] = 60):
         """Recovers the Sandbox from a recoverable error and waits for it to be ready.
@@ -313,9 +295,7 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Sandbox {self.id} failed to stop within the {timeout} seconds timeout period"
-        )
+        error_message=lambda self, timeout: (f"Sandbox {self.id} failed to stop within the {timeout} seconds timeout period")
     )
     async def stop(self, timeout: Optional[float] = 60):
         """Stops the Sandbox and waits for it to be fully stopped.
@@ -376,9 +356,7 @@ class AsyncSandbox(SandboxDto):
                 return
 
             if self.state in ["error", "build_failed"]:
-                err_msg = (
-                    f"Sandbox {self.id} failed to start with state: {self.state}, error reason: {self.error_reason}"
-                )
+                err_msg = f"Sandbox {self.id} failed to start with state: {self.state}, error reason: {self.error_reason}"
                 raise DaytonaError(err_msg)
 
             await asyncio.sleep(0.1)  # Wait 100ms between checks
@@ -409,9 +387,7 @@ class AsyncSandbox(SandboxDto):
                 await self.__refresh_data_safe()
 
                 if self.state in ["error", "build_failed"]:
-                    err_msg = (
-                        f"Sandbox {self.id} failed to stop with status: {self.state}, error reason: {self.error_reason}"
-                    )
+                    err_msg = f"Sandbox {self.id} failed to stop with status: {self.state}, error reason: {self.error_reason}"
                     raise DaytonaError(err_msg)
             except Exception as e:
                 # If there's a validation error, continue waiting
@@ -522,9 +498,7 @@ class AsyncSandbox(SandboxDto):
         return await self._sandbox_api.get_port_preview_url(self.id, port)
 
     @intercept_errors(message_prefix="Failed to create signed preview url: ")
-    async def create_signed_preview_url(
-        self, port: int, expires_in_seconds: Optional[int] = None
-    ) -> SignedPortPreviewUrl:
+    async def create_signed_preview_url(self, port: int, expires_in_seconds: Optional[int] = None) -> SignedPortPreviewUrl:
         """Creates a signed preview URL for the sandbox at the specified port.
 
         Args:

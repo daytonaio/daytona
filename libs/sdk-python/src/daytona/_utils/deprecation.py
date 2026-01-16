@@ -30,8 +30,7 @@ def deprecated_alias(old_name: str, new_name: str) -> Callable[[Type[T]], Type[T
     def decorator(cls: Type[T]) -> Type[T]:
         # Create warning message once
         warning_message = (
-            f"`{old_name}` is deprecated. Please use `{new_name}` instead. "
-            + "This will be removed in a future version."
+            f"`{old_name}` is deprecated. Please use `{new_name}` instead. " + "This will be removed in a future version."
         )
 
         if isinstance(cls, type) and issubclass(cls, Enum):

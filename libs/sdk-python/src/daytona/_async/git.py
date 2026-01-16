@@ -167,9 +167,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to commit changes: ")
-    async def commit(
-        self, path: str, message: str, author: str, email: str, allow_empty: bool = False
-    ) -> GitCommitResponse:
+    async def commit(self, path: str, message: str, author: str, email: str, allow_empty: bool = False) -> GitCommitResponse:
         """Creates a new commit with the staged changes. Make sure to stage
         changes using the add() method before committing.
 
