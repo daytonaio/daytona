@@ -682,6 +682,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         created_at: response.createdAt,
         created_by: response.createdBy,
         personal: response.personal,
+        environment: this.configService.get('posthog.environment'),
       },
     })
 

@@ -17,25 +17,25 @@ import { PostHog } from 'posthog-node'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class AnalyticsService {
   private readonly logger = new Logger(AnalyticsService.name)
   private readonly posthog?: PostHog
 
-  constructor() {
-    if (!process.env.POSTHOG_API_KEY) {
+  constructor(private readonly configService: TypedConfigService) {
+    if (!this.configService.get('posthog.apiKey')) {
       return
     }
 
-    if (!process.env.POSTHOG_HOST) {
+    if (!this.configService.get('posthog.host')) {
       return
     }
 
     // Initialize PostHog client
-    // Make sure to set POSTHOG_API_KEY in your environment variables
-    this.posthog = new PostHog(process.env.POSTHOG_API_KEY, {
-      host: process.env.POSTHOG_HOST,
+    this.posthog = new PostHog(this.configService.get('posthog.apiKey'), {
+      host: this.configService.get('posthog.host'),
     })
   }
 
@@ -94,6 +94,7 @@ export class AnalyticsService {
         created_at: payload.createdAt,
         created_by: payload.createdBy,
         personal: payload.personal,
+        environment: this.configService.get('posthog.environment'),
       },
     })
   }
