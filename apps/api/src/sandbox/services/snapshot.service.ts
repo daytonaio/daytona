@@ -192,9 +192,11 @@ export class SnapshotService {
           snapshotRegions: [{ snapshotId, regionId }],
         })
 
-        await this.eventEmitter.emitAsync(SnapshotEvents.CREATED, new SnapshotCreatedEvent(snapshot))
+        const savedSnapshot = await this.snapshotRepository.save(snapshot)
 
-        return await this.snapshotRepository.save(snapshot)
+        this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(savedSnapshot))
+
+        return savedSnapshot
       } catch (error) {
         if (error.code === '23505') {
           // PostgreSQL unique violation error code
