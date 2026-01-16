@@ -113,9 +113,27 @@ func GetEnvironment() string {
 }
 
 func GetBuildLogFilePath(snapshotRef string) (string, error) {
+	// Extract image name from various snapshot ref formats:
+	// - registry:5000/daytona/daytona-<hash>
+	// - daytona-<hash>
+	// - daytona-<hash>:tag
+	// - cr.preprod.daytona.io/sbox/daytona/daytona-<hash>:daytona
+
 	buildId := snapshotRef
-	if colonIndex := strings.Index(snapshotRef, ":"); colonIndex != -1 {
-		buildId = snapshotRef[:colonIndex]
+
+	// Remove tag if present (everything after last colon that's not part of a port)
+	// A tag colon will come after the last slash
+	lastSlashIndex := strings.LastIndex(buildId, "/")
+	lastColonIndex := strings.LastIndex(buildId, ":")
+
+	if lastColonIndex > lastSlashIndex && lastColonIndex != -1 {
+		// This colon is a tag separator, not a port separator
+		buildId = buildId[:lastColonIndex]
+	}
+
+	// Extract the image name (last component after the last slash)
+	if lastSlashIndex := strings.LastIndex(buildId, "/"); lastSlashIndex != -1 {
+		buildId = buildId[lastSlashIndex+1:]
 	}
 
 	c, err := GetConfig()

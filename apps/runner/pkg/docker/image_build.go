@@ -184,10 +184,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 	}
 	defer resp.Body.Close()
 
-	// Extract image name without tag
-	filePath := buildImageDto.Snapshot[:strings.LastIndex(buildImageDto.Snapshot, ":")]
-
-	logFilePath, err := config.GetBuildLogFilePath(filePath)
+	logFilePath, err := config.GetBuildLogFilePath(buildImageDto.Snapshot)
 	if err != nil {
 		return err
 	}
