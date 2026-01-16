@@ -514,9 +514,6 @@ export class DockerRegistryService {
     regionId: string,
     organizationId?: string,
   ): Promise<DockerRegistry | null> {
-    // Remove docker.io prefix since it's the default registry
-    imageName = imageName.replace(/^docker\.io\//, '')
-
     // Parse the image to extract potential registry hostname
     const parsedImage = parseDockerImage(imageName)
 
