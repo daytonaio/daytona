@@ -214,7 +214,11 @@ export class SnapshotService {
     if (options.onLogs) {
       options.onLogs(`Creating snapshot ${createdSnapshot.name} (${createdSnapshot.state})`)
 
-      if (createdSnapshot.state !== SnapshotState.PENDING) {
+      if (
+        createSnapshotReq.buildInfo &&
+        createdSnapshot.state !== SnapshotState.PENDING &&
+        !terminalStates.includes(createdSnapshot.state)
+      ) {
         await startLogStreaming(options.onLogs)
       }
     }
@@ -222,7 +226,7 @@ export class SnapshotService {
     let previousState = createdSnapshot.state
     while (!terminalStates.includes(createdSnapshot.state)) {
       if (options.onLogs && previousState !== createdSnapshot.state) {
-        if (createdSnapshot.state !== SnapshotState.PENDING && !streamPromise) {
+        if (createSnapshotReq.buildInfo && createdSnapshot.state !== SnapshotState.PENDING && !streamPromise) {
           await startLogStreaming(options.onLogs)
         }
         options.onLogs(`Creating snapshot ${createdSnapshot.name} (${createdSnapshot.state})`)

@@ -178,14 +178,18 @@ class SnapshotService:
         log_task = None
         if on_logs:
             on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
-            if created_snapshot.state != SnapshotState.PENDING and created_snapshot.state not in terminal_states:
+            if (
+                create_snapshot_req.build_info
+                and created_snapshot.state != SnapshotState.PENDING
+                and created_snapshot.state not in terminal_states
+            ):
                 log_task = threading.Thread(target=start_log_streaming)
                 log_task.start()
 
         previous_state = created_snapshot.state
         while created_snapshot.state not in terminal_states:
             if on_logs and previous_state != created_snapshot.state:
-                if created_snapshot.state != SnapshotState.PENDING and not log_task:
+                if create_snapshot_req.build_info and created_snapshot.state != SnapshotState.PENDING and not log_task:
                     log_task = threading.Thread(target=start_log_streaming)
                     log_task.start()
                 on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
