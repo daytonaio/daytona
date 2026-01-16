@@ -30,7 +30,9 @@ async def main():
         print(session_command)
 
         # Execute a second command in the session and see that the environment variable is set
-        exec_command2 = await sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(command="echo $FOO"))
+        exec_command2 = await sandbox.process.execute_session_command(
+            exec_session_id, SessionExecuteRequest(command="echo $FOO")
+        )
         if exec_command2.exit_code != 0:
             print(f"Error: {exec_command2.exit_code} {exec_command2.stderr}")
         else:

@@ -161,7 +161,9 @@ class AsyncLspServer:
             uri=f"file://{path}",
         )
 
-    @deprecated(reason="Method is deprecated. Use `sandbox_symbols` instead. This method will be removed in a future version.")
+    @deprecated(
+        reason="Method is deprecated. Use `sandbox_symbols` instead. This method will be removed in a future version."
+    )
     async def workspace_symbols(self, query: str) -> List[LspSymbol]:
         """Searches for symbols matching the query string across all files
         in the Sandbox.

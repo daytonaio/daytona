@@ -38,7 +38,9 @@ def main():
         [
             FileUpload(source=local_file_path, destination=os.path.join(new_dir, "example.txt")),
             FileUpload(source=config_data.encode("utf-8"), destination=os.path.join(new_dir, "config.json")),
-            FileUpload(source=b'#!/bin/bash\necho "Hello from script!"\nexit 0', destination=os.path.join(new_dir, "script.sh")),
+            FileUpload(
+                source=b'#!/bin/bash\necho "Hello from script!"\nexit 0', destination=os.path.join(new_dir, "script.sh")
+            ),
         ]
     )
 

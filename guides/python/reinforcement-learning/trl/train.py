@@ -224,7 +224,9 @@ async def evaluate_single_completion_async(
     }
 
 
-async def _evaluate_batch_async(sandbox_pool: List[AsyncSandbox], completions: List[str], prompts: List[str]) -> List[EvalResult]:
+async def _evaluate_batch_async(
+    sandbox_pool: List[AsyncSandbox], completions: List[str], prompts: List[str]
+) -> List[EvalResult]:
     print(f"Evaluating {len(completions)} completions in parallel across " f"{len(sandbox_pool)} sandboxes...")
 
     async def run_one(i: int, sandbox: AsyncSandbox, completion: str, prompt: str) -> EvalResult:
