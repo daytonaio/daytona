@@ -5,7 +5,7 @@ description: Implement recursive language model agents where each agent runs in 
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-This guide demonstrates how to build a recursive language model (RLM) agent system on Daytona sandboxes, based on the approach pioneered in [Recursive Language Models](https://arxiv.org/abs/2512.24601) (Zhang, Kraska, Khattab) and further explored by [Prime Intellect](https://www.primeintellect.ai/blog/rlm).
+This guide demonstrates how to build a recursive language model (RLM) agent system that uses Daytona sandboxes, based on the approach pioneered in [Recursive Language Models](https://arxiv.org/abs/2512.24601) (Zhang, Kraska, Khattab) and further explored by [Prime Intellect](https://www.primeintellect.ai/blog/rlm).
 
 While the original paper and Prime Intellect's implementation focus on single-level recursion (depth=1), this guide extends the concept to **unlimited recursion depth** — agents can spawn sub-agents, which can spawn their own sub-agents, and so on. Each agent runs in its own isolated Daytona sandbox with a fresh clone of the target repository.
 
@@ -18,8 +18,8 @@ The system implements a recursive agent architecture where agents can delegate s
 1. **Initialize**: Root agent receives a task and gets a Daytona sandbox with a fresh repository clone
 2. **Iterate**: Agent runs a loop: LLM call → extract Python code → execute in REPL
 3. **Delegate**: Code can call `rlm_query()` to spawn sub-agents, each with their own sandbox
-4. **Aggregate**: Sub-agents return results; parent synthesizes findings
-5. **Complete**: Root agent produces a git patch; all sandboxes are cleaned up
+4. **Aggregate**: Sub-agents return results; parent synthesizes findings and optionally runs more code
+5. **Complete**: Root agent receives all sub-agent results, produces a git patch; all sandboxes are cleaned up
 
 ```
 Root Agent (depth=0)
@@ -31,7 +31,7 @@ Root Agent (depth=0)
     └── Sub-Agent B2 (depth=2)
 ```
 
-Each agent runs in its own isolated Daytona sandbox with a fresh repository clone, enabling true parallel exploration.
+Each agent runs in its own isolated Daytona sandbox with a fresh repository clone, enabling parallel exploration.
 
 ### 2. Setup
 
@@ -60,7 +60,6 @@ pip install -e .
 This installs:
 - `daytona` - Daytona SDK for sandbox management
 - `litellm` - Unified LLM interface for any provider
-- `rich` - Terminal output formatting
 - `typer` - CLI framework
 - `pyyaml` - Configuration parsing
 
@@ -84,7 +83,7 @@ python run.py https://github.com/scikit-learn/scikit-learn \
   -p "Investigate TODO comments across this repository. Spawn sub-agents to explore different modules. Find the easiest TODO and fix it."
 ```
 
-This spawns a root agent that explores the codebase, delegates to sub-agents for parallel investigation, and produces a git patch fixing the easiest TODO it finds. We'll walk through the results and trace the execution in detail later — first, let's look at how the code works.
+This spawns a root agent that explores the codebase, delegates to sub-agents for parallel investigation, and produces a git patch fixing the easiest TODO it finds. We'll walk through the results and trace the execution in detail later, but first, let's look at how the code works.
 
 #### CLI Options
 
@@ -276,7 +275,7 @@ Each of these 25 sub-agents gets its own Daytona sandbox with a fresh clone of s
 
 **Step 2: Depth-1 agents spawn depth-2 agents**
 
-Some depth-1 agents decide their module is too large and spawn their own sub-agents. For example, the `sklearn/metrics/` agent spawned 5 depth-2 agents:
+Some depth-1 agents decide their module is too large and spawn their own sub-agents. For example, the `sklearn/metrics/` agent spawned 3 depth-2 agents:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -287,9 +286,7 @@ Some depth-1 agents decide their module is too large and spawn their own sub-age
     tasks = [
         "Identify and assess TODOs in 'sklearn/metrics/cluster/'. Provide file, line, content, and difficulty.",
         "Identify and assess TODOs in 'sklearn/metrics/tests/'. Provide file, line, content, and difficulty.",
-        "Identify and assess TODOs in 'sklearn/metrics/_plot/' and its 'tests' sub-directory.",
-        "Identify and assess TODOs in 'sklearn/metrics/_pairwise_distances_reduction/'.",
-        "Identify and assess TODOs in remaining files in 'sklearn/metrics/' (e.g., _classification.py, _scorer.py)."
+        "Identify and assess TODOs in 'sklearn/metrics/_plot/' and its 'tests' sub-directory."
     ]
 
     results = rlm_query_batched(tasks)
@@ -366,15 +363,15 @@ Configure the agent in `config.yaml`:
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `model.name` | `openrouter/google/gemini-3-flash-preview` | LLM model in LiteLLM format |
-| `rlm.max_sandboxes` | 50 | Maximum concurrent sandboxes (global budget) |
+| `rlm.max_sandboxes` | 50 | Maximum total sandboxes across entire rollout |
 | `rlm.max_iterations` | 50 | Maximum iterations per agent |
 | `rlm.global_timeout` | 3600 | Total timeout in seconds |
 | `rlm.result_truncation_limit` | 10000 | Max chars in sub-agent results |
 
 :::tip[Scaling Tips]
 - Increase `max_sandboxes` for tasks requiring more parallel exploration
-- The sandbox budget is shared across the entire agent tree
-- Sub-agent sandboxes are deleted immediately after completion to free budget
+- The sandbox budget tracks total sandboxes created over the lifetime of the rollout
+- Sub-agent sandboxes are deleted immediately after completion
 :::
 
 ### 7. Viewing Results
@@ -391,7 +388,11 @@ The viewer provides:
 - Iteration details with code and output for each agent
 - Statistics: agent count, max depth, total iterations
 
----
+### 8. Conclusion
+
+Current language models aren't specifically trained to leverage recursive delegation, so RLMs don't necessarily outperform single-agent approaches on benchmarks yet. However, the architecture demonstrates compelling properties for complex tasks.
+
+In our scikit-learn example, 40 agents ran in parallel across the agent tree, each with its own isolated sandbox, completing the entire run in just over 5 minutes. This level of parallelism, where each agent can freely modify files, run tests, and explore without affecting others, would be difficult to achieve without per-agent sandboxes.
 
 **Key advantages of this approach:**
 
