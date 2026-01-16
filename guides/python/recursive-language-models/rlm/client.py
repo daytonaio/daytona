@@ -1,3 +1,6 @@
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """LiteLLM-based unified client for all LLM providers."""
 
 import logging

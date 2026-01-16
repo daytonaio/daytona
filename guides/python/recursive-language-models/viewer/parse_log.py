@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """Parse agent log files into structured JSON for the viewer."""
 
 import json

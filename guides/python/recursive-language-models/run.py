@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """Main entry point for deeper-rlm."""
 
 import logging

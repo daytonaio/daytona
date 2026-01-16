@@ -1,3 +1,6 @@
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """REPL execution for deeper-rlm agents.
 
 Uses a broker server pattern for blocking rlm_query() calls:
