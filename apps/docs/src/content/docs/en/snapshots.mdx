@@ -5,7 +5,7 @@ title: Snapshots
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
 
-Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshot) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
+Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
 ## Create Snapshots
 
@@ -126,7 +126,7 @@ To use an image from Google Artifact Registry, configure the registry using a [s
 5. Click the **Create Snapshot** button
 6. Enter the snapshot name and image tag or digest. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
 
-#### GitHub Container Registry (GHCR) 
+#### GitHub Container Registry (GHCR)
 
 Daytona supports creating snapshots from images from GitHub Container Registry (GHCR).
 
@@ -394,9 +394,19 @@ const pods = await sandbox.process.executeCommand(
 console.log(pods.result)
 ```
 
-## Default Snapshot
+## Default Snapshots
 
-When a sandbox is created with no snapshot specified, Daytona uses a default snapshot that includes `python`, `node`, their language servers, and several common pip packages:
+When a sandbox is created with no snapshot specified, Daytona uses a default snapshot that includes `python`, `node`, their language servers, and several common pip packages. Daytona provides three default snapshot sizes:
+
+| **Snapshot**         | **vCPU** | **Memory** | **Storage** |
+| -------------------- | -------- | ---------- | ----------- |
+| **`daytona-small`**  | 1        | 1GiB       | 3GiB        |
+| **`daytona-medium`** | 2        | 4GiB       | 8GiB        |
+| **`daytona-large`**  | 4        | 8GiB       | 10GiB       |
+
+All default snapshots are based on the `daytonaio/sandbox:<version>` image. For more information, see the [Dockerfile](https://github.com/daytonaio/daytona/blob/main/images/sandbox/Dockerfile).
+
+The default snapshot includes the following packages:
 
 - `anthropic` (v0.49.0)
 - `beautifulsoup4` (v4.13.3)
