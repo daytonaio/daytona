@@ -41,13 +41,9 @@ def _retry_file_op(op_func, max_retries: int = 3, operation_name: str = "file op
             last_error = e
             error_str = str(e)
             # Retry on redirect or gateway errors
-            if any(
-                x in error_str for x in ["307", "302", "502", "503", "504", "Redirect", "Gateway"]
-            ):
+            if any(x in error_str for x in ["307", "302", "502", "503", "504", "Redirect", "Gateway"]):
                 if attempt < max_retries - 1:
-                    logger.warning(
-                        f"{operation_name} failed, retrying ({attempt + 1}/{max_retries}): {e}"
-                    )
+                    logger.warning(f"{operation_name} failed, retrying ({attempt + 1}/{max_retries}): {e}")
                     time.sleep(2 * (attempt + 1))
                     continue
             raise
@@ -67,7 +63,8 @@ CODE_BLOCK_PATTERN = re.compile(
 # Broker Server Script (runs inside sandbox, handles rlm_query request queue)
 # =============================================================================
 
-_BROKER_SCRIPT = textwrap.dedent('''
+_BROKER_SCRIPT = textwrap.dedent(
+    '''
 import json
 import threading
 import time
@@ -149,7 +146,8 @@ def respond():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, threaded=True)
-''')
+'''
+)
 
 
 @dataclass
@@ -245,9 +243,7 @@ class DaytonaREPL:
 
         # Upload broker script with retry
         _retry_file_op(
-            lambda: self.sandbox.fs.upload_file(
-                _BROKER_SCRIPT.encode("utf-8"), "/tmp/rlm_broker.py"
-            ),
+            lambda: self.sandbox.fs.upload_file(_BROKER_SCRIPT.encode("utf-8"), "/tmp/rlm_broker.py"),
             operation_name="broker script upload",
         )
 
@@ -395,7 +391,8 @@ class DaytonaREPL:
         # Encode initial variables as base64 to avoid escaping issues
         initial_vars_b64 = base64.b64encode(json.dumps(self.initial_variables).encode()).decode()
 
-        return textwrap.dedent(f'''
+        return textwrap.dedent(
+            f'''
 import sys
 import io
 import json
@@ -636,7 +633,8 @@ print(json.dumps({{
     "final_var_name": _final_var_name,
     "locals": serialize_locals(_locals),
 }}))
-''')
+'''
+        )
 
     def execute_code(self, code: str) -> CodeBlockResult:
         """Execute a Python code block in the sandbox."""
@@ -669,8 +667,7 @@ print(json.dumps({{
                 if any(code in error_str for code in ["502", "503", "504", "Bad Gateway"]):
                     if attempt < max_retries - 1:
                         logger.warning(
-                            f"Command execution failed with gateway error, "
-                            f"retrying ({attempt + 1}/{max_retries})"
+                            f"Command execution failed with gateway error, " f"retrying ({attempt + 1}/{max_retries})"
                         )
                         time.sleep(2 * (attempt + 1))
                         continue

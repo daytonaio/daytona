@@ -114,7 +114,7 @@ Root Agent (depth=0)
 ## Key Functions Available in Agent Code
 
 | Function | Description |
-|----------|-------------|
+| -------- | ----------- |
 | `rlm_query(task)` | Spawn a single sub-agent with the given task, returns result string |
 | `rlm_query_batched(tasks)` | Spawn multiple sub-agents in parallel, returns list of result strings |
 | `FINAL(answer)` | Submit final result (root agent: triggers git patch extraction) |
@@ -133,6 +133,7 @@ python -m http.server 8000
 ```
 
 The viewer provides:
+
 - Interactive tree visualization of the agent hierarchy
 - Iteration details with code and output for each agent
 

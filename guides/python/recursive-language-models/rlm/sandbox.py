@@ -85,16 +85,13 @@ class SandboxManager:
         # Check budget
         if not self.budget.try_acquire():
             raise RuntimeError(
-                f"Cannot create sandbox - budget exhausted "
-                f"({self.budget.status.created}/{self.budget.max} used)"
+                f"Cannot create sandbox - budget exhausted " f"({self.budget.status.created}/{self.budget.max} used)"
             )
 
         try:
             # Create a base image with git installed (needed for agent to produce diffs)
             base_image = (
-                Image.debian_slim("3.11")
-                .run_commands("apt-get update && apt-get install -y git")
-                .workdir("/workspace")
+                Image.debian_slim("3.11").run_commands("apt-get update && apt-get install -y git").workdir("/workspace")
             )
 
             logger.info(f"Creating sandbox from base image for repo: {repo_url}")

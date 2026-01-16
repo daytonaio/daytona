@@ -107,18 +107,13 @@ class RLMAgent:
             if self.existing_sandbox is not None:
                 self.sandbox = self.existing_sandbox
                 self.sandbox_id = self.sandbox.id
-                logger.info(
-                    f"Agent {self.agent_id} (depth={self.depth}) "
-                    f"using existing sandbox {self.sandbox_id}"
-                )
+                logger.info(f"Agent {self.agent_id} (depth={self.depth}) " f"using existing sandbox {self.sandbox_id}")
             else:
                 self.sandbox, info = self.sandbox_manager.create_sandbox_from_repo(
                     repo_url=self._get_repo_url(),
                 )
                 self.sandbox_id = info.sandbox_id
-                logger.info(
-                    f"Agent {self.agent_id} (depth={self.depth}) created sandbox {self.sandbox_id}"
-                )
+                logger.info(f"Agent {self.agent_id} (depth={self.depth}) created sandbox {self.sandbox_id}")
 
             # Determine task content for REPL variable
             # Root agents get the problem statement, sub-agents get their assigned task
@@ -240,9 +235,7 @@ class RLMAgent:
             if repl_result.code_blocks:
                 result_parts = []
                 for block in repl_result.code_blocks:
-                    result_parts.append(
-                        format_execution_result(block.code, block.stdout, block.stderr, block.error)
-                    )
+                    result_parts.append(format_execution_result(block.code, block.stdout, block.stderr, block.error))
                 execution_result = "\n\n".join(result_parts)
             else:
                 execution_result = None
@@ -339,9 +332,7 @@ class RLMAgent:
 
         # Run sub-agents in parallel using thread pool
         with ThreadPoolExecutor(max_workers=min(len(tasks), 10)) as executor:
-            future_to_idx = {
-                executor.submit(self._handle_rlm_query, task): i for i, task in enumerate(tasks)
-            }
+            future_to_idx = {executor.submit(self._handle_rlm_query, task): i for i, task in enumerate(tasks)}
 
             for future in as_completed(future_to_idx):
                 idx = future_to_idx[future]
