@@ -186,7 +186,7 @@
     "tailwind": "^4.0.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "tar": "^6.2.0",
+    "tar": "^7.5.3",
     "typeorm": "^0.3.20",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.3",
