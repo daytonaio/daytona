@@ -69,6 +69,10 @@ def _async_raise(target_tid: int, exception: type) -> bool:
         return False
 
 
+def _round_up_to_nearest_second(seconds: float) -> int:
+    return int(seconds) + (1 if seconds % 1 > 0 else 0)
+
+
 class _ThreadingTimeout:
     """Context manager for timeout using threading.Timer and async exception raising.
 
@@ -168,7 +172,7 @@ class _SignalTimeout:
         self.old_handler = None
         self.start_time = None
 
-    def _timeout_handler(self, signum, frame):
+    def _timeout_handler(self, _signum, _frame):
         """Signal handler that raises timeout exception."""
         raise DaytonaTimeoutError(f"Function '{self.func_name}' exceeded timeout of {self.seconds} seconds.")
 
@@ -186,7 +190,7 @@ class _SignalTimeout:
 
         # Set alarm for the shortest timeout
         # Round up to avoid sub-second precision issues
-        alarm_seconds = int(self.seconds) + (1 if self.seconds % 1 > 0 else 0)
+        alarm_seconds = _round_up_to_nearest_second(self.seconds)
         signal.alarm(alarm_seconds)
 
         return self
@@ -210,7 +214,7 @@ class _SignalTimeout:
             elapsed = time.time() - outer.start_time
             remaining = outer.seconds - elapsed
             if remaining > 0:
-                alarm_seconds = int(remaining) + (1 if remaining % 1 > 0 else 0)
+                alarm_seconds = _round_up_to_nearest_second(remaining)
                 signal.alarm(alarm_seconds)
 
         return False  # Don't suppress exceptions
