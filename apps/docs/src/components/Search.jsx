@@ -29,15 +29,40 @@ const searchClient =
     ? algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY)
     : null
 
+function getSortedIndexes() {
+  const path = typeof window !== 'undefined' ? window.location.pathname : ''
+  const isApiPage = path.includes('/tools/api')
+  const isSdkPage = path.includes('/typescript-sdk') || path.includes('/python-sdk')
+  const isCliPage = path.includes('/tools/cli')
+
+  if (isApiPage) {
+    return [API_INDEX_NAME, DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME]
+  }
+  if (isSdkPage) {
+    return [SDK_INDEX_NAME, DOCS_INDEX_NAME, CLI_INDEX_NAME, API_INDEX_NAME]
+  }
+  if (isCliPage) {
+    return [CLI_INDEX_NAME, DOCS_INDEX_NAME, SDK_INDEX_NAME, API_INDEX_NAME]
+  }
+  return [DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME, API_INDEX_NAME]
+}
+
 function SearchContent() {
   const [isSearchVisible, setIsSearchVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [debounceQuery, setDebounceQuery] = useState('')
   const [displayHits, setDisplayHits] = useState(false)
   const [totalHits, setTotalHits] = useState(0)
+  const [sortedIndexes, setSortedIndexes] = useState(getSortedIndexes())
   const debounceTimeoutRef = useRef(null)
   const searchWrapperRef = useRef(null)
   const t = useGT()
+
+  useEffect(() => {
+    if (isSearchVisible) {
+      setSortedIndexes(getSortedIndexes())
+    }
+  }, [isSearchVisible])
 
   useEffect(() => {
     const toggleSearch = () => {
@@ -146,34 +171,16 @@ function SearchContent() {
           <div className="search-content">
             {debounceQuery && (
               <>
-                <SearchIndex
-                  indexName={DOCS_INDEX_NAME}
-                  setDisplayHits={setDisplayHits}
-                  setIsSearchVisible={setIsSearchVisible}
-                  setTotalHits={setTotalHits}
-                  debounceQuery={debounceQuery}
-                />
-                <SearchIndex
-                  indexName={CLI_INDEX_NAME}
-                  setDisplayHits={setDisplayHits}
-                  setIsSearchVisible={setIsSearchVisible}
-                  setTotalHits={setTotalHits}
-                  debounceQuery={debounceQuery}
-                />
-                <SearchIndex
-                  indexName={SDK_INDEX_NAME}
-                  setDisplayHits={setDisplayHits}
-                  setIsSearchVisible={setIsSearchVisible}
-                  setTotalHits={setTotalHits}
-                  debounceQuery={debounceQuery}
-                />
-                <SearchIndex
-                  indexName={API_INDEX_NAME}
-                  setDisplayHits={setDisplayHits}
-                  setIsSearchVisible={setIsSearchVisible}
-                  setTotalHits={setTotalHits}
-                  debounceQuery={debounceQuery}
-                />
+                {sortedIndexes.map(indexName => (
+                  <SearchIndex
+                    key={indexName}
+                    indexName={indexName}
+                    setDisplayHits={setDisplayHits}
+                    setIsSearchVisible={setIsSearchVisible}
+                    setTotalHits={setTotalHits}
+                    debounceQuery={debounceQuery}
+                  />
+                ))}
                 {totalHits === 0 && (
                   <div style={{ 
                     textAlign: 'center', 
@@ -348,7 +355,7 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
           )}
         <p
           style={{
-            fontSize: '12px',
+            fontSize: '14px',
             paddingBottom: '16px',
             paddingLeft: '24px',
           }}
