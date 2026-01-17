@@ -492,10 +492,6 @@ export class SandboxService {
 
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
-      if (error.code === '23505') {
-        throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
-      }
-
       await this.rollbackPendingUsage(
         organization.id,
         regionId,
@@ -503,6 +499,10 @@ export class SandboxService {
         pendingMemoryIncrement,
         pendingDiskIncrement,
       )
+
+      if (error.code === '23505') {
+        throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
+      }
 
       throw error
     }
@@ -701,10 +701,6 @@ export class SandboxService {
 
       return SandboxDto.fromSandbox(sandbox)
     } catch (error) {
-      if (error.code === '23505') {
-        throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
-      }
-
       await this.rollbackPendingUsage(
         organization.id,
         regionId,
@@ -712,6 +708,10 @@ export class SandboxService {
         pendingMemoryIncrement,
         pendingDiskIncrement,
       )
+
+      if (error.code === '23505') {
+        throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
+      }
 
       throw error
     }
