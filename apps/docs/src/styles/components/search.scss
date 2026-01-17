@@ -62,7 +62,7 @@ nav.mobile-navigation {
   width: 100%;
   border-radius: 4px;
   border: 1px solid var(--secondary-text-color);
-  padding: 20px;
+  padding: 16px;
   font-size: 15px;
   text-align: left;
   box-sizing: border-box;
@@ -160,6 +160,10 @@ mark {
   background-color: var(--bg-color);
   font-style: normal;
 }
+
+// .ais-Highlight-nonHighlighted {
+//   font-size: 16px;
+// }
 
 .no-scroll {
   overflow: hidden;
