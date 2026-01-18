@@ -71,8 +71,8 @@ The script has several configurable parameters in `config.yaml`:
 
 ### Sandbox Settings
 
-- `max_sandboxes`: Maximum concurrent sandboxes across the entire agent tree (default: 25)
-- `global_timeout`: Total timeout in seconds for the entire run (default: 3600 = 60 minutes)
+- `max_sandboxes`: Maximum total sandboxes that can be created over the entire run (default: 50)
+- `global_timeout`: Total timeout in seconds for the entire run (default: 1800 = 30 minutes)
 
 ### Model Settings
 
