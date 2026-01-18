@@ -1,6 +1,6 @@
 {
   "name": "@daytonaio/sdk",
-  "version": "0.0.0-dev",
+  "version": "0.131.0-alpha.1",
   "description": "TypeScript SDK for Daytona",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",

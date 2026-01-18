@@ -1,6 +1,6 @@
 {
   "name": "@daytonaio/toolbox-api-client",
-  "version": "0.0.0-dev",
+  "version": "0.131.0-alpha.1",
   "description": "OpenAPI client for @daytonaio/toolbox-api-client",
   "author": "OpenAPI-Generator Contributors",
   "repository": {

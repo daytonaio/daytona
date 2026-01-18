@@ -14,6 +14,7 @@ This document lists components and features that are planned for future implemen
 - ✅ **Web Terminal** (`pkg/terminal/`): Browser-based terminal using xterm.js on port 22222 with ConPTY backend
 - ✅ **Toolbox Proxy** (`pkg/toolbox/proxy/`): Internal proxy route to access daemon services (e.g., `/proxy/22222/` for terminal)
 - ✅ **Computer Use** (`pkg/toolbox/computeruse/`): Full programmatic desktop automation (see below)
+- ✅ **Screen Recording** (`pkg/toolbox/recording/`): FFmpeg-based screen recording with start/stop/list/delete API (see below)
 
 ---
 
@@ -95,6 +96,54 @@ See `BASE_IMAGE_SETUP.md` for detailed configuration instructions.
 Browser ─────► noVNC (6080) ─────► websockify ─────► TightVNC (5900)
                (Web Client)        (WebSocket)        (VNC Server)
 ```
+
+---
+
+## Screen Recording - Full Implementation ✅
+
+**Reference**: `apps/daemon-win/pkg/toolbox/recording/`
+
+FFmpeg-based screen recording with API control and dashboard viewer.
+
+### Implementation Details
+
+| File | Purpose |
+|------|---------|
+| `types.go` | Request/response structs and recording status types |
+| `manager.go` | RecordingManager with FFmpeg process management |
+| `handlers.go` | HTTP handlers with Swagger annotations |
+
+### API Endpoints
+
+| Endpoint | Status | Description |
+|----------|--------|-------------|
+| `POST /computeruse/recordings/start` | ✅ Done | Start a new screen recording |
+| `POST /computeruse/recordings/stop` | ✅ Done | Stop an active recording |
+| `GET /computeruse/recordings` | ✅ Done | List all recordings (active + completed) |
+| `GET /computeruse/recordings/:id` | ✅ Done | Get recording details by ID |
+| `DELETE /computeruse/recordings/:id` | ✅ Done | Delete a recording file |
+
+### Key Features
+
+- **FFmpeg-based capture** using `gdigrab` for Windows Desktop Duplication
+- **Graceful shutdown** by sending `q` to FFmpeg stdin (prevents corrupted files)
+- **Timestamp-based filenames**: `{id}_{label}_{timestamp}.mp4`
+- **Storage location**: `%APPDATA%\daytona\recordings\`
+- **Optional labels** for custom recording names
+- **Thread-safe** recording management with mutex protection
+- **Hidden FFmpeg window** using `CREATE_NO_WINDOW` flag
+- **Dashboard server** for browsing and playing recordings (port 2281)
+
+### FFmpeg Command
+
+```bash
+ffmpeg -f gdigrab -framerate 30 -i desktop -c:v libx264 -preset ultrafast -pix_fmt yuv420p output.mp4
+```
+
+### Prerequisites
+
+- FFmpeg must be installed and available in PATH
+- Daemon must run in interactive Windows session (same as Computer Use)
 
 ---
 
@@ -209,6 +258,7 @@ GET    /lsp/workspacesymbols - Get workspace symbols
 - ✅ **SSH Server** - Built-in SSH with SFTP and port forwarding
 - ✅ **Web Terminal** - Browser-based terminal via xterm.js
 - ✅ **Computer Use** - Full programmatic desktop automation
+- ✅ **Screen Recording** - FFmpeg-based screen recording with API control
 
 ---
 
@@ -222,10 +272,12 @@ The Windows sandbox base image includes these pre-installed components:
 | Daytona Daemon | Latest | 2280 | Toolbox API |
 | Daytona SSH Server | (built-in) | 22220 | SSH, SFTP, port forwarding |
 | Daytona Web Terminal | (built-in) | 22222 | Browser-based terminal |
+| Recording Dashboard | (built-in) | 2281 | Recording browser/player |
 | TightVNC | 2.8.85 | 5900 | VNC server |
 | Python | 3.12 | - | For websockify |
 | websockify | Latest | - | WebSocket bridge |
 | noVNC | 1.4.0 | 6080 | Web VNC client |
+| FFmpeg | Latest | - | Screen recording |
 
 All services are configured to auto-start. The daemon runs via a scheduled task that triggers at user logon with interactive session privileges.
 

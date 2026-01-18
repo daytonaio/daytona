@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "daytona"
-version = "0.0.0-dev"
+version = "0.131.0a1"
 authors = [
     { name = "Daytona Platforms Inc.", email = "support@daytona.io"  },
 ]
@@ -21,7 +21,11 @@ dependencies = [
     "obstore>=0.7.0,<0.8.0",
     "websockets>=15.0.0,<16.0.0",
     "multipart>=1.0.0,<2.0.0",
-    "typing-extensions>=4.0.0; python_version < '3.10'"
+    "typing-extensions>=4.0.0; python_version < '3.10'",
+    "daytona-api-client (==0.131.0a1)",
+    "daytona-api-client-async (==0.131.0a1)",
+    "daytona-toolbox-api-client (==0.131.0a1)",
+    "daytona-toolbox-api-client-async (==0.131.0a1)"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
