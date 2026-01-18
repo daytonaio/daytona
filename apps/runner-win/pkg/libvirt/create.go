@@ -20,6 +20,10 @@ import (
 )
 
 func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, string, error) {
+	// Log the incoming create request for debugging
+	log.Infof("Create request received: Id=%s, MemoryQuota=%d GB, CpuQuota=%d, StorageQuota=%d GB, Snapshot=%s",
+		sandboxDto.Id, sandboxDto.MemoryQuota, sandboxDto.CpuQuota, sandboxDto.StorageQuota, sandboxDto.Snapshot)
+
 	domainMutex := l.getDomainMutex(sandboxDto.Id)
 	domainMutex.Lock()
 	defer domainMutex.Unlock()
@@ -148,20 +152,21 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 
 // Minimum resource requirements for Windows VMs
 const (
-	minWindowsMemoryMB  = 4096 // 4 GB minimum for Windows 11
-	minWindowsVCPUs     = 2    // 2 vCPUs minimum for Windows 11
-	minWindowsStorageGB = 40   // 40 GB minimum for Windows 11 (base image ~30GB + headroom)
+	minWindowsMemoryGB  = 4  // 4 GB minimum for Windows 11
+	minWindowsVCPUs     = 2  // 2 vCPUs minimum for Windows 11
+	minWindowsStorageGB = 40 // 40 GB minimum for Windows 11 (base image ~30GB + headroom)
 )
 
 func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string, nvramPath string, macAddress string) (string, error) {
-	// Get memory in MB, enforce minimum for Windows
-	memoryMB := sandboxDto.MemoryQuota
-	if memoryMB < minWindowsMemoryMB {
-		log.Warnf("Memory quota %d MB is below minimum %d MB for Windows, using minimum", memoryMB, minWindowsMemoryMB)
-		memoryMB = minWindowsMemoryMB
+	// MemoryQuota is in GB, enforce minimum for Windows
+	memoryGB := sandboxDto.MemoryQuota
+	if memoryGB < minWindowsMemoryGB {
+		log.Warnf("Memory quota %d GB is below minimum %d GB for Windows, using minimum", memoryGB, minWindowsMemoryGB)
+		memoryGB = minWindowsMemoryGB
 	}
-	// Convert memory from MB to KiB (libvirt uses KiB)
-	memoryKiB := uint(memoryMB * 1024)
+	// Convert memory from GB to KiB (libvirt uses KiB)
+	// GB -> MB -> KiB: multiply by 1024 twice
+	memoryKiB := uint(memoryGB * 1024 * 1024)
 
 	// Use CPU quota as number of VCPUs, enforce minimum for Windows
 	vcpus := uint(sandboxDto.CpuQuota)
@@ -169,6 +174,9 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 		log.Warnf("CPU quota %d is below minimum %d for Windows, using minimum", vcpus, minWindowsVCPUs)
 		vcpus = minWindowsVCPUs
 	}
+
+	log.Infof("Building domain XML: Id=%s, Memory=%d KiB (%d GB), vCPUs=%d",
+		sandboxDto.Id, memoryKiB, memoryGB, vcpus)
 
 	// Build the domain configuration for Windows 11 (requires UEFI + SecureBoot)
 	domainCfg := &libvirtxml.Domain{
@@ -291,6 +299,14 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 						Heads:  1,
 					},
 				},
+			},
+			// Memory ballooning for dynamic memory management
+			// Allows host to reclaim memory from guest VMs without shutting them down
+			// Requires virtio-win balloon driver (BLNSVR.exe) running in guest
+			MemBalloon: &libvirtxml.DomainMemBalloon{
+				Model:             "virtio",
+				AutoDeflate:       "on", // Automatically deflate if guest hits memory pressure
+				FreePageReporting: "on", // Guest proactively reports free pages to host
 			},
 		},
 	}

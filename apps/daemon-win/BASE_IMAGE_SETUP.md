@@ -10,6 +10,7 @@ The Windows sandbox base image is a pre-configured Windows Server 2022 QCOW2 dis
 - Auto-logon configuration for headless operation
 - VNC server for remote desktop access
 - Proper session configuration for computer use features
+- VirtIO balloon driver for dynamic memory management
 
 ## Prerequisites
 
@@ -197,14 +198,56 @@ python -m websockify --web . 6080 localhost:5900
 Set-Content -Path "C:\start-novnc.bat" -Value $websockifyScript
 ```
 
-### 6. Copy Daemon Binary
+### 6. Install VirtIO Balloon Driver (Memory Ballooning)
+
+Memory ballooning allows the host to dynamically reclaim memory from VMs without shutting them down. This requires the VirtIO balloon driver and service.
+
+**Prerequisites**: The virtio-win ISO should be mounted or extracted on the hypervisor at `/var/lib/libvirt/images/virtio-win.iso`.
+
+```powershell
+# Create directory for balloon driver
+mkdir C:\virtio-balloon
+
+# Copy balloon driver files from virtio-win (via daemon API upload or manual copy)
+# Files needed: balloon.cat, balloon.inf, balloon.sys, blnsvr.exe
+# From: virtio-win ISO -> Balloon/2k22/amd64/
+
+# Install the balloon driver
+pnputil /add-driver C:\virtio-balloon\balloon.inf /install
+
+# Create the balloon service
+sc create BalloonService binPath= C:\virtio-balloon\blnsvr.exe start= auto
+
+# Start the service
+sc start BalloonService
+
+# Verify service is running
+sc query BalloonService
+```
+
+**Expected output**: `STATE: 4 RUNNING`
+
+**Verify from host**:
+
+```bash
+# Check balloon stats (should show detailed memory info)
+virsh dommemstat <vm-id>
+
+# Test ballooning (reduce memory to 12GB)
+virsh setmem <vm-id> 12582912 --live
+
+# Restore memory
+virsh setmem <vm-id> 16777216 --live
+```
+
+### 7. Copy Daemon Binary
 
 ```powershell
 # Copy daemon to C:\
 Copy-Item "path\to\daemon-win.exe" -Destination "C:\daemon-win.exe"
 ```
 
-### 7. Configure Windows Firewall
+### 8. Configure Windows Firewall
 
 The daemon auto-configures firewall rules on startup, but you can pre-configure them:
 
@@ -225,7 +268,7 @@ New-NetFirewallRule -DisplayName "TightVNC" -Direction Inbound -Port 5900 -Proto
 New-NetFirewallRule -DisplayName "noVNC" -Direction Inbound -Port 6080 -Protocol TCP -Action Allow
 ```
 
-### 8. Verify Configuration
+### 9. Verify Configuration
 
 After rebooting, verify the daemon is running in the correct session:
 
@@ -417,6 +460,8 @@ curl http://<vm-ip>:2280/version
 | noVNC | `C:\noVNC\` |
 | VNC password | Stored in TightVNC registry |
 | Startup script | `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\start-daemon.bat` |
+| Balloon driver | `C:\virtio-balloon\` |
+| Balloon service | `BalloonService` (`C:\virtio-balloon\blnsvr.exe`) |
 
 ### Registry Keys
 
