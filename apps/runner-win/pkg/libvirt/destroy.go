@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/daytonaio/runner-win/pkg/models/enums"
 	log "github.com/sirupsen/logrus"
@@ -34,7 +35,16 @@ func (l *LibVirt) Destroy(ctx context.Context, domainId string) error {
 		// Try by name
 		domain, err = conn.LookupDomainByName(domainId)
 		if err != nil {
-			log.Warnf("Domain %s not found, considering it already destroyed", domainId)
+			log.Warnf("Domain %s not found, attempting disk cleanup anyway (may be orphan from failed creation)", domainId)
+			// Still try to clean up files in case they exist (partial creation failure leaves orphan disks)
+			l.cleanupDomainFiles(context.Background(), domainId)
+			// Clean up DHCP reservation too
+			mac := GetReservedMAC(domainId)
+			ip := GetReservedIP(domainId)
+			if err := l.RemoveDHCPReservation(mac, ip); err != nil {
+				log.Warnf("Failed to remove DHCP reservation for %s: %v", domainId, err)
+			}
+			GetIPCache().Delete(domainId)
 			if l.statesCache != nil {
 				l.statesCache.SetSandboxState(ctx, domainId, enums.SandboxStateDestroyed)
 			}
@@ -115,6 +125,7 @@ func (l *LibVirt) RemoveDestroyed(ctx context.Context, domainId string) error {
 }
 
 // cleanupDomainFiles removes disk and NVRAM files for a destroyed domain
+// It attempts removal with retries to handle transient failures (SSH, network, etc.)
 func (l *LibVirt) cleanupDomainFiles(ctx context.Context, domainId string) {
 	isLocal := l.isLocalURI()
 	host := ""
@@ -130,27 +141,60 @@ func (l *LibVirt) cleanupDomainFiles(ctx context.Context, domainId string) {
 	diskPath := filepath.Join(sandboxesBasePath, fmt.Sprintf("%s.qcow2", domainId))
 	nvramPath := filepath.Join(nvramBasePath, fmt.Sprintf("%s_VARS.fd", domainId))
 
-	// Remove disk file
+	const maxRetries = 3
+	retryDelay := time.Second
+
+	// Remove disk file with retries
 	log.Infof("Removing disk file: %s", diskPath)
-	var cmd *exec.Cmd
-	if isLocal {
-		cmd = exec.CommandContext(ctx, "rm", "-f", diskPath)
-	} else {
-		cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", diskPath))
-	}
-	if output, err := cmd.CombinedOutput(); err != nil {
-		log.Warnf("Failed to remove disk %s: %v (output: %s)", diskPath, err, string(output))
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		var cmd *exec.Cmd
+		if isLocal {
+			cmd = exec.CommandContext(ctx, "rm", "-f", diskPath)
+		} else {
+			cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", diskPath))
+		}
+		output, err := cmd.CombinedOutput()
+		if err == nil {
+			log.Infof("Successfully removed disk %s", diskPath)
+			break
+		}
+		if attempt < maxRetries {
+			log.Warnf("Failed to remove disk %s (attempt %d/%d): %v (output: %s), retrying in %v",
+				diskPath, attempt, maxRetries, err, string(output), retryDelay)
+			time.Sleep(retryDelay)
+			retryDelay *= 2 // Exponential backoff
+		} else {
+			log.Errorf("Failed to remove disk %s after %d attempts: %v (output: %s)",
+				diskPath, maxRetries, err, string(output))
+		}
 	}
 
-	// Remove NVRAM file
+	// Reset retry delay for NVRAM
+	retryDelay = time.Second
+
+	// Remove NVRAM file with retries
 	log.Infof("Removing NVRAM file: %s", nvramPath)
-	if isLocal {
-		cmd = exec.CommandContext(ctx, "rm", "-f", nvramPath)
-	} else {
-		cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", nvramPath))
-	}
-	if output, err := cmd.CombinedOutput(); err != nil {
-		log.Warnf("Failed to remove NVRAM %s: %v (output: %s)", nvramPath, err, string(output))
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		var cmd *exec.Cmd
+		if isLocal {
+			cmd = exec.CommandContext(ctx, "rm", "-f", nvramPath)
+		} else {
+			cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -f %s", nvramPath))
+		}
+		output, err := cmd.CombinedOutput()
+		if err == nil {
+			log.Infof("Successfully removed NVRAM %s", nvramPath)
+			break
+		}
+		if attempt < maxRetries {
+			log.Warnf("Failed to remove NVRAM %s (attempt %d/%d): %v (output: %s), retrying in %v",
+				nvramPath, attempt, maxRetries, err, string(output), retryDelay)
+			time.Sleep(retryDelay)
+			retryDelay *= 2 // Exponential backoff
+		} else {
+			log.Errorf("Failed to remove NVRAM %s after %d attempts: %v (output: %s)",
+				nvramPath, maxRetries, err, string(output))
+		}
 	}
 
 	log.Infof("Cleanup completed for domain %s", domainId)

@@ -75,12 +75,18 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 	// Copy NVRAM for UEFI boot
 	nvramPath, err := l.copyNVRAM(ctx, sandboxDto.Id)
 	if err != nil {
+		// Clean up disk on failure
+		log.Warnf("NVRAM copy failed, cleaning up disk for %s", sandboxDto.Id)
+		l.cleanupDomainFiles(context.Background(), sandboxDto.Id)
 		return "", "", fmt.Errorf("failed to copy NVRAM: %w", err)
 	}
 
 	// Build domain XML configuration with specific MAC address and NVRAM path
 	domainXML, err := l.buildDomainXML(sandboxDto, diskPath, nvramPath, mac)
 	if err != nil {
+		// Clean up disk and NVRAM on failure
+		log.Warnf("Domain XML build failed, cleaning up files for %s", sandboxDto.Id)
+		l.cleanupDomainFiles(context.Background(), sandboxDto.Id)
 		return "", "", fmt.Errorf("failed to build domain XML: %w", err)
 	}
 
@@ -88,6 +94,9 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 	log.Infof("Defining domain %s", sandboxDto.Id)
 	domain, err := conn.DomainDefineXML(domainXML)
 	if err != nil {
+		// Clean up disk and NVRAM on failure
+		log.Warnf("Domain definition failed, cleaning up files for %s", sandboxDto.Id)
+		l.cleanupDomainFiles(context.Background(), sandboxDto.Id)
 		return "", "", fmt.Errorf("failed to define domain: %w", err)
 	}
 	defer domain.Free()
@@ -105,6 +114,12 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 	// Start the domain automatically after creation
 	log.Infof("Starting domain %s after creation", name)
 	if err := domain.Create(); err != nil {
+		// Undefine the domain and clean up files on failure
+		log.Warnf("Domain start failed, undefining and cleaning up for %s", sandboxDto.Id)
+		if undefErr := domain.Undefine(); undefErr != nil {
+			log.Warnf("Failed to undefine domain after start failure: %v", undefErr)
+		}
+		l.cleanupDomainFiles(context.Background(), sandboxDto.Id)
 		return "", "", fmt.Errorf("failed to start domain: %w", err)
 	}
 
@@ -133,8 +148,9 @@ func (l *LibVirt) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (
 
 // Minimum resource requirements for Windows VMs
 const (
-	minWindowsMemoryMB = 4096 // 4 GB minimum for Windows 11
-	minWindowsVCPUs    = 2    // 2 vCPUs minimum for Windows 11
+	minWindowsMemoryMB  = 4096 // 4 GB minimum for Windows 11
+	minWindowsVCPUs     = 2    // 2 vCPUs minimum for Windows 11
+	minWindowsStorageGB = 40   // 40 GB minimum for Windows 11 (base image ~30GB + headroom)
 )
 
 func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath string, nvramPath string, macAddress string) (string, error) {
@@ -403,12 +419,20 @@ func (l *LibVirt) createDisk(ctx context.Context, sandboxDto dto.CreateSandboxDT
 		log.Infof("No snapshot specified, using default base image: %s", baseImagePath)
 	}
 
-	log.Infof("Creating disk %s from base image %s", newDiskPath, snapshotPath)
+	// Enforce storage quota with minimum for Windows
+	storageGB := sandboxDto.StorageQuota
+	if storageGB < minWindowsStorageGB {
+		log.Warnf("Storage quota %d GB is below minimum %d GB for Windows, using minimum", storageGB, minWindowsStorageGB)
+		storageGB = minWindowsStorageGB
+	}
+
+	log.Infof("Creating disk %s from base image %s with quota %dG", newDiskPath, snapshotPath, storageGB)
 
 	// Create a qcow2 overlay disk with the base image as backing file
 	// This uses copy-on-write, so each VM has its own changes without modifying the base
-	createDiskCmd := fmt.Sprintf("qemu-img create -f qcow2 -F qcow2 -b %s %s && chown libvirt-qemu:kvm %s",
-		snapshotPath, newDiskPath, newDiskPath)
+	// The size parameter sets the maximum virtual size of the overlay, preventing unbounded growth
+	createDiskCmd := fmt.Sprintf("qemu-img create -f qcow2 -F qcow2 -b %s %s %dG && chown libvirt-qemu:kvm %s",
+		snapshotPath, newDiskPath, storageGB, newDiskPath)
 
 	var cmd *exec.Cmd
 	if isLocal {
