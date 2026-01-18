@@ -303,10 +303,14 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 			// Memory ballooning for dynamic memory management
 			// Allows host to reclaim memory from guest VMs without shutting them down
 			// Requires virtio-win balloon driver (BLNSVR.exe) running in guest
+			// Note: autodeflate is disabled - memory controller manages deflation
+			// This allows aggressive ballooning; controller runs every 5s to respond to pressure
 			MemBalloon: &libvirtxml.DomainMemBalloon{
 				Model:             "virtio",
-				AutoDeflate:       "on", // Automatically deflate if guest hits memory pressure
 				FreePageReporting: "on", // Guest proactively reports free pages to host
+				Stats: &libvirtxml.DomainMemBalloonStats{
+					Period: 5, // Collect stats every 5 seconds for responsive balloon control
+				},
 			},
 		},
 	}

@@ -20,6 +20,7 @@ type RunnerInstanceConfig struct {
 	MetricsService    *services.MetricsService
 	NetRulesManager   *netrules.NetRulesManager
 	SSHGatewayService *sshgateway.Service
+	StatsStore        *libvirt.StatsStore
 }
 
 type Runner struct {
@@ -29,6 +30,7 @@ type Runner struct {
 	MetricsService    *services.MetricsService
 	NetRulesManager   *netrules.NetRulesManager
 	SSHGatewayService *sshgateway.Service
+	StatsStore        *libvirt.StatsStore
 }
 
 var runner *Runner
@@ -50,6 +52,7 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 			MetricsService:    config.MetricsService,
 			NetRulesManager:   config.NetRulesManager,
 			SSHGatewayService: config.SSHGatewayService,
+			StatsStore:        config.StatsStore,
 		}
 	}
 

@@ -101,6 +101,12 @@ func (a *ApiServer) Start() error {
 		metricsController.GET("", gin.WrapH(promhttp.Handler()))
 	}
 
+	statsController := public.Group("/stats")
+	{
+		statsController.GET("/memory", controllers.GetMemoryStats)
+		statsController.GET("/memory/view", controllers.GetMemoryStatsView)
+	}
+
 	infoController := protected.Group("/info")
 	{
 		infoController.GET("", controllers.RunnerInfo)

@@ -119,6 +119,33 @@ func main() {
 	})
 	metricsService.StartMetricsCollection(ctx)
 
+	// Initialize stats store for memory stats persistence
+	statsStore, err := libvirt.NewStatsStore(libvirt.StatsStoreConfig{
+		RetentionDays: 7, // Keep 7 days of stats
+	})
+	if err != nil {
+		log.Warnf("Failed to create stats store: %v (stats will not be persisted)", err)
+	} else {
+		statsStore.Start(ctx)
+		defer statsStore.Close()
+	}
+
+	// Initialize memory ballooning controller
+	if cfg.MemoryBallooningEnabled {
+		memoryController := libvirt.NewMemoryController(libvirt.MemoryControllerConfig{
+			LibVirt:           libvirtClient,
+			StatsStore:        statsStore,
+			CheckInterval:     time.Duration(cfg.MemoryBallooningIntervalSec) * time.Second,
+			MinVMMemoryGB:     uint64(cfg.MemoryBallooningMinVMGB),
+			SafetyBufferGB:    uint64(cfg.MemoryBallooningBufferGB),
+			SafetyBufferRatio: cfg.MemoryBallooningBufferRatio,
+			Enabled:           true,
+		})
+		go memoryController.Start(ctx)
+	} else {
+		log.Info("Memory ballooning disabled")
+	}
+
 	// Initialize sandbox state synchronization service
 	sandboxSyncService := services.NewSandboxSyncService(services.SandboxSyncServiceConfig{
 		LibVirt:  libvirtClient,
@@ -148,6 +175,7 @@ func main() {
 		MetricsService:    metricsService,
 		NetRulesManager:   netRulesManager,
 		SSHGatewayService: sshGatewayService,
+		StatsStore:        statsStore,
 	})
 
 	// Setup structured logger
