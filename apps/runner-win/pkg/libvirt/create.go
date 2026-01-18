@@ -262,6 +262,20 @@ func (l *LibVirt) buildDomainXML(sandboxDto dto.CreateSandboxDTO, diskPath strin
 					},
 				},
 			},
+			// QXL video device for high resolution display support
+			// QXL is a paravirtualized graphics adapter that supports resolutions up to 4K
+			// Requires virtio-win drivers installed in the guest (included in base image)
+			Videos: []libvirtxml.DomainVideo{
+				{
+					Model: libvirtxml.DomainVideoModel{
+						Type:   "qxl",
+						Ram:    65536, // 64 MB RAM for QXL
+						VRam:   65536, // 64 MB VRAM
+						VGAMem: 16384, // 16 MB VGA memory for legacy compatibility
+						Heads:  1,
+					},
+				},
+			},
 		},
 	}
 
