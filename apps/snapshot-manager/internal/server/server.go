@@ -61,10 +61,17 @@ func (s *Server) Start(ctx context.Context) error {
 	app := handlers.NewApp(ctx, s.config)
 	s.app = app
 
-	// Create HTTP server
+	// Create HTTP server with health check endpoint
+	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
+	mux.Handle("/", app)
+
 	s.server = &http.Server{
 		Addr:    s.config.HTTP.Addr,
-		Handler: app,
+		Handler: mux,
 	}
 
 	s.logger.Info("Daytona snapshot-manager started",
