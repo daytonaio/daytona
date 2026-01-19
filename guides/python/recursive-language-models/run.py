@@ -98,80 +98,82 @@ def main(
             budget=budget,
         )
 
-        # Create sandbox from GitHub repo
-        print("Creating sandbox from repository...")
-        sandbox, _ = sandbox_manager.create_sandbox_from_repo(
-            repo_url=repo,
-            branch=branch,
-            commit=commit,
-        )
-        print(f"Sandbox created: {sandbox.id}")
-        print()
-
-        # Extract repo name for logging
-        repo_name = repo.rstrip("/").split("/")[-1].replace(".git", "")
-
-        # Create agent
-        agent = RLMAgent(
-            client=client,
-            sandbox_manager=sandbox_manager,
-            config=config,
-            problem_statement=prompt,
-            instance_id=repo_name,
-            repo_url=repo,
-            depth=0,
-            on_iteration=lambda it: output_handler.iteration(agent.agent_id, 0, it),
-            output=output_handler,
-            existing_sandbox=sandbox,
-        )
-
-        # Run agent
-        print(f"Starting agent with prompt: {prompt[:80]}...")
-        print()
-        agent_result = agent.run()
-
-        # Get the patch
-        patch = agent_result.result
-
-        # Display results
-        print()
-        print("=" * 40)
-        print("Results")
-        print("=" * 40)
-
-        if patch:
-            print(f"Patch generated ({len(patch)} chars)")
+        try:
+            # Create sandbox from GitHub repo
+            print("Creating sandbox from repository...")
+            sandbox, _ = sandbox_manager.create_sandbox_from_repo(
+                repo_url=repo,
+                branch=branch,
+                commit=commit,
+            )
+            print(f"Sandbox created: {sandbox.id}")
             print()
 
-            if output_file:
-                output_file.write_text(patch)
-                print(f"Patch saved to: {output_file}")
+            # Extract repo name for logging
+            repo_name = repo.rstrip("/").split("/")[-1].replace(".git", "")
+
+            # Create agent
+            agent = RLMAgent(
+                client=client,
+                sandbox_manager=sandbox_manager,
+                config=config,
+                problem_statement=prompt,
+                instance_id=repo_name,
+                repo_url=repo,
+                depth=0,
+                on_iteration=lambda it: output_handler.iteration(agent.agent_id, 0, it),
+                output=output_handler,
+                existing_sandbox=sandbox,
+            )
+
+            # Run agent
+            print(f"Starting agent with prompt: {prompt[:80]}...")
+            print()
+            agent_result = agent.run()
+
+            # Get the patch
+            patch = agent_result.result
+
+            # Display results
+            print()
+            print("=" * 40)
+            print("Results")
+            print("=" * 40)
+
+            if patch:
+                print(f"Patch generated ({len(patch)} chars)")
+                print()
+
+                if output_file:
+                    output_file.write_text(patch)
+                    print(f"Patch saved to: {output_file}")
+                else:
+                    print("--- Patch ---")
+                    print(patch)
+                    print("--- End Patch ---")
             else:
-                print("--- Patch ---")
-                print(patch)
-                print("--- End Patch ---")
-        else:
-            print("No patch was generated")
+                print("No patch was generated")
 
-        # Show stats
-        print()
-        print(f"Total iterations: {len(agent_result.iterations)}")
-        print(f"Sub-agents spawned: {len(agent_result.spawned_agents)}")
-        print(f"Execution time: {agent_result.execution_time:.1f}s")
-        print(f"Total cost: ${agent_result.usage.cost:.4f}")
+            # Show stats
+            print()
+            print(f"Total iterations: {len(agent_result.iterations)}")
+            print(f"Sub-agents spawned: {len(agent_result.spawned_agents)}")
+            print(f"Execution time: {agent_result.execution_time:.1f}s")
+            print(f"Total cost: ${agent_result.usage.cost:.4f}")
 
-        # Show tree view
-        if agent_result:
-            output_handler.tree_view(agent_result)
+            # Show tree view
+            if agent_result:
+                output_handler.tree_view(agent_result)
 
-        # Save results for viewer
-        tree_logger = TreeLogger("results")
-        run_id = f"{repo_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        result_path = tree_logger.log_agent_result(agent_result, run_id)
-        print(f"\nResults saved to: {result_path}")
+            # Save results for viewer
+            tree_logger = TreeLogger("results")
+            run_id = f"{repo_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            result_path = tree_logger.log_agent_result(agent_result, run_id)
+            print(f"\nResults saved to: {result_path}")
 
-        # Cleanup
-        sandbox_manager.cleanup_all()
+        finally:
+            # Always cleanup sandboxes, even on failure
+            sandbox_manager.cleanup_all()
 
     except Exception as e:
         logger.exception("Error running agent")
