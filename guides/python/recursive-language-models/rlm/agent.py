@@ -288,8 +288,9 @@ class RLMAgent:
 
         # Run sub-agent
         result = sub_agent.run()
-        self._spawned_agents.append(result)
-        self._usage += result.usage
+        with self._lock:
+            self._spawned_agents.append(result)
+            self._usage += result.usage
 
         # Return result, truncated if necessary
         if result.error:
