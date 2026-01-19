@@ -17,10 +17,7 @@ When you launch the main module, a Daytona sandbox is created and a Node.js agen
 
 You interact with the main program via a command line chat interface. The program sends your prompts to the agent inside the sandbox, which executes them and returns the results:
 
-<details>
-  <summary>Click to view example workflow</summary>
-  <div>
-    ```
+```
 $ npm run start
 Creating sandbox...
 Installing Codex agent in sandbox...
@@ -55,17 +52,9 @@ https://8080-e7c5deb5-7723-4bb8-93c6-25258d9b7c53.proxy.daytona.works
 
 If you need to stop it later: kill 274.
 Usage Summary: Cached: 4096, Input: 22231, Output: 272
-User: the info panel blocks the gameplay
-Thinking...
-📝 Update /home/daytona/style.css
-📝 Update /home/daytona/style.css
-Moved the HUD to the top-left with a tighter max width so it no longer blocks the center of the play area. Files touched: style.css. Reload the page to see the updated layout.
-Usage Summary: Cached: 32640, Input: 39945, Output: 622
 User:
 Cleaning up...
-    ```
-  </div>
-</details>
+```
 
 The agent can also host web apps and provide you with a preview link using the [Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
 
