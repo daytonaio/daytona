@@ -3,10 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { useSidebar } from '@/components/ui/sidebar'
+import { RoutePath } from '@/enums/RoutePath'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn } from '@/lib/utils'
+import { OrganizationRolePermissionsEnum, SandboxState } from '@daytonaio/api-client'
 import { flexRender } from '@tanstack/react-table'
+import { Container, Trash2 } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
-import { Button } from '../ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { useNavigate } from 'react-router-dom'
+import { Pagination } from '../Pagination'
+import { TableEmptyState } from '../TableEmptyState'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,19 +26,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../ui/alert-dialog'
-import { Pagination } from '../Pagination'
-import { TableEmptyState } from '../TableEmptyState'
+import { Button } from '../ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { SandboxTableHeader } from './SandboxTableHeader'
 import { SandboxTableProps } from './types'
 import { useSandboxTable } from './useSandboxTable'
-import { SandboxTableHeader } from './SandboxTableHeader'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { OrganizationRolePermissionsEnum, SandboxState } from '@daytonaio/api-client'
-import { cn } from '@/lib/utils'
-import { Container, Trash2 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
-import { RoutePath } from '@/enums/RoutePath'
-import { AnimatePresence, motion } from 'motion/react'
-import { useSidebar } from '@/components/ui/sidebar'
 
 export function SandboxTable({
   data,
@@ -268,10 +268,7 @@ export function SandboxTable({
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleBulkDeleteConfirm}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
+                    <AlertDialogAction onClick={handleBulkDeleteConfirm} variant="destructive">
                       Delete
                     </AlertDialogAction>
                   </AlertDialogFooter>
