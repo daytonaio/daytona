@@ -25,6 +25,8 @@ To run this example, you need to set the following environment variables:
 
 Create a `.env` file in the project directory with these variables.
 
+## Getting Started
+
 ### Setup and Run
 
 1. Install dependencies:
