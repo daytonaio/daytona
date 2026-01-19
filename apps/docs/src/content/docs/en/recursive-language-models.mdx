@@ -235,12 +235,14 @@ Example spawning pattern used by agents:
 
 ### 5. Example Walkthrough
 
-Let's trace what happens when we run an agent on scikit-learn:
+Let's trace what happens when we run an agent on a popular machine learning library, scikit-learn:
 
 ```bash
 python run.py https://github.com/scikit-learn/scikit-learn \
   -p "Investigate TODO comments across this repository. Spawn sub-agents to explore different modules under sklearn/ in parallel. For each TODO found, assess how difficult it would be to fix (easy/medium/hard). After gathering results, pick the easiest TODO and fix it."
 ```
+
+Note that there are about 400 lines in scikit-learn that contain the substring "# TODO".
 
 **Step 1: Root agent explores and spawns depth-1 sub-agents**
 
