@@ -35,7 +35,7 @@ Press Ctrl+C to stop.
   Web interface:      https://3000-1e0f775c-c01b-40e7-8c64-062fd3dadd75.proxy.daytona.works/
 ```
 
-The agent can host web apps and provide you with a preview link using the [Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
+The agent can host web apps and provide you with a preview link using the [Daytona Preview Links](/docs/en/preview-and-authentication/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
 
 <Image
   src={opencodeResult}
@@ -94,11 +94,11 @@ This example consists of a Node.js script that installs, configures and runs Ope
 #### Initialization
 
 On initialization, the main script:
-1. Creates a new [Daytona sandbox](/docs/en/sandbox-management).
+1. Creates a new [Daytona sandbox](/docs/en/sandboxes).
 2. Installs OpenCode globally inside the sandbox using npm with [process execution](/docs/en/process-code-execution#process-execution).
 3. Creates and uploads a [custom agent configuration](https://opencode.ai/docs/agents/) with Daytona-specific system prompt.
 4. Starts the OpenCode web server inside the sandbox on port 3000.
-5. Substitutes the URL in OpenCode's output with a [Daytona preview link](https://www.daytona.io/docs/en/preview-and-authentication/) for the web interface.
+5. Substitutes the URL in OpenCode's output with a [Daytona preview link](docs/en/preview-and-authentication/) for the web interface.
 
 #### Main Script Code
 
@@ -140,7 +140,7 @@ The OpenCode agent is configured with a system prompt that includes instructions
 }
 ```
 
-The preview URL pattern placeholder in the agent prompt is replaced with a generic preview URL pattern for [Daytona preview links](https://www.daytona.io/docs/en/preview-and-authentication/).
+The preview URL pattern placeholder in the agent prompt is replaced with a generic preview URL pattern for [Daytona preview links](/docs/en/preview-and-authentication/).
 
 #### Clean up
 
