@@ -6,6 +6,7 @@ package docker
 import (
 	"io"
 	"sync"
+	"time"
 
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
@@ -14,20 +15,21 @@ import (
 )
 
 type DockerClientConfig struct {
-	ApiClient              client.APIClient
-	StatesCache            *cache.StatesCache
-	LogWriter              io.Writer
-	AWSRegion              string
-	AWSEndpointUrl         string
-	AWSAccessKeyId         string
-	AWSSecretAccessKey     string
-	DaemonPath             string
-	ComputerUsePluginPath  string
-	NetRulesManager        *netrules.NetRulesManager
-	ResourceLimitsDisabled bool
-	DaemonStartTimeoutSec  int
-	SandboxStartTimeoutSec int
-	UseSnapshotEntrypoint  bool
+	ApiClient                client.APIClient
+	StatesCache              *cache.StatesCache
+	LogWriter                io.Writer
+	AWSRegion                string
+	AWSEndpointUrl           string
+	AWSAccessKeyId           string
+	AWSSecretAccessKey       string
+	DaemonPath               string
+	ComputerUsePluginPath    string
+	NetRulesManager          *netrules.NetRulesManager
+	ResourceLimitsDisabled   bool
+	DaemonStartTimeoutSec    int
+	SandboxStartTimeoutSec   int
+	UseSnapshotEntrypoint    bool
+	VolumeCleanupIntervalSec int
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
@@ -42,21 +44,22 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 	}
 
 	return &DockerClient{
-		apiClient:              config.ApiClient,
-		statesCache:            config.StatesCache,
-		logWriter:              config.LogWriter,
-		awsRegion:              config.AWSRegion,
-		awsEndpointUrl:         config.AWSEndpointUrl,
-		awsAccessKeyId:         config.AWSAccessKeyId,
-		awsSecretAccessKey:     config.AWSSecretAccessKey,
-		volumeMutexes:          make(map[string]*sync.Mutex),
-		daemonPath:             config.DaemonPath,
-		computerUsePluginPath:  config.ComputerUsePluginPath,
-		netRulesManager:        config.NetRulesManager,
-		resourceLimitsDisabled: config.ResourceLimitsDisabled,
-		daemonStartTimeoutSec:  config.DaemonStartTimeoutSec,
-		sandboxStartTimeoutSec: config.SandboxStartTimeoutSec,
-		useSnapshotEntrypoint:  config.UseSnapshotEntrypoint,
+		apiClient:                config.ApiClient,
+		statesCache:              config.StatesCache,
+		logWriter:                config.LogWriter,
+		awsRegion:                config.AWSRegion,
+		awsEndpointUrl:           config.AWSEndpointUrl,
+		awsAccessKeyId:           config.AWSAccessKeyId,
+		awsSecretAccessKey:       config.AWSSecretAccessKey,
+		volumeMutexes:            make(map[string]*sync.Mutex),
+		daemonPath:               config.DaemonPath,
+		computerUsePluginPath:    config.ComputerUsePluginPath,
+		netRulesManager:          config.NetRulesManager,
+		resourceLimitsDisabled:   config.ResourceLimitsDisabled,
+		daemonStartTimeoutSec:    config.DaemonStartTimeoutSec,
+		sandboxStartTimeoutSec:   config.SandboxStartTimeoutSec,
+		useSnapshotEntrypoint:    config.UseSnapshotEntrypoint,
+		volumeCleanupIntervalSec: config.VolumeCleanupIntervalSec,
 	}
 }
 
@@ -65,20 +68,23 @@ func (d *DockerClient) ApiClient() client.APIClient {
 }
 
 type DockerClient struct {
-	apiClient              client.APIClient
-	statesCache            *cache.StatesCache
-	logWriter              io.Writer
-	awsRegion              string
-	awsEndpointUrl         string
-	awsAccessKeyId         string
-	awsSecretAccessKey     string
-	volumeMutexes          map[string]*sync.Mutex
-	volumeMutexesMutex     sync.Mutex
-	daemonPath             string
-	computerUsePluginPath  string
-	netRulesManager        *netrules.NetRulesManager
-	resourceLimitsDisabled bool
-	daemonStartTimeoutSec  int
-	sandboxStartTimeoutSec int
-	useSnapshotEntrypoint  bool
+	apiClient                client.APIClient
+	statesCache              *cache.StatesCache
+	logWriter                io.Writer
+	awsRegion                string
+	awsEndpointUrl           string
+	awsAccessKeyId           string
+	awsSecretAccessKey       string
+	volumeMutexes            map[string]*sync.Mutex
+	volumeMutexesMutex       sync.Mutex
+	daemonPath               string
+	computerUsePluginPath    string
+	netRulesManager          *netrules.NetRulesManager
+	resourceLimitsDisabled   bool
+	daemonStartTimeoutSec    int
+	sandboxStartTimeoutSec   int
+	useSnapshotEntrypoint    bool
+	volumeCleanupIntervalSec int
+	volumeCleanupMu          sync.Mutex
+	lastVolumeCleanup        time.Time
 }

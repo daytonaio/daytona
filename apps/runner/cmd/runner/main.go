@@ -85,18 +85,19 @@ func main() {
 	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
-		ApiClient:              cli,
-		StatesCache:            statesCache,
-		LogWriter:              os.Stdout,
-		AWSRegion:              cfg.AWSRegion,
-		AWSEndpointUrl:         cfg.AWSEndpointUrl,
-		AWSAccessKeyId:         cfg.AWSAccessKeyId,
-		AWSSecretAccessKey:     cfg.AWSSecretAccessKey,
-		DaemonPath:             daemonPath,
-		ComputerUsePluginPath:  pluginPath,
-		NetRulesManager:        netRulesManager,
-		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
-		UseSnapshotEntrypoint:  cfg.UseSnapshotEntrypoint,
+		ApiClient:                cli,
+		StatesCache:              statesCache,
+		LogWriter:                os.Stdout,
+		AWSRegion:                cfg.AWSRegion,
+		AWSEndpointUrl:           cfg.AWSEndpointUrl,
+		AWSAccessKeyId:           cfg.AWSAccessKeyId,
+		AWSSecretAccessKey:       cfg.AWSSecretAccessKey,
+		DaemonPath:               daemonPath,
+		ComputerUsePluginPath:    pluginPath,
+		NetRulesManager:          netRulesManager,
+		ResourceLimitsDisabled:   cfg.ResourceLimitsDisabled,
+		UseSnapshotEntrypoint:    cfg.UseSnapshotEntrypoint,
+		VolumeCleanupIntervalSec: cfg.VolumeCleanupIntervalSec,
 	})
 
 	// Start Docker events monitor

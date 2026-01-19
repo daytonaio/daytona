@@ -9,13 +9,23 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
 )
 
-// CleanupOrphanedVolumeMounts removes volume mount directories that are no longer used by any container
+// CleanupOrphanedVolumeMounts removes volume mount directories that are no longer used by any container.
+// Throttled to run at most once per volumeCleanupIntervalSec (default 30s).
 func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
+	d.volumeCleanupMu.Lock()
+	defer d.volumeCleanupMu.Unlock()
+
+	if d.volumeCleanupIntervalSec > 0 && time.Since(d.lastVolumeCleanup) < time.Duration(d.volumeCleanupIntervalSec)*time.Second {
+		return
+	}
+	d.lastVolumeCleanup = time.Now()
+
 	mountDirs, err := filepath.Glob(filepath.Join(getVolumeMountBasePath(), volumeMountPrefix+"*"))
 	if err != nil || len(mountDirs) == 0 {
 		return
