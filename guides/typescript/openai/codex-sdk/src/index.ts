@@ -28,7 +28,7 @@ async function processPrompt(prompt: string, sandbox: Sandbox): Promise<void> {
 
   // Run the agent asynchronously, passing the prompt and OpenAI API key
   const command = await sandbox.process.executeSessionCommand(sessionId, {
-    command: `${environmentPrefix({ PROMPT: prompt })} node /tmp/agent/index.ts`,
+    command: `${environmentPrefix({ PROMPT: prompt })} npm exec --prefix /tmp/agent tsx -- /tmp/agent/index.ts`,
     runAsync: true,
   })
 
