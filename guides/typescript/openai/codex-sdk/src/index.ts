@@ -106,7 +106,7 @@ async function main() {
     await sandbox.fs.createFolder('.codex', '755')
     await sandbox.fs.uploadFile(Buffer.from(config, 'utf8'), '.codex/config.toml')
 
-    // Upload the NodeJS agent package into a temporary directory in the sandbox
+    // Upload the Node.js agent package into a temporary directory in the sandbox
     console.log('Installing Codex agent in sandbox...')
     await sandbox.fs.createFolder('/tmp/agent', '755')
     await sandbox.fs.uploadFile('./agent/index.ts', '/tmp/agent/index.ts')
