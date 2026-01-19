@@ -11,21 +11,27 @@ class DaytonaError(Exception)
 
 Base error for Daytona SDK.
 
+**Attributes**:
+
+- `message` _str_ - Error message
+- `status_code` _int | None_ - HTTP status code if available
+- `headers` _dict[str, Any]_ - Response headers
+
 #### DaytonaError.\_\_init\_\_
 
 ```python
 def __init__(message: str,
-             status_code: Optional[int] = None,
-             headers: Optional[dict] = None)
+             status_code: int | None = None,
+             headers: Mapping[str, Any] | None = None)
 ```
 
 Initialize Daytona error.
 
 **Arguments**:
 
-- `message` - Error message
-- `status_code` - HTTP status code if available
-- `headers` - Response headers if available
+- `message` _str_ - Error message
+- `status_code` _int | None_ - HTTP status code if available
+- `headers` _Mapping[str, Any] | None_ - Response headers if available
 
 
 ## DaytonaNotFoundError
