@@ -1,4 +1,4 @@
-# Running Recursive Agents on Sandboxes Guide (deeper-rlm + Daytona)
+# Run Recursive Language Models on Daytona
 
 ## Overview
 
@@ -95,20 +95,16 @@ The system runs a recursive agent architecture where each agent operates in its 
 6. **Completion:** Root agent calls `FINAL()` or times out, producing a git patch of all changes
 7. **Cleanup:** Sandboxes are deleted and results are logged to JSON
 
-## Agent Hierarchy
+## Agent Hierarchy Example
 
 ```
 Root Agent (depth=0)
-├── Sandbox 0 (fresh repo clone)
-├── Runs iteration loop, spawns sub-agents via rlm_query()
-│
 ├── Sub-Agent A (depth=1)
-│   ├── Sandbox 1 (fresh repo clone)
-│   └── Can spawn further sub-agents (depth=2, etc.)
-│
+│   ├── Sub-Agent A1 (depth=2)
+│   └── Sub-Agent A2 (depth=2)
 └── Sub-Agent B (depth=1)
-    ├── Sandbox 2 (fresh repo clone)
-    └── Returns result to parent
+    ├── Sub-Agent B1 (depth=2)
+    └── Sub-Agent B2 (depth=2)
 ```
 
 ## Key Functions Available in Agent Code
