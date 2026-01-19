@@ -14,6 +14,7 @@ import {
 } from '@daytonaio/api-client'
 import { RunnerTable } from '@/components/RunnerTable'
 import { CreateRunnerDialog } from '@/components/CreateRunnerDialog'
+import RunnerDetailsSheet from '@/components/RunnerDetailsSheet'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -45,6 +46,11 @@ const Runners: React.FC = () => {
   const [runnerToToggleScheduling, setRunnerToToggleScheduling] = useState<Runner | null>(null)
   const [toggleRunnerSchedulingDialogIsOpen, setToggleRunnerSchedulingDialogIsOpen] = useState(false)
 
+  const [selectedRunner, setSelectedRunner] = useState<Runner | null>(null)
+  const [showRunnerDetails, setShowRunnerDetails] = useState(false)
+
+  const [autoRefresh, setAutoRefresh] = useState(false)
+
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
   const fetchRunners = useCallback(
@@ -71,6 +77,14 @@ const Runners: React.FC = () => {
   useEffect(() => {
     fetchRunners()
   }, [fetchRunners])
+
+  useEffect(() => {
+    if (!autoRefresh) return
+    const interval = setInterval(() => {
+      fetchRunners(false)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [autoRefresh, fetchRunners])
 
   useEffect(() => {
     const handleRunnerCreatedEvent = (runner: Runner) => {
@@ -118,6 +132,17 @@ const Runners: React.FC = () => {
       notificationSocket.off('runner.unschedulable.updated', handleRunnerUnschedulableUpdatedEvent)
     }
   }, [notificationSocket, runners])
+
+  useEffect(() => {
+    if (!selectedRunner || !runners) return
+    const found = runners.find((r) => r.id === selectedRunner.id)
+    if (!found) {
+      setSelectedRunner(null)
+      setShowRunnerDetails(false)
+      return
+    }
+    if (found !== selectedRunner) setSelectedRunner(found)
+  }, [runners, selectedRunner])
 
   const handleCreateRunner = async (createRunnerData: CreateRunner): Promise<CreateRunnerResponse | null> => {
     try {
@@ -206,6 +231,12 @@ const Runners: React.FC = () => {
         onToggleEnabled={handleToggleEnabled}
         onDelete={handleDelete}
         getRegionName={getRegionName}
+        onRowClick={(runner: Runner) => {
+          setSelectedRunner(runner)
+          setShowRunnerDetails(true)
+        }}
+        autoRefresh={autoRefresh}
+        onAutoRefreshChange={setAutoRefresh}
       />
 
       {runnerToToggleScheduling && (
@@ -262,6 +293,21 @@ const Runners: React.FC = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      <RunnerDetailsSheet
+        runner={selectedRunner}
+        open={showRunnerDetails}
+        onOpenChange={setShowRunnerDetails}
+        runnerIsLoading={runnerIsLoading}
+        writePermitted={writePermitted}
+        deletePermitted={deletePermitted}
+        onDelete={(runner) => {
+          setRunnerToDelete(runner)
+          setDeleteRunnerDialogIsOpen(true)
+          setShowRunnerDetails(false)
+        }}
+        getRegionName={getRegionName}
+      />
     </div>
   )
 }
