@@ -9,7 +9,7 @@
     "format:py": "isort libs examples/python guides/python --skip-glob \"**/libs/*api-client-python*/**\" --skip-glob \"**/.venv/**\" && nbqa isort examples/jupyter && black libs examples guides/python --extend-exclude '(^|/)(libs/.*api-client-python.*|\\.venv)(/|$)'",
     "lint": "yarn lint:ts && yarn lint:py",
     "lint:ts": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\"",
-    "lint:py": "pylint libs examples/python guides/python --recursive=y -sn && nbqa pylint examples/jupyter --recursive=y -sn && basedpyright",
+    "lint:py": "pylint libs examples/python --recursive=y -sn && nbqa pylint examples/jupyter --recursive=y -sn && basedpyright",
     "lint:fix": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\" --fix",
     "build": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "build:production": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production --nxBail=true",

@@ -382,6 +382,7 @@ __all__ = [
     "SetSnapshotGeneralStatusDto",
     "SignedPortPreviewUrl",
     "SnapshotDto",
+    "SnapshotManagerCredentials",
     "SnapshotState",
     "SshAccessDto",
     "SshAccessValidationDto",
