@@ -32,9 +32,9 @@ class PtySessionInfo(BaseModel):
     envs: Dict[str, Any] = Field(description="Environment variables for the PTY session")
     cols: Union[StrictFloat, StrictInt] = Field(description="Number of terminal columns")
     rows: Union[StrictFloat, StrictInt] = Field(description="Number of terminal rows")
-    created_at: StrictStr = Field(description="When the PTY session was created", alias="createdAt")
+    created_at: StrictStr = Field(description="When the PTY session was created", serialization_alias="createdAt")
     active: StrictBool = Field(description="Whether the PTY session is currently active")
-    lazy_start: StrictBool = Field(description="Whether the PTY session uses lazy start (only start when first client connects)", alias="lazyStart")
+    lazy_start: StrictBool = Field(description="Whether the PTY session uses lazy start (only start when first client connects)", serialization_alias="lazyStart")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "cwd", "envs", "cols", "rows", "createdAt", "active", "lazyStart"]
 
@@ -101,9 +101,9 @@ class PtySessionInfo(BaseModel):
             "envs": obj.get("envs"),
             "cols": obj.get("cols"),
             "rows": obj.get("rows"),
-            "createdAt": obj.get("createdAt"),
+            "created_at": obj.get("createdAt"),
             "active": obj.get("active"),
-            "lazyStart": obj.get("lazyStart") if obj.get("lazyStart") is not None else False
+            "lazy_start": obj.get("lazyStart") if obj.get("lazyStart") is not None else False
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

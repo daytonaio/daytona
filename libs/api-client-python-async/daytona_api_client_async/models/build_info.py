@@ -28,11 +28,11 @@ class BuildInfo(BaseModel):
     """
     BuildInfo
     """ # noqa: E501
-    dockerfile_content: Optional[StrictStr] = Field(default=None, description="The Dockerfile content used for the build", alias="dockerfileContent")
-    context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", alias="contextHashes")
-    created_at: datetime = Field(description="The creation timestamp", alias="createdAt")
-    updated_at: datetime = Field(description="The last update timestamp", alias="updatedAt")
-    snapshot_ref: StrictStr = Field(description="The snapshot reference", alias="snapshotRef")
+    dockerfile_content: Optional[StrictStr] = Field(default=None, description="The Dockerfile content used for the build", serialization_alias="dockerfileContent")
+    context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", serialization_alias="contextHashes")
+    created_at: datetime = Field(description="The creation timestamp", serialization_alias="createdAt")
+    updated_at: datetime = Field(description="The last update timestamp", serialization_alias="updatedAt")
+    snapshot_ref: StrictStr = Field(description="The snapshot reference", serialization_alias="snapshotRef")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["dockerfileContent", "contextHashes", "createdAt", "updatedAt", "snapshotRef"]
 
@@ -94,11 +94,11 @@ class BuildInfo(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "dockerfileContent": obj.get("dockerfileContent"),
-            "contextHashes": obj.get("contextHashes"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "snapshotRef": obj.get("snapshotRef")
+            "dockerfile_content": obj.get("dockerfileContent"),
+            "context_hashes": obj.get("contextHashes"),
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt"),
+            "snapshot_ref": obj.get("snapshotRef")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

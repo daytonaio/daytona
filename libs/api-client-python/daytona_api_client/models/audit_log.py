@@ -29,19 +29,19 @@ class AuditLog(BaseModel):
     AuditLog
     """ # noqa: E501
     id: StrictStr
-    actor_id: StrictStr = Field(alias="actorId")
-    actor_email: StrictStr = Field(alias="actorEmail")
-    organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
+    actor_id: StrictStr = Field(serialization_alias="actorId")
+    actor_email: StrictStr = Field(serialization_alias="actorEmail")
+    organization_id: Optional[StrictStr] = Field(default=None, serialization_alias="organizationId")
     action: StrictStr
-    target_type: Optional[StrictStr] = Field(default=None, alias="targetType")
-    target_id: Optional[StrictStr] = Field(default=None, alias="targetId")
-    status_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="statusCode")
-    error_message: Optional[StrictStr] = Field(default=None, alias="errorMessage")
-    ip_address: Optional[StrictStr] = Field(default=None, alias="ipAddress")
-    user_agent: Optional[StrictStr] = Field(default=None, alias="userAgent")
+    target_type: Optional[StrictStr] = Field(default=None, serialization_alias="targetType")
+    target_id: Optional[StrictStr] = Field(default=None, serialization_alias="targetId")
+    status_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="statusCode")
+    error_message: Optional[StrictStr] = Field(default=None, serialization_alias="errorMessage")
+    ip_address: Optional[StrictStr] = Field(default=None, serialization_alias="ipAddress")
+    user_agent: Optional[StrictStr] = Field(default=None, serialization_alias="userAgent")
     source: Optional[StrictStr] = None
     metadata: Optional[Dict[str, Any]] = None
-    created_at: datetime = Field(alias="createdAt")
+    created_at: datetime = Field(serialization_alias="createdAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "actorId", "actorEmail", "organizationId", "action", "targetType", "targetId", "statusCode", "errorMessage", "ipAddress", "userAgent", "source", "metadata", "createdAt"]
 
@@ -104,19 +104,19 @@ class AuditLog(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
-            "actorId": obj.get("actorId"),
-            "actorEmail": obj.get("actorEmail"),
-            "organizationId": obj.get("organizationId"),
+            "actor_id": obj.get("actorId"),
+            "actor_email": obj.get("actorEmail"),
+            "organization_id": obj.get("organizationId"),
             "action": obj.get("action"),
-            "targetType": obj.get("targetType"),
-            "targetId": obj.get("targetId"),
-            "statusCode": obj.get("statusCode"),
-            "errorMessage": obj.get("errorMessage"),
-            "ipAddress": obj.get("ipAddress"),
-            "userAgent": obj.get("userAgent"),
+            "target_type": obj.get("targetType"),
+            "target_id": obj.get("targetId"),
+            "status_code": obj.get("statusCode"),
+            "error_message": obj.get("errorMessage"),
+            "ip_address": obj.get("ipAddress"),
+            "user_agent": obj.get("userAgent"),
             "source": obj.get("source"),
             "metadata": obj.get("metadata"),
-            "createdAt": obj.get("createdAt")
+            "created_at": obj.get("createdAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -27,7 +27,7 @@ class UpdateOrganizationDefaultRegion(BaseModel):
     """
     UpdateOrganizationDefaultRegion
     """ # noqa: E501
-    default_region_id: StrictStr = Field(description="The ID of the default region for the organization", alias="defaultRegionId")
+    default_region_id: StrictStr = Field(description="The ID of the default region for the organization", serialization_alias="defaultRegionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["defaultRegionId"]
 
@@ -89,7 +89,7 @@ class UpdateOrganizationDefaultRegion(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "defaultRegionId": obj.get("defaultRegionId")
+            "default_region_id": obj.get("defaultRegionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

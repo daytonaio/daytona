@@ -1,0 +1,403 @@
+from __future__ import annotations
+import pprint
+import re  # noqa: F401
+import json
+
+{{#vendorExtensions.x-py-other-imports}}
+{{{.}}}
+{{/vendorExtensions.x-py-other-imports}}
+{{#vendorExtensions.x-py-model-imports}}
+{{{.}}}
+{{/vendorExtensions.x-py-model-imports}}
+from typing import Optional, Set
+from typing_extensions import Self
+
+{{#hasChildren}}
+{{#discriminator}}
+{{! If this model is a super class, importlib is used. So import the necessary modules for the type here. }}
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+{{#mappedModels}}
+    from {{packageName}}.models.{{model.classFilename}} import {{modelName}}
+{{/mappedModels}}
+
+{{/discriminator}}
+{{/hasChildren}}
+class {{classname}}({{#parent}}{{{.}}}{{/parent}}{{^parent}}BaseModel{{/parent}}):
+    """
+    {{#description}}{{{description}}}{{/description}}{{^description}}{{{classname}}}{{/description}}
+    """ # noqa: E501
+{{#vars}}
+    {{name}}: {{{vendorExtensions.x-py-typing}}}
+{{/vars}}
+{{#isAdditionalPropertiesTrue}}
+    additional_properties: Dict[str, Any] = {}
+{{/isAdditionalPropertiesTrue}}
+    __properties: ClassVar[List[str]] = [{{#allVars}}"{{baseName}}"{{^-last}}, {{/-last}}{{/allVars}}]
+{{#vars}}
+    {{#vendorExtensions.x-regex}}
+
+    @field_validator('{{{name}}}')
+    def {{{name}}}_validate_regular_expression(cls, value):
+        """Validates the regular expression"""
+        {{^required}}
+        if value is None:
+            return value
+
+        {{/required}}
+        {{#required}}
+        {{#isNullable}}
+        if value is None:
+            return value
+
+        {{/isNullable}}
+        {{/required}}
+        if not re.match(r"{{{.}}}", value{{#vendorExtensions.x-modifiers}} ,re.{{{.}}}{{/vendorExtensions.x-modifiers}}):
+            raise ValueError(r"must validate the regular expression {{{vendorExtensions.x-pattern}}}")
+        return value
+    {{/vendorExtensions.x-regex}}
+    {{#isEnum}}
+
+    @field_validator('{{{name}}}')
+    def {{{name}}}_validate_enum(cls, value):
+        """Validates the enum"""
+        {{^required}}
+        if value is None:
+            return value
+
+        {{/required}}
+        {{#required}}
+        {{#isNullable}}
+        if value is None:
+            return value
+
+        {{/isNullable}}
+        {{/required}}
+        {{#isContainer}}
+        {{#isArray}}
+        for i in value:
+            if i not in set([{{#allowableValues}}{{#enumVars}}{{{value}}}{{^-last}}, {{/-last}}{{/enumVars}}{{/allowableValues}}]):
+                raise ValueError("each list item must be one of ({{#allowableValues}}{{#enumVars}}{{{value}}}{{^-last}}, {{/-last}}{{/enumVars}}{{/allowableValues}})")
+        {{/isArray}}
+        {{#isMap}}
+        for i in value.values():
+            if i not in set([{{#allowableValues}}{{#enumVars}}{{{value}}}{{^-last}}, {{/-last}}{{/enumVars}}{{/allowableValues}}]):
+                raise ValueError("dict values must be one of enum values ({{#allowableValues}}{{#enumVars}}{{{value}}}{{^-last}}, {{/-last}}{{/enumVars}}{{/allowableValues}})")
+        {{/isMap}}
+        {{/isContainer}}
+        {{^isContainer}}
+        if value not in set([{{#allowableValues}}{{#enumVars}}{{{value}}}{{^-last}}, {{/-last}}{{/enumVars}}{{/allowableValues}}]):
+            raise ValueError("must be one of enum values ({{#allowableValues}}{{#enumVars}}{{{value}}}{{^-last}}, {{/-last}}{{/enumVars}}{{/allowableValues}})")
+        {{/isContainer}}
+        return value
+    {{/isEnum}}
+{{/vars}}
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        validate_assignment=True,
+        protected_namespaces=(),
+    )
+
+
+{{#hasChildren}}
+{{#discriminator}}
+    # JSON field name that stores the object type
+    __discriminator_property_name: ClassVar[str] = '{{discriminator.propertyBaseName}}'
+
+    # discriminator mappings
+    __discriminator_value_class_map: ClassVar[Dict[str, str]] = {
+        {{#mappedModels}}'{{{mappingName}}}': '{{{modelName}}}'{{^-last}},{{/-last}}{{/mappedModels}}
+    }
+
+    @classmethod
+    def get_discriminator_value(cls, obj: Dict[str, Any]) -> Optional[str]:
+        """Returns the discriminator value (object type) of the data"""
+        discriminator_value = obj[cls.__discriminator_property_name]
+        if discriminator_value:
+            return cls.__discriminator_value_class_map.get(discriminator_value)
+        else:
+            return None
+
+{{/discriminator}}
+{{/hasChildren}}
+    def to_str(self) -> str:
+        """Returns the string representation of the model using alias"""
+        return pprint.pformat(self.model_dump(by_alias=True))
+
+    def to_json(self) -> str:
+        """Returns the JSON representation of the model using alias"""
+        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
+        return json.dumps(self.to_dict())
+
+    @classmethod
+    def from_json(cls, json_str: str) -> Optional[{{^hasChildren}}Self{{/hasChildren}}{{#hasChildren}}{{#discriminator}}Union[{{#mappedModels}}{{{modelName}}}{{^-last}}, {{/-last}}{{/mappedModels}}]{{/discriminator}}{{^discriminator}}Self{{/discriminator}}{{/hasChildren}}]:
+        """Create an instance of {{{classname}}} from a JSON string"""
+        return cls.from_dict(json.loads(json_str))
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return the dictionary representation of the model using alias.
+
+        This has the following differences from calling pydantic's
+        `self.model_dump(by_alias=True)`:
+
+        * `None` is only added to the output dict for nullable fields that
+          were set at model initialization. Other fields with value `None`
+          are ignored.
+        {{#vendorExtensions.x-py-readonly}}
+        * OpenAPI `readOnly` fields are excluded.
+        {{/vendorExtensions.x-py-readonly}}
+        {{#isAdditionalPropertiesTrue}}
+        * Fields in `self.additional_properties` are added to the output dict.
+        {{/isAdditionalPropertiesTrue}}
+        """
+        excluded_fields: Set[str] = set([
+            {{#vendorExtensions.x-py-readonly}}
+            "{{{.}}}",
+            {{/vendorExtensions.x-py-readonly}}
+            {{#isAdditionalPropertiesTrue}}
+            "additional_properties",
+            {{/isAdditionalPropertiesTrue}}
+        ])
+
+        _dict = self.model_dump(
+            by_alias=True,
+            exclude=excluded_fields,
+            exclude_none=True,
+        )
+        {{#allVars}}
+        {{#isContainer}}
+        {{#isArray}}
+        {{#items.isArray}}
+        {{^items.items.isPrimitiveType}}
+        # override the default output from pydantic by calling `to_dict()` of each item in {{{name}}} (list of list)
+        _items = []
+        if self.{{{name}}}:
+            for _item_{{{name}}} in self.{{{name}}}:
+                if _item_{{{name}}}:
+                    _items.append(
+                         [_inner_item.to_dict() for _inner_item in _item_{{{name}}} if _inner_item is not None]
+                    )
+            _dict['{{{baseName}}}'] = _items
+        {{/items.items.isPrimitiveType}}
+        {{/items.isArray}}
+        {{^items.isArray}}
+        {{^items.isPrimitiveType}}
+        {{^items.isEnumOrRef}}
+        # override the default output from pydantic by calling `to_dict()` of each item in {{{name}}} (list)
+        _items = []
+        if self.{{{name}}}:
+            for _item_{{{name}}} in self.{{{name}}}:
+                if _item_{{{name}}}:
+                    _items.append(_item_{{{name}}}.to_dict())
+            _dict['{{{baseName}}}'] = _items
+        {{/items.isEnumOrRef}}
+        {{/items.isPrimitiveType}}
+        {{/items.isArray}}
+        {{/isArray}}
+        {{#isMap}}
+        {{#items.isArray}}
+        {{^items.items.isPrimitiveType}}
+        # override the default output from pydantic by calling `to_dict()` of each value in {{{name}}} (dict of array)
+        _field_dict_of_array = {}
+        if self.{{{name}}}:
+            for _key_{{{name}}} in self.{{{name}}}:
+                if self.{{{name}}}[_key_{{{name}}}] is not None:
+                    _field_dict_of_array[_key_{{{name}}}] = [
+                        _item.to_dict() for _item in self.{{{name}}}[_key_{{{name}}}]
+                    ]
+            _dict['{{{baseName}}}'] = _field_dict_of_array
+        {{/items.items.isPrimitiveType}}
+        {{/items.isArray}}
+        {{^items.isArray}}
+        {{^items.isPrimitiveType}}
+        {{^items.isEnumOrRef}}
+        # override the default output from pydantic by calling `to_dict()` of each value in {{{name}}} (dict)
+        _field_dict = {}
+        if self.{{{name}}}:
+            for _key_{{{name}}} in self.{{{name}}}:
+                if self.{{{name}}}[_key_{{{name}}}]:
+                    _field_dict[_key_{{{name}}}] = self.{{{name}}}[_key_{{{name}}}].to_dict()
+            _dict['{{{baseName}}}'] = _field_dict
+        {{/items.isEnumOrRef}}
+        {{/items.isPrimitiveType}}
+        {{/items.isArray}}
+        {{/isMap}}
+        {{/isContainer}}
+        {{^isContainer}}
+        {{^isPrimitiveType}}
+        {{^isEnumOrRef}}
+        # override the default output from pydantic by calling `to_dict()` of {{{name}}}
+        if self.{{{name}}}:
+            _dict['{{{baseName}}}'] = self.{{{name}}}.to_dict()
+        {{/isEnumOrRef}}
+        {{/isPrimitiveType}}
+        {{/isContainer}}
+        {{/allVars}}
+        {{#isAdditionalPropertiesTrue}}
+        # puts key-value pairs in additional_properties in the top level
+        if self.additional_properties is not None:
+            for _key, _value in self.additional_properties.items():
+                _dict[_key] = _value
+
+        {{/isAdditionalPropertiesTrue}}
+        {{#allVars}}
+        {{#isNullable}}
+        # set to None if {{{name}}} (nullable) is None
+        # and model_fields_set contains the field
+        if self.{{name}} is None and "{{{name}}}" in self.model_fields_set:
+            _dict['{{{baseName}}}'] = None
+
+        {{/isNullable}}
+        {{/allVars}}
+        return _dict
+
+    {{#hasChildren}}
+    @classmethod
+    def from_dict(cls, obj: Dict[str, Any]) -> Optional[{{#discriminator}}Union[{{#mappedModels}}{{{modelName}}}{{^-last}}, {{/-last}}{{/mappedModels}}]{{/discriminator}}{{^discriminator}}Self{{/discriminator}}]:
+        """Create an instance of {{{classname}}} from a dict"""
+        {{#discriminator}}
+        # look up the object type based on discriminator mapping
+        object_type = cls.get_discriminator_value(obj)
+        {{#mappedModels}}
+        if object_type ==  '{{{modelName}}}':
+            return import_module("{{packageName}}.models.{{model.classFilename}}").{{modelName}}.from_dict(obj)
+        {{/mappedModels}}
+
+        raise ValueError("{{{classname}}} failed to lookup discriminator value from " +
+                            json.dumps(obj) + ". Discriminator property name: " + cls.__discriminator_property_name +
+                            ", mapping: " + json.dumps(cls.__discriminator_value_class_map))
+        {{/discriminator}}
+    {{/hasChildren}}
+    {{^hasChildren}}
+    @classmethod
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+        """Create an instance of {{{classname}}} from a dict"""
+        if obj is None:
+            return None
+
+        if not isinstance(obj, dict):
+            return cls.model_validate(obj)
+
+        {{#disallowAdditionalPropertiesIfNotPresent}}
+        {{^isAdditionalPropertiesTrue}}
+        # raise errors for additional fields in the input
+        for _key in obj.keys():
+            if _key not in cls.__properties:
+                raise ValueError("Error due to additional fields (not defined in {{classname}}) in the input: " + _key)
+
+        {{/isAdditionalPropertiesTrue}}
+        {{/disallowAdditionalPropertiesIfNotPresent}}
+        _obj = cls.model_validate({
+            {{#allVars}}
+            {{#isContainer}}
+            {{#isArray}}
+            {{#items.isArray}}
+            {{#items.items.isPrimitiveType}}
+            "{{{name}}}": obj.get("{{{baseName}}}"){{^-last}},{{/-last}}
+            {{/items.items.isPrimitiveType}}
+            {{^items.items.isPrimitiveType}}
+            "{{{name}}}": [
+                    [{{{items.items.dataType}}}.from_dict(_inner_item) for _inner_item in _item]
+                    for _item in obj["{{{baseName}}}"]
+                ] if obj.get("{{{baseName}}}") is not None else None{{^-last}},{{/-last}}
+            {{/items.items.isPrimitiveType}}
+            {{/items.isArray}}
+            {{^items.isArray}}
+            {{^items.isPrimitiveType}}
+            {{#items.isEnumOrRef}}
+            "{{{name}}}": obj.get("{{{baseName}}}"){{^-last}},{{/-last}}
+            {{/items.isEnumOrRef}}
+            {{^items.isEnumOrRef}}
+            "{{{name}}}": [{{{items.dataType}}}.from_dict(_item) for _item in obj["{{{baseName}}}"]] if obj.get("{{{baseName}}}") is not None else None{{^-last}},{{/-last}}
+            {{/items.isEnumOrRef}}
+            {{/items.isPrimitiveType}}
+            {{#items.isPrimitiveType}}
+            "{{{name}}}": obj.get("{{{baseName}}}"){{^-last}},{{/-last}}
+            {{/items.isPrimitiveType}}
+            {{/items.isArray}}
+            {{/isArray}}
+            {{#isMap}}
+            {{^items.isPrimitiveType}}
+            {{^items.isEnumOrRef}}
+            {{#items.isContainer}}
+            {{#items.isMap}}
+            "{{{name}}}": dict(
+                (_k, dict(
+                    (_ik, {{{items.items.dataType}}}.from_dict(_iv))
+                        for _ik, _iv in _v.items()
+                    )
+                    if _v is not None
+                    else None
+                )
+                for _k, _v in obj.get("{{{baseName}}}").items()
+            )
+            if obj.get("{{{baseName}}}") is not None
+            else None{{^-last}},{{/-last}}
+            {{/items.isMap}}
+            {{#items.isArray}}
+            "{{{name}}}": dict(
+                (_k,
+                        [{{{items.items.dataType}}}.from_dict(_item) for _item in _v]
+                        if _v is not None
+                        else None
+                )
+                for _k, _v in obj.get("{{{baseName}}}", {}).items()
+            ){{^-last}},{{/-last}}
+            {{/items.isArray}}
+            {{/items.isContainer}}
+            {{^items.isContainer}}
+            "{{{name}}}": dict(
+                (_k, {{{items.dataType}}}.from_dict(_v))
+                for _k, _v in obj["{{{baseName}}}"].items()
+            )
+            if obj.get("{{{baseName}}}") is not None
+            else None{{^-last}},{{/-last}}
+            {{/items.isContainer}}
+            {{/items.isEnumOrRef}}
+            {{#items.isEnumOrRef}}
+            "{{{name}}}": dict((_k, _v) for _k, _v in obj.get("{{{baseName}}}").items()) if obj.get("{{{baseName}}}") is not None else None{{^-last}},{{/-last}}
+            {{/items.isEnumOrRef}}
+            {{/items.isPrimitiveType}}
+            {{#items.isPrimitiveType}}
+            "{{{name}}}": obj.get("{{{baseName}}}"){{^-last}},{{/-last}}
+            {{/items.isPrimitiveType}}
+            {{/isMap}}
+            {{/isContainer}}
+            {{^isContainer}}
+            {{^isPrimitiveType}}
+            {{^isEnumOrRef}}
+            "{{{name}}}": {{{dataType}}}.from_dict(obj["{{{baseName}}}"]) if obj.get("{{{baseName}}}") is not None else None{{^-last}},{{/-last}}
+            {{/isEnumOrRef}}
+            {{#isEnumOrRef}}
+            "{{{name}}}": obj.get("{{{baseName}}}"){{#defaultValue}} if obj.get("{{baseName}}") is not None else {{defaultValue}}{{/defaultValue}}{{^-last}},{{/-last}}
+            {{/isEnumOrRef}}
+            {{/isPrimitiveType}}
+            {{#isPrimitiveType}}
+            {{#defaultValue}}
+            "{{{name}}}": obj.get("{{{baseName}}}") if obj.get("{{{baseName}}}") is not None else {{{defaultValue}}}{{^-last}},{{/-last}}
+            {{/defaultValue}}
+            {{^defaultValue}}
+            "{{{name}}}": obj.get("{{{baseName}}}"){{^-last}},{{/-last}}
+            {{/defaultValue}}
+            {{/isPrimitiveType}}
+            {{/isContainer}}
+            {{/allVars}}
+        })
+        {{#isAdditionalPropertiesTrue}}
+        # store additional fields in additional_properties
+        for _key in obj.keys():
+            if _key not in cls.__properties:
+                _obj.additional_properties[_key] = obj.get(_key)
+
+        {{/isAdditionalPropertiesTrue}}
+        return _obj
+    {{/hasChildren}}
+
+{{#vendorExtensions.x-py-postponed-model-imports.size}}
+{{#vendorExtensions.x-py-postponed-model-imports}}
+{{{.}}}
+{{/vendorExtensions.x-py-postponed-model-imports}}
+# TODO: Rewrite to not use raise_errors
+{{classname}}.model_rebuild(raise_errors=False)
+{{/vendorExtensions.x-py-postponed-model-imports.size}}

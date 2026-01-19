@@ -29,8 +29,8 @@ class LspCompletionParams(BaseModel):
     """
     LspCompletionParams
     """ # noqa: E501
-    language_id: StrictStr = Field(description="Language identifier", alias="languageId")
-    path_to_project: StrictStr = Field(description="Path to the project", alias="pathToProject")
+    language_id: StrictStr = Field(description="Language identifier", serialization_alias="languageId")
+    path_to_project: StrictStr = Field(description="Path to the project", serialization_alias="pathToProject")
     uri: StrictStr = Field(description="Document URI")
     position: Position
     context: Optional[CompletionContext] = None
@@ -101,8 +101,8 @@ class LspCompletionParams(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "languageId": obj.get("languageId"),
-            "pathToProject": obj.get("pathToProject"),
+            "language_id": obj.get("languageId"),
+            "path_to_project": obj.get("pathToProject"),
             "uri": obj.get("uri"),
             "position": Position.from_dict(obj["position"]) if obj.get("position") is not None else None,
             "context": CompletionContext.from_dict(obj["context"]) if obj.get("context") is not None else None

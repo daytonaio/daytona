@@ -27,10 +27,10 @@ class MouseDragRequest(BaseModel):
     """
     MouseDragRequest
     """ # noqa: E501
-    start_x: Union[StrictFloat, StrictInt] = Field(description="The starting X coordinate for the drag operation", alias="startX")
-    start_y: Union[StrictFloat, StrictInt] = Field(description="The starting Y coordinate for the drag operation", alias="startY")
-    end_x: Union[StrictFloat, StrictInt] = Field(description="The ending X coordinate for the drag operation", alias="endX")
-    end_y: Union[StrictFloat, StrictInt] = Field(description="The ending Y coordinate for the drag operation", alias="endY")
+    start_x: Union[StrictFloat, StrictInt] = Field(description="The starting X coordinate for the drag operation", serialization_alias="startX")
+    start_y: Union[StrictFloat, StrictInt] = Field(description="The starting Y coordinate for the drag operation", serialization_alias="startY")
+    end_x: Union[StrictFloat, StrictInt] = Field(description="The ending X coordinate for the drag operation", serialization_alias="endX")
+    end_y: Union[StrictFloat, StrictInt] = Field(description="The ending Y coordinate for the drag operation", serialization_alias="endY")
     button: Optional[StrictStr] = Field(default=None, description="The mouse button to use for dragging (left, right, middle). Defaults to left")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["startX", "startY", "endX", "endY", "button"]
@@ -93,10 +93,10 @@ class MouseDragRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "startX": obj.get("startX"),
-            "startY": obj.get("startY"),
-            "endX": obj.get("endX"),
-            "endY": obj.get("endY"),
+            "start_x": obj.get("startX"),
+            "start_y": obj.get("startY"),
+            "end_x": obj.get("endX"),
+            "end_y": obj.get("endY"),
             "button": obj.get("button")
         })
         # store additional fields in additional_properties

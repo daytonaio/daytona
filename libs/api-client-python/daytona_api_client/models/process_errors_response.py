@@ -27,7 +27,7 @@ class ProcessErrorsResponse(BaseModel):
     """
     ProcessErrorsResponse
     """ # noqa: E501
-    process_name: StrictStr = Field(description="The name of the VNC process whose error logs were retrieved", alias="processName")
+    process_name: StrictStr = Field(description="The name of the VNC process whose error logs were retrieved", serialization_alias="processName")
     errors: StrictStr = Field(description="The error log output from the specified VNC process")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["processName", "errors"]
@@ -90,7 +90,7 @@ class ProcessErrorsResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "processName": obj.get("processName"),
+            "process_name": obj.get("processName"),
             "errors": obj.get("errors")
         })
         # store additional fields in additional_properties

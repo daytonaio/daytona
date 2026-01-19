@@ -28,7 +28,7 @@ class OidcConfig(BaseModel):
     OidcConfig
     """ # noqa: E501
     issuer: StrictStr = Field(description="OIDC issuer")
-    client_id: StrictStr = Field(description="OIDC client ID", alias="clientId")
+    client_id: StrictStr = Field(description="OIDC client ID", serialization_alias="clientId")
     audience: StrictStr = Field(description="OIDC audience")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["issuer", "clientId", "audience"]
@@ -92,7 +92,7 @@ class OidcConfig(BaseModel):
 
         _obj = cls.model_validate({
             "issuer": obj.get("issuer"),
-            "clientId": obj.get("clientId"),
+            "client_id": obj.get("clientId"),
             "audience": obj.get("audience")
         })
         # store additional fields in additional_properties

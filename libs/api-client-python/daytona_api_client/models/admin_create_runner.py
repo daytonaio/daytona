@@ -28,16 +28,16 @@ class AdminCreateRunner(BaseModel):
     """
     AdminCreateRunner
     """ # noqa: E501
-    region_id: StrictStr = Field(alias="regionId")
+    region_id: StrictStr = Field(serialization_alias="regionId")
     name: StrictStr
-    api_key: StrictStr = Field(alias="apiKey")
-    api_version: Annotated[str, Field(strict=True)] = Field(description="The api version of the runner to create", alias="apiVersion")
+    api_key: StrictStr = Field(serialization_alias="apiKey")
+    api_version: Annotated[str, Field(strict=True)] = Field(description="The api version of the runner to create", serialization_alias="apiVersion")
     domain: Optional[StrictStr] = Field(default=None, description="The domain of the runner")
-    api_url: Optional[StrictStr] = Field(default=None, description="The API URL of the runner", alias="apiUrl")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="The proxy URL of the runner", alias="proxyUrl")
+    api_url: Optional[StrictStr] = Field(default=None, description="The API URL of the runner", serialization_alias="apiUrl")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="The proxy URL of the runner", serialization_alias="proxyUrl")
     cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The CPU capacity of the runner")
-    memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The memory capacity of the runner in GiB", alias="memoryGiB")
-    disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk capacity of the runner in GiB", alias="diskGiB")
+    memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The memory capacity of the runner in GiB", serialization_alias="memoryGiB")
+    disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk capacity of the runner in GiB", serialization_alias="diskGiB")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["regionId", "name", "apiKey", "apiVersion", "domain", "apiUrl", "proxyUrl", "cpu", "memoryGiB", "diskGiB"]
 
@@ -106,16 +106,16 @@ class AdminCreateRunner(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "regionId": obj.get("regionId"),
+            "region_id": obj.get("regionId"),
             "name": obj.get("name"),
-            "apiKey": obj.get("apiKey"),
-            "apiVersion": obj.get("apiVersion"),
+            "api_key": obj.get("apiKey"),
+            "api_version": obj.get("apiVersion"),
             "domain": obj.get("domain"),
-            "apiUrl": obj.get("apiUrl"),
-            "proxyUrl": obj.get("proxyUrl"),
+            "api_url": obj.get("apiUrl"),
+            "proxy_url": obj.get("proxyUrl"),
             "cpu": obj.get("cpu"),
-            "memoryGiB": obj.get("memoryGiB"),
-            "diskGiB": obj.get("diskGiB")
+            "memory_gi_b": obj.get("memoryGiB"),
+            "disk_gi_b": obj.get("diskGiB")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

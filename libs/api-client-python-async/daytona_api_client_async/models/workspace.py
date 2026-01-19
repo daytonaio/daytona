@@ -33,39 +33,39 @@ class Workspace(BaseModel):
     Workspace
     """ # noqa: E501
     id: StrictStr = Field(description="The ID of the sandbox")
-    organization_id: StrictStr = Field(description="The organization ID of the sandbox", alias="organizationId")
+    organization_id: StrictStr = Field(description="The organization ID of the sandbox", serialization_alias="organizationId")
     name: StrictStr = Field(description="The name of the sandbox")
     snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the sandbox")
     user: StrictStr = Field(description="The user associated with the project")
     env: Dict[str, StrictStr] = Field(description="Environment variables for the sandbox")
     labels: Dict[str, StrictStr] = Field(description="Labels for the sandbox")
     public: StrictBool = Field(description="Whether the sandbox http preview is public")
-    network_block_all: StrictBool = Field(description="Whether to block all network access for the sandbox", alias="networkBlockAll")
-    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed CIDR network addresses for the sandbox", alias="networkAllowList")
+    network_block_all: StrictBool = Field(description="Whether to block all network access for the sandbox", serialization_alias="networkBlockAll")
+    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed CIDR network addresses for the sandbox", serialization_alias="networkAllowList")
     target: StrictStr = Field(description="The target environment for the sandbox")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU quota for the sandbox")
     gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU quota for the sandbox")
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory quota for the sandbox")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk quota for the sandbox")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
-    desired_state: Optional[SandboxDesiredState] = Field(default=None, description="The desired state of the sandbox", alias="desiredState")
-    error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the sandbox", alias="errorReason")
+    desired_state: Optional[SandboxDesiredState] = Field(default=None, description="The desired state of the sandbox", serialization_alias="desiredState")
+    error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the sandbox", serialization_alias="errorReason")
     recoverable: Optional[StrictBool] = Field(default=None, description="Whether the sandbox error is recoverable.")
-    backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", alias="backupState")
-    backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt")
-    auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
-    auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval")
-    auto_delete_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)", alias="autoDeleteInterval")
+    backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", serialization_alias="backupState")
+    backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", serialization_alias="backupCreatedAt")
+    auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", serialization_alias="autoStopInterval")
+    auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-archive interval in minutes", serialization_alias="autoArchiveInterval")
+    auto_delete_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)", serialization_alias="autoDeleteInterval")
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes attached to the sandbox")
-    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the sandbox", alias="buildInfo")
-    created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the sandbox", alias="createdAt")
-    updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the sandbox", alias="updatedAt")
-    var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
-    daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion")
-    runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", alias="runnerId")
+    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the sandbox", serialization_alias="buildInfo")
+    created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the sandbox", serialization_alias="createdAt")
+    updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the sandbox", serialization_alias="updatedAt")
+    var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", serialization_alias="class")
+    daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", serialization_alias="daemonVersion")
+    runner_id: Optional[StrictStr] = Field(default=None, description="The runner ID of the sandbox", serialization_alias="runnerId")
     image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
-    snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", alias="snapshotState")
-    snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
+    snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", serialization_alias="snapshotState")
+    snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", serialization_alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "recoverable", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "runnerId", "image", "snapshotState", "snapshotCreatedAt", "info"]
@@ -172,39 +172,39 @@ class Workspace(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
-            "organizationId": obj.get("organizationId"),
+            "organization_id": obj.get("organizationId"),
             "name": obj.get("name"),
             "snapshot": obj.get("snapshot"),
             "user": obj.get("user"),
             "env": obj.get("env"),
             "labels": obj.get("labels"),
             "public": obj.get("public"),
-            "networkBlockAll": obj.get("networkBlockAll"),
-            "networkAllowList": obj.get("networkAllowList"),
+            "network_block_all": obj.get("networkBlockAll"),
+            "network_allow_list": obj.get("networkAllowList"),
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "state": obj.get("state"),
-            "desiredState": obj.get("desiredState"),
-            "errorReason": obj.get("errorReason"),
+            "desired_state": obj.get("desiredState"),
+            "error_reason": obj.get("errorReason"),
             "recoverable": obj.get("recoverable"),
-            "backupState": obj.get("backupState"),
-            "backupCreatedAt": obj.get("backupCreatedAt"),
-            "autoStopInterval": obj.get("autoStopInterval"),
-            "autoArchiveInterval": obj.get("autoArchiveInterval"),
-            "autoDeleteInterval": obj.get("autoDeleteInterval"),
+            "backup_state": obj.get("backupState"),
+            "backup_created_at": obj.get("backupCreatedAt"),
+            "auto_stop_interval": obj.get("autoStopInterval"),
+            "auto_archive_interval": obj.get("autoArchiveInterval"),
+            "auto_delete_interval": obj.get("autoDeleteInterval"),
             "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
-            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "class": obj.get("class"),
-            "daemonVersion": obj.get("daemonVersion"),
-            "runnerId": obj.get("runnerId"),
+            "build_info": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt"),
+            "var_class": obj.get("class"),
+            "daemon_version": obj.get("daemonVersion"),
+            "runner_id": obj.get("runnerId"),
             "image": obj.get("image"),
-            "snapshotState": obj.get("snapshotState"),
-            "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
+            "snapshot_state": obj.get("snapshotState"),
+            "snapshot_created_at": obj.get("snapshotCreatedAt"),
             "info": SandboxInfo.from_dict(obj["info"]) if obj.get("info") is not None else None
         })
         # store additional fields in additional_properties

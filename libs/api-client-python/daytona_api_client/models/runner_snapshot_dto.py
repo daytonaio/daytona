@@ -27,9 +27,9 @@ class RunnerSnapshotDto(BaseModel):
     """
     RunnerSnapshotDto
     """ # noqa: E501
-    runner_snapshot_id: StrictStr = Field(description="Runner snapshot ID", alias="runnerSnapshotId")
-    runner_id: StrictStr = Field(description="Runner ID", alias="runnerId")
-    runner_domain: Optional[StrictStr] = Field(default=None, description="Runner domain", alias="runnerDomain")
+    runner_snapshot_id: StrictStr = Field(description="Runner snapshot ID", serialization_alias="runnerSnapshotId")
+    runner_id: StrictStr = Field(description="Runner ID", serialization_alias="runnerId")
+    runner_domain: Optional[StrictStr] = Field(default=None, description="Runner domain", serialization_alias="runnerDomain")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["runnerSnapshotId", "runnerId", "runnerDomain"]
 
@@ -91,9 +91,9 @@ class RunnerSnapshotDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "runnerSnapshotId": obj.get("runnerSnapshotId"),
-            "runnerId": obj.get("runnerId"),
-            "runnerDomain": obj.get("runnerDomain")
+            "runner_snapshot_id": obj.get("runnerSnapshotId"),
+            "runner_id": obj.get("runnerId"),
+            "runner_domain": obj.get("runnerDomain")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

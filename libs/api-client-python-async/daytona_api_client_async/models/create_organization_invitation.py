@@ -30,8 +30,8 @@ class CreateOrganizationInvitation(BaseModel):
     """ # noqa: E501
     email: StrictStr = Field(description="Email address of the invitee")
     role: StrictStr = Field(description="Organization member role for the invitee")
-    assigned_role_ids: List[StrictStr] = Field(description="Array of assigned role IDs for the invitee", alias="assignedRoleIds")
-    expires_at: Optional[datetime] = Field(default=None, description="Expiration date of the invitation", alias="expiresAt")
+    assigned_role_ids: List[StrictStr] = Field(description="Array of assigned role IDs for the invitee", serialization_alias="assignedRoleIds")
+    expires_at: Optional[datetime] = Field(default=None, description="Expiration date of the invitation", serialization_alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["email", "role", "assignedRoleIds", "expiresAt"]
 
@@ -102,8 +102,8 @@ class CreateOrganizationInvitation(BaseModel):
         _obj = cls.model_validate({
             "email": obj.get("email"),
             "role": obj.get("role") if obj.get("role") is not None else 'member',
-            "assignedRoleIds": obj.get("assignedRoleIds"),
-            "expiresAt": obj.get("expiresAt")
+            "assigned_role_ids": obj.get("assignedRoleIds"),
+            "expires_at": obj.get("expiresAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

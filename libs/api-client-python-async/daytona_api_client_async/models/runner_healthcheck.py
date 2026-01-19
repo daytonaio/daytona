@@ -30,9 +30,9 @@ class RunnerHealthcheck(BaseModel):
     """ # noqa: E501
     metrics: Optional[RunnerHealthMetrics] = Field(default=None, description="Runner metrics")
     domain: Optional[StrictStr] = Field(default=None, description="Runner domain")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", alias="proxyUrl")
-    api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", alias="apiUrl")
-    app_version: StrictStr = Field(description="Runner app version", alias="appVersion")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", serialization_alias="proxyUrl")
+    api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", serialization_alias="apiUrl")
+    app_version: StrictStr = Field(description="Runner app version", serialization_alias="appVersion")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["metrics", "domain", "proxyUrl", "apiUrl", "appVersion"]
 
@@ -99,9 +99,9 @@ class RunnerHealthcheck(BaseModel):
         _obj = cls.model_validate({
             "metrics": RunnerHealthMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None,
             "domain": obj.get("domain"),
-            "proxyUrl": obj.get("proxyUrl"),
-            "apiUrl": obj.get("apiUrl"),
-            "appVersion": obj.get("appVersion")
+            "proxy_url": obj.get("proxyUrl"),
+            "api_url": obj.get("apiUrl"),
+            "app_version": obj.get("appVersion")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

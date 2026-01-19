@@ -27,9 +27,9 @@ class SessionExecuteResponse(BaseModel):
     """
     SessionExecuteResponse
     """ # noqa: E501
-    cmd_id: Optional[StrictStr] = Field(default=None, description="The ID of the executed command", alias="cmdId")
+    cmd_id: Optional[StrictStr] = Field(default=None, description="The ID of the executed command", serialization_alias="cmdId")
     output: Optional[StrictStr] = Field(default=None, description="The output of the executed command marked with stdout and stderr prefixes")
-    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the executed command", alias="exitCode")
+    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the executed command", serialization_alias="exitCode")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["cmdId", "output", "exitCode"]
 
@@ -91,9 +91,9 @@ class SessionExecuteResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "cmdId": obj.get("cmdId"),
+            "cmd_id": obj.get("cmdId"),
             "output": obj.get("output"),
-            "exitCode": obj.get("exitCode")
+            "exit_code": obj.get("exitCode")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

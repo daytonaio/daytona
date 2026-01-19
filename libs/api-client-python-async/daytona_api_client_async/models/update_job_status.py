@@ -29,8 +29,8 @@ class UpdateJobStatus(BaseModel):
     UpdateJobStatus
     """ # noqa: E501
     status: JobStatus = Field(description="The new status of the job")
-    error_message: Optional[StrictStr] = Field(default=None, description="Error message if the job failed", alias="errorMessage")
-    result_metadata: Optional[StrictStr] = Field(default=None, description="Result metadata for the job", alias="resultMetadata")
+    error_message: Optional[StrictStr] = Field(default=None, description="Error message if the job failed", serialization_alias="errorMessage")
+    result_metadata: Optional[StrictStr] = Field(default=None, description="Result metadata for the job", serialization_alias="resultMetadata")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["status", "errorMessage", "resultMetadata"]
 
@@ -93,8 +93,8 @@ class UpdateJobStatus(BaseModel):
 
         _obj = cls.model_validate({
             "status": obj.get("status"),
-            "errorMessage": obj.get("errorMessage"),
-            "resultMetadata": obj.get("resultMetadata")
+            "error_message": obj.get("errorMessage"),
+            "result_metadata": obj.get("resultMetadata")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

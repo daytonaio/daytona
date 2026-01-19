@@ -27,17 +27,17 @@ class RunnerHealthMetrics(BaseModel):
     """
     RunnerHealthMetrics
     """ # noqa: E501
-    current_cpu_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current CPU usage percentage", alias="currentCpuUsagePercentage")
-    current_memory_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current memory usage percentage", alias="currentMemoryUsagePercentage")
-    current_disk_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current disk usage percentage", alias="currentDiskUsagePercentage")
-    current_allocated_cpu: Union[StrictFloat, StrictInt] = Field(description="Currently allocated CPU cores", alias="currentAllocatedCpu")
-    current_allocated_memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Currently allocated memory in GiB", alias="currentAllocatedMemoryGiB")
-    current_allocated_disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Currently allocated disk in GiB", alias="currentAllocatedDiskGiB")
-    current_snapshot_count: Union[StrictFloat, StrictInt] = Field(description="Number of snapshots currently stored", alias="currentSnapshotCount")
-    current_started_sandboxes: Union[StrictFloat, StrictInt] = Field(description="Number of started sandboxes", alias="currentStartedSandboxes")
+    current_cpu_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current CPU usage percentage", serialization_alias="currentCpuUsagePercentage")
+    current_memory_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current memory usage percentage", serialization_alias="currentMemoryUsagePercentage")
+    current_disk_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current disk usage percentage", serialization_alias="currentDiskUsagePercentage")
+    current_allocated_cpu: Union[StrictFloat, StrictInt] = Field(description="Currently allocated CPU cores", serialization_alias="currentAllocatedCpu")
+    current_allocated_memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Currently allocated memory in GiB", serialization_alias="currentAllocatedMemoryGiB")
+    current_allocated_disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Currently allocated disk in GiB", serialization_alias="currentAllocatedDiskGiB")
+    current_snapshot_count: Union[StrictFloat, StrictInt] = Field(description="Number of snapshots currently stored", serialization_alias="currentSnapshotCount")
+    current_started_sandboxes: Union[StrictFloat, StrictInt] = Field(description="Number of started sandboxes", serialization_alias="currentStartedSandboxes")
     cpu: Union[StrictFloat, StrictInt] = Field(description="Total CPU cores on the runner")
-    memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total RAM in GiB on the runner", alias="memoryGiB")
-    disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total disk space in GiB on the runner", alias="diskGiB")
+    memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total RAM in GiB on the runner", serialization_alias="memoryGiB")
+    disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="Total disk space in GiB on the runner", serialization_alias="diskGiB")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "cpu", "memoryGiB", "diskGiB"]
 
@@ -99,17 +99,17 @@ class RunnerHealthMetrics(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "currentCpuUsagePercentage": obj.get("currentCpuUsagePercentage"),
-            "currentMemoryUsagePercentage": obj.get("currentMemoryUsagePercentage"),
-            "currentDiskUsagePercentage": obj.get("currentDiskUsagePercentage"),
-            "currentAllocatedCpu": obj.get("currentAllocatedCpu"),
-            "currentAllocatedMemoryGiB": obj.get("currentAllocatedMemoryGiB"),
-            "currentAllocatedDiskGiB": obj.get("currentAllocatedDiskGiB"),
-            "currentSnapshotCount": obj.get("currentSnapshotCount"),
-            "currentStartedSandboxes": obj.get("currentStartedSandboxes"),
+            "current_cpu_usage_percentage": obj.get("currentCpuUsagePercentage"),
+            "current_memory_usage_percentage": obj.get("currentMemoryUsagePercentage"),
+            "current_disk_usage_percentage": obj.get("currentDiskUsagePercentage"),
+            "current_allocated_cpu": obj.get("currentAllocatedCpu"),
+            "current_allocated_memory_gi_b": obj.get("currentAllocatedMemoryGiB"),
+            "current_allocated_disk_gi_b": obj.get("currentAllocatedDiskGiB"),
+            "current_snapshot_count": obj.get("currentSnapshotCount"),
+            "current_started_sandboxes": obj.get("currentStartedSandboxes"),
             "cpu": obj.get("cpu"),
-            "memoryGiB": obj.get("memoryGiB"),
-            "diskGiB": obj.get("diskGiB")
+            "memory_gi_b": obj.get("memoryGiB"),
+            "disk_gi_b": obj.get("diskGiB")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

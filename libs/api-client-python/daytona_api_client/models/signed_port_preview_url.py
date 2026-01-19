@@ -27,7 +27,7 @@ class SignedPortPreviewUrl(BaseModel):
     """
     SignedPortPreviewUrl
     """ # noqa: E501
-    sandbox_id: StrictStr = Field(description="ID of the sandbox", alias="sandboxId")
+    sandbox_id: StrictStr = Field(description="ID of the sandbox", serialization_alias="sandboxId")
     port: StrictInt = Field(description="Port number of the signed preview URL")
     token: StrictStr = Field(description="Token of the signed preview URL")
     url: StrictStr = Field(description="Signed preview url")
@@ -92,7 +92,7 @@ class SignedPortPreviewUrl(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sandboxId": obj.get("sandboxId"),
+            "sandbox_id": obj.get("sandboxId"),
             "port": obj.get("port"),
             "token": obj.get("token"),
             "url": obj.get("url")
