@@ -322,10 +322,7 @@ export function SandboxTable({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleBulkDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleBulkDeleteConfirm} variant="destructive">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

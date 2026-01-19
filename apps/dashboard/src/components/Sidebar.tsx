@@ -27,7 +27,7 @@ import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
-import { cn } from '@/lib/utils'
+import { cn, getMetaKey } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { addHours, formatRelative } from 'date-fns'
 import {
@@ -283,6 +283,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   useNavCommands(commandItems)
 
   const cmdkEnabled = useIsCommandPaletteEnabled()
+  const metaKey = getMetaKey()
 
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
@@ -299,22 +300,22 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           <SidebarTrigger className="p-2 [&_svg]:size-5" />
         </div>
         <SidebarMenu>
+          <OrganizationPicker />
           {cmdkEnabled && (
             <SidebarMenuItem className="mb-1">
               <SidebarMenuButton
-                tooltip="Search"
+                tooltip={`Search ${metaKey}+K`}
                 variant="outline"
-                className="flex items-center gap-2 justify-between"
+                className="flex items-center gap-2 justify-between dark:bg-input/30 dark:hover:bg-sidebar-accent hover:shadow-[0_0_0_1px_hsl(var(--sidebar-border))]"
                 onClick={() => commandPaletteActions.setIsOpen(true)}
               >
                 <span className="flex items-center gap-2">
                   <SearchIcon className="w-4 h-4" /> Search
                 </span>
-                <Kbd className="whitespace-nowrap">⌘ K</Kbd>
+                <Kbd className="whitespace-nowrap">{metaKey} K</Kbd>
               </SidebarMenuButton>
             </SidebarMenuItem>
           )}
-          <OrganizationPicker />
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
