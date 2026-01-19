@@ -9,7 +9,7 @@ async def main():
         snapshot1 = f"us-{int(time.time() * 1000)}"
         print(f"Creating snapshot {snapshot1}")
         try:
-            await daytona.snapshot.create(
+            _ = await daytona.snapshot.create(
                 CreateSnapshotParams(
                     name=snapshot1,
                     image=Image.debian_slim("3.12"),
@@ -23,7 +23,7 @@ async def main():
         snapshot2 = f"eu-{int(time.time() * 1000)}"
         print(f"Creating snapshot {snapshot2}")
         try:
-            await daytona.snapshot.create(
+            _ = await daytona.snapshot.create(
                 CreateSnapshotParams(
                     name=snapshot2,
                     image=Image.debian_slim("3.13"),

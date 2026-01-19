@@ -1,23 +1,37 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Optional
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any
 
 
 class DaytonaError(Exception):
-    """Base error for Daytona SDK."""
+    """Base error for Daytona SDK.
 
-    def __init__(self, message: str, status_code: Optional[int] = None, headers: Optional[dict] = None):
+    Attributes:
+        message (str): Error message
+        status_code (int | None): HTTP status code if available
+        headers (dict[str, Any]): Response headers
+    """
+
+    def __init__(
+        self,
+        message: str,
+        status_code: int | None = None,
+        headers: Mapping[str, Any] | None = None,
+    ):
         """Initialize Daytona error.
 
         Args:
-            message: Error message
-            status_code: HTTP status code if available
-            headers: Response headers if available
+            message (str): Error message
+            status_code (int | None): HTTP status code if available
+            headers (Mapping[str, Any] | None): Response headers if available
         """
         super().__init__(message)
-        self.status_code = status_code
-        self.headers = headers or {}
+        self.status_code: int | None = status_code
+        self.headers: dict[str, Any] = dict(headers or {})
 
 
 class DaytonaNotFoundError(DaytonaError):

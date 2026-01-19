@@ -1,8 +1,9 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -41,9 +42,9 @@ class PtyResult:
     the exit code and any error information.
 
     Attributes:
-        exit_code: Exit code of the PTY process (0 for success, non-zero for errors).
+        exit_code: int | None: Exit code of the PTY process (0 for success, non-zero for errors).
                   None if the process hasn't exited yet or exit code couldn't be determined.
-        error: Error message if the PTY failed or was terminated abnormally.
+        error: str | None: Error message if the PTY failed or was terminated abnormally.
                None if no error occurred.
 
     Example:
@@ -60,5 +61,5 @@ class PtyResult:
         ```
     """
 
-    exit_code: Optional[int] = None
-    error: Optional[str] = None
+    exit_code: int | None = None
+    error: str | None = None

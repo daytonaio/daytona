@@ -1,22 +1,19 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-import sys
+from __future__ import annotations
+
 import warnings
 from enum import Enum, EnumMeta
-from typing import Any, Callable, Type, TypeVar, cast
+from typing import Any, Callable, TypeVar, cast
 
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
+from typing_extensions import override
 
 E = TypeVar("E", bound=Enum)
-P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def deprecated_alias(old_name: str, new_name: str) -> Callable[[Type[T]], Type[T]]:
+def deprecated_alias(old_name: str, new_name: str) -> Callable[[type[T]], type[T]]:
     """Decorator to mark a class or enum as deprecated with an alias.
 
     Args:
@@ -27,16 +24,17 @@ def deprecated_alias(old_name: str, new_name: str) -> Callable[[Type[T]], Type[T
         A wrapped class that issues deprecation warnings when used
     """
 
-    def decorator(cls: Type[T]) -> Type[T]:
+    def decorator(cls: type[T]) -> type[T]:
         # Create warning message once
         warning_message = (
             f"`{old_name}` is deprecated. Please use `{new_name}` instead. "
             + "This will be removed in a future version."
         )
 
-        if isinstance(cls, type) and issubclass(cls, Enum):
+        if issubclass(cls, Enum):
 
             class DeprecatedEnumMeta(EnumMeta):  # pylint: disable=unused-variable
+                @override
                 def __getattribute__(cls, name: str) -> Any:
                     if not name.startswith("_"):
                         warnings.warn(warning_message, DeprecationWarning, stacklevel=2)
@@ -44,12 +42,13 @@ def deprecated_alias(old_name: str, new_name: str) -> Callable[[Type[T]], Type[T
 
             # Create the deprecated enum class with optimized creation
             class DeprecatedEnum(Enum, metaclass=DeprecatedEnumMeta):
-                def __new__(cls, value: Any) -> "DeprecatedEnum":
+                def __new__(cls, value: object) -> "DeprecatedEnum":
                     obj = object.__new__(cls)
                     obj._value_ = value
                     return obj
 
-                def __eq__(self, other: Any) -> bool:
+                @override
+                def __eq__(self, other: object) -> bool:
                     return self.value == getattr(other, "value", other)
 
             # Add enum members and copy metadata in one pass
@@ -64,15 +63,15 @@ def deprecated_alias(old_name: str, new_name: str) -> Callable[[Type[T]], Type[T
                     getattr(cls, attr) if attr != "__name__" else old_name,
                 )
 
-            return cast(Type[T], DeprecatedEnum)
+            return cast(type[T], DeprecatedEnum)
 
         # For non-enum classes, create a wrapper class that preserves type hints
         class WrappedClass(cls):  # type: ignore
-            def __new__(cls, *args: P.args, **kwargs: P.kwargs) -> T:
+            def __new__(cls, *args: object, **kwargs: object) -> "WrappedClass":
                 warnings.warn(warning_message, DeprecationWarning, stacklevel=2)
                 return super().__new__(cls)  # pylint: disable=no-value-for-parameter
 
-            def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+            def __init__(self, *args: object, **kwargs: object) -> None:
                 warnings.warn(warning_message, DeprecationWarning, stacklevel=2)
                 super().__init__(*args, **kwargs)
 
@@ -91,6 +90,6 @@ def deprecated_alias(old_name: str, new_name: str) -> Callable[[Type[T]], Type[T
             if not attr.startswith("__"):
                 setattr(WrappedClass, attr, value)
 
-        return cast(Type[T], WrappedClass)
+        return cast(type[T], WrappedClass)
 
     return decorator
