@@ -80,7 +80,7 @@ The script has several configurable parameters in `config.yaml`:
 
 ### Agent Settings
 
-- `max_iterations`: Maximum iterations per agent before timeout (default: 30)
+- `max_iterations`: Maximum iterations per agent before timeout (default: 50)
 - `result_truncation_limit`: Maximum characters for sub-agent results (default: 20000)
 
 ## How It Works
