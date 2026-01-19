@@ -86,6 +86,13 @@ const Playground: React.FC = () => {
     return currentIndex > prevIndex ? 'right' : 'left'
   }, [playgroundCategory])
 
+  const sidePanel = useMemo(() => {
+    if (playgroundCategory === PlaygroundCategories.SANDBOX) return <SandboxParameters />
+    if (playgroundCategory === PlaygroundCategories.TERMINAL) return <TerminalDescription />
+    if (playgroundCategory === PlaygroundCategories.VNC) return <VNCInteractionOptions />
+    return null
+  }, [playgroundCategory])
+
   return (
     <PageLayout>
       <PageHeader>
@@ -128,31 +135,15 @@ const Playground: React.FC = () => {
               <PlaygroundLayout>
                 <PlaygroundLayoutSidebar>
                   <AnimatePresence mode="popLayout">
-                    {playgroundCategory === PlaygroundCategories.SANDBOX && (
-                      <SlideLeftRight direction={direction} key="sandbox-parameters">
-                        <SandboxParameters />
-                      </SlideLeftRight>
-                    )}
-                    {playgroundCategory === PlaygroundCategories.TERMINAL && (
-                      <SlideLeftRight direction={direction} key="terminal-description">
-                        <TerminalDescription />
-                      </SlideLeftRight>
-                    )}
-                    {playgroundCategory === PlaygroundCategories.VNC && (
-                      <SlideLeftRight direction={direction} key="vnc-interaction-options">
-                        <VNCInteractionOptions />
-                      </SlideLeftRight>
-                    )}
+                    <SlideLeftRight direction={direction} key={playgroundCategory}>
+                      {sidePanel}
+                    </SlideLeftRight>
                   </AnimatePresence>
                 </PlaygroundLayoutSidebar>
 
                 <Drawer open={drawerOpen === playgroundCategory} onOpenChange={handleDrawerOpenChange}>
                   <DrawerContent>
-                    <div className="p-4 overflow-auto">
-                      {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxParameters />}
-                      {playgroundCategory === PlaygroundCategories.TERMINAL && <TerminalDescription />}
-                      {playgroundCategory === PlaygroundCategories.VNC && <VNCInteractionOptions />}
-                    </div>
+                    <div className="p-4 overflow-auto">{sidePanel}</div>
                   </DrawerContent>
                 </Drawer>
                 <PlaygroundLayoutContent className="[&>*]:w-full [&>*]:max-w-[min(90%,1024px)]">
