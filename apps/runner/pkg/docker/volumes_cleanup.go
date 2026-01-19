@@ -10,21 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/docker/docker/api/types/container"
 	log "github.com/sirupsen/logrus"
 )
 
-const volumeMountPrefix = "daytona-volume-"
-
 // CleanupOrphanedVolumeMounts removes volume mount directories that are no longer used by any container
 func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
-	basePath := "/mnt"
-	if config.GetEnvironment() == "development" {
-		basePath = "/tmp"
-	}
-
-	mountDirs, err := filepath.Glob(filepath.Join(basePath, volumeMountPrefix+"*"))
+	mountDirs, err := filepath.Glob(filepath.Join(getVolumeMountBasePath(), volumeMountPrefix+"*"))
 	if err != nil || len(mountDirs) == 0 {
 		return
 	}
@@ -41,21 +33,19 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 
 func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) map[string]bool {
 	inUse := make(map[string]bool)
+	prefix := filepath.Join(getVolumeMountBasePath(), volumeMountPrefix)
 
 	containers, err := d.apiClient.ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
 		return inUse
 	}
 
+	// Use Mounts from list response - avoids expensive ContainerInspect calls
 	for _, ct := range containers {
-		info, err := d.apiClient.ContainerInspect(ctx, ct.ID)
-		if err != nil || info.HostConfig == nil {
-			continue
-		}
-		for _, bind := range info.HostConfig.Binds {
-			parts := strings.Split(bind, ":")
-			if len(parts) >= 1 {
-				inUse[strings.TrimSuffix(parts[0], "/")] = true
+		for _, m := range ct.Mounts {
+			src := strings.TrimSuffix(m.Source, "/")
+			if strings.HasPrefix(src, prefix) {
+				inUse[src] = true
 			}
 		}
 	}
