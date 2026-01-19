@@ -67,17 +67,6 @@ func main() {
 		return
 	}
 
-	// Start Docker events monitor
-	monitor := docker.NewDockerMonitor(cli, netRulesManager)
-	go func() {
-		err = monitor.Start()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-	defer monitor.Stop()
-	defer netRulesManager.Stop()
-
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
 		log.Errorf("Error writing daemon binary: %v", err)
@@ -109,6 +98,22 @@ func main() {
 		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
 		UseSnapshotEntrypoint:  cfg.UseSnapshotEntrypoint,
 	})
+
+	// Start Docker events monitor
+	monitorOpts := docker.MonitorOptions{
+		OnDestroyEvent: func(ctx context.Context) {
+			dockerClient.CleanupOrphanedVolumeMounts(ctx)
+		},
+	}
+	monitor := docker.NewDockerMonitor(cli, netRulesManager, monitorOpts)
+	go func() {
+		err = monitor.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	defer monitor.Stop()
+	defer netRulesManager.Stop()
 
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
 

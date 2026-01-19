@@ -17,14 +17,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type MonitorOptions struct {
+	OnDestroyEvent func(ctx context.Context)
+}
+
 type DockerMonitor struct {
 	apiClient       client.APIClient
 	ctx             context.Context
 	cancel          context.CancelFunc
 	netRulesManager *netrules.NetRulesManager
+	opts            MonitorOptions
 }
 
-func NewDockerMonitor(apiClient client.APIClient, netRulesManager *netrules.NetRulesManager) *DockerMonitor {
+func NewDockerMonitor(apiClient client.APIClient, netRulesManager *netrules.NetRulesManager, opts MonitorOptions) *DockerMonitor {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &DockerMonitor{
@@ -32,6 +37,7 @@ func NewDockerMonitor(apiClient client.APIClient, netRulesManager *netrules.NetR
 		ctx:             ctx,
 		cancel:          cancel,
 		netRulesManager: netRulesManager,
+		opts:            opts,
 	}
 }
 
@@ -161,6 +167,9 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 		err := dm.netRulesManager.DeleteNetworkRules(shortContainerID)
 		if err != nil {
 			log.Errorf("Error deleting network rules: %v", err)
+		}
+		if dm.opts.OnDestroyEvent != nil {
+			go dm.opts.OnDestroyEvent(dm.ctx)
 		}
 	}
 }
