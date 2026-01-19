@@ -87,6 +87,24 @@ npm run start
 
 The OpenCode web interface will start and wait for you to open it in your browser.
 
+### Models and API Providers
+
+OpenCode works with [over 75 LLM providers](https://opencode.ai/docs/providers/), with a free provider selected by default. You can change the model or provider at any time using the menu below the prompt input in the web interface. If your chosen provider needs an API key, you’ll be prompted to enter it.
+
+#### Persisting API Keys
+
+To persist API keys between uses of the script, you can set them as environment variables when creating the Daytona sandbox.
+
+For example, to use an Anthropic API key, modify the `daytona.create()` call in `src/index.ts` to include your desired API key:
+
+```typescript
+sandbox = await daytona.create({
+  envVars: {
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+  },
+})
+```
+
 ### 3. Understanding the Script
 
 This example consists of a Node.js script that installs, configures and runs OpenCode inside a Daytona sandbox.
@@ -111,20 +129,20 @@ const command = await sandbox.process.executeSessionCommand(sessionId, {
 })
 ```
 
-The script automatically replaces the localhost URL in OpenCode's output with a Daytona preview link so you can access it from your browser:
+When OpenCode starts its web server, it prints a link to its web UI using a localhost address (e.g., `http://127.0.0.1:3000`). However, since the sandbox runs remotely, this localhost link is only accessible inside the sandbox itself. To solve this, the script parses OpenCode’s output, and replaces the URL with the corresponding Daytona preview link.
 
 ```typescript
 const opencodePreviewLink = await sandbox.getPreviewLink(OPENCODE_PORT)
 const replaceUrl = (text: string) =>
   text.replace(
-    new RegExp(`http:\\/\\/127\\.0\\.0\\.1:${OPENCODE_PORT}`, 'g'),
+    new RegExp(`http:\/\/127\.0\.0\.1:${OPENCODE_PORT}`, 'g'),
     opencodePreviewLink.url
   )
 ```
 
 #### OpenCode Agent Configuration
 
-The OpenCode agent is configured with a system prompt that includes instructions to use Daytona sandbox paths and preview links. The agent configuration is passed to the sandbox as the environment variable `OPENCODE_CONFIG_CONTENT` containing a JSON string:
+A custom system prompt is used to instruct the agent on how to use Daytona sandbox paths and preview links. This prompt is packaged into a JSON configuration string, which is passed to the sandbox as the `OPENCODE_CONFIG_CONTENT` environment variable:
 
 ```json
 {
@@ -134,13 +152,13 @@ The OpenCode agent is configured with a system prompt that includes instructions
     "daytona": {
       "description": "Daytona sandbox-aware coding agent",
       "mode": "primary",
-      "prompt": "You are running in a Daytona sandbox. Use the /home/daytona directory instead of /workspace for file operations. When running services on localhost, they will be accessible as: {PREVIEW_URL_PATTERN}. When starting a server, always give the user the preview URL to access it. When starting a server, start it in the background with & so the command does not block further instructions."
+      "prompt": "You are running in a Daytona sandbox. Use the /home/daytona directory instead of /workspace for file operations. When running services on localhost, they will be accessible as: <PREVIEW_URL_PATTERN>. When starting a server, always give the user the preview URL to access it. When starting a server, start it in the background with & so the command does not block further instructions."
     }
   }
 }
 ```
 
-The preview URL pattern placeholder in the agent prompt is replaced with a generic preview URL pattern for [Daytona preview links](/docs/en/preview-and-authentication/).
+The `<PREVIEW_URL_PATTERN>` in the agent prompt is a template URL where `{PORT}` is a placeholder for the port to access on the Daytona sandbox. This template string is created by generating a [preview link](/docs/en/preview-and-authentication/) for a specific port number and then replacing the port number with `{PORT}`.
 
 #### Clean up
 
