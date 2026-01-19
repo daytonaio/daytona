@@ -138,24 +138,27 @@ Once the agent is ready, the program creates a readline interface to read user i
 Each user request is passed to the agent by running a command in the sandbox:
 
 ```typescript
-  // Create a session
-  const sessionId = `codex-session-${Date.now()}`
-  await sandbox.process.createSession(sessionId)
-  // Run the agent asynchronously, passing the prompt and OpenAI API key
-  const command = await sandbox.process.executeSessionCommand(sessionId, {
-    command: `${environmentPrefix({ PROMPT: prompt })} node /tmp/agent/index.ts`,
-    runAsync: true,
-  })
-  // Stream the command output
-  await sandbox.process.getSessionCommandLogs(
-    sessionId,
-    command.cmdId,
-    onStdout,
-    onStderr,
-  )
-  // Clean up the session
-  await sandbox.process.deleteSession(sessionId)
-}
+// Create a session to stream the agent output
+const sessionId = `codex-session-${Date.now()}`
+await sandbox.process.createSession(sessionId)
+
+// Run the agent asynchronously, passing the prompt and OpenAI API key
+const command = await sandbox.process.executeSessionCommand(sessionId, {
+  command: `${environmentPrefix({ PROMPT: prompt })} node /tmp/agent/index.ts`,
+  runAsync: true,
+})
+
+// Stream agent output as it arrives
+if (!command.cmdId) throw new Error('Failed to start agent command in sandbox')
+await sandbox.process.getSessionCommandLogs(
+  sessionId,
+  command.cmdId,
+  onStdout,
+  onStderr,
+)
+
+// Delete the session
+await sandbox.process.deleteSession(sessionId)
 ```
 
 The `onStdout` and `onStderr` callbacks are used to pass the agent's output back to the main program. After the agent finishes responding to the prompt, the main program waits for the next user input.
