@@ -40,6 +40,8 @@ import type { PaginatedLogs } from '../models'
 // @ts-ignore
 import type { PaginatedSandboxes } from '../models'
 // @ts-ignore
+import type { PaginatedSandboxesDeprecated } from '../models'
+// @ts-ignore
 import type { PaginatedTraces } from '../models'
 // @ts-ignore
 import type { PortPreviewUrl } from '../models'
@@ -1023,20 +1025,22 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     *
-     * @summary List all sandboxes
+     * Basic filtering with cursor-based pagination. Newest first. Strongly consistent.
+     * @summary List sandboxes
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [verbose] Include verbose output
-     * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+     * @param {string} [cursor] Pagination cursor from a previous response
+     * @param {number} [limit] Number of results per page
+     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     listSandboxes: async (
       xDaytonaOrganizationID?: string,
-      verbose?: boolean,
-      labels?: string,
+      cursor?: string,
+      limit?: number,
       includeErroredDeleted?: boolean,
+      states?: Array<ListSandboxesStatesEnum>,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/sandbox`
@@ -1057,16 +1061,20 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       // authentication oauth2 required
 
-      if (verbose !== undefined) {
-        localVarQueryParameter['verbose'] = verbose
+      if (cursor !== undefined) {
+        localVarQueryParameter['cursor'] = cursor
       }
 
-      if (labels !== undefined) {
-        localVarQueryParameter['labels'] = labels
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
       }
 
       if (includeErroredDeleted !== undefined) {
         localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted
+      }
+
+      if (states) {
+        localVarQueryParameter['states'] = states
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -2477,27 +2485,30 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     *
-     * @summary List all sandboxes
+     * Basic filtering with cursor-based pagination. Newest first. Strongly consistent.
+     * @summary List sandboxes
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [verbose] Include verbose output
-     * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+     * @param {string} [cursor] Pagination cursor from a previous response
+     * @param {number} [limit] Number of results per page
+     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async listSandboxes(
       xDaytonaOrganizationID?: string,
-      verbose?: boolean,
-      labels?: string,
+      cursor?: string,
+      limit?: number,
       includeErroredDeleted?: boolean,
+      states?: Array<ListSandboxesStatesEnum>,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Sandbox>>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSandboxes>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(
         xDaytonaOrganizationID,
-        verbose,
-        labels,
+        cursor,
+        limit,
         includeErroredDeleted,
+        states,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -2560,7 +2571,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       sort?: ListSandboxesPaginatedDeprecatedSortEnum,
       order?: ListSandboxesPaginatedDeprecatedOrderEnum,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSandboxes>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSandboxesDeprecated>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxesPaginatedDeprecated(
         xDaytonaOrganizationID,
         page,
@@ -3343,24 +3354,26 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
-     *
-     * @summary List all sandboxes
+     * Basic filtering with cursor-based pagination. Newest first. Strongly consistent.
+     * @summary List sandboxes
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [verbose] Include verbose output
-     * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+     * @param {string} [cursor] Pagination cursor from a previous response
+     * @param {number} [limit] Number of results per page
+     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     listSandboxes(
       xDaytonaOrganizationID?: string,
-      verbose?: boolean,
-      labels?: string,
+      cursor?: string,
+      limit?: number,
       includeErroredDeleted?: boolean,
+      states?: Array<ListSandboxesStatesEnum>,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<Sandbox>> {
+    ): AxiosPromise<PaginatedSandboxes> {
       return localVarFp
-        .listSandboxes(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, options)
+        .listSandboxes(xDaytonaOrganizationID, cursor, limit, includeErroredDeleted, states, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -3412,7 +3425,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       sort?: ListSandboxesPaginatedDeprecatedSortEnum,
       order?: ListSandboxesPaginatedDeprecatedOrderEnum,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<PaginatedSandboxes> {
+    ): AxiosPromise<PaginatedSandboxesDeprecated> {
       return localVarFp
         .listSandboxesPaginatedDeprecated(
           xDaytonaOrganizationID,
@@ -4033,25 +4046,27 @@ export class SandboxApi extends BaseAPI {
   }
 
   /**
-   *
-   * @summary List all sandboxes
+   * Basic filtering with cursor-based pagination. Newest first. Strongly consistent.
+   * @summary List sandboxes
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {boolean} [verbose] Include verbose output
-   * @param {string} [labels] JSON encoded labels to filter by
-   * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+   * @param {string} [cursor] Pagination cursor from a previous response
+   * @param {number} [limit] Number of results per page
+   * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
+   * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by. Can not be combined with \&quot;name\&quot;
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
   public listSandboxes(
     xDaytonaOrganizationID?: string,
-    verbose?: boolean,
-    labels?: string,
+    cursor?: string,
+    limit?: number,
     includeErroredDeleted?: boolean,
+    states?: Array<ListSandboxesStatesEnum>,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .listSandboxes(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, options)
+      .listSandboxes(xDaytonaOrganizationID, cursor, limit, includeErroredDeleted, states, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -4377,6 +4392,28 @@ export class SandboxApi extends BaseAPI {
   }
 }
 
+/**
+ * @export
+ */
+export const ListSandboxesStatesEnum = {
+  CREATING: 'creating',
+  RESTORING: 'restoring',
+  DESTROYING: 'destroying',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STARTING: 'starting',
+  STOPPING: 'stopping',
+  ERROR: 'error',
+  BUILD_FAILED: 'build_failed',
+  PENDING_BUILD: 'pending_build',
+  BUILDING_SNAPSHOT: 'building_snapshot',
+  UNKNOWN: 'unknown',
+  PULLING_SNAPSHOT: 'pulling_snapshot',
+  ARCHIVED: 'archived',
+  ARCHIVING: 'archiving',
+  RESIZING: 'resizing',
+} as const
+export type ListSandboxesStatesEnum = (typeof ListSandboxesStatesEnum)[keyof typeof ListSandboxesStatesEnum]
 /**
  * @export
  */

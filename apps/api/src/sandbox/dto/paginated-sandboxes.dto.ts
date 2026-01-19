@@ -8,15 +8,16 @@ import { SandboxDto } from './sandbox.dto'
 
 @ApiSchema({ name: 'PaginatedSandboxes' })
 export class PaginatedSandboxesDto {
-  @ApiProperty({ type: [SandboxDto] })
+  @ApiProperty({
+    description: 'List of results for the current page',
+    type: [SandboxDto],
+  })
   items: SandboxDto[]
 
-  @ApiProperty()
-  total: number
-
-  @ApiProperty()
-  page: number
-
-  @ApiProperty()
-  totalPages: number
+  @ApiProperty({
+    description: 'Cursor for the next page of results',
+    type: String,
+    nullable: true,
+  })
+  nextCursor: string | null
 }

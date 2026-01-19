@@ -119,6 +119,7 @@ models/otel-config.ts
 models/paginated-audit-logs.ts
 models/paginated-jobs.ts
 models/paginated-logs.ts
+models/paginated-sandboxes-deprecated.ts
 models/paginated-sandboxes.ts
 models/paginated-snapshots.ts
 models/paginated-traces.ts

@@ -19,19 +19,31 @@ import type { Sandbox } from './sandbox'
 /**
  *
  * @export
- * @interface PaginatedSandboxes
+ * @interface PaginatedSandboxesDeprecated
  */
-export interface PaginatedSandboxes {
+export interface PaginatedSandboxesDeprecated {
   /**
-   * List of results for the current page
+   *
    * @type {Array<Sandbox>}
-   * @memberof PaginatedSandboxes
+   * @memberof PaginatedSandboxesDeprecated
    */
   items: Array<Sandbox>
   /**
-   * Cursor for the next page of results
-   * @type {string}
-   * @memberof PaginatedSandboxes
+   *
+   * @type {number}
+   * @memberof PaginatedSandboxesDeprecated
    */
-  nextCursor: string | null
+  total: number
+  /**
+   *
+   * @type {number}
+   * @memberof PaginatedSandboxesDeprecated
+   */
+  page: number
+  /**
+   *
+   * @type {number}
+   * @memberof PaginatedSandboxesDeprecated
+   */
+  totalPages: number
 }

@@ -108,7 +108,7 @@ export class WorkspaceController {
     @Query('labels') labelsQuery?: string,
   ): Promise<WorkspaceDto[]> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const workspacees = await this.workspaceService.findAllDeprecated(authContext.organizationId, labels)
+    const workspacees = await this.workspaceService.list_deprecated_v1(authContext.organizationId, labels)
     const dtos = workspacees.map(async (workspace) => {
       const dto = WorkspaceDto.fromSandbox(workspace)
       return dto
