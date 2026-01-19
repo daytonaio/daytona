@@ -115,7 +115,7 @@ export function RunnerTable({
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={(value) => setGlobalFilter(String(value))}
-          placeholder="Search by ID or Region"
+          placeholder="Search by ID, Name, or Region"
           className="max-w-sm"
         />
         {onAutoRefreshChange && (
