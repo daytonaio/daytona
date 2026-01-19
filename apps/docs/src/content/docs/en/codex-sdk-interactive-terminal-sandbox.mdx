@@ -134,8 +134,22 @@ On initialization, the main program:
 
 #### Main Program Code
 
-Once the agent is ready, the program creates a readline interface to read user input and sends it to the agent.
-Each user request is passed to the agent by running a command in the sandbox:
+Custom system prompts for Codex must be configured via a `.codex/config.toml` file, so the main program creates this file in the sandbox before starting the agent:
+
+```typescript
+const systemPrompt = [
+  'You are running in a Daytona sandbox.',
+  'Use the /home/daytona directory instead of /workspace for file operations.',
+  `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
+].join(' ')
+const config = `developer_instructions = "${systemPrompt}"`
+await sandbox.fs.createFolder('.codex', '755')
+await sandbox.fs.uploadFile(Buffer.from(config, 'utf8'), '.codex/config.toml')
+```
+
+This prompt instructs the agent to use the correct file paths and preview link format for Daytona sandboxes.
+
+After installing dependencies, the main program enters a loop to read user input and send it to the agent. For each user prompt it receives, it creates a new Daytona process session to run the agent command asynchronously and stream back the output:
 
 ```typescript
 // Create a session to stream the agent output
@@ -176,19 +190,6 @@ const options: ThreadOptions = {
   skipGitRepoCheck: true,
   sandboxMode: 'danger-full-access',
 }
-```
-
-The system prompt is configured via a `.codex/config.toml` file that's created before the agent starts:
-
-```typescript
-const systemPrompt = [
-  'You are running in a Daytona sandbox.',
-  'Use the /home/daytona directory instead of /workspace for file operations.',
-  `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
-].join(' ')
-const config = `developer_instructions = "${systemPrompt}"`
-await sandbox.fs.createFolder('.codex', '755')
-await sandbox.fs.uploadFile(Buffer.from(config, 'utf8'), '.codex/config.toml')
 ```
 
 The agent maintains thread state between requests by writing the thread ID to a file, allowing it to maintain context across multiple interactions:
