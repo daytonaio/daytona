@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
@@ -880,7 +880,7 @@ const Sandboxes: React.FC = () => {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  className={buttonVariants({ variant: 'destructive' })}
+                  variant="destructive"
                   onClick={() => handleDelete(sandboxToDelete)}
                   disabled={sandboxIsLoading[sandboxToDelete]}
                 >

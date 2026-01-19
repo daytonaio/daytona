@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Mail, Trash2 } from 'lucide-react'
 import React from 'react'
-import { OrganizationEmailsTableActionsProps } from './types'
-import { Button } from '../ui/button'
-import { Trash2, Mail } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +16,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../ui/alert-dialog'
+import { Button } from '../ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import { OrganizationEmailsTableActionsProps } from './types'
 
 export function OrganizationEmailsTableActions({
   email,
@@ -62,9 +62,9 @@ export function OrganizationEmailsTableActions({
         <AlertDialogTrigger asChild>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon-sm"
             disabled={isLoading}
-            className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
+            className="h-8 w-8 p-0 hover:bg-destructive hover:text-white"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -78,10 +78,7 @@ export function OrganizationEmailsTableActions({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDelete} variant="destructive">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
