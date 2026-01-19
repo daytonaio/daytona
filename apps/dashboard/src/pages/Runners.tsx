@@ -141,7 +141,9 @@ const Runners: React.FC = () => {
       setShowRunnerDetails(false)
       return
     }
-    if (found !== selectedRunner) setSelectedRunner(found)
+    if (found.id !== selectedRunner.id) {
+      setSelectedRunner(found)
+    }
   }, [runners, selectedRunner])
 
   const handleCreateRunner = async (createRunnerData: CreateRunner): Promise<CreateRunnerResponse | null> => {
