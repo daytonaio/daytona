@@ -26,7 +26,7 @@ class IsPortInUseResponse(BaseModel):
     """
     IsPortInUseResponse
     """ # noqa: E501
-    is_in_use: Optional[StrictBool] = Field(default=None, alias="isInUse")
+    is_in_use: Optional[StrictBool] = Field(default=None, serialization_alias="isInUse")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["isInUse"]
 
@@ -88,7 +88,7 @@ class IsPortInUseResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "isInUse": obj.get("isInUse")
+            "is_in_use": obj.get("isInUse")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

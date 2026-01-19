@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,7 +26,7 @@ class PtyCreateResponse(BaseModel):
     """
     PtyCreateResponse
     """ # noqa: E501
-    session_id: Optional[StrictStr] = Field(default=None, alias="sessionId")
+    session_id: StrictStr = Field(serialization_alias="sessionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessionId"]
 
@@ -88,7 +88,7 @@ class PtyCreateResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sessionId": obj.get("sessionId")
+            "session_id": obj.get("sessionId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

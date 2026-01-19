@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from daytona_toolbox_api_client_async.models.pty_session_info import PtySessionInfo
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,7 +27,7 @@ class PtyListResponse(BaseModel):
     """
     PtyListResponse
     """ # noqa: E501
-    sessions: Optional[List[PtySessionInfo]] = None
+    sessions: List[PtySessionInfo]
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessions"]
 

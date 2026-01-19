@@ -26,9 +26,9 @@ class SessionExecuteRequest(BaseModel):
     """
     SessionExecuteRequest
     """ # noqa: E501
-    var_async: Optional[StrictBool] = Field(default=None, alias="async")
+    var_async: Optional[StrictBool] = Field(default=None, serialization_alias="async")
     command: StrictStr
-    run_async: Optional[StrictBool] = Field(default=None, alias="runAsync")
+    run_async: Optional[StrictBool] = Field(default=None, serialization_alias="runAsync")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["async", "command", "runAsync"]
 
@@ -90,9 +90,9 @@ class SessionExecuteRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "async": obj.get("async"),
+            "var_async": obj.get("async"),
             "command": obj.get("command"),
-            "runAsync": obj.get("runAsync")
+            "run_async": obj.get("runAsync")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

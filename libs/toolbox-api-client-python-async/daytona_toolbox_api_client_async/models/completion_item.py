@@ -28,11 +28,11 @@ class CompletionItem(BaseModel):
     """ # noqa: E501
     detail: Optional[StrictStr] = None
     documentation: Optional[Dict[str, Any]] = None
-    filter_text: Optional[StrictStr] = Field(default=None, alias="filterText")
-    insert_text: Optional[StrictStr] = Field(default=None, alias="insertText")
+    filter_text: Optional[StrictStr] = Field(default=None, serialization_alias="filterText")
+    insert_text: Optional[StrictStr] = Field(default=None, serialization_alias="insertText")
     kind: Optional[StrictInt] = None
     label: StrictStr
-    sort_text: Optional[StrictStr] = Field(default=None, alias="sortText")
+    sort_text: Optional[StrictStr] = Field(default=None, serialization_alias="sortText")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["detail", "documentation", "filterText", "insertText", "kind", "label", "sortText"]
 
@@ -96,11 +96,11 @@ class CompletionItem(BaseModel):
         _obj = cls.model_validate({
             "detail": obj.get("detail"),
             "documentation": obj.get("documentation"),
-            "filterText": obj.get("filterText"),
-            "insertText": obj.get("insertText"),
+            "filter_text": obj.get("filterText"),
+            "insert_text": obj.get("insertText"),
             "kind": obj.get("kind"),
             "label": obj.get("label"),
-            "sortText": obj.get("sortText")
+            "sort_text": obj.get("sortText")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

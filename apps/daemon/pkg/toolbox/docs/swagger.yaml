@@ -613,6 +613,8 @@ definitions:
     properties:
       sessionId:
         type: string
+    required:
+      - sessionId
     type: object
   PtyListResponse:
     properties:
@@ -620,6 +622,8 @@ definitions:
         items:
           $ref: '#/definitions/PtySessionInfo'
         type: array
+    required:
+      - sessions
     type: object
   PtyResizeRequest:
     properties:
@@ -656,6 +660,15 @@ definitions:
         type: boolean
       rows:
         type: integer
+    required:
+      - active
+      - cols
+      - createdAt
+      - cwd
+      - envs
+      - id
+      - lazyStart
+      - rows
     type: object
   ReplaceRequest:
     properties:
@@ -739,6 +752,8 @@ definitions:
         type: string
       stdout:
         type: string
+    required:
+      - cmdId
     type: object
   Status:
     enum:
@@ -764,6 +779,8 @@ definitions:
     properties:
       dir:
         type: string
+    required:
+      - dir
     type: object
   WindowInfo:
     properties:
@@ -793,6 +810,8 @@ definitions:
     properties:
       dir:
         type: string
+    required:
+      - dir
     type: object
   gin.H:
     additionalProperties: {}

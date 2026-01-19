@@ -26,7 +26,7 @@ class ProcessStatus(BaseModel):
     """
     ProcessStatus
     """ # noqa: E501
-    auto_restart: Optional[StrictBool] = Field(default=None, alias="autoRestart")
+    auto_restart: Optional[StrictBool] = Field(default=None, serialization_alias="autoRestart")
     pid: Optional[StrictInt] = None
     priority: Optional[StrictInt] = None
     running: Optional[StrictBool] = None
@@ -91,7 +91,7 @@ class ProcessStatus(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "autoRestart": obj.get("autoRestart"),
+            "auto_restart": obj.get("autoRestart"),
             "pid": obj.get("pid"),
             "priority": obj.get("priority"),
             "running": obj.get("running")
