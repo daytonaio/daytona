@@ -5,17 +5,16 @@
 
 import {
   Command,
+  CommandCheckboxItem,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandInputButton,
-  CommandItem,
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
 import { SnapshotDto } from '@daytonaio/api-client'
-import { Check, Loader2, X } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { useState } from 'react'
 
 interface SnapshotFilterProps {
@@ -119,24 +118,15 @@ export function SnapshotFilter({
             <CommandEmpty>No Snapshots found.</CommandEmpty>
             <CommandGroup>
               {snapshots.map((snapshot) => (
-                <CommandItem
+                <CommandCheckboxItem
                   key={snapshot.id}
                   onSelect={() => handleSelect(snapshot.name ?? '')}
                   value={snapshot.name}
                   className="cursor-pointer"
+                  checked={value.includes(snapshot.name ?? '')}
                 >
-                  <div
-                    className={cn(
-                      'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                      value.includes(snapshot.name ?? '')
-                        ? 'bg-primary text-primary-foreground'
-                        : 'opacity-50 [&_svg]:invisible',
-                    )}
-                  >
-                    <Check className={cn('h-4 w-4')} />
-                  </div>
-                  <span>{snapshot.name}</span>
-                </CommandItem>
+                  {snapshot.name}
+                </CommandCheckboxItem>
               ))}
             </CommandGroup>
           </>

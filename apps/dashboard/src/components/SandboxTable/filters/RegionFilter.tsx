@@ -5,16 +5,15 @@
 
 import {
   Command,
+  CommandCheckboxItem,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandInputButton,
-  CommandItem,
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
-import { Check, Loader2, X } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { FacetedFilterOption } from '../types'
 
 interface RegionFilterProps {
@@ -69,7 +68,8 @@ export function RegionFilter({ value, onFilterChange, options, isLoading }: Regi
             <CommandEmpty>No regions found.</CommandEmpty>
             <CommandGroup>
               {options?.map((region) => (
-                <CommandItem
+                <CommandCheckboxItem
+                  checked={value.includes(region.value)}
                   key={region.value}
                   onSelect={() => {
                     const newValue = value.includes(region.value)
@@ -78,20 +78,8 @@ export function RegionFilter({ value, onFilterChange, options, isLoading }: Regi
                     onFilterChange(newValue.length > 0 ? newValue : undefined)
                   }}
                 >
-                  <div className="flex items-center">
-                    <div
-                      className={cn(
-                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                        value.includes(region.value)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'opacity-50 [&_svg]:invisible',
-                      )}
-                    >
-                      <Check className={cn('h-4 w-4')} />
-                    </div>
-                    {region.label}
-                  </div>
-                </CommandItem>
+                  {region.label}
+                </CommandCheckboxItem>
               ))}
             </CommandGroup>
           </>

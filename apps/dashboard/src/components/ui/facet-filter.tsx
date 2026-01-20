@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import * as React from 'react'
-import { Check, PlusCircle } from 'lucide-react'
+import { PlusCircle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Badge } from './badge'
 import { Button } from './button'
 import {
   Command,
+  CommandCheckboxItem,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -18,9 +18,9 @@ import {
   CommandList,
   CommandSeparator,
 } from './command'
+import { FacetedFilterOption } from './data-table-faceted-filter'
 import { Popover, PopoverContent, PopoverTrigger } from './popover'
 import { Separator } from './separator'
-import { FacetedFilterOption } from './data-table-faceted-filter'
 
 interface FacetFilterProps {
   title: string
@@ -71,7 +71,8 @@ export function FacetFilter({ title, options, selectedValues, setSelectedValues,
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value)
                 return (
-                  <CommandItem
+                  <CommandCheckboxItem
+                    checked={isSelected}
                     key={option.value}
                     onSelect={() => {
                       if (isSelected) {
@@ -82,17 +83,9 @@ export function FacetFilter({ title, options, selectedValues, setSelectedValues,
                       setSelectedValues(new Set(selectedValues))
                     }}
                   >
-                    <div
-                      className={cn(
-                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                        isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible',
-                      )}
-                    >
-                      <Check />
-                    </div>
                     {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
                     <span>{option.label}</span>
-                  </CommandItem>
+                  </CommandCheckboxItem>
                 )
               })}
             </CommandGroup>
