@@ -27,8 +27,8 @@ class CreateBuildInfo(BaseModel):
     """
     CreateBuildInfo
     """ # noqa: E501
-    dockerfile_content: StrictStr = Field(description="The Dockerfile content used for the build", alias="dockerfileContent")
-    context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", alias="contextHashes")
+    dockerfile_content: StrictStr = Field(description="The Dockerfile content used for the build", serialization_alias="dockerfileContent")
+    context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", serialization_alias="contextHashes")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["dockerfileContent", "contextHashes"]
 
@@ -90,8 +90,8 @@ class CreateBuildInfo(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "dockerfileContent": obj.get("dockerfileContent"),
-            "contextHashes": obj.get("contextHashes")
+            "dockerfile_content": obj.get("dockerfileContent"),
+            "context_hashes": obj.get("contextHashes")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

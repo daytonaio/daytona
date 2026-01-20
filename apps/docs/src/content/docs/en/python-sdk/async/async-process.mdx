@@ -14,7 +14,7 @@ Handles process and code execution within a Sandbox.
 #### AsyncProcess.\_\_init\_\_
 
 ```python
-def __init__(code_toolbox: SandboxPythonCodeToolbox, api_client: ProcessApi,
+def __init__(code_toolbox: SandboxCodeToolbox, api_client: ProcessApi,
              ensure_toolbox_url: Callable[[], Awaitable[None]])
 ```
 
@@ -22,7 +22,7 @@ Initialize a new Process instance.
 
 **Arguments**:
 
-- `code_toolbox` _SandboxPythonCodeToolbox_ - Language-specific code execution toolbox.
+- `code_toolbox` _SandboxCodeToolbox_ - Language-specific code execution toolbox.
 - `api_client` _ProcessApi_ - API client for process operations.
 - `ensure_toolbox_url` _Callable[[], Awaitable[None]]_ - Ensures the toolbox API URL is initialized.
   Must be called before invoking any private methods on the API client.
@@ -32,9 +32,9 @@ Initialize a new Process instance.
 ```python
 @intercept_errors(message_prefix="Failed to execute command: ")
 async def exec(command: str,
-               cwd: Optional[str] = None,
-               env: Optional[Dict[str, str]] = None,
-               timeout: Optional[int] = None) -> ExecuteResponse
+               cwd: str | None = None,
+               env: dict[str, str] | None = None,
+               timeout: int | None = None) -> ExecuteResponse
 ```
 
 Execute a shell command in the Sandbox.
@@ -42,10 +42,10 @@ Execute a shell command in the Sandbox.
 **Arguments**:
 
 - `command` _str_ - Shell command to execute.
-- `cwd` _Optional[str]_ - Working directory for command execution. If not
+- `cwd` _str | None_ - Working directory for command execution. If not
   specified, uses the sandbox working directory.
-- `env` _Optional[Dict[str, str]]_ - Environment variables to set for the command.
-- `timeout` _Optional[int]_ - Maximum time in seconds to wait for the command
+- `env` _dict[str, str] | None_ - Environment variables to set for the command.
+- `timeout` _int | None_ - Maximum time in seconds to wait for the command
   to complete. 0 means wait indefinitely.
   
 
@@ -76,8 +76,8 @@ result = await sandbox.process.exec("sleep 10", timeout=5)
 
 ```python
 async def code_run(code: str,
-                   params: Optional[CodeRunParams] = None,
-                   timeout: Optional[int] = None) -> ExecuteResponse
+                   params: CodeRunParams | None = None,
+                   timeout: int | None = None) -> ExecuteResponse
 ```
 
 Executes code in the Sandbox using the appropriate language runtime.
@@ -85,8 +85,8 @@ Executes code in the Sandbox using the appropriate language runtime.
 **Arguments**:
 
 - `code` _str_ - Code to execute.
-- `params` _Optional[CodeRunParams]_ - Parameters for code execution.
-- `timeout` _Optional[int]_ - Maximum time in seconds to wait for the code
+- `params` _CodeRunParams | None_ - Parameters for code execution.
+- `timeout` _int | None_ - Maximum time in seconds to wait for the code
   to complete. 0 means wait indefinitely.
   
 
@@ -246,7 +246,7 @@ if cmd.exit_code == 0:
 async def execute_session_command(
         session_id: str,
         req: SessionExecuteRequest,
-        timeout: Optional[int] = None) -> SessionExecuteResponse
+        timeout: int | None = None) -> SessionExecuteResponse
 ```
 
 Executes a command in the session.
@@ -359,14 +359,14 @@ await sandbox.process.get_session_command_logs_async(
 
 ```python
 @intercept_errors(message_prefix="Failed to list sessions: ")
-async def list_sessions() -> List[Session]
+async def list_sessions() -> list[Session]
 ```
 
 Lists all sessions in the Sandbox.
 
 **Returns**:
 
-- `List[Session]` - List of all sessions in the Sandbox.
+- `list[Session]` - List of all sessions in the Sandbox.
   
 
 **Example**:
@@ -410,11 +410,10 @@ await sandbox.process.delete_session("temp-session")
 @intercept_errors(message_prefix="Failed to create PTY session: ")
 async def create_pty_session(
         id: str,
-        on_data: Union[Callable[[bytes], None],
-                       Callable[[bytes], Awaitable[None]]] = None,
-        cwd: Optional[str] = None,
-        envs: Optional[Dict[str, str]] = None,
-        pty_size: Optional[PtySize] = None) -> AsyncPtyHandle
+        on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]],
+        cwd: str | None = None,
+        envs: dict[str, str] | None = None,
+        pty_size: PtySize | None = None) -> AsyncPtyHandle
 ```
 
 Creates a new PTY (pseudo-terminal) session in the Sandbox.
@@ -425,6 +424,8 @@ The PTY session behaves like a real terminal, supporting features like command h
 **Arguments**:
 
 - `id` - Unique identifier for the PTY session. Must be unique within the Sandbox.
+  on_data (Callable[[bytes], None] | Callable[[bytes], Awaitable[None]]):
+  Callback function to handle PTY output data.
 - `cwd` - Working directory for the PTY session. Defaults to the sandbox's working directory.
 - `env` - Environment variables to set in the PTY session. These will be merged with
   the Sandbox's default environment variables.
@@ -446,8 +447,8 @@ The PTY session behaves like a real terminal, supporting features like command h
 ```python
 @intercept_errors(message_prefix="Failed to connect PTY session: ")
 async def connect_pty_session(
-    session_id: str, on_data: Union[Callable[[bytes], None],
-                                    Callable[[bytes], Awaitable[None]]]
+    session_id: str,
+    on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]]
 ) -> AsyncPtyHandle
 ```
 
@@ -474,7 +475,7 @@ interact with a previously created terminal session.
 
 ```python
 @intercept_errors(message_prefix="Failed to list PTY sessions: ")
-async def list_pty_sessions() -> List[PtySessionInfo]
+async def list_pty_sessions() -> list[PtySessionInfo]
 ```
 
 Lists all PTY sessions in the Sandbox.
@@ -483,7 +484,7 @@ Retrieves information about all PTY sessions in this Sandbox.
 
 **Returns**:
 
-- `List[PtySessionInfo]` - List of PTY session information objects containing
+- `list[PtySessionInfo]` - List of PTY session information objects containing
   details about each session's state, creation time, and configuration.
   
 
@@ -631,8 +632,8 @@ Parameters for code execution.
 
 **Attributes**:
 
-- `argv` _Optional[List[str]]_ - Command line arguments
-- `env` _Optional[Dict[str, str]]_ - Environment variables
+- `argv` _list[str] | None_ - Command line arguments
+- `env` _dict[str, str] | None_ - Environment variables
 
 ## SessionExecuteRequest
 
@@ -646,12 +647,13 @@ Contains the request for executing a command in a session.
 **Attributes**:
 
 - `command` _str_ - The command to execute.
-- `run_async` _Optional[bool]_ - Whether to execute the command asynchronously.
-- `var_async` _Optional[bool]_ - Deprecated. Use `run_async` instead.
+- `run_async` _bool | None_ - Whether to execute the command asynchronously.
+- `var_async` _bool | None_ - Deprecated. Use `run_async` instead.
 
 ## ExecutionArtifacts
 
 ```python
+@dataclass
 class ExecutionArtifacts()
 ```
 
@@ -660,7 +662,7 @@ Artifacts from the command execution.
 **Attributes**:
 
 - `stdout` _str_ - Standard output from the command, same as `result` in `ExecuteResponse`
-- `charts` _Optional[List[Chart]]_ - List of chart metadata from matplotlib
+- `charts` _list[Chart] | None_ - List of chart metadata from matplotlib
 
 ## ExecuteResponse
 
@@ -674,7 +676,7 @@ Response from the command execution.
 
 - `exit_code` _int_ - The exit code from the command execution
 - `result` _str_ - The output from the command execution
-- `artifacts` _Optional[ExecutionArtifacts]_ - Artifacts from the command execution
+- `artifacts` _ExecutionArtifacts | None_ - Artifacts from the command execution
 
 ## SessionExecuteResponse
 
@@ -686,12 +688,16 @@ Response from the session command execution.
 
 **Attributes**:
 
+- `cmd_id` _str_ - The ID of the executed command
+- `stdout` _str | None_ - The stdout from the command execution
+- `stderr` _str | None_ - The stderr from the command execution
 - `output` _str_ - The output from the command execution
 - `exit_code` _int_ - The exit code from the command execution
 
 ## SessionCommandLogsResponse
 
 ```python
+@dataclass
 class SessionCommandLogsResponse()
 ```
 
@@ -699,9 +705,9 @@ Response from the command logs.
 
 **Attributes**:
 
-- `output` _str_ - The combined output from the command
-- `stdout` _str_ - The stdout from the command
-- `stderr` _str_ - The stderr from the command
+- `output` _str | None_ - The combined output from the command
+- `stdout` _str | None_ - The stdout from the command
+- `stderr` _str | None_ - The stderr from the command
 
 #### parse\_session\_command\_logs
 

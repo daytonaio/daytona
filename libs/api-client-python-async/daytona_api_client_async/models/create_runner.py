@@ -27,7 +27,7 @@ class CreateRunner(BaseModel):
     """
     CreateRunner
     """ # noqa: E501
-    region_id: StrictStr = Field(alias="regionId")
+    region_id: StrictStr = Field(serialization_alias="regionId")
     name: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["regionId", "name"]
@@ -90,7 +90,7 @@ class CreateRunner(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "regionId": obj.get("regionId"),
+            "region_id": obj.get("regionId"),
             "name": obj.get("name")
         })
         # store additional fields in additional_properties

@@ -28,10 +28,10 @@ class RateLimitConfig(BaseModel):
     """
     RateLimitConfig
     """ # noqa: E501
-    failed_auth: Optional[RateLimitEntry] = Field(default=None, description="Failed authentication rate limit", alias="failedAuth")
+    failed_auth: Optional[RateLimitEntry] = Field(default=None, description="Failed authentication rate limit", serialization_alias="failedAuth")
     authenticated: Optional[RateLimitEntry] = Field(default=None, description="Authenticated rate limit")
-    sandbox_create: Optional[RateLimitEntry] = Field(default=None, description="Sandbox create rate limit", alias="sandboxCreate")
-    sandbox_lifecycle: Optional[RateLimitEntry] = Field(default=None, description="Sandbox lifecycle rate limit", alias="sandboxLifecycle")
+    sandbox_create: Optional[RateLimitEntry] = Field(default=None, description="Sandbox create rate limit", serialization_alias="sandboxCreate")
+    sandbox_lifecycle: Optional[RateLimitEntry] = Field(default=None, description="Sandbox lifecycle rate limit", serialization_alias="sandboxLifecycle")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["failedAuth", "authenticated", "sandboxCreate", "sandboxLifecycle"]
 
@@ -105,10 +105,10 @@ class RateLimitConfig(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "failedAuth": RateLimitEntry.from_dict(obj["failedAuth"]) if obj.get("failedAuth") is not None else None,
+            "failed_auth": RateLimitEntry.from_dict(obj["failedAuth"]) if obj.get("failedAuth") is not None else None,
             "authenticated": RateLimitEntry.from_dict(obj["authenticated"]) if obj.get("authenticated") is not None else None,
-            "sandboxCreate": RateLimitEntry.from_dict(obj["sandboxCreate"]) if obj.get("sandboxCreate") is not None else None,
-            "sandboxLifecycle": RateLimitEntry.from_dict(obj["sandboxLifecycle"]) if obj.get("sandboxLifecycle") is not None else None
+            "sandbox_create": RateLimitEntry.from_dict(obj["sandboxCreate"]) if obj.get("sandboxCreate") is not None else None,
+            "sandbox_lifecycle": RateLimitEntry.from_dict(obj["sandboxLifecycle"]) if obj.get("sandboxLifecycle") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -1,16 +1,19 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 import asyncio
 import inspect
 import json
-from typing import Awaitable, Callable, Optional, Union
+from collections.abc import Awaitable, Callable
+from typing import Any, cast
 
 import websockets
 from daytona_toolbox_api_client_async import PtySessionInfo
-from websockets.asyncio.client import Connection
+from websockets.asyncio.connection import Connection
 
-from .._utils.errors import DaytonaError
+from ..common.errors import DaytonaError
 from ..common.pty import PtyResult, PtySize
 
 
@@ -56,10 +59,10 @@ class AsyncPtyHandle:
     def __init__(
         self,
         ws: Connection,
-        on_data: Optional[Union[Callable[[bytes], None], Callable[[bytes], Awaitable[None]]]] = None,
-        session_id: Optional[str] = None,
-        handle_resize: Optional[Callable[[PtySize], Awaitable[PtySessionInfo]]] = None,
-        handle_kill: Optional[Callable[[], Awaitable[None]]] = None,
+        on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]] | None = None,
+        session_id: str | None = None,
+        handle_resize: Callable[[PtySize], Awaitable[PtySessionInfo]] | None = None,
+        handle_kill: Callable[[], Awaitable[None]] | None = None,
     ):
         """
         Initialize the PTY handle.
@@ -71,31 +74,31 @@ class AsyncPtyHandle:
             handle_resize: Optional callback for resizing the PTY
             handle_kill: Optional callback for killing the PTY
         """
-        self._ws = ws
-        self._on_data = on_data
-        self._session_id = session_id
-        self._handle_resize = handle_resize
-        self._handle_kill = handle_kill
-        self._exit_code: Optional[int] = None
-        self._error: Optional[str] = None
-        self._connected = False
-        self._connection_established = False
+        self._ws: Connection = ws
+        self._on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]] | None = on_data
+        self._session_id: str | None = session_id
+        self._handle_resize: Callable[[PtySize], Awaitable[PtySessionInfo]] | None = handle_resize
+        self._handle_kill: Callable[[], Awaitable[None]] | None = handle_kill
+        self._exit_code: int | None = None
+        self._error: str | None = None
+        self._connected: bool = False
+        self._connection_established: bool = False
 
         # Start handling WebSocket events
-        self._wait = asyncio.create_task(self._handle_websocket())
+        self._wait: asyncio.Task[None] = asyncio.create_task(self._handle_websocket())
 
     @property
-    def session_id(self) -> Optional[str]:
+    def session_id(self) -> str | None:
         """Session ID of the PTY session"""
         return self._session_id
 
     @property
-    def exit_code(self) -> Optional[int]:
+    def exit_code(self) -> int | None:
         """Exit code of the PTY process (if terminated)"""
         return self._exit_code
 
     @property
-    def error(self) -> Optional[str]:
+    def error(self) -> str | None:
         """Error message if the PTY failed"""
         return self._error
 
@@ -139,7 +142,7 @@ class AsyncPtyHandle:
 
             await asyncio.sleep(0.1)
 
-    async def send_input(self, data: Union[str, bytes]) -> None:
+    async def send_input(self, data: str | bytes) -> None:
         """
         Send input data to the PTY.
 
@@ -211,7 +214,7 @@ class AsyncPtyHandle:
     async def disconnect(self) -> None:
         """Disconnect from the PTY session"""
         if self._wait and not self._wait.done():
-            self._wait.cancel()
+            _ = self._wait.cancel()
             try:
                 await self._wait
             except asyncio.CancelledError:
@@ -239,9 +242,9 @@ class AsyncPtyHandle:
             # If we exit the loop normally, the connection was closed gracefully
             # Simulate a close event with normal close code
             class CloseEvent:
-                def __init__(self, code=1000, reason=""):
-                    self.code = code
-                    self.reason = reason
+                def __init__(self, code: int = 1000, reason: str = ""):
+                    self.code: int = code
+                    self.reason: str = reason
 
             await self._handle_close(CloseEvent())
 
@@ -254,13 +257,13 @@ class AsyncPtyHandle:
         finally:
             self._connected = False
 
-    async def _handle_message(self, message: Union[str, bytes]) -> None:
+    async def _handle_message(self, message: str | bytes) -> None:
         """Handle individual WebSocket messages"""
         try:
             if isinstance(message, str):
                 # Try to parse as control message first
                 try:
-                    control_msg = json.loads(message)
+                    control_msg: dict[str, object] = json.loads(message)
                     if control_msg.get("type") == "control":
                         await self._handle_control_message(control_msg)
                         return
@@ -280,17 +283,17 @@ class AsyncPtyHandle:
         except Exception as e:
             raise DaytonaError(f"Error handling PTY message: {e}") from e
 
-    async def _handle_control_message(self, control_msg: dict) -> None:
+    async def _handle_control_message(self, control_msg: dict[str, object]) -> None:
         """Handle control messages from the PTY server"""
         status = control_msg.get("status")
 
         if status == "connected":
             self._connection_established = True
         elif status == "error":
-            self._error = control_msg.get("error", "Unknown connection error")
+            self._error = cast(str, control_msg.get("error", "Unknown connection error"))
             self._connected = False
 
-    async def _handle_close(self, close_event) -> None:
+    async def _handle_close(self, close_event: object) -> None:
         """Handle WebSocket close event"""
         self._connected = False
 
@@ -303,20 +306,22 @@ class AsyncPtyHandle:
         if close_reason:
             try:
                 exit_data = json.loads(close_reason)
-                if isinstance(exit_data.get("exitCode"), int):
-                    self._exit_code = exit_data["exitCode"]
-                    # Store exit reason if provided
-                    if exit_data.get("exitReason"):
-                        self._error = exit_data["exitReason"]
-
-                # Handle error messages from server
-                if exit_data.get("error"):
-                    self._error = exit_data["error"]
-
             except (json.JSONDecodeError, ValueError):
-                # Default to exit code 0 for normal close
                 if close_code == 1000:
                     self._exit_code = 0
+            else:
+                if isinstance(exit_data, dict):
+                    exit_data = cast(dict[str, Any], exit_data)
+                    exit_code_value: int | None = exit_data.get("exitCode")
+                    if isinstance(exit_code_value, int):
+                        self._exit_code = exit_code_value
+                        exit_reason_value = exit_data.get("exitReason")
+                        if isinstance(exit_reason_value, str):
+                            self._error = exit_reason_value
+
+                    error_value = exit_data.get("error")
+                    if isinstance(error_value, str):
+                        self._error = error_value
 
         # Default to exit code 0 if we can't parse it and it was a normal close
         if self._exit_code is None and close_code == 1000:

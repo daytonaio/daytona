@@ -1,0 +1,35 @@
+# coding: utf-8
+
+# flake8: noqa
+
+{{>partial_header}}
+
+__version__ = "{{packageVersion}}"
+
+# import apis into sdk package
+{{#apiInfo}}{{#apis}}from {{apiPackage}}.{{classFilename}} import {{classname}}
+{{/apis}}{{/apiInfo}}
+# import ApiClient
+from {{packageName}}.api_response import ApiResponse
+from {{packageName}}.api_client import ApiClient
+from {{packageName}}.configuration import Configuration
+from {{packageName}}.exceptions import OpenApiException
+from {{packageName}}.exceptions import ApiTypeError
+from {{packageName}}.exceptions import ApiValueError
+from {{packageName}}.exceptions import ApiKeyError
+from {{packageName}}.exceptions import ApiAttributeError
+from {{packageName}}.exceptions import ApiException
+{{#hasHttpSignatureMethods}}
+from {{packageName}}.signing import HttpSigningConfiguration
+{{/hasHttpSignatureMethods}}
+
+# import models into sdk package
+{{#models}}
+{{#model}}
+from {{modelPackage}}.{{classFilename}} import {{classname}}
+{{/model}}
+{{/models}}
+{{#recursionLimit}}
+
+__import__('sys').setrecursionlimit({{{.}}})
+{{/recursionLimit}}

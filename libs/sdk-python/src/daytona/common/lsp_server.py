@@ -1,10 +1,16 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
+from dataclasses import dataclass
 from enum import Enum
+from typing import Literal
+
+from typing_extensions import override
 
 
-class LspLanguageId(Enum):
+class LspLanguageId(str, Enum):
     """Language IDs for Language Server Protocol (LSP).
 
     **Enum Members**:
@@ -17,15 +23,15 @@ class LspLanguageId(Enum):
     TYPESCRIPT = "typescript"
     JAVASCRIPT = "javascript"
 
+    @override
     def __str__(self):
         return self.value
 
-    def __eq__(self, other):
-        if isinstance(other, str):
-            return self.value == other
-        return super().__eq__(other)
+
+LspLanguageIdLiteral = Literal["python", "typescript", "javascript"]
 
 
+@dataclass
 class LspCompletionPosition:
     """Represents a zero-based completion position in a text document,
     specified by line number and character offset.
@@ -35,12 +41,5 @@ class LspCompletionPosition:
         character (int): Zero-based character offset on the line.
     """
 
-    def __init__(self, line: int, character: int):
-        """Initialize a new LspCompletionPosition instance.
-
-        Args:
-            line (int): Zero-based line number in the document.
-            character (int): Zero-based character offset on the line.
-        """
-        self.line = line
-        self.character = character
+    line: int
+    character: int

@@ -27,7 +27,7 @@ class ReplaceRequest(BaseModel):
     ReplaceRequest
     """ # noqa: E501
     files: List[StrictStr]
-    new_value: StrictStr = Field(alias="newValue")
+    new_value: StrictStr = Field(serialization_alias="newValue")
     pattern: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["files", "newValue", "pattern"]
@@ -91,7 +91,7 @@ class ReplaceRequest(BaseModel):
 
         _obj = cls.model_validate({
             "files": obj.get("files"),
-            "newValue": obj.get("newValue"),
+            "new_value": obj.get("newValue"),
             "pattern": obj.get("pattern")
         })
         # store additional fields in additional_properties

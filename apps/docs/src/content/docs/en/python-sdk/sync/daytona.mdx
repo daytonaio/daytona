@@ -42,7 +42,7 @@ sandbox = daytona.create()
 #### Daytona.\_\_init\_\_
 
 ```python
-def __init__(config: Optional[DaytonaConfig] = None)
+def __init__(config: DaytonaConfig | None = None)
 ```
 
 Initializes Daytona instance with optional configuration.
@@ -54,7 +54,7 @@ If no config is provided, reads from environment variables:
 
 **Arguments**:
 
-- `config` _Optional[DaytonaConfig]_ - Object containing api_key, api_url, and target.
+- `config` _DaytonaConfig | None_ - Object containing api_key, api_url, and target.
   
 
 **Raises**:
@@ -83,9 +83,9 @@ daytona2 = Daytona(config)
 
 ```python
 @overload
-def create(params: Optional[CreateSandboxFromSnapshotParams] = None,
+def create(params: CreateSandboxFromSnapshotParams | None = None,
            *,
-           timeout: Optional[float] = 60) -> Sandbox
+           timeout: float = 60) -> Sandbox
 ```
 
 Creates Sandboxes from specified or default snapshot. You can specify various parameters,
@@ -93,9 +93,9 @@ including language, image, environment variables, and volumes.
 
 **Arguments**:
 
-- `params` _Optional[CreateSandboxFromSnapshotParams]_ - Parameters for Sandbox creation. If not provided,
+- `params` _CreateSandboxFromSnapshotParams | None_ - Parameters for Sandbox creation. If not provided,
   defaults to default Daytona snapshot and Python language.
-- `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
+- `timeout` _float_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
   Default is 60 seconds.
   
 
@@ -134,10 +134,12 @@ sandbox = daytona.create(params, timeout=40)
 
 ```python
 @overload
-def create(params: Optional[CreateSandboxFromImageParams] = None,
-           *,
-           timeout: Optional[float] = 60,
-           on_snapshot_create_logs: Callable[[str], None] = None) -> Sandbox
+def create(
+        params: CreateSandboxFromImageParams | None = None,
+        *,
+        timeout: float = 60,
+        on_snapshot_create_logs: Callable[[str], None] | None = None
+) -> Sandbox
 ```
 
 Creates Sandboxes from specified image available on some registry or declarative Daytona Image.
@@ -146,10 +148,11 @@ and volumes. Daytona creates snapshot from provided image and uses it to create 
 
 **Arguments**:
 
-- `params` _Optional[CreateSandboxFromImageParams]_ - Parameters for Sandbox creation from image.
-- `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
+- `params` _CreateSandboxFromImageParams | None_ - Parameters for Sandbox creation from image.
+- `timeout` _float_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
   Default is 60 seconds.
-- `on_snapshot_create_logs` _Callable[[str], None]_ - This callback function handles snapshot creation logs.
+- `on_snapshot_create_logs` _Callable[[str], None] | None_ - This callback function
+  handles snapshot creation logs.
   
 
 **Returns**:
@@ -196,7 +199,7 @@ sandbox = daytona.create(
 #### Daytona.delete
 
 ```python
-def delete(sandbox: Sandbox, timeout: Optional[float] = 60) -> None
+def delete(sandbox: Sandbox, timeout: float = 60) -> None
 ```
 
 Deletes a Sandbox.
@@ -204,7 +207,7 @@ Deletes a Sandbox.
 **Arguments**:
 
 - `sandbox` _Sandbox_ - The Sandbox instance to delete.
-- `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox deletion. 0 means no timeout.
+- `timeout` _float_ - Timeout (in seconds) for sandbox deletion. 0 means no timeout.
   Default is 60 seconds.
   
 
@@ -256,16 +259,16 @@ print(sandbox.state)
 
 ```python
 @intercept_errors(message_prefix="Failed to find sandbox: ")
-def find_one(sandbox_id_or_name: Optional[str] = None,
-             labels: Optional[Dict[str, str]] = None) -> Sandbox
+def find_one(sandbox_id_or_name: str | None = None,
+             labels: dict[str, str] | None = None) -> Sandbox
 ```
 
 Finds a Sandbox by its ID or name or labels.
 
 **Arguments**:
 
-- `sandbox_id_or_name` _Optional[str]_ - The ID or name of the Sandbox to retrieve.
-- `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
+- `sandbox_id_or_name` _str | None_ - The ID or name of the Sandbox to retrieve.
+- `labels` _dict[str, str] | None_ - Labels to filter Sandboxes.
   
 
 **Returns**:
@@ -289,18 +292,18 @@ print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 
 ```python
 @intercept_errors(message_prefix="Failed to list sandboxes: ")
-def list(labels: Optional[Dict[str, str]] = None,
-         page: Optional[int] = None,
-         limit: Optional[int] = None) -> PaginatedSandboxes
+def list(labels: dict[str, str] | None = None,
+         page: int | None = None,
+         limit: int | None = None) -> PaginatedSandboxes
 ```
 
 Returns paginated list of Sandboxes filtered by labels.
 
 **Arguments**:
 
-- `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
-- `page` _Optional[int]_ - Page number for pagination (starting from 1).
-- `limit` _Optional[int]_ - Maximum number of items per page.
+- `labels` _dict[str, str] | None_ - Labels to filter Sandboxes.
+- `page` _int | None_ - Page number for pagination (starting from 1).
+- `limit` _int | None_ - Maximum number of items per page.
   
 
 **Returns**:
@@ -319,7 +322,7 @@ for sandbox in result.items:
 #### Daytona.start
 
 ```python
-def start(sandbox: Sandbox, timeout: Optional[float] = 60) -> None
+def start(sandbox: Sandbox, timeout: float = 60) -> None
 ```
 
 Starts a Sandbox and waits for it to be ready.
@@ -327,7 +330,7 @@ Starts a Sandbox and waits for it to be ready.
 **Arguments**:
 
 - `sandbox` _Sandbox_ - The Sandbox to start.
-- `timeout` _Optional[float]_ - Optional timeout in seconds to wait for the Sandbox to start.
+- `timeout` _float_ - Optional timeout in seconds to wait for the Sandbox to start.
   0 means no timeout. Default is 60 seconds.
   
 
@@ -338,7 +341,7 @@ Starts a Sandbox and waits for it to be ready.
 #### Daytona.stop
 
 ```python
-def stop(sandbox: Sandbox, timeout: Optional[float] = 60) -> None
+def stop(sandbox: Sandbox, timeout: float = 60) -> None
 ```
 
 Stops a Sandbox and waits for it to be stopped.
@@ -346,7 +349,7 @@ Stops a Sandbox and waits for it to be stopped.
 **Arguments**:
 
 - `sandbox` _Sandbox_ - The sandbox to stop
-- `timeout` _Optional[float]_ - Optional timeout (in seconds) for sandbox stop.
+- `timeout` _float_ - Optional timeout (in seconds) for sandbox stop.
   0 means no timeout. Default is 60 seconds.
   
 
@@ -358,8 +361,7 @@ Stops a Sandbox and waits for it to be stopped.
 ## CodeLanguage
 
 ```python
-@dataclass
-class CodeLanguage(Enum)
+class CodeLanguage(str, Enum)
 ```
 
 Programming languages supported by Daytona
@@ -379,17 +381,17 @@ Configuration options for initializing the Daytona client.
 
 **Attributes**:
 
-- `api_key` _Optional[str]_ - API key for authentication with the Daytona API. If not set, it must be provided
+- `api_key` _str | None_ - API key for authentication with the Daytona API. If not set, it must be provided
   via the environment variable `DAYTONA_API_KEY`, or a JWT token must be provided instead.
-- `jwt_token` _Optional[str]_ - JWT token for authentication with the Daytona API. If not set, it must be provided
+- `jwt_token` _str | None_ - JWT token for authentication with the Daytona API. If not set, it must be provided
   via the environment variable `DAYTONA_JWT_TOKEN`, or an API key must be provided instead.
-- `organization_id` _Optional[str]_ - Organization ID used for JWT-based authentication. Required if a JWT token
+- `organization_id` _str | None_ - Organization ID used for JWT-based authentication. Required if a JWT token
   is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
-- `api_url` _Optional[str]_ - URL of the Daytona API. Defaults to `'https://app.daytona.io/api'` if not set
+- `api_url` _str | None_ - URL of the Daytona API. Defaults to `'https://app.daytona.io/api'` if not set
   here or in the environment variable `DAYTONA_API_URL`.
-- `server_url` _Optional[str]_ - Deprecated. Use `api_url` instead. This property will be removed
+- `server_url` _str | None_ - Deprecated. Use `api_url` instead. This property will be removed
   in a future version.
-- `target` _Optional[str]_ - Target runner location for the Sandbox. Default region for the organization is used
+- `target` _str | None_ - Target runner location for the Sandbox. Default region for the organization is used
   if not set here or in the environment variable `DAYTONA_TARGET`.
   
 
@@ -412,26 +414,27 @@ Base parameters for creating a new Sandbox.
 
 **Attributes**:
 
-- `name` _Optional[str]_ - Name of the Sandbox.
-- `language` _Optional[CodeLanguage]_ - Programming language for the Sandbox. Defaults to "python".
-- `os_user` _Optional[str]_ - OS user for the Sandbox.
-- `env_vars` _Optional[Dict[str, str]]_ - Environment variables to set in the Sandbox.
-- `labels` _Optional[Dict[str, str]]_ - Custom labels for the Sandbox.
-- `public` _Optional[bool]_ - Whether the Sandbox should be public.
-- `timeout` _Optional[float]_ - Timeout in seconds for Sandbox to be created and started.
-- `auto_stop_interval` _Optional[int]_ - Interval in minutes after which Sandbox will
+- `name` _str | None_ - Name of the Sandbox.
+- `language` _CodeLanguage | CodeLanguageLiteral | None_ - Programming language for the Sandbox.
+  Defaults to "python".
+- `os_user` _str | None_ - OS user for the Sandbox.
+- `env_vars` _dict[str, str] | None_ - Environment variables to set in the Sandbox.
+- `labels` _dict[str, str] | None_ - Custom labels for the Sandbox.
+- `public` _bool | None_ - Whether the Sandbox should be public.
+- `timeout` _float | None_ - Timeout in seconds for Sandbox to be created and started.
+- `auto_stop_interval` _int | None_ - Interval in minutes after which Sandbox will
   automatically stop if no Sandbox event occurs during that time. Default is 15 minutes.
   0 means no auto-stop.
-- `auto_archive_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
+- `auto_archive_interval` _int | None_ - Interval in minutes after which a continuously stopped Sandbox will
   automatically archive. Default is 7 days.
   0 means the maximum interval will be used.
-- `auto_delete_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
+- `auto_delete_interval` _int | None_ - Interval in minutes after which a continuously stopped Sandbox will
   automatically be deleted. By default, auto-delete is disabled.
   Negative value means disabled, 0 means delete immediately upon stopping.
-- `volumes` _Optional[List[VolumeMount]]_ - List of volumes mounts to attach to the Sandbox.
-- `network_block_all` _Optional[bool]_ - Whether to block all network access for the Sandbox.
-- `network_allow_list` _Optional[str]_ - Comma-separated list of allowed CIDR network addresses for the Sandbox.
-- `ephemeral` _Optional[bool]_ - Whether the Sandbox should be ephemeral.
+- `volumes` _list[VolumeMount] | None_ - List of volumes mounts to attach to the Sandbox.
+- `network_block_all` _bool | None_ - Whether to block all network access for the Sandbox.
+- `network_allow_list` _str | None_ - Comma-separated list of allowed CIDR network addresses for the Sandbox.
+- `ephemeral` _bool | None_ - Whether the Sandbox should be ephemeral.
   If True, auto_delete_interval will be set to 0.
 
 ## CreateSandboxFromImageParams
@@ -444,9 +447,9 @@ Parameters for creating a new Sandbox from an image.
 
 **Attributes**:
 
-- `image` _Union[str, Image]_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
+- `image` _str | Image_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
   the image will be dynamically built.
-- `resources` _Optional[Resources]_ - Resource configuration for the Sandbox. If not provided, sandbox will
+- `resources` _Resources | None_ - Resource configuration for the Sandbox. If not provided, sandbox will
   have default resources.
 
 ## CreateSandboxFromSnapshotParams
@@ -459,5 +462,5 @@ Parameters for creating a new Sandbox from a snapshot.
 
 **Attributes**:
 
-- `snapshot` _Optional[str]_ - Name of the snapshot to use for the Sandbox.
+- `snapshot` _str | None_ - Name of the snapshot to use for the Sandbox.
 

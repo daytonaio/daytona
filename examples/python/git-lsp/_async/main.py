@@ -48,7 +48,7 @@ async def main():
             print("Symbols:", symbols)
 
             # Fix the error in the document
-            await sandbox.fs.replace_in_files([matches[0].file], "var obj1 = new Base();", "var obj1 = new E();")
+            _ = await sandbox.fs.replace_in_files([matches[0].file], "var obj1 = new Base();", "var obj1 = new E();")
 
             # Notify the language server of the document change
             await lsp.did_close(matches[0].file)

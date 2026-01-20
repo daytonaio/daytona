@@ -28,7 +28,7 @@ class DisplayInfo(BaseModel):
     """ # noqa: E501
     height: Optional[StrictInt] = None
     id: Optional[StrictInt] = None
-    is_active: Optional[StrictBool] = Field(default=None, alias="isActive")
+    is_active: Optional[StrictBool] = Field(default=None, serialization_alias="isActive")
     width: Optional[StrictInt] = None
     x: Optional[StrictInt] = None
     y: Optional[StrictInt] = None
@@ -95,7 +95,7 @@ class DisplayInfo(BaseModel):
         _obj = cls.model_validate({
             "height": obj.get("height"),
             "id": obj.get("id"),
-            "isActive": obj.get("isActive"),
+            "is_active": obj.get("isActive"),
             "width": obj.get("width"),
             "x": obj.get("x"),
             "y": obj.get("y")

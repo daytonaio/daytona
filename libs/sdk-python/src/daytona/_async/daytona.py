@@ -1,5 +1,6 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
 
 import asyncio
 import json
@@ -7,7 +8,8 @@ import time
 import warnings
 from copy import deepcopy
 from importlib.metadata import version
-from typing import Callable, Dict, Optional, Union, overload
+from types import TracebackType
+from typing import Callable, cast, overload
 
 from daytona_api_client_async import (
     ApiClient,
@@ -18,6 +20,7 @@ from daytona_api_client_async import (
     ObjectStorageApi,
     SandboxApi,
     SandboxState,
+    SandboxVolume,
     SnapshotsApi,
 )
 from daytona_api_client_async import VolumesApi as VolumesApi
@@ -25,7 +28,7 @@ from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
 from environs import Env
 
 from .._utils.enum import to_enum
-from .._utils.errors import DaytonaError, intercept_errors
+from .._utils.errors import intercept_errors
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
@@ -33,11 +36,14 @@ from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
 from ..common.daytona import (
     CodeLanguage,
+    CodeLanguageLiteral,
     CreateSandboxFromImageParams,
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
-    Image,
 )
+from ..common.errors import DaytonaError
+from ..common.image import Image
+from ..common.protocols import SandboxCodeToolbox
 from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
@@ -75,13 +81,13 @@ class AsyncDaytona:
         ```
     """
 
-    _api_key: Optional[str] = None
-    _jwt_token: Optional[str] = None
-    _organization_id: Optional[str] = None
+    _api_key: str | None = None
+    _jwt_token: str | None = None
+    _organization_id: str | None = None
     _api_url: str
-    _target: Optional[str] = None
+    _target: str | None = None
 
-    def __init__(self, config: Optional[DaytonaConfig] = None):
+    def __init__(self, config: DaytonaConfig | None = None):
         """Initializes Daytona instance with optional configuration.
 
         If no config is provided, reads from environment variables:
@@ -90,7 +96,7 @@ class AsyncDaytona:
         - `DAYTONA_TARGET`: Optional target environment (if not provided, default region for the organization is used)
 
         Args:
-            config (Optional[DaytonaConfig]): Object containing api_key, api_url, and target.
+            config (DaytonaConfig | None): Object containing api_key, api_url, and target.
 
         Raises:
             DaytonaError: If API key is not provided either through config or environment variables
@@ -113,7 +119,7 @@ class AsyncDaytona:
         """
 
         default_api_url = "https://app.daytona.io/api"
-        self.default_language = CodeLanguage.PYTHON
+        self.default_language: CodeLanguage = CodeLanguage.PYTHON
         api_url = None
 
         if config:
@@ -136,14 +142,14 @@ class AsyncDaytona:
         ):
             # Initialize env - it automatically reads from .env and .env.local
             env = Env()
-            env.read_env()
-            env.read_env(".env", override=True)
-            env.read_env(".env.local", override=True)
+            _ = env.read_env()
+            _ = env.read_env(".env", override=True)
+            _ = env.read_env(".env.local", override=True)
 
             self._api_key = self._api_key or (env.str("DAYTONA_API_KEY", None) if not self._jwt_token else None)
             self._jwt_token = self._jwt_token or env.str("DAYTONA_JWT_TOKEN", None)
             self._organization_id = self._organization_id or env.str("DAYTONA_ORGANIZATION_ID", None)
-            api_url = api_url or env.str("DAYTONA_API_URL", None) or env.str("DAYTONA_SERVER_URL", default_api_url)
+            api_url = api_url or env.str("DAYTONA_API_URL", None) or env.str("DAYTONA_SERVER_URL", None)
             self._target = self._target or env.str("DAYTONA_TARGET", None)
 
             if env.str("DAYTONA_SERVER_URL", None) and not env.str("DAYTONA_API_URL", None):
@@ -154,14 +160,14 @@ class AsyncDaytona:
                     stacklevel=2,
                 )
 
-        self._api_url = api_url
+        self._api_url = api_url or default_api_url
 
         if not self._api_key and not self._jwt_token:
             raise DaytonaError("API key or JWT token is required")
 
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
-        self._api_client = ApiClient(configuration)
+        self._api_client: ApiClient = ApiClient(configuration)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
         self._api_client.default_headers["X-Daytona-Source"] = "python-sdk"
 
@@ -189,24 +195,32 @@ class AsyncDaytona:
             self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
 
         # Initialize API clients with the api_client instance
-        self._sandbox_api = SandboxApi(self._api_client)
-        self._object_storage_api = ObjectStorageApi(self._api_client)
-        self._config_api = ConfigApi(self._api_client)
+        self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
+        self._object_storage_api: ObjectStorageApi = ObjectStorageApi(self._api_client)
+        self._config_api: ConfigApi = ConfigApi(self._api_client)
         # Toolbox proxy cache per region
-        self._proxy_toolbox_url_tasks: Dict[str, asyncio.Task] = {}
-        self._proxy_toolbox_url_lock = asyncio.Lock()
-        self._toolbox_api_client = self._clone_api_client_to_toolbox_api_client()
+        self._proxy_toolbox_url_tasks: dict[str, asyncio.Task[str]] = {}
+        self._proxy_toolbox_url_lock: asyncio.Lock = asyncio.Lock()
+        self._toolbox_api_client: ToolboxApiClient = self._clone_api_client_to_toolbox_api_client()
 
         # Initialize services
-        self.volume = AsyncVolumeService(VolumesApi(self._api_client))
-        self.snapshot = AsyncSnapshotService(SnapshotsApi(self._api_client), self._object_storage_api, self._target)
+        self.volume: AsyncVolumeService = AsyncVolumeService(VolumesApi(self._api_client))
+        self.snapshot: AsyncSnapshotService = AsyncSnapshotService(
+            SnapshotsApi(self._api_client),
+            self._object_storage_api,
+            self._target,
+        )
 
-    # unasync: delete start
     async def __aenter__(self):
         """Async context manager entry."""
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None = None,
+        exc_value: BaseException | None = None,
+        traceback: TracebackType | None = None,
+    ):
         """Async context manager exit - ensures proper cleanup."""
         await self.close()
 
@@ -242,22 +256,20 @@ class AsyncDaytona:
         if hasattr(self, "_toolbox_api_client") and self._toolbox_api_client:
             await self._toolbox_api_client.close()
 
-    # unasync: delete end
-
     @overload
     async def create(
         self,
-        params: Optional[CreateSandboxFromSnapshotParams] = None,
+        params: CreateSandboxFromSnapshotParams | None = None,
         *,
-        timeout: Optional[float] = 60,
+        timeout: float = 60,
     ) -> AsyncSandbox:
         """Creates Sandboxes from specified or default snapshot. You can specify various parameters,
         including language, image, environment variables, and volumes.
 
         Args:
-            params (Optional[CreateSandboxFromSnapshotParams]): Parameters for Sandbox creation. If not provided,
+            params (CreateSandboxFromSnapshotParams | None): Parameters for Sandbox creation. If not provided,
                    defaults to default Daytona snapshot and Python language.
-            timeout (Optional[float]): Timeout (in seconds) for sandbox creation. 0 means no timeout.
+            timeout (float): Timeout (in seconds) for sandbox creation. 0 means no timeout.
                 Default is 60 seconds.
 
         Returns:
@@ -290,20 +302,21 @@ class AsyncDaytona:
     @overload
     async def create(
         self,
-        params: Optional[CreateSandboxFromImageParams] = None,
+        params: CreateSandboxFromImageParams | None = None,
         *,
-        timeout: Optional[float] = 60,
-        on_snapshot_create_logs: Callable[[str], None] = None,
+        timeout: float = 60,
+        on_snapshot_create_logs: Callable[[str], None] | None = None,
     ) -> AsyncSandbox:
         """Creates Sandboxes from specified image available on some registry or declarative Daytona Image.
         You can specify various parameters, including resources, language, image, environment variables,
         and volumes. Daytona creates snapshot from provided image and uses it to create Sandbox.
 
         Args:
-            params (Optional[CreateSandboxFromImageParams]): Parameters for Sandbox creation from image.
-            timeout (Optional[float]): Timeout (in seconds) for sandbox creation. 0 means no timeout.
+            params (CreateSandboxFromImageParams | None): Parameters for Sandbox creation from image.
+            timeout (float): Timeout (in seconds) for sandbox creation. 0 means no timeout.
                 Default is 60 seconds.
-            on_snapshot_create_logs (Callable[[str], None]): This callback function handles snapshot creation logs.
+            on_snapshot_create_logs (Callable[[str], None] | None): This callback function
+                handles snapshot creation logs.
 
         Returns:
             Sandbox: The created Sandbox instance.
@@ -345,15 +358,15 @@ class AsyncDaytona:
     @intercept_errors(message_prefix="Failed to create sandbox: ")
     async def create(
         self,
-        params: Optional[Union[CreateSandboxFromSnapshotParams, CreateSandboxFromImageParams]] = None,
+        params: CreateSandboxFromSnapshotParams | CreateSandboxFromImageParams | None = None,
         *,
-        timeout: Optional[float] = 60,
-        on_snapshot_create_logs: Callable[[str], None] = None,
+        timeout: float = 60,
+        on_snapshot_create_logs: Callable[[str], None] | None = None,
     ) -> AsyncSandbox:
         # If no params provided, create default params for Python
-        if params is None:
+        if not params:
             params = CreateSandboxFromSnapshotParams(language=self.default_language)
-        elif params.language is None:
+        elif not params.language:
             params.language = self.default_language
 
         return await self._create(params, timeout=timeout, on_snapshot_create_logs=on_snapshot_create_logs)
@@ -365,14 +378,14 @@ class AsyncDaytona:
     )
     async def _create(
         self,
-        params: Optional[Union[CreateSandboxFromSnapshotParams, CreateSandboxFromImageParams]] = None,
+        params: CreateSandboxFromSnapshotParams | CreateSandboxFromImageParams,
         *,
-        timeout: Optional[float] = 60,
-        on_snapshot_create_logs: Callable[[str], None] = None,
+        timeout: float = 60,
+        on_snapshot_create_logs: Callable[[str], None] | None = None,
     ) -> AsyncSandbox:
         code_toolbox = self._get_code_toolbox(params.language)
 
-        if timeout < 0:
+        if timeout and timeout < 0:
             raise DaytonaError("Timeout must be a non-negative number")
 
         start_time = time.time()
@@ -385,6 +398,12 @@ class AsyncDaytona:
 
         target = self._target
 
+        volumes = []
+        if params.volumes:
+            volumes = [
+                SandboxVolume(volume_id=volume.volume_id, mount_path=volume.mount_path) for volume in params.volumes
+            ]
+
         # Create sandbox using dictionary
         sandbox_data = CreateSandbox(
             name=params.name,
@@ -396,20 +415,20 @@ class AsyncDaytona:
             auto_stop_interval=params.auto_stop_interval,
             auto_archive_interval=params.auto_archive_interval,
             auto_delete_interval=params.auto_delete_interval,
-            volumes=params.volumes,
+            volumes=volumes,
             network_block_all=params.network_block_all,
             network_allow_list=params.network_allow_list,
         )
 
-        if getattr(params, "snapshot", None):
+        if isinstance(params, CreateSandboxFromSnapshotParams) and params.snapshot:
             sandbox_data.snapshot = params.snapshot
 
-        if getattr(params, "image", None):
+        if isinstance(params, CreateSandboxFromImageParams) and params.image:
             if isinstance(params.image, str):
                 sandbox_data.build_info = CreateBuildInfo(
                     dockerfile_content=Image.base(params.image).dockerfile(),
                 )
-            elif isinstance(params.image, Image):
+            else:
                 context_hashes = await AsyncSnapshotService.process_image_context(
                     self._object_storage_api, params.image
                 )
@@ -418,11 +437,11 @@ class AsyncDaytona:
                     dockerfile_content=params.image.dockerfile(),
                 )
 
-        if getattr(params, "resources", None):
-            sandbox_data.cpu = params.resources.cpu
-            sandbox_data.memory = params.resources.memory
-            sandbox_data.disk = params.resources.disk
-            sandbox_data.gpu = params.resources.gpu
+            if params.resources:
+                sandbox_data.cpu = params.resources.cpu
+                sandbox_data.memory = params.resources.memory
+                sandbox_data.disk = params.resources.disk
+                sandbox_data.gpu = params.resources.gpu
 
         response = await self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=timeout or None)
 
@@ -446,7 +465,7 @@ class AsyncDaytona:
 
             await process_streaming_response(
                 url=build_logs_url + "?follow=true",
-                headers=self._sandbox_api.api_client.default_headers,
+                headers=cast(dict[str, str], self._sandbox_api.api_client.default_headers),
                 on_chunk=lambda chunk: on_snapshot_create_logs(chunk.rstrip()),
                 should_terminate=should_terminate,
             )
@@ -471,14 +490,14 @@ class AsyncDaytona:
 
         return sandbox
 
-    def _get_code_toolbox(self, language: Optional[CodeLanguage] = None):
+    def _get_code_toolbox(self, language: CodeLanguage | CodeLanguageLiteral | None = None) -> SandboxCodeToolbox:
         """Helper method to get the appropriate code toolbox based on language.
 
         Args:
-            language (Optional[CodeLanguage]): Language of the code toolbox. If not provided, defaults to Python.
+            language (CodeLanguage | None): Language of the code toolbox. If not provided, defaults to Python.
 
         Returns:
-            The appropriate code toolbox instance for the specified language.
+            SandboxCodeToolbox: The appropriate code toolbox instance for the specified language.
 
         Raises:
             DaytonaError: If an unsupported language is specified.
@@ -491,21 +510,23 @@ class AsyncDaytona:
             raise DaytonaError(f"Unsupported language: {language}")
         language = enum_language
 
-        if language == CodeLanguage.JAVASCRIPT:
-            return SandboxJsCodeToolbox()
-        if language == CodeLanguage.TYPESCRIPT:
-            return SandboxTsCodeToolbox()
-        if language == CodeLanguage.PYTHON:
-            return SandboxPythonCodeToolbox()
+        toolboxes = {
+            CodeLanguage.JAVASCRIPT.value: SandboxJsCodeToolbox,
+            CodeLanguage.TYPESCRIPT.value: SandboxTsCodeToolbox,
+            CodeLanguage.PYTHON.value: SandboxPythonCodeToolbox,
+        }
 
-        raise DaytonaError(f"Unsupported language: {language}")
+        try:
+            return toolboxes[language.value]()
+        except KeyError as e:
+            raise DaytonaError(f"Unsupported language: {language}") from e
 
-    async def delete(self, sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None:
+    async def delete(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:
         """Deletes a Sandbox.
 
         Args:
             sandbox (Sandbox): The Sandbox instance to delete.
-            timeout (Optional[float]): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
+            timeout (float): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
                 Default is 60 seconds.
 
         Raises:
@@ -518,7 +539,7 @@ class AsyncDaytona:
             await daytona.delete(sandbox)  # Clean up when done
             ```
         """
-        return await sandbox.delete(timeout)
+        _ = await sandbox.delete(timeout)
 
     @intercept_errors(message_prefix="Failed to get sandbox: ")
     async def get(self, sandbox_id_or_name: str) -> AsyncSandbox:
@@ -557,13 +578,13 @@ class AsyncDaytona:
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
     async def find_one(
-        self, sandbox_id_or_name: Optional[str] = None, labels: Optional[Dict[str, str]] = None
+        self, sandbox_id_or_name: str | None = None, labels: dict[str, str] | None = None
     ) -> AsyncSandbox:
         """Finds a Sandbox by its ID or name or labels.
 
         Args:
-            sandbox_id_or_name (Optional[str]): The ID or name of the Sandbox to retrieve.
-            labels (Optional[Dict[str, str]]): Labels to filter Sandboxes.
+            sandbox_id_or_name (str | None): The ID or name of the Sandbox to retrieve.
+            labels (dict[str, str] | None): Labels to filter Sandboxes.
 
         Returns:
             Sandbox: First Sandbox that matches the ID or name or labels.
@@ -586,14 +607,14 @@ class AsyncDaytona:
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     async def list(
-        self, labels: Optional[Dict[str, str]] = None, page: Optional[int] = None, limit: Optional[int] = None
+        self, labels: dict[str, str] | None = None, page: int | None = None, limit: int | None = None
     ) -> AsyncPaginatedSandboxes:
         """Returns paginated list of Sandboxes filtered by labels.
 
         Args:
-            labels (Optional[Dict[str, str]]): Labels to filter Sandboxes.
-            page (Optional[int]): Page number for pagination (starting from 1).
-            limit (Optional[int]): Maximum number of items per page.
+            labels (dict[str, str] | None): Labels to filter Sandboxes.
+            page (int | None): Page number for pagination (starting from 1).
+            limit (int | None): Maximum number of items per page.
 
         Returns:
             AsyncPaginatedSandboxes: Paginated list of Sandbox instances that match the labels.
@@ -629,11 +650,11 @@ class AsyncDaytona:
             total_pages=response.total_pages,
         )
 
-    def _validate_language_label(self, language: Optional[str]) -> CodeLanguage:
+    def _validate_language_label(self, language: str | None = None) -> CodeLanguage:
         """Validates and normalizes the language label.
 
         Args:
-            language (Optional[str]): The language label to validate.
+            language (str | None): The language label to validate.
 
         Returns:
             CodeLanguage: The validated language, defaults to "python" if None
@@ -649,12 +670,12 @@ class AsyncDaytona:
             raise DaytonaError(f"Invalid code-toolbox-language: {language}")
         return enum_language
 
-    async def start(self, sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None:
+    async def start(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:
         """Starts a Sandbox and waits for it to be ready.
 
         Args:
             sandbox (Sandbox): The Sandbox to start.
-            timeout (Optional[float]): Optional timeout in seconds to wait for the Sandbox to start.
+            timeout (float): Optional timeout in seconds to wait for the Sandbox to start.
                 0 means no timeout. Default is 60 seconds.
 
         Raises:
@@ -662,12 +683,12 @@ class AsyncDaytona:
         """
         await sandbox.start(timeout)
 
-    async def stop(self, sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None:
+    async def stop(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:
         """Stops a Sandbox and waits for it to be stopped.
 
         Args:
             sandbox (Sandbox): The sandbox to stop
-            timeout (Optional[float]): Optional timeout (in seconds) for sandbox stop.
+            timeout (float): Optional timeout (in seconds) for sandbox stop.
                 0 means no timeout. Default is 60 seconds.
 
         Raises:
@@ -681,16 +702,17 @@ class AsyncDaytona:
         Returns:
             ToolboxApiClient: The toolbox API client.
         """
+        assert isinstance(self._api_client.configuration, Configuration)
         config = deepcopy(self._api_client.configuration)
         config.host = ""
         toolbox_api_client = ToolboxApiClient(config)
-        toolbox_api_client.default_headers = deepcopy(self._api_client.default_headers)
+        toolbox_api_client.default_headers = deepcopy(cast(dict[str, str], self._api_client.default_headers))
 
         return toolbox_api_client
 
     async def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
         if self._proxy_toolbox_url_tasks.get(region_id) is not None:
-            return await self._proxy_toolbox_url_tasks.get(region_id)
+            return await self._proxy_toolbox_url_tasks[region_id]
 
         async with self._proxy_toolbox_url_lock:
             # Double-check: another coroutine might have created the task
@@ -703,4 +725,4 @@ class AsyncDaytona:
                 self._proxy_toolbox_url_tasks[region_id] = asyncio.create_task(_fetch())
 
         # All coroutines that made it here can now await the same task in parallel
-        return await self._proxy_toolbox_url_tasks.get(region_id)
+        return await self._proxy_toolbox_url_tasks[region_id]

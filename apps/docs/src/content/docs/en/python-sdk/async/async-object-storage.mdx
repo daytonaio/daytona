@@ -24,7 +24,7 @@ AsyncObjectStorage class for interacting with object storage services.
 ```python
 async def upload(path: str,
                  organization_id: str,
-                 archive_base_path: Optional[str] = None) -> str
+                 archive_base_path: str | None = None) -> str
 ```
 
 Uploads a file to the object storage service.

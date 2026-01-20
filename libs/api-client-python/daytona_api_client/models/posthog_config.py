@@ -27,7 +27,7 @@ class PosthogConfig(BaseModel):
     """
     PosthogConfig
     """ # noqa: E501
-    api_key: StrictStr = Field(description="PostHog API key", alias="apiKey")
+    api_key: StrictStr = Field(description="PostHog API key", serialization_alias="apiKey")
     host: StrictStr = Field(description="PostHog host URL")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["apiKey", "host"]
@@ -90,7 +90,7 @@ class PosthogConfig(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "apiKey": obj.get("apiKey"),
+            "api_key": obj.get("apiKey"),
             "host": obj.get("host")
         })
         # store additional fields in additional_properties

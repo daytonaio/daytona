@@ -28,11 +28,11 @@ class GitStatus(BaseModel):
     """
     GitStatus
     """ # noqa: E501
-    current_branch: StrictStr = Field(alias="currentBranch")
-    file_status: List[FileStatus] = Field(alias="fileStatus")
+    current_branch: StrictStr = Field(serialization_alias="currentBranch")
+    file_status: List[FileStatus] = Field(serialization_alias="fileStatus")
     ahead: Optional[Union[StrictFloat, StrictInt]] = None
     behind: Optional[Union[StrictFloat, StrictInt]] = None
-    branch_published: Optional[StrictBool] = Field(default=None, alias="branchPublished")
+    branch_published: Optional[StrictBool] = Field(default=None, serialization_alias="branchPublished")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["currentBranch", "fileStatus", "ahead", "behind", "branchPublished"]
 
@@ -101,11 +101,11 @@ class GitStatus(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "currentBranch": obj.get("currentBranch"),
-            "fileStatus": [FileStatus.from_dict(_item) for _item in obj["fileStatus"]] if obj.get("fileStatus") is not None else None,
+            "current_branch": obj.get("currentBranch"),
+            "file_status": [FileStatus.from_dict(_item) for _item in obj["fileStatus"]] if obj.get("fileStatus") is not None else None,
             "ahead": obj.get("ahead"),
             "behind": obj.get("behind"),
-            "branchPublished": obj.get("branchPublished")
+            "branch_published": obj.get("branchPublished")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

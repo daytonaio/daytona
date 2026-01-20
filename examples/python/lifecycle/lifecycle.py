@@ -8,9 +8,9 @@ def main():
     sandbox = daytona.create()
     print("Sandbox created")
 
-    sandbox.set_labels(
+    _ = sandbox.set_labels(
         {
-            "public": True,
+            "public": "true",
         }
     )
 

@@ -70,13 +70,13 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		return
 	}
 
-	cmdId := util.Pointer(uuid.NewString())
+	cmdId := uuid.NewString()
 
 	command := &Command{
-		Id:      *cmdId,
+		Id:      cmdId,
 		Command: request.Command,
 	}
-	session.commands.Set(*cmdId, command)
+	session.commands.Set(cmdId, command)
 
 	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
 	logDir := filepath.Dir(logFilePath)
@@ -121,9 +121,9 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	cleanup
 }
 `+"\n",
-		logFilePath,    // %q  -> log
-		logDir,         // %q  -> dir
-		*cmdId, *cmdId, // %s  %s -> fifo names
+		logFilePath,  // %q  -> log
+		logDir,       // %q  -> dir
+		cmdId, cmdId, // %s  %s -> fifo names
 		toOctalEscapes(STDOUT_PREFIX), // %s  -> stdout prefix
 		toOctalEscapes(STDERR_PREFIX), // %s  -> stderr prefix
 		request.Command,               // %s  -> verbatim script body
@@ -146,7 +146,7 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	for {
 		select {
 		case <-session.ctx.Done():
-			command, ok := session.commands.Get(*cmdId)
+			command, ok := session.commands.Get(cmdId)
 			if !ok {
 				c.AbortWithError(http.StatusBadRequest, errors.New("command not found"))
 				return
@@ -172,7 +172,7 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 				return
 			}
 
-			command, ok := session.commands.Get(*cmdId)
+			command, ok := session.commands.Get(cmdId)
 			if !ok {
 				c.AbortWithError(http.StatusBadRequest, errors.New("command not found"))
 				return

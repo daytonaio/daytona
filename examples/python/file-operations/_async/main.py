@@ -27,7 +27,7 @@ async def main():
         # Create a local file for demonstration
         local_file_path = "local-example.txt"
         with open(local_file_path, "w", encoding="utf-8") as f:
-            f.write("This is a local file created for demonstration purposes")
+            _ = f.write("This is a local file created for demonstration purposes")
 
         # Create a configuration file with JSON data
         config_data = json.dumps(
@@ -52,7 +52,7 @@ async def main():
         print(ls_result.result)
 
         # Make the script executable
-        await sandbox.process.exec(f"chmod +x {os.path.join(new_dir, 'script.sh')}")
+        _ = await sandbox.process.exec(f"chmod +x {os.path.join(new_dir, 'script.sh')}")
 
         # Run the script
         print("Running script:")
@@ -64,7 +64,7 @@ async def main():
         print("JSON files found:", matches)
 
         # Replace content in config file
-        await sandbox.fs.replace_in_files([os.path.join(new_dir, "config.json")], '"debug": true', '"debug": false')
+        _ = await sandbox.fs.replace_in_files([os.path.join(new_dir, "config.json")], '"debug": true', '"debug": false')
 
         # Download multiple files - mix of local file and memory download
         print("Downloading multiple files:")
@@ -81,8 +81,10 @@ async def main():
                 print(f"Error downloading {result.source}: {result.error}")
             elif isinstance(result.result, str):
                 print(f"Downloaded {result.source} to {result.result}")
-            else:
+            elif result.result:
                 print(f"Downloaded {result.source} to memory ({len(result.result)} bytes)")
+            else:
+                print(f"Downloaded {result.source} to None (unknown result type)")
 
         # Single file download example
         print("Single file download example:")

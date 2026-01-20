@@ -28,8 +28,8 @@ class RegionScreenshotResponse(BaseModel):
     RegionScreenshotResponse
     """ # noqa: E501
     screenshot: StrictStr = Field(description="Base64 encoded screenshot image data of the specified region")
-    cursor_position: Optional[Dict[str, Any]] = Field(default=None, description="The current cursor position when the region screenshot was taken", alias="cursorPosition")
-    size_bytes: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The size of the screenshot data in bytes", alias="sizeBytes")
+    cursor_position: Optional[Dict[str, Any]] = Field(default=None, description="The current cursor position when the region screenshot was taken", serialization_alias="cursorPosition")
+    size_bytes: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The size of the screenshot data in bytes", serialization_alias="sizeBytes")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["screenshot", "cursorPosition", "sizeBytes"]
 
@@ -92,8 +92,8 @@ class RegionScreenshotResponse(BaseModel):
 
         _obj = cls.model_validate({
             "screenshot": obj.get("screenshot"),
-            "cursorPosition": obj.get("cursorPosition"),
-            "sizeBytes": obj.get("sizeBytes")
+            "cursor_position": obj.get("cursorPosition"),
+            "size_bytes": obj.get("sizeBytes")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

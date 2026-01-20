@@ -26,7 +26,7 @@ class ProcessStatusResponse(BaseModel):
     """
     ProcessStatusResponse
     """ # noqa: E501
-    process_name: Optional[StrictStr] = Field(default=None, alias="processName")
+    process_name: Optional[StrictStr] = Field(default=None, serialization_alias="processName")
     running: Optional[StrictBool] = None
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["processName", "running"]
@@ -89,7 +89,7 @@ class ProcessStatusResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "processName": obj.get("processName"),
+            "process_name": obj.get("processName"),
             "running": obj.get("running")
         })
         # store additional fields in additional_properties

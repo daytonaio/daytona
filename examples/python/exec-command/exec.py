@@ -86,7 +86,7 @@ def stateful_code_interpreter(sandbox: Sandbox):
         print(f"[STDOUT] {ctx_result.stdout}")
 
         print("-" * 3 + " Print value from different context " + "-" * 3)
-        sandbox.code_interpreter.run_code(
+        _ = sandbox.code_interpreter.run_code(
             "print(value)",
             on_stdout=handle_stdout,
             on_stderr=handle_stderr,
@@ -103,7 +103,7 @@ print('Starting long running task...')
 time.sleep(5)
 print('Finished!')
 """
-        sandbox.code_interpreter.run_code(
+        _ = sandbox.code_interpreter.run_code(
             code,
             timeout=1,
             on_stdout=handle_stdout,

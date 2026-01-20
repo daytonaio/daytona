@@ -23,5 +23,5 @@ export interface PtyCreateResponse {
    * @type {string}
    * @memberof PtyCreateResponse
    */
-  sessionId?: string
+  sessionId: string
 }

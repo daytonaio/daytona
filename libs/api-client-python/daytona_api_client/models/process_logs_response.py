@@ -27,7 +27,7 @@ class ProcessLogsResponse(BaseModel):
     """
     ProcessLogsResponse
     """ # noqa: E501
-    process_name: StrictStr = Field(description="The name of the VNC process whose logs were retrieved", alias="processName")
+    process_name: StrictStr = Field(description="The name of the VNC process whose logs were retrieved", serialization_alias="processName")
     logs: StrictStr = Field(description="The log output from the specified VNC process")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["processName", "logs"]
@@ -90,7 +90,7 @@ class ProcessLogsResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "processName": obj.get("processName"),
+            "process_name": obj.get("processName"),
             "logs": obj.get("logs")
         })
         # store additional fields in additional_properties

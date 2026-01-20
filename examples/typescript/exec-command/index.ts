@@ -37,7 +37,7 @@ async function sessionExec(sandbox: Sandbox) {
   console.log('sessionUpdated: ', sessionUpdated)
 
   //  get the command details
-  const sessionCommand = await sandbox.process.getSessionCommand('exec-session-1', command.cmdId!)
+  const sessionCommand = await sandbox.process.getSessionCommand('exec-session-1', command.cmdId)
   console.log('sessionCommand: ', sessionCommand)
 
   //  execute a second command in the session and see that the environment variable is set
@@ -47,7 +47,7 @@ async function sessionExec(sandbox: Sandbox) {
   console.log(`FOO=${response.stdout}`)
 
   //  we can also get the logs for the command any time after it is executed
-  const logs = await sandbox.process.getSessionCommandLogs('exec-session-1', response.cmdId!)
+  const logs = await sandbox.process.getSessionCommandLogs('exec-session-1', response.cmdId)
   console.log('[STDOUT]:', logs.stdout)
   console.log('[STDERR]:', logs.stderr)
 
@@ -69,7 +69,7 @@ async function sessionExecLogsAsync(sandbox: Sandbox) {
 
   await sandbox.process.getSessionCommandLogs(
     sessionId,
-    command.cmdId!,
+    command.cmdId,
     (stdout) => console.log('[STDOUT]:', stdout),
     (stderr) => console.log('[STDERR]:', stderr),
   )

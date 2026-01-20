@@ -147,21 +147,21 @@ print(f"Size of the downloaded file {local_path}: {size_mb} MB")
 
 ```python
 @intercept_errors(message_prefix="Failed to download files: ")
-def download_files(files: List[FileDownloadRequest],
-                   timeout: int = 30 * 60) -> List[FileDownloadResponse]
+def download_files(files: list[FileDownloadRequest],
+                   timeout: int = 30 * 60) -> list[FileDownloadResponse]
 ```
 
 Downloads multiple files from the Sandbox. If the files already exist locally, they will be overwritten.
 
 **Arguments**:
 
-- `files` _List[FileDownloadRequest]_ - List of files to download.
+- `files` _list[FileDownloadRequest]_ - List of files to download.
 - `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
   
 
 **Returns**:
 
-- `List[FileDownloadResponse]` - List of download results.
+- `list[FileDownloadResponse]` - List of download results.
   
 
 **Raises**:
@@ -189,7 +189,7 @@ for result in results:
 
 ```python
 @intercept_errors(message_prefix="Failed to find files: ")
-def find_files(path: str, pattern: str) -> List[Match]
+def find_files(path: str, pattern: str) -> list[Match]
 ```
 
 Searches for files containing a pattern, similar to
@@ -205,7 +205,7 @@ the grep command.
 
 **Returns**:
 
-- `List[Match]` - List of matches found in files. Each Match object includes:
+- `list[Match]` - List of matches found in files. Each Match object includes:
   - file: Path to the file containing the match
   - line: The line number where the match was found
   - content: The matching line content
@@ -268,7 +268,7 @@ if info.is_dir:
 
 ```python
 @intercept_errors(message_prefix="Failed to list files: ")
-def list_files(path: str) -> List[FileInfo]
+def list_files(path: str) -> list[FileInfo]
 ```
 
 Lists files and directories in a given path and returns their information, similar to the ls -l command.
@@ -281,7 +281,7 @@ Lists files and directories in a given path and returns their information, simil
 
 **Returns**:
 
-- `List[FileInfo]` - List of file and directory information. Each FileInfo
+- `list[FileInfo]` - List of file and directory information. Each FileInfo
   object includes the same fields as described in get_file_info().
   
 
@@ -344,15 +344,15 @@ sandbox.fs.move_files(
 
 ```python
 @intercept_errors(message_prefix="Failed to replace in files: ")
-def replace_in_files(files: List[str], pattern: str,
-                     new_value: str) -> List[ReplaceResult]
+def replace_in_files(files: list[str], pattern: str,
+                     new_value: str) -> list[ReplaceResult]
 ```
 
 Performs search and replace operations across multiple files.
 
 **Arguments**:
 
-- `files` _List[str]_ - List of file paths to perform replacements in. Relative paths are
+- `files` _list[str]_ - List of file paths to perform replacements in. Relative paths are
   resolved based on the sandbox working directory.
 - `pattern` _str_ - Pattern to search for.
 - `new_value` _str_ - Text to replace matches with.
@@ -360,7 +360,7 @@ Performs search and replace operations across multiple files.
 
 **Returns**:
 
-- `List[ReplaceResult]` - List of results indicating replacements made in
+- `list[ReplaceResult]` - List of results indicating replacements made in
   each file. Each ReplaceResult includes:
   - file: Path to the modified file
   - success: Whether the operation was successful
@@ -427,9 +427,9 @@ print(f"Found {len(result.files)} test files")
 ```python
 @intercept_errors(message_prefix="Failed to set file permissions: ")
 def set_file_permissions(path: str,
-                         mode: str = None,
-                         owner: str = None,
-                         group: str = None) -> None
+                         mode: str | None = None,
+                         owner: str | None = None,
+                         group: str | None = None) -> None
 ```
 
 Sets permissions and ownership for a file or directory. Any of the parameters can be None
@@ -439,10 +439,10 @@ to leave that attribute unchanged.
 
 - `path` _str_ - Path to the file or directory. Relative paths are resolved based on
   the sandbox working directory.
-- `mode` _Optional[str]_ - File mode/permissions in octal format
+- `mode` _str | None_ - File mode/permissions in octal format
   (e.g., "644" for rw-r--r--).
-- `owner` _Optional[str]_ - User owner of the file.
-- `group` _Optional[str]_ - Group owner of the file.
+- `owner` _str | None_ - User owner of the file.
+- `group` _str | None_ - Group owner of the file.
   
 
 **Example**:
@@ -532,7 +532,7 @@ sandbox.fs.upload_file("local_file.txt", "tmp/large_file.txt")
 
 ```python
 @intercept_errors(message_prefix="Failed to upload files: ")
-def upload_files(files: List[FileUpload], timeout: int = 30 * 60) -> None
+def upload_files(files: list[FileUpload], timeout: int = 30 * 60) -> None
 ```
 
 Uploads multiple files to the Sandbox. If files already exist at the destination paths,
@@ -540,7 +540,7 @@ they will be overwritten.
 
 **Arguments**:
 
-- `files` _List[FileUpload]_ - List of files to upload.
+- `files` _list[FileUpload]_ - List of files to upload.
 - `timeout` _int_ - Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
 **Example**:
@@ -576,7 +576,7 @@ Represents a file to be uploaded to the Sandbox.
 
 **Attributes**:
 
-- `source` _Union[bytes, str]_ - File contents as a bytes object or a local file path. If a bytes object is provided,
+- `source` _bytes | str_ - File contents as a bytes object or a local file path. If a bytes object is provided,
   make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
 - `destination` _str_ - Absolute destination path in the Sandbox. Relative paths are resolved based on
   the sandbox working directory.
@@ -594,7 +594,7 @@ Represents a request to download a single file from the Sandbox.
 
 - `source` _str_ - Source path in the Sandbox. Relative paths are resolved based on the user's
   root directory.
-- `destination` _Optional[str]_ - Destination path in the local filesystem where the file content will be
+- `destination` _str | None_ - Destination path in the local filesystem where the file content will be
   streamed to. If not provided, the file will be downloaded in the bytes buffer
   (might cause memory issues if the file is large).
 
@@ -610,7 +610,7 @@ Represents the response to a single file download request.
 **Attributes**:
 
 - `source` _str_ - The original source path requested for download.
-- `result` _Union[str, bytes, None]_ - The download result - file path (if destination provided in the request)
+- `result` _str | bytes | None_ - The download result - file path (if destination provided in the request)
   or bytes content (if no destination in the request), None if failed or no data received.
-- `error` _Optional[str]_ - Error message if the download failed, None if successful.
+- `error` _str | None_ - Error message if the download failed, None if successful.
 

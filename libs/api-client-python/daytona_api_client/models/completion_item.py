@@ -31,9 +31,9 @@ class CompletionItem(BaseModel):
     kind: Optional[Union[StrictFloat, StrictInt]] = None
     detail: Optional[StrictStr] = None
     documentation: Optional[Dict[str, Any]] = None
-    sort_text: Optional[StrictStr] = Field(default=None, alias="sortText")
-    filter_text: Optional[StrictStr] = Field(default=None, alias="filterText")
-    insert_text: Optional[StrictStr] = Field(default=None, alias="insertText")
+    sort_text: Optional[StrictStr] = Field(default=None, serialization_alias="sortText")
+    filter_text: Optional[StrictStr] = Field(default=None, serialization_alias="filterText")
+    insert_text: Optional[StrictStr] = Field(default=None, serialization_alias="insertText")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["label", "kind", "detail", "documentation", "sortText", "filterText", "insertText"]
 
@@ -99,9 +99,9 @@ class CompletionItem(BaseModel):
             "kind": obj.get("kind"),
             "detail": obj.get("detail"),
             "documentation": obj.get("documentation"),
-            "sortText": obj.get("sortText"),
-            "filterText": obj.get("filterText"),
-            "insertText": obj.get("insertText")
+            "sort_text": obj.get("sortText"),
+            "filter_text": obj.get("filterText"),
+            "insert_text": obj.get("insertText")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

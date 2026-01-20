@@ -23,47 +23,47 @@ export interface PtySessionInfo {
    * @type {boolean}
    * @memberof PtySessionInfo
    */
-  active?: boolean
+  active: boolean
   /**
    *
    * @type {number}
    * @memberof PtySessionInfo
    */
-  cols?: number
+  cols: number
   /**
    *
    * @type {string}
    * @memberof PtySessionInfo
    */
-  createdAt?: string
+  createdAt: string
   /**
    *
    * @type {string}
    * @memberof PtySessionInfo
    */
-  cwd?: string
+  cwd: string
   /**
    *
    * @type {{ [key: string]: string; }}
    * @memberof PtySessionInfo
    */
-  envs?: { [key: string]: string }
+  envs: { [key: string]: string }
   /**
    *
    * @type {string}
    * @memberof PtySessionInfo
    */
-  id?: string
+  id: string
   /**
    * Whether this session uses lazy start
    * @type {boolean}
    * @memberof PtySessionInfo
    */
-  lazyStart?: boolean
+  lazyStart: boolean
   /**
    *
    * @type {number}
    * @memberof PtySessionInfo
    */
-  rows?: number
+  rows: number
 }

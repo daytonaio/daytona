@@ -1,10 +1,12 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
 
 import base64
 import json
 import re
-from typing import Awaitable, Callable, Dict, List, Optional, Union
+from collections.abc import Awaitable, Callable
+from typing import Any, cast
 
 import websockets
 from daytona_toolbox_api_client_async import (
@@ -21,8 +23,7 @@ from websockets.asyncio.client import connect
 
 from .._utils.errors import intercept_errors
 from .._utils.stream import std_demux_stream
-from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
-from ..common.charts import parse_chart
+from ..common.charts import Chart, parse_chart
 from ..common.process import (
     CodeRunParams,
     ExecuteResponse,
@@ -33,6 +34,7 @@ from ..common.process import (
     demux_log,
     parse_session_command_logs,
 )
+from ..common.protocols import SandboxCodeToolbox
 from ..common.pty import PtySize
 from ..handle.async_pty_handle import AsyncPtyHandle
 
@@ -42,24 +44,24 @@ class AsyncProcess:
 
     def __init__(
         self,
-        code_toolbox: SandboxPythonCodeToolbox,
+        code_toolbox: SandboxCodeToolbox,
         api_client: ProcessApi,
         ensure_toolbox_url: Callable[[], Awaitable[None]],
     ):
         """Initialize a new Process instance.
 
         Args:
-            code_toolbox (SandboxPythonCodeToolbox): Language-specific code execution toolbox.
+            code_toolbox (SandboxCodeToolbox): Language-specific code execution toolbox.
             api_client (ProcessApi): API client for process operations.
             ensure_toolbox_url (Callable[[], Awaitable[None]]): Ensures the toolbox API URL is initialized.
             Must be called before invoking any private methods on the API client.
         """
-        self._code_toolbox = code_toolbox
-        self._api_client = api_client
-        self._ensure_toolbox_url = ensure_toolbox_url
+        self._code_toolbox: SandboxCodeToolbox = code_toolbox
+        self._api_client: ProcessApi = api_client
+        self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
 
     @staticmethod
-    def _parse_output(lines: List[str]) -> Optional[ExecutionArtifacts]:
+    def _parse_output(lines: list[str]) -> ExecutionArtifacts:
         """
         Parse the output of a command to extract ExecutionArtifacts.
 
@@ -69,8 +71,8 @@ class AsyncProcess:
         Returns:
             ExecutionArtifacts: The artifacts from the command execution
         """
-        stdout_lines = []
-        charts = []
+        stdout_lines: list[str] = []
+        charts: list[Chart] = []
 
         for line in lines:
             if not line.startswith("dtn_artifact_k39fd2:"):
@@ -84,7 +86,9 @@ class AsyncProcess:
                 # Check if this is chart data
                 if data_type == "chart":
                     chart_data = data.get("value", {})
-                    charts.append(parse_chart(**chart_data))
+                    chart = parse_chart(**chart_data)
+                    if chart:
+                        charts.append(chart)
 
         return ExecutionArtifacts(stdout="\n".join(stdout_lines), charts=charts)
 
@@ -92,18 +96,18 @@ class AsyncProcess:
     async def exec(
         self,
         command: str,
-        cwd: Optional[str] = None,
-        env: Optional[Dict[str, str]] = None,
-        timeout: Optional[int] = None,
+        cwd: str | None = None,
+        env: dict[str, str] | None = None,
+        timeout: int | None = None,
     ) -> ExecuteResponse:
         """Execute a shell command in the Sandbox.
 
         Args:
             command (str): Shell command to execute.
-            cwd (Optional[str]): Working directory for command execution. If not
+            cwd (str | None): Working directory for command execution. If not
                 specified, uses the sandbox working directory.
-            env (Optional[Dict[str, str]]): Environment variables to set for the command.
-            timeout (Optional[int]): Maximum time in seconds to wait for the command
+            env (dict[str, str] | None): Environment variables to set for the command.
+            timeout (int | None): Maximum time in seconds to wait for the command
                 to complete. 0 means wait indefinitely.
 
         Returns:
@@ -163,15 +167,15 @@ class AsyncProcess:
     async def code_run(
         self,
         code: str,
-        params: Optional[CodeRunParams] = None,
-        timeout: Optional[int] = None,
+        params: CodeRunParams | None = None,
+        timeout: int | None = None,
     ) -> ExecuteResponse:
         """Executes code in the Sandbox using the appropriate language runtime.
 
         Args:
             code (str): Code to execute.
-            params (Optional[CodeRunParams]): Parameters for code execution.
-            timeout (Optional[int]): Maximum time in seconds to wait for the code
+            params (CodeRunParams | None): Parameters for code execution.
+            timeout (int | None): Maximum time in seconds to wait for the code
                 to complete. 0 means wait indefinitely.
 
         Returns:
@@ -255,7 +259,7 @@ class AsyncProcess:
             await sandbox.process.delete_session(session_id)
             ```
         """
-        request = CreateSessionRequest(sessionId=session_id)
+        request = CreateSessionRequest(session_id=session_id)
         await self._api_client.create_session(request=request)
 
     @intercept_errors(message_prefix="Failed to get session: ")
@@ -307,7 +311,7 @@ class AsyncProcess:
         self,
         session_id: str,
         req: SessionExecuteRequest,
-        timeout: Optional[int] = None,
+        timeout: int | None = None,
     ) -> SessionExecuteResponse:
         """Executes a command in the session.
 
@@ -390,13 +394,11 @@ class AsyncProcess:
             session_id=session_id, command_id=command_id
         )
 
-        # unasync: delete start
+        response = cast(Any, response)
         response.data = await response.content.read()
-        # unasync: delete end
 
         return parse_session_command_logs(response.data)
 
-    # unasync: preserve start
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs_async(
         self, session_id: str, command_id: str, on_stdout: Callable[[str], None], on_stderr: Callable[[str], None]
@@ -419,10 +421,8 @@ class AsyncProcess:
             )
             ```
         """
-        # unasync: preserve end
-
         await self._ensure_toolbox_url()
-        _, url, headers, *_ = self._api_client._get_session_command_logs_serialize(  # pylint: disable=protected-access
+        _, url, headers, *_ = self._api_client._get_session_command_logs_serialize(
             session_id=session_id,
             command_id=command_id,
             follow=True,
@@ -434,18 +434,15 @@ class AsyncProcess:
 
         url = re.sub(r"^http", "ws", url)
 
-        # unasync: preserve start
         async with websockets.connect(url, additional_headers=headers) as ws:
             await std_demux_stream(ws, on_stdout, on_stderr)
 
-    # unasync: preserve end
-
     @intercept_errors(message_prefix="Failed to list sessions: ")
-    async def list_sessions(self) -> List[Session]:
+    async def list_sessions(self) -> list[Session]:
         """Lists all sessions in the Sandbox.
 
         Returns:
-            List[Session]: List of all sessions in the Sandbox.
+            list[Session]: List of all sessions in the Sandbox.
 
         Example:
             ```python
@@ -481,12 +478,10 @@ class AsyncProcess:
     async def create_pty_session(
         self,
         id: str,
-        # unasync: delete start
-        on_data: Union[Callable[[bytes], None], Callable[[bytes], Awaitable[None]]] = None,
-        # unasync: delete end
-        cwd: Optional[str] = None,
-        envs: Optional[Dict[str, str]] = None,
-        pty_size: Optional[PtySize] = None,
+        on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]],
+        cwd: str | None = None,
+        envs: dict[str, str] | None = None,
+        pty_size: PtySize | None = None,
     ) -> AsyncPtyHandle:
         """Creates a new PTY (pseudo-terminal) session in the Sandbox.
 
@@ -495,6 +490,8 @@ class AsyncProcess:
 
         Args:
             id: Unique identifier for the PTY session. Must be unique within the Sandbox.
+            on_data (Callable[[bytes], None] | Callable[[bytes], Awaitable[None]]):
+                Callback function to handle PTY output data.
             cwd: Working directory for the PTY session. Defaults to the sandbox's working directory.
             env: Environment variables to set in the PTY session. These will be merged with
                 the Sandbox's default environment variables.
@@ -520,18 +517,14 @@ class AsyncProcess:
 
         return await self.connect_pty_session(
             response.session_id,
-            # unasync: delete start
             on_data,
-            # unasync: delete end
         )
 
     @intercept_errors(message_prefix="Failed to connect PTY session: ")
     async def connect_pty_session(
         self,
         session_id: str,
-        # unasync: delete start
-        on_data: Union[Callable[[bytes], None], Callable[[bytes], Awaitable[None]]],
-        # unasync: delete end
+        on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]],
     ) -> AsyncPtyHandle:
         """Connects to an existing PTY session in the Sandbox.
 
@@ -548,7 +541,7 @@ class AsyncProcess:
             DaytonaError: If the PTY session doesn't exist or connection fails.
         """
         await self._ensure_toolbox_url()
-        _, url, headers, *_ = self._api_client._connect_pty_session_serialize(  # pylint: disable=protected-access
+        _, url, headers, *_ = self._api_client._connect_pty_session_serialize(
             session_id=session_id,
             _request_auth=None,
             _content_type=None,
@@ -568,9 +561,7 @@ class AsyncProcess:
 
         handle = AsyncPtyHandle(
             ws,
-            # unasync: delete start
             on_data,
-            # unasync: delete end
             session_id=session_id,
             handle_resize=resize_handler,
             handle_kill=kill_handler,
@@ -579,13 +570,13 @@ class AsyncProcess:
         return handle
 
     @intercept_errors(message_prefix="Failed to list PTY sessions: ")
-    async def list_pty_sessions(self) -> List[PtySessionInfo]:
+    async def list_pty_sessions(self) -> list[PtySessionInfo]:
         """Lists all PTY sessions in the Sandbox.
 
         Retrieves information about all PTY sessions in this Sandbox.
 
         Returns:
-            List[PtySessionInfo]: List of PTY session information objects containing
+            list[PtySessionInfo]: List of PTY session information objects containing
                                 details about each session's state, creation time, and configuration.
 
         Example:
@@ -599,7 +590,7 @@ class AsyncProcess:
                 print(f"Created: {session.created_at}")
             ```
         """
-        return await self._api_client.list_pty_sessions()
+        return (await self._api_client.list_pty_sessions()).sessions
 
     @intercept_errors(message_prefix="Failed to get PTY session info: ")
     async def get_pty_session_info(self, session_id: str) -> PtySessionInfo:
@@ -656,7 +647,7 @@ class AsyncProcess:
                 print(f"PTY session: {pty_session.id}")
             ```
         """
-        await self._api_client.delete_pty_session(session_id=session_id)
+        _ = await self._api_client.delete_pty_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to resize PTY session: ")
     async def resize_pty_session(self, session_id: str, pty_size: PtySize) -> PtySessionInfo:

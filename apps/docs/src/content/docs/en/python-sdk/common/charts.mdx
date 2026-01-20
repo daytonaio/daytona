@@ -6,7 +6,7 @@ hideTitleOnPage: true
 ## Chart
 
 ```python
-class Chart()
+class Chart(BaseModel)
 ```
 
 Represents a chart with metadata from matplotlib.
@@ -15,8 +15,16 @@ Represents a chart with metadata from matplotlib.
 
 - `type` _ChartType_ - The type of chart
 - `title` _str_ - The title of the chart
-- `elements` _List[Any]_ - The elements of the chart
-- `png` _Optional[str]_ - The PNG representation of the chart encoded in base64
+- `elements` _list[Any]_ - The elements of the chart
+- `png` _str | None_ - The PNG representation of the chart encoded in base64
+
+#### Chart.to\_dict
+
+```python
+def to_dict() -> dict[str, Any]
+```
+
+Return the metadata dictionary used to create the chart.
 
 
 ## ChartType
@@ -46,13 +54,13 @@ Represents a 2D chart with metadata.
 
 **Attributes**:
 
-- `x_label` _Optional[str]_ - The label of the x-axis
-- `y_label` _Optional[str]_ - The label of the y-axis
+- `x_label` _str | None_ - The label of the x-axis
+- `y_label` _str | None_ - The label of the y-axis
 
 ## PointData
 
 ```python
-class PointData()
+class PointData(BaseModel)
 ```
 
 Represents a point in a 2D chart.
@@ -60,7 +68,7 @@ Represents a point in a 2D chart.
 **Attributes**:
 
 - `label` _str_ - The label of the point
-- `points` _List[Tuple[Union[str, float], Union[str, float]]]_ - The points of the chart
+- `points` _list[tuple[str | float, str | float]]_ - The points of the chart
 
 ## PointChart
 
@@ -72,13 +80,13 @@ Represents a point chart with metadata.
 
 **Attributes**:
 
-- `x_ticks` _List[Union[str, float]]_ - The ticks of the x-axis
-- `x_tick_labels` _List[str]_ - The labels of the x-axis
+- `x_ticks` _list[str | float]_ - The ticks of the x-axis
+- `x_tick_labels` _list[str]_ - The labels of the x-axis
 - `x_scale` _str_ - The scale of the x-axis
-- `y_ticks` _List[Union[str, float]]_ - The ticks of the y-axis
-- `y_tick_labels` _List[str]_ - The labels of the y-axis
+- `y_ticks` _list[str | float]_ - The ticks of the y-axis
+- `y_tick_labels` _list[str]_ - The labels of the y-axis
 - `y_scale` _str_ - The scale of the y-axis
-- `elements` _List[PointData]_ - The points of the chart
+- `elements` _list[PointData]_ - The points of the chart
 
 ## LineChart
 
@@ -107,7 +115,7 @@ Represents a scatter chart with metadata.
 ## BarData
 
 ```python
-class BarData()
+class BarData(BaseModel)
 ```
 
 Represents a bar in a bar chart.
@@ -129,12 +137,12 @@ Represents a bar chart with metadata.
 **Attributes**:
 
 - `type` _ChartType_ - The type of chart
-- `elements` _List[BarData]_ - The bars of the chart
+- `elements` _list[BarData]_ - The bars of the chart
 
 ## PieData
 
 ```python
-class PieData()
+class PieData(BaseModel)
 ```
 
 Represents a pie slice in a pie chart.
@@ -144,7 +152,7 @@ Represents a pie slice in a pie chart.
 - `label` _str_ - The label of the pie slice
 - `angle` _float_ - The angle of the pie slice
 - `radius` _float_ - The radius of the pie slice
-- `autopct` _float_ - The autopct value of the pie slice
+- `autopct` _str | float_ - The autopct value of the pie slice
 
 ## PieChart
 
@@ -157,12 +165,12 @@ Represents a pie chart with metadata.
 **Attributes**:
 
 - `type` _ChartType_ - The type of chart
-- `elements` _List[PieData]_ - The pie slices of the chart
+- `elements` _list[PieData]_ - The pie slices of the chart
 
 ## BoxAndWhiskerData
 
 ```python
-class BoxAndWhiskerData()
+class BoxAndWhiskerData(BaseModel)
 ```
 
 Represents a box and whisker in a box and whisker chart.
@@ -175,7 +183,7 @@ Represents a box and whisker in a box and whisker chart.
 - `median` _float_ - The median of the box and whisker
 - `third_quartile` _float_ - The third quartile of the box and whisker
 - `max` _float_ - The maximum value of the box and whisker
-- `outliers` _List[float]_ - The outliers of the box and whisker
+- `outliers` _list[float]_ - The outliers of the box and whisker
 
 ## BoxAndWhiskerChart
 
@@ -188,7 +196,7 @@ Represents a box and whisker chart with metadata.
 **Attributes**:
 
 - `type` _ChartType_ - The type of chart
-- `elements` _List[BoxAndWhiskerData]_ - The box and whiskers of the chart
+- `elements` _list[BoxAndWhiskerData]_ - The box and whiskers of the chart
 
 ## CompositeChart
 
@@ -202,5 +210,5 @@ that contains multiple charts (subplots).
 **Attributes**:
 
 - `type` _ChartType_ - The type of chart
-- `elements` _List[Chart]_ - The charts (subplots) of the composite chart
+- `elements` _list[Chart]_ - The charts (subplots) of the composite chart
 

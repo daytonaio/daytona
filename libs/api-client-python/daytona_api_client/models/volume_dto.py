@@ -30,12 +30,12 @@ class VolumeDto(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="Volume ID")
     name: StrictStr = Field(description="Volume name")
-    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
+    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
     state: VolumeState = Field(description="Volume state")
-    created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
-    updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
-    last_used_at: Optional[StrictStr] = Field(default=None, description="Last used timestamp", alias="lastUsedAt")
-    error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", alias="errorReason")
+    created_at: StrictStr = Field(description="Creation timestamp", serialization_alias="createdAt")
+    updated_at: StrictStr = Field(description="Last update timestamp", serialization_alias="updatedAt")
+    last_used_at: Optional[StrictStr] = Field(default=None, description="Last used timestamp", serialization_alias="lastUsedAt")
+    error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", serialization_alias="errorReason")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason"]
 
@@ -109,12 +109,12 @@ class VolumeDto(BaseModel):
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "name": obj.get("name"),
-            "organizationId": obj.get("organizationId"),
+            "organization_id": obj.get("organizationId"),
             "state": obj.get("state"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "lastUsedAt": obj.get("lastUsedAt"),
-            "errorReason": obj.get("errorReason")
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt"),
+            "last_used_at": obj.get("lastUsedAt"),
+            "error_reason": obj.get("errorReason")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

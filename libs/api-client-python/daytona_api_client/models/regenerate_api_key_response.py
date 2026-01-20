@@ -27,7 +27,7 @@ class RegenerateApiKeyResponse(BaseModel):
     """
     RegenerateApiKeyResponse
     """ # noqa: E501
-    api_key: StrictStr = Field(description="The newly generated API key", alias="apiKey")
+    api_key: StrictStr = Field(description="The newly generated API key", serialization_alias="apiKey")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["apiKey"]
 
@@ -89,7 +89,7 @@ class RegenerateApiKeyResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "apiKey": obj.get("apiKey")
+            "api_key": obj.get("apiKey")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -47,11 +47,11 @@ type Server struct {
 }
 
 type WorkDirResponse struct {
-	Dir string `json:"dir"`
+	Dir string `json:"dir" validate:"required"`
 } // @name WorkDirResponse
 
 type UserHomeDirResponse struct {
-	Dir string `json:"dir"`
+	Dir string `json:"dir" validate:"required"`
 } // @name UserHomeDirResponse
 
 // GetWorkDir godoc

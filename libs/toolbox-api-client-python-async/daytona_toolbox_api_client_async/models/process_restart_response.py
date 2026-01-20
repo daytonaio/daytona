@@ -27,7 +27,7 @@ class ProcessRestartResponse(BaseModel):
     ProcessRestartResponse
     """ # noqa: E501
     message: Optional[StrictStr] = None
-    process_name: Optional[StrictStr] = Field(default=None, alias="processName")
+    process_name: Optional[StrictStr] = Field(default=None, serialization_alias="processName")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["message", "processName"]
 
@@ -90,7 +90,7 @@ class ProcessRestartResponse(BaseModel):
 
         _obj = cls.model_validate({
             "message": obj.get("message"),
-            "processName": obj.get("processName")
+            "process_name": obj.get("processName")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -32,35 +32,35 @@ class RunnerFull(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="The ID of the runner")
     domain: Optional[StrictStr] = Field(default=None, description="The domain of the runner")
-    api_url: Optional[StrictStr] = Field(default=None, description="The API URL of the runner", alias="apiUrl")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="The proxy URL of the runner", alias="proxyUrl")
+    api_url: Optional[StrictStr] = Field(default=None, description="The API URL of the runner", serialization_alias="apiUrl")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="The proxy URL of the runner", serialization_alias="proxyUrl")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU capacity of the runner")
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GiB")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB")
     gpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The GPU capacity of the runner")
-    gpu_type: Optional[StrictStr] = Field(default=None, description="The type of GPU", alias="gpuType")
-    var_class: SandboxClass = Field(description="The class of the runner", alias="class")
-    current_cpu_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU usage percentage", alias="currentCpuUsagePercentage")
-    current_memory_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current RAM usage percentage", alias="currentMemoryUsagePercentage")
-    current_disk_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current disk usage percentage", alias="currentDiskUsagePercentage")
-    current_allocated_cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated CPU", alias="currentAllocatedCpu")
-    current_allocated_memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated memory in GiB", alias="currentAllocatedMemoryGiB")
-    current_allocated_disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated disk in GiB", alias="currentAllocatedDiskGiB")
-    current_snapshot_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current snapshot count", alias="currentSnapshotCount")
-    current_started_sandboxes: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current number of started sandboxes", alias="currentStartedSandboxes")
-    availability_score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Runner availability score", alias="availabilityScore")
+    gpu_type: Optional[StrictStr] = Field(default=None, description="The type of GPU", serialization_alias="gpuType")
+    var_class: SandboxClass = Field(description="The class of the runner", serialization_alias="class")
+    current_cpu_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU usage percentage", serialization_alias="currentCpuUsagePercentage")
+    current_memory_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current RAM usage percentage", serialization_alias="currentMemoryUsagePercentage")
+    current_disk_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current disk usage percentage", serialization_alias="currentDiskUsagePercentage")
+    current_allocated_cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated CPU", serialization_alias="currentAllocatedCpu")
+    current_allocated_memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated memory in GiB", serialization_alias="currentAllocatedMemoryGiB")
+    current_allocated_disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated disk in GiB", serialization_alias="currentAllocatedDiskGiB")
+    current_snapshot_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current snapshot count", serialization_alias="currentSnapshotCount")
+    current_started_sandboxes: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current number of started sandboxes", serialization_alias="currentStartedSandboxes")
+    availability_score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Runner availability score", serialization_alias="availabilityScore")
     region: StrictStr = Field(description="The region of the runner")
     name: StrictStr = Field(description="The name of the runner")
     state: RunnerState = Field(description="The state of the runner")
-    last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
+    last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", serialization_alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
-    created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
-    updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
+    created_at: StrictStr = Field(description="The creation timestamp of the runner", serialization_alias="createdAt")
+    updated_at: StrictStr = Field(description="The last update timestamp of the runner", serialization_alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner (deprecated in favor of apiVersion)")
-    api_version: StrictStr = Field(description="The api version of the runner", alias="apiVersion")
-    app_version: Optional[StrictStr] = Field(default=None, description="The app version of the runner", alias="appVersion")
-    api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
-    region_type: Optional[RegionType] = Field(default=None, description="The region type of the runner", alias="regionType")
+    api_version: StrictStr = Field(description="The api version of the runner", serialization_alias="apiVersion")
+    app_version: Optional[StrictStr] = Field(default=None, description="The app version of the runner", serialization_alias="appVersion")
+    api_key: StrictStr = Field(description="The API key for the runner", serialization_alias="apiKey")
+    region_type: Optional[RegionType] = Field(default=None, description="The region type of the runner", serialization_alias="regionType")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "currentStartedSandboxes", "availabilityScore", "region", "name", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version", "apiVersion", "appVersion", "apiKey", "regionType"]
 
@@ -124,35 +124,35 @@ class RunnerFull(BaseModel):
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "domain": obj.get("domain"),
-            "apiUrl": obj.get("apiUrl"),
-            "proxyUrl": obj.get("proxyUrl"),
+            "api_url": obj.get("apiUrl"),
+            "proxy_url": obj.get("proxyUrl"),
             "cpu": obj.get("cpu"),
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "gpu": obj.get("gpu"),
-            "gpuType": obj.get("gpuType"),
-            "class": obj.get("class"),
-            "currentCpuUsagePercentage": obj.get("currentCpuUsagePercentage"),
-            "currentMemoryUsagePercentage": obj.get("currentMemoryUsagePercentage"),
-            "currentDiskUsagePercentage": obj.get("currentDiskUsagePercentage"),
-            "currentAllocatedCpu": obj.get("currentAllocatedCpu"),
-            "currentAllocatedMemoryGiB": obj.get("currentAllocatedMemoryGiB"),
-            "currentAllocatedDiskGiB": obj.get("currentAllocatedDiskGiB"),
-            "currentSnapshotCount": obj.get("currentSnapshotCount"),
-            "currentStartedSandboxes": obj.get("currentStartedSandboxes"),
-            "availabilityScore": obj.get("availabilityScore"),
+            "gpu_type": obj.get("gpuType"),
+            "var_class": obj.get("class"),
+            "current_cpu_usage_percentage": obj.get("currentCpuUsagePercentage"),
+            "current_memory_usage_percentage": obj.get("currentMemoryUsagePercentage"),
+            "current_disk_usage_percentage": obj.get("currentDiskUsagePercentage"),
+            "current_allocated_cpu": obj.get("currentAllocatedCpu"),
+            "current_allocated_memory_gi_b": obj.get("currentAllocatedMemoryGiB"),
+            "current_allocated_disk_gi_b": obj.get("currentAllocatedDiskGiB"),
+            "current_snapshot_count": obj.get("currentSnapshotCount"),
+            "current_started_sandboxes": obj.get("currentStartedSandboxes"),
+            "availability_score": obj.get("availabilityScore"),
             "region": obj.get("region"),
             "name": obj.get("name"),
             "state": obj.get("state"),
-            "lastChecked": obj.get("lastChecked"),
+            "last_checked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
+            "created_at": obj.get("createdAt"),
+            "updated_at": obj.get("updatedAt"),
             "version": obj.get("version"),
-            "apiVersion": obj.get("apiVersion"),
-            "appVersion": obj.get("appVersion"),
-            "apiKey": obj.get("apiKey"),
-            "regionType": obj.get("regionType")
+            "api_version": obj.get("apiVersion"),
+            "app_version": obj.get("appVersion"),
+            "api_key": obj.get("apiKey"),
+            "region_type": obj.get("regionType")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

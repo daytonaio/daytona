@@ -28,7 +28,7 @@ class CreateLinkedAccount(BaseModel):
     CreateLinkedAccount
     """ # noqa: E501
     provider: StrictStr = Field(description="The authentication provider of the secondary account")
-    user_id: StrictStr = Field(description="The user ID of the secondary account", alias="userId")
+    user_id: StrictStr = Field(description="The user ID of the secondary account", serialization_alias="userId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["provider", "userId"]
 
@@ -91,7 +91,7 @@ class CreateLinkedAccount(BaseModel):
 
         _obj = cls.model_validate({
             "provider": obj.get("provider"),
-            "userId": obj.get("userId")
+            "user_id": obj.get("userId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

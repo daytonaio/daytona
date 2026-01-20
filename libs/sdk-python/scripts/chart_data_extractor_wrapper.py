@@ -259,7 +259,7 @@ def _get_chart_type(ax):
     objects = list(
         filter(
             lambda obj: not isinstance(obj, mpl.text.Text) and not isinstance(obj, mpl.patches.Shadow),
-            ax._children,  # pylint: disable=protected-access
+            ax._children,
         )
     )
 
@@ -298,11 +298,7 @@ def _is_auto_empty_axis(ax):
 
 
 def _is_colorbar_axis(ax):
-    return any(
-        # pylint: disable=protected-access
-        isinstance(child, mpl.colorbar._ColorbarSpine)
-        for child in ax.get_children()
-    )
+    return any(isinstance(child, mpl.colorbar._ColorbarSpine) for child in ax.get_children())
 
 
 def _filter_out_unwanted_axes(axes):
@@ -310,7 +306,7 @@ def _filter_out_unwanted_axes(axes):
 
 
 def _extract_ticks_data(converter: any, ticks: any) -> list:
-    if isinstance(converter, mpl.dates._SwitchableDateConverter):  # pylint: disable=protected-access
+    if isinstance(converter, mpl.dates._SwitchableDateConverter):
         return [mpl.dates.num2date(tick).isoformat() for tick in ticks]
     try:
         return [float(tick) for tick in ticks]
@@ -319,7 +315,7 @@ def _extract_ticks_data(converter: any, ticks: any) -> list:
 
 
 def _extract_scale(converter, scale: str, ticks, labels) -> str:
-    if isinstance(converter, mpl.dates._SwitchableDateConverter):  # pylint: disable=protected-access
+    if isinstance(converter, mpl.dates._SwitchableDateConverter):
         return "datetime"
 
     # If the scale is not linear, it can't be categorical
