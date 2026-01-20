@@ -171,8 +171,8 @@ const RunnerDetailsSheet: React.FC<RunnerDetailsSheetProps> = ({
                 </div>
               </div>
               <div>
-                <h3 className="text-sm text-muted-foreground">Class</h3>
-                <p className="mt-1 text-sm font-medium">{runner.class}</p>
+                <h3 className="text-sm text-muted-foreground">Version</h3>
+                <p className="mt-1 text-sm font-medium">{runner.appVersion ?? 'N/A'}</p>
               </div>
             </div>
 
@@ -247,60 +247,6 @@ const RunnerDetailsSheet: React.FC<RunnerDetailsSheetProps> = ({
                 </div>
               </div>
             </div>
-
-            {/* Endpoints */}
-            {(runner.domain || runner.apiUrl || runner.proxyUrl) && (
-              <div>
-                <h3 className="text-lg font-medium mb-4">Endpoints</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  {runner.domain && (
-                    <div>
-                      <h4 className="text-sm text-muted-foreground">Domain</h4>
-                      <div className="mt-1 flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{runner.domain}</p>
-                        <button
-                          onClick={() => copyToClipboard(runner.domain!)}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="Copy domain"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  {runner.apiUrl && (
-                    <div>
-                      <h4 className="text-sm text-muted-foreground">API URL</h4>
-                      <div className="mt-1 flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{runner.apiUrl}</p>
-                        <button
-                          onClick={() => copyToClipboard(runner.apiUrl!)}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="Copy API URL"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  {runner.proxyUrl && (
-                    <div>
-                      <h4 className="text-sm text-muted-foreground">Proxy URL</h4>
-                      <div className="mt-1 flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{runner.proxyUrl}</p>
-                        <button
-                          onClick={() => copyToClipboard(runner.proxyUrl!)}
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="Copy Proxy URL"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Timestamps */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
