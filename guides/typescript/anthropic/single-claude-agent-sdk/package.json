@@ -1,5 +1,5 @@
 {
-  "name": "claude-agent-sdk",
+  "name": "single-claude-agent-sdk",
   "version": "1.0.0",
   "description": "A coding agent powered by the Claude Agent SDK and Daytona sandboxes.",
   "main": "dist/index.js",
