@@ -135,7 +135,7 @@ When OpenCode starts its web server, it prints a link to its web UI using a loca
 const opencodePreviewLink = await sandbox.getPreviewLink(OPENCODE_PORT)
 const replaceUrl = (text: string) =>
   text.replace(
-    new RegExp(`http:\/\/127\.0\.0\.1:${OPENCODE_PORT}`, 'g'),
+    new RegExp(`http:\\/\\/127\\.0\\.0\\.1:${OPENCODE_PORT}`, 'g'),
     opencodePreviewLink.url
   )
 ```
