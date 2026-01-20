@@ -118,6 +118,7 @@
   "sidebarconfig.inngestAgentKit": "AgentKit",
   "sidebarconfig.mastra": "Mastra",
   "sidebarconfig.claude": "Claude",
+  "sidebarconfig.codex": "Codex",
   "sidebarconfig.trlGrpo": "TRL",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."

@@ -1,0 +1,11 @@
+{
+  "name": "codex-sdk-agent",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A Codex SDK agent for code generation tasks",
+  "main": "index.ts",
+  "dependencies": {
+    "@openai/codex-sdk": "^0.77.0",
+    "tsx": "^4.0.0"
+  }
+}

@@ -501,6 +501,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/codex-sdk-interactive-terminal-sandbox', locale),
+          label: t('sidebarconfig.codex'),
+          disablePagination: true,
+          attrs: {
+            icon: 'openai.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/trl-grpo-training', locale),
           label: t('sidebarconfig.trlGrpo'),
           disablePagination: true,
