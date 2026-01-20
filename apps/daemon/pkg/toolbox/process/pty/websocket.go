@@ -6,18 +6,12 @@ package pty
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
-
-// WebSocket upgrader with permissive origin policy
-var ptyUpgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
 
 // attachWebSocket connects a new WebSocket client to the PTY session
 func (s *PTYSession) attachWebSocket(ws *websocket.Conn) {
