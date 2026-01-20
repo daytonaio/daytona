@@ -15,6 +15,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// normalizePath removes all trailing slashes from a path to ensure consistent comparison.
+// This handles cases where Docker API might return paths with trailing slashes (single or multiple).
+func normalizePath(path string) string {
+	return strings.TrimRight(path, "/")
+}
+
 // CleanupOrphanedVolumeMounts removes volume mount directories that are no longer used by any container.
 // Throttled to run at most once per volumeCleanupIntervalSec (default 30s).
 func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
@@ -34,7 +40,7 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 	inUse := d.getInUseVolumeMounts(ctx)
 
 	for _, dir := range mountDirs {
-		if !inUse[strings.TrimSuffix(dir, "/")] {
+		if !inUse[normalizePath(dir)] {
 			log.Infof("Cleaning orphaned volume mount: %s", dir)
 			d.unmountAndRemoveDir(dir)
 		}
@@ -53,7 +59,7 @@ func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) map[string]bool
 	// Use Mounts from list response - avoids expensive ContainerInspect calls
 	for _, ct := range containers {
 		for _, m := range ct.Mounts {
-			src := strings.TrimSuffix(m.Source, "/")
+			src := normalizePath(m.Source)
 			if strings.HasPrefix(src, prefix) {
 				inUse[src] = true
 			}
@@ -64,18 +70,20 @@ func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) map[string]bool
 }
 
 func (d *DockerClient) unmountAndRemoveDir(path string) {
-	if !strings.Contains(path, volumeMountPrefix) {
+	base := filepath.Join(getVolumeMountBasePath(), volumeMountPrefix)
+	cleanPath := filepath.Clean(path)
+	if !strings.HasPrefix(cleanPath, base) {
 		return
 	}
 
-	if d.isDirectoryMounted(path) {
-		if err := exec.Command("umount", path).Run(); err != nil {
-			log.Errorf("Failed to unmount %s: %v", path, err)
+	if d.isDirectoryMounted(cleanPath) {
+		if err := exec.Command("umount", cleanPath).Run(); err != nil {
+			log.Errorf("Failed to unmount %s: %v", cleanPath, err)
 			return
 		}
 	}
 
-	if err := os.RemoveAll(path); err != nil {
-		log.Errorf("Failed to remove %s: %v", path, err)
+	if err := os.RemoveAll(cleanPath); err != nil {
+		log.Errorf("Failed to remove %s: %v", cleanPath, err)
 	}
 }
