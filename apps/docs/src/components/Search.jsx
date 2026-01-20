@@ -58,11 +58,14 @@ function SearchContent() {
   const searchWrapperRef = useRef(null)
   const t = useGT()
 
+  const currentPath =
+    typeof window !== 'undefined' ? window.location.pathname : ''
+
   useEffect(() => {
     if (isSearchVisible) {
       setSortedIndexes(getSortedIndexes())
     }
-  }, [isSearchVisible])
+  }, [isSearchVisible, currentPath])
 
   useEffect(() => {
     const toggleSearch = () => {
@@ -182,8 +185,8 @@ function SearchContent() {
                   />
                 ))}
                 {totalHits === 0 && (
-                  <div style={{ 
-                    textAlign: 'center', 
+                  <div style={{
+                    textAlign: 'center',
                     padding: '20px',
                     color: 'var(--primary-text-color)',
                     fontSize: '16px'
@@ -204,7 +207,7 @@ function SearchContent() {
 function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible, setTotalHits, debounceQuery }) {
   return (
     <Index indexName={indexName}>
-      <ConditionalSearchIndex 
+      <ConditionalSearchIndex
         indexName={indexName}
         setDisplayHits={setDisplayHits}
         setIsSearchVisible={setIsSearchVisible}
@@ -270,7 +273,7 @@ function Hit({ hit, setIsSearchVisible, indexName }) {
     }
 
     const currentUrl = window.location.href
-    
+
     if (currentUrl.includes(hitUrl)) {
       const element = document.querySelector(`[data-slug='${hit.slug}']`)
       if (element) {
