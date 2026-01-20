@@ -21,15 +21,17 @@ import {
 } from '@/components/ui/sidebar'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
+import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
-import { cn } from '@/lib/utils'
+import { cn, getMetaKey } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { addHours, formatRelative } from 'date-fns'
 import {
+  ArrowRightIcon,
   BookOpen,
   Box,
   ChartColumn,
@@ -42,8 +44,11 @@ import {
   LockKeyhole,
   LogOut,
   Mail,
+  MapPinned,
   Moon,
   PackageOpen,
+  SearchIcon,
+  Server,
   Settings,
   Slack,
   SquareUserRound,
@@ -51,20 +56,23 @@ import {
   TextSearch,
   TriangleAlert,
   Users,
-  Server,
-  MapPinned,
 } from 'lucide-react'
-import { usePostHog } from 'posthog-js/react'
+import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  CommandConfig,
+  useCommandPaletteActions,
+  useIsCommandPaletteEnabled,
+  useRegisterCommands,
+} from './CommandPalette'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { FeatureFlags } from '@/enums/FeatureFlags'
 
 interface SidebarProps {
   isBannerVisible: boolean
@@ -77,6 +85,26 @@ interface SidebarItem {
   label: string
   path: RoutePath | string
   onClick?: () => void
+}
+
+const useNavCommands = (items: { label: string; path: RoutePath | string; onClick?: () => void }[]) => {
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+
+  const navCommands: CommandConfig[] = useMemo(
+    () =>
+      items
+        .filter((item) => item.path !== pathname)
+        .map((item) => ({
+          id: `nav-${item.path}`,
+          label: `Go to ${item.label}`,
+          icon: <ArrowRightIcon className="w-4 h-4" />,
+          onSelect: () => navigate(item.path),
+        })),
+    [pathname, navigate, items],
+  )
+
+  useRegisterCommands(navCommands, { groupId: 'navigation', groupLabel: 'Navigation', groupOrder: 1 })
 }
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
@@ -228,6 +256,35 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     ].filter((group) => group.items.length > 0)
   }, [sidebarItems, settingsItems, billingItems, infrastructureItems])
 
+  const commandItems = useMemo(() => {
+    return sidebarGroups
+      .flatMap((group) => group.items)
+      .concat(
+        {
+          path: RoutePath.ACCOUNT_SETTINGS,
+          label: 'Account Settings',
+          icon: <Settings size={16} strokeWidth={1.5} />,
+        },
+        {
+          path: RoutePath.USER_INVITATIONS,
+          label: 'Invitations',
+          icon: <Mail size={16} strokeWidth={1.5} />,
+        },
+        {
+          path: RoutePath.ONBOARDING,
+          label: 'Onboarding',
+          icon: <ListChecks size={16} strokeWidth={1.5} />,
+        },
+      )
+  }, [sidebarGroups])
+
+  const commandPaletteActions = useCommandPaletteActions()
+
+  useNavCommands(commandItems)
+
+  const cmdkEnabled = useIsCommandPaletteEnabled()
+  const metaKey = getMetaKey()
+
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarHeader>
@@ -244,6 +301,21 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         </div>
         <SidebarMenu>
           <OrganizationPicker />
+          {cmdkEnabled && (
+            <SidebarMenuItem className="mb-1">
+              <SidebarMenuButton
+                tooltip={`Search ${metaKey}+K`}
+                variant="outline"
+                className="flex items-center gap-2 justify-between dark:bg-input/30 dark:hover:bg-sidebar-accent hover:shadow-[0_0_0_1px_hsl(var(--sidebar-border))]"
+                onClick={() => commandPaletteActions.setIsOpen(true)}
+              >
+                <span className="flex items-center gap-2">
+                  <SearchIcon className="w-4 h-4" /> Search
+                </span>
+                <Kbd className="whitespace-nowrap">{metaKey} K</Kbd>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
