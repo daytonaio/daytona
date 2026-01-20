@@ -1799,6 +1799,9 @@ const docTemplate = `{
                 "currentAllocatedMemoryGiB": {
                     "type": "integer"
                 },
+                "currentCpuLoadAverage": {
+                    "type": "number"
+                },
                 "currentCpuUsagePercentage": {
                     "type": "number"
                 },

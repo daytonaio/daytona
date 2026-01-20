@@ -92,9 +92,13 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	defer cancel()
 
 	// Collect metrics
-	m := s.collector.Collect(reqCtx)
+	m, err := s.collector.Collect(reqCtx)
+	if err != nil {
+		return err
+	}
 
 	metricsPtr := &apiclient.RunnerHealthMetrics{
+		CurrentCpuLoadAverage:        m.CPULoadAverage,
 		CurrentCpuUsagePercentage:    m.CPUUsagePercentage,
 		CurrentMemoryUsagePercentage: m.MemoryUsagePercentage,
 		CurrentDiskUsagePercentage:   m.DiskUsagePercentage,
@@ -125,7 +129,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	healthcheck.SetApiUrl(apiUrl)
 
 	req := s.client.RunnersAPI.RunnerHealthcheck(reqCtx).RunnerHealthcheck(*healthcheck)
-	_, err := req.Execute()
+	_, err = req.Execute()
 	if err != nil {
 		return err
 	}

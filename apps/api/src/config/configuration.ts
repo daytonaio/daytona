@@ -158,23 +158,56 @@ const configuration = {
     apiVersion: (process.env.DEFAULT_RUNNER_API_VERSION || '2') as '0' | '2',
     name: process.env.DEFAULT_RUNNER_NAME,
   },
-  runnerUsage: {
-    declarativeBuildScoreThreshold: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),
-    availabilityScoreThreshold: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '10', 10),
-    startScoreThreshold: parseInt(process.env.RUNNER_START_SCORE_THRESHOLD || '3', 10),
-    cpuUsageWeight: parseFloat(process.env.RUNNER_CPU_USAGE_WEIGHT || '0.25'),
-    memoryUsageWeight: parseFloat(process.env.RUNNER_MEMORY_USAGE_WEIGHT || '0.4'),
-    diskUsageWeight: parseFloat(process.env.RUNNER_DISK_USAGE_WEIGHT || '0.4'),
-    allocatedCpuWeight: parseFloat(process.env.RUNNER_ALLOCATED_CPU_WEIGHT || '0.03'),
-    allocatedMemoryWeight: parseFloat(process.env.RUNNER_ALLOCATED_MEMORY_WEIGHT || '0.03'),
-    allocatedDiskWeight: parseFloat(process.env.RUNNER_ALLOCATED_DISK_WEIGHT || '0.03'),
-    startedSandboxesWeight: parseFloat(process.env.RUNNER_STARTED_SANDBOXES_WEIGHT || '0.1'),
-    cpuPenaltyExponent: parseFloat(process.env.RUNNER_CPU_PENALTY_EXPONENT || '0.15'),
-    memoryPenaltyExponent: parseFloat(process.env.RUNNER_MEMORY_PENALTY_EXPONENT || '0.15'),
-    diskPenaltyExponent: parseFloat(process.env.RUNNER_DISK_PENALTY_EXPONENT || '0.15'),
-    cpuPenaltyThreshold: parseInt(process.env.RUNNER_CPU_PENALTY_THRESHOLD || '90', 10),
-    memoryPenaltyThreshold: parseInt(process.env.RUNNER_MEMORY_PENALTY_THRESHOLD || '75', 10),
-    diskPenaltyThreshold: parseInt(process.env.RUNNER_DISK_PENALTY_THRESHOLD || '75', 10),
+  runnerScore: {
+    thresholds: {
+      declarativeBuild: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '10', 10),
+      availability: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '10', 10),
+      start: parseInt(process.env.RUNNER_START_SCORE_THRESHOLD || '3', 10),
+    },
+    weights: {
+      cpuUsage: parseFloat(process.env.RUNNER_CPU_USAGE_WEIGHT || '0.25'),
+      memoryUsage: parseFloat(process.env.RUNNER_MEMORY_USAGE_WEIGHT || '0.4'),
+      diskUsage: parseFloat(process.env.RUNNER_DISK_USAGE_WEIGHT || '0.4'),
+      allocatedCpu: parseFloat(process.env.RUNNER_ALLOCATED_CPU_WEIGHT || '0.03'),
+      allocatedMemory: parseFloat(process.env.RUNNER_ALLOCATED_MEMORY_WEIGHT || '0.03'),
+      allocatedDisk: parseFloat(process.env.RUNNER_ALLOCATED_DISK_WEIGHT || '0.03'),
+      startedSandboxes: parseFloat(process.env.RUNNER_STARTED_SANDBOXES_WEIGHT || '0.1'),
+    },
+    penalty: {
+      exponents: {
+        cpuLoadAvg: parseFloat(process.env.RUNNER_CPU_LOAD_AVG_PENALTY_EXPONENT || '0.1'),
+        cpu: parseFloat(process.env.RUNNER_CPU_PENALTY_EXPONENT || '0.15'),
+        memory: parseFloat(process.env.RUNNER_MEMORY_PENALTY_EXPONENT || '0.15'),
+        disk: parseFloat(process.env.RUNNER_DISK_PENALTY_EXPONENT || '0.15'),
+      },
+      thresholds: {
+        // cpuLoadAvg is a normalized per-CPU load average (e.g. load_avg / num_cpus), not a percentage like the cpu/memory/disk thresholds below.
+        cpuLoadAvg: parseFloat(process.env.RUNNER_CPU_LOAD_AVG_PENALTY_THRESHOLD || '0.7'),
+        cpu: parseInt(process.env.RUNNER_CPU_PENALTY_THRESHOLD || '90', 10),
+        memory: parseInt(process.env.RUNNER_MEMORY_PENALTY_THRESHOLD || '75', 10),
+        disk: parseInt(process.env.RUNNER_DISK_PENALTY_THRESHOLD || '75', 10),
+      },
+    },
+    targetValues: {
+      optimal: {
+        cpu: parseInt(process.env.RUNNER_OPTIMAL_CPU || '0', 10),
+        memory: parseInt(process.env.RUNNER_OPTIMAL_MEMORY || '0', 10),
+        disk: parseInt(process.env.RUNNER_OPTIMAL_DISK || '0', 10),
+        allocCpu: parseInt(process.env.RUNNER_OPTIMAL_ALLOC_CPU || '100', 10),
+        allocMem: parseInt(process.env.RUNNER_OPTIMAL_ALLOC_MEM || '100', 10),
+        allocDisk: parseInt(process.env.RUNNER_OPTIMAL_ALLOC_DISK || '100', 10),
+        startedSandboxes: parseInt(process.env.RUNNER_OPTIMAL_STARTED_SANDBOXES || '0', 10),
+      },
+      critical: {
+        cpu: parseInt(process.env.RUNNER_CRITICAL_CPU || '100', 10),
+        memory: parseInt(process.env.RUNNER_CRITICAL_MEMORY || '100', 10),
+        disk: parseInt(process.env.RUNNER_CRITICAL_DISK || '100', 10),
+        allocCpu: parseInt(process.env.RUNNER_CRITICAL_ALLOC_CPU || '500', 10),
+        allocMem: parseInt(process.env.RUNNER_CRITICAL_ALLOC_MEM || '500', 10),
+        allocDisk: parseInt(process.env.RUNNER_CRITICAL_ALLOC_DISK || '500', 10),
+        startedSandboxes: parseInt(process.env.RUNNER_CRITICAL_STARTED_SANDBOXES || '100', 10),
+      },
+    },
   },
   rateLimit: {
     anonymous: {

@@ -4,6 +4,7 @@
 package dto
 
 type RunnerMetrics struct {
+	CurrentCpuLoadAverage        float64 `json:"currentCpuLoadAverage"`
 	CurrentCpuUsagePercentage    float64 `json:"currentCpuUsagePercentage"`
 	CurrentMemoryUsagePercentage float64 `json:"currentMemoryUsagePercentage"`
 	CurrentDiskUsagePercentage   float64 `json:"currentDiskUsagePercentage"`

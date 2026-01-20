@@ -112,12 +112,6 @@ func main() {
 
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
 
-	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
-		Docker:   dockerClient,
-		Interval: 15 * time.Second,
-	})
-	metricsService.StartMetricsCollection(ctx)
-
 	// Initialize sandbox state synchronization service
 	sandboxSyncService := services.NewSandboxSyncService(services.SandboxSyncServiceConfig{
 		Docker:   dockerClient,
@@ -140,22 +134,23 @@ func main() {
 		log.Info("Gateway disabled - set SSH_GATEWAY_ENABLE=true to enable")
 	}
 
+	// Setup structured logger
+	slogLogger := newSLogger()
+
+	// Create metrics collector
+	metricsCollector := metrics.NewCollector(slogLogger, dockerClient, cfg.CollectorWindowSize)
+	metricsCollector.Start(ctx)
+
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
 		StatesCache:       statesCache,
 		Docker:            dockerClient,
 		SandboxService:    sandboxService,
-		MetricsService:    metricsService,
+		MetricsCollector:  metricsCollector,
 		NetRulesManager:   netRulesManager,
 		SSHGatewayService: sshGatewayService,
 	})
 
-	// Setup structured logger
-	slogLogger := newSLogger()
-
 	if cfg.ApiVersion == 2 {
-		// Create metrics collector
-		metricsCollector := metrics.NewCollector(slogLogger)
-
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
 			Interval:   cfg.HealthcheckInterval,
 			Timeout:    cfg.HealthcheckTimeout,
