@@ -81,12 +81,7 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		return
 	}
 
-	var cookieDomain string
-	if p.cookieDomain != nil {
-		cookieDomain = *p.cookieDomain
-	} else {
-		cookieDomain = GetCookieDomainFromHost(ctx.Request.Host)
-	}
+	cookieDomain := p.getCookieDomain(ctx.Request.Host)
 
 	// Clear the PKCE cookie
 	ctx.SetCookie("pkce_verifier", "", -1, "/", cookieDomain, p.config.EnableTLS, true)
@@ -161,12 +156,7 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 		return "", fmt.Errorf("failed to encode pkce_verifier cookie: %w", err)
 	}
 
-	var cookieDomain string
-	if p.cookieDomain != nil {
-		cookieDomain = *p.cookieDomain
-	} else {
-		cookieDomain = GetCookieDomainFromHost(baseHost)
-	}
+	cookieDomain := p.getCookieDomain(baseHost)
 
 	ctx.SetCookie("pkce_verifier", encodedVerifier, 300, "/", cookieDomain, p.config.EnableTLS, true)
 
@@ -228,6 +218,13 @@ func (p *Proxy) getOidcEndpoint(ctx context.Context) (context.Context, *oauth2.E
 	}
 
 	return providerCtx, &endpoint, nil
+}
+
+func (p *Proxy) getCookieDomain(host string) string {
+	if p.cookieDomain != nil {
+		return *p.cookieDomain
+	}
+	return GetCookieDomainFromHost(host)
 }
 
 func GenerateRandomState() (string, error) {

@@ -72,12 +72,7 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 		}
 	}
 
-	var cookieDomain string
-	if p.cookieDomain != nil {
-		cookieDomain = *p.cookieDomain
-	} else {
-		cookieDomain = GetCookieDomainFromHost(ctx.Request.Host)
-	}
+	cookieDomain := p.getCookieDomain(ctx.Request.Host)
 
 	sandboxId, err = p.getSandboxIdFromSignedPreviewUrlToken(ctx, sandboxIdOrSignedToken, port, cookieDomain)
 	if err == nil {
