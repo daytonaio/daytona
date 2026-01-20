@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/daytonaio/apiclient"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/mark3labs/mcp-go/mcp"
 
 	log "github.com/sirupsen/logrus"

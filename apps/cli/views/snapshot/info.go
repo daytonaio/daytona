@@ -8,9 +8,9 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
-	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"golang.org/x/term"
 )
 

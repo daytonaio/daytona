@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 
-	apiclient "github.com/daytonaio/apiclient"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/pkg/api/dto"
 )
 
