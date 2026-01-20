@@ -14,12 +14,16 @@ import { useNavigate } from 'react-router-dom'
 const SUSPENSION_BANNER_ID = 'suspension-banner'
 
 // todo: enumerate reasons
+const PAYMENT_METHOD_REQUIRED_REASON = 'Payment method required'
+const VERIFY_EMAIL_REASON = 'Please verify your email address'
+const CREDITS_DEPLETED_REASON = 'Credits depleted'
+
 function isSetupRequiredSuspension(reason: string) {
-  return reason === 'Payment method required' || reason === 'Please verify your email address'
+  return reason === PAYMENT_METHOD_REQUIRED_REASON || reason === VERIFY_EMAIL_REASON
 }
 
 function isCreditsDepletionSuspension(reason: string) {
-  return reason === 'Credits depleted'
+  return reason === CREDITS_DEPLETED_REASON
 }
 
 type Suspension = Pick<
@@ -51,7 +55,7 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
     const reason = suspension.suspensionReason
 
     if (isSetupRequiredSuspension(reason)) {
-      if (reason === 'Payment method required') {
+      if (reason === PAYMENT_METHOD_REQUIRED_REASON) {
         addBanner({
           id: SUSPENSION_BANNER_ID,
           variant: 'info',
@@ -64,7 +68,7 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
           },
           isDismissible: false,
         })
-      } else if (reason === 'Please verify your email address') {
+      } else if (reason === VERIFY_EMAIL_REASON) {
         addBanner({
           id: SUSPENSION_BANNER_ID,
           variant: 'info',

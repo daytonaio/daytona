@@ -260,8 +260,6 @@ export const BannerStack = ({ className, bannerClassName }: { className?: string
     }
   }, [activeItem, removeBanner])
 
-  const _handleDismiss = activeItem?.onDismiss ? handleDismiss : undefined
-
   if (!activeItem) {
     return null
   }
@@ -283,7 +281,7 @@ export const BannerStack = ({ className, bannerClassName }: { className?: string
             total={notifications.length}
             currentIndex={activeIndex}
             onNext={handleNext}
-            onDismiss={_handleDismiss}
+            onDismiss={activeItem?.onDismiss ? handleDismiss : undefined}
             initial={{ opacity: 0, y: -20, filter: 'blur(2px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 20, filter: 'blur(2px)' }}
