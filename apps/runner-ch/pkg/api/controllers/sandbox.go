@@ -319,6 +319,48 @@ func CreateBackup(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, "Backup started")
 }
 
+// Fork creates a fork (copy-on-write clone) of a running sandbox
+// @Summary		Fork a sandbox
+// @Description	Create a CoW fork of a running/paused sandbox with memory state
+// @Tags			sandboxes
+// @Accept			json
+// @Produce		json
+// @Param			sandboxId	path		string				true	"Source Sandbox ID"
+// @Param			fork		body		dto.ForkSandboxDTO	true	"Fork configuration"
+// @Success		201			{object}	dto.ForkSandboxResponseDTO
+// @Failure		400			{object}	error
+// @Failure		500			{object}	error
+// @Router			/sandboxes/{sandboxId}/fork [post]
+func Fork(ctx *gin.Context) {
+	sandboxId := ctx.Param("sandboxId")
+
+	var forkDTO dto.ForkSandboxDTO
+	if err := ctx.ShouldBindJSON(&forkDTO); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	log.Infof("Forking sandbox %s to %s", sandboxId, forkDTO.NewSandboxId)
+
+	// Fork the sandbox using Cloud Hypervisor
+	info, err := Runner.CHClient.ForkVM(ctx.Request.Context(), cloudhypervisor.ForkOptions{
+		SourceSandboxId: sandboxId,
+		NewSandboxId:    forkDTO.NewSandboxId,
+		Prefault:        forkDTO.Prefault,
+	})
+	if err != nil {
+		log.Errorf("Failed to fork sandbox %s: %v", sandboxId, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, dto.ForkSandboxResponseDTO{
+		Id:       info.Id,
+		State:    string(info.State),
+		ParentId: sandboxId,
+	})
+}
+
 // HealthCheck returns health status
 // @Summary		Health check
 // @Description	Returns OK if the runner is healthy

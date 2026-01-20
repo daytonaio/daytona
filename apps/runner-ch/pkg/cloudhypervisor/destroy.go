@@ -55,16 +55,9 @@ func (c *Client) Destroy(ctx context.Context, sandboxId string) error {
 		log.Warnf("Failed to kill VM process: %v", err)
 	}
 
-	// Release TAP interface (back to pool or delete)
-	if c.tapPool.IsEnabled() {
-		if err := c.tapPool.Release(ctx, sandboxId); err != nil {
-			log.Warnf("Failed to release TAP to pool: %v", err)
-		}
-	} else {
-		tapName := c.getTapName(sandboxId)
-		if err := c.deleteTapInterface(ctx, tapName); err != nil {
-			log.Warnf("Failed to delete TAP interface: %v", err)
-		}
+	// Delete network namespace (this also cleans up TAP and veth interfaces)
+	if err := c.netnsPool.Delete(ctx, sandboxId); err != nil {
+		log.Warnf("Failed to delete network namespace: %v", err)
 	}
 
 	// Remove sandbox directory
@@ -100,9 +93,8 @@ func (c *Client) RemoveDestroyed(ctx context.Context, sandboxId string) error {
 	// Kill any remaining process
 	_ = c.killVMProcess(ctx, sandboxId)
 
-	// Delete TAP interface
-	tapName := c.getTapName(sandboxId)
-	_ = c.deleteTapInterface(ctx, tapName)
+	// Delete network namespace (this also cleans up TAP and veth interfaces)
+	_ = c.netnsPool.Delete(ctx, sandboxId)
 
 	// Remove sandbox directory
 	sandboxDir := c.getSandboxDir(sandboxId)

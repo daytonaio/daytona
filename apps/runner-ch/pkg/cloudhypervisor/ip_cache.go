@@ -76,14 +76,22 @@ func (c *IPCache) Delete(sandboxId string) {
 	}
 }
 
-// GetOrFetch returns the cached IP, or fetches it from IP pool/sandbox info
+// GetOrFetch returns the cached IP, or fetches it from namespace pool/sandbox info
+// With network namespaces, this returns the guest IP (192.168.0.2) which is the same
+// for all VMs. Use GetRoutableIP for the IP that can be used to reach the VM from host.
 func (c *IPCache) GetOrFetch(ctx context.Context, sandboxId string, client *Client) string {
 	// Check cache first
 	if ip := c.Get(sandboxId); ip != "" {
 		return ip
 	}
 
-	// Try IP pool (instant lookup)
+	// Try network namespace pool (new architecture)
+	if ns := client.GetNetNSPool().Get(sandboxId); ns != nil {
+		c.Set(sandboxId, ns.GuestIP)
+		return ns.GuestIP
+	}
+
+	// Try IP pool (legacy, instant lookup)
 	if ip := client.GetIPPool().Get(sandboxId); ip != "" {
 		c.Set(sandboxId, ip)
 		return ip
@@ -91,7 +99,7 @@ func (c *IPCache) GetOrFetch(ctx context.Context, sandboxId string, client *Clie
 
 	// Try to read from stored file (for legacy sandboxes)
 	ipFilePath := filepath.Join(client.config.SandboxesPath, sandboxId, "ip")
-	if output, err := client.runSSHCommand(ctx, fmt.Sprintf("cat %s 2>/dev/null", ipFilePath)); err == nil {
+	if output, err := client.runShellScript(ctx, fmt.Sprintf("cat %s 2>/dev/null", ipFilePath)); err == nil {
 		if ip := strings.TrimSpace(output); isValidIP(ip) {
 			c.Set(sandboxId, ip)
 			return ip
@@ -100,6 +108,21 @@ func (c *IPCache) GetOrFetch(ctx context.Context, sandboxId string, client *Clie
 
 	log.Warnf("IP cache: could not find IP for sandbox %s", sandboxId)
 	return ""
+}
+
+// GetRoutableIP returns the IP that can be used to reach the VM from the host
+// With network namespaces, this is the namespace's external IP (10.0.{num}.1)
+// which the host can route to, and the namespace NATs to the guest IP (192.168.0.2)
+func (c *IPCache) GetRoutableIP(ctx context.Context, sandboxId string, client *Client) string {
+	// With network namespaces, the routable IP is the namespace's external IP
+	if ns := client.GetNetNSPool().Get(sandboxId); ns != nil {
+		// Return the external IP that the host can reach
+		// The namespace will NAT this to the guest IP
+		return ns.ExternalIP
+	}
+
+	// Fallback to the cached/fetched IP (legacy mode or direct access)
+	return c.GetOrFetch(ctx, sandboxId, client)
 }
 
 // Clear removes all cached IPs

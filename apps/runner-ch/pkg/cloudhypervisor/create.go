@@ -79,43 +79,37 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 		return nil, fmt.Errorf("failed to create disk: %w", err)
 	}
 
-	// Get TAP interface (from pool if enabled, otherwise create)
-	var tapName string
-	if c.tapPool.IsEnabled() {
-		var err error
-		tapName, err = c.tapPool.Acquire(ctx, opts.SandboxId)
-		if err != nil {
-			c.cleanupSandbox(ctx, opts.SandboxId)
-			return nil, fmt.Errorf("failed to acquire TAP from pool: %w", err)
-		}
-		log.Infof("Acquired TAP %s from pool for %s", tapName, opts.SandboxId)
-	} else {
-		tapName = c.getTapName(opts.SandboxId)
-		if err := c.createTapInterface(ctx, tapName); err != nil {
-			c.cleanupSandbox(ctx, opts.SandboxId)
-			return nil, fmt.Errorf("failed to create TAP interface: %w", err)
-		}
-	}
-
-	// Allocate static IP from pool (instant, no DHCP wait)
-	ip, err := c.ipPool.Allocate(opts.SandboxId)
+	// Create network namespace for this sandbox
+	// Each VM gets its own isolated namespace with fixed internal IP (192.168.0.2)
+	netns, err := c.netnsPool.Create(ctx, opts.SandboxId)
 	if err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)
-		return nil, fmt.Errorf("failed to allocate IP: %w", err)
+		return nil, fmt.Errorf("failed to create network namespace: %w", err)
 	}
-	log.Infof("Allocated IP %s for sandbox %s", ip, opts.SandboxId)
+	log.Infof("Created network namespace %s for %s (external: %s)", netns.NamespaceName, opts.SandboxId, netns.ExternalIP)
 
-	// Store IP immediately (no need to wait for DHCP)
+	// TAP is created inside the namespace (tap0), use that name
+	tapName := netns.TapName
+
+	// Use fixed guest IP (same for all VMs, namespace provides isolation)
+	ip := netns.GuestIP
+	log.Infof("Using fixed guest IP %s for sandbox %s (namespace: %s)", ip, opts.SandboxId, netns.NamespaceName)
+
+	// Store namespace external IP for proxy routing
 	ipFilePath := filepath.Join(c.getSandboxDir(opts.SandboxId), "ip")
-	c.runCommand(ctx, fmt.Sprintf("echo '%s' > %s", ip, ipFilePath))
+	_ = c.runCommand(ctx, "sh", "-c", fmt.Sprintf("echo '%s' > %s", ip, ipFilePath))
 	GetIPCache().Set(opts.SandboxId, ip)
 
-	// Create cloud-init ISO with static IP configuration
+	// Create cloud-init ISO with fixed internal network configuration
+	hostname := opts.SandboxId
+	if len(hostname) > 12 {
+		hostname = hostname[:12]
+	}
 	cloudInitISO, err := c.createCloudInitISO(ctx, opts.SandboxId, CloudInitConfig{
 		IP:       ip,
-		Gateway:  IPPoolGateway,
-		Netmask:  IPPoolNetmask,
-		Hostname: opts.SandboxId[:12], // Use first 12 chars of ID as hostname
+		Gateway:  netns.GatewayIP,
+		Netmask:  GuestNetmask,
+		Hostname: hostname,
 	})
 	if err != nil {
 		log.Warnf("Failed to create cloud-init ISO: %v (VM will use DHCP fallback)", err)
@@ -140,8 +134,8 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 		return nil, fmt.Errorf("failed to write VM config: %w", err)
 	}
 
-	// Start Cloud Hypervisor process and wait for socket (combined for efficiency)
-	if err := c.startVMProcessAndWait(ctx, opts.SandboxId, 30*time.Second); err != nil {
+	// Start Cloud Hypervisor process inside the network namespace and wait for socket
+	if err := c.startVMProcessInNamespaceAndWait(ctx, opts.SandboxId, netns, 30*time.Second); err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)
 		return nil, fmt.Errorf("failed to start VM: %w", err)
 	}
@@ -420,6 +414,7 @@ func (c *Client) startVMProcess(ctx context.Context, sandboxId string) error {
 
 // startVMProcessAndWait starts CH process and waits for socket in a single SSH call
 // This saves an SSH round-trip compared to calling startVMProcess + waitForSocket separately
+// DEPRECATED: Use startVMProcessInNamespaceAndWait for namespace-based networking
 func (c *Client) startVMProcessAndWait(ctx context.Context, sandboxId string, timeout time.Duration) error {
 	socketPath := c.getSocketPath(sandboxId)
 	logPath := filepath.Join(c.getSandboxDir(sandboxId), "cloud-hypervisor.log")
@@ -468,6 +463,49 @@ exit 1
 		return fmt.Errorf("failed to start VM process: %w", err)
 	}
 	return c.waitForSocket(ctx, sandboxId, timeout)
+}
+
+// startVMProcessInNamespaceAndWait starts CH process inside a network namespace and waits for socket
+// This is the preferred method for namespace-based networking
+func (c *Client) startVMProcessInNamespaceAndWait(ctx context.Context, sandboxId string, netns *NetNamespace, timeout time.Duration) error {
+	socketPath := c.getSocketPath(sandboxId)
+	logPath := filepath.Join(c.getSandboxDir(sandboxId), "cloud-hypervisor.log")
+	timeoutSec := int(timeout.Seconds())
+
+	log.Infof("Starting cloud-hypervisor process for %s in namespace %s with socket %s", sandboxId, netns.NamespaceName, socketPath)
+
+	// Combined: start CH in namespace + wait for socket in one SSH call
+	combinedCmd := fmt.Sprintf(`
+# Start cloud-hypervisor in namespace background
+nohup ip netns exec %s cloud-hypervisor --api-socket %s > %s 2>&1 &
+pid=$!
+
+# Wait for socket with fast polling
+timeout=%d
+elapsed=0
+while [ $elapsed -lt $timeout ]; do
+    if [ -S '%s' ]; then
+        sleep 0.2
+        echo "READY"
+        exit 0
+    fi
+    sleep 0.05
+    elapsed=$((elapsed + 1))
+done
+echo "TIMEOUT"
+kill $pid 2>/dev/null || true
+exit 1
+`, netns.NamespaceName, socketPath, logPath, timeoutSec*20, socketPath) // *20 because we sleep 0.05s
+
+	output, err := c.runShellScript(ctx, combinedCmd)
+	output = strings.TrimSpace(output)
+
+	if err != nil || strings.Contains(output, "TIMEOUT") {
+		return fmt.Errorf("failed to start CH in namespace or timeout waiting for socket: %v (output: %s)", err, output)
+	}
+
+	log.Infof("cloud-hypervisor started in namespace %s and socket ready for %s", netns.NamespaceName, sandboxId)
+	return nil
 }
 
 // waitForSocket waits for the API socket to be ready
@@ -533,13 +571,11 @@ func (c *Client) cleanupSandbox(ctx context.Context, sandboxId string) {
 	// Kill VM process
 	_ = c.killVMProcess(ctx, sandboxId)
 
-	// Release TAP interface (back to pool or delete)
-	if c.tapPool.IsEnabled() {
-		_ = c.tapPool.Release(ctx, sandboxId)
-	} else {
-		tapName := c.getTapName(sandboxId)
-		_ = c.deleteTapInterface(ctx, tapName)
-	}
+	// Delete network namespace (this also cleans up TAP and veth interfaces)
+	_ = c.netnsPool.Delete(ctx, sandboxId)
+
+	// Release IP from cache
+	GetIPCache().Delete(sandboxId)
 
 	// Remove sandbox directory
 	sandboxDir := c.getSandboxDir(sandboxId)

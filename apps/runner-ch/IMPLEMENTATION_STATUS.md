@@ -13,10 +13,20 @@ Cloud Hypervisor runner for Daytona - implementation status and roadmap.
 ### Core Infrastructure
 
 - [x] Cloud Hypervisor REST API client
-- [x] Remote SSH execution mode
+- [x] **Dual-mode operation: Local + Remote (SSH)**
+  - Local mode: Runner on same host as Cloud Hypervisor (production)
+  - Remote mode: Runner connects via SSH (development)
 - [x] API server with Gin framework
 - [x] Authentication middleware
 - [x] Prometheus metrics endpoint
+
+### SSH Gateway
+
+- [x] SSH gateway service (port 2220)
+- [x] Public key authentication (matches global SSH gateway)
+- [x] Dual-mode: Direct connection (local) or SSH tunnel (remote)
+- [x] Channel and request forwarding to daemon
+- [x] Proper channel rejection on connection failure
 
 ### VM Lifecycle
 
@@ -77,11 +87,13 @@ Cloud Hypervisor runner for Daytona - implementation status and roadmap.
 - [x] Static IP pool (10.0.0.2 - 10.0.0.254)
 - [x] Cloud-init ISO for static IP configuration (no DHCP wait)
 - [x] IP allocation instant (0ms overhead)
-- [x] Toolbox proxy (`/sandboxes/:id/toolbox/*`) - SSH tunnel
-- [x] Port proxy (`/sandboxes/:id/proxy/:port/*`) - SSH tunnel
+- [x] Toolbox proxy (`/sandboxes/:id/toolbox/*`) - dual mode
+- [x] Port proxy (`/sandboxes/:id/proxy/:port/*`) - dual mode
 - [x] IP cache for sandbox IPs
-- [x] SOCKS5 proxy via SSH (persistent connection)
+- [x] SOCKS5 proxy via SSH (remote mode)
+- [x] Direct HTTP proxy (local mode)
 - [x] Persistent IP storage in sandbox directory
+- [x] SSH gateway for sandbox SSH access
 
 ### VM Features
 
@@ -92,9 +104,6 @@ Cloud Hypervisor runner for Daytona - implementation status and roadmap.
 
 ### High Priority
 
-- [ ] Daemon installation in VMs (cloud-init or toolbox)
-- [ ] VM IP address detection/assignment
-- [ ] SSH access to VMs
 - [ ] Backup to S3
 - [ ] Memory state snapshots (for instant resume)
 
@@ -124,7 +133,8 @@ Cloud Hypervisor runner for Daytona - implementation status and roadmap.
 SERVER_URL=http://localhost:3000      # Daytona API URL
 API_TOKEN=<token>                      # Runner API token
 
-# Cloud Hypervisor Host (remote mode)
+# Cloud Hypervisor Host (remote mode only)
+# Leave CH_SSH_HOST empty for local mode
 CH_SSH_HOST=root@206.223.225.17
 CH_SSH_KEY_PATH=/path/to/id_rsa
 
@@ -136,6 +146,18 @@ LOG_LEVEL=info                         # debug, info, warn, error
 CH_DEFAULT_CPUS=2
 CH_DEFAULT_MEMORY_MB=2048
 CH_DEFAULT_DISK_GB=20
+
+# SSH Gateway (optional)
+SSH_GATEWAY_ENABLE=true               # Enable SSH gateway
+SSH_GATEWAY_PORT=2220                 # SSH gateway port
+SSH_PUBLIC_KEY=<base64-encoded-key>   # Public key for authentication
+SSH_HOST_KEY_PATH=/root/.ssh/id_rsa   # Host key path
+SANDBOX_SSH_USER=daytona              # User for sandbox SSH
+SANDBOX_SSH_PORT=22220                # SSH port inside sandbox
+
+# Performance
+TAP_POOL_ENABLED=true                 # Pre-create TAP interfaces
+TAP_POOL_SIZE=10                      # Number of TAPs to pre-create
 ```
 
 ### Directory Structure (Remote Host)
@@ -214,15 +236,15 @@ Format: `tap-<11 chars from sandbox ID>` = 15 chars max
 
 ## Known Issues
 
-1. **No daemon in VMs** - VMs boot but have no Daytona daemon installed
-2. **S3 integration missing** - Snapshot push/pull not implemented
-3. **GPU passthrough untested** - VFIO code exists but needs testing
+1. **S3 integration missing** - Snapshot push/pull not implemented
+2. **GPU passthrough untested** - VFIO code exists but needs testing
+3. **Port conflicts** - SSH gateway (port 2220) may conflict with runner-win if both running
 
 ## Next Steps
 
-1. **VM Connectivity** - Implement cloud-init or daemon injection
-2. **IP Detection** - Use DHCP lease files or guest agent
-3. **S3 Snapshots** - Implement push/pull for snapshot portability
+1. **S3 Snapshots** - Implement push/pull for snapshot portability
+2. **GPU Testing** - Test VFIO passthrough with actual GPUs
+3. **Memory Snapshots** - Implement memory state save/restore for instant resume
 4. **Testing** - End-to-end tests with actual workloads
 
 ## Comparison with runner-win
@@ -238,6 +260,27 @@ Format: `tap-<11 chars from sandbox ID>` = 15 chars max
 | Memory Overhead | Higher | Lower |
 | Disk Format | qcow2 | qcow2 |
 
+## Architecture
+
+### SSH Connection Flow
+
+```
+User → Global SSH Gateway (2222) → Runner SSH Gateway (2220) → Daemon SSH (22220)
+         │                              │                           │
+         │ token as username            │ sandboxId as username     │ password auth
+         │ public key auth              │ public key auth           │ "sandbox-ssh"
+```
+
+### Local vs Remote Mode
+
+| Operation | Local Mode | Remote Mode |
+|-----------|------------|-------------|
+| Shell commands | `/bin/sh -c` | `ssh user@host` |
+| File operations | `os.Stat`, `os.ReadFile` | SSH commands |
+| Proxy to VM | Direct HTTP | SOCKS5 via SSH |
+| SSH Gateway | Direct dial | SSH tunnel dial |
+| Metrics | Local `gopsutil` | SSH to remote host |
+
 ---
 
-_Last updated: 2026-01-20_
+_Last updated: 2026-01-20 (SSH Gateway + Local Mode)_

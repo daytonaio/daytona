@@ -151,9 +151,9 @@ func getProxyTarget(ctx *gin.Context, client *cloudhypervisor.Client) (*url.URL,
 		return nil, errors.New("sandbox ID is required")
 	}
 
-	// Get IP from cache or fetch it
+	// Get routable IP (namespace external IP or legacy IP)
 	ipCache := cloudhypervisor.GetIPCache()
-	containerIP := ipCache.GetOrFetch(ctx.Request.Context(), sandboxId, client)
+	containerIP := ipCache.GetRoutableIP(ctx.Request.Context(), sandboxId, client)
 
 	if containerIP == "" {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Could not determine sandbox IP"})
@@ -195,9 +195,9 @@ func getProxyToPortTarget(ctx *gin.Context, client *cloudhypervisor.Client) (*ur
 		return nil, errors.New("port is required")
 	}
 
-	// Get IP from cache or fetch it
+	// Get routable IP (namespace external IP or legacy IP)
 	ipCache := cloudhypervisor.GetIPCache()
-	containerIP := ipCache.GetOrFetch(ctx.Request.Context(), sandboxId, client)
+	containerIP := ipCache.GetRoutableIP(ctx.Request.Context(), sandboxId, client)
 
 	if containerIP == "" {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Could not determine sandbox IP"})

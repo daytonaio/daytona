@@ -66,6 +66,7 @@ type Client struct {
 	sandboxMuMu  sync.Mutex
 	tapPool      *TapPool
 	ipPool       *IPPool
+	netnsPool    *NetNSPool
 
 	// SSHHost is the remote host for SSH-based operations (exported for proxy)
 	SSHHost string
@@ -136,6 +137,9 @@ func NewClient(config ClientConfig) (*Client, error) {
 	// Initialize IP pool
 	c.ipPool = NewIPPool(c)
 
+	// Initialize network namespace pool
+	c.netnsPool = NewNetNSPool(c)
+
 	return c, nil
 }
 
@@ -147,6 +151,16 @@ func (c *Client) InitializeIPPool(ctx context.Context) error {
 // GetIPPool returns the IP pool
 func (c *Client) GetIPPool() *IPPool {
 	return c.ipPool
+}
+
+// InitializeNetNSPool loads existing namespace allocations from sandbox directories
+func (c *Client) InitializeNetNSPool(ctx context.Context) error {
+	return c.netnsPool.Initialize(ctx)
+}
+
+// GetNetNSPool returns the network namespace pool
+func (c *Client) GetNetNSPool() *NetNSPool {
+	return c.netnsPool
 }
 
 // StartTapPool starts the TAP pool background service
