@@ -55,6 +55,9 @@ import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
 import { Job } from './entities/job.entity'
 import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup-cache-invalidation.service'
+import { OpensearchModule } from 'nestjs-opensearch'
+import { TypedConfigService } from '../config/typed-config.service'
+import { SandboxSearchAdapterProvider } from './providers/sandbox-search.provider'
 
 @Module({
   imports: [
@@ -76,6 +79,12 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
       Region,
       Job,
     ]),
+    OpensearchModule.forRootAsync({
+      inject: [TypedConfigService],
+      useFactory: (configService: TypedConfigService) => {
+        return configService.getOpenSearchConfig()
+      },
+    }),
   ],
   controllers: [
     SandboxController,
@@ -112,6 +121,7 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
     SandboxArchiveAction,
     JobService,
     JobStateHandlerService,
+    SandboxSearchAdapterProvider,
     {
       provide: SandboxRepository,
       inject: [DataSource],

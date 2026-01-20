@@ -139,6 +139,10 @@ const configuration = {
     tls: {
       rejectUnauthorized: process.env.OPENSEARCH_TLS_REJECT_UNAUTHORIZED !== 'false',
     },
+    sandboxSearch: {
+      enabled: process.env.OPENSEARCH_SANDBOX_SEARCH_ENABLED === 'true',
+      indexName: process.env.OPENSEARCH_SANDBOX_SEARCH_INDEX_NAME || 'sandboxes',
+    },
   },
   cronTimeZone: process.env.CRON_TIMEZONE,
   maxConcurrentBackupsPerRunner: parseInt(process.env.MAX_CONCURRENT_BACKUPS_PER_RUNNER || '6', 10),

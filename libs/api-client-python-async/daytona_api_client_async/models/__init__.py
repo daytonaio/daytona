@@ -152,6 +152,7 @@ from daytona_api_client_async.models.sandbox_state import SandboxState
 from daytona_api_client_async.models.sandbox_volume import SandboxVolume
 from daytona_api_client_async.models.screenshot_response import ScreenshotResponse
 from daytona_api_client_async.models.search_files_response import SearchFilesResponse
+from daytona_api_client_async.models.search_sandboxes_result import SearchSandboxesResult
 from daytona_api_client_async.models.send_webhook_dto import SendWebhookDto
 from daytona_api_client_async.models.session import Session
 from daytona_api_client_async.models.session_execute_request import SessionExecuteRequest

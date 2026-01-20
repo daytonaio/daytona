@@ -5,13 +5,13 @@
 
 import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 import {
-  ListSandboxesPaginatedOrderEnum,
-  ListSandboxesPaginatedSortEnum,
-  ListSandboxesPaginatedStatesEnum,
   Region,
   Sandbox,
   SandboxState,
   SnapshotDto,
+  SearchSandboxesSortEnum,
+  SearchSandboxesOrderEnum,
+  SearchSandboxesStatesEnum,
 } from '@daytonaio/api-client'
 import { ColumnFiltersState, SortingState, Table } from '@tanstack/react-table'
 
@@ -42,13 +42,12 @@ export interface SandboxTableProps {
   handleRefresh: () => void
   isRefreshing?: boolean
   onRowClick?: (sandbox: Sandbox) => void
-  pagination: {
-    pageIndex: number
-    pageSize: number
-  }
-  pageCount: number
-  totalItems: number
-  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
+  pageSize: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+  onNextPage: () => void
+  onPreviousPage: () => void
+  onPageSizeChange: (pageSize: number) => void
   sorting: SandboxSorting
   onSortingChange: (sorting: SandboxSorting) => void
   filters: SandboxFilters
@@ -98,35 +97,24 @@ export const convertTableSortingToApiSorting = (sorting: SortingState): SandboxS
   }
 
   const sort = sorting[0]
-  let field: ListSandboxesPaginatedSortEnum
+  let field: SearchSandboxesSortEnum
 
   switch (sort.id) {
     case 'name':
-      field = ListSandboxesPaginatedSortEnum.NAME
-      break
-    case 'state':
-      field = ListSandboxesPaginatedSortEnum.STATE
-      break
-    case 'snapshot':
-      field = ListSandboxesPaginatedSortEnum.SNAPSHOT
-      break
-    case 'region':
-    case 'target':
-      field = ListSandboxesPaginatedSortEnum.REGION
+      field = SearchSandboxesSortEnum.NAME
       break
     case 'lastEvent':
-    case 'updatedAt':
-      field = ListSandboxesPaginatedSortEnum.UPDATED_AT
+      field = SearchSandboxesSortEnum.LAST_ACTIVITY_AT
       break
     case 'createdAt':
     default:
-      field = ListSandboxesPaginatedSortEnum.CREATED_AT
+      field = SearchSandboxesSortEnum.CREATED_AT
       break
   }
 
   return {
     field,
-    direction: sort.desc ? ListSandboxesPaginatedOrderEnum.DESC : ListSandboxesPaginatedOrderEnum.ASC,
+    direction: sort.desc ? SearchSandboxesOrderEnum.DESC : SearchSandboxesOrderEnum.ASC,
   }
 }
 
@@ -137,12 +125,12 @@ export const convertTableFiltersToApiFilters = (columnFilters: ColumnFiltersStat
     switch (filter.id) {
       case 'name':
         if (filter.value && typeof filter.value === 'string') {
-          filters.idOrName = filter.value
+          filters.name = filter.value
         }
         break
       case 'state':
         if (Array.isArray(filter.value) && filter.value.length > 0) {
-          filters.states = filter.value as ListSandboxesPaginatedStatesEnum[]
+          filters.states = filter.value as SearchSandboxesStatesEnum[]
         }
         break
       case 'snapshot':
@@ -209,6 +197,27 @@ export const convertTableFiltersToApiFilters = (columnFilters: ColumnFiltersStat
           }
         }
         break
+      case 'createdAt':
+        if (Array.isArray(filter.value) && filter.value.length > 0) {
+          const dateRange = filter.value as (Date | undefined)[]
+          if (dateRange[0]) {
+            filters.createdAtAfter = dateRange[0]
+          }
+          if (dateRange[1]) {
+            filters.createdAtBefore = dateRange[1]
+          }
+        }
+        break
+      case 'isPublic':
+        if (typeof filter.value === 'boolean') {
+          filters.isPublic = filter.value
+        }
+        break
+      case 'isRecoverable':
+        if (typeof filter.value === 'boolean') {
+          filters.isRecoverable = filter.value
+        }
+        break
     }
   })
 
@@ -222,35 +231,26 @@ export const convertApiSortingToTableSorting = (sorting: SandboxSorting): Sortin
 
   let id: string
   switch (sorting.field) {
-    case ListSandboxesPaginatedSortEnum.NAME:
+    case SearchSandboxesSortEnum.NAME:
       id = 'name'
       break
-    case ListSandboxesPaginatedSortEnum.STATE:
-      id = 'state'
-      break
-    case ListSandboxesPaginatedSortEnum.SNAPSHOT:
-      id = 'snapshot'
-      break
-    case ListSandboxesPaginatedSortEnum.REGION:
-      id = 'region'
-      break
-    case ListSandboxesPaginatedSortEnum.UPDATED_AT:
+    case SearchSandboxesSortEnum.LAST_ACTIVITY_AT:
       id = 'lastEvent'
       break
-    case ListSandboxesPaginatedSortEnum.CREATED_AT:
+    case SearchSandboxesSortEnum.CREATED_AT:
     default:
       id = 'createdAt'
       break
   }
 
-  return [{ id, desc: sorting.direction === ListSandboxesPaginatedOrderEnum.DESC }]
+  return [{ id, desc: sorting.direction === SearchSandboxesOrderEnum.DESC }]
 }
 
 export const convertApiFiltersToTableFilters = (filters: SandboxFilters): ColumnFiltersState => {
   const columnFilters: ColumnFiltersState = []
 
-  if (filters.idOrName) {
-    columnFilters.push({ id: 'name', value: filters.idOrName })
+  if (filters.name) {
+    columnFilters.push({ id: 'name', value: filters.name })
   }
 
   if (filters.states && filters.states.length > 0) {
@@ -305,6 +305,23 @@ export const convertApiFiltersToTableFilters = (filters: SandboxFilters): Column
     if (filters.lastEventAfter) dateRange[0] = filters.lastEventAfter
     if (filters.lastEventBefore) dateRange[1] = filters.lastEventBefore
     columnFilters.push({ id: 'lastEvent', value: dateRange })
+  }
+
+  // Convert createdAt date range filters
+  if (filters.createdAtAfter || filters.createdAtBefore) {
+    const dateRange: (Date | undefined)[] = [undefined, undefined]
+    if (filters.createdAtAfter) dateRange[0] = filters.createdAtAfter
+    if (filters.createdAtBefore) dateRange[1] = filters.createdAtBefore
+    columnFilters.push({ id: 'createdAt', value: dateRange })
+  }
+
+  // Convert boolean filters
+  if (filters.isPublic !== undefined) {
+    columnFilters.push({ id: 'isPublic', value: filters.isPublic })
+  }
+
+  if (filters.isRecoverable !== undefined) {
+    columnFilters.push({ id: 'isRecoverable', value: filters.isRecoverable })
   }
 
   return columnFilters

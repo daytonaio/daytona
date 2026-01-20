@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -81,6 +81,10 @@ import {
   sandboxLookupCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
+import { SearchSandboxesResultDto } from '../dto/search-sandboxes-result.dto'
+import { SearchSandboxesQueryDto } from '../dto/search-sandboxes-query.dto'
+import { SANDBOX_SEARCH_ADAPTER } from '../constants/sandbox-tokens'
+import { SandboxSearchAdapter } from '../interfaces/sandbox-search.interface'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -114,6 +118,8 @@ export class SandboxService {
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
     private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+    @Inject(SANDBOX_SEARCH_ADAPTER)
+    private readonly sandboxSearchAdapter: SandboxSearchAdapter,
   ) {}
 
   /**
@@ -913,6 +919,57 @@ export class SandboxService {
       page: pageNum,
       totalPages: Math.ceil(total / limitNum),
     }
+  }
+
+  /**
+   * Search sandboxes
+   * @param organizationId - The ID of the organization
+   * @param query - The query parameters
+   * @returns The paginated list of sandboxes. If cursor is omitted from the query, newest sandboxes will be returned.
+   * @throws BadRequestError if the cursor is invalid
+   */
+  async search(organizationId: string, query: SearchSandboxesQueryDto): Promise<SearchSandboxesResultDto> {
+    let parsedLabels: { [key: string]: string } | undefined
+    if (query.labels) {
+      try {
+        parsedLabels = JSON.parse(query.labels)
+      } catch {
+        throw new BadRequestError('Invalid labels JSON format')
+      }
+    }
+
+    return this.sandboxSearchAdapter.search({
+      filters: {
+        organizationId,
+        idPrefix: query.id,
+        namePrefix: query.name,
+        labels: parsedLabels,
+        includeErroredDeleted: query.includeErroredDeleted,
+        states: query.states,
+        snapshots: query.snapshots,
+        regionIds: query.regionIds,
+        minCpu: query.minCpu,
+        maxCpu: query.maxCpu,
+        minMemoryGiB: query.minMemoryGiB,
+        maxMemoryGiB: query.maxMemoryGiB,
+        minDiskGiB: query.minDiskGiB,
+        maxDiskGiB: query.maxDiskGiB,
+        isPublic: query.isPublic,
+        isRecoverable: query.isRecoverable,
+        createdAtAfter: query.createdAtAfter,
+        createdAtBefore: query.createdAtBefore,
+        lastEventAfter: query.lastEventAfter,
+        lastEventBefore: query.lastEventBefore,
+      },
+      pagination: {
+        cursor: query.cursor,
+        limit: query.limit,
+      },
+      sort: {
+        field: query.sort,
+        direction: query.order,
+      },
+    })
   }
 
   private getExpectedDesiredStateForState(state: SandboxState): SandboxDesiredState | undefined {

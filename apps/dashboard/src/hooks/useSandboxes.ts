@@ -7,18 +7,17 @@ import { QueryKey, useQuery } from '@tanstack/react-query'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import {
-  ListSandboxesPaginatedOrderEnum,
-  ListSandboxesPaginatedSortEnum,
-  ListSandboxesPaginatedStatesEnum,
-  PaginatedSandboxes,
+  SearchSandboxesOrderEnum,
+  SearchSandboxesSortEnum,
+  SearchSandboxesStatesEnum,
+  SearchSandboxesResult,
 } from '@daytonaio/api-client'
-import { isValidUUID } from '@/lib/utils'
 
 export interface SandboxFilters {
-  idOrName?: string
+  name?: string
   labels?: Record<string, string>
   includeErroredDeleted?: boolean
-  states?: ListSandboxesPaginatedStatesEnum[]
+  states?: SearchSandboxesStatesEnum[]
   snapshots?: string[]
   regions?: string[]
   minCpu?: number
@@ -29,21 +28,25 @@ export interface SandboxFilters {
   maxDiskGiB?: number
   lastEventAfter?: Date
   lastEventBefore?: Date
+  createdAtAfter?: Date
+  createdAtBefore?: Date
+  isPublic?: boolean
+  isRecoverable?: boolean
 }
 
 export interface SandboxSorting {
-  field?: ListSandboxesPaginatedSortEnum
-  direction?: ListSandboxesPaginatedOrderEnum
+  field?: SearchSandboxesSortEnum
+  direction?: SearchSandboxesOrderEnum
 }
 
 export const DEFAULT_SANDBOX_SORTING: SandboxSorting = {
-  field: ListSandboxesPaginatedSortEnum.UPDATED_AT,
-  direction: ListSandboxesPaginatedOrderEnum.DESC,
+  field: SearchSandboxesSortEnum.LAST_ACTIVITY_AT,
+  direction: SearchSandboxesOrderEnum.DESC,
 }
 
 export interface SandboxQueryParams {
-  page: number
-  pageSize: number
+  cursor?: string
+  limit: number
   filters?: SandboxFilters
   sorting?: SandboxSorting
 }
@@ -56,8 +59,8 @@ export const getSandboxesQueryKey = (organizationId: string | undefined, params?
   }
 
   const normalizedParams = {
-    page: params.page,
-    pageSize: params.pageSize,
+    cursor: params.cursor,
+    limit: params.limit,
     ...(params.filters && { filters: params.filters }),
     ...(params.sorting && { sorting: params.sorting }),
   }
@@ -69,21 +72,21 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
   const { sandboxApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
 
-  return useQuery<PaginatedSandboxes>({
+  return useQuery<SearchSandboxesResult>({
     queryKey,
     queryFn: async () => {
       if (!selectedOrganization) {
         throw new Error('No organization selected')
       }
 
-      const { page, pageSize, filters = {}, sorting = {} } = params
+      const { cursor, limit, filters = {}, sorting = {} } = params
 
-      const listResponse = await sandboxApi.listSandboxesPaginated(
+      const searchResponse = await sandboxApi.searchSandboxes(
         selectedOrganization.id,
-        page,
-        pageSize,
+        cursor,
+        limit,
         undefined,
-        filters.idOrName,
+        filters.name,
         filters.labels ? JSON.stringify(filters.labels) : undefined,
         filters.includeErroredDeleted,
         filters.states,
@@ -95,35 +98,17 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         filters.maxMemoryGiB,
         filters.minDiskGiB,
         filters.maxDiskGiB,
+        filters.isPublic,
+        filters.isRecoverable,
+        filters.createdAtAfter,
+        filters.createdAtBefore,
         filters.lastEventAfter,
         filters.lastEventBefore,
         sorting.field,
         sorting.direction,
       )
 
-      let paginatedData = listResponse.data
-
-      // TODO: this will be obsolete once we introduce the search API
-      if (filters.idOrName && isValidUUID(filters.idOrName) && page === 1) {
-        // Attempt to fetch sandbox by ID if the search value is a valid UUID
-        try {
-          const sandbox = (await sandboxApi.getSandbox(filters.idOrName, selectedOrganization.id)).data
-          const existsInPaginatedData = paginatedData.items.some((item) => item.id === sandbox.id)
-
-          if (!existsInPaginatedData) {
-            paginatedData = {
-              ...paginatedData,
-              // This is an exact UUID match, ignore sorting
-              items: [sandbox, ...paginatedData.items],
-              total: paginatedData.total + 1,
-            }
-          }
-        } catch (error) {
-          // TODO: rethrow if not 4xx
-        }
-      }
-
-      return paginatedData
+      return searchResponse.data
     },
     enabled: !!selectedOrganization,
     staleTime: 1000 * 10, // 10 seconds

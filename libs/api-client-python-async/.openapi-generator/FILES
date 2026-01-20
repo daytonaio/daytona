@@ -162,6 +162,7 @@ daytona_api_client_async/models/sandbox_state.py
 daytona_api_client_async/models/sandbox_volume.py
 daytona_api_client_async/models/screenshot_response.py
 daytona_api_client_async/models/search_files_response.py
+daytona_api_client_async/models/search_sandboxes_result.py
 daytona_api_client_async/models/send_webhook_dto.py
 daytona_api_client_async/models/session.py
 daytona_api_client_async/models/session_execute_request.py
