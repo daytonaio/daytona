@@ -11,8 +11,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/daytonaio/apiclient"
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/gin-gonic/gin"
 
 	log "github.com/sirupsen/logrus"

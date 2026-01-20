@@ -16,7 +16,7 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
-	apiclient "github.com/daytonaio/apiclient"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/internal/metrics"
 	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
 	"github.com/daytonaio/runner/pkg/docker"

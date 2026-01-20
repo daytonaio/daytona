@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/daytonaio/apiclient"
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/gin-gonic/gin"
 )
 
