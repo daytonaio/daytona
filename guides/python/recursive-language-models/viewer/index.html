@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RLM Agent Viewer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0b;
+            color: #fafafa;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 24px;
+            background: rgba(10, 10, 11, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #1f1f23;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fafafa;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.75rem;
+            color: #71717a;
+        }
+
+        .stats span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stats .value {
+            color: #a1a1aa;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .result-select {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #fafafa;
+            font-size: 0.8125rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            cursor: pointer;
+            min-width: 280px;
+        }
+
+        .result-select:hover {
+            border-color: #3f3f46;
+        }
+
+        .result-select:focus {
+            outline: none;
+            border-color: #4ade80;
+        }
+
+        .result-select option {
+            background: #18181b;
+            color: #fafafa;
+        }
+
+        .empty-state {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #52525b;
+        }
+
+        .empty-state h2 {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #71717a;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        .hidden { display: none !important; }
+        input[type="file"] { display: none; }
+
+        #canvas {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        /* Question bubble */
+        .q-bubble {
+            fill: #1a1a2e;
+            stroke: #2d2d4a;
+            stroke-width: 1;
+        }
+
+        .q-bubble:hover {
+            stroke: #4a4a6a;
+        }
+
+        /* Answer bubble */
+        .a-bubble {
+            fill: #0a1a0a;
+            stroke: #14532d;
+            stroke-width: 1;
+        }
+
+        .a-bubble:hover {
+            stroke: #22c55e;
+        }
+
+        .a-bubble.error {
+            fill: #1a0a0a;
+            stroke: #7f1d1d;
+        }
+
+        /* Text styles */
+        .bubble-label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .bubble-text {
+            font-size: 12px;
+            line-height: 1.5;
+            user-select: text;
+            -webkit-user-select: text;
+            cursor: text;
+            pointer-events: all;
+        }
+
+        .q-group, .a-group {
+            pointer-events: all;
+        }
+
+        .q-text {
+            fill: #c4c4d4;
+        }
+
+        .a-text {
+            fill: #86efac;
+        }
+
+        .a-text.error {
+            fill: #fca5a5;
+        }
+
+        /* Agent header */
+        .agent-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .agent-id {
+            font-size: 9px;
+            font-family: 'SF Mono', Monaco, monospace;
+            fill: #52525b;
+        }
+
+        /* Arrow and call count */
+        .arrow-line {
+            fill: none;
+            stroke-width: 3;
+            stroke: #52525b;
+        }
+
+        .arrow-head {
+            fill: #52525b;
+        }
+
+        .call-badge {
+            cursor: pointer;
+        }
+
+        .call-badge-bg {
+            fill: #27272a;
+            stroke: #3f3f46;
+            stroke-width: 1;
+            transition: all 0.15s ease;
+        }
+
+        .call-badge:hover .call-badge-bg {
+            fill: #3f3f46;
+            stroke: #52525b;
+        }
+
+        .call-badge-text {
+            font-size: 10px;
+            font-weight: 500;
+            fill: #a1a1aa;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .call-badge:hover .call-badge-text {
+            fill: #fafafa;
+        }
+
+        /* Spawn connector */
+        .spawn-line {
+            fill: none;
+            stroke-width: 1.6;
+            stroke-opacity: 0.65;
+            stroke-dasharray: 5 4;
+            stroke-linecap: round;
+        }
+
+        .spawn-arrow {
+            fill-opacity: 0.8;
+        }
+
+        /* Depth bands */
+        .depth-band {
+            fill-opacity: 0.02;
+        }
+
+        .depth-band-line {
+            stroke: #27272a;
+            stroke-width: 1.5;
+            stroke-opacity: 0.8;
+        }
+
+        .depth-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            fill: #27272a;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: #111113;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(20px) scale(0.98);
+            transition: transform 0.2s ease;
+            overflow: hidden;
+        }
+
+        .modal-overlay.visible .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #27272a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #18181b;
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-title h3 {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #fafafa;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .modal-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.6875rem;
+            font-weight: 600;
+        }
+
+        .modal-badge.depth-0 { background: #14532d; color: #4ade80; }
+        .modal-badge.depth-1 { background: #1e3a5f; color: #60a5fa; }
+        .modal-badge.depth-2 { background: #3b0764; color: #c084fc; }
+        .modal-badge.depth-3 { background: #431407; color: #fb923c; }
+
+        .modal-close {
+            background: #27272a;
+            border: none;
+            color: #71717a;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.15s ease;
+        }
+
+        .modal-close:hover {
+            background: #3f3f46;
+            color: #fafafa;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .iteration-block {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #18181b;
+            border-radius: 12px;
+            border: 1px solid #27272a;
+        }
+
+        .iteration-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .iteration-header {
+            font-size: 0.75rem;
+            color: #52525b;
+            margin-bottom: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .code-block {
+            background: #0a0a0c;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            border: 1px solid #1f1f23;
+        }
+
+        .code-block pre {
+            font-size: 0.8125rem;
+            color: #e4e4e7;
+            line-height: 1.6;
+            font-family: 'SF Mono', Monaco, 'Fira Code', monospace;
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .output-block {
+            background: #071507;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 8px;
+            border: 1px solid #14532d;
+        }
+
+        .output-block pre {
+            font-size: 0.75rem;
+            color: #4ade80;
+            line-height: 1.5;
+            font-family: 'SF Mono', Monaco, monospace;
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .stderr-block {
+            background: #150707;
+            border-color: #7f1d1d;
+        }
+
+        .stderr-block pre {
+            color: #f87171;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <select class="result-select" id="resultSelect">
+            <option value="">Select a run...</option>
+        </select>
+        <div class="stats">
+            <span>Agents: <span class="value" id="totalAgents">0</span></span>
+            <span>Depth: <span class="value" id="maxDepth">0</span></span>
+            <span>Iterations: <span class="value" id="totalIterations">0</span></span>
+        </div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+        <h2>No result selected</h2>
+        <p>Choose a result file from the dropdown above</p>
+    </div>
+
+    <svg id="canvas"></svg>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span class="modal-badge" id="modalBadge">Depth 0</span>
+                    <h3 id="modalAgentId">agent_xxx</h3>
+                    <span style="color: #52525b; font-size: 0.75rem;" id="modalIterCount"></span>
+                </div>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const COLORS = {
+            depth: ['#4ade80', '#60a5fa', '#c084fc', '#fb923c'],
+            depthBg: ['#14532d', '#1e3a5f', '#3b0764', '#431407'],
+            bandBg: ['rgba(74, 222, 128, 0.02)', 'rgba(96, 165, 250, 0.02)', 'rgba(192, 132, 252, 0.02)', 'rgba(251, 146, 60, 0.02)']
+        };
+
+        const LAYOUT = {
+            bubblePadding: 16,
+            bubbleRadius: 12,
+            minBubbleWidth: 200,
+            maxBubbleWidth: 320,
+            arrowGap: 150,
+            rowGap: 80,
+            colGap: 24,
+            lineHeight: 16,
+            fontSize: 12
+        };
+
+        let svg, container, zoom;
+        const resultSelect = document.getElementById('resultSelect');
+        const emptyState = document.getElementById('emptyState');
+        const modalOverlay = document.getElementById('modalOverlay');
+
+        function init() {
+            svg = d3.select('#canvas').attr('width', '100%').attr('height', '100%');
+            zoom = d3.zoom()
+                .scaleExtent([0.1, 3])
+                .filter((e) => {
+                    // Don't zoom/pan when clicking on text (allow text selection)
+                    const target = e.target;
+                    if (target.tagName === 'text' || target.tagName === 'tspan') return false;
+                    if (target.closest && target.closest('.bubble-text')) return false;
+                    // Allow wheel zoom and right-click pan, block left-click on text
+                    return !e.button;
+                })
+                .on('zoom', (e) => container.attr('transform', e.transform));
+            svg.call(zoom);
+            container = svg.append('g');
+
+            // Load available results
+            loadResultsList();
+        }
+
+        // Fetch available results from index.json
+        async function loadResultsList() {
+            try {
+                const response = await fetch('../results/index.json');
+                const files = await response.json();
+
+                resultSelect.innerHTML = '<option value="">Select a run...</option>';
+                files.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file;
+                    // Show cleaner name (remove .detail.json)
+                    option.textContent = file.replace('.detail.json', '');
+                    resultSelect.appendChild(option);
+                });
+
+                if (files.length === 0) {
+                    emptyState.querySelector('h2').textContent = 'No results found';
+                    emptyState.querySelector('p').textContent = 'Run an agent first to generate results';
+                } else {
+                    // Auto-load the most recent result (first in list)
+                    resultSelect.value = files[0];
+                    loadResult(files[0]);
+                }
+            } catch (err) {
+                emptyState.querySelector('h2').textContent = 'No results found';
+                emptyState.querySelector('p').textContent = 'Run an agent first to generate results';
+            }
+        }
+
+        // Load a specific result file
+        async function loadResult(filename) {
+            try {
+                const response = await fetch(`../results/${filename}`);
+                const data = await response.json();
+                if (data.root_agent) {
+                    emptyState.classList.add('hidden');
+                    renderData(data);
+                }
+            } catch (err) {
+                console.error('Error loading result:', err);
+            }
+        }
+
+        // Handle result selection
+        resultSelect.addEventListener('change', (e) => {
+            const filename = e.target.value;
+            if (filename) loadResult(filename);
+        });
+
+        function measureText(text, fontSize = 12, fontFamily = 'Inter, sans-serif') {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.font = `${fontSize}px ${fontFamily}`;
+            return ctx.measureText(text).width;
+        }
+
+        function wrapTextLines(text, maxWidth, fontSize = 12) {
+            if (!text) return [''];
+
+            // Convert literal \n strings to actual newlines (from escaped JSON)
+            text = text.replace(/\\n/g, '\n');
+
+            // Split by newlines first, then wrap each paragraph
+            const paragraphs = text.split('\n');
+            const allLines = [];
+
+            for (const para of paragraphs) {
+                if (!para.trim()) {
+                    allLines.push(''); // Preserve empty lines
+                    continue;
+                }
+
+                const words = para.split(/\s+/);
+                let currentLine = '';
+
+                for (const word of words) {
+                    const testLine = currentLine ? `${currentLine} ${word}` : word;
+                    if (measureText(testLine, fontSize) <= maxWidth) {
+                        currentLine = testLine;
+                    } else {
+                        if (currentLine) allLines.push(currentLine);
+                        currentLine = word;
+                    }
+                }
+                if (currentLine) allLines.push(currentLine);
+            }
+
+            return allLines.length ? allLines : [''];
+        }
+
+        // Detect which iterations spawned sub-agents by looking at code + stdout
+        function detectSpawnIterations(iterations) {
+            const spawnIters = [];
+            for (let i = 0; i < iterations.length; i++) {
+                const it = iterations[i];
+                const blocks = it.parsed_code_blocks || [];
+                for (const cb of blocks) {
+                    const code = cb.code || '';
+                    const stdout = cb.stdout || '';
+                    // Check for rlm_query call AND sub-agent results in stdout
+                    if (code.includes('rlm_query') &&
+                        (stdout.includes('=== Sub-agent') || stdout.includes('findings ==='))) {
+                        spawnIters.push(i);
+                        break;
+                    }
+                }
+            }
+            return spawnIters;
+        }
+
+        // Build timeline segments: [{type: 'iterations', count, startIdx, endIdx}, {type: 'spawn', iterIdx}, ...]
+        function buildTimelineSegments(iterations, spawnIters, childCount) {
+            if (iterations.length === 0) return [{ type: 'iterations', count: 0 }];
+            if (spawnIters.length === 0) {
+                // No spawns - single segment
+                return [{ type: 'iterations', count: iterations.length, startIdx: 0, endIdx: iterations.length - 1 }];
+            }
+
+            const segments = [];
+            let lastIdx = 0;
+
+            for (const spawnIdx of spawnIters) {
+                // Iterations before this spawn (not including the spawn iteration)
+                if (spawnIdx > lastIdx) {
+                    segments.push({
+                        type: 'iterations',
+                        count: spawnIdx - lastIdx,
+                        startIdx: lastIdx,
+                        endIdx: spawnIdx - 1
+                    });
+                }
+                // The spawn point
+                segments.push({ type: 'spawn', iterIdx: spawnIdx, childCount });
+                lastIdx = spawnIdx + 1;
+            }
+
+            // Iterations after last spawn
+            if (lastIdx < iterations.length) {
+                segments.push({
+                    type: 'iterations',
+                    count: iterations.length - lastIdx,
+                    startIdx: lastIdx,
+                    endIdx: iterations.length - 1
+                });
+            }
+
+            return segments;
+        }
+
+        function renderData(data) {
+            emptyState.classList.add('hidden');
+            container.selectAll('*').remove();
+
+            // Timeline layout constants
+            const ITER_WIDTH = 25;    // pixels per iteration
+            const SPAWN_WIDTH = 40;   // pixels for spawn marker
+            const MIN_ARROW_WIDTH = LAYOUT.arrowGap;
+            const TIMELINE = {
+                gap: 8,
+                endPad: 8,
+                markerMargin: 16,
+                badgeMinW: 32,
+                badgePadX: 16,
+                badgeFontSize: 10,
+                spawnR: 8,
+                spawnFontSize: 11,
+                monoFont: "'SF Mono', Monaco, monospace"
+            };
+
+            function generatePastelColors(count) {
+                // Deterministic, evenly spaced hues (pastel-ish)
+                const colors = [];
+                if (count <= 0) return colors;
+                for (let i = 0; i < count; i++) {
+                    const hue = (i * 360) / count;
+                    const sat = 60;
+                    const light = 72;
+                    colors.push(`hsl(${hue}, ${sat}%, ${light}%)`);
+                }
+                return colors;
+            }
+
+            // Extract agents
+            const agents = [];
+            function extract(agent, depth = 0, parent = null) {
+                const iterations = agent.iterations || [];
+                const childCount = (agent.spawned_agents || []).length;
+                const spawnIters = detectSpawnIterations(iterations);
+                const segments = buildTimelineSegments(iterations, spawnIters, childCount);
+
+                // Distribute children across detected spawn markers (best-effort; detail.json doesn't record exact mapping)
+                const spawnSegCount = segments.filter(s => s.type === 'spawn').length;
+                if (childCount > 0 && spawnSegCount === 0) {
+                    segments.push({
+                        type: 'spawn',
+                        iterIdx: Math.max(0, iterations.length - 1),
+                        assignedChildren: childCount,
+                        childStartIdx: 0,
+                        childEndIdx: childCount - 1,
+                        synthetic: true
+                    });
+                } else if (spawnSegCount > 0) {
+                    const base = Math.floor(childCount / spawnSegCount);
+                    const rem = childCount % spawnSegCount;
+                    let childIdx = 0;
+                    let spawnIdx = 0;
+                    segments.forEach(seg => {
+                        if (seg.type !== 'spawn') return;
+                        const assigned = base + (spawnIdx < rem ? 1 : 0);
+                        seg.assignedChildren = assigned;
+                        seg.childStartIdx = childIdx;
+                        seg.childEndIdx = childIdx + assigned - 1;
+                        childIdx += assigned;
+                        spawnIdx += 1;
+                    });
+                }
+
+                // Calculate arrow width based on segments
+                let arrowWidth = segments.reduce((sum, seg) => {
+                    if (seg.type === 'iterations') return sum + Math.max(seg.count * ITER_WIDTH, 40);
+                    if (seg.type === 'spawn') return sum + SPAWN_WIDTH;
+                    return sum;
+                }, 0);
+
+                // Ensure arrow is long enough to fit all timeline markers (badges + spawn labels + gaps)
+                function segmentWidth(seg) {
+                    if (seg.type === 'iterations') {
+                        if (!seg.count) return 0;
+                        const textW = measureText(String(seg.count), TIMELINE.badgeFontSize, TIMELINE.monoFont);
+                        return Math.max(TIMELINE.badgeMinW, textW + TIMELINE.badgePadX);
+                    }
+                    if (seg.type === 'spawn') {
+                        const n = seg.assignedChildren ?? 0;
+                        if (n <= 0) return 0;
+                        const label = `↓${n}`;
+                        const textW = measureText(label, TIMELINE.spawnFontSize, TIMELINE.monoFont);
+                        return Math.max(TIMELINE.spawnR * 2, textW + 6);
+                    }
+                    return 0;
+                }
+
+                const enrichedSegments = segments.map(seg => ({ ...seg, width: segmentWidth(seg) }));
+                const visibleSegments = enrichedSegments.filter(seg => seg.width > 0);
+                const timelineWidth = visibleSegments.reduce((sum, seg) => sum + seg.width, 0) +
+                    Math.max(0, visibleSegments.length - 1) * TIMELINE.gap;
+
+                arrowWidth = Math.max(
+                    arrowWidth,
+                    MIN_ARROW_WIDTH,
+                    timelineWidth + 2 * TIMELINE.endPad + 2 * TIMELINE.markerMargin
+                ) + 40; // Extra padding for arrows
+
+                const node = {
+                    id: agent.agent_id,
+                    depth: agent.depth ?? depth,
+                    spawnColor: null,
+                    task: agent.task || (depth === 0 ? data.instance_id : ''),
+                    result: agent.result || '',
+                    error: agent.error || '',
+                    iterations: iterations,
+                    segments: enrichedSegments,
+                    spawnIters: spawnIters,
+                    arrowWidth: arrowWidth,
+                    children: [],
+                    parent
+                };
+                agents.push(node);
+                for (const child of (agent.spawned_agents || [])) {
+                    node.children.push(extract(child, depth + 1, node));
+                }
+                return node;
+            }
+            const root = extract(data.root_agent);
+
+            // Assign pastel colors only to agents that spawn children (so circles/arrows are distinct without overwhelming)
+            const spawnParents = agents
+                .filter(a => a.children.length > 0)
+                .sort((a, b) => a.id.localeCompare(b.id));
+            const palette = generatePastelColors(spawnParents.length);
+            spawnParents.forEach((a, i) => { a.spawnColor = palette[i]; });
+
+            // Stats
+            const maxDepth = Math.max(...agents.map(a => a.depth));
+            const totalIters = agents.reduce((s, a) => s + a.iterations.length, 0);
+            document.getElementById('totalAgents').textContent = agents.length;
+            document.getElementById('maxDepth').textContent = maxDepth;
+            document.getElementById('totalIterations').textContent = totalIters;
+
+            // Compute bubble sizes
+            const contentWidth = LAYOUT.maxBubbleWidth - LAYOUT.bubblePadding * 2;
+            const MAX_LINES = 6; // Truncate long content in bubbles
+            agents.forEach(a => {
+                const qLinesAll = wrapTextLines(a.task, contentWidth);
+                const aLinesAll = wrapTextLines(a.result || a.error || 'Processing...', contentWidth);
+
+                // Truncate for display, mark if truncated
+                a.qLines = qLinesAll.slice(0, MAX_LINES);
+                a.aLines = aLinesAll.slice(0, MAX_LINES);
+                a.qTruncated = qLinesAll.length > MAX_LINES;
+                a.aTruncated = aLinesAll.length > MAX_LINES;
+
+                if (a.qTruncated) a.qLines.push('... (click to see full)');
+                if (a.aTruncated) a.aLines.push('... (click to see full)');
+
+                a.qHeight = Math.max(40, a.qLines.length * LAYOUT.lineHeight + LAYOUT.bubblePadding * 2 + 20);
+                a.aHeight = Math.max(40, a.aLines.length * LAYOUT.lineHeight + LAYOUT.bubblePadding * 2 + 20);
+                a.totalHeight = Math.max(a.qHeight, a.aHeight);
+            });
+
+            // Tree layout: calculate subtree widths bottom-up, then position top-down
+            function calculateSubtreeWidth(node) {
+                const nodeWidth = LAYOUT.maxBubbleWidth + node.arrowWidth + LAYOUT.maxBubbleWidth;
+                if (node.children.length === 0) {
+                    node.subtreeWidth = nodeWidth;
+                } else {
+                    const childrenWidth = node.children.reduce((sum, child) => {
+                        return sum + calculateSubtreeWidth(child);
+                    }, 0) + (node.children.length - 1) * LAYOUT.colGap;
+                    node.subtreeWidth = Math.max(nodeWidth, childrenWidth);
+                }
+                return node.subtreeWidth;
+            }
+
+            function assignPositions(node, x, y) {
+                const nodeWidth = LAYOUT.maxBubbleWidth + node.arrowWidth + LAYOUT.maxBubbleWidth;
+                // Center this node within its subtree width
+                node.x = x + (node.subtreeWidth - nodeWidth) / 2;
+                node.y = y;
+                node.rowHeight = node.totalHeight;
+
+                if (node.children.length > 0) {
+                    const childY = y + node.totalHeight + LAYOUT.rowGap;
+                    let childX = x;
+                    for (const child of node.children) {
+                        assignPositions(child, childX, childY);
+                        childX += child.subtreeWidth + LAYOUT.colGap;
+                    }
+                }
+            }
+
+            calculateSubtreeWidth(root);
+            assignPositions(root, 50, 50);
+
+            // Group by depth for stats and depth bands
+            const byDepth = {};
+            agents.forEach(a => {
+                byDepth[a.depth] = byDepth[a.depth] || [];
+                byDepth[a.depth].push(a);
+            });
+
+            function computeTimelineMarkers(node) {
+                const qX = node.x;
+                const aX = node.x + LAYOUT.maxBubbleWidth + node.arrowWidth;
+                const arrowY = node.y + node.totalHeight / 2;
+                const arrowX1 = qX + LAYOUT.maxBubbleWidth;
+                const arrowX2 = aX;
+
+                const lineX1 = arrowX1 + TIMELINE.endPad;
+                const lineX2 = arrowX2 - TIMELINE.endPad;
+                const lineW = Math.max(0, lineX2 - lineX1);
+
+                const contentX1 = lineX1 + TIMELINE.markerMargin;
+                const contentX2 = lineX2 - TIMELINE.markerMargin;
+                const contentW = Math.max(0, contentX2 - contentX1);
+
+                const visibleSegments = node.segments.filter(seg =>
+                    (seg.type === 'iterations' && seg.count > 0) ||
+                    (seg.type === 'spawn' && (seg.assignedChildren ?? 0) > 0)
+                );
+
+                const totalBadgeWidth = visibleSegments.reduce((sum, seg) => {
+                    const fallbackW = seg.type === 'spawn' ? TIMELINE.spawnR * 2 : TIMELINE.badgeMinW;
+                    return sum + (seg.width ?? fallbackW);
+                }, 0) + Math.max(0, visibleSegments.length - 1) * TIMELINE.gap;
+
+                let segX = contentX1 + (contentW - totalBadgeWidth) / 2;
+                const childMarkers = new Array(node.children.length).fill(null);
+                let fallbackMarker = null;
+
+                visibleSegments.forEach(seg => {
+                    const segW = seg.width ?? (seg.type === 'spawn' ? TIMELINE.spawnR * 2 : TIMELINE.badgeMinW);
+                    if (seg.type === 'spawn') {
+                        const n = seg.assignedChildren ?? 0;
+                        if (n <= 0) {
+                            segX += segW + TIMELINE.gap;
+                            return;
+                        }
+
+                        const cx = segX + segW / 2;
+                        const marker = { iterIdx: seg.iterIdx, x: cx, y: arrowY };
+                        fallbackMarker ||= marker;
+
+                        const startIdx = seg.childStartIdx ?? 0;
+                        const endIdx = seg.childEndIdx ?? (startIdx + n - 1);
+                        for (let childIdx = startIdx; childIdx <= endIdx; childIdx++) {
+                            if (childIdx >= 0 && childIdx < node.children.length) {
+                                childMarkers[childIdx] = marker;
+                            }
+                        }
+                    }
+                    segX += segW + TIMELINE.gap;
+                });
+
+                // Fallback: if any child wasn't assigned to a spawn marker, point it at the first marker (or center of arrow).
+                if (node.children.length) {
+                    const centerMarker = fallbackMarker || { iterIdx: 0, x: contentX1 + contentW / 2, y: arrowY };
+                    for (let i = 0; i < childMarkers.length; i++) {
+                        if (!childMarkers[i]) childMarkers[i] = centerMarker;
+                    }
+                }
+
+                return { arrowY, lineX1, lineX2, lineW, contentX1, contentX2, contentW, childMarkers };
+            }
+
+            agents.forEach(node => {
+                node.timeline = computeTimelineMarkers(node);
+            });
+
+            // Calculate bounds
+            const allX = agents.flatMap(a => [a.x, a.x + LAYOUT.maxBubbleWidth * 2 + a.arrowWidth]);
+            const allY = agents.flatMap(a => [a.y, a.y + a.totalHeight]);
+            const minX = Math.min(...allX) - 100;
+            const maxX = Math.max(...allX) + 100;
+            const minY = Math.min(...allY) - 50;
+            const maxY = Math.max(...allY) + 50;
+
+            // Draw depth bands based on actual agent positions
+            for (let d = 0; d <= maxDepth; d++) {
+                const row = byDepth[d] || [];
+                if (row.length === 0) continue;
+
+                // Get Y range from actual positioned agents at this depth
+                const depthMinY = Math.min(...row.map(a => a.y));
+                const depthMaxY = Math.max(...row.map(a => a.y + a.totalHeight));
+                const bandY = depthMinY - 30;
+                const bandH = depthMaxY - depthMinY + LAYOUT.rowGap - 20;
+
+                container.append('rect')
+                    .attr('class', 'depth-band')
+                    .attr('x', minX)
+                    .attr('y', bandY)
+                    .attr('width', maxX - minX)
+                    .attr('height', bandH)
+                    .attr('fill', COLORS.bandBg[Math.min(d, 3)])
+                    .attr('rx', 0);
+
+                if (d > 0) {
+                    container.append('line')
+                        .attr('class', 'depth-band-line')
+                        .attr('x1', minX).attr('y1', bandY)
+                        .attr('x2', maxX).attr('y2', bandY);
+                }
+
+                container.append('text')
+                    .attr('class', 'depth-label')
+                    .attr('x', minX + 20)
+                    .attr('y', bandY + 20)
+                    .text(`DEPTH ${d}`);
+            }
+
+            // Draw spawn connectors
+            const defs = container.append('defs');
+
+            // Arrowhead for spawn connectors (inherits each connector's stroke color)
+            defs.append('marker')
+                .attr('id', 'spawn-arrow')
+                .attr('viewBox', '0 -4 8 8')
+                .attr('refX', 6).attr('refY', 0)
+                .attr('markerWidth', 6).attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-4L8,0L0,4')
+                .attr('class', 'spawn-arrow')
+                .attr('fill', 'context-stroke');
+
+            agents.forEach(a => {
+                a.children.forEach((child, childIdx) => {
+                    const childMarker = a.timeline?.childMarkers?.[childIdx] || null;
+                    const parentColor = a.spawnColor || COLORS.depth[Math.min(a.depth, 3)];
+
+                    // Parent -> Child Q (spawn arrow)
+                    const spawnX1 = childMarker ? childMarker.x : a.x + LAYOUT.maxBubbleWidth + a.arrowWidth / 2;
+                    const spawnY1 = childMarker ? childMarker.y : a.y + a.totalHeight / 2;
+                    const spawnX2 = child.x + LAYOUT.maxBubbleWidth / 2;
+                    const spawnY2 = child.y;
+                    const spawnMidY = a.y + a.totalHeight + (child.y - a.y - a.totalHeight) / 2;
+
+                    container.append('path')
+                        .attr('class', 'spawn-line')
+                        .attr('stroke', parentColor)
+                        .attr('d', `M${spawnX1},${spawnY1} L${spawnX1},${spawnMidY} L${spawnX2},${spawnMidY} L${spawnX2},${spawnY2}`)
+                        .attr('marker-end', 'url(#spawn-arrow)');
+                });
+            });
+
+            // Draw Q -> A arrows with call count
+            defs.append('marker')
+                .attr('id', 'qa-arrow')
+                .attr('viewBox', '0 -5 10 10')
+                .attr('refX', 8).attr('refY', 0)
+                .attr('markerWidth', 8).attr('markerHeight', 8)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,-5L10,0L0,5')
+                .attr('class', 'arrow-head');
+
+            agents.forEach(node => {
+                const color = COLORS.depth[Math.min(node.depth, 3)];
+                const bgColor = COLORS.depthBg[Math.min(node.depth, 3)];
+                const g = container.append('g');
+
+                const qX = node.x;
+                const aX = node.x + LAYOUT.maxBubbleWidth + node.arrowWidth;
+                const centerY = node.y + node.totalHeight / 2;
+
+                // Question bubble (clickable if truncated)
+                const qG = g.append('g').attr('class', 'q-group');
+                if (node.qTruncated) qG.style('cursor', 'pointer').on('click', () => showTextModal('Question', node.task, node));
+                qG.append('rect')
+                    .attr('class', 'q-bubble')
+                    .attr('x', qX).attr('y', node.y)
+                    .attr('width', LAYOUT.maxBubbleWidth)
+                    .attr('height', node.totalHeight)
+                    .attr('rx', LAYOUT.bubbleRadius);
+
+                // Q label
+                qG.append('text')
+                    .attr('class', 'bubble-label')
+                    .attr('x', qX + LAYOUT.bubblePadding)
+                    .attr('y', node.y + LAYOUT.bubblePadding + 8)
+                    .attr('fill', '#6366f1')
+                    .text('QUESTION');
+
+                // Agent badge
+                qG.append('rect')
+                    .attr('x', qX + LAYOUT.maxBubbleWidth - 70)
+                    .attr('y', node.y + LAYOUT.bubblePadding - 2)
+                    .attr('width', 56).attr('height', 16)
+                    .attr('rx', 4).attr('fill', bgColor);
+                qG.append('text')
+                    .attr('class', 'agent-label')
+                    .attr('x', qX + LAYOUT.maxBubbleWidth - 42)
+                    .attr('y', node.y + LAYOUT.bubblePadding + 9)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', color)
+                    .style('font-size', '8px')
+                    .text(`D${node.depth}`);
+                qG.append('text')
+                    .attr('class', 'agent-id')
+                    .attr('x', qX + LAYOUT.maxBubbleWidth - LAYOUT.bubblePadding)
+                    .attr('y', node.y + LAYOUT.bubblePadding + 24)
+                    .attr('text-anchor', 'end')
+                    .text(node.id.replace('agent_', ''));
+
+                // Q text
+                const qTextG = qG.append('text')
+                    .attr('class', 'bubble-text q-text')
+                    .attr('x', qX + LAYOUT.bubblePadding)
+                    .attr('y', node.y + LAYOUT.bubblePadding + 36);
+                node.qLines.forEach((line, i) => {
+                    qTextG.append('tspan')
+                        .attr('x', qX + LAYOUT.bubblePadding)
+                        .attr('dy', i === 0 ? 0 : LAYOUT.lineHeight)
+                        .text(line || ' '); // Use space for empty lines to preserve height
+                });
+
+                // Answer bubble (clickable if truncated)
+                const aG = g.append('g').attr('class', 'a-group');
+                if (node.aTruncated) aG.style('cursor', 'pointer').on('click', () => showTextModal('Answer', node.result || node.error, node));
+                aG.append('rect')
+                    .attr('class', node.error ? 'a-bubble error' : 'a-bubble')
+                    .attr('x', aX).attr('y', node.y)
+                    .attr('width', LAYOUT.maxBubbleWidth)
+                    .attr('height', node.totalHeight)
+                    .attr('rx', LAYOUT.bubbleRadius);
+
+                // A label
+                aG.append('text')
+                    .attr('class', 'bubble-label')
+                    .attr('x', aX + LAYOUT.bubblePadding)
+                    .attr('y', node.y + LAYOUT.bubblePadding + 8)
+                    .attr('fill', node.error ? '#ef4444' : '#22c55e')
+                    .text('ANSWER');
+
+                // A text
+                const aTextG = aG.append('text')
+                    .attr('class', node.error ? 'bubble-text a-text error' : 'bubble-text a-text')
+                    .attr('x', aX + LAYOUT.bubblePadding)
+                    .attr('y', node.y + LAYOUT.bubblePadding + 36);
+                node.aLines.forEach((line, i) => {
+                    aTextG.append('tspan')
+                        .attr('x', aX + LAYOUT.bubblePadding)
+                        .attr('dy', i === 0 ? 0 : LAYOUT.lineHeight)
+                        .text(line || ' '); // Use space for empty lines to preserve height
+                });
+
+                // Arrow between Q and A with timeline segments
+                const arrowY = centerY;
+                const arrowX1 = qX + LAYOUT.maxBubbleWidth;
+                const arrowX2 = aX;
+                const endPad = TIMELINE.endPad;
+                const markerMargin = TIMELINE.markerMargin;
+
+                // Draw the main arrow line
+                g.append('line')
+                    .attr('class', 'arrow-line')
+                    .attr('x1', arrowX1 + endPad).attr('y1', arrowY)
+                    .attr('x2', arrowX2 - endPad).attr('y2', arrowY)
+                    .attr('marker-end', 'url(#qa-arrow)');
+
+                // Draw timeline segments - small fixed-size badges
+                const gap = TIMELINE.gap;
+                const badgeH = 20;
+                const badgeY = arrowY - badgeH / 2;
+                const spawnR = TIMELINE.spawnR;
+
+                const lineX1 = arrowX1 + endPad;
+                const lineX2 = arrowX2 - endPad;
+                const lineW = Math.max(0, lineX2 - lineX1);
+                const contentX1 = lineX1 + markerMargin;
+                const contentX2 = lineX2 - markerMargin;
+                const contentW = Math.max(0, contentX2 - contentX1);
+                const visibleSegments = node.segments.filter(seg =>
+                    (seg.type === 'iterations' && seg.count > 0) ||
+                    (seg.type === 'spawn' && (seg.assignedChildren ?? 0) > 0)
+                );
+
+                // Center the badges on the arrow
+                const totalBadgeWidth = visibleSegments.reduce((sum, seg) => {
+                    const fallbackW = seg.type === 'spawn' ? spawnR * 2 : TIMELINE.badgeMinW;
+                    return sum + (seg.width ?? fallbackW);
+                }, 0) + Math.max(0, visibleSegments.length - 1) * gap;
+
+                let segX = contentX1 + (contentW - totalBadgeWidth) / 2;
+
+                visibleSegments.forEach((seg) => {
+                    if (seg.type === 'iterations' && seg.count > 0) {
+                        const segW = seg.width ?? TIMELINE.badgeMinW;
+
+                        const badge = g.append('g')
+                            .attr('class', 'call-badge')
+                            .style('cursor', 'pointer')
+                            .on('click', () => openModal(node, seg.startIdx, seg.endIdx));
+
+                        badge.append('rect')
+                            .attr('class', 'call-badge-bg')
+                            .attr('x', segX).attr('y', badgeY)
+                            .attr('width', segW).attr('height', badgeH)
+                            .attr('rx', 4);
+
+                        badge.append('text')
+                            .attr('class', 'call-badge-text')
+                            .attr('x', segX + segW / 2)
+                            .attr('y', badgeY + badgeH / 2 + 3)
+                            .attr('text-anchor', 'middle')
+                            .text(seg.count);
+
+                        segX += segW + gap;
+                    } else if (seg.type === 'spawn') {
+                        const segW = seg.width ?? spawnR * 2;
+                        const n = seg.assignedChildren ?? 0;
+                        if (n <= 0) {
+                            segX += segW + gap;
+                            return;
+                        }
+
+                        const cx = segX + segW / 2;
+                        const spawnColor = node.spawnColor || color;
+
+                        g.append('circle')
+                            .attr('cx', cx)
+                            .attr('cy', arrowY)
+                            .attr('r', spawnR)
+                            .attr('fill', spawnColor)
+                            .attr('stroke', '#18181b')
+                            .attr('stroke-width', 2)
+                            .style('cursor', 'pointer')
+                            .on('click', () => openModal(node, seg.iterIdx, seg.iterIdx));
+
+                        // Small "spawn" indicator (count)
+                        g.append('text')
+                            .attr('x', cx)
+                            .attr('y', arrowY - spawnR - 6)
+                            .attr('text-anchor', 'middle')
+                            .attr('fill', '#71717a')
+                            .style('font-size', `${TIMELINE.spawnFontSize}px`)
+                            .style('font-family', TIMELINE.monoFont)
+                            .style('paint-order', 'stroke')
+                            .style('stroke', '#0a0a0b')
+                            .style('stroke-width', 3)
+                            .text(`↓${n}`);
+
+                        segX += segW + gap;
+                    }
+                });
+            });
+
+            // Center view
+            const bounds = container.node().getBBox();
+            const scale = Math.min(
+                (window.innerWidth - 80) / bounds.width,
+                (window.innerHeight - 140) / bounds.height,
+                0.9
+            );
+            svg.call(zoom.transform, d3.zoomIdentity
+                .translate(
+                    (window.innerWidth - bounds.width * scale) / 2 - bounds.x * scale,
+                    (window.innerHeight - bounds.height * scale) / 2 - bounds.y * scale + 30
+                )
+                .scale(scale)
+            );
+        }
+
+        function openModal(node, startIdx = 0, endIdx = null) {
+            // Filter iterations by range if specified
+            const allIters = node.iterations;
+            const end = endIdx !== null ? endIdx + 1 : allIters.length;
+            const filteredIters = allIters.slice(startIdx, end);
+            const isFiltered = startIdx > 0 || end < allIters.length;
+
+            document.getElementById('modalBadge').textContent = `Depth ${node.depth}`;
+            document.getElementById('modalBadge').className = `modal-badge depth-${Math.min(node.depth, 3)}`;
+            document.getElementById('modalAgentId').textContent = node.id;
+
+            // Show range info if filtered
+            const rangeText = isFiltered
+                ? `Iterations ${startIdx}-${end - 1} (of ${allIters.length} total)`
+                : `${allIters.length} code executions`;
+            document.getElementById('modalIterCount').textContent = rangeText;
+
+            const body = document.getElementById('modalBody');
+            body.innerHTML = filteredIters.map((iter, idx) => {
+                const blocks = iter.parsed_code_blocks || [];
+                const actualIdx = startIdx + idx;
+                const rawResponse = iter.raw_response || '';
+
+                // If no parsed blocks, show raw response instead
+                const content = blocks.length > 0
+                    ? blocks.map(block => `
+                        <div class="code-block">
+                            <pre>${escapeHtml(block.code || '')}</pre>
+                        </div>
+                        ${block.stdout ? `<div class="output-block"><pre>${escapeHtml(block.stdout)}</pre></div>` : ''}
+                        ${block.stderr ? `<div class="output-block stderr-block"><pre>${escapeHtml(block.stderr)}</pre></div>` : ''}
+                    `).join('')
+                    : `<div class="code-block" style="background: #1a1a2e;"><pre style="color: #a1a1aa;">${escapeHtml(rawResponse) || '(no response)'}</pre></div>`;
+
+                return `
+                    <div class="iteration-block">
+                        <div class="iteration-header">Iteration ${iter.iteration ?? actualIdx}${blocks.length === 0 ? ' <span style="color:#71717a;font-size:10px;">(raw response)</span>' : ''}</div>
+                        ${content}
+                    </div>
+                `;
+            }).join('') || '<p style="color: #52525b; text-align: center; padding: 40px;">No code executions</p>';
+
+            modalOverlay.classList.add('visible');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('visible');
+        }
+
+        function showTextModal(title, text, node) {
+            document.getElementById('modalBadge').textContent = `Depth ${node.depth}`;
+            document.getElementById('modalBadge').className = `modal-badge depth-${Math.min(node.depth, 3)}`;
+            document.getElementById('modalAgentId').textContent = node.id;
+            document.getElementById('modalIterCount').textContent = title;
+
+            // Convert literal \n to real newlines
+            const processedText = (text || '').replace(/\\n/g, '\n');
+
+            const body = document.getElementById('modalBody');
+            body.innerHTML = `<div class="code-block" style="background: #1a1a2e; white-space: pre-wrap; word-break: break-word;"><pre style="color: #e4e4e7;">${escapeHtml(processedText)}</pre></div>`;
+
+            modalOverlay.classList.add('visible');
+        }
+
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        init();
+    </script>
+</body>
+</html>

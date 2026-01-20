@@ -517,6 +517,15 @@ export const getSidebarConfig = (
             icon: 'trl-logo.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/recursive-language-models', locale),
+          label: t('sidebarconfig.recursiveLms'),
+          disablePagination: true,
+          attrs: {
+            icon: 'recursive-lm.svg',
+          },
+        },
       ],
     },
     {
