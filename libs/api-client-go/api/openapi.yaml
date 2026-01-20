@@ -1281,6 +1281,42 @@ paths:
       summary: Regenerate SSH gateway API key for a region
       tags:
         - organizations
+  /regions/{id}/regenerate-snapshot-manager-credentials:
+    post:
+      operationId: regenerateSnapshotManagerCredentials
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotManagerCredentials'
+          description: The snapshot manager credentials have been successfully regenerated.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Regenerate snapshot manager credentials for a region
+      tags:
+        - organizations
   /users/me:
     get:
       operationId: getAuthenticatedUser
@@ -9406,6 +9442,7 @@ components:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
         createdAt: 2023-01-01T00:00:00.000Z
+        snapshotManagerUrl: http://snapshot-manager.example.com
         regionType: shared
         proxyUrl: https://proxy.example.com
         name: us-east-1
@@ -9447,6 +9484,11 @@ components:
         sshGatewayUrl:
           description: SSH Gateway URL for the region
           example: http://ssh-gateway.example.com
+          nullable: true
+          type: string
+        snapshotManagerUrl:
+          description: Snapshot Manager URL for the region
+          example: http://snapshot-manager.example.com
           nullable: true
           type: string
       required:
@@ -9529,6 +9571,22 @@ components:
           type: string
       required:
         - apiKey
+      type: object
+    SnapshotManagerCredentials:
+      example:
+        password: password
+        username: daytona
+      properties:
+        username:
+          description: Snapshot Manager username for the region
+          example: daytona
+          type: string
+        password:
+          description: Snapshot Manager password for the region
+          type: string
+      required:
+        - password
+        - username
       type: object
     UserPublicKey:
       example:

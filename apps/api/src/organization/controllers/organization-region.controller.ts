@@ -37,6 +37,7 @@ import { FeatureFlags } from '../../common/constants/feature-flags'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { SnapshotManagerCredentialsDto } from '../../region/dto/snapshot-manager-credentials.dto'
 
 @ApiTags('organizations')
 @Controller('regions')
@@ -213,5 +214,34 @@ export class OrganizationRegionController {
   async regenerateSshGatewayApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
     const apiKey = await this.regionService.regenerateSshGatewayApiKey(id)
     return new RegenerateApiKeyResponseDto(apiKey)
+  }
+
+  @Post(':id/regenerate-snapshot-manager-credentials')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Regenerate snapshot manager credentials for a region',
+    operationId: 'regenerateSnapshotManagerCredentials',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The snapshot manager credentials have been successfully regenerated.',
+    type: SnapshotManagerCredentialsDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Region ID',
+    type: String,
+  })
+  @Audit({
+    action: AuditAction.REGENERATE_SNAPSHOT_MANAGER_CREDENTIALS,
+    targetType: AuditTarget.REGION,
+    targetIdFromRequest: (req) => req.params.id,
+  })
+  @UseGuards(RegionAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  async regenerateSnapshotManagerCredentials(@Param('id') id: string): Promise<SnapshotManagerCredentialsDto> {
+    return await this.regionService.regenerateSnapshotManagerCredentials(id)
   }
 }

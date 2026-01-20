@@ -34,8 +34,7 @@ interface DataTableProps {
   deletePermitted: boolean
   writePermitted: boolean
   onDelete: (region: Region) => void
-  onRegenerateProxyApiKey: (region: Region) => void
-  onRegenerateSshGatewayApiKey: (region: Region) => void
+  onOpenDetails: (region: Region) => void
 }
 
 export function RegionTable({
@@ -45,8 +44,7 @@ export function RegionTable({
   deletePermitted,
   writePermitted,
   onDelete,
-  onRegenerateProxyApiKey,
-  onRegenerateSshGatewayApiKey,
+  onOpenDetails,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -67,8 +65,7 @@ export function RegionTable({
     deletePermitted,
     writePermitted,
     copyToClipboard,
-    onRegenerateProxyApiKey,
-    onRegenerateSshGatewayApiKey,
+    onOpenDetails,
   })
   const table = useReactTable({
     data,
@@ -134,25 +131,34 @@ export function RegionTable({
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className={`${isLoadingRegion(row.original) ? 'opacity-50 pointer-events-none' : ''}`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      className="px-2"
-                      key={cell.id}
-                      style={{
-                        width: `${cell.column.getSize()}px`,
-                      }}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const isCustom = row.original.regionType === RegionType.CUSTOM
+                const isLoading = isLoadingRegion(row.original)
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                    className={`${isLoading ? 'opacity-50 pointer-events-none' : ''} ${isCustom && !isLoading ? 'cursor-pointer hover:bg-muted/50' : ''}`}
+                    onClick={() => {
+                      if (isCustom && !isLoading) {
+                        onOpenDetails(row.original)
+                      }
+                    }}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        className="px-2"
+                        key={cell.id}
+                        style={{
+                          width: `${cell.column.getSize()}px`,
+                        }}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+              })
             ) : (
               <TableEmptyState
                 colSpan={columns.length}
@@ -179,16 +185,14 @@ const getColumns = ({
   deletePermitted,
   writePermitted,
   copyToClipboard,
-  onRegenerateProxyApiKey,
-  onRegenerateSshGatewayApiKey,
+  onOpenDetails,
 }: {
   onDelete: (region: Region) => void
   isLoadingRegion: (region: Region) => boolean
   deletePermitted: boolean
   writePermitted: boolean
   copyToClipboard: (text: string) => Promise<void>
-  onRegenerateProxyApiKey: (region: Region) => void
-  onRegenerateSshGatewayApiKey: (region: Region) => void
+  onOpenDetails: (region: Region) => void
 }): ColumnDef<Region>[] => {
   const columns: ColumnDef<Region>[] = [
     {
@@ -270,10 +274,9 @@ const getColumns = ({
       }
 
       const isLoading = isLoadingRegion(row.original)
-      const region = row.original
 
       return (
-        <div className="flex justify-end">
+        <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isLoading}>
@@ -281,24 +284,13 @@ const getColumns = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {writePermitted && region.proxyUrl && (
-                <DropdownMenuItem
-                  onClick={() => onRegenerateProxyApiKey(row.original)}
-                  className="cursor-pointer"
-                  disabled={isLoading}
-                >
-                  Regenerate Proxy API Key
-                </DropdownMenuItem>
-              )}
-              {writePermitted && region.sshGatewayUrl && (
-                <DropdownMenuItem
-                  onClick={() => onRegenerateSshGatewayApiKey(row.original)}
-                  className="cursor-pointer"
-                  disabled={isLoading}
-                >
-                  Regenerate SSH Gateway API Key
-                </DropdownMenuItem>
-              )}
+              <DropdownMenuItem
+                onClick={() => onOpenDetails(row.original)}
+                className="cursor-pointer"
+                disabled={isLoading}
+              >
+                Details
+              </DropdownMenuItem>
               {deletePermitted && (
                 <DropdownMenuItem
                   onClick={() => onDelete(row.original)}

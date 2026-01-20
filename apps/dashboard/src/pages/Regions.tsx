@@ -5,9 +5,16 @@
 
 import React, { useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
-import { Region, OrganizationRolePermissionsEnum, CreateRegion, CreateRegionResponse } from '@daytonaio/api-client'
+import {
+  Region,
+  OrganizationRolePermissionsEnum,
+  CreateRegion,
+  CreateRegionResponse,
+  SnapshotManagerCredentials,
+} from '@daytonaio/api-client'
 import { RegionTable } from '@/components/RegionTable'
 import { CreateRegionDialog } from '@/components/CreateRegionDialog'
+import RegionDetailsSheet from '@/components/RegionDetailsSheet'
 import {
   Dialog,
   DialogClose,
@@ -32,7 +39,8 @@ import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { useRegions } from '@/hooks/useRegions'
-import { Check, Copy } from 'lucide-react'
+import { getMaskedToken } from '@/lib/utils'
+import { Copy } from 'lucide-react'
 
 const Regions: React.FC = () => {
   const { organizationsApi } = useApi()
@@ -51,9 +59,18 @@ const Regions: React.FC = () => {
   // Regenerate API Key state
   const [showRegenerateProxyApiKeyDialog, setShowRegenerateProxyApiKeyDialog] = useState(false)
   const [showRegenerateSshGatewayApiKeyDialog, setShowRegenerateSshGatewayApiKeyDialog] = useState(false)
+  const [showRegenerateSnapshotManagerCredsDialog, setShowRegenerateSnapshotManagerCredsDialog] = useState(false)
   const [regeneratedApiKey, setRegeneratedApiKey] = useState<string | null>(null)
+  const [regeneratedSnapshotManagerCreds, setRegeneratedSnapshotManagerCreds] =
+    useState<SnapshotManagerCredentials | null>(null)
   const [regionForRegenerate, setRegionForRegenerate] = useState<Region | null>(null)
   const [copied, setCopied] = useState(false)
+  const [isApiKeyRevealed, setIsApiKeyRevealed] = useState(false)
+  const [isSnapshotManagerPasswordRevealed, setIsSnapshotManagerPasswordRevealed] = useState(false)
+
+  // Region Details Sheet state
+  const [selectedRegion, setSelectedRegion] = useState<Region | null>(null)
+  const [showRegionDetails, setShowRegionDetails] = useState(false)
 
   const handleCreateRegion = async (createRegionData: CreateRegion): Promise<CreateRegionResponse | null> => {
     if (!selectedOrganization) {
@@ -113,6 +130,17 @@ const Regions: React.FC = () => {
     setShowRegenerateSshGatewayApiKeyDialog(true)
   }
 
+  const handleRegenerateSnapshotManagerCredentials = async (region: Region) => {
+    setRegionForRegenerate(region)
+    setRegeneratedSnapshotManagerCreds(null)
+    setShowRegenerateSnapshotManagerCredsDialog(true)
+  }
+
+  const handleOpenRegionDetails = (region: Region) => {
+    setSelectedRegion(region)
+    setShowRegionDetails(true)
+  }
+
   const confirmRegenerateProxyApiKey = async () => {
     if (!regionForRegenerate || !selectedOrganization) {
       return
@@ -158,6 +186,30 @@ const Regions: React.FC = () => {
     }
   }
 
+  const confirmRegenerateSnapshotManagerCredentials = async () => {
+    if (!regionForRegenerate || !selectedOrganization) {
+      return
+    }
+
+    setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: true }))
+
+    try {
+      const response = await organizationsApi.regenerateSnapshotManagerCredentials(
+        regionForRegenerate.id,
+        selectedOrganization.id,
+      )
+      setRegeneratedSnapshotManagerCreds(response.data)
+      setShowRegenerateSnapshotManagerCredsDialog(true)
+      toast.success('Snapshot Manager credentials regenerated successfully')
+    } catch (error) {
+      handleApiError(error, 'Failed to regenerate Snapshot Manager credentials')
+      setShowRegenerateSnapshotManagerCredsDialog(false)
+      setRegionForRegenerate(null)
+    } finally {
+      setRegionIsLoading((prev) => ({ ...prev, [regionForRegenerate.id]: false }))
+    }
+  }
+
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
@@ -191,8 +243,29 @@ const Regions: React.FC = () => {
           setRegionToDelete(region)
           setDeleteRegionDialogIsOpen(true)
         }}
+        onOpenDetails={handleOpenRegionDetails}
+      />
+
+      <RegionDetailsSheet
+        region={selectedRegion}
+        open={showRegionDetails}
+        onOpenChange={(open) => {
+          setShowRegionDetails(open)
+          if (!open) {
+            setSelectedRegion(null)
+          }
+        }}
+        regionIsLoading={regionIsLoading}
+        writePermitted={writePermitted}
+        deletePermitted={deletePermitted}
+        onDelete={(region) => {
+          setRegionToDelete(region)
+          setDeleteRegionDialogIsOpen(true)
+          setShowRegionDetails(false)
+        }}
         onRegenerateProxyApiKey={handleRegenerateProxyApiKey}
         onRegenerateSshGatewayApiKey={handleRegenerateSshGatewayApiKey}
+        onRegenerateSnapshotManagerCredentials={handleRegenerateSnapshotManagerCredentials}
       />
 
       {regionToDelete && (
@@ -239,6 +312,7 @@ const Regions: React.FC = () => {
             setRegionForRegenerate(null)
             setRegeneratedApiKey(null)
             setCopied(false)
+            setIsApiKeyRevealed(false)
           }
         }}
       >
@@ -259,12 +333,17 @@ const Regions: React.FC = () => {
               {regeneratedApiKey && (
                 <div className="space-y-4 mt-4">
                   <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                    <span className="overflow-x-auto pr-2 cursor-text select-all">{regeneratedApiKey}</span>
-                    {copied ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4 cursor-pointer" onClick={() => copyToClipboard(regeneratedApiKey)} />
-                    )}
+                    <span
+                      className="overflow-x-auto pr-2 cursor-text select-all"
+                      onMouseEnter={() => setIsApiKeyRevealed(true)}
+                      onMouseLeave={() => setIsApiKeyRevealed(false)}
+                    >
+                      {isApiKeyRevealed ? regeneratedApiKey : getMaskedToken(regeneratedApiKey)}
+                    </span>
+                    <Copy
+                      className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => copyToClipboard(regeneratedApiKey)}
+                    />
                   </div>
                 </div>
               )}
@@ -290,6 +369,7 @@ const Regions: React.FC = () => {
                   setRegionForRegenerate(null)
                   setRegeneratedApiKey(null)
                   setCopied(false)
+                  setIsApiKeyRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               >
@@ -309,6 +389,7 @@ const Regions: React.FC = () => {
             setRegionForRegenerate(null)
             setRegeneratedApiKey(null)
             setCopied(false)
+            setIsApiKeyRevealed(false)
           }
         }}
       >
@@ -329,12 +410,17 @@ const Regions: React.FC = () => {
               {regeneratedApiKey && (
                 <div className="space-y-4 mt-4">
                   <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                    <span className="overflow-x-auto pr-2 cursor-text select-all">{regeneratedApiKey}</span>
-                    {copied ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4 cursor-pointer" onClick={() => copyToClipboard(regeneratedApiKey)} />
-                    )}
+                    <span
+                      className="overflow-x-auto pr-2 cursor-text select-all"
+                      onMouseEnter={() => setIsApiKeyRevealed(true)}
+                      onMouseLeave={() => setIsApiKeyRevealed(false)}
+                    >
+                      {isApiKeyRevealed ? regeneratedApiKey : getMaskedToken(regeneratedApiKey)}
+                    </span>
+                    <Copy
+                      className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => copyToClipboard(regeneratedApiKey)}
+                    />
                   </div>
                 </div>
               )}
@@ -360,6 +446,103 @@ const Regions: React.FC = () => {
                   setRegionForRegenerate(null)
                   setRegeneratedApiKey(null)
                   setCopied(false)
+                  setIsApiKeyRevealed(false)
+                }}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              >
+                Close
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Regenerate Snapshot Manager Credentials Dialog */}
+      <AlertDialog
+        open={showRegenerateSnapshotManagerCredsDialog}
+        onOpenChange={(isOpen) => {
+          setShowRegenerateSnapshotManagerCredsDialog(isOpen)
+          if (!isOpen) {
+            setRegionForRegenerate(null)
+            setRegeneratedSnapshotManagerCreds(null)
+            setCopied(false)
+            setIsSnapshotManagerPasswordRevealed(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {regeneratedSnapshotManagerCreds
+                ? 'Snapshot Manager Credentials Regenerated'
+                : 'Regenerate Snapshot Manager Credentials'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {regeneratedSnapshotManagerCreds ? (
+                'The new credentials have been generated. Copy them now as they will not be shown again.'
+              ) : (
+                <>
+                  <strong>Warning:</strong> This will immediately invalidate the current Snapshot Manager credentials.
+                  The Snapshot Manager will need to be reconfigured with the new credentials.
+                </>
+              )}
+              {regeneratedSnapshotManagerCreds && (
+                <div className="space-y-4 mt-4">
+                  <div>
+                    <span className="text-xs text-muted-foreground">Username</span>
+                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                      <span className="overflow-x-auto pr-2 cursor-text select-all">
+                        {regeneratedSnapshotManagerCreds.username}
+                      </span>
+                      <Copy
+                        className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => copyToClipboard(regeneratedSnapshotManagerCreds.username)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">Password</span>
+                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                      <span
+                        className="overflow-x-auto pr-2 cursor-text select-all"
+                        onMouseEnter={() => setIsSnapshotManagerPasswordRevealed(true)}
+                        onMouseLeave={() => setIsSnapshotManagerPasswordRevealed(false)}
+                      >
+                        {isSnapshotManagerPasswordRevealed
+                          ? regeneratedSnapshotManagerCreds.password
+                          : getMaskedToken(regeneratedSnapshotManagerCreds.password)}
+                      </span>
+                      <Copy
+                        className="w-4 h-4 cursor-pointer flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => copyToClipboard(regeneratedSnapshotManagerCreds.password)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            {!regeneratedSnapshotManagerCreds ? (
+              <>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={confirmRegenerateSnapshotManagerCredentials}
+                  disabled={!regionForRegenerate || regionIsLoading[regionForRegenerate?.id || '']}
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                >
+                  {regionForRegenerate && regionIsLoading[regionForRegenerate.id] ? 'Regenerating...' : 'Regenerate'}
+                </AlertDialogAction>
+              </>
+            ) : (
+              <AlertDialogAction
+                onClick={() => {
+                  setShowRegenerateSnapshotManagerCredsDialog(false)
+                  setRegionForRegenerate(null)
+                  setRegeneratedSnapshotManagerCreds(null)
+                  setCopied(false)
+                  setIsSnapshotManagerPasswordRevealed(false)
                 }}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
               >

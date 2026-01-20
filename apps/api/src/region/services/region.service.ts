@@ -25,6 +25,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { RegionEvents } from '../constants/region-events.constant'
 import { RegionCreatedEvent } from '../events/region-created.event'
 import { RegionDeletedEvent } from '../events/region-deleted.event'
+import { SnapshotManagerCredentialsDto } from '../dto/snapshot-manager-credentials.dto'
+import { RegionSnapshotManagerCredsRegeneratedEvent } from '../events/region-snapshot-manager-creds-regenerated.event'
 
 @Injectable()
 export class RegionService {
@@ -303,5 +305,36 @@ export class RegionService {
     await this.regionRepository.save(region)
 
     return newApiKey
+  }
+
+  /**
+   * @param regionId - The ID of the region.
+   * @throws {NotFoundException} If the region is not found.
+   * @throws {BadRequestException} If the region does not have a snapshot manager URL configured.
+   * @returns The newly generated snapshot manager credentials.
+   */
+  async regenerateSnapshotManagerCredentials(regionId: string): Promise<SnapshotManagerCredentialsDto> {
+    const region = await this.findOne(regionId)
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    if (!region.snapshotManagerUrl) {
+      throw new BadRequestException('Region does not have a snapshot manager URL configured')
+    }
+
+    const newUsername = 'daytona'
+    const newPassword = generateRandomString(16)
+
+    await this.eventEmitter.emitAsync(
+      RegionEvents.SNAPSHOT_MANAGER_CREDENTIALS_REGENERATED,
+      new RegionSnapshotManagerCredsRegeneratedEvent(regionId, region.snapshotManagerUrl, newUsername, newPassword),
+    )
+
+    return new SnapshotManagerCredentialsDto({
+      username: newUsername,
+      password: newPassword,
+    })
   }
 }
