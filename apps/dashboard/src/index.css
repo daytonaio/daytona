@@ -23,7 +23,7 @@ body {
     --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
+    --accent: 0 0% 95%;
     --accent-foreground: 0 0% 9%;
 
     --border: 0 0% 89.8%;
@@ -81,7 +81,7 @@ body {
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
+    --accent: 0 0% 16%;
     --accent-foreground: 0 0% 98%;
 
     --border: 0 0% 14.9%;

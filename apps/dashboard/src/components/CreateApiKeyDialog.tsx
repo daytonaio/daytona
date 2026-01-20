@@ -16,7 +16,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, InfoIcon } from 'lucide-react'
 
@@ -37,6 +36,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 
 interface CreateApiKeyDialogProps {
   availablePermissions: CreateApiKeyPermissionsEnum[]
@@ -197,7 +197,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
 
               <Tabs
                 defaultValue="full-access"
-                className="items-start"
+                className="items-start pb-4"
                 onValueChange={(value) => {
                   if (value === 'full-access') {
                     form.setFieldValue('permissions', availablePermissions)
@@ -213,8 +213,8 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
               >
                 <Label className="mb-1">Permissions</Label>
 
-                <TabsList className="bg-muted">
-                  <TabsTrigger value="full-access">Full</TabsTrigger>
+                <TabsList className="bg-muted w-full [&>*]:flex-1">
+                  <TabsTrigger value="full-access">Full Access</TabsTrigger>
                   <TabsTrigger value="sandbox-access">Sandboxes</TabsTrigger>
                   <TabsTrigger value="restricted-access">Restricted </TabsTrigger>
                 </TabsList>
@@ -222,7 +222,9 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                   <Alert variant="info">
                     <InfoIcon />
                     <AlertTitle>Sandboxes Access</AlertTitle>
-                    <AlertDescription>This key grants access to the Sandboxes resource.</AlertDescription>
+                    <AlertDescription>
+                      This key grants read and write access to the Sandboxes resource.
+                    </AlertDescription>
                   </Alert>
                 </TabsContent>
                 <TabsContent value="full-access" className="w-full">
@@ -235,7 +237,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                     </AlertDescription>
                   </Alert>
                 </TabsContent>
-                <TabsContent value="restricted-access" className="xs:pl-3 w-full">
+                <TabsContent value="restricted-access" className="w-full">
                   {availableGroups.length > 0 && (
                     <form.Field name="permissions">
                       {(field) => (
