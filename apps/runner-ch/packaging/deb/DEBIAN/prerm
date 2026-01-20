@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+# Stop the service if running
+if systemctl is-active --quiet daytona-runner; then
+    systemctl stop daytona-runner
+fi
+
+exit 0

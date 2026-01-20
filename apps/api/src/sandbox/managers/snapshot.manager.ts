@@ -286,7 +286,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       // Separate Windows runners from Docker-based runners
       const windowsRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.WINDOWS_EXPERIMENTAL)
-      const dockerRunners = runnersToPropagateTo.filter((runner) => runner.class !== RunnerClass.WINDOWS_EXPERIMENTAL)
+      const linuxRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.LINUX_EXPERIMENTAL)
+      const dockerRunners = runnersToPropagateTo.filter((runner) => runner.class !== RunnerClass.LINUX)
 
       // For Docker-based runners, get the registry
       let dockerRegistry: DockerRegistry | undefined

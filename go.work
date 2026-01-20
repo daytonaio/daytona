@@ -6,6 +6,7 @@ use (
 	./apps/daemon-win
 	./apps/proxy
 	./apps/runner
+	./apps/runner-ch
 	./apps/runner-win
 	./apps/ssh-gateway
 	./libs/api-client-go

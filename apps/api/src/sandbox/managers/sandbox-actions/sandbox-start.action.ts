@@ -225,7 +225,8 @@ export class SandboxStartAction extends SandboxAction {
     // Windows runners use qcow2 snapshots from object storage, not Docker registries
     // The runner will pull from object storage directly when creating the sandbox
     const isWindowsRunner = runner.class === RunnerClass.WINDOWS_EXPERIMENTAL
-    if (isWindowsRunner) {
+    const isLinuxRunner = runner.class === RunnerClass.LINUX_EXPERIMENTAL
+    if (isWindowsRunner || isLinuxRunner) {
       // For Windows runners, we call pullSnapshot without a Docker registry
       // The runner will handle pulling from object storage
       let retries = 0
@@ -335,7 +336,8 @@ export class SandboxStartAction extends SandboxAction {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     // Windows runners use qcow2 snapshots from object storage, not Docker registries
-    const isWindowsRunner = runner.class === RunnerClass.WINDOWS_EXPERIMENTAL
+    const isExperimentalRunner =
+      runner.class === RunnerClass.WINDOWS_EXPERIMENTAL || runner.class === RunnerClass.LINUX_EXPERIMENTAL
 
     let registry: DockerRegistry | undefined
     let entrypoint: string[]
@@ -344,8 +346,8 @@ export class SandboxStartAction extends SandboxAction {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       const snapshotRef = snapshot.ref
 
-      // Only look up Docker registry for non-Windows runners
-      if (!isWindowsRunner) {
+      // Only look up Docker registry for traditional runners
+      if (!isExperimentalRunner) {
         registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef, sandbox.organizationId)
         if (!registry) {
           throw new Error('No registry found for snapshot')

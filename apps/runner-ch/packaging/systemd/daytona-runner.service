@@ -1,0 +1,38 @@
+[Unit]
+Description=Daytona Runner CH (Cloud Hypervisor)
+Documentation=https://daytona.io
+After=network-online.target cloud-hypervisor.socket
+Wants=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/daytona/runner-ch
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+
+# Environment
+Environment=API_PORT=8080
+Environment=LOG_LEVEL=info
+Environment=CH_SOCKETS_PATH=/var/run/cloud-hypervisor
+Environment=CH_SANDBOXES_PATH=/var/lib/cloud-hypervisor/sandboxes
+Environment=CH_SNAPSHOTS_PATH=/var/lib/cloud-hypervisor/snapshots
+Environment=CH_KERNEL_PATH=/var/lib/cloud-hypervisor/kernels/vmlinux
+Environment=CH_FIRMWARE_PATH=/var/lib/cloud-hypervisor/firmware/hypervisor-fw
+Environment=CH_BRIDGE_NAME=br0
+
+# Environment file for secrets
+EnvironmentFile=-/etc/daytona/runner-ch.env
+
+# Security
+NoNewPrivileges=false
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_SYS_ADMIN CAP_DAC_OVERRIDE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
