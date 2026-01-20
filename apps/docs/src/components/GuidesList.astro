@@ -1,0 +1,162 @@
+---
+import { getCollection } from 'astro:content'
+import { getSidebarConfig, NavigationCategory } from '../content/config'
+import type { NavigationGroup, NavigationLink } from '../utils/navigation'
+
+interface Props {
+  lang?: string
+  category?: string
+}
+
+interface GuideItem {
+  href: string
+  title: string
+  description?: string
+}
+
+const { category, lang = 'en' } = Astro.props
+
+const sidebarConfig = getSidebarConfig(lang, (key: string) => {
+  try {
+    return Astro.locals?.t?.(key as any) || key
+  } catch {
+    return key
+  }
+})
+
+const guidesGroups = sidebarConfig.filter(
+  (group: NavigationGroup) => group.category === NavigationCategory.GUIDES
+)
+
+let navLinks: NavigationLink[]
+
+if (category) {
+  // When filtering by category, include all guides in that category (even hidden ones)
+  navLinks = guidesGroups.flatMap((group: NavigationGroup) =>
+    (group.entries || []).filter(
+      (entry: NavigationLink) =>
+        entry.type === 'link' && entry.href.includes(`/guides/${category}/`)
+    )
+  ) as NavigationLink[]
+} else {
+  // For main guides page, only show non-hidden entries
+  navLinks = guidesGroups.flatMap((group: NavigationGroup) =>
+    (group.entries || []).filter(
+      (entry: NavigationLink) => !entry.hideInSidebar && entry.type === 'link'
+    )
+  ) as NavigationLink[]
+}
+
+// Get all docs to fetch actual titles
+const allDocs = await getCollection('docs')
+
+// Map navigation links to guide items with actual titles from frontmatter
+const guides: GuideItem[] = navLinks.map(link => {
+  // Convert href to slug format (remove /docs/en/ prefix)
+  const slug = link.href.replace(/^\/docs\//, '').replace(/^en\//, 'en/')
+
+  // Find matching doc
+  const doc = allDocs.find(
+    d => d.slug === slug || d.slug === slug.replace(/\/$/, '')
+  )
+
+  return {
+    href: link.href,
+    title: doc?.data?.title || link.label,
+    description: doc?.data?.description || link.description,
+  }
+})
+---
+
+<div class="guides-list">
+  <ul>
+    {
+      guides.map(guide => (
+        <a href={guide.href}>
+          <li>
+            <span class="guide-title">{guide.title}</span>
+            {guide.description && (
+              <span class="guide-description">{guide.description}</span>
+            )}
+          </li>
+        </a>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .guides-list {
+    margin-top: 2em;
+  }
+
+  ul {
+    all: unset;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+
+  @media (max-width: 768px) {
+    ul {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  a,
+  a:hover,
+  a:visited,
+  a:active {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--block-bg-color);
+    border: var(--border);
+    border-color: var(--block-bg-color);
+    border-radius: 4px;
+    transition: all 0.15s;
+    text-decoration: none !important;
+  }
+
+  a:hover {
+    background: var(--secondary-text-color);
+    border-color: var(--secondary-text-color);
+  }
+
+  a * {
+    text-decoration: none !important;
+  }
+
+  li {
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    width: 100%;
+    height: 160px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .guide-title {
+    font-weight: bold;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .guide-description {
+    font-weight: normal;
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+    margin-top: 0.9em;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  a:hover .guide-description {
+    color: var(--primary-text-color);
+  }
+</style>

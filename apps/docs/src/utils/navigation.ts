@@ -254,43 +254,44 @@ export function getSidebar(
   const mainGroup = getMainNavGroup(sidebarConfig)
   const currentGroup = getNavGroupByHref(sidebarConfig, currentPath)
 
-  if (!currentGroup) return [mainGroup]
+  // If no current group found, return GENERAL category groups as default
+  if (!currentGroup) {
+    const generalGroups = getNavGroupsByCategory(
+      sidebarConfig,
+      NavigationCategory.GENERAL
+    )
+    return generalGroups.map(group => ({
+      ...group,
+      entries: group.entries?.filter(
+        entry =>
+          entry.type !== 'link' || !(entry as NavigationLink).hideInSidebar
+      ),
+    }))
+  }
 
-  let contextHref: string | null = null
   let relatedGroups: NavigationGroup[] = []
 
-  if (currentGroup.category === NavigationCategory.MAIN) {
+  if (currentGroup.category === NavigationCategory.MAIN && mainGroup) {
     const currentLink = getNavLinkByHref(
       sidebarConfig,
       currentPath,
       currentGroup
     ) as MainNavigationLink
 
-    if (!currentLink) return [mainGroup]
+    if (!currentLink) {
+      const generalGroups = getNavGroupsByCategory(
+        sidebarConfig,
+        NavigationCategory.GENERAL
+      )
+      return generalGroups
+    }
 
-    contextHref = currentPath
     relatedGroups = getNavGroupsByCategory(
       sidebarConfig,
       currentLink.relatedGroupCategory
     )
   } else {
     relatedGroups = getNavGroupsByCategory(sidebarConfig, currentGroup.category)
-    contextHref = currentGroup.homePageHref || null
-  }
-
-  if (contextHref && mainGroup.entries) {
-    mainGroup.entries = mainGroup.entries.map(entry => ({
-      ...entry,
-      context: comparePaths(entry.href, contextHref as string),
-    }))
-  }
-
-  // Filter out links with hideInSidebar from main group
-  const filteredMainGroup = {
-    ...mainGroup,
-    entries: mainGroup.entries?.filter(
-      entry => entry.type !== 'link' || !(entry as NavigationLink).hideInSidebar
-    ),
   }
 
   // Filter out links with hideInSidebar from related groups
@@ -301,7 +302,7 @@ export function getSidebar(
     ),
   }))
 
-  return [filteredMainGroup, ...filteredRelatedGroups]
+  return filteredRelatedGroups
 }
 
 export function getExploreMoreData(
@@ -311,27 +312,44 @@ export function getExploreMoreData(
   processAutopopulateGroups(sidebarConfig)
 
   currentPath = currentPath.replace(/\/$/, '')
-  const link = getNavLinkByHref(
-    sidebarConfig,
-    currentPath
-  ) as MainNavigationLink
-  if (!link) {
-    return []
+
+  // Check if this is the main docs index page
+  const isMainIndex =
+    currentPath.endsWith('/docs') ||
+    currentPath.match(/\/docs\/[a-z]{2}$/) !== null
+
+  let relatedGroups: NavigationGroup[]
+
+  if (isMainIndex) {
+    // For main index, show GENERAL category groups
+    relatedGroups = getNavGroupsByCategory(
+      sidebarConfig,
+      NavigationCategory.GENERAL
+    )
+  } else {
+    const link = getNavLinkByHref(
+      sidebarConfig,
+      currentPath
+    ) as MainNavigationLink
+    if (!link || !link.relatedGroupCategory) {
+      return []
+    }
+    relatedGroups = getNavGroupsByCategory(
+      sidebarConfig,
+      link.relatedGroupCategory
+    )
   }
 
-  const relatedGroups = getNavGroupsByCategory(
-    sidebarConfig,
-    link.relatedGroupCategory
-  )
-
   return relatedGroups.map(group => {
-    const items = (group.entries || []).map(navLink => {
-      return {
-        title: navLink.label,
-        subtitle: navLink.description || '',
-        href: navLink.href,
-      }
-    })
+    const items = (group.entries || [])
+      .filter(entry => !entry.hideInSidebar)
+      .map(navLink => {
+        return {
+          title: navLink.label,
+          subtitle: navLink.description || '',
+          href: navLink.href,
+        }
+      })
 
     return {
       title: group.label || '',
@@ -342,4 +360,23 @@ export function getExploreMoreData(
 
 export function comparePaths(path1: string, path2: string): boolean {
   return normalizePath(path1) === normalizePath(path2)
+}
+
+export function isActiveOrParentPath(
+  entryPath: string,
+  currentPath: string
+): boolean {
+  const normalizedEntry = normalizePath(entryPath)
+  const normalizedCurrent = normalizePath(currentPath)
+
+  if (normalizedEntry === normalizedCurrent) {
+    return true
+  }
+
+  const segments = normalizedEntry.split('/').filter(Boolean)
+  if (segments.length < 3) {
+    return false
+  }
+
+  return normalizedCurrent.startsWith(normalizedEntry + '/')
 }

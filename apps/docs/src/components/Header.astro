@@ -1,11 +1,15 @@
 ---
 import daytonaLogo from '@assets/icons/daytona-logo.svg?raw'
 import searchIcon from '@assets/icons/search.svg?raw'
+import packageIcon from '@assets/sidebar/package.svg?raw'
+import serverIcon from '@assets/sidebar/server.svg?raw'
+import terminalIcon from '@assets/sidebar/terminal.svg?raw'
 import Search from '@components/Search'
 import Version from '@components/Version.astro'
 import gtconfig from '../../gt.config.json'
 import '../styles/components/search.scss'
 import { SideNavLinks } from './menu/SideNavLinks'
+import { isActiveOrParentPath } from '@utils/navigation'
 
 const PUBLIC_WEB_URL = (
   import.meta.env.PUBLIC_WEB_URL || 'https://daytona.io'
@@ -19,13 +23,45 @@ const algoliaEnabled =
 
 // Show search in production when enabled, or always in dev mode
 const showSearch = algoliaEnabled || import.meta.env.DEV
+
+// Reference paths for active state detection
+const referencePaths = {
+  typescriptSdk: `${import.meta.env.BASE_URL}/en/typescript-sdk`,
+  pythonSdk: `${import.meta.env.BASE_URL}/en/python-sdk`,
+  api: `${import.meta.env.BASE_URL}/en/tools/api`,
+  cli: `${import.meta.env.BASE_URL}/en/tools/cli`,
+}
+
+const currentPath = Astro.url.pathname
+
+// Check if each reference page is active
+const isTypescriptSdkActive = isActiveOrParentPath(
+  referencePaths.typescriptSdk,
+  currentPath
+)
+const isPythonSdkActive = isActiveOrParentPath(
+  referencePaths.pythonSdk,
+  currentPath
+)
+const isApiActive = isActiveOrParentPath(referencePaths.api, currentPath)
+const isCliActive = isActiveOrParentPath(referencePaths.cli, currentPath)
+
+// Check if any reference page is active
+const isReferencesActive =
+  isTypescriptSdkActive || isPythonSdkActive || isApiActive || isCliActive
+
+// Check if guides page is active
+const isGuidesActive = isActiveOrParentPath(
+  `${import.meta.env.BASE_URL}/en/guides`,
+  currentPath
+)
 ---
 
 <header class="navbar">
   <nav class="desktop-only">
     <div class="logo-divider">
       <a
-        href="https://www.daytona.io/"
+        href={import.meta.env.BASE_URL}
         aria-label="Daytona"
         class="daytona-logo"
       >
@@ -33,20 +69,61 @@ const showSearch = algoliaEnabled || import.meta.env.DEV
       </a>
     </div>
     <div class="navbar-links">
-      <a href={import.meta.env.BASE_URL}
-        >{Astro.locals.t('header.documentation' as any)}
+      <div class="dropdown">
+        <span class:list={['dropdown-trigger', { active: isReferencesActive }]}>
+          {Astro.locals.t('header.references' as any)}
+          <svg
+            class="chevron"
+            width="10"
+            height="6"
+            viewBox="0 0 10 6"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1 1L5 5L9 1"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </span>
+        <div class="dropdown-menu">
+          <a
+            href={`${import.meta.env.BASE_URL}/en/typescript-sdk`}
+            class:list={[{ active: isTypescriptSdkActive }]}
+          >
+            <Fragment set:html={packageIcon} />
+            {Astro.locals.t('sidebarconfig.tsSdkReference' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/python-sdk`}
+            class:list={[{ active: isPythonSdkActive }]}
+          >
+            <Fragment set:html={packageIcon} />
+            {Astro.locals.t('sidebarconfig.pythonSdkReference' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/tools/api`}
+            class:list={[{ active: isApiActive }]}
+          >
+            <Fragment set:html={serverIcon} />
+            {Astro.locals.t('sidebarconfig.apiReference' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/tools/cli`}
+            class:list={[{ active: isCliActive }]}
+          >
+            <Fragment set:html={terminalIcon} />
+            {Astro.locals.t('sidebarconfig.cliReference' as any)}
+          </a>
+        </div>
+      </div>
+      <a href={`/docs/en/guides`} class:list={[{ active: isGuidesActive }]}
+        >{Astro.locals.t('header.guides' as any)}
       </a>
-      <a href={`${PUBLIC_WEB_URL}/customers`}
-        >{Astro.locals.t('header.customers' as any)}
-      </a>
-      <a href={`${PUBLIC_WEB_URL}/pricing`}
-        >{Astro.locals.t('header.pricing' as any)}
-      </a>
-      <a href={`${PUBLIC_WEB_URL}/startups`}
-        >{Astro.locals.t('header.startups' as any)}
-      </a>
-      <a href={`${PUBLIC_WEB_URL}/blog`}
-        >{Astro.locals.t('header.blog' as any)}
+      <a href="https://www.daytona.io/changelog"
+        >{Astro.locals.t('header.changelog' as any)}
       </a>
     </div>
     <div class="nav__items_side_menu">
@@ -68,7 +145,7 @@ const showSearch = algoliaEnabled || import.meta.env.DEV
   <nav class="mobile-navigation">
     <div class="blur-section">
       <a
-        href="https://www.daytona.io/"
+        href={import.meta.env.BASE_URL}
         aria-label="Daytona"
         class="daytona-logo blur-section"
       >
@@ -97,7 +174,8 @@ const showSearch = algoliaEnabled || import.meta.env.DEV
     gap: 16px;
   }
 
-  .navbar-links a {
+  .navbar-links > a,
+  .navbar-links .dropdown-trigger {
     text-transform: uppercase;
     font-size: 14px;
     font-family: 'Berkeley Mono', monospace;
@@ -105,9 +183,88 @@ const showSearch = algoliaEnabled || import.meta.env.DEV
     transition: all 0.2s;
     font-weight: 400;
     letter-spacing: -0.01rem;
+    cursor: pointer;
     &:hover {
       color: var(--hover-color);
     }
+  }
+
+  .navbar-links .dropdown-trigger.active,
+  .navbar-links > a.active {
+    color: var(--hover-color);
+  }
+
+  .dropdown {
+    position: relative;
+  }
+
+  .dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dropdown-trigger .chevron {
+    width: 8px;
+    height: 8px;
+    transition: transform 0.3s;
+  }
+
+  .dropdown:hover .dropdown-trigger .chevron {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    min-width: 200px;
+    background-color: var(--block-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    z-index: 100;
+    margin-top: 8px;
+  }
+
+  .dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-family: 'Berkeley Mono', monospace;
+    color: var(--primary-text-color);
+    text-transform: none;
+    transition: all 0.15s;
+    &:hover {
+      background-color: var(--hover-bg-color, rgba(255, 255, 255, 0.05));
+      color: var(--hover-color);
+    }
+    &.active {
+      background-color: var(--hover-bg-color, rgba(255, 255, 255, 0.05));
+      color: var(--hover-color);
+    }
+  }
+
+  .dropdown-menu a :global(svg) {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .dropdown-menu a :global(svg path) {
+    fill: currentColor;
   }
 
   .search-click-desktop {

@@ -1,5 +1,5 @@
 ---
-title: Regions & Runners
+title: Regions
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -106,55 +106,4 @@ When you create a custom region, Daytona will provide credentials for any option
 
 :::note
 If needed, these credentials can always be regenerated, but you will need to redeploy the corresponding services with the updated credentials.
-:::
-
-## Runners
-
-Runners are machines that power Daytona's compute plane, providing the underlying infrastructure for running sandbox workloads. Each runner is responsible for:
-
-- **Workload Execution** — Running sandbox workloads
-- **Resource Management** — Allocating and monitoring CPU, memory, and disk resources
-- **Health Reporting** — Continuously reporting metrics and health status to the Daytona control plane
-- **Network Connectivity** — Managing networking, proxy connections, and SSH access for sandboxes
-
-Runners in **shared** and **dedicated** regions are fully managed by Daytona — from provisioning and maintenance to monitoring and scaling. For **custom** regions, you bring your own runner machines and are responsible for their management and operation.
-
-### Custom Runners
-
-Custom runners are created and managed by your organization, allowing you to use your own runner machines and scale compute resources independently within each custom region.
-
-:::caution
-Custom runners are currently an experimental feature and may change in future releases.
-To request access, please contact [support@daytona.io](mailto:support@daytona.io).
-:::
-
-#### Custom Runner Configuration
-
-**name** (required)
-
-- A unique identifier for the runner
-- Must contain only letters, numbers, underscores, periods, and hyphens
-- Helps distinguish between multiple runners in the same region
-
-**regionId** (required)
-
-- The ID of the region this runner is assigned to
-- Must be a custom region owned by your organization
-- All runners in a region share the region's proxy and SSH gateway configuration
-
-#### Custom Runner Token
-
-When you create a custom runner, Daytona will provide you with a **token** that should be used by your runner to authenticate with Daytona.
-
-:::note
-Save this token securely. You won't be able to see it again.
-:::
-
-
-#### Installing the Custom Runner
-
-After registering a custom runner and obtaining its secure token, you need to install and configure the Daytona runner application on your infrastructure.
-
-:::note
-Detailed installation instructions for the runner application will be provided in a future update. For assistance with runner installation, please contact [support@daytona.io](mailto:support@daytona.io).
 :::

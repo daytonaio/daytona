@@ -3,6 +3,9 @@ import { getSidebarConfig } from '../content/config'
 import { getSidebar } from '../utils/navigation'
 import SidebarSublist from './SidebarSublist.astro'
 import { SideNavLinks } from './menu/SideNavLinks'
+import packageIcon from '@assets/sidebar/package.svg?raw'
+import serverIcon from '@assets/sidebar/server.svg?raw'
+import terminalIcon from '@assets/sidebar/terminal.svg?raw'
 
 const PUBLIC_WEB_URL = (
   import.meta.env.PUBLIC_WEB_URL || 'https://daytona.io'
@@ -22,19 +25,45 @@ const PUBLIC_WEB_URL = (
   )}
 />
 <div class="navbar-links">
-  <a href={import.meta.env.BASE_URL}
-    >{Astro.locals.t('header.documentation' as any)}
-  </a>
-  <a href={`${PUBLIC_WEB_URL}/customers`}
-    >{Astro.locals.t('header.customers' as any)}
-  </a>
-  <a href={`${PUBLIC_WEB_URL}/pricing`}
-    >{Astro.locals.t('header.pricing' as any)}
-  </a>
-  <a href={`${PUBLIC_WEB_URL}/startups`}
-    >{Astro.locals.t('header.startups' as any)}
-  </a>
-  <a href={`${PUBLIC_WEB_URL}/blog`}>{Astro.locals.t('header.blog' as any)} </a>
+  <details class="mobile-dropdown">
+    <summary>
+      {Astro.locals.t('header.references' as any)}
+      <svg
+        class="chevron"
+        width="10"
+        height="6"
+        viewBox="0 0 10 6"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M1 1L5 5L9 1"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </summary>
+    <div class="mobile-dropdown-menu">
+      <a href={`${import.meta.env.BASE_URL}/en/typescript-sdk`}>
+        <Fragment set:html={packageIcon} />
+        {Astro.locals.t('sidebarconfig.tsSdkReference' as any)}
+      </a>
+      <a href={`${import.meta.env.BASE_URL}/en/python-sdk`}>
+        <Fragment set:html={packageIcon} />
+        {Astro.locals.t('sidebarconfig.pythonSdkReference' as any)}
+      </a>
+      <a href={`${import.meta.env.BASE_URL}/en/tools/api`}>
+        <Fragment set:html={serverIcon} />
+        {Astro.locals.t('sidebarconfig.apiReference' as any)}
+      </a>
+      <a href={`${import.meta.env.BASE_URL}/en/tools/cli`}>
+        <Fragment set:html={terminalIcon} />
+        {Astro.locals.t('sidebarconfig.cliReference' as any)}
+      </a>
+    </div>
+  </details>
+  <a href={`/docs/en/guides`}>{Astro.locals.t('header.guides' as any)}</a>
 </div>
 <div class="mobile-nav-btn nav__items_side_menu">
   <SideNavLinks client:load locale={Astro.props.lang} />
@@ -54,7 +83,8 @@ const PUBLIC_WEB_URL = (
     }
   }
 
-  .navbar-links a {
+  .navbar-links > a,
+  .mobile-dropdown summary {
     text-transform: uppercase;
     font-size: 14px;
     font-family: 'Berkeley Mono', monospace;
@@ -62,8 +92,65 @@ const PUBLIC_WEB_URL = (
     transition: all 0.2s;
     font-weight: 400;
     letter-spacing: -0.01rem;
+    cursor: pointer;
     &:hover {
       color: var(--hover-color);
     }
+  }
+
+  .mobile-dropdown {
+    width: 100%;
+  }
+
+  .mobile-dropdown summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+  }
+
+  .mobile-dropdown summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile-dropdown .chevron {
+    width: 10px;
+    height: 6px;
+    transition: transform 0.2s;
+  }
+
+  .mobile-dropdown[open] .chevron {
+    transform: rotate(180deg);
+  }
+
+  .mobile-dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0 4px 0;
+  }
+
+  .mobile-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-family: 'Berkeley Mono', monospace;
+    color: var(--secondary-text-color);
+    text-transform: none;
+    transition: all 0.15s;
+    &:hover {
+      color: var(--hover-color);
+    }
+  }
+
+  .mobile-dropdown-menu a :global(svg) {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .mobile-dropdown-menu a :global(svg path) {
+    fill: currentColor;
   }
 </style>
