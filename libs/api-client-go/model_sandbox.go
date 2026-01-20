@@ -77,6 +77,8 @@ type Sandbox struct {
 	CreatedAt *string `json:"createdAt,omitempty"`
 	// The last update timestamp of the sandbox
 	UpdatedAt *string `json:"updatedAt,omitempty"`
+	// The last activity timestamp of the sandbox
+	LastActivityAt *string `json:"lastActivityAt,omitempty"`
 	// The class of the sandbox
 	// Deprecated
 	Class *string `json:"class,omitempty"`
@@ -911,6 +913,38 @@ func (o *Sandbox) SetUpdatedAt(v string) {
 	o.UpdatedAt = &v
 }
 
+// GetLastActivityAt returns the LastActivityAt field value if set, zero value otherwise.
+func (o *Sandbox) GetLastActivityAt() string {
+	if o == nil || IsNil(o.LastActivityAt) {
+		var ret string
+		return ret
+	}
+	return *o.LastActivityAt
+}
+
+// GetLastActivityAtOk returns a tuple with the LastActivityAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetLastActivityAtOk() (*string, bool) {
+	if o == nil || IsNil(o.LastActivityAt) {
+		return nil, false
+	}
+	return o.LastActivityAt, true
+}
+
+// HasLastActivityAt returns a boolean if a field has been set.
+func (o *Sandbox) HasLastActivityAt() bool {
+	if o != nil && !IsNil(o.LastActivityAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastActivityAt gets a reference to the given string and assigns it to the LastActivityAt field.
+func (o *Sandbox) SetLastActivityAt(v string) {
+	o.LastActivityAt = &v
+}
+
 // GetClass returns the Class field value if set, zero value otherwise.
 // Deprecated
 func (o *Sandbox) GetClass() string {
@@ -1078,6 +1112,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.UpdatedAt) {
 		toSerialize["updatedAt"] = o.UpdatedAt
 	}
+	if !IsNil(o.LastActivityAt) {
+		toSerialize["lastActivityAt"] = o.LastActivityAt
+	}
 	if !IsNil(o.Class) {
 		toSerialize["class"] = o.Class
 	}
@@ -1170,6 +1207,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "buildInfo")
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "lastActivityAt")
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
 		delete(additionalProperties, "runnerId")

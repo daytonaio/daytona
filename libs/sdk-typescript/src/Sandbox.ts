@@ -82,6 +82,7 @@ export interface SandboxCodeToolbox {
  * @property {BuildInfo} [buildInfo] - Build information for the Sandbox if it was created from dynamic build
  * @property {string} [createdAt] - When the Sandbox was created
  * @property {string} [updatedAt] - When the Sandbox was last updated
+ * @property {string} [lastActivityAt] - When the Sandbox last had activity
  * @property {boolean} networkBlockAll - Whether to block all network access for the Sandbox
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
  *
@@ -119,6 +120,7 @@ export class Sandbox implements SandboxDto {
   public buildInfo?: BuildInfo
   public createdAt?: string
   public updatedAt?: string
+  public lastActivityAt?: string
   public networkBlockAll!: boolean
   public networkAllowList?: string
 
@@ -745,6 +747,7 @@ export class Sandbox implements SandboxDto {
     this.buildInfo = sandboxDto.buildInfo
     this.createdAt = sandboxDto.createdAt
     this.updatedAt = sandboxDto.updatedAt
+    this.lastActivityAt = sandboxDto.lastActivityAt
     this.networkBlockAll = sandboxDto.networkBlockAll
     this.networkAllowList = sandboxDto.networkAllowList
   }

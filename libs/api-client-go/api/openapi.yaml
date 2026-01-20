@@ -10366,6 +10366,7 @@ components:
       example:
         memory: 4
         buildInfo: ''
+        lastActivityAt: 2024-10-01T12:00:00Z
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -10533,6 +10534,10 @@ components:
           description: The last update timestamp of the sandbox
           example: 2024-10-01T12:00:00Z
           type: string
+        lastActivityAt:
+          description: The last activity timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
         class:
           deprecated: true
           description: The class of the sandbox
@@ -10573,6 +10578,7 @@ components:
         items:
           - memory: 4
             buildInfo: ''
+            lastActivityAt: 2024-10-01T12:00:00Z
             autoStopInterval: 30
             organizationId: organization123
             createdAt: 2024-10-01T12:00:00Z
@@ -10612,6 +10618,7 @@ components:
             snapshot: daytonaio/sandbox:latest
           - memory: 4
             buildInfo: ''
+            lastActivityAt: 2024-10-01T12:00:00Z
             autoStopInterval: 30
             organizationId: organization123
             createdAt: 2024-10-01T12:00:00Z
@@ -13247,6 +13254,7 @@ components:
       example:
         memory: 4
         buildInfo: ''
+        lastActivityAt: 2024-10-01T12:00:00Z
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -13416,6 +13424,10 @@ components:
           type: string
         updatedAt:
           description: The last update timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
+        lastActivityAt:
+          description: The last activity timestamp of the sandbox
           example: 2024-10-01T12:00:00Z
           type: string
         class:

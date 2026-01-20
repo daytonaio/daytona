@@ -200,6 +200,12 @@ export interface Sandbox {
    */
   updatedAt?: string
   /**
+   * The last activity timestamp of the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   */
+  lastActivityAt?: string
+  /**
    * The class of the sandbox
    * @type {string}
    * @memberof Sandbox

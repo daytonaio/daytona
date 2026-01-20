@@ -244,6 +244,14 @@ export class SandboxDto {
   updatedAt?: string
 
   @ApiPropertyOptional({
+    description: 'The last activity timestamp of the sandbox',
+    example: '2024-10-01T12:00:00Z',
+    required: false,
+  })
+  @IsOptional()
+  lastActivityAt?: string
+
+  @ApiPropertyOptional({
     description: 'The class of the sandbox',
     enum: SandboxClass,
     example: Object.values(SandboxClass)[0],
@@ -300,6 +308,7 @@ export class SandboxDto {
       class: sandbox.class,
       createdAt: sandbox.createdAt ? new Date(sandbox.createdAt).toISOString() : undefined,
       updatedAt: sandbox.updatedAt ? new Date(sandbox.updatedAt).toISOString() : undefined,
+      lastActivityAt: sandbox.lastActivityAt ? new Date(sandbox.lastActivityAt).toISOString() : undefined,
       buildInfo: sandbox.buildInfo
         ? {
             dockerfileContent: sandbox.buildInfo.dockerfileContent,
