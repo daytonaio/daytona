@@ -5,6 +5,7 @@ use (
 	./apps/daemon
 	./apps/proxy
 	./apps/runner
+	./apps/snapshot-manager
 	./apps/ssh-gateway
 	./libs/api-client-go
 	./libs/common-go

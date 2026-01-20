@@ -1,0 +1,46 @@
+{
+  "name": "snapshot-manager",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/snapshot-manager",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/main.go",
+        "env": {
+          "CGO_ENABLED": "0"
+        }
+      },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/snapshot-manager/internal.Version=$VERSION'\""]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "cmd": "gow",
+        "main": "{projectRoot}/cmd/main.go"
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "tidy": {
+      "executor": "@nx-go/nx-go:tidy"
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "snapshot-manager"
+      }
+    },
+    "push-manifest": {}
+  }
+}
