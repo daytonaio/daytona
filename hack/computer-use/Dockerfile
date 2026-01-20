@@ -32,6 +32,7 @@ COPY ./apps/proxy /app/apps/proxy
 COPY ./apps/daemon /app/apps/daemon
 COPY ./libs/computer-use /app/libs/computer-use
 COPY ./apps/ssh-gateway /app/apps/ssh-gateway
+COPY ./apps/snapshot-manager /app/apps/snapshot-manager
 
 # Build the application with optimizations
 RUN cd /app/libs/computer-use && \

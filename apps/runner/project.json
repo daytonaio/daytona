@@ -33,14 +33,10 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/cmd/runner/main.go",
-        "outputPath": "dist/apps/runner"
+        "outputPath": "dist/apps/runner",
+        "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
       },
-      "configurations": {
-        "production": {
-          "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
-        }
-      },
-      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"]
     },
     "build-amd64": {
       "executor": "@nx-go/nx-go:build",
@@ -50,14 +46,10 @@
         "env": {
           "GOARCH": "amd64",
           "GOOS": "linux"
-        }
+        },
+        "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
       },
-      "configurations": {
-        "production": {
-          "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
-        }
-      },
-      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
