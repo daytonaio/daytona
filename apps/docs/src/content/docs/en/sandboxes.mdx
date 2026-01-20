@@ -491,7 +491,7 @@ The inactivity timer resets only for specific external interactions:
 
 - Opened [preview windows](/docs/en/preview-and-authentication)
 - Active [SSH connections](/docs/en/ssh-access)
-- Daytona SDK API calls (toolbox actions connecting to the sandbox)
+- [Daytona Toolbox SDK API](/docs/en/tools/api/#daytona-toolbox) calls
 
 #### What does not reset the timer
 
@@ -502,8 +502,6 @@ Internal processes running in the background do not reset the timer:
 - Processes that don't involve SDK polling or active monitoring
 
 **Example**: If you run a long-running task like LLM inference that takes more than 15 minutes without any external interaction, the sandbox may auto-stop mid-process because the process itself doesn't count as "activity".
-
-**Recommendation**: If your workflow relies on long-running background tasks, ensure there is a form of external interaction (such as polling logs via the SDK) to prevent the sandbox from auto-stopping.
 
 The parameter can either be set to:
 
