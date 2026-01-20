@@ -23,6 +23,7 @@ import { RegionEvents } from '../../region/constants/region-events.constant'
 import { RegionCreatedEvent } from '../../region/events/region-created.event'
 import { RegionDeletedEvent } from '../../region/events/region-deleted.event'
 import { RegionService } from '../../region/services/region.service'
+import { RegionSnapshotManagerCredsRegeneratedEvent } from '../../region/events/region-snapshot-manager-creds-regenerated.event'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
@@ -815,6 +816,23 @@ export class DockerRegistryService {
     }
 
     return sourceRegistries
+  }
+
+  @OnAsyncEvent({
+    event: RegionEvents.SNAPSHOT_MANAGER_CREDENTIALS_REGENERATED,
+  })
+  async updateRegionSnapshotManagerCredentials(payload: RegionSnapshotManagerCredsRegeneratedEvent): Promise<void> {
+    const { regionId, snapshotManagerUrl, username, password } = payload
+
+    const registries = await this.dockerRegistryRepository.count({
+      where: { region: regionId, url: snapshotManagerUrl },
+    })
+
+    if (registries === 0) {
+      throw new NotFoundException(`No registries found for region ${regionId} with URL ${snapshotManagerUrl}`)
+    }
+
+    await this.dockerRegistryRepository.update({ region: regionId, url: snapshotManagerUrl }, { username, password })
   }
 
   @OnAsyncEvent({

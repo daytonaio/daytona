@@ -67,6 +67,14 @@ export class RegionDto {
   })
   sshGatewayUrl?: string | null
 
+  @ApiProperty({
+    description: 'Snapshot Manager URL for the region',
+    example: 'http://snapshot-manager.example.com',
+    nullable: true,
+    required: false,
+  })
+  snapshotManagerUrl?: string | null
+
   static fromRegion(region: Region): RegionDto {
     return {
       id: region.id,
@@ -77,6 +85,7 @@ export class RegionDto {
       updatedAt: region.updatedAt?.toISOString(),
       proxyUrl: region.proxyUrl,
       sshGatewayUrl: region.sshGatewayUrl,
+      snapshotManagerUrl: region.snapshotManagerUrl,
     }
   }
 }
