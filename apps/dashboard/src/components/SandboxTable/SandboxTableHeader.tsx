@@ -7,10 +7,12 @@ import { cn } from '@/lib/utils'
 import {
   ArrowUpDown,
   Calendar,
+  CalendarPlus,
   Camera,
   Check,
   Columns,
   Cpu,
+  Eye,
   Globe,
   HardDrive,
   ListFilter,
@@ -18,6 +20,7 @@ import {
   RefreshCw,
   Square,
   Tag,
+  Wrench,
 } from 'lucide-react'
 import * as React from 'react'
 import { DebouncedInput } from '../DebouncedInput'
@@ -42,6 +45,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+import { BooleanFilter, BooleanFilterIndicator } from './filters/BooleanFilter'
+import { CreatedAtFilter, CreatedAtFilterIndicator } from './filters/CreatedAtFilter'
 import { LabelFilter, LabelFilterIndicator } from './filters/LabelFilter'
 import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFilter'
 import { RegionFilter, RegionFilterIndicator } from './filters/RegionFilter'
@@ -72,10 +77,8 @@ export function SandboxTableHeader({
 
   const sortableColumns = [
     { id: 'name', label: 'Name' },
-    { id: 'state', label: 'State' },
-    { id: 'snapshot', label: 'Snapshot' },
-    { id: 'region', label: 'Region' },
     { id: 'lastEvent', label: 'Last Event' },
+    { id: 'createdAt', label: 'Created' },
   ]
 
   return (
@@ -84,7 +87,7 @@ export function SandboxTableHeader({
         <DebouncedInput
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
-          placeholder="Search by Name or UUID"
+          placeholder="Search by Name"
           className="w-[240px]"
         />
 
@@ -279,6 +282,50 @@ export function SandboxTableHeader({
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <CalendarPlus className="w-4 h-4" />
+                Created
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="p-3 w-92">
+                  <CreatedAtFilter
+                    onFilterChange={(value) => table.getColumn('createdAt')?.setFilterValue(value)}
+                    value={(table.getColumn('createdAt')?.getFilterValue() as Date[]) || []}
+                  />
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Eye className="w-4 h-4" />
+                Public
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="p-3 w-48">
+                  <BooleanFilter
+                    label="Public"
+                    onFilterChange={(value) => table.getColumn('isPublic')?.setFilterValue(value)}
+                    value={table.getColumn('isPublic')?.getFilterValue() as boolean | undefined}
+                  />
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Wrench className="w-4 h-4" />
+                Recoverable
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="p-3 w-48">
+                  <BooleanFilter
+                    label="Recoverable"
+                    onFilterChange={(value) => table.getColumn('isRecoverable')?.setFilterValue(value)}
+                    value={table.getColumn('isRecoverable')?.getFilterValue() as boolean | undefined}
+                  />
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -334,6 +381,29 @@ export function SandboxTableHeader({
           <LastEventFilterIndicator
             value={(table.getColumn('lastEvent')?.getFilterValue() as Date[]) || []}
             onFilterChange={(value) => table.getColumn('lastEvent')?.setFilterValue(value)}
+          />
+        )}
+
+        {(table.getColumn('createdAt')?.getFilterValue() as Date[])?.length > 0 && (
+          <CreatedAtFilterIndicator
+            value={(table.getColumn('createdAt')?.getFilterValue() as Date[]) || []}
+            onFilterChange={(value) => table.getColumn('createdAt')?.setFilterValue(value)}
+          />
+        )}
+
+        {table.getColumn('isPublic')?.getFilterValue() !== undefined && (
+          <BooleanFilterIndicator
+            label="Public"
+            value={table.getColumn('isPublic')?.getFilterValue() as boolean | undefined}
+            onFilterChange={(value) => table.getColumn('isPublic')?.setFilterValue(value)}
+          />
+        )}
+
+        {table.getColumn('isRecoverable')?.getFilterValue() !== undefined && (
+          <BooleanFilterIndicator
+            label="Recoverable"
+            value={table.getColumn('isRecoverable')?.getFilterValue() as boolean | undefined}
+            onFilterChange={(value) => table.getColumn('isRecoverable')?.setFilterValue(value)}
           />
         )}
       </div>

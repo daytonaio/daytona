@@ -66,43 +66,76 @@ const Sandboxes: React.FC = () => {
 
   // Pagination
 
-  const [paginationParams, setPaginationParams] = useState({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  })
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
+  const [cursor, setCursor] = useState<string | undefined>(undefined)
+  const [cursorHistory, setCursorHistory] = useState<(string | undefined)[]>([])
 
-  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
-    setPaginationParams({ pageIndex, pageSize })
+  const resetCursor = useCallback(() => {
+    setCursor(undefined)
+    setCursorHistory([])
   }, [])
+
+  const handleNextPage = useCallback(
+    (nextCursor: string | null) => {
+      if (nextCursor) {
+        setCursorHistory((prev) => [...prev, cursor])
+        setCursor(nextCursor)
+      }
+    },
+    [cursor],
+  )
+
+  const handlePreviousPage = useCallback(() => {
+    if (cursorHistory.length > 0) {
+      const newHistory = [...cursorHistory]
+      const previousCursor = newHistory.pop()
+      setCursorHistory(newHistory)
+      setCursor(previousCursor)
+    }
+  }, [cursorHistory])
+
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      setPageSize(newPageSize)
+      resetCursor()
+    },
+    [resetCursor],
+  )
 
   // Filters
 
   const [filters, setFilters] = useState<SandboxFilters>({})
 
-  const handleFiltersChange = useCallback((filters: SandboxFilters) => {
-    setFilters(filters)
-    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  const handleFiltersChange = useCallback(
+    (newFilters: SandboxFilters) => {
+      setFilters(newFilters)
+      resetCursor()
+    },
+    [resetCursor],
+  )
 
   // Sorting
 
   const [sorting, setSorting] = useState<SandboxSorting>(DEFAULT_SANDBOX_SORTING)
 
-  const handleSortingChange = useCallback((sorting: SandboxSorting) => {
-    setSorting(sorting)
-    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  const handleSortingChange = useCallback(
+    (newSorting: SandboxSorting) => {
+      setSorting(newSorting)
+      resetCursor()
+    },
+    [resetCursor],
+  )
 
   // Sandboxes Data
 
   const queryParams = useMemo<SandboxQueryParams>(
     () => ({
-      page: paginationParams.pageIndex + 1, // 1-indexed
-      pageSize: paginationParams.pageSize,
+      cursor: cursor,
+      limit: pageSize,
       filters: filters,
       sorting: sorting,
     }),
-    [paginationParams, filters, sorting],
+    [cursor, pageSize, filters, sorting],
   )
 
   const baseQueryKey = useMemo<QueryKey>(
@@ -177,13 +210,10 @@ const Sandboxes: React.FC = () => {
   // Go to previous page if there are no items on the current page
 
   useEffect(() => {
-    if (sandboxesData?.items.length === 0 && paginationParams.pageIndex > 0) {
-      setPaginationParams((prev) => ({
-        ...prev,
-        pageIndex: prev.pageIndex - 1,
-      }))
+    if (sandboxesData?.items.length === 0 && cursorHistory.length > 0) {
+      handlePreviousPage()
     }
-  }, [sandboxesData?.items.length, paginationParams.pageIndex])
+  }, [sandboxesData?.items.length, cursorHistory.length, handlePreviousPage])
 
   // Ephemeral Sandbox States
 
@@ -310,7 +340,7 @@ const Sandboxes: React.FC = () => {
 
   useEffect(() => {
     const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
-      const isFirstPage = paginationParams.pageIndex === 0
+      const isFirstPage = cursor === undefined
       const isDefaultFilters = Object.keys(filters).length === 0
       const isDefaultSorting =
         sorting.field === DEFAULT_SANDBOX_SORTING.field && sorting.direction === DEFAULT_SANDBOX_SORTING.direction
@@ -380,10 +410,10 @@ const Sandboxes: React.FC = () => {
       notificationSocket.off('sandbox.desired-state.updated', handleSandboxDesiredStateUpdatedEvent)
     }
   }, [
+    cursor,
     filters,
     markAllSandboxQueriesAsStale,
     notificationSocket,
-    paginationParams.pageIndex,
     performSandboxStateOptimisticUpdate,
     sorting.direction,
     sorting.field,
@@ -966,13 +996,12 @@ const Sandboxes: React.FC = () => {
             setSelectedSandbox(sandbox)
             setShowSandboxDetails(true)
           }}
-          pageCount={sandboxesData?.totalPages || 0}
-          totalItems={sandboxesData?.total || 0}
-          onPaginationChange={handlePaginationChange}
-          pagination={{
-            pageIndex: paginationParams.pageIndex,
-            pageSize: paginationParams.pageSize,
-          }}
+          pageSize={pageSize}
+          hasNextPage={!!sandboxesData?.nextCursor}
+          hasPreviousPage={cursorHistory.length > 0}
+          onNextPage={() => handleNextPage(sandboxesData?.nextCursor ?? null)}
+          onPreviousPage={handlePreviousPage}
+          onPageSizeChange={handlePageSizeChange}
           sorting={sorting}
           onSortingChange={handleSortingChange}
           filters={filters}
