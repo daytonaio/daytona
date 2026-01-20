@@ -195,6 +195,18 @@ func GetSSHTunnelTransport(sshHost, sshKeyPath string) *http.Transport {
 	return transport
 }
 
+// GetLocalTransport returns an http.Transport for local mode (no SSH tunneling)
+// This is used when the runner is on the same machine as Cloud Hypervisor
+// and can directly connect to VMs without going through SSH
+func GetLocalTransport() *http.Transport {
+	return &http.Transport{
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   10,
+		IdleConnTimeout:       90 * time.Second,
+		ResponseHeaderTimeout: 30 * time.Second,
+	}
+}
+
 // getFallbackTransport returns a transport that uses ssh -W per request
 // This is slower but works as a fallback
 func getFallbackTransport(sshHost, sshKeyPath string) *http.Transport {

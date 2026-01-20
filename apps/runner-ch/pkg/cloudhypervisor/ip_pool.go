@@ -64,7 +64,7 @@ func (p *IPPool) Initialize(ctx context.Context) error {
 	for _, sandboxId := range sandboxes {
 		// Check if sandbox has stored IP
 		ipFilePath := filepath.Join(p.client.config.SandboxesPath, sandboxId, "ip")
-		output, err := p.client.runSSHCommand(ctx, fmt.Sprintf("cat %s 2>/dev/null", ipFilePath))
+		output, err := p.client.runShellScript(ctx, fmt.Sprintf("cat %s 2>/dev/null", ipFilePath))
 		if err != nil {
 			continue
 		}

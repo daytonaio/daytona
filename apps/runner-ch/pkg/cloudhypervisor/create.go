@@ -198,7 +198,7 @@ func (c *Client) createDiskBatched(ctx context.Context, opts CreateOptions) (str
 			`echo "CREATED"`,
 		diskPath, baseImage, sandboxDir, baseImage, diskPath, opts.StorageGB)
 
-	output, err := c.runSSHCommand(ctx, batchCmd)
+	output, err := c.runShellScript(ctx, batchCmd)
 	output = strings.TrimSpace(output)
 
 	if err != nil {
@@ -600,7 +600,7 @@ func (c *Client) GetSandboxInfo(ctx context.Context, sandboxId string) (*Sandbox
 		}
 	}
 
-	// Get IP from pool (instant lookup, no SSH)
+	// Get IP from pool (instant lookup)
 	if ip := c.ipPool.Get(sandboxId); ip != "" {
 		info.IpAddress = ip
 	} else if ip := GetIPCache().Get(sandboxId); ip != "" {
@@ -609,7 +609,7 @@ func (c *Client) GetSandboxInfo(ctx context.Context, sandboxId string) (*Sandbox
 	} else {
 		// Last resort: try to read from stored file
 		ipFilePath := filepath.Join(c.getSandboxDir(sandboxId), "ip")
-		if output, err := c.runSSHCommand(ctx, fmt.Sprintf("cat %s 2>/dev/null", ipFilePath)); err == nil {
+		if output, err := c.runShellScript(ctx, fmt.Sprintf("cat %s 2>/dev/null", ipFilePath)); err == nil {
 			if ip := strings.TrimSpace(output); ip != "" {
 				info.IpAddress = ip
 				GetIPCache().Set(sandboxId, ip)

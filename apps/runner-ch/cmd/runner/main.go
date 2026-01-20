@@ -25,6 +25,7 @@ import (
 	"github.com/daytonaio/runner-ch/pkg/runner/v2/executor"
 	"github.com/daytonaio/runner-ch/pkg/runner/v2/healthcheck"
 	"github.com/daytonaio/runner-ch/pkg/runner/v2/poller"
+	"github.com/daytonaio/runner-ch/pkg/sshgateway"
 	"github.com/joho/godotenv"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -191,6 +192,17 @@ func main() {
 		log.Info("Healthcheck service started")
 	} else {
 		log.Warn("No Daytona API URL configured - running in standalone mode (no job polling or healthcheck)")
+	}
+
+	// Start SSH gateway if enabled
+	if sshgateway.IsSSHGatewayEnabled() {
+		sshGatewayService := sshgateway.NewService(chClient)
+		go func() {
+			// Note: Start() logs "SSH Gateway listening on port X" on success
+			if err := sshGatewayService.Start(ctx); err != nil {
+				log.Errorf("SSH Gateway error: %v", err)
+			}
+		}()
 	}
 
 	log.Info("Runner is ready!")

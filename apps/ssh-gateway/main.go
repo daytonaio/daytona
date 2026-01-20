@@ -259,33 +259,35 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, runnerDomain string, token string, sandboxId string) {
 	log.Printf("New channel: %s for runner: %s", newChannel.ChannelType(), runnerID)
 
-	// Accept the channel from the client
+	// Use the loaded private key instead of fetching from API
+	signer := g.privateKey
+
+	// First, try to connect to the runner BEFORE accepting the channel
+	// This allows us to reject with a proper error message if runner is unreachable
+	runnerConn, err := g.connectToRunner(sandboxId, runnerDomain, signer)
+	if err != nil {
+		log.Printf("Failed to connect to runner: %v", err)
+		newChannel.Reject(ssh.ConnectionFailed, fmt.Sprintf("could not connect to runner: %v", err))
+		return
+	}
+	defer runnerConn.Close()
+
+	// Open channel to the runner before accepting client channel
+	runnerChannel, runnerRequests, err := runnerConn.OpenChannel(newChannel.ChannelType(), newChannel.ExtraData())
+	if err != nil {
+		log.Printf("Failed to open channel to runner: %v", err)
+		newChannel.Reject(ssh.ConnectionFailed, fmt.Sprintf("could not open channel to runner: %v", err))
+		return
+	}
+	defer runnerChannel.Close()
+
+	// Now accept the client channel since we know runner is reachable
 	clientChannel, clientRequests, err := newChannel.Accept()
 	if err != nil {
 		log.Printf("Could not accept client channel: %v", err)
 		return
 	}
 	defer clientChannel.Close()
-
-	// Use the loaded private key instead of fetching from API
-	signer := g.privateKey
-
-	// Connect to the runner's SSH gateway
-	runnerConn, err := g.connectToRunner(sandboxId, runnerDomain, signer)
-	if err != nil {
-		log.Printf("Failed to connect to runner: %v", err)
-		clientChannel.Close()
-		return
-	}
-	defer runnerConn.Close()
-
-	// Open channel to the runner
-	runnerChannel, runnerRequests, err := runnerConn.OpenChannel(newChannel.ChannelType(), newChannel.ExtraData())
-	if err != nil {
-		log.Printf("Failed to open channel to runner: %v", err)
-		return
-	}
-	defer runnerChannel.Close()
 
 	// Forward requests from client to runner
 	go func() {

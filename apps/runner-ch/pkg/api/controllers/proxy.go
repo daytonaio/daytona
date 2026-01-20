@@ -51,8 +51,8 @@ func ProxyRequest(ctx *gin.Context) {
 		return // Error already set in context
 	}
 
-	// Use SSH tunnel for proxying since VMs are on remote CH host
-	proxyWithSSHTunnel(ctx, r.CHClient, target)
+	// Use appropriate transport based on local/remote mode
+	proxyWithTransport(ctx, r.CHClient, target)
 }
 
 // ProxyToPort handles proxying requests to applications on specific ports in the sandbox
@@ -102,13 +102,21 @@ func ProxyToPort(ctx *gin.Context) {
 		return // Error already set in context
 	}
 
-	// Use SSH tunnel for proxying since VMs are on remote CH host
-	proxyWithSSHTunnel(ctx, r.CHClient, target)
+	// Use appropriate transport based on local/remote mode
+	proxyWithTransport(ctx, r.CHClient, target)
 }
 
-// proxyWithSSHTunnel proxies requests through an SSH tunnel to the VM
-func proxyWithSSHTunnel(ctx *gin.Context, client *cloudhypervisor.Client, target *url.URL) {
-	transport := cloudhypervisor.GetSSHTunnelTransport(client.SSHHost, client.SSHKeyPath)
+// proxyWithTransport proxies requests to the VM using the appropriate transport
+// In remote mode, it uses SSH tunnel; in local mode, it connects directly
+func proxyWithTransport(ctx *gin.Context, client *cloudhypervisor.Client, target *url.URL) {
+	var transport *http.Transport
+	if client.IsRemote() {
+		// Remote mode: use SSH tunnel
+		transport = cloudhypervisor.GetSSHTunnelTransport(client.SSHHost, client.SSHKeyPath)
+	} else {
+		// Local mode: connect directly to VMs
+		transport = cloudhypervisor.GetLocalTransport()
+	}
 
 	reverseProxy := &httputil.ReverseProxy{
 		Director: func(req *http.Request) {

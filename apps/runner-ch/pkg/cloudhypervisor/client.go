@@ -932,3 +932,22 @@ func (c *Client) runSSHCommand(ctx context.Context, command string) (string, err
 	}
 	return string(output), nil
 }
+
+// runShellScript executes a shell script either locally or remotely via SSH
+// This is the preferred method for executing complex shell scripts that need to work
+// in both local and remote modes. It handles the mode detection automatically.
+func (c *Client) runShellScript(ctx context.Context, script string) (string, error) {
+	if c.IsRemote() {
+		return c.runSSHCommand(ctx, script)
+	}
+
+	// Local mode: execute directly via /bin/sh
+	cmd := exec.CommandContext(ctx, "/bin/sh", "-c", script)
+	log.Debugf("Running local shell script: %s", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Warnf("Local shell script failed: err=%v, output=%s", err, string(output))
+		return string(output), fmt.Errorf("shell script failed: %w (output: %s)", err, string(output))
+	}
+	return string(output), nil
+}

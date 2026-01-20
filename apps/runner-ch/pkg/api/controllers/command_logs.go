@@ -31,20 +31,27 @@ func ProxyCommandLogsStream(ctx *gin.Context) {
 
 	if ctx.Query("follow") != "true" {
 		// Non-streaming request, use regular proxy
-		proxyWithSSHTunnel(ctx, r.CHClient, targetURL)
+		proxyWithTransport(ctx, r.CHClient, targetURL)
 		return
 	}
 
-	// For streaming, we need to handle WebSocket through SSH tunnel
-	// This requires dialing through the SOCKS proxy
+	// For streaming, we need to handle WebSocket
+	// In remote mode, this goes through SSH tunnel; in local mode, it connects directly
 	fullTargetURL := strings.Replace(targetURL.String(), "http://", "ws://", 1)
 
-	// Create WebSocket dialer that uses SSH tunnel
-	transport := cloudhypervisor.GetSSHTunnelTransport(r.CHClient.SSHHost, r.CHClient.SSHKeyPath)
-	dialer := websocket.Dialer{
-		NetDialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			return transport.DialContext(ctx, network, addr)
-		},
+	// Create WebSocket dialer using appropriate transport
+	var dialer websocket.Dialer
+	if r.CHClient.IsRemote() {
+		// Remote mode: use SSH tunnel
+		transport := cloudhypervisor.GetSSHTunnelTransport(r.CHClient.SSHHost, r.CHClient.SSHKeyPath)
+		dialer = websocket.Dialer{
+			NetDialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				return transport.DialContext(ctx, network, addr)
+			},
+		}
+	} else {
+		// Local mode: use default dialer (direct connection)
+		dialer = *websocket.DefaultDialer
 	}
 
 	ws, _, err := dialer.DialContext(context.Background(), fullTargetURL+"?follow=true", nil)
