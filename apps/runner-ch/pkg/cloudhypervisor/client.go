@@ -29,9 +29,11 @@ type ClientConfig struct {
 	SnapshotsPath string
 	// SocketsPath is the directory for API sockets
 	SocketsPath string
-	// KernelPath is the path to the vmlinux kernel
+	// KernelPath is the path to the vmlinuz kernel (bzImage format)
 	KernelPath string
-	// FirmwarePath is the path to hypervisor-fw
+	// InitramfsPath is the path to the initramfs/initrd
+	InitramfsPath string
+	// FirmwarePath is the path to hypervisor-fw (fallback, not recommended)
 	FirmwarePath string
 	// BaseImagePath is the path to the base disk image
 	BaseImagePath string
@@ -49,6 +51,10 @@ type ClientConfig struct {
 	TapCreateScript string
 	// TapDeleteScript is the path to the TAP deletion script
 	TapDeleteScript string
+	// TapPoolEnabled enables pre-created TAP pool for faster VM creation
+	TapPoolEnabled bool
+	// TapPoolSize is the number of TAPs to keep ready in the pool
+	TapPoolSize int
 }
 
 // Client is a Cloud Hypervisor API client
@@ -58,6 +64,13 @@ type Client struct {
 	httpMutex    sync.RWMutex
 	sandboxMutex map[string]*sync.Mutex
 	sandboxMuMu  sync.Mutex
+	tapPool      *TapPool
+	ipPool       *IPPool
+
+	// SSHHost is the remote host for SSH-based operations (exported for proxy)
+	SSHHost string
+	// SSHKeyPath is the path to the SSH private key (exported for proxy)
+	SSHKeyPath string
 }
 
 // NewClient creates a new Cloud Hypervisor client
@@ -73,13 +86,16 @@ func NewClient(config ClientConfig) (*Client, error) {
 		config.SocketsPath = "/var/run/cloud-hypervisor"
 	}
 	if config.KernelPath == "" {
-		config.KernelPath = "/var/lib/cloud-hypervisor/kernels/vmlinux"
+		config.KernelPath = "/var/lib/cloud-hypervisor/kernels/vmlinuz-6.8.0-90-generic"
+	}
+	if config.InitramfsPath == "" {
+		config.InitramfsPath = "/var/lib/cloud-hypervisor/kernels/initrd.img-6.8.0-90-generic"
 	}
 	if config.FirmwarePath == "" {
 		config.FirmwarePath = "/var/lib/cloud-hypervisor/firmware/hypervisor-fw"
 	}
 	if config.BaseImagePath == "" {
-		config.BaseImagePath = "/var/lib/cloud-hypervisor/images/ubuntu-24.04-server-cloudimg-amd64.img"
+		config.BaseImagePath = "/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1.qcow2"
 	}
 	if config.DefaultCpus == 0 {
 		config.DefaultCpus = 2
@@ -101,6 +117,8 @@ func NewClient(config ClientConfig) (*Client, error) {
 		config:       config,
 		httpClients:  make(map[string]*http.Client),
 		sandboxMutex: make(map[string]*sync.Mutex),
+		SSHHost:      config.SSHHost,
+		SSHKeyPath:   config.SSHKeyPath,
 	}
 
 	// Ensure directories exist
@@ -108,7 +126,39 @@ func NewClient(config ClientConfig) (*Client, error) {
 		return nil, fmt.Errorf("failed to ensure directories: %w", err)
 	}
 
+	// Initialize TAP pool
+	c.tapPool = NewTapPool(c, TapPoolConfig{
+		Enabled:    config.TapPoolEnabled,
+		Size:       config.TapPoolSize,
+		BridgeName: config.BridgeName,
+	})
+
+	// Initialize IP pool
+	c.ipPool = NewIPPool(c)
+
 	return c, nil
+}
+
+// InitializeIPPool loads existing IP allocations from sandbox directories
+func (c *Client) InitializeIPPool(ctx context.Context) error {
+	return c.ipPool.Initialize(ctx)
+}
+
+// GetIPPool returns the IP pool
+func (c *Client) GetIPPool() *IPPool {
+	return c.ipPool
+}
+
+// StartTapPool starts the TAP pool background service
+func (c *Client) StartTapPool(ctx context.Context) error {
+	return c.tapPool.Start(ctx)
+}
+
+// StopTapPool stops the TAP pool and cleans up
+func (c *Client) StopTapPool() {
+	if c.tapPool != nil {
+		c.tapPool.Stop()
+	}
 }
 
 // ensureDirectories creates required directories
@@ -150,8 +200,24 @@ func (c *Client) getSandboxDir(sandboxId string) string {
 }
 
 // getDiskPath returns the disk image path for a sandbox
+// Supports both qcow2 (new) and raw (legacy) formats
 func (c *Client) getDiskPath(sandboxId string) string {
-	return filepath.Join(c.getSandboxDir(sandboxId), "disk.raw")
+	sandboxDir := c.getSandboxDir(sandboxId)
+	// Prefer qcow2 (new format), fall back to raw (legacy)
+	qcow2Path := filepath.Join(sandboxDir, "disk.qcow2")
+	rawPath := filepath.Join(sandboxDir, "disk.raw")
+
+	// Check if qcow2 exists (quick local check, for remote we default to qcow2)
+	if !c.IsRemote() {
+		if _, err := os.Stat(qcow2Path); err == nil {
+			return qcow2Path
+		}
+		if _, err := os.Stat(rawPath); err == nil {
+			return rawPath
+		}
+	}
+	// Default to qcow2 for new sandboxes
+	return qcow2Path
 }
 
 // getConfigPath returns the config JSON path for a sandbox
@@ -166,10 +232,11 @@ func (c *Client) getSnapshotPath(sandboxId string) string {
 
 // getTapName returns the TAP device name for a sandbox
 func (c *Client) getTapName(sandboxId string) string {
-	// Use first 12 chars of sandbox ID for tap name (Linux limit is 15 chars)
+	// Linux interface names are limited to 15 chars (IFNAMSIZ-1)
+	// With "tap-" prefix (4 chars), we can use 11 chars from sandbox ID
 	name := sandboxId
-	if len(name) > 12 {
-		name = name[:12]
+	if len(name) > 11 {
+		name = name[:11]
 	}
 	return fmt.Sprintf("tap-%s", name)
 }
@@ -372,33 +439,37 @@ func (c *Client) apiRequestRemote(ctx context.Context, sandboxId, socketPath, me
 	return []byte(output), nil
 }
 
-// createVmRemote creates a VM on a remote host by writing config to a temp file
+// createVmRemote creates a VM on a remote host by piping config directly to ch-remote
 func (c *Client) createVmRemote(ctx context.Context, socketPath string, body interface{}) ([]byte, error) {
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal VM config: %w", err)
 	}
 
-	// Write config to temp file on remote host, then use ch-remote to create
+	// Single SSH call: write config + create VM in one command
+	// Use process substitution or temp file approach combined
 	tmpConfig := fmt.Sprintf("/tmp/ch-config-%d.json", time.Now().UnixNano())
 
-	// Write the config file
-	if err := c.writeFile(ctx, tmpConfig, jsonBody); err != nil {
-		return nil, fmt.Errorf("failed to write config file: %w", err)
-	}
+	// Combine write + create + cleanup into single SSH call
+	// This reduces from 2 SSH round-trips to 1
+	cmd := exec.CommandContext(ctx, "ssh",
+		"-i", c.config.SSHKeyPath,
+		"-o", "StrictHostKeyChecking=accept-new",
+		"-o", "BatchMode=yes",
+		c.config.SSHHost,
+		fmt.Sprintf("cat > %s && ch-remote --api-socket %s create %s; ret=$?; rm -f %s; exit $ret",
+			tmpConfig, socketPath, tmpConfig, tmpConfig),
+	)
+	cmd.Stdin = bytes.NewReader(jsonBody)
 
-	// Create VM using the config file
-	cmdStr := fmt.Sprintf("ch-remote --api-socket %s create %s && rm -f %s", socketPath, tmpConfig, tmpConfig)
-	log.Debugf("Executing ch-remote create: %s", cmdStr)
+	log.Debugf("Executing ch-remote create (single SSH): socket=%s", socketPath)
 
-	output, err := c.runCommandOutput(ctx, "sh", "-c", cmdStr)
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		// Clean up temp file on failure
-		_ = c.runCommand(ctx, "rm", "-f", tmpConfig)
-		return nil, fmt.Errorf("ch-remote create failed: %w (output: %s)", err, output)
+		return nil, fmt.Errorf("ch-remote create failed: %w (output: %s)", err, string(output))
 	}
 
-	return []byte(output), nil
+	return output, nil
 }
 
 // mapEndpointToChRemote maps CH API endpoints to ch-remote CLI commands

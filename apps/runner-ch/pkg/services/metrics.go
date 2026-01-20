@@ -78,10 +78,12 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 		s.collectRemoteSystemMetrics(ctx, metrics)
 	}
 
-	// Get snapshot count
-	snapshots, err := s.chClient.ListSnapshots(ctx)
+	// Get snapshot count with timeout
+	snapshotCtx, snapshotCancel := context.WithTimeout(ctx, 3*time.Second)
+	defer snapshotCancel()
+	snapshots, err := s.chClient.ListSnapshots(snapshotCtx)
 	if err != nil {
-		log.Errorf("Error getting snapshot count: %v", err)
+		log.Warnf("Error getting snapshot count: %v", err)
 	} else {
 		metrics.SnapshotCount = int64(len(snapshots))
 	}
@@ -204,32 +206,59 @@ func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMet
 }
 
 func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *models.SystemMetrics) {
-	sandboxes, err := s.chClient.List(ctx)
+	// Use a shorter timeout for this operation
+	listCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	sandboxes, err := s.chClient.List(listCtx)
 	if err != nil {
-		log.Errorf("Error listing sandboxes when getting allocated resources: %v", err)
+		log.Warnf("Error listing sandboxes when getting allocated resources: %v", err)
 		return
+	}
+
+	// Collect sandbox info in parallel with individual timeouts
+	type sandboxResult struct {
+		info *cloudhypervisor.SandboxInfo
+		err  error
+	}
+
+	results := make(chan sandboxResult, len(sandboxes))
+
+	for _, sandboxId := range sandboxes {
+		go func(id string) {
+			// Short timeout per sandbox
+			infoCtx, infoCancel := context.WithTimeout(ctx, 3*time.Second)
+			defer infoCancel()
+
+			info, err := s.chClient.GetSandboxInfo(infoCtx, id)
+			results <- sandboxResult{info: info, err: err}
+		}(sandboxId)
 	}
 
 	var totalAllocatedCPU int64 = 0
 	var totalAllocatedMemoryGiB int64 = 0
 	var totalAllocatedDiskGB int64 = 0
 
-	for _, sandboxId := range sandboxes {
-		info, err := s.chClient.GetSandboxInfo(ctx, sandboxId)
-		if err != nil {
-			log.Errorf("Error getting info for sandbox %s: %v", sandboxId, err)
-			continue
+	// Collect results
+	for i := 0; i < len(sandboxes); i++ {
+		select {
+		case result := <-results:
+			if result.err != nil {
+				// Don't log every error, just count disk
+				totalAllocatedDiskGB += 20 // Default 20GB per sandbox even on error
+				continue
+			}
+			if result.info != nil {
+				// Only count running sandboxes for CPU and memory
+				if result.info.State == cloudhypervisor.VmStateRunning {
+					totalAllocatedCPU += int64(result.info.Vcpus)
+					totalAllocatedMemoryGiB += int64(result.info.MemoryMB / 1024) // Convert MB to GiB
+				}
+				totalAllocatedDiskGB += 20 // Default 20GB per sandbox
+			}
+		case <-ctx.Done():
+			return
 		}
-
-		// Only count running sandboxes for CPU and memory
-		if info.State == cloudhypervisor.VmStateRunning {
-			totalAllocatedCPU += int64(info.Vcpus)
-			totalAllocatedMemoryGiB += int64(info.MemoryMB / 1024) // Convert MB to GiB
-		}
-
-		// Count disk for all sandboxes (running and stopped)
-		// Estimate disk based on default or stored metadata
-		totalAllocatedDiskGB += 20 // Default 20GB per sandbox
 	}
 
 	metrics.AllocatedCPU = totalAllocatedCPU

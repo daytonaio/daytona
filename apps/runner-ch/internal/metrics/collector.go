@@ -8,6 +8,7 @@ package metrics
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/daytonaio/runner-ch/pkg/cloudhypervisor"
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -157,41 +158,80 @@ func (c *Collector) collectAllocatedResources(ctx context.Context, metrics *Metr
 		return
 	}
 
+	// Use a short timeout for listing sandboxes
+	listCtx, listCancel := context.WithTimeout(ctx, 3*time.Second)
+	defer listCancel()
+
 	// Get list of sandboxes
-	sandboxes, err := c.chClient.List(ctx)
+	sandboxes, err := c.chClient.List(listCtx)
 	if err != nil {
 		c.log.Warn("Failed to list sandboxes for allocated resources", slog.Any("error", err))
 		return
+	}
+
+	// Collect sandbox info in parallel with individual timeouts
+	type sandboxResult struct {
+		info *cloudhypervisor.SandboxInfo
+		err  error
+	}
+
+	results := make(chan sandboxResult, len(sandboxes))
+
+	for _, sandboxId := range sandboxes {
+		go func(id string) {
+			// Short timeout per sandbox (2 seconds)
+			infoCtx, infoCancel := context.WithTimeout(ctx, 2*time.Second)
+			defer infoCancel()
+
+			info, err := c.chClient.GetSandboxInfo(infoCtx, id)
+			results <- sandboxResult{info: info, err: err}
+		}(sandboxId)
 	}
 
 	var totalAllocatedCPU float32 = 0
 	var totalAllocatedMemoryGiB float32 = 0
 	var totalAllocatedDiskGiB float32 = 0
 
-	for _, sandboxId := range sandboxes {
-		info, err := c.chClient.GetSandboxInfo(ctx, sandboxId)
-		if err != nil {
-			c.log.Warn("Failed to get sandbox info", slog.String("sandbox", sandboxId), slog.Any("error", err))
-			continue
+	// Collect results with overall timeout
+	collectTimeout := time.After(5 * time.Second)
+	collected := 0
+	for collected < len(sandboxes) {
+		select {
+		case result := <-results:
+			collected++
+			if result.err != nil {
+				// Still count disk for failed sandboxes
+				totalAllocatedDiskGiB += 20
+				continue
+			}
+			if result.info != nil {
+				// Only count running sandboxes for CPU and memory
+				if result.info.State == cloudhypervisor.VmStateRunning {
+					totalAllocatedCPU += float32(result.info.Vcpus)
+					totalAllocatedMemoryGiB += float32(result.info.MemoryMB) / 1024 // Convert MB to GiB
+				}
+				totalAllocatedDiskGiB += 20
+			}
+		case <-collectTimeout:
+			c.log.Warn("Timeout collecting sandbox info, using partial results")
+			// Count remaining sandboxes as just disk
+			remaining := len(sandboxes) - collected
+			totalAllocatedDiskGiB += float32(remaining * 20)
+			goto done
+		case <-ctx.Done():
+			return
 		}
-
-		// Only count running sandboxes for CPU and memory
-		if info.State == cloudhypervisor.VmStateRunning {
-			totalAllocatedCPU += float32(info.Vcpus)
-			totalAllocatedMemoryGiB += float32(info.MemoryMB) / 1024 // Convert MB to GiB
-		}
-
-		// Count disk for all sandboxes (running and stopped)
-		// Default 20GB per sandbox
-		totalAllocatedDiskGiB += 20
 	}
+done:
 
 	metrics.AllocatedCPU = totalAllocatedCPU
 	metrics.AllocatedMemoryGiB = totalAllocatedMemoryGiB
 	metrics.AllocatedDiskGiB = totalAllocatedDiskGiB
 
-	// Get snapshot count
-	snapshots, err := c.chClient.ListSnapshots(ctx)
+	// Get snapshot count with timeout
+	snapshotCtx, snapshotCancel := context.WithTimeout(ctx, 2*time.Second)
+	defer snapshotCancel()
+	snapshots, err := c.chClient.ListSnapshots(snapshotCtx)
 	if err != nil {
 		c.log.Warn("Failed to list snapshots", slog.Any("error", err))
 	} else {

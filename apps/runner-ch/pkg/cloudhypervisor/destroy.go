@@ -19,6 +19,10 @@ func (c *Client) Destroy(ctx context.Context, sandboxId string) error {
 
 	log.Infof("Destroying sandbox %s", sandboxId)
 
+	// Release IP back to pool
+	c.ipPool.Release(sandboxId)
+	GetIPCache().Delete(sandboxId)
+
 	socketPath := c.getSocketPath(sandboxId)
 	socketExists, _ := c.fileExists(ctx, socketPath)
 
@@ -51,10 +55,16 @@ func (c *Client) Destroy(ctx context.Context, sandboxId string) error {
 		log.Warnf("Failed to kill VM process: %v", err)
 	}
 
-	// Delete TAP interface
-	tapName := c.getTapName(sandboxId)
-	if err := c.deleteTapInterface(ctx, tapName); err != nil {
-		log.Warnf("Failed to delete TAP interface: %v", err)
+	// Release TAP interface (back to pool or delete)
+	if c.tapPool.IsEnabled() {
+		if err := c.tapPool.Release(ctx, sandboxId); err != nil {
+			log.Warnf("Failed to release TAP to pool: %v", err)
+		}
+	} else {
+		tapName := c.getTapName(sandboxId)
+		if err := c.deleteTapInterface(ctx, tapName); err != nil {
+			log.Warnf("Failed to delete TAP interface: %v", err)
+		}
 	}
 
 	// Remove sandbox directory

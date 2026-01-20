@@ -51,6 +51,7 @@ func main() {
 		SnapshotsPath:   cfg.CHSnapshotsPath,
 		SocketsPath:     cfg.CHSocketsPath,
 		KernelPath:      cfg.CHKernelPath,
+		InitramfsPath:   cfg.CHInitramfsPath,
 		FirmwarePath:    cfg.CHFirmwarePath,
 		BaseImagePath:   cfg.CHBaseImagePath,
 		DefaultCpus:     cfg.CHDefaultCpus,
@@ -60,11 +61,23 @@ func main() {
 		BridgeName:      cfg.CHBridgeName,
 		TapCreateScript: cfg.CHTapCreateScript,
 		TapDeleteScript: cfg.CHTapDeleteScript,
+		TapPoolEnabled:  cfg.TapPoolEnabled,
+		TapPoolSize:     cfg.TapPoolSize,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create Cloud Hypervisor client: %v", err)
 	}
 	defer chClient.Close()
+
+	// Start TAP pool if enabled
+	if cfg.TapPoolEnabled {
+		if err := chClient.StartTapPool(ctx); err != nil {
+			log.Warnf("Failed to start TAP pool: %v", err)
+		} else {
+			log.Infof("TAP pool started (size=%d)", cfg.TapPoolSize)
+		}
+		defer chClient.StopTapPool()
+	}
 
 	log.Info("Cloud Hypervisor runner started")
 	log.Infof("Configuration:")
@@ -72,12 +85,19 @@ func main() {
 	log.Infof("  Snapshots path: %s", cfg.CHSnapshotsPath)
 	log.Infof("  Sockets path: %s", cfg.CHSocketsPath)
 	log.Infof("  Kernel path: %s", cfg.CHKernelPath)
+	log.Infof("  Initramfs path: %s", cfg.CHInitramfsPath)
 	log.Infof("  Base image: %s", cfg.CHBaseImagePath)
 	log.Infof("  Bridge: %s", cfg.CHBridgeName)
 	if cfg.CHSSHHost != "" {
 		log.Infof("  Remote mode: SSH to %s", cfg.CHSSHHost)
 	} else {
 		log.Infof("  Local mode")
+	}
+
+	// Initialize IP pool (loads existing allocations)
+	log.Info("Initializing IP pool...")
+	if err := chClient.InitializeIPPool(ctx); err != nil {
+		log.Warnf("Failed to initialize IP pool: %v", err)
 	}
 
 	// List existing sandboxes

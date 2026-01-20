@@ -377,30 +377,7 @@ func GetMemoryStatsView(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "Memory stats view not implemented for Cloud Hypervisor runner")
 }
 
-// ProxyRequest proxies requests to the sandbox toolbox
-// @Summary		Proxy to toolbox
-// @Description	Proxies requests to the sandbox's toolbox daemon
-// @Tags			sandboxes
-// @Param			sandboxId	path	string	true	"Sandbox ID"
-// @Param			path		path	string	true	"Path"
-// @Router			/sandboxes/{sandboxId}/toolbox/{path} [get]
-func ProxyRequest(ctx *gin.Context) {
-	// TODO: Implement toolbox proxy
-	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "Toolbox proxy not yet implemented"})
-}
-
-// ProxyToPort proxies requests to a specific port in the sandbox
-// @Summary		Proxy to port
-// @Description	Proxies requests to a specific port in the sandbox
-// @Tags			sandboxes
-// @Param			sandboxId	path	string	true	"Sandbox ID"
-// @Param			port		path	int		true	"Port"
-// @Param			path		path	string	true	"Path"
-// @Router			/sandboxes/{sandboxId}/proxy/{port}/{path} [get]
-func ProxyToPort(ctx *gin.Context) {
-	// TODO: Implement port proxy
-	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "Port proxy not yet implemented"})
-}
+// NOTE: ProxyRequest and ProxyToPort are implemented in proxy.go
 
 // PullSnapshot pulls a snapshot from registry
 // @Summary		Pull snapshot

@@ -33,9 +33,10 @@ type Config struct {
 	CHSocketsPath     string `envconfig:"CH_SOCKETS_PATH" default:"/var/run/cloud-hypervisor"`
 	CHSandboxesPath   string `envconfig:"CH_SANDBOXES_PATH" default:"/var/lib/cloud-hypervisor/sandboxes"`
 	CHSnapshotsPath   string `envconfig:"CH_SNAPSHOTS_PATH" default:"/var/lib/cloud-hypervisor/snapshots"`
-	CHKernelPath      string `envconfig:"CH_KERNEL_PATH" default:"/var/lib/cloud-hypervisor/kernels/vmlinux"`
+	CHKernelPath      string `envconfig:"CH_KERNEL_PATH" default:"/var/lib/cloud-hypervisor/kernels/vmlinuz-6.8.0-90-generic"`
+	CHInitramfsPath   string `envconfig:"CH_INITRAMFS_PATH" default:"/var/lib/cloud-hypervisor/kernels/initrd.img-6.8.0-90-generic"`
 	CHFirmwarePath    string `envconfig:"CH_FIRMWARE_PATH" default:"/var/lib/cloud-hypervisor/firmware/hypervisor-fw"`
-	CHBaseImagePath   string `envconfig:"CH_BASE_IMAGE_PATH" default:"/var/lib/cloud-hypervisor/images/ubuntu-24.04-server-cloudimg-amd64.img"`
+	CHBaseImagePath   string `envconfig:"CH_BASE_IMAGE_PATH" default:"/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1.qcow2"`
 	CHBridgeName      string `envconfig:"CH_BRIDGE_NAME" default:"br0"`
 	CHTapCreateScript string `envconfig:"CH_TAP_CREATE_SCRIPT" default:"/usr/local/bin/ch-create-tap"`
 	CHTapDeleteScript string `envconfig:"CH_TAP_DELETE_SCRIPT" default:"/usr/local/bin/ch-delete-tap"`
@@ -48,6 +49,10 @@ type Config struct {
 	CHDefaultCpus     int `envconfig:"CH_DEFAULT_CPUS" default:"2"`
 	CHDefaultMemoryMB int `envconfig:"CH_DEFAULT_MEMORY_MB" default:"2048"`
 	CHDefaultDiskGB   int `envconfig:"CH_DEFAULT_DISK_GB" default:"20"`
+
+	// TAP pool configuration (pre-created TAP interfaces for fast VM creation)
+	TapPoolEnabled bool `envconfig:"TAP_POOL_ENABLED" default:"true"`
+	TapPoolSize    int  `envconfig:"TAP_POOL_SIZE" default:"10"`
 
 	// VM pool configuration (for fast fork)
 	VMPoolEnabled bool `envconfig:"VMPOOL_ENABLED" default:"false"`

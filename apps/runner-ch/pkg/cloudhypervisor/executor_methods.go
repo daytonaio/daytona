@@ -19,7 +19,7 @@ func (c *Client) Create(ctx context.Context, createDto dto.CreateSandboxDTO) (*S
 	opts := CreateOptions{
 		SandboxId:  createDto.Id,
 		Cpus:       int(createDto.CpuQuota),
-		MemoryMB:   uint64(createDto.MemoryQuota),
+		MemoryMB:   uint64(createDto.MemoryQuota * 1024), // MemoryQuota is in GB, convert to MB
 		StorageGB:  int(createDto.StorageQuota),
 		Snapshot:   createDto.Snapshot,
 		GpuDevices: createDto.GpuDevices,
@@ -170,9 +170,12 @@ func (c *Client) CreateSnapshot(ctx context.Context, request dto.CreateSnapshotR
 		return nil, err
 	}
 
-	// Get size of the snapshot
+	// Get size of the snapshot (check qcow2 first, then legacy raw)
 	var sizeBytes int64
-	diskPath := filepath.Join(snapshotPath, "disk.raw")
+	diskPath := filepath.Join(snapshotPath, "disk.qcow2")
+	if exists, _ := c.fileExists(ctx, diskPath); !exists {
+		diskPath = filepath.Join(snapshotPath, "disk.raw")
+	}
 	sizeOutput, err := c.runCommandOutput(ctx, "stat", "-c", "%s", diskPath)
 	if err == nil {
 		fmt.Sscanf(sizeOutput, "%d", &sizeBytes)

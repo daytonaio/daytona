@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -56,31 +57,76 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 		opts.StorageGB = 20
 	}
 
-	// Create sandbox directory
-	sandboxDir := c.getSandboxDir(opts.SandboxId)
-	if err := c.runCommand(ctx, "mkdir", "-p", sandboxDir); err != nil {
-		return nil, fmt.Errorf("failed to create sandbox directory: %w", err)
+	// Enforce minimum memory of 1 GB
+	const minMemoryMB uint64 = 1024
+	if opts.MemoryMB < minMemoryMB {
+		log.Warnf("Memory %d MB is below minimum %d MB, using minimum", opts.MemoryMB, minMemoryMB)
+		opts.MemoryMB = minMemoryMB
 	}
 
-	// Create disk image
-	diskPath, err := c.createDisk(ctx, opts)
+	// Cloud Hypervisor's virtio-mem requires memory to be aligned to 128 MiB
+	// Round up to the nearest 128 MiB (131072 KB = 128 * 1024)
+	const alignmentMB uint64 = 128
+	if opts.MemoryMB%alignmentMB != 0 {
+		opts.MemoryMB = ((opts.MemoryMB / alignmentMB) + 1) * alignmentMB
+		log.Infof("Memory aligned to %d MB (128 MiB boundary)", opts.MemoryMB)
+	}
+
+	// Create sandbox directory and disk in one batched SSH call (for speed)
+	diskPath, err := c.createDiskBatched(ctx, opts)
 	if err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)
 		return nil, fmt.Errorf("failed to create disk: %w", err)
 	}
 
-	// Create TAP interface
-	tapName := c.getTapName(opts.SandboxId)
-	if err := c.createTapInterface(ctx, tapName); err != nil {
+	// Get TAP interface (from pool if enabled, otherwise create)
+	var tapName string
+	if c.tapPool.IsEnabled() {
+		var err error
+		tapName, err = c.tapPool.Acquire(ctx, opts.SandboxId)
+		if err != nil {
+			c.cleanupSandbox(ctx, opts.SandboxId)
+			return nil, fmt.Errorf("failed to acquire TAP from pool: %w", err)
+		}
+		log.Infof("Acquired TAP %s from pool for %s", tapName, opts.SandboxId)
+	} else {
+		tapName = c.getTapName(opts.SandboxId)
+		if err := c.createTapInterface(ctx, tapName); err != nil {
+			c.cleanupSandbox(ctx, opts.SandboxId)
+			return nil, fmt.Errorf("failed to create TAP interface: %w", err)
+		}
+	}
+
+	// Allocate static IP from pool (instant, no DHCP wait)
+	ip, err := c.ipPool.Allocate(opts.SandboxId)
+	if err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)
-		return nil, fmt.Errorf("failed to create TAP interface: %w", err)
+		return nil, fmt.Errorf("failed to allocate IP: %w", err)
+	}
+	log.Infof("Allocated IP %s for sandbox %s", ip, opts.SandboxId)
+
+	// Store IP immediately (no need to wait for DHCP)
+	ipFilePath := filepath.Join(c.getSandboxDir(opts.SandboxId), "ip")
+	c.runCommand(ctx, fmt.Sprintf("echo '%s' > %s", ip, ipFilePath))
+	GetIPCache().Set(opts.SandboxId, ip)
+
+	// Create cloud-init ISO with static IP configuration
+	cloudInitISO, err := c.createCloudInitISO(ctx, opts.SandboxId, CloudInitConfig{
+		IP:       ip,
+		Gateway:  IPPoolGateway,
+		Netmask:  IPPoolNetmask,
+		Hostname: opts.SandboxId[:12], // Use first 12 chars of ID as hostname
+	})
+	if err != nil {
+		log.Warnf("Failed to create cloud-init ISO: %v (VM will use DHCP fallback)", err)
+		cloudInitISO = "" // Continue without cloud-init
 	}
 
 	// Generate MAC address
 	mac := c.generateMAC(opts.SandboxId)
 
 	// Build VM configuration
-	vmConfig := c.buildVmConfig(opts, diskPath, tapName, mac)
+	vmConfig := c.buildVmConfig(opts, diskPath, tapName, mac, cloudInitISO)
 
 	// Write config to file
 	configPath := c.getConfigPath(opts.SandboxId)
@@ -94,16 +140,10 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 		return nil, fmt.Errorf("failed to write VM config: %w", err)
 	}
 
-	// Start Cloud Hypervisor process
-	if err := c.startVMProcess(ctx, opts.SandboxId); err != nil {
+	// Start Cloud Hypervisor process and wait for socket (combined for efficiency)
+	if err := c.startVMProcessAndWait(ctx, opts.SandboxId, 30*time.Second); err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)
-		return nil, fmt.Errorf("failed to start VM process: %w", err)
-	}
-
-	// Wait for API socket to be ready
-	if err := c.waitForSocket(ctx, opts.SandboxId, 30*time.Second); err != nil {
-		c.cleanupSandbox(ctx, opts.SandboxId)
-		return nil, fmt.Errorf("failed to wait for API socket: %w", err)
+		return nil, fmt.Errorf("failed to start VM: %w", err)
 	}
 
 	// Create the VM using the API
@@ -118,12 +158,66 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 		return nil, fmt.Errorf("failed to boot VM: %w", err)
 	}
 
-	log.Infof("Sandbox %s created and booted successfully", opts.SandboxId)
+	log.Infof("Sandbox %s created successfully with IP %s", opts.SandboxId, ip)
 
 	return c.GetSandboxInfo(ctx, opts.SandboxId)
 }
 
-// createDisk creates the disk image for a sandbox
+// waitForIP waits for the VM to obtain an IP address via DHCP
+// createDiskBatched creates sandbox directory and disk image in a single SSH call
+// This reduces SSH connection overhead from ~4 calls to 1 call
+func (c *Client) createDiskBatched(ctx context.Context, opts CreateOptions) (string, error) {
+	sandboxDir := c.getSandboxDir(opts.SandboxId)
+	diskPath := c.getDiskPath(opts.SandboxId)
+
+	var baseImage string
+	if opts.Snapshot != "" {
+		// Use snapshot as base
+		baseImage = filepath.Join(c.config.SnapshotsPath, opts.Snapshot)
+		if !hasImageExtension(baseImage) {
+			baseImage += ".qcow2"
+		}
+	} else {
+		baseImage = c.config.BaseImagePath
+	}
+
+	log.Infof("Creating disk from base image: %s", baseImage)
+
+	// Batch all operations into a single SSH command:
+	// 1. Check if disk already exists (skip if yes)
+	// 2. Check if base image exists (fail if no)
+	// 3. Create sandbox directory
+	// 4. Create qcow2 overlay disk
+	log.Infof("Creating disk: base=%s disk=%s size=%dG", baseImage, diskPath, opts.StorageGB)
+
+	batchCmd := fmt.Sprintf(
+		`if [ -f "%s" ]; then echo "EXISTS"; exit 0; fi; `+
+			`if [ ! -f "%s" ]; then echo "BASE_NOT_FOUND"; exit 1; fi; `+
+			`mkdir -p "%s" && `+
+			`qemu-img create -f qcow2 -F qcow2 -b "%s" "%s" %dG && `+
+			`echo "CREATED"`,
+		diskPath, baseImage, sandboxDir, baseImage, diskPath, opts.StorageGB)
+
+	output, err := c.runSSHCommand(ctx, batchCmd)
+	output = strings.TrimSpace(output)
+
+	if err != nil {
+		if strings.Contains(output, "BASE_NOT_FOUND") {
+			return "", fmt.Errorf("base image not found: %s", baseImage)
+		}
+		return "", fmt.Errorf("failed to create disk: %w (output: %s)", err, output)
+	}
+
+	if strings.Contains(output, "EXISTS") {
+		log.Infof("Disk %s already exists", diskPath)
+	} else {
+		log.Infof("Disk created: %s (qcow2 overlay, %dGB quota)", diskPath, opts.StorageGB)
+	}
+
+	return diskPath, nil
+}
+
+// createDisk creates the disk image for a sandbox (non-batched version for compatibility)
 func (c *Client) createDisk(ctx context.Context, opts CreateOptions) (string, error) {
 	diskPath := c.getDiskPath(opts.SandboxId)
 
@@ -156,39 +250,22 @@ func (c *Client) createDisk(ctx context.Context, opts CreateOptions) (string, er
 
 	log.Infof("Creating disk from base image: %s", baseImage)
 
-	// For Cloud Hypervisor, we create a qcow2 overlay with backing file
-	// This is copy-on-write, so very fast and space-efficient
-	qcowPath := filepath.Join(c.getSandboxDir(opts.SandboxId), "disk.qcow2")
+	// Create sandbox directory first
+	sandboxDir := c.getSandboxDir(opts.SandboxId)
+	if err := c.runCommand(ctx, "mkdir", "-p", sandboxDir); err != nil {
+		return "", fmt.Errorf("failed to create sandbox directory: %w", err)
+	}
 
 	// Create qcow2 overlay with backing file
-	// The backing file format is auto-detected by qemu-img
 	createCmd := fmt.Sprintf("qemu-img create -f qcow2 -F qcow2 -b '%s' '%s' %dG",
-		baseImage, qcowPath, opts.StorageGB)
+		baseImage, diskPath, opts.StorageGB)
 
 	log.Debugf("Running: %s", createCmd)
 	if err := c.runCommand(ctx, "sh", "-c", createCmd); err != nil {
 		return "", fmt.Errorf("failed to create overlay disk: %w", err)
 	}
 
-	// For better CH performance, convert to raw format
-	// This takes longer but gives better runtime performance
-	log.Infof("Converting disk to raw format for better performance")
-	convertCmd := fmt.Sprintf("qemu-img convert -p -O raw '%s' '%s'", qcowPath, diskPath)
-
-	if err := c.runCommand(ctx, "sh", "-c", convertCmd); err != nil {
-		// If conversion fails, keep qcow2 (CH supports both)
-		log.Warnf("Failed to convert to raw (will use qcow2): %v", err)
-		// Rename qcow2 to be the disk path
-		if err := c.runCommand(ctx, "mv", qcowPath, diskPath); err != nil {
-			return "", fmt.Errorf("failed to move qcow2 disk: %w", err)
-		}
-		return diskPath, nil
-	}
-
-	// Remove qcow2 overlay after successful conversion
-	_ = c.runCommand(ctx, "rm", "-f", qcowPath)
-
-	log.Infof("Disk created: %s", diskPath)
+	log.Infof("Disk created: %s (qcow2 overlay, %dGB quota)", diskPath, opts.StorageGB)
 	return diskPath, nil
 }
 
@@ -232,24 +309,39 @@ func (c *Client) generateMAC(sandboxId string) string {
 }
 
 // buildVmConfig creates a VM configuration
-func (c *Client) buildVmConfig(opts CreateOptions, diskPath, tapName, mac string) *VmConfig {
+func (c *Client) buildVmConfig(opts CreateOptions, diskPath, tapName, mac, cloudInitISO string) *VmConfig {
 	// Build payload config
 	// Cloud Hypervisor supports two boot methods:
-	// 1. Firmware boot (hypervisor-fw): boots like a BIOS, works with cloud images
-	// 2. Direct kernel boot: requires PVH-enabled kernel
-	// We use firmware boot by default since it works with standard cloud images
-	payload := &PayloadConfig{
-		Firmware: c.config.FirmwarePath,
+	// 1. Firmware boot (hypervisor-fw): boots like a BIOS, but doesn't set root= properly
+	// 2. Direct kernel boot: requires bzImage kernel + initramfs, works reliably
+	// We use kernel boot by default since firmware boot fails to set root= parameter
+	cmdline := "console=ttyS0 root=LABEL=cloudimg-rootfs rw"
+	if opts.KernelArgs != "" {
+		cmdline += " " + opts.KernelArgs
 	}
 
-	// If kernel path is explicitly provided and KernelArgs are set, use kernel boot
-	if opts.KernelArgs != "" && c.config.KernelPath != "" {
-		cmdline := "console=hvc0 root=/dev/vda1 rw"
-		cmdline += " " + opts.KernelArgs
-		payload = &PayloadConfig{
-			Kernel:  c.config.KernelPath,
-			Cmdline: cmdline,
-		}
+	payload := &PayloadConfig{
+		Kernel:    c.config.KernelPath,
+		Initramfs: c.config.InitramfsPath,
+		Cmdline:   cmdline,
+	}
+
+	// Build disk list
+	// Note: Direct (O_DIRECT) is disabled because it doesn't work properly
+	// with qcow2 files that have backing files. The backing chain reads fail
+	// with O_DIRECT enabled, causing kernel panic "unable to mount root fs".
+	disks := []DiskConfig{
+		{
+			Path: diskPath,
+		},
+	}
+
+	// Add cloud-init ISO as second disk if available
+	if cloudInitISO != "" {
+		disks = append(disks, DiskConfig{
+			Path:     cloudInitISO,
+			Readonly: true,
+		})
 	}
 
 	config := &VmConfig{
@@ -259,17 +351,12 @@ func (c *Client) buildVmConfig(opts CreateOptions, diskPath, tapName, mac string
 			MaxVcpus:  opts.Cpus * 2, // Allow hotplug up to 2x
 		},
 		Memory: &MemoryConfig{
-			Size:          opts.MemoryMB * 1024 * 1024, // Convert MB to bytes
+			Size:          opts.MemoryMB * 1024 * 1024, // Convert MB to bytes (already 128 MiB aligned)
 			HotplugMethod: "VirtioMem",
-			HotplugSize:   ptrUint64(opts.MemoryMB * 1024 * 1024 * 2), // Allow 2x hotplug
+			HotplugSize:   ptrUint64(opts.MemoryMB * 1024 * 1024), // Hotplug pool (128 MiB aligned)
 			Thp:           true,
 		},
-		Disks: []DiskConfig{
-			{
-				Path:   diskPath,
-				Direct: true, // Use O_DIRECT for better performance
-			},
-		},
+		Disks: disks,
 		Net: []NetConfig{
 			{
 				Tap: tapName,
@@ -319,6 +406,7 @@ func (c *Client) startVMProcess(ctx context.Context, sandboxId string) error {
 		cmd := exec.CommandContext(ctx, "ssh",
 			"-i", c.config.SSHKeyPath,
 			"-o", "StrictHostKeyChecking=accept-new",
+			"-o", "BatchMode=yes",
 			c.config.SSHHost,
 			fmt.Sprintf("nohup %s", cmdStr),
 		)
@@ -330,13 +418,95 @@ func (c *Client) startVMProcess(ctx context.Context, sandboxId string) error {
 	return cmd.Run()
 }
 
+// startVMProcessAndWait starts CH process and waits for socket in a single SSH call
+// This saves an SSH round-trip compared to calling startVMProcess + waitForSocket separately
+func (c *Client) startVMProcessAndWait(ctx context.Context, sandboxId string, timeout time.Duration) error {
+	socketPath := c.getSocketPath(sandboxId)
+	logPath := filepath.Join(c.getSandboxDir(sandboxId), "cloud-hypervisor.log")
+	timeoutSec := int(timeout.Seconds())
+
+	log.Infof("Starting cloud-hypervisor process for %s with socket %s", sandboxId, socketPath)
+
+	if c.IsRemote() {
+		// Combined: start CH + wait for socket in one SSH call
+		// This saves ~2-3 seconds of SSH overhead
+		combinedCmd := fmt.Sprintf(`
+# Start cloud-hypervisor in background
+nohup cloud-hypervisor --api-socket %s > %s 2>&1 &
+pid=$!
+
+# Wait for socket with fast polling
+timeout=%d
+elapsed=0
+while [ $elapsed -lt $timeout ]; do
+    if [ -S '%s' ]; then
+        sleep 0.2
+        echo "READY"
+        exit 0
+    fi
+    sleep 0.05
+    elapsed=$((elapsed + 1))
+done
+echo "TIMEOUT"
+kill $pid 2>/dev/null || true
+exit 1
+`, socketPath, logPath, timeoutSec*20, socketPath) // *20 because we sleep 0.05s
+
+		output, err := c.runSSHCommand(ctx, combinedCmd)
+		output = strings.TrimSpace(output)
+
+		if err != nil || strings.Contains(output, "TIMEOUT") {
+			return fmt.Errorf("failed to start CH or timeout waiting for socket: %v (output: %s)", err, output)
+		}
+
+		log.Infof("cloud-hypervisor started and socket ready for %s", sandboxId)
+		return nil
+	}
+
+	// Local mode: start process then wait
+	if err := c.startVMProcess(ctx, sandboxId); err != nil {
+		return fmt.Errorf("failed to start VM process: %w", err)
+	}
+	return c.waitForSocket(ctx, sandboxId, timeout)
+}
+
 // waitForSocket waits for the API socket to be ready
+// Uses remote-side polling to avoid multiple SSH round-trips
 func (c *Client) waitForSocket(ctx context.Context, sandboxId string, timeout time.Duration) error {
 	socketPath := c.getSocketPath(sandboxId)
-	deadline := time.Now().Add(timeout)
+	timeoutSec := int(timeout.Seconds())
 
 	log.Infof("Waiting for API socket %s", socketPath)
 
+	if c.IsRemote() {
+		// Remote polling: single SSH call that polls on the remote side
+		pollCmd := fmt.Sprintf(`
+timeout=%d
+elapsed=0
+while [ $elapsed -lt $timeout ]; do
+    if [ -S '%s' ]; then
+        sleep 0.2
+        echo "READY"
+        exit 0
+    fi
+    sleep 0.05
+    elapsed=$((elapsed + 1))
+done
+echo "TIMEOUT"
+exit 1
+`, timeoutSec*20, socketPath) // *20 because we sleep 0.05s
+
+		output, err := c.runCommandOutput(ctx, "sh", "-c", pollCmd)
+		output = strings.TrimSpace(output)
+
+		if err != nil || strings.Contains(output, "TIMEOUT") {
+			return fmt.Errorf("timeout waiting for socket %s", socketPath)
+		}
+		return nil
+	}
+
+	// Local polling (original logic)
+	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		select {
 		case <-ctx.Done():
@@ -346,8 +516,7 @@ func (c *Client) waitForSocket(ctx context.Context, sandboxId string, timeout ti
 
 		exists, _ := c.fileExists(ctx, socketPath)
 		if exists {
-			// Give it a moment to be fully ready
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 			return nil
 		}
 
@@ -364,9 +533,13 @@ func (c *Client) cleanupSandbox(ctx context.Context, sandboxId string) {
 	// Kill VM process
 	_ = c.killVMProcess(ctx, sandboxId)
 
-	// Delete TAP interface
-	tapName := c.getTapName(sandboxId)
-	_ = c.deleteTapInterface(ctx, tapName)
+	// Release TAP interface (back to pool or delete)
+	if c.tapPool.IsEnabled() {
+		_ = c.tapPool.Release(ctx, sandboxId)
+	} else {
+		tapName := c.getTapName(sandboxId)
+		_ = c.deleteTapInterface(ctx, tapName)
+	}
 
 	// Remove sandbox directory
 	sandboxDir := c.getSandboxDir(sandboxId)
@@ -424,6 +597,23 @@ func (c *Client) GetSandboxInfo(ctx context.Context, sandboxId string) (*Sandbox
 		}
 		if vmInfo.Config.Memory != nil {
 			info.MemoryMB = vmInfo.Config.Memory.Size / (1024 * 1024)
+		}
+	}
+
+	// Get IP from pool (instant lookup, no SSH)
+	if ip := c.ipPool.Get(sandboxId); ip != "" {
+		info.IpAddress = ip
+	} else if ip := GetIPCache().Get(sandboxId); ip != "" {
+		// Fallback to cache
+		info.IpAddress = ip
+	} else {
+		// Last resort: try to read from stored file
+		ipFilePath := filepath.Join(c.getSandboxDir(sandboxId), "ip")
+		if output, err := c.runSSHCommand(ctx, fmt.Sprintf("cat %s 2>/dev/null", ipFilePath)); err == nil {
+			if ip := strings.TrimSpace(output); ip != "" {
+				info.IpAddress = ip
+				GetIPCache().Set(sandboxId, ip)
+			}
 		}
 	}
 

@@ -75,9 +75,10 @@ ENV API_PORT=8080
 ENV CH_SOCKETS_PATH=/var/run/cloud-hypervisor
 ENV CH_SANDBOXES_PATH=/var/lib/cloud-hypervisor/sandboxes
 ENV CH_SNAPSHOTS_PATH=/var/lib/cloud-hypervisor/snapshots
-ENV CH_KERNEL_PATH=/var/lib/cloud-hypervisor/kernels/vmlinux
+ENV CH_KERNEL_PATH=/var/lib/cloud-hypervisor/kernels/vmlinuz-6.8.0-90-generic
+ENV CH_INITRAMFS_PATH=/var/lib/cloud-hypervisor/kernels/initrd.img-6.8.0-90-generic
 ENV CH_FIRMWARE_PATH=/var/lib/cloud-hypervisor/firmware/hypervisor-fw
-ENV CH_BASE_IMAGE_PATH=/var/lib/cloud-hypervisor/images/ubuntu-24.04-server-cloudimg-amd64.img
+ENV CH_BASE_IMAGE_PATH=/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1.qcow2
 ENV CH_BRIDGE_NAME=br0
 
 # Expose API port

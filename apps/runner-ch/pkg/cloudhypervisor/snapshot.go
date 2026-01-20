@@ -92,7 +92,7 @@ func (c *Client) CreateSnapshotFromVM(ctx context.Context, opts SnapshotOptions)
 
 	// Copy disk image to snapshot
 	diskPath := c.getDiskPath(opts.SandboxId)
-	snapshotDiskPath := filepath.Join(snapshotPath, "disk.raw")
+	snapshotDiskPath := filepath.Join(snapshotPath, "disk.qcow2")
 
 	log.Infof("Copying disk to snapshot")
 	if err := c.runCommand(ctx, "cp", diskPath, snapshotDiskPath); err != nil {
@@ -141,8 +141,12 @@ func (c *Client) Restore(ctx context.Context, opts RestoreOptions) (*SandboxInfo
 		return nil, fmt.Errorf("failed to create sandbox directory: %w", err)
 	}
 
-	// Copy disk from snapshot
-	snapshotDiskPath := filepath.Join(snapshotPath, "disk.raw")
+	// Copy disk from snapshot (check both qcow2 and legacy raw format)
+	snapshotDiskPath := filepath.Join(snapshotPath, "disk.qcow2")
+	if exists, _ := c.fileExists(ctx, snapshotDiskPath); !exists {
+		// Fall back to legacy raw format
+		snapshotDiskPath = filepath.Join(snapshotPath, "disk.raw")
+	}
 	diskPath := c.getDiskPath(opts.SandboxId)
 
 	diskExists, _ := c.fileExists(ctx, snapshotDiskPath)
@@ -154,11 +158,22 @@ func (c *Client) Restore(ctx context.Context, opts RestoreOptions) (*SandboxInfo
 		}
 	}
 
-	// Create TAP interface
-	tapName := c.getTapName(opts.SandboxId)
-	if err := c.createTapInterface(ctx, tapName); err != nil {
-		c.cleanupSandbox(ctx, opts.SandboxId)
-		return nil, fmt.Errorf("failed to create TAP interface: %w", err)
+	// Get TAP interface (from pool if enabled, otherwise create)
+	var tapName string
+	if c.tapPool.IsEnabled() {
+		var err error
+		tapName, err = c.tapPool.Acquire(ctx, opts.SandboxId)
+		if err != nil {
+			c.cleanupSandbox(ctx, opts.SandboxId)
+			return nil, fmt.Errorf("failed to acquire TAP from pool: %w", err)
+		}
+		log.Infof("Acquired TAP %s from pool for fork %s", tapName, opts.SandboxId)
+	} else {
+		tapName = c.getTapName(opts.SandboxId)
+		if err := c.createTapInterface(ctx, tapName); err != nil {
+			c.cleanupSandbox(ctx, opts.SandboxId)
+			return nil, fmt.Errorf("failed to create TAP interface: %w", err)
+		}
 	}
 
 	// Start cloud-hypervisor process
@@ -294,8 +309,11 @@ func (c *Client) GetSnapshotInfo(ctx context.Context, name string) (*SnapshotInf
 		}
 	}
 
-	// Get disk size if present
-	diskPath := filepath.Join(snapshotPath, "disk.raw")
+	// Get disk size if present (check qcow2 first, then legacy raw)
+	diskPath := filepath.Join(snapshotPath, "disk.qcow2")
+	if exists, _ := c.fileExists(ctx, diskPath); !exists {
+		diskPath = filepath.Join(snapshotPath, "disk.raw")
+	}
 	sizeOutput, err := c.runCommandOutput(ctx, "stat", "-c", "%s", diskPath)
 	if err == nil {
 		var size int64
