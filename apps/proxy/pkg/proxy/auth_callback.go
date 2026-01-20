@@ -81,8 +81,15 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		return
 	}
 
+	var cookieDomain string
+	if p.cookieDomain != nil {
+		cookieDomain = *p.cookieDomain
+	} else {
+		cookieDomain = GetCookieDomainFromHost(ctx.Request.Host)
+	}
+
 	// Clear the PKCE cookie
-	ctx.SetCookie("pkce_verifier", "", -1, "/", p.cookieDomain, p.config.EnableTLS, true)
+	ctx.SetCookie("pkce_verifier", "", -1, "/", cookieDomain, p.config.EnableTLS, true)
 
 	// Exchange code for token
 	authContext, endpoint, err := p.getOidcEndpoint(ctx)
@@ -117,7 +124,7 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxId, encoded, 3600, "/", p.cookieDomain, p.config.EnableTLS, true)
+	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxId, encoded, 3600, "/", cookieDomain, p.config.EnableTLS, true)
 
 	// Redirect back to the original URL
 	ctx.Redirect(http.StatusFound, returnTo)
@@ -129,10 +136,15 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 		return "", fmt.Errorf("failed to initialize OIDC endpoint: %w", err)
 	}
 
+	_, _, baseHost, err := p.parseHost(ctx.Request.Host)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse request host: %w", err)
+	}
+
 	oauth2Config := oauth2.Config{
 		ClientID:     p.config.Oidc.ClientId,
 		ClientSecret: p.config.Oidc.ClientSecret,
-		RedirectURL:  fmt.Sprintf("%s://%s/callback", p.config.ProxyProtocol, p.config.ProxyDomain),
+		RedirectURL:  fmt.Sprintf("%s://%s/callback", p.config.ProxyProtocol, baseHost),
 		Endpoint:     *endpoint,
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
@@ -148,7 +160,15 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to encode pkce_verifier cookie: %w", err)
 	}
-	ctx.SetCookie("pkce_verifier", encodedVerifier, 300, "/", p.cookieDomain, p.config.EnableTLS, true)
+
+	var cookieDomain string
+	if p.cookieDomain != nil {
+		cookieDomain = *p.cookieDomain
+	} else {
+		cookieDomain = GetCookieDomainFromHost(baseHost)
+	}
+
+	ctx.SetCookie("pkce_verifier", encodedVerifier, 300, "/", cookieDomain, p.config.EnableTLS, true)
 
 	// Store the original request URL in the state
 	stateData := map[string]string{
@@ -218,4 +238,9 @@ func GenerateRandomState() (string, error) {
 	}
 
 	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+func GetCookieDomainFromHost(host string) string {
+	host = strings.Split(host, ":")[0]
+	return fmt.Sprintf(".%s", host)
 }
