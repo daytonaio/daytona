@@ -1688,7 +1688,7 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
     },
     /**
      *
-     * @summary Update region proxy/ssh gateway/snapshot manager
+     * @summary Update region configuration
      * @param {string} id Region ID
      * @param {UpdateRegion} updateRegion
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2720,7 +2720,7 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Update region proxy/ssh gateway/snapshot manager
+     * @summary Update region configuration
      * @param {string} id Region ID
      * @param {UpdateRegion} updateRegion
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3296,7 +3296,7 @@ export const OrganizationsApiFactory = function (
     },
     /**
      *
-     * @summary Update region proxy/ssh gateway/snapshot manager
+     * @summary Update region configuration
      * @param {string} id Region ID
      * @param {UpdateRegion} updateRegion
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3899,7 +3899,7 @@ export class OrganizationsApi extends BaseAPI {
 
   /**
    *
-   * @summary Update region proxy/ssh gateway/snapshot manager
+   * @summary Update region configuration
    * @param {string} id Region ID
    * @param {UpdateRegion} updateRegion
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID

@@ -192,7 +192,7 @@ export class OrganizationRegionController {
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
-    summary: 'Update region proxy/ssh gateway/snapshot manager',
+    summary: 'Update region configuration',
     operationId: 'updateRegion',
   })
   @ApiResponse({

@@ -9490,7 +9490,7 @@ class OrganizationsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> CreateRegionResponse:
-        """Update region proxy/ssh gateway/snapshot manager
+        """Update region configuration
 
 
         :param id: Region ID (required)
@@ -9564,7 +9564,7 @@ class OrganizationsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[CreateRegionResponse]:
-        """Update region proxy/ssh gateway/snapshot manager
+        """Update region configuration
 
 
         :param id: Region ID (required)
@@ -9638,7 +9638,7 @@ class OrganizationsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Update region proxy/ssh gateway/snapshot manager
+        """Update region configuration
 
 
         :param id: Region ID (required)

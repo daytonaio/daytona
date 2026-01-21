@@ -467,7 +467,7 @@ type OrganizationsAPI interface {
 	UpdateOrganizationRoleExecute(r OrganizationsAPIUpdateOrganizationRoleRequest) (*OrganizationRole, *http.Response, error)
 
 	/*
-		UpdateRegion Update region proxy/ssh gateway/snapshot manager
+		UpdateRegion Update region configuration
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id Region ID
@@ -4137,7 +4137,7 @@ func (r OrganizationsAPIUpdateRegionRequest) Execute() (*CreateRegionResponse, *
 }
 
 /*
-UpdateRegion Update region proxy/ssh gateway/snapshot manager
+UpdateRegion Update region configuration
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Region ID

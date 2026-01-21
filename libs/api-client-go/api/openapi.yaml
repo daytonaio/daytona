@@ -1247,7 +1247,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Update region proxy/ssh gateway/snapshot manager
+      summary: Update region configuration
       tags:
         - organizations
   /regions/{id}/regenerate-proxy-api-key:
