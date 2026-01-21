@@ -846,17 +846,32 @@ export class DockerRegistryService {
     event: RegionEvents.SNAPSHOT_MANAGER_UPDATED,
   })
   private async _handleRegionSnapshotManagerUpdated(payload: RegionSnapshotManagerUpdatedEvent): Promise<void> {
-    const { region, organizationId, snapshotManagerUrl, username, password, prevSnapshotManagerUrl, entityManager } =
-      payload
+    const {
+      region,
+      organizationId,
+      snapshotManagerUrl,
+      prevSnapshotManagerUrl,
+      entityManager,
+      newUsername,
+      newPassword,
+    } = payload
 
     const em = entityManager ?? this.dockerRegistryRepository.manager
 
     if (prevSnapshotManagerUrl && prevSnapshotManagerUrl !== snapshotManagerUrl) {
       // Delete old registries associated with previous snapshot manager URL
-      await em.delete(DockerRegistry, {
-        region: region.id,
-        url: prevSnapshotManagerUrl,
-      })
+      await em.update(
+        DockerRegistry,
+        {
+          region: region.id,
+          url: prevSnapshotManagerUrl,
+        },
+        {
+          url: snapshotManagerUrl,
+          username: newUsername,
+          password: newPassword,
+        },
+      )
     }
 
     const registries = await em.count(DockerRegistry, {
@@ -865,12 +880,9 @@ export class DockerRegistryService {
 
     if (registries === 0) {
       await this._handleRegionCreatedEvent(
-        new RegionCreatedEvent(entityManager, region, organizationId, username, password),
+        new RegionCreatedEvent(entityManager, region, organizationId, newUsername, newPassword),
       )
-      return
     }
-
-    await em.update(DockerRegistry, { region: region.id, url: snapshotManagerUrl }, { username, password })
   }
 
   @OnAsyncEvent({

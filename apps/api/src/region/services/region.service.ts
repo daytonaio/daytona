@@ -264,28 +264,20 @@ export class RegionService {
     })
   }
 
-  async update(regionId: string, updateRegion: UpdateRegionDto): Promise<CreateRegionResponseDto> {
+  async update(regionId: string, updateRegion: UpdateRegionDto): Promise<void> {
     const region = await this.findOne(regionId)
 
     if (!region) {
       throw new NotFoundException('Region not found')
     }
 
-    const response = new CreateRegionResponseDto({ id: region.id })
-
     await this.dataSource.transaction(async (em) => {
       if (updateRegion.proxyUrl !== undefined) {
         region.proxyUrl = updateRegion.proxyUrl
-        const newProxyApiKey = generateApiKeyValue()
-        region.proxyApiKeyHash = generateApiKeyHash(newProxyApiKey)
-        response.proxyApiKey = newProxyApiKey
       }
 
       if (updateRegion.sshGatewayUrl !== undefined) {
         region.sshGatewayUrl = updateRegion.sshGatewayUrl
-        const newSshGatewayApiKey = generateApiKeyValue()
-        region.sshGatewayApiKeyHash = generateApiKeyHash(newSshGatewayApiKey)
-        response.sshGatewayApiKey = newSshGatewayApiKey
       }
 
       if (updateRegion.snapshotManagerUrl !== undefined) {
@@ -304,31 +296,42 @@ export class RegionService {
         }
 
         const prevSnapshotManagerUrl = region.snapshotManagerUrl
-
         region.snapshotManagerUrl = updateRegion.snapshotManagerUrl
-        const newUsername = 'daytona'
-        const newPassword = generateRandomString(16)
-        response.snapshotManagerUsername = newUsername
-        response.snapshotManagerPassword = newPassword
 
-        await this.eventEmitter.emitAsync(
-          RegionEvents.SNAPSHOT_MANAGER_UPDATED,
-          new RegionSnapshotManagerUpdatedEvent(
-            region,
-            region.organizationId,
-            region.snapshotManagerUrl,
-            newUsername,
-            newPassword,
-            prevSnapshotManagerUrl,
-            em,
-          ),
-        )
+        // If the region did not have a snapshot manager, create new credentials
+        if (!prevSnapshotManagerUrl) {
+          const newUsername = 'daytona'
+          const newPassword = generateRandomString(16)
+          await this.eventEmitter.emitAsync(
+            RegionEvents.SNAPSHOT_MANAGER_UPDATED,
+            new RegionSnapshotManagerUpdatedEvent(
+              region,
+              region.organizationId,
+              region.snapshotManagerUrl,
+              prevSnapshotManagerUrl,
+              newUsername,
+              newPassword,
+              em,
+            ),
+          )
+        } else {
+          await this.eventEmitter.emitAsync(
+            RegionEvents.SNAPSHOT_MANAGER_UPDATED,
+            new RegionSnapshotManagerUpdatedEvent(
+              region,
+              region.organizationId,
+              region.snapshotManagerUrl,
+              prevSnapshotManagerUrl,
+              undefined,
+              undefined,
+              em,
+            ),
+          )
+        }
       }
 
       await em.save(region)
     })
-
-    return response
   }
 
   /**

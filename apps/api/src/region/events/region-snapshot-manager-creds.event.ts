@@ -21,9 +21,9 @@ export class RegionSnapshotManagerUpdatedEvent {
     public readonly region: Region,
     public readonly organizationId: string,
     public readonly snapshotManagerUrl: string,
-    public readonly username: string,
-    public readonly password: string,
     public readonly prevSnapshotManagerUrl?: string,
+    public readonly newUsername?: string,
+    public readonly newPassword?: string,
     public readonly entityManager?: EntityManager,
   ) {}
 }

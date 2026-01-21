@@ -2732,7 +2732,7 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
       updateRegion: UpdateRegion,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.updateRegion(
         id,
         updateRegion,
@@ -3308,7 +3308,7 @@ export const OrganizationsApiFactory = function (
       updateRegion: UpdateRegion,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<CreateRegionResponse> {
+    ): AxiosPromise<void> {
       return localVarFp
         .updateRegion(id, updateRegion, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))

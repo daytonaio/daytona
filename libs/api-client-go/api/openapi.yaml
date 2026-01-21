@@ -1236,11 +1236,7 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateRegionResponse'
-          description: The region has been successfully updated.
+          description: ''
       security:
         - bearer: []
         - oauth2:

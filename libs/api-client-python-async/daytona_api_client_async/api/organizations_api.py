@@ -9489,7 +9489,7 @@ class OrganizationsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> CreateRegionResponse:
+    ) -> None:
         """Update region configuration
 
 
@@ -9532,7 +9532,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CreateRegionResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -9563,7 +9563,7 @@ class OrganizationsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[CreateRegionResponse]:
+    ) -> ApiResponse[None]:
         """Update region configuration
 
 
@@ -9606,7 +9606,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CreateRegionResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -9680,7 +9680,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CreateRegionResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -9727,13 +9727,6 @@ class OrganizationsApi:
             _body_params = update_region
 
 
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
 
         # set the HTTP header `Content-Type`
         if _content_type:

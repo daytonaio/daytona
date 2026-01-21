@@ -195,11 +195,6 @@ export class OrganizationRegionController {
     summary: 'Update region configuration',
     operationId: 'updateRegion',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'The region has been successfully updated.',
-    type: CreateRegionResponseDto,
-  })
   @ApiParam({
     name: 'id',
     description: 'Region ID',
@@ -218,10 +213,7 @@ export class OrganizationRegionController {
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
-  async updateRegion(
-    @Param('id') id: string,
-    @Body() updateRegionDto: UpdateRegionDto,
-  ): Promise<CreateRegionResponseDto> {
+  async updateRegion(@Param('id') id: string, @Body() updateRegionDto: UpdateRegionDto): Promise<void> {
     return await this.regionService.update(id, updateRegionDto)
   }
 

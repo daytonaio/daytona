@@ -147,21 +147,18 @@ const Regions: React.FC = () => {
     setShowRegionDetails(true)
   }
 
-  const handleUpdateRegion = async (
-    regionId: string,
-    updateData: UpdateRegion,
-  ): Promise<CreateRegionResponse | null> => {
-    if (!selectedOrganization) return null
+  const handleUpdateRegion = async (regionId: string, updateData: UpdateRegion): Promise<boolean> => {
+    if (!selectedOrganization) return false
 
     setRegionIsLoading((prev) => ({ ...prev, [regionId]: true }))
     try {
-      const response = (await organizationsApi.updateRegion(regionId, updateData, selectedOrganization.id)).data
+      await organizationsApi.updateRegion(regionId, updateData, selectedOrganization.id)
       toast.success('Region updated successfully')
       await refreshRegions()
-      return response
+      return true
     } catch (error) {
       handleApiError(error, 'Failed to update region')
-      return null
+      return false
     } finally {
       setRegionIsLoading((prev) => ({ ...prev, [regionId]: false }))
     }
