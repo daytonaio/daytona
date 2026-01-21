@@ -9,6 +9,7 @@ import { OrganizationSuspendedError } from '@/api/errors'
 import {
   OrganizationUserRoleEnum,
   Sandbox,
+  SandboxBackupStateEnum,
   SandboxDesiredState,
   SandboxState,
   SshAccessDto,
@@ -833,6 +834,11 @@ const Sandboxes: React.FC = () => {
     }
 
     setSandboxIsLoading((prev) => ({ ...prev, [forkSandboxId]: true }))
+
+    // Optimistically update the backup state to show "Snapshotting" immediately
+    await cancelQueryRefetches(queryKey)
+    updateSandboxInCache(forkSandboxId, { backupState: SandboxBackupStateEnum.IN_PROGRESS })
+
     try {
       await sandboxApi.forkSandbox(forkSandboxId, { name: forkName }, selectedOrganization?.id)
       setShowForkDialog(false)
@@ -842,6 +848,8 @@ const Sandboxes: React.FC = () => {
       // Refetch to get the new forked sandbox
       await markAllSandboxQueriesAsStale(true)
     } catch (error) {
+      // Revert optimistic update on error
+      updateSandboxInCache(forkSandboxId, { backupState: SandboxBackupStateEnum.NONE })
       handleApiError(error, 'Failed to fork sandbox')
     } finally {
       setSandboxIsLoading((prev) => ({ ...prev, [forkSandboxId]: false }))

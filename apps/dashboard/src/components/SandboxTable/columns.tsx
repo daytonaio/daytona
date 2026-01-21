@@ -26,12 +26,17 @@ const WindowsIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 )
 
+const UbuntuIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.243 2.398c2.456-.153 4.89.618 6.756 2.14l-1.63 2.252c-2.612-2.026-6.39-1.558-8.418 1.055-.464.598-.81 1.279-1.02 1.999l-2.637-.861c.754-2.571 2.637-4.716 5.008-5.899a9.02 9.02 0 0 1 1.941-.686zm-5.39 9.376c.008-1.074.228-2.134.642-3.12l2.638.861a5.99 5.99 0 0 0 2.013 6.497l-1.63 2.252a9.096 9.096 0 0 1-3.663-6.49zm11.458 5.785a9.04 9.04 0 0 1-6.702 2.17l.304-2.77a6.02 6.02 0 0 0 4.767-1.652 6.02 6.02 0 0 0 .392-8.116l1.632-2.251a9.076 9.076 0 0 1 2.219 6.545 9.074 9.074 0 0 1-2.612 6.074zM3.6 12a1.8 1.8 0 1 1 3.6 0 1.8 1.8 0 0 1-3.6 0zm5.4 6.6a1.8 1.8 0 1 1 3.6 0 1.8 1.8 0 0 1-3.6 0zm4.2-10.8a1.8 1.8 0 1 1 3.6 0 1.8 1.8 0 0 1-3.6 0z" />
+  </svg>
+)
+
 const RunnerClassIcon: React.FC<{ runnerClass: RunnerClass }> = ({ runnerClass }) => {
   const iconClass = 'h-4 w-4'
 
   switch (runnerClass) {
     case 'linux':
-    case 'linux-exp':
       return (
         <TooltipProvider>
           <Tooltip>
@@ -41,7 +46,22 @@ const RunnerClassIcon: React.FC<{ runnerClass: RunnerClass }> = ({ runnerClass }
               </span>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{runnerClass === 'linux' ? 'Linux' : 'Linux (Experimental)'}</p>
+              <p>Linux</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )
+    case 'linux-exp':
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <UbuntuIcon className={iconClass} />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Ubuntu (Experimental)</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
