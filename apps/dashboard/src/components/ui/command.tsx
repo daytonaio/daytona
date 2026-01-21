@@ -162,9 +162,15 @@ function CommandCheckboxItem({
   return (
     <CommandItem {...props}>
       <div className="flex items-center">
-        <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary">
-          <Check className="h-4 w-4 " />
+        <div
+          className={cn('mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary', {
+            'bg-primary text-primary-foreground': checked,
+            'opacity-50 [&_svg]:invisible': !checked,
+          })}
+        >
+          <Check className={cn('size-3.5 text-current')} />
         </div>
+        {children}
       </div>
     </CommandItem>
   )

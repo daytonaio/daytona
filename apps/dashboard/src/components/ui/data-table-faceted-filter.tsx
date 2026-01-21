@@ -4,7 +4,7 @@
  */
 
 import { Column } from '@tanstack/react-table'
-import { Check, PlusCircle } from 'lucide-react'
+import { PlusCircle } from 'lucide-react'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ import { Badge } from './badge'
 import { Button } from './button'
 import {
   Command,
+  CommandCheckboxItem,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -84,7 +85,8 @@ export function DataTableFacetedFilter<TData, TValue>({
               {options.map((option) => {
                 const isSelected = selectedValues.has(option.value)
                 return (
-                  <CommandItem
+                  <CommandCheckboxItem
+                    checked={isSelected}
                     key={option.value}
                     onSelect={() => {
                       if (isSelected) {
@@ -96,14 +98,6 @@ export function DataTableFacetedFilter<TData, TValue>({
                       column?.setFilterValue(filterValues.length ? filterValues : undefined)
                     }}
                   >
-                    <div
-                      className={cn(
-                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                        isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible',
-                      )}
-                    >
-                      <Check />
-                    </div>
                     {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
                     <span>{option.label}</span>
                     {facets?.get(option.value) && (
@@ -111,7 +105,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                         {facets.get(option.value)}
                       </span>
                     )}
-                  </CommandItem>
+                  </CommandCheckboxItem>
                 )
               })}
             </CommandGroup>
