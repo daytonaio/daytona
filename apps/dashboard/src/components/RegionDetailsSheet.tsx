@@ -110,10 +110,6 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
               <h3 className="text-sm text-muted-foreground">Created</h3>
               <p className="mt-1 text-sm font-medium">{formatTimestamp(region.createdAt)}</p>
             </div>
-            <div>
-              <h3 className="text-sm text-muted-foreground">Type</h3>
-              <p className="mt-1 text-sm font-medium">{region.regionType}</p>
-            </div>
           </div>
 
           <div>
