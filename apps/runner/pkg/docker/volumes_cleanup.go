@@ -24,8 +24,8 @@ func normalizePath(path string) string {
 // CleanupOrphanedVolumeMounts removes volume mount directories that are no longer used by any container.
 // Throttled to run at most once per volumeCleanupIntervalSec (default 30s).
 func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
-	d.volumeCleanupMu.Lock()
-	defer d.volumeCleanupMu.Unlock()
+	d.volumeCleanupMutex.Lock()
+	defer d.volumeCleanupMutex.Unlock()
 
 	if d.volumeCleanupIntervalSec > 0 && time.Since(d.lastVolumeCleanup) < time.Duration(d.volumeCleanupIntervalSec)*time.Second {
 		return

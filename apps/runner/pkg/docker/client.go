@@ -85,6 +85,6 @@ type DockerClient struct {
 	sandboxStartTimeoutSec   int
 	useSnapshotEntrypoint    bool
 	volumeCleanupIntervalSec int
-	volumeCleanupMu          sync.Mutex
+	volumeCleanupMutex       sync.Mutex
 	lastVolumeCleanup        time.Time
 }
