@@ -38,5 +38,5 @@ keywords = ["daytona", "sdk"]
 license = {text = "Apache-2.0"}
 
 [tool.deptry]
-exclude = ["src/daytona/_utils/chart_data_extractor_wrapper.py", "scripts/sync_generator.py"]
+exclude = ["scripts"]
 extend_exclude = [".venv", "dist", "build", ".pytest_cache", "__pycache__"]
