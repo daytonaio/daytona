@@ -519,6 +519,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/letta-code-agent', locale),
+          label: t('sidebarconfig.lettacode'),
+          disablePagination: true,
+          attrs: {
+            icon: 'letta-code.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/trl-grpo-training', locale),
           label: t('sidebarconfig.trlGrpo'),
           disablePagination: true,
