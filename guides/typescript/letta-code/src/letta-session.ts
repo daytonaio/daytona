@@ -34,7 +34,11 @@ function formatToolCall(toolCall: any): string {
       (args.query && `${toolCall.name}: ${args.query}`) ||
       (args.url && `${toolCall.name} ${args.url}`) ||
       toolCall.name
-  } catch {}
+  } catch (error) {
+    // Fall back to a basic description and log the parse error
+    description = toolCall.name || 'Tool call'
+    console.warn('Failed to parse tool call arguments as JSON:', toolCall.arguments, error)
+  }
 
   return `\n🔧 ${description}`
 }
