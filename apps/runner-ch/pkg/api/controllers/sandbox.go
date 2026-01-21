@@ -46,16 +46,17 @@ type SandboxInfoResponse struct {
 } //	@name	SandboxInfoResponse
 
 // Create creates a new sandbox
-// @Summary		Create a new sandbox
-// @Description	Create a new sandbox from a snapshot
-// @Tags			sandboxes
-// @Accept			json
-// @Produce		json
-// @Param			sandbox	body		dto.CreateSandboxDTO	true	"Sandbox configuration"
-// @Success		201		{object}	dto.StartSandboxResponse
-// @Failure		400		{object}	error
-// @Failure		500		{object}	error
-// @Router			/sandboxes [post]
+//
+//	@Summary		Create a new sandbox
+//	@Description	Create a new sandbox from a snapshot
+//	@Tags			sandboxes
+//	@Accept			json
+//	@Produce		json
+//	@Param			sandbox	body		dto.CreateSandboxDTO	true	"Sandbox configuration"
+//	@Success		201		{object}	dto.StartSandboxResponse
+//	@Failure		400		{object}	error
+//	@Failure		500		{object}	error
+//	@Router			/sandboxes [post]
 func Create(ctx *gin.Context) {
 	var createDTO dto.CreateSandboxDTO
 	if err := ctx.ShouldBindJSON(&createDTO); err != nil {
@@ -79,15 +80,16 @@ func Create(ctx *gin.Context) {
 }
 
 // Info returns information about a sandbox
-// @Summary		Get sandbox info
-// @Description	Get information about a sandbox
-// @Tags			sandboxes
-// @Produce		json
-// @Param			sandboxId	path		string	true	"Sandbox ID"
-// @Success		200			{object}	SandboxInfoResponse
-// @Failure		404			{object}	error
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId} [get]
+//
+//	@Summary		Get sandbox info
+//	@Description	Get information about a sandbox
+//	@Tags			sandboxes
+//	@Produce		json
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		200			{object}	SandboxInfoResponse
+//	@Failure		404			{object}	error
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId} [get]
 func Info(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -128,13 +130,14 @@ func mapCHStateToSandboxState(chState cloudhypervisor.VmState) SandboxState {
 }
 
 // Destroy destroys a sandbox
-// @Summary		Destroy a sandbox
-// @Description	Destroy a sandbox and all its resources
-// @Tags			sandboxes
-// @Param			sandboxId	path		string	true	"Sandbox ID"
-// @Success		200			{string}	string	"Sandbox destroyed"
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId}/destroy [post]
+//
+//	@Summary		Destroy a sandbox
+//	@Description	Destroy a sandbox and all its resources
+//	@Tags			sandboxes
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		200			{string}	string	"Sandbox destroyed"
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/destroy [post]
 func Destroy(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -150,14 +153,15 @@ func Destroy(ctx *gin.Context) {
 }
 
 // Start starts a sandbox
-// @Summary		Start a sandbox
-// @Description	Start a stopped or paused sandbox
-// @Tags			sandboxes
-// @Produce		json
-// @Param			sandboxId	path		string	true	"Sandbox ID"
-// @Success		200			{object}	dto.StartSandboxResponse
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId}/start [post]
+//
+//	@Summary		Start a sandbox
+//	@Description	Start a stopped or paused sandbox
+//	@Tags			sandboxes
+//	@Produce		json
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		200			{object}	dto.StartSandboxResponse
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/start [post]
 func Start(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -176,13 +180,14 @@ func Start(ctx *gin.Context) {
 }
 
 // Stop stops a sandbox
-// @Summary		Stop a sandbox
-// @Description	Stop (pause) a running sandbox
-// @Tags			sandboxes
-// @Param			sandboxId	path		string	true	"Sandbox ID"
-// @Success		200			{string}	string	"Sandbox stopped"
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId}/stop [post]
+//
+//	@Summary		Stop a sandbox
+//	@Description	Stop (pause) a running sandbox
+//	@Tags			sandboxes
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		200			{string}	string	"Sandbox stopped"
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/stop [post]
 func Stop(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -198,16 +203,17 @@ func Stop(ctx *gin.Context) {
 }
 
 // Resize resizes a sandbox's resources
-// @Summary		Resize a sandbox
-// @Description	Resize CPU, memory, or GPU allocation for a sandbox
-// @Tags			sandboxes
-// @Accept			json
-// @Param			sandboxId	path		string				true	"Sandbox ID"
-// @Param			resize		body		dto.ResizeSandboxDTO	true	"New resource allocation"
-// @Success		200			{string}	string	"Sandbox resized"
-// @Failure		400			{object}	error
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId}/resize [post]
+//
+//	@Summary		Resize a sandbox
+//	@Description	Resize CPU, memory, or GPU allocation for a sandbox
+//	@Tags			sandboxes
+//	@Accept			json
+//	@Param			sandboxId	path		string					true	"Sandbox ID"
+//	@Param			resize		body		dto.ResizeSandboxDTO	true	"New resource allocation"
+//	@Success		200			{string}	string					"Sandbox resized"
+//	@Failure		400			{object}	error
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/resize [post]
 func Resize(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -232,13 +238,14 @@ func Resize(ctx *gin.Context) {
 }
 
 // RemoveDestroyed removes a destroyed sandbox's resources
-// @Summary		Remove destroyed sandbox
-// @Description	Clean up resources for a destroyed sandbox
-// @Tags			sandboxes
-// @Param			sandboxId	path		string	true	"Sandbox ID"
-// @Success		200			{string}	string	"Sandbox removed"
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId} [delete]
+//
+//	@Summary		Remove destroyed sandbox
+//	@Description	Clean up resources for a destroyed sandbox
+//	@Tags			sandboxes
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		200			{string}	string	"Sandbox removed"
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId} [delete]
 func RemoveDestroyed(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -254,16 +261,17 @@ func RemoveDestroyed(ctx *gin.Context) {
 }
 
 // UpdateNetworkSettings updates network settings for a sandbox
-// @Summary		Update network settings
-// @Description	Update network blocking and allow list settings
-// @Tags			sandboxes
-// @Accept			json
-// @Param			sandboxId	path		string						true	"Sandbox ID"
-// @Param			settings	body		dto.UpdateNetworkSettingsDTO	true	"Network settings"
-// @Success		200			{string}	string	"Network settings updated"
-// @Failure		400			{object}	error
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId}/network-settings [post]
+//
+//	@Summary		Update network settings
+//	@Description	Update network blocking and allow list settings
+//	@Tags			sandboxes
+//	@Accept			json
+//	@Param			sandboxId	path		string							true	"Sandbox ID"
+//	@Param			settings	body		dto.UpdateNetworkSettingsDTO	true	"Network settings"
+//	@Success		200			{string}	string							"Network settings updated"
+//	@Failure		400			{object}	error
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/network-settings [post]
 func UpdateNetworkSettings(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -294,13 +302,14 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 }
 
 // CreateBackup creates a backup/snapshot of a sandbox
-// @Summary		Create backup
-// @Description	Create a backup (snapshot) of a running sandbox
-// @Tags			sandboxes
-// @Param			sandboxId	path		string	true	"Sandbox ID"
-// @Success		201			{string}	string	"Backup started"
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId}/backup [post]
+//
+//	@Summary		Create backup
+//	@Description	Create a backup (snapshot) of a running sandbox
+//	@Tags			sandboxes
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Success		201			{string}	string	"Backup started"
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/backup [post]
 func CreateBackup(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -320,17 +329,18 @@ func CreateBackup(ctx *gin.Context) {
 }
 
 // Fork creates a fork (copy-on-write clone) of a running sandbox
-// @Summary		Fork a sandbox
-// @Description	Create a CoW fork of a running/paused sandbox with memory state
-// @Tags			sandboxes
-// @Accept			json
-// @Produce		json
-// @Param			sandboxId	path		string				true	"Source Sandbox ID"
-// @Param			fork		body		dto.ForkSandboxDTO	true	"Fork configuration"
-// @Success		201			{object}	dto.ForkSandboxResponseDTO
-// @Failure		400			{object}	error
-// @Failure		500			{object}	error
-// @Router			/sandboxes/{sandboxId}/fork [post]
+//
+//	@Summary		Fork a sandbox
+//	@Description	Create a CoW fork of a running/paused sandbox with memory state
+//	@Tags			sandboxes
+//	@Accept			json
+//	@Produce		json
+//	@Param			sandboxId	path		string				true	"Source Sandbox ID"
+//	@Param			fork		body		dto.ForkSandboxDTO	true	"Fork configuration"
+//	@Success		201			{object}	dto.ForkSandboxResponseDTO
+//	@Failure		400			{object}	error
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/fork [post]
 func Fork(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
@@ -362,12 +372,13 @@ func Fork(ctx *gin.Context) {
 }
 
 // HealthCheck returns health status
-// @Summary		Health check
-// @Description	Returns OK if the runner is healthy
-// @Tags			health
-// @Produce		json
-// @Success		200	{object}	map[string]string
-// @Router			/ [get]
+//
+//	@Summary		Health check
+//	@Description	Returns OK if the runner is healthy
+//	@Tags			health
+//	@Produce		json
+//	@Success		200	{object}	map[string]string
+//	@Router			/ [get]
 func HealthCheck(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"status":  "ok",
@@ -376,12 +387,13 @@ func HealthCheck(ctx *gin.Context) {
 }
 
 // RunnerInfo returns runner information
-// @Summary		Runner info
-// @Description	Returns information about the runner
-// @Tags			info
-// @Produce		json
-// @Success		200	{object}	map[string]interface{}
-// @Router			/info [get]
+//
+//	@Summary		Runner info
+//	@Description	Returns information about the runner
+//	@Tags			info
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/info [get]
 func RunnerInfo(ctx *gin.Context) {
 	// Get list of sandboxes
 	sandboxes, _ := Runner.CHClient.List(ctx.Request.Context())
@@ -393,12 +405,13 @@ func RunnerInfo(ctx *gin.Context) {
 }
 
 // GetMemoryStats returns memory statistics
-// @Summary		Get memory stats
-// @Description	Returns memory usage statistics
-// @Tags			stats
-// @Produce		json
-// @Success		200	{object}	map[string]interface{}
-// @Router			/stats/memory [get]
+//
+//	@Summary		Get memory stats
+//	@Description	Returns memory usage statistics
+//	@Tags			stats
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Router			/stats/memory [get]
 func GetMemoryStats(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"total":     0,
@@ -409,12 +422,13 @@ func GetMemoryStats(ctx *gin.Context) {
 }
 
 // GetMemoryStatsView returns memory statistics view
-// @Summary		Get memory stats view
-// @Description	Returns memory usage statistics in HTML view
-// @Tags			stats
-// @Produce		html
-// @Success		200	{string}	string
-// @Router			/stats/memory/view [get]
+//
+//	@Summary		Get memory stats view
+//	@Description	Returns memory usage statistics in HTML view
+//	@Tags			stats
+//	@Produce		html
+//	@Success		200	{string}	string
+//	@Router			/stats/memory/view [get]
 func GetMemoryStatsView(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "Memory stats view not implemented for Cloud Hypervisor runner")
 }
@@ -422,39 +436,42 @@ func GetMemoryStatsView(ctx *gin.Context) {
 // NOTE: ProxyRequest and ProxyToPort are implemented in proxy.go
 
 // PullSnapshot pulls a snapshot from registry
-// @Summary		Pull snapshot
-// @Description	Pulls a snapshot from the registry
-// @Tags			snapshots
-// @Accept			json
-// @Param			request	body	dto.PullSnapshotRequestDTO	true	"Pull request"
-// @Success		200
-// @Router			/snapshots/pull [post]
+//
+//	@Summary		Pull snapshot
+//	@Description	Pulls a snapshot from the registry
+//	@Tags			snapshots
+//	@Accept			json
+//	@Param			request	body	dto.PullSnapshotRequestDTO	true	"Pull request"
+//	@Success		200
+//	@Router			/snapshots/pull [post]
 func PullSnapshot(ctx *gin.Context) {
 	// TODO: Implement snapshot pull
 	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "Snapshot pull not yet implemented"})
 }
 
 // PushSnapshot pushes a snapshot to registry
-// @Summary		Push snapshot
-// @Description	Pushes a snapshot to the registry
-// @Tags			snapshots
-// @Accept			json
-// @Param			request	body	dto.PushSnapshotRequestDTO	true	"Push request"
-// @Success		200
-// @Router			/snapshots/push [post]
+//
+//	@Summary		Push snapshot
+//	@Description	Pushes a snapshot to the registry
+//	@Tags			snapshots
+//	@Accept			json
+//	@Param			request	body	dto.PushSnapshotRequestDTO	true	"Push request"
+//	@Success		200
+//	@Router			/snapshots/push [post]
 func PushSnapshot(ctx *gin.Context) {
 	// TODO: Implement snapshot push
 	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "Snapshot push not yet implemented"})
 }
 
 // CreateSnapshot creates a new snapshot from a sandbox
-// @Summary		Create snapshot
-// @Description	Creates a snapshot from a running sandbox
-// @Tags			snapshots
-// @Accept			json
-// @Param			request	body	dto.CreateSnapshotRequestDTO	true	"Create request"
-// @Success		200
-// @Router			/snapshots/create [post]
+//
+//	@Summary		Create snapshot
+//	@Description	Creates a snapshot from a running sandbox
+//	@Tags			snapshots
+//	@Accept			json
+//	@Param			request	body	dto.CreateSnapshotRequestDTO	true	"Create request"
+//	@Success		200
+//	@Router			/snapshots/create [post]
 func CreateSnapshot(ctx *gin.Context) {
 	var createDTO dto.CreateSnapshotRequestDTO
 	if err := ctx.ShouldBindJSON(&createDTO); err != nil {
@@ -472,38 +489,41 @@ func CreateSnapshot(ctx *gin.Context) {
 }
 
 // BuildSnapshot builds a snapshot from a Dockerfile
-// @Summary		Build snapshot
-// @Description	Builds a snapshot from a Dockerfile
-// @Tags			snapshots
-// @Accept			json
-// @Param			request	body	dto.BuildSnapshotRequestDTO	true	"Build request"
-// @Success		200
-// @Router			/snapshots/build [post]
+//
+//	@Summary		Build snapshot
+//	@Description	Builds a snapshot from a Dockerfile
+//	@Tags			snapshots
+//	@Accept			json
+//	@Param			request	body	dto.BuildSnapshotRequestDTO	true	"Build request"
+//	@Success		200
+//	@Router			/snapshots/build [post]
 func BuildSnapshot(ctx *gin.Context) {
 	// TODO: Implement snapshot build
 	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "Snapshot build not yet implemented"})
 }
 
 // TagImage tags an image
-// @Summary		Tag image
-// @Description	Tags an image with a new reference
-// @Tags			snapshots
-// @Accept			json
-// @Param			request	body	dto.TagImageRequestDTO	true	"Tag request"
-// @Success		200
-// @Router			/snapshots/tag [post]
+//
+//	@Summary		Tag image
+//	@Description	Tags an image with a new reference
+//	@Tags			snapshots
+//	@Accept			json
+//	@Param			request	body	dto.TagImageRequestDTO	true	"Tag request"
+//	@Success		200
+//	@Router			/snapshots/tag [post]
 func TagImage(ctx *gin.Context) {
 	// TODO: Implement image tagging
 	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "Image tagging not yet implemented"})
 }
 
 // SnapshotExists checks if a snapshot exists
-// @Summary		Check snapshot exists
-// @Description	Checks if a snapshot exists
-// @Tags			snapshots
-// @Param			ref	query	string	true	"Snapshot reference"
-// @Success		200	{object}	bool
-// @Router			/snapshots/exists [get]
+//
+//	@Summary		Check snapshot exists
+//	@Description	Checks if a snapshot exists
+//	@Tags			snapshots
+//	@Param			ref	query		string	true	"Snapshot reference"
+//	@Success		200	{object}	bool
+//	@Router			/snapshots/exists [get]
 func SnapshotExists(ctx *gin.Context) {
 	ref := ctx.Query("ref")
 	if ref == "" {
@@ -528,12 +548,13 @@ func SnapshotExists(ctx *gin.Context) {
 }
 
 // GetSnapshotInfo returns snapshot information
-// @Summary		Get snapshot info
-// @Description	Returns information about a snapshot
-// @Tags			snapshots
-// @Param			ref	query	string	true	"Snapshot reference"
-// @Success		200	{object}	dto.SnapshotInfoResponseDTO
-// @Router			/snapshots/info [get]
+//
+//	@Summary		Get snapshot info
+//	@Description	Returns information about a snapshot
+//	@Tags			snapshots
+//	@Param			ref	query		string	true	"Snapshot reference"
+//	@Success		200	{object}	dto.SnapshotInfoResponseDTO
+//	@Router			/snapshots/info [get]
 func GetSnapshotInfo(ctx *gin.Context) {
 	ref := ctx.Query("ref")
 	if ref == "" {
@@ -554,13 +575,14 @@ func GetSnapshotInfo(ctx *gin.Context) {
 }
 
 // RemoveSnapshot removes a snapshot
-// @Summary		Remove snapshot
-// @Description	Removes a snapshot
-// @Tags			snapshots
-// @Accept			json
-// @Param			request	body	dto.RemoveImageRequestDTO	true	"Remove request"
-// @Success		200
-// @Router			/snapshots/remove [post]
+//
+//	@Summary		Remove snapshot
+//	@Description	Removes a snapshot
+//	@Tags			snapshots
+//	@Accept			json
+//	@Param			request	body	dto.RemoveImageRequestDTO	true	"Remove request"
+//	@Success		200
+//	@Router			/snapshots/remove [post]
 func RemoveSnapshot(ctx *gin.Context) {
 	var removeDTO dto.RemoveImageRequestDTO
 	if err := ctx.ShouldBindJSON(&removeDTO); err != nil {
@@ -577,11 +599,12 @@ func RemoveSnapshot(ctx *gin.Context) {
 }
 
 // GetBuildLogs returns build logs
-// @Summary		Get build logs
-// @Description	Returns build logs for a snapshot build
-// @Tags			snapshots
-// @Success		200	{string}	string
-// @Router			/snapshots/logs [get]
+//
+//	@Summary		Get build logs
+//	@Description	Returns build logs for a snapshot build
+//	@Tags			snapshots
+//	@Success		200	{string}	string
+//	@Router			/snapshots/logs [get]
 func GetBuildLogs(ctx *gin.Context) {
 	// TODO: Implement build logs
 	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "Build logs not yet implemented"})

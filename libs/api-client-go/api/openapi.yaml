@@ -2629,6 +2629,113 @@ paths:
       summary: Get toolbox proxy URL for a sandbox
       tags:
         - sandbox
+  /sandbox/{sandboxIdOrName}/snapshot:
+    post:
+      description: "Create a new snapshot from an existing sandbox. The snapshot captures\
+        \ the current state of the sandbox filesystem. Supports safe mode (pauses\
+        \ VM during operation) and live mode (no pause, may be inconsistent)."
+      operationId: createSandboxSnapshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox to create a snapshot from
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSandboxSnapshot'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Snapshot creation job has been started. The snapshot will be
+            available once the job completes.
+        '400':
+          description: Sandbox is not in a valid state for snapshot creation (must
+            be STARTED or STOPPED)
+        '404':
+          description: Sandbox not found
+        '409':
+          description: Snapshot creation is already in progress for this sandbox
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a snapshot from a sandbox
+      tags:
+        - sandbox
+  /sandbox/{sandboxIdOrName}/fork:
+    post:
+      description: Create a copy-on-write clone of a running sandbox. The fork includes
+        both the filesystem and memory state. Only available for sandboxes running
+        on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+      operationId: forkSandbox
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox to fork
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForkSandbox'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForkSandboxResponse'
+          description: Fork job has been created. The forked sandbox will be available
+            once the job completes.
+        '400':
+          description: Sandbox is not in a valid state for forking (must be STARTED)
+            or runner class is not LINUX_EXPERIMENTAL
+        '404':
+          description: Sandbox not found
+        '409':
+          description: Fork operation is already in progress or sandbox name already
+            exists
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Fork a sandbox
+      tags:
+        - sandbox
   /runners:
     get:
       operationId: listRunners
@@ -9511,6 +9618,7 @@ components:
       example:
         memory: 4
         buildInfo: ''
+        parentSandboxId: parent-sandbox-123
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -9685,6 +9793,10 @@ components:
           description: The version of the daemon running in the sandbox
           example: 1.0.0
           type: string
+        parentSandboxId:
+          description: The ID of the parent sandbox if this sandbox was forked
+          example: parent-sandbox-123
+          type: string
       required:
         - cpu
         - disk
@@ -9708,6 +9820,7 @@ components:
         items:
           - memory: 4
             buildInfo: ''
+            parentSandboxId: parent-sandbox-123
             autoStopInterval: 30
             organizationId: organization123
             createdAt: 2024-10-01T12:00:00Z
@@ -9745,6 +9858,7 @@ components:
             snapshot: daytonaio/sandbox:latest
           - memory: 4
             buildInfo: ''
+            parentSandboxId: parent-sandbox-123
             autoStopInterval: 30
             organizationId: organization123
             createdAt: 2024-10-01T12:00:00Z
@@ -10091,6 +10205,79 @@ components:
           type: string
       required:
         - url
+      type: object
+    CreateSandboxSnapshot:
+      example:
+        name: my-dev-env-v1
+        live: false
+      properties:
+        name:
+          description: Name for the new snapshot
+          example: my-dev-env-v1
+          type: string
+        live:
+          description: Use live mode (optimistic snapshot without pausing the VM).
+            Default is false (safe mode with pause).
+          example: false
+          type: boolean
+      required:
+        - name
+      type: object
+    ForkSandbox:
+      example:
+        name: my-forked-sandbox
+      properties:
+        name:
+          description: "The name for the forked sandbox. If not provided, a unique\
+            \ name will be generated."
+          example: my-forked-sandbox
+          type: string
+      type: object
+    ForkSandboxResponse:
+      example:
+        name: my-forked-sandbox
+        parentSandboxId: parent-sandbox-123
+        id: forked-sandbox-123
+        state: creating
+      properties:
+        id:
+          description: The ID of the newly forked sandbox
+          example: forked-sandbox-123
+          type: string
+        name:
+          description: The name of the forked sandbox
+          example: my-forked-sandbox
+          type: string
+        state:
+          description: The current state of the forked sandbox
+          enum:
+            - creating
+            - restoring
+            - destroyed
+            - destroying
+            - started
+            - stopped
+            - starting
+            - stopping
+            - error
+            - build_failed
+            - pending_build
+            - building_snapshot
+            - unknown
+            - pulling_snapshot
+            - archived
+            - archiving
+          example: creating
+          type: string
+        parentSandboxId:
+          description: The ID of the parent sandbox that was forked
+          example: parent-sandbox-123
+          type: string
+      required:
+        - id
+        - name
+        - parentSandboxId
+        - state
       type: object
     CreateRunner:
       example:
@@ -12291,6 +12478,7 @@ components:
       example:
         memory: 4
         buildInfo: ''
+        parentSandboxId: parent-sandbox-123
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -12468,6 +12656,10 @@ components:
         daemonVersion:
           description: The version of the daemon running in the sandbox
           example: 1.0.0
+          type: string
+        parentSandboxId:
+          description: The ID of the parent sandbox if this sandbox was forked
+          example: parent-sandbox-123
           type: string
         image:
           description: The image used for the workspace
@@ -12720,6 +12912,8 @@ components:
         - PULL_SNAPSHOT
         - REMOVE_SNAPSHOT
         - UPDATE_SANDBOX_NETWORK_SETTINGS
+        - CREATE_SANDBOX_SNAPSHOT
+        - FORK_SANDBOX
       type: string
     Job:
       example:

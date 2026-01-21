@@ -5,14 +5,36 @@ package cloudhypervisor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"syscall"
 	"time"
+	"unsafe"
 
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 )
+
+// TUN/TAP ioctl constants
+const (
+	tunSetIff = 0x400454ca // TUNSETIFF ioctl number
+	iffTap    = 0x0002     // TAP device (layer 2)
+	iffNoPi   = 0x1000     // No packet info
+	iffMultiQ = 0x0100     // Multi-queue support
+	devNetTun = "/dev/net/tun"
+)
+
+// ifreq structure for TUNSETIFF ioctl
+type ifreq struct {
+	name  [16]byte
+	flags uint16
+	_     [22]byte // padding to match kernel struct size
+}
 
 // ForkOptions specifies options for forking a VM
 type ForkOptions struct {
@@ -131,6 +153,28 @@ func (c *Client) ForkVM(ctx context.Context, opts ForkOptions) (*SandboxInfo, er
 		return nil, fmt.Errorf("failed to create overlay disk: %w (output: %s)", err, output)
 	}
 
+	// Step 3b: Patch the snapshot config to use the new disk path
+	// The snapshot's config.json contains the source VM's disk paths which are locked
+	// We need to replace them with our CoW overlay disk
+	log.Infof("Patching snapshot config to use overlay disk")
+	patchConfigCmd := fmt.Sprintf(`
+# Read the config.json from snapshot
+config_file="%s/config.json"
+if [ -f "$config_file" ]; then
+    # Use jq to replace the disk path
+    # The first disk (_disk0) is the main OS disk, second (_disk1) is cloud-init
+    jq '.disks[0].path = "%s"' "$config_file" > "$config_file.new" && mv "$config_file.new" "$config_file"
+    echo "Patched disk path in snapshot config"
+else
+    echo "No config.json found in snapshot"
+fi
+`, snapshotPath, targetDiskPath)
+
+	if output, err := c.runShellScript(ctx, patchConfigCmd); err != nil {
+		log.Warnf("Failed to patch snapshot config: %v (output: %s)", err, output)
+		// Continue anyway - the restore might work if disks aren't locked
+	}
+
 	// Step 4: Create network namespace for child VM
 	netns, err := c.netnsPool.Create(ctx, opts.NewSandboxId)
 	if err != nil {
@@ -181,16 +225,36 @@ exit 1
 	}
 
 	// Step 6: Restore VM from snapshot
+	// In local mode, we can pass the TAP file descriptor for proper live restore
+	// In remote mode, we fall back to cold restore (disk only, fresh boot)
 	log.Infof("Restoring forked VM from snapshot")
 
-	restoreConfig := RestoreConfig{
-		SourceUrl: fmt.Sprintf("file://%s", snapshotPath),
-		Prefault:  opts.Prefault,
-	}
+	if !c.IsRemote() {
+		// Get the network device ID from source VM config for proper FD mapping
+		netId := "_net0" // Default fallback - should match create.go
+		if sourceInfo != nil && sourceInfo.Config != nil && len(sourceInfo.Config.Net) > 0 {
+			if sourceInfo.Config.Net[0].Id != "" {
+				netId = sourceInfo.Config.Net[0].Id
+				log.Infof("Using network device ID from source VM: %s", netId)
+			}
+		}
 
-	if _, err := c.apiRequest(ctx, opts.NewSandboxId, http.MethodPut, "vm.restore", restoreConfig); err != nil {
-		c.cleanupFork(ctx, opts.NewSandboxId, snapshotPath)
-		return nil, fmt.Errorf("failed to restore forked VM: %w", err)
+		// Local mode: Use FD passing for true live fork
+		if err := c.restoreWithNetFds(ctx, opts.NewSandboxId, snapshotPath, netns, netId, opts.Prefault); err != nil {
+			c.cleanupFork(ctx, opts.NewSandboxId, snapshotPath)
+			return nil, fmt.Errorf("failed to restore forked VM with net_fds: %w", err)
+		}
+	} else {
+		// Remote mode: Fall back to standard restore (cold fork - disk only)
+		log.Warnf("Remote mode: live memory fork not supported, using cold fork (disk only)")
+		restoreConfig := RestoreConfig{
+			SourceUrl: fmt.Sprintf("file://%s", snapshotPath),
+			Prefault:  opts.Prefault,
+		}
+		if _, err := c.apiRequest(ctx, opts.NewSandboxId, http.MethodPut, "vm.restore", restoreConfig); err != nil {
+			c.cleanupFork(ctx, opts.NewSandboxId, snapshotPath)
+			return nil, fmt.Errorf("failed to restore forked VM: %w", err)
+		}
 	}
 
 	// Step 7: Resume child VM if it restored as paused
@@ -259,4 +323,198 @@ func (c *Client) GetParentSandboxId(ctx context.Context, sandboxId string) (stri
 func (c *Client) IsFork(ctx context.Context, sandboxId string) bool {
 	parent, _ := c.GetParentSandboxId(ctx, sandboxId)
 	return parent != ""
+}
+
+// restoreWithNetFds performs vm.restore with TAP file descriptor passing
+// This enables true live fork with memory state in local mode
+func (c *Client) restoreWithNetFds(ctx context.Context, sandboxId, snapshotPath string, netns *NetNamespace, netId string, prefault bool) error {
+	socketPath := c.getSocketPath(sandboxId)
+
+	log.Infof("Attempting live restore with net_fds for %s in namespace %s (net_id=%s)", sandboxId, netns.NamespaceName, netId)
+
+	// Step 1: Open the TAP device (tap0) in the namespace
+	// We need to enter the namespace, open /dev/net/tun, and attach to tap0
+	tapFd, err := c.openTapInNamespace(netns.NamespaceName, netns.TapName)
+	if err != nil {
+		log.Warnf("Failed to open TAP device for live fork: %v, falling back to cold fork", err)
+		return c.restoreWithoutNetFds(ctx, sandboxId, snapshotPath, prefault)
+	}
+
+	log.Infof("Opened TAP device %s in namespace %s, fd=%d", netns.TapName, netns.NamespaceName, tapFd)
+
+	// Step 2: Connect to CH's Unix socket
+	conn, err := net.Dial("unix", socketPath)
+	if err != nil {
+		unix.Close(tapFd) // Close TAP on error
+		return fmt.Errorf("failed to connect to CH socket: %w", err)
+	}
+
+	// Step 3: Build the restore request with net_fds
+	// The net_fds array tells CH which network device gets which FD
+	// Format: [{"id": "<net_id>", "fds": [fd_index]}]
+	// The FD is passed via SCM_RIGHTS, fd_index refers to position in the rights array
+	restoreReq := RestoreConfig{
+		SourceUrl: fmt.Sprintf("file://%s", snapshotPath),
+		Prefault:  prefault,
+		NetFds: []NetFd{
+			{Id: netId, Fds: []int{0}}, // Use the network device ID from source VM
+		},
+	}
+
+	reqBody, err := json.Marshal(restoreReq)
+	if err != nil {
+		unix.Close(tapFd)
+		conn.Close()
+		return fmt.Errorf("failed to marshal restore request: %w", err)
+	}
+
+	log.Debugf("Restore request body: %s", string(reqBody))
+
+	// Step 4: Send HTTP request with FD via SCM_RIGHTS
+	err = c.sendRestoreWithFd(conn, reqBody, tapFd)
+	conn.Close()
+
+	if err != nil {
+		unix.Close(tapFd) // Close TAP before falling back
+		log.Warnf("Failed to send restore with FD: %v, falling back to cold fork", err)
+		return c.restoreWithoutNetFds(ctx, sandboxId, snapshotPath, prefault)
+	}
+
+	// Keep the TAP FD open - CH now owns it via SCM_RIGHTS
+	// Note: we shouldn't close it here as CH is using it
+
+	log.Infof("Live restore completed for %s with net_fds", sandboxId)
+	return nil
+}
+
+// openTapInNamespace opens the TAP device in the specified network namespace
+func (c *Client) openTapInNamespace(nsName, tapName string) (int, error) {
+	// Lock this goroutine to an OS thread since we're changing namespaces
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	// Get current namespace FD
+	currentNsPath := "/proc/self/ns/net"
+	currentNsFd, err := unix.Open(currentNsPath, unix.O_RDONLY, 0)
+	if err != nil {
+		return -1, fmt.Errorf("failed to open current netns: %w", err)
+	}
+	defer unix.Close(currentNsFd)
+
+	// Open target namespace
+	nsPath := fmt.Sprintf("/var/run/netns/%s", nsName)
+	nsFd, err := unix.Open(nsPath, unix.O_RDONLY, 0)
+	if err != nil {
+		return -1, fmt.Errorf("failed to open namespace %s: %w", nsName, err)
+	}
+	defer unix.Close(nsFd)
+
+	// Enter the namespace
+	if err := unix.Setns(nsFd, unix.CLONE_NEWNET); err != nil {
+		return -1, fmt.Errorf("failed to enter namespace: %w", err)
+	}
+
+	// Open /dev/net/tun
+	tunFd, err := unix.Open(devNetTun, unix.O_RDWR, 0)
+	if err != nil {
+		// Restore original namespace before returning error
+		unix.Setns(currentNsFd, unix.CLONE_NEWNET)
+		return -1, fmt.Errorf("failed to open %s: %w", devNetTun, err)
+	}
+
+	// Configure the interface with TUNSETIFF
+	var ifr ifreq
+	copy(ifr.name[:], tapName)
+	// Use TAP mode without multi-queue (simpler and more compatible)
+	ifr.flags = iffTap | iffNoPi
+
+	log.Debugf("TUNSETIFF: opening TAP %s in namespace %s", tapName, nsName)
+
+	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, uintptr(tunFd), tunSetIff, uintptr(unsafe.Pointer(&ifr)))
+	if errno != 0 {
+		unix.Close(tunFd)
+		unix.Setns(currentNsFd, unix.CLONE_NEWNET)
+		return -1, fmt.Errorf("TUNSETIFF ioctl failed: %v (tap=%s, flags=0x%x)", errno, tapName, ifr.flags)
+	}
+
+	// Return to original namespace
+	if err := unix.Setns(currentNsFd, unix.CLONE_NEWNET); err != nil {
+		log.Warnf("Failed to restore original namespace: %v", err)
+	}
+
+	return tunFd, nil
+}
+
+// sendRestoreWithFd sends the restore HTTP request with the TAP FD via SCM_RIGHTS
+func (c *Client) sendRestoreWithFd(conn net.Conn, reqBody []byte, tapFd int) error {
+	// Get the underlying file descriptor for the Unix socket
+	unixConn, ok := conn.(*net.UnixConn)
+	if !ok {
+		return fmt.Errorf("connection is not a Unix socket")
+	}
+
+	file, err := unixConn.File()
+	if err != nil {
+		return fmt.Errorf("failed to get socket file: %w", err)
+	}
+	defer file.Close()
+	sockFd := int(file.Fd())
+
+	// Build HTTP request
+	httpReq := fmt.Sprintf("PUT /api/v1/vm.restore HTTP/1.1\r\n"+
+		"Host: localhost\r\n"+
+		"Content-Type: application/json\r\n"+
+		"Content-Length: %d\r\n"+
+		"\r\n"+
+		"%s", len(reqBody), string(reqBody))
+
+	// Send the request with the FD attached via SCM_RIGHTS
+	rights := syscall.UnixRights(tapFd)
+	err = syscall.Sendmsg(sockFd, []byte(httpReq), rights, nil, 0)
+	if err != nil {
+		return fmt.Errorf("sendmsg failed: %w", err)
+	}
+
+	// Read response
+	buf := make([]byte, 4096)
+	n, err := syscall.Read(sockFd, buf)
+	if err != nil {
+		return fmt.Errorf("failed to read response: %w", err)
+	}
+
+	response := string(buf[:n])
+	log.Debugf("CH restore response: %s", response)
+
+	// Check for HTTP success status
+	if !strings.Contains(response, "200") && !strings.Contains(response, "204") {
+		return fmt.Errorf("restore failed: %s", response)
+	}
+
+	return nil
+}
+
+// restoreWithoutNetFds performs a cold restore (disk only, fresh boot)
+func (c *Client) restoreWithoutNetFds(ctx context.Context, sandboxId, snapshotPath string, prefault bool) error {
+	socketPath := c.getSocketPath(sandboxId)
+
+	log.Infof("Performing cold restore (without net_fds) for %s", sandboxId)
+
+	// Build restore request without net_fds
+	restoreReq := fmt.Sprintf(`{"source_url":"file://%s","prefault":%v}`, snapshotPath, prefault)
+
+	// Use curl to call the CH API
+	curlCmd := fmt.Sprintf(`curl -s -X PUT -H "Content-Type: application/json" --unix-socket "%s" -d '%s' "http://localhost/api/v1/vm.restore"`,
+		socketPath, restoreReq)
+
+	output, err := c.runShellScript(ctx, curlCmd)
+	if err != nil {
+		return fmt.Errorf("vm.restore failed: %w (output: %s)", err, output)
+	}
+
+	output = strings.TrimSpace(output)
+	if strings.Contains(strings.ToLower(output), "error") {
+		return fmt.Errorf("vm.restore returned error: %s", output)
+	}
+
+	return nil
 }

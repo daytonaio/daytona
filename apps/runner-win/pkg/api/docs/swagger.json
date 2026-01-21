@@ -450,6 +450,182 @@
         }
       }
     },
+    "/sandboxes/{sandboxId}/proxy/{port}/{path}": {
+      "get": {
+        "description": "Forwards the request to the daemon's proxy endpoint which routes to localhost:port",
+        "tags": ["proxy"],
+        "summary": "Proxy requests to applications on specific ports",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Target port number",
+            "name": "port",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Path to forward",
+            "name": "path",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxied response",
+            "schema": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "Sandbox container not found",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Forwards the request to the daemon's proxy endpoint which routes to localhost:port",
+        "tags": ["proxy"],
+        "summary": "Proxy requests to applications on specific ports",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Target port number",
+            "name": "port",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Path to forward",
+            "name": "path",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxied response",
+            "schema": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "Sandbox container not found",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Forwards the request to the daemon's proxy endpoint which routes to localhost:port",
+        "tags": ["proxy"],
+        "summary": "Proxy requests to applications on specific ports",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Target port number",
+            "name": "port",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Path to forward",
+            "name": "path",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxied response",
+            "schema": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "Sandbox container not found",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
     "/sandboxes/{sandboxId}/resize": {
       "post": {
         "description": "Resize sandbox",
@@ -865,6 +1041,63 @@
         }
       }
     },
+    "/snapshots/create": {
+      "post": {
+        "description": "Create a snapshot from a sandbox's disk and upload it to the S3-compatible snapshot store. Supports two modes: safe mode (live=false, default) pauses the VM briefly for a consistent snapshot, optimistic mode (live=true) takes the snapshot without pausing but may be inconsistent if the VM is actively writing.",
+        "tags": ["snapshots"],
+        "summary": "Create a snapshot from a running or stopped sandbox",
+        "operationId": "CreateSnapshot",
+        "parameters": [
+          {
+            "description": "Create snapshot request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateSnapshotRequestDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Snapshot successfully created",
+            "schema": {
+              "$ref": "#/definitions/CreateSnapshotResponseDTO"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/snapshots/exists": {
       "get": {
         "description": "Check if a specified snapshot exists locally",
@@ -1083,6 +1316,63 @@
         }
       }
     },
+    "/snapshots/push": {
+      "post": {
+        "description": "Create a snapshot from a sandbox's disk and upload it to the S3-compatible snapshot store",
+        "tags": ["snapshots"],
+        "summary": "Push a snapshot to the snapshot store",
+        "operationId": "PushSnapshot",
+        "parameters": [
+          {
+            "description": "Push snapshot request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PushSnapshotRequestDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Snapshot successfully pushed",
+            "schema": {
+              "$ref": "#/definitions/PushSnapshotResponseDTO"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/snapshots/remove": {
       "post": {
         "description": "Remove a specified snapshot from the local system",
@@ -1191,6 +1481,68 @@
             "description": "Internal Server Error",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/stats/memory": {
+      "get": {
+        "description": "Returns memory statistics for VMs over a time range",
+        "produces": ["application/json"],
+        "tags": ["stats"],
+        "summary": "Get memory statistics",
+        "operationId": "GetMemoryStats",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Filter by VM name",
+            "name": "vm",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Lookback hours (default: 24)",
+            "name": "hours",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/controllers.MemoryStatsResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/stats/memory/view": {
+      "get": {
+        "description": "Returns an interactive HTML page with memory usage charts",
+        "produces": ["text/html"],
+        "tags": ["stats"],
+        "summary": "Memory stats visualization",
+        "operationId": "GetMemoryStatsView",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Lookback hours (default: 24)",
+            "name": "hours",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML page",
+            "schema": {
+              "type": "string"
             }
           }
         }
@@ -1314,6 +1666,50 @@
         }
       }
     },
+    "CreateSnapshotRequestDTO": {
+      "type": "object",
+      "required": ["name", "organizationId", "sandboxId"],
+      "properties": {
+        "live": {
+          "description": "If true, use optimistic mode (no pause); if false (default), pause VM for consistency",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Name for the snapshot (e.g., \"myapp-v1.0\")",
+          "type": "string"
+        },
+        "organizationId": {
+          "description": "Organization ID to namespace the snapshot in S3",
+          "type": "string"
+        },
+        "sandboxId": {
+          "description": "ID of the sandbox to create snapshot from",
+          "type": "string"
+        }
+      }
+    },
+    "CreateSnapshotResponseDTO": {
+      "type": "object",
+      "properties": {
+        "liveMode": {
+          "description": "Which mode was used",
+          "type": "boolean",
+          "example": false
+        },
+        "name": {
+          "type": "string",
+          "example": "myapp-v1.0"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "example": 15032385536
+        },
+        "snapshotPath": {
+          "type": "string",
+          "example": "snapshots/myapp-v1.0.qcow2"
+        }
+      }
+    },
     "ErrorResponse": {
       "description": "Error response",
       "type": "object",
@@ -1360,6 +1756,37 @@
         },
         "snapshot": {
           "type": "string"
+        }
+      }
+    },
+    "PushSnapshotRequestDTO": {
+      "type": "object",
+      "required": ["sandboxId", "snapshotName"],
+      "properties": {
+        "sandboxId": {
+          "description": "ID of the sandbox to create snapshot from",
+          "type": "string"
+        },
+        "snapshotName": {
+          "description": "Name for the new snapshot (e.g., \"myapp-v1.0\")",
+          "type": "string"
+        }
+      }
+    },
+    "PushSnapshotResponseDTO": {
+      "type": "object",
+      "properties": {
+        "sizeBytes": {
+          "type": "integer",
+          "example": 15032385536
+        },
+        "snapshotName": {
+          "type": "string",
+          "example": "myapp-v1.0"
+        },
+        "snapshotPath": {
+          "type": "string",
+          "example": "snapshots/myapp-v1.0.qcow2"
         }
       }
     },
@@ -1526,6 +1953,32 @@
         }
       }
     },
+    "controllers.MemoryStatsResponse": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "from_time": {
+          "type": "string"
+        },
+        "stats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/libvirt.MemoryStatsRecord"
+          }
+        },
+        "to_time": {
+          "type": "string"
+        },
+        "vm_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "dto.VolumeDTO": {
       "type": "object",
       "properties": {
@@ -1581,6 +2034,41 @@
         "SandboxStateUnknown",
         "SandboxStatePullingSnapshot"
       ]
+    },
+    "libvirt.MemoryStatsRecord": {
+      "type": "object",
+      "properties": {
+        "actual_kib": {
+          "type": "integer"
+        },
+        "balloon_active": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "max_memory_kib": {
+          "type": "integer"
+        },
+        "rss_kib": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "unused_kib": {
+          "type": "integer"
+        },
+        "used_kib": {
+          "type": "integer"
+        },
+        "vm_name": {
+          "type": "string"
+        },
+        "vm_uuid": {
+          "type": "string"
+        }
+      }
     }
   },
   "securityDefinitions": {

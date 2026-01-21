@@ -79,7 +79,9 @@ type Sandbox struct {
 	// Deprecated
 	Class *string `json:"class,omitempty"`
 	// The version of the daemon running in the sandbox
-	DaemonVersion        *string `json:"daemonVersion,omitempty"`
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// The ID of the parent sandbox if this sandbox was forked
+	ParentSandboxId      *string `json:"parentSandboxId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -942,6 +944,38 @@ func (o *Sandbox) SetDaemonVersion(v string) {
 	o.DaemonVersion = &v
 }
 
+// GetParentSandboxId returns the ParentSandboxId field value if set, zero value otherwise.
+func (o *Sandbox) GetParentSandboxId() string {
+	if o == nil || IsNil(o.ParentSandboxId) {
+		var ret string
+		return ret
+	}
+	return *o.ParentSandboxId
+}
+
+// GetParentSandboxIdOk returns a tuple with the ParentSandboxId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetParentSandboxIdOk() (*string, bool) {
+	if o == nil || IsNil(o.ParentSandboxId) {
+		return nil, false
+	}
+	return o.ParentSandboxId, true
+}
+
+// HasParentSandboxId returns a boolean if a field has been set.
+func (o *Sandbox) HasParentSandboxId() bool {
+	if o != nil && !IsNil(o.ParentSandboxId) {
+		return true
+	}
+
+	return false
+}
+
+// SetParentSandboxId gets a reference to the given string and assigns it to the ParentSandboxId field.
+func (o *Sandbox) SetParentSandboxId(v string) {
+	o.ParentSandboxId = &v
+}
+
 func (o Sandbox) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -1012,6 +1046,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.DaemonVersion) {
 		toSerialize["daemonVersion"] = o.DaemonVersion
+	}
+	if !IsNil(o.ParentSandboxId) {
+		toSerialize["parentSandboxId"] = o.ParentSandboxId
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -1097,6 +1134,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
+		delete(additionalProperties, "parentSandboxId")
 		o.AdditionalProperties = additionalProperties
 	}
 

@@ -12,6 +12,7 @@ import {
   VolumesApi,
   SandboxVolume,
   ConfigApi,
+  ForkSandboxResponse,
 } from '@daytonaio/api-client'
 import axios, { AxiosError, AxiosInstance } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
@@ -657,6 +658,26 @@ export class Daytona {
    */
   public async delete(sandbox: Sandbox, timeout = 60) {
     await sandbox.delete(timeout)
+  }
+
+  /**
+   * Creates a live fork of a Sandbox, including memory and filesystem state.
+   * The new sandbox will be a copy-on-write clone of the source sandbox.
+   *
+   * This method is only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+   * The source sandbox must be in STARTED state.
+   *
+   * @param {Sandbox} sandbox - The Sandbox to fork
+   * @param {string} [name] - Optional name for the forked sandbox
+   * @returns {Promise<ForkSandboxResponse>} The response containing the forked sandbox ID, name, and state.
+   *
+   * @example
+   * const sandbox = await daytona.get('my-sandbox-id');
+   * const forkResult = await daytona.fork(sandbox, 'my-forked-sandbox');
+   * console.log(`Forked sandbox ID: ${forkResult.id}`);
+   */
+  public async fork(sandbox: Sandbox, name?: string): Promise<ForkSandboxResponse> {
+    return sandbox.fork(name)
   }
 
   /**

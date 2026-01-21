@@ -53,6 +53,7 @@ daytona_api_client_async/models/create_region_response.py
 daytona_api_client_async/models/create_runner.py
 daytona_api_client_async/models/create_runner_response.py
 daytona_api_client_async/models/create_sandbox.py
+daytona_api_client_async/models/create_sandbox_snapshot.py
 daytona_api_client_async/models/create_session_request.py
 daytona_api_client_async/models/create_snapshot.py
 daytona_api_client_async/models/create_user.py
@@ -66,6 +67,8 @@ daytona_api_client_async/models/execute_request.py
 daytona_api_client_async/models/execute_response.py
 daytona_api_client_async/models/file_info.py
 daytona_api_client_async/models/file_status.py
+daytona_api_client_async/models/fork_sandbox.py
+daytona_api_client_async/models/fork_sandbox_response.py
 daytona_api_client_async/models/git_add_request.py
 daytona_api_client_async/models/git_branch_request.py
 daytona_api_client_async/models/git_checkout_request.py

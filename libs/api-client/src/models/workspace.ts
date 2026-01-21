@@ -210,6 +210,12 @@ export interface Workspace {
    */
   daemonVersion?: string
   /**
+   * The ID of the parent sandbox if this sandbox was forked
+   * @type {string}
+   * @memberof Workspace
+   */
+  parentSandboxId?: string
+  /**
    * The image used for the workspace
    * @type {string}
    * @memberof Workspace

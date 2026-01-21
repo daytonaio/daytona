@@ -118,6 +118,8 @@ export class RunnerAdapterV2 implements RunnerAdapter {
         return job.status === JobStatus.COMPLETED ? SandboxState.STOPPED : SandboxState.STOPPING
       case JobType.DESTROY_SANDBOX:
         return job.status === JobStatus.COMPLETED ? SandboxState.DESTROYED : SandboxState.DESTROYING
+      case JobType.FORK_SANDBOX:
+        return job.status === JobStatus.COMPLETED ? SandboxState.STARTED : SandboxState.CREATING
       default:
         // For other job types (backup, etc.), return current sandbox state
         return sandbox.state
@@ -440,5 +442,26 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     )
 
     this.logger.debug(`Created CREATE_SANDBOX_SNAPSHOT job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+  }
+
+  @Transactional()
+  async forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void> {
+    const payload = {
+      sourceSandboxId,
+      newSandboxId,
+    }
+
+    await this.jobService.createJob(
+      null,
+      JobType.FORK_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      newSandboxId,
+      payload,
+    )
+
+    this.logger.debug(
+      `Created FORK_SANDBOX job for sandbox ${sourceSandboxId} -> ${newSandboxId} on runner ${this.runner.id}`,
+    )
   }
 }

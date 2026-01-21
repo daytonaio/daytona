@@ -69,6 +69,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
+import { ForkSandboxDto, ForkSandboxResponseDto } from '../dto/fork-sandbox.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
@@ -1107,6 +1108,71 @@ export class SandboxController {
       dto.live,
     )
     return SandboxDto.fromSandbox(sandbox)
+  }
+
+  @Post(':sandboxIdOrName/fork')
+  @HttpCode(200)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-create')
+  @ApiOperation({
+    summary: 'Fork a sandbox',
+    description:
+      'Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.',
+    operationId: 'forkSandbox',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox to fork',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Fork job has been created. The forked sandbox will be available once the job completes.',
+    type: ForkSandboxResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Sandbox is not in a valid state for forking (must be STARTED) or runner class is not LINUX_EXPERIMENTAL',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sandbox not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Fork operation is already in progress or sandbox name already exists',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.FORK,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxIdOrName,
+    targetIdFromResult: (result: ForkSandboxResponseDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<ForkSandboxDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
+  async forkSandbox(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() dto: ForkSandboxDto,
+  ): Promise<ForkSandboxResponseDto> {
+    const forkedSandbox = await this.sandboxService.forkSandbox(sandboxIdOrName, authContext.organization, dto.name)
+
+    // Wait for the forked sandbox to start (up to 60 seconds)
+    // Fork should be fast since it's restoring from snapshot, but we give some buffer
+    const startedSandbox = await this.waitForSandboxStarted(forkedSandbox, 60)
+
+    return {
+      id: startedSandbox.id,
+      name: startedSandbox.name,
+      state: startedSandbox.state!,
+      parentSandboxId: startedSandbox.parentSandboxId,
+    }
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn't, return current sandbox

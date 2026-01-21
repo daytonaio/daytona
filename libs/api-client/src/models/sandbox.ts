@@ -206,6 +206,12 @@ export interface Sandbox {
    * @memberof Sandbox
    */
   daemonVersion?: string
+  /**
+   * The ID of the parent sandbox if this sandbox was forked
+   * @type {string}
+   * @memberof Sandbox
+   */
+  parentSandboxId?: string
 }
 
 export const SandboxBackupStateEnum = {

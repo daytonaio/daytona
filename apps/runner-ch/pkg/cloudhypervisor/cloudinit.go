@@ -92,8 +92,8 @@ fi
 rm -rf "$TMPDIR"
 `, networkConfig, metaData, userData, isoPath, isoPath, isoPath, isoPath)
 
-	if _, err := c.runCommandOutput(ctx, script); err != nil {
-		return "", fmt.Errorf("failed to create cloud-init ISO: %w", err)
+	if output, err := c.runShellScript(ctx, script); err != nil {
+		return "", fmt.Errorf("failed to create cloud-init ISO: %w (output: %s)", err, output)
 	}
 
 	log.Debugf("Created cloud-init ISO at %s with IP %s", isoPath, cfg.IP)
@@ -144,8 +144,8 @@ cat > %s/user-data << 'EOF'
 EOF
 `, seedDir, seedDir, networkConfig, seedDir, metaData, seedDir, userData)
 
-	if _, err := c.runCommandOutput(ctx, script); err != nil {
-		return "", fmt.Errorf("failed to create cloud-init seed: %w", err)
+	if output, err := c.runShellScript(ctx, script); err != nil {
+		return "", fmt.Errorf("failed to create cloud-init seed: %w (output: %s)", err, output)
 	}
 
 	return seedDir, nil

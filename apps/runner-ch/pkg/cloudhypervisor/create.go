@@ -46,6 +46,12 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 		return c.GetSandboxInfo(ctx, opts.SandboxId)
 	}
 
+	// Check if this is a warm snapshot (has memory state for instant restore)
+	if opts.Snapshot != "" && c.isWarmSnapshot(ctx, opts.Snapshot) {
+		log.Infof("Detected warm snapshot %s - using instant restore", opts.Snapshot)
+		return c.createFromWarmSnapshot(ctx, opts)
+	}
+
 	// Set defaults
 	if opts.Cpus <= 0 {
 		opts.Cpus = c.config.DefaultCpus
@@ -101,6 +107,7 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 	GetIPCache().Set(opts.SandboxId, ip)
 
 	// Create cloud-init ISO with fixed internal network configuration
+	// This is REQUIRED for network namespaces - there's no DHCP server, so VM must have static IP
 	hostname := opts.SandboxId
 	if len(hostname) > 12 {
 		hostname = hostname[:12]
@@ -112,8 +119,8 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 		Hostname: hostname,
 	})
 	if err != nil {
-		log.Warnf("Failed to create cloud-init ISO: %v (VM will use DHCP fallback)", err)
-		cloudInitISO = "" // Continue without cloud-init
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to create cloud-init ISO (required for network config): %w", err)
 	}
 
 	// Generate MAC address
@@ -150,6 +157,11 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 	if _, err := c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.boot", nil); err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)
 		return nil, fmt.Errorf("failed to boot VM: %w", err)
+	}
+
+	// Wait for daemon to be reachable (the VM needs time to boot and start the daemon)
+	if err := c.waitForDaemon(ctx, opts.SandboxId, netns.ExternalIP, 30*time.Second); err != nil {
+		log.Warnf("Daemon health check failed for %s: %v (continuing anyway)", opts.SandboxId, err)
 	}
 
 	log.Infof("Sandbox %s created successfully with IP %s", opts.SandboxId, ip)
@@ -353,6 +365,7 @@ func (c *Client) buildVmConfig(opts CreateOptions, diskPath, tapName, mac, cloud
 		Disks: disks,
 		Net: []NetConfig{
 			{
+				Id:  "_net0", // Explicit ID for fork restore compatibility
 				Tap: tapName,
 				Mac: mac,
 			},
@@ -665,4 +678,119 @@ func hasImageExtension(path string) bool {
 // ptrUint64 returns a pointer to a uint64
 func ptrUint64(v uint64) *uint64 {
 	return &v
+}
+
+// isWarmSnapshot checks if a snapshot is a "warm" snapshot with memory state
+// Warm snapshots contain: disk.qcow2, memory-ranges, state.json, config.json
+// They allow instant VM restore without booting (3-4 seconds vs 15+ seconds)
+func (c *Client) isWarmSnapshot(ctx context.Context, snapshotName string) bool {
+	// Warm snapshots are directories containing memory state
+	snapshotDir := filepath.Join(c.config.SnapshotsPath, snapshotName)
+
+	// Check if it's a directory with memory-ranges file
+	checkCmd := fmt.Sprintf(`[ -d "%s" ] && [ -f "%s/memory-ranges" ] && [ -f "%s/disk.qcow2" ] && echo "WARM" || echo "COLD"`,
+		snapshotDir, snapshotDir, snapshotDir)
+
+	output, err := c.runShellScript(ctx, checkCmd)
+	if err != nil {
+		return false
+	}
+
+	return strings.TrimSpace(output) == "WARM"
+}
+
+// createFromWarmSnapshot creates a VM by restoring from a warm snapshot
+// This is much faster than cold boot (~3-4 seconds vs ~15 seconds) because:
+// 1. No kernel boot required
+// 2. Memory state is restored directly
+// 3. Daemon is immediately available
+func (c *Client) createFromWarmSnapshot(ctx context.Context, opts CreateOptions) (*SandboxInfo, error) {
+	snapshotDir := filepath.Join(c.config.SnapshotsPath, opts.Snapshot)
+	sandboxDir := c.getSandboxDir(opts.SandboxId)
+	diskPath := c.getDiskPath(opts.SandboxId)
+
+	log.Infof("Creating sandbox %s from warm snapshot %s (instant restore)", opts.SandboxId, opts.Snapshot)
+
+	// Step 1: Create sandbox directory and CoW disk overlay
+	goldenDisk := filepath.Join(snapshotDir, "disk.qcow2")
+	createDiskCmd := fmt.Sprintf(
+		`mkdir -p "%s" && qemu-img create -f qcow2 -F qcow2 -b "%s" "%s" %dG`,
+		sandboxDir, goldenDisk, diskPath, opts.StorageGB)
+
+	if _, err := c.runShellScript(ctx, createDiskCmd); err != nil {
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to create disk overlay: %w", err)
+	}
+	log.Infof("Created CoW disk overlay from warm snapshot")
+
+	// Step 2: Create network namespace
+	netns, err := c.netnsPool.Create(ctx, opts.SandboxId)
+	if err != nil {
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to create network namespace: %w", err)
+	}
+	log.Infof("Created network namespace %s for %s", netns.NamespaceName, opts.SandboxId)
+
+	// Store IP for proxy routing
+	ip := netns.GuestIP
+	ipFilePath := filepath.Join(sandboxDir, "ip")
+	_ = c.runCommand(ctx, "sh", "-c", fmt.Sprintf("echo '%s' > %s", ip, ipFilePath))
+	GetIPCache().Set(opts.SandboxId, ip)
+
+	// Step 3: Create temporary snapshot directory with patched config
+	// The config needs to point to the new disk path
+	tempSnapshotDir := filepath.Join(sandboxDir, "temp-snapshot")
+	patchCmd := fmt.Sprintf(`
+mkdir -p "%s"
+cp "%s/memory-ranges" "%s/"
+cp "%s/state.json" "%s/"
+
+# Patch config.json to use the new disk path and remove cloud-init disk
+cat "%s/config.json" | jq '.disks[0].path = "%s"' > "%s/config.json"
+`,
+		tempSnapshotDir,
+		snapshotDir, tempSnapshotDir,
+		snapshotDir, tempSnapshotDir,
+		snapshotDir, diskPath, tempSnapshotDir)
+
+	if _, err := c.runShellScript(ctx, patchCmd); err != nil {
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to prepare snapshot for restore: %w", err)
+	}
+
+	// Step 4: Start cloud-hypervisor process in namespace
+	if err := c.startVMProcessInNamespaceAndWait(ctx, opts.SandboxId, netns, 10*time.Second); err != nil {
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to start cloud-hypervisor: %w", err)
+	}
+
+	// Step 5: Restore VM from snapshot
+	restoreReq := map[string]interface{}{
+		"source_url": fmt.Sprintf("file://%s", tempSnapshotDir),
+		"prefault":   false,
+	}
+
+	if _, err := c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.restore", restoreReq); err != nil {
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to restore VM from snapshot: %w", err)
+	}
+	log.Infof("VM restored from warm snapshot")
+
+	// Step 6: Resume the VM
+	if _, err := c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.resume", nil); err != nil {
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to resume VM: %w", err)
+	}
+
+	// Step 7: Clean up temporary snapshot directory
+	_ = c.runCommand(ctx, "rm", "-rf", tempSnapshotDir)
+
+	// Wait briefly for daemon to be ready (should be almost instant since memory is restored)
+	if err := c.waitForDaemon(ctx, opts.SandboxId, netns.ExternalIP, 10*time.Second); err != nil {
+		log.Warnf("Daemon health check failed after warm restore for %s: %v", opts.SandboxId, err)
+	}
+
+	log.Infof("Sandbox %s created from warm snapshot in instant restore mode", opts.SandboxId)
+
+	return c.GetSandboxInfo(ctx, opts.SandboxId)
 }

@@ -15,6 +15,7 @@ from daytona_api_client_async import (
     Configuration,
     CreateBuildInfo,
     CreateSandbox,
+    ForkSandboxResponse,
     ObjectStorageApi,
     SandboxApi,
     SandboxState,
@@ -678,6 +679,31 @@ class AsyncDaytona:
             DaytonaError: If timeout is negative; If Sandbox fails to stop or times out
         """
         await sandbox.stop(timeout)
+
+    @intercept_errors(message_prefix="Failed to fork sandbox: ")
+    async def fork(self, sandbox: AsyncSandbox, name: Optional[str] = None) -> ForkSandboxResponse:
+        """Creates a live fork of a Sandbox, including memory and filesystem state.
+        The new sandbox will be a copy-on-write clone of the source sandbox.
+
+        This method is only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+        The source sandbox must be in STARTED state.
+
+        Args:
+            sandbox (AsyncSandbox): The Sandbox to fork.
+            name (Optional[str]): Optional name for the forked sandbox. If not provided,
+                a unique name will be generated.
+
+        Returns:
+            ForkSandboxResponse: The response containing the forked sandbox ID, name, and state.
+
+        Example:
+            ```python
+            sandbox = await daytona.get("my-sandbox")
+            fork_result = await daytona.fork(sandbox, "my-forked-sandbox")
+            print(f"Forked sandbox ID: {fork_result.id}")
+            ```
+        """
+        return await sandbox.fork(name)
 
     def _clone_api_client_to_toolbox_api_client(self):
         config = deepcopy(self._api_client.configuration)

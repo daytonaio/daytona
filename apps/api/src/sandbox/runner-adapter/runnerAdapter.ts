@@ -99,6 +99,8 @@ export interface RunnerAdapter {
     organizationId: string,
     live?: boolean,
   ): Promise<void>
+
+  forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void>
 }
 
 @Injectable()

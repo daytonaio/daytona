@@ -67,6 +67,8 @@ models/execute-request.ts
 models/execute-response.ts
 models/file-info.ts
 models/file-status.ts
+models/fork-sandbox-response.ts
+models/fork-sandbox.ts
 models/git-add-request.ts
 models/git-branch-request.ts
 models/git-checkout-request.ts

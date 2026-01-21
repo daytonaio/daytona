@@ -69,12 +69,38 @@ func NewNetNSPool(client *Client) *NetNSPool {
 	return pool
 }
 
-// Initialize loads existing namespace allocations from sandbox directories
+// Initialize loads existing namespace allocations from sandbox directories and network state
 func (p *NetNSPool) Initialize(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	// Get list of existing sandboxes
+	// FIRST: Scan actual network interfaces to find used IP ranges
+	// This prevents conflicts even if netns files are missing or corrupted
+	usedNums := make(map[int]bool)
+
+	// Parse veth interfaces: veth-XXXX with IP 10.0.{num}.254
+	output, err := p.client.runShellScript(ctx, "ip addr | grep -E 'inet 10\\.0\\.[0-9]+\\.254' | awk '{print $2}' | cut -d'.' -f3")
+	if err == nil {
+		for _, line := range strings.Split(strings.TrimSpace(output), "\n") {
+			if line == "" {
+				continue
+			}
+			num, err := strconv.Atoi(line)
+			if err == nil && num >= ExternalNetStart && num <= ExternalNetEnd {
+				usedNums[num] = true
+				log.Debugf("NetNS pool: found used network number %d from veth interface", num)
+			}
+		}
+	}
+
+	// Remove all used numbers from available pool
+	for num := range usedNums {
+		p.removeFromAvailable(num)
+	}
+
+	log.Infof("NetNS pool: found %d used network numbers from existing veth interfaces", len(usedNums))
+
+	// SECOND: Get list of existing sandboxes and load their allocations
 	sandboxes, err := p.client.List(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to list sandboxes: %w", err)
@@ -100,14 +126,14 @@ func (p *NetNSPool) Initialize(ctx context.Context) error {
 			continue
 		}
 
-		// Restore namespace info
+		// Restore namespace info (removeFromAvailable is idempotent)
 		ns := p.buildNetNamespace(sandboxId, num)
 		p.namespaces[sandboxId] = ns
-		p.removeFromAvailable(num)
+		p.removeFromAvailable(num) // Safe to call again even if already removed
 		log.Debugf("NetNS pool: restored allocation %s -> %d", sandboxId, num)
 	}
 
-	log.Infof("NetNS pool: %d allocated, %d available", len(p.namespaces), len(p.availableNum))
+	log.Infof("NetNS pool: %d tracked sandboxes, %d available network numbers", len(p.namespaces), len(p.availableNum))
 	return nil
 }
 

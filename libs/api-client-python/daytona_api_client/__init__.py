@@ -78,6 +78,7 @@ from daytona_api_client.models.create_region_response import CreateRegionRespons
 from daytona_api_client.models.create_runner import CreateRunner
 from daytona_api_client.models.create_runner_response import CreateRunnerResponse
 from daytona_api_client.models.create_sandbox import CreateSandbox
+from daytona_api_client.models.create_sandbox_snapshot import CreateSandboxSnapshot
 from daytona_api_client.models.create_session_request import CreateSessionRequest
 from daytona_api_client.models.create_snapshot import CreateSnapshot
 from daytona_api_client.models.create_user import CreateUser
@@ -91,6 +92,8 @@ from daytona_api_client.models.execute_request import ExecuteRequest
 from daytona_api_client.models.execute_response import ExecuteResponse
 from daytona_api_client.models.file_info import FileInfo
 from daytona_api_client.models.file_status import FileStatus
+from daytona_api_client.models.fork_sandbox import ForkSandbox
+from daytona_api_client.models.fork_sandbox_response import ForkSandboxResponse
 from daytona_api_client.models.git_add_request import GitAddRequest
 from daytona_api_client.models.git_branch_request import GitBranchRequest
 from daytona_api_client.models.git_checkout_request import GitCheckoutRequest

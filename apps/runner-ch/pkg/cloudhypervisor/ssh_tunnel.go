@@ -180,9 +180,10 @@ func GetSSHTunnelTransport(sshHost, sshKeyPath string) *http.Transport {
 			log.Debugf("SOCKS proxy: connected to %s", addr)
 			return conn, nil
 		},
+		DisableKeepAlives:     true,
 		MaxIdleConns:          100,
 		MaxIdleConnsPerHost:   10,
-		IdleConnTimeout:       90 * time.Second,
+		IdleConnTimeout:       30 * time.Second,
 		ResponseHeaderTimeout: 30 * time.Second,
 	}
 

@@ -254,6 +254,14 @@ export class SandboxDto {
   @IsOptional()
   daemonVersion?: string
 
+  @ApiPropertyOptional({
+    description: 'The ID of the parent sandbox if this sandbox was forked',
+    example: 'parent-sandbox-123',
+    required: false,
+  })
+  @IsOptional()
+  parentSandboxId?: string
+
   static fromSandbox(sandbox: Sandbox): SandboxDto {
     return {
       id: sandbox.id,
@@ -292,6 +300,7 @@ export class SandboxDto {
           }
         : undefined,
       daemonVersion: sandbox.daemonVersion,
+      parentSandboxId: sandbox.parentSandboxId,
     }
   }
 

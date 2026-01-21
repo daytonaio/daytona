@@ -80,6 +80,8 @@ type Workspace struct {
 	Class *string `json:"class,omitempty"`
 	// The version of the daemon running in the sandbox
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	// The ID of the parent sandbox if this sandbox was forked
+	ParentSandboxId *string `json:"parentSandboxId,omitempty"`
 	// The image used for the workspace
 	Image *string `json:"image,omitempty"`
 	// The state of the snapshot
@@ -950,6 +952,38 @@ func (o *Workspace) SetDaemonVersion(v string) {
 	o.DaemonVersion = &v
 }
 
+// GetParentSandboxId returns the ParentSandboxId field value if set, zero value otherwise.
+func (o *Workspace) GetParentSandboxId() string {
+	if o == nil || IsNil(o.ParentSandboxId) {
+		var ret string
+		return ret
+	}
+	return *o.ParentSandboxId
+}
+
+// GetParentSandboxIdOk returns a tuple with the ParentSandboxId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetParentSandboxIdOk() (*string, bool) {
+	if o == nil || IsNil(o.ParentSandboxId) {
+		return nil, false
+	}
+	return o.ParentSandboxId, true
+}
+
+// HasParentSandboxId returns a boolean if a field has been set.
+func (o *Workspace) HasParentSandboxId() bool {
+	if o != nil && !IsNil(o.ParentSandboxId) {
+		return true
+	}
+
+	return false
+}
+
+// SetParentSandboxId gets a reference to the given string and assigns it to the ParentSandboxId field.
+func (o *Workspace) SetParentSandboxId(v string) {
+	o.ParentSandboxId = &v
+}
+
 // GetImage returns the Image field value if set, zero value otherwise.
 func (o *Workspace) GetImage() string {
 	if o == nil || IsNil(o.Image) {
@@ -1149,6 +1183,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.DaemonVersion) {
 		toSerialize["daemonVersion"] = o.DaemonVersion
 	}
+	if !IsNil(o.ParentSandboxId) {
+		toSerialize["parentSandboxId"] = o.ParentSandboxId
+	}
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
@@ -1245,6 +1282,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
+		delete(additionalProperties, "parentSandboxId")
 		delete(additionalProperties, "image")
 		delete(additionalProperties, "snapshotState")
 		delete(additionalProperties, "snapshotCreatedAt")

@@ -194,6 +194,10 @@ export class Sandbox {
   @Column({ nullable: true })
   daemonVersion?: string
 
+  // Parent sandbox ID for forked sandboxes - tracks the fork lineage
+  @Column({ type: 'uuid', nullable: true })
+  parentSandboxId?: string
+
   constructor(region: string, name?: string) {
     this.id = uuidv4()
     // Set name - use provided name or fallback to ID

@@ -5,7 +5,7 @@
   "sourceRoot": "apps/daemon-win",
   "tags": [],
   "targets": {
-    "build": {
+    "build-skip": {
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/cmd/daemon-win/main.go",

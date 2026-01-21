@@ -17,6 +17,7 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { RunnerClass } from '../enums/runner-class'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
@@ -804,6 +805,147 @@ export class SandboxService {
     this.logger.log(`Created snapshot job for sandbox ${sandbox.id} with name ${snapshotName}`)
 
     return sandbox
+  }
+
+  /**
+   * Fork a running sandbox, creating a copy-on-write clone with the same memory and filesystem state.
+   * This is only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+   *
+   * @param sandboxIdOrName - ID or name of the sandbox to fork
+   * @param organization - Organization making the request
+   * @param name - Optional name for the forked sandbox
+   * @returns The newly forked sandbox
+   */
+  @Transactional()
+  async forkSandbox(sandboxIdOrName: string, organization: Organization, name?: string): Promise<SandboxDto> {
+    let pendingCpuIncrement: number | undefined
+    let pendingMemoryIncrement: number | undefined
+    let pendingDiskIncrement: number | undefined
+
+    const sourceSandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
+
+    // Validate source sandbox state - must be STARTED for live forking
+    if (sourceSandbox.state !== SandboxState.STARTED) {
+      throw new BadRequestException(`Sandbox must be in STARTED state to fork. Current state: ${sourceSandbox.state}`)
+    }
+
+    // Validate the snapshot's runner class is LINUX_EXPERIMENTAL
+    const snapshot = await this.snapshotRepository.findOne({
+      where: [
+        { organizationId: organization.id, name: sourceSandbox.snapshot },
+        { general: true, name: sourceSandbox.snapshot },
+      ],
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${sourceSandbox.snapshot} not found`)
+    }
+
+    if (snapshot.runnerClass !== RunnerClass.LINUX_EXPERIMENTAL) {
+      throw new BadRequestException(
+        `Fork is only available for sandboxes using LINUX_EXPERIMENTAL runner class. Current runner class: ${snapshot.runnerClass}`,
+      )
+    }
+
+    // Check for existing active fork jobs for this sandbox
+    const existingJob = await this.jobRepository.findOne({
+      where: {
+        resourceType: ResourceType.SANDBOX,
+        resourceId: sourceSandbox.id,
+        type: JobType.FORK_SANDBOX,
+        completedAt: IsNull(),
+      },
+    })
+
+    if (existingJob) {
+      throw new ConflictException('Fork operation is already in progress for this sandbox')
+    }
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    try {
+      // Validate organization quotas - fork inherits parent's resources
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(
+          organization,
+          sourceSandbox.region,
+          sourceSandbox.cpu,
+          sourceSandbox.mem,
+          sourceSandbox.disk,
+        )
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = sourceSandbox.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = sourceSandbox.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sourceSandbox.disk
+      }
+
+      // Create new sandbox entity for the fork
+      const forkedSandbox = new Sandbox(sourceSandbox.region, name)
+
+      // Copy properties from source sandbox
+      forkedSandbox.organizationId = organization.id
+      forkedSandbox.class = sourceSandbox.class
+      forkedSandbox.snapshot = sourceSandbox.snapshot
+      forkedSandbox.osUser = sourceSandbox.osUser
+      forkedSandbox.env = { ...sourceSandbox.env }
+      forkedSandbox.labels = { ...sourceSandbox.labels }
+      forkedSandbox.cpu = sourceSandbox.cpu
+      forkedSandbox.gpu = sourceSandbox.gpu
+      forkedSandbox.mem = sourceSandbox.mem
+      forkedSandbox.disk = sourceSandbox.disk
+      forkedSandbox.public = sourceSandbox.public
+      forkedSandbox.networkBlockAll = sourceSandbox.networkBlockAll
+      forkedSandbox.networkAllowList = sourceSandbox.networkAllowList
+      forkedSandbox.autoStopInterval = sourceSandbox.autoStopInterval
+      forkedSandbox.autoArchiveInterval = sourceSandbox.autoArchiveInterval
+      forkedSandbox.autoDeleteInterval = sourceSandbox.autoDeleteInterval
+
+      // Set fork lineage
+      forkedSandbox.parentSandboxId = sourceSandbox.id
+
+      // Fork must run on the same runner as the source
+      forkedSandbox.runnerId = sourceSandbox.runnerId
+      forkedSandbox.pending = true
+
+      await this.sandboxRepository.insert(forkedSandbox)
+
+      // Get runner adapter and create the fork job
+      const runner = await this.runnerService.findOne(sourceSandbox.runnerId)
+      if (!runner) {
+        throw new NotFoundException(`Runner for sandbox not found`)
+      }
+
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      await runnerAdapter.forkSandbox(sourceSandbox.id, forkedSandbox.id)
+
+      // Note: We intentionally do NOT emit SandboxCreatedEvent here because:
+      // 1. We've already created the FORK_SANDBOX job via runnerAdapter.forkSandbox()
+      // 2. SandboxCreatedEvent would trigger SandboxManager to create another CREATE_SANDBOX job
+      // 3. This would violate the IDX_UNIQUE_INCOMPLETE_JOB constraint
+
+      this.logger.log(`Created fork job for sandbox ${sourceSandbox.id} -> ${forkedSandbox.id}`)
+
+      return SandboxDto.fromSandbox(forkedSandbox)
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException(`Sandbox with name ${name} already exists`)
+      }
+
+      await this.rollbackPendingUsage(
+        organization.id,
+        sourceSandbox.region,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+
+      throw error
+    }
   }
 
   async findAllDeprecated(

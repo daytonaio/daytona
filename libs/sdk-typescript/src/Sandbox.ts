@@ -15,6 +15,8 @@ import {
   Configuration,
   SshAccessDto,
   SshAccessValidationDto,
+  ForkSandbox,
+  ForkSandboxResponse,
 } from '@daytonaio/api-client'
 import {
   FileSystemApi,
@@ -526,6 +528,26 @@ export class Sandbox implements SandboxDto {
   public async archive(): Promise<void> {
     await this.sandboxApi.archiveSandbox(this.id)
     await this.refreshData()
+  }
+
+  /**
+   * Creates a live fork of the sandbox, including memory and filesystem state.
+   * The new sandbox will be a copy-on-write clone of the source sandbox.
+   *
+   * This method is only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+   * The source sandbox must be in STARTED state.
+   *
+   * @param {string} [name] - Optional name for the forked sandbox. If not provided, a unique name will be generated.
+   * @returns {Promise<ForkSandboxResponse>} The response containing the forked sandbox ID, name, and state.
+   *
+   * @example
+   * const forkResult = await sandbox.fork('my-forked-sandbox');
+   * console.log(`Forked sandbox ID: ${forkResult.id}`);
+   */
+  public async fork(name?: string): Promise<ForkSandboxResponse> {
+    const forkRequest: ForkSandbox = { name }
+    const response = await this.sandboxApi.forkSandbox(this.id, forkRequest)
+    return response.data
   }
 
   /**

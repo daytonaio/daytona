@@ -86,6 +86,42 @@ definitions:
       - snapshot
       - userId
     type: object
+  CreateSnapshotRequestDTO:
+    properties:
+      live:
+        description: If true, use optimistic mode (no pause); if false (default),
+          pause VM for consistency
+        type: boolean
+      name:
+        description: Name for the snapshot (e.g., "myapp-v1.0")
+        type: string
+      organizationId:
+        description: Organization ID to namespace the snapshot in S3
+        type: string
+      sandboxId:
+        description: ID of the sandbox to create snapshot from
+        type: string
+    required:
+      - name
+      - organizationId
+      - sandboxId
+    type: object
+  CreateSnapshotResponseDTO:
+    properties:
+      liveMode:
+        description: Which mode was used
+        example: false
+        type: boolean
+      name:
+        example: myapp-v1.0
+        type: string
+      sizeBytes:
+        example: 15032385536
+        type: integer
+      snapshotPath:
+        example: snapshots/myapp-v1.0.qcow2
+        type: string
+    type: object
   ErrorResponse:
     description: Error response
     properties:
@@ -127,6 +163,30 @@ definitions:
         type: string
     required:
       - snapshot
+    type: object
+  PushSnapshotRequestDTO:
+    properties:
+      sandboxId:
+        description: ID of the sandbox to create snapshot from
+        type: string
+      snapshotName:
+        description: Name for the new snapshot (e.g., "myapp-v1.0")
+        type: string
+    required:
+      - sandboxId
+      - snapshotName
+    type: object
+  PushSnapshotResponseDTO:
+    properties:
+      sizeBytes:
+        example: 15032385536
+        type: integer
+      snapshotName:
+        example: myapp-v1.0
+        type: string
+      snapshotPath:
+        example: snapshots/myapp-v1.0.qcow2
+        type: string
     type: object
   RegistryDTO:
     properties:
@@ -248,6 +308,23 @@ definitions:
       networkLimitEgress:
         type: boolean
     type: object
+  controllers.MemoryStatsResponse:
+    properties:
+      count:
+        type: integer
+      from_time:
+        type: string
+      stats:
+        items:
+          $ref: '#/definitions/libvirt.MemoryStatsRecord'
+        type: array
+      to_time:
+        type: string
+      vm_names:
+        items:
+          type: string
+        type: array
+    type: object
   dto.VolumeDTO:
     properties:
       mountPath:
@@ -299,6 +376,29 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
+  libvirt.MemoryStatsRecord:
+    properties:
+      actual_kib:
+        type: integer
+      balloon_active:
+        type: boolean
+      id:
+        type: integer
+      max_memory_kib:
+        type: integer
+      rss_kib:
+        type: integer
+      timestamp:
+        type: string
+      unused_kib:
+        type: integer
+      used_kib:
+        type: integer
+      vm_name:
+        type: string
+      vm_uuid:
+        type: string
+    type: object
 info:
   contact: {}
   description: Daytona Runner API
@@ -622,6 +722,133 @@ paths:
       summary: Update sandbox network settings
       tags:
         - sandbox
+  /sandboxes/{sandboxId}/proxy/{port}/{path}:
+    delete:
+      description: Forwards the request to the daemon's proxy endpoint which routes
+        to localhost:port
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Target port number
+          in: path
+          name: port
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to applications on specific ports
+      tags:
+        - proxy
+    get:
+      description: Forwards the request to the daemon's proxy endpoint which routes
+        to localhost:port
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Target port number
+          in: path
+          name: port
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to applications on specific ports
+      tags:
+        - proxy
+    post:
+      description: Forwards the request to the daemon's proxy endpoint which routes
+        to localhost:port
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Target port number
+          in: path
+          name: port
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to applications on specific ports
+      tags:
+        - proxy
   /sandboxes/{sandboxId}/resize:
     post:
       description: Resize sandbox
@@ -914,6 +1141,49 @@ paths:
       summary: Build a snapshot
       tags:
         - snapshots
+  /snapshots/create:
+    post:
+      description: "Create a snapshot from a sandbox's disk and upload it to the
+        S3-compatible snapshot store. Supports two modes: safe mode (live=false, default)
+        pauses the VM briefly for a consistent snapshot, optimistic mode (live=true)
+        takes the snapshot without pausing but may be inconsistent if the VM is actively
+        writing."
+      operationId: CreateSnapshot
+      parameters:
+        - description: Create snapshot request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSnapshotRequestDTO'
+      responses:
+        '200':
+          description: Snapshot successfully created
+          schema:
+            $ref: '#/definitions/CreateSnapshotResponseDTO'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a snapshot from a running or stopped sandbox
+      tags:
+        - snapshots
   /snapshots/exists:
     get:
       description: Check if a specified snapshot exists locally
@@ -1068,6 +1338,46 @@ paths:
       summary: Pull a snapshot
       tags:
         - snapshots
+  /snapshots/push:
+    post:
+      description: Create a snapshot from a sandbox's disk and upload it to the S3-compatible
+        snapshot store
+      operationId: PushSnapshot
+      parameters:
+        - description: Push snapshot request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/PushSnapshotRequestDTO'
+      responses:
+        '200':
+          description: Snapshot successfully pushed
+          schema:
+            $ref: '#/definitions/PushSnapshotResponseDTO'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Push a snapshot to the snapshot store
+      tags:
+        - snapshots
   /snapshots/remove:
     post:
       description: Remove a specified snapshot from the local system
@@ -1147,6 +1457,52 @@ paths:
       summary: Tag an image
       tags:
         - snapshots
+  /stats/memory:
+    get:
+      description: Returns memory statistics for VMs over a time range
+      operationId: GetMemoryStats
+      parameters:
+        - description: Filter by VM name
+          in: query
+          name: vm
+          type: string
+        - description: 'Lookback hours (default: 24)'
+          in: query
+          name: hours
+          type: integer
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.MemoryStatsResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get memory statistics
+      tags:
+        - stats
+  /stats/memory/view:
+    get:
+      description: Returns an interactive HTML page with memory usage charts
+      operationId: GetMemoryStatsView
+      parameters:
+        - description: 'Lookback hours (default: 24)'
+          in: query
+          name: hours
+          type: integer
+      produces:
+        - text/html
+      responses:
+        '200':
+          description: HTML page
+          schema:
+            type: string
+      summary: Memory stats visualization
+      tags:
+        - stats
 security:
   - Bearer: []
 securityDefinitions:

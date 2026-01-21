@@ -965,3 +965,28 @@ func (c *Client) runShellScript(ctx context.Context, script string) (string, err
 	}
 	return string(output), nil
 }
+
+// waitForDaemon waits for the daemon inside the VM to become reachable
+// This is called after VM boot to ensure the sandbox is actually ready for use
+func (c *Client) waitForDaemon(ctx context.Context, sandboxId string, vmIP string, timeout time.Duration) error {
+	log.Infof("Waiting for daemon to be ready on %s (IP: %s)", sandboxId, vmIP)
+
+	// Build curl command to check daemon health
+	// We use curl from the remote host (or locally) to check if daemon is responding
+	healthCheckCmd := fmt.Sprintf("curl -s --connect-timeout 2 --max-time 3 http://%s:2280/version", vmIP)
+
+	deadline := time.Now().Add(timeout)
+	attempt := 0
+	for time.Now().Before(deadline) {
+		attempt++
+		output, err := c.runShellScript(ctx, healthCheckCmd)
+		if err == nil && strings.Contains(output, "version") {
+			log.Infof("Daemon ready on %s after %d attempts", sandboxId, attempt)
+			return nil
+		}
+		log.Debugf("Daemon health check attempt %d for %s failed: %v", attempt, sandboxId, err)
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	return fmt.Errorf("timeout waiting for daemon on %s after %v", sandboxId, timeout)
+}

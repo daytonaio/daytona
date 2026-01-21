@@ -11,6 +11,7 @@ import (
 
 	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/runner-ch/pkg/api/dto"
+	"github.com/daytonaio/runner-ch/pkg/cloudhypervisor"
 	"github.com/daytonaio/runner-ch/pkg/common"
 )
 
@@ -75,4 +76,35 @@ func (e *Executor) updateNetworkSettings(ctx context.Context, job *apiclient.Job
 	}
 
 	return nil, e.chClient.UpdateNetworkSettings(ctx, job.ResourceId, updateNetworkSettingsDto)
+}
+
+// ForkSandboxPayload matches the payload sent by the API for FORK_SANDBOX jobs
+type ForkSandboxPayload struct {
+	SourceSandboxId string `json:"sourceSandboxId"`
+	NewSandboxId    string `json:"newSandboxId"`
+}
+
+func (e *Executor) forkSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
+	var payload ForkSandboxPayload
+	err := e.parsePayload(job.Payload, &payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	info, err := e.chClient.ForkVM(ctx, cloudhypervisor.ForkOptions{
+		SourceSandboxId: payload.SourceSandboxId,
+		NewSandboxId:    payload.NewSandboxId,
+	})
+	if err != nil {
+		common.ContainerOperationCount.WithLabelValues("fork", string(common.PrometheusOperationStatusFailure)).Inc()
+		return nil, err
+	}
+
+	common.ContainerOperationCount.WithLabelValues("fork", string(common.PrometheusOperationStatusSuccess)).Inc()
+
+	return dto.ForkSandboxResponseDTO{
+		Id:       info.Id,
+		State:    string(info.State),
+		ParentId: payload.SourceSandboxId,
+	}, nil
 }

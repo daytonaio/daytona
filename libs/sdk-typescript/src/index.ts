@@ -39,6 +39,7 @@ export type {
 } from './types/Charts'
 
 export { SandboxState } from '@daytonaio/api-client'
+export type { ForkSandboxResponse } from '@daytonaio/api-client'
 export type {
   FileInfo,
   GitStatus,

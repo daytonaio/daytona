@@ -80,6 +80,11 @@ func main() {
 		defer chClient.StopTapPool()
 	}
 
+	// Initialize network namespace pool - loads existing allocations to prevent IP conflicts
+	if err := chClient.InitializeNetNSPool(ctx); err != nil {
+		log.Warnf("Failed to initialize NetNS pool: %v", err)
+	}
+
 	log.Info("Cloud Hypervisor runner started")
 	log.Infof("Configuration:")
 	log.Infof("  Sandboxes path: %s", cfg.CHSandboxesPath)

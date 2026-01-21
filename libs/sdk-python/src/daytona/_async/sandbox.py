@@ -6,6 +6,7 @@ import time
 from types import MethodType
 from typing import Awaitable, Callable, Dict, List, Optional
 
+from daytona_api_client_async import ForkSandbox, ForkSandboxResponse
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client_async import PortPreviewUrl
 from daytona_api_client_async import Sandbox as SandboxDto
@@ -507,6 +508,30 @@ class AsyncSandbox(SandboxDto):
         """
         await self._sandbox_api.archive_sandbox(self.id)
         await self.refresh_data()
+
+    @intercept_errors(message_prefix="Failed to fork sandbox: ")
+    async def fork(self, name: Optional[str] = None) -> ForkSandboxResponse:
+        """Creates a live fork of the sandbox, including memory and filesystem state.
+        The new sandbox will be a copy-on-write clone of the source sandbox.
+
+        This method is only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+        The source sandbox must be in STARTED state.
+
+        Args:
+            name (Optional[str]): Optional name for the forked sandbox. If not provided,
+                a unique name will be generated.
+
+        Returns:
+            ForkSandboxResponse: The response containing the forked sandbox ID, name, and state.
+
+        Example:
+            ```python
+            fork_result = await sandbox.fork("my-forked-sandbox")
+            print(f"Forked sandbox ID: {fork_result.id}")
+            ```
+        """
+        fork_request = ForkSandbox(name=name)
+        return await self._sandbox_api.fork_sandbox(self.id, fork_request)
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     async def create_ssh_access(self, expires_in_minutes: Optional[int] = None) -> SshAccessDto:
