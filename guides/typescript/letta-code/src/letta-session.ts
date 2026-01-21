@@ -50,6 +50,7 @@ export class LettaSession {
   private ptyHandle: any
   private onResponseComplete?: () => void
   private onAgentInitialized?: () => void
+  private agentInitialized = false
 
   constructor(private sandbox: Sandbox) {}
 
@@ -117,7 +118,10 @@ export class LettaSession {
       try {
         const output = this.handleParsedMessage(JSON.parse(line))
         if (output) process.stdout.write(output)
-      } catch {}
+      } catch (err) {
+        if (!this.agentInitialized) continue
+        console.error('Failed to parse JSON line from Letta:', line, err)
+      }
     }
   }
 
@@ -166,6 +170,7 @@ export class LettaSession {
     await new Promise<void>((resolve) => {
       this.onAgentInitialized = resolve
     })
+    this.agentInitialized = true
     console.log('Agent initialized. Press Ctrl+C at any time to exit.\n')
   }
 }
