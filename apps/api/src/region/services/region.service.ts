@@ -274,6 +274,7 @@ export class RegionService {
     await this.dataSource.transaction(async (em) => {
       if (updateRegion.proxyUrl !== undefined) {
         region.proxyUrl = updateRegion.proxyUrl ?? null
+        region.toolboxProxyUrl = updateRegion.proxyUrl ?? null
       }
 
       if (updateRegion.sshGatewayUrl !== undefined) {
