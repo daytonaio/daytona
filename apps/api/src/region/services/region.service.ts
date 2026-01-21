@@ -285,7 +285,7 @@ export class RegionService {
           // If snapshots already exist, prevent changing the snapshot manager URL
           const exists = await this.snapshotRepository.exists({
             where: {
-              ref: Like(`%${region.snapshotManagerUrl}%`),
+              ref: Like(`${region.snapshotManagerUrl.replace(/^https?:\/\//, '')}%`),
             },
           })
           if (exists) {
